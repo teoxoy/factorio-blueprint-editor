@@ -4,6 +4,7 @@ const merge = require('webpack-merge')
 const common = require('./webpack.common.js')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const Visualizer = require('webpack-visualizer-plugin')
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 //const ClosureCompilerPlugin = require('webpack-closure-compiler')
 
 // https://webpack.github.io/analyse/

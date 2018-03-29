@@ -64,15 +64,15 @@ G.app.stage.addChild(infoContainer)
 
 PIXI.loader
 .add([
-    { name: 'extra_iconSprites', url: 'spritesheets/extra_iconSpritesheet.json' },
-    { name: 'iconSprites', url: 'spritesheets/iconSpritesheet.json' },
-    { name: 'entitySprites', url: 'spritesheets/entitySpritesheet.json' }
+    { name: 'extra_iconSpritesheet', url: 'spritesheets/extra_iconSpritesheet.json' },
+    { name: 'iconSpritesheet', url: 'spritesheets/iconSpritesheet.json' },
+    { name: 'entitySpritesheet', url: 'spritesheets/entitySpritesheet.json' }
 ])
 .load((_: any, resources: any) => {
     G.app.renderer.plugins.prepare
-    .add(resources.extra_iconSprites.spritesheet.baseTexture)
-    .add(resources.iconSprites.spritesheet.baseTexture)
-    .add(resources.entitySprites.spritesheet.baseTexture)
+    .add(resources.extra_iconSpritesheet.spritesheet.baseTexture)
+    .add(resources.iconSpritesheet.spritesheet.baseTexture)
+    .add(resources.entitySpritesheet.spritesheet.baseTexture)
     .upload(setup)
 })
 
