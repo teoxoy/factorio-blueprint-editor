@@ -1,0 +1,1908 @@
+[
+  {
+    "name": "logistics",
+    "icon": "icon:item-group/logistics",
+    "subgroups": [
+      {
+        "name": "storage",
+        "items": [
+          {
+            "name": "wooden-chest",
+            "icon": "icon:icons/wooden-chest"
+          },
+          {
+            "name": "iron-chest",
+            "icon": "icon:icons/iron-chest"
+          },
+          {
+            "name": "steel-chest",
+            "icon": "icon:icons/steel-chest"
+          },
+          {
+            "name": "storage-tank",
+            "icon": "icon:icons/storage-tank"
+          }
+        ]
+      },
+      {
+        "name": "belt",
+        "items": [
+          {
+            "name": "transport-belt",
+            "icon": "icon:icons/transport-belt"
+          },
+          {
+            "name": "fast-transport-belt",
+            "icon": "icon:icons/fast-transport-belt"
+          },
+          {
+            "name": "express-transport-belt",
+            "icon": "icon:icons/express-transport-belt"
+          },
+          {
+            "name": "underground-belt",
+            "icon": "icon:icons/underground-belt"
+          },
+          {
+            "name": "fast-underground-belt",
+            "icon": "icon:icons/fast-underground-belt"
+          },
+          {
+            "name": "express-underground-belt",
+            "icon": "icon:icons/express-underground-belt"
+          },
+          {
+            "name": "splitter",
+            "icon": "icon:icons/splitter"
+          },
+          {
+            "name": "fast-splitter",
+            "icon": "icon:icons/fast-splitter"
+          },
+          {
+            "name": "express-splitter",
+            "icon": "icon:icons/express-splitter"
+          }
+        ]
+      },
+      {
+        "name": "inserter",
+        "items": [
+          {
+            "name": "burner-inserter",
+            "icon": "icon:icons/burner-inserter"
+          },
+          {
+            "name": "inserter",
+            "icon": "icon:icons/inserter"
+          },
+          {
+            "name": "long-handed-inserter",
+            "icon": "icon:icons/long-handed-inserter"
+          },
+          {
+            "name": "fast-inserter",
+            "icon": "icon:icons/fast-inserter"
+          },
+          {
+            "name": "filter-inserter",
+            "icon": "icon:icons/filter-inserter"
+          },
+          {
+            "name": "stack-inserter",
+            "icon": "icon:icons/stack-inserter"
+          },
+          {
+            "name": "stack-filter-inserter",
+            "icon": "icon:icons/stack-filter-inserter"
+          }
+        ]
+      },
+      {
+        "name": "energy-pipe-distribution",
+        "items": [
+          {
+            "name": "small-electric-pole",
+            "icon": "icon:icons/small-electric-pole"
+          },
+          {
+            "name": "medium-electric-pole",
+            "icon": "icon:icons/medium-electric-pole"
+          },
+          {
+            "name": "big-electric-pole",
+            "icon": "icon:icons/big-electric-pole"
+          },
+          {
+            "name": "substation",
+            "icon": "icon:icons/substation"
+          },
+          {
+            "name": "pipe",
+            "icon": "icon:icons/pipe"
+          },
+          {
+            "name": "pipe-to-ground",
+            "icon": "icon:icons/pipe-to-ground"
+          },
+          {
+            "name": "pump",
+            "icon": "icon:icons/pump"
+          }
+        ]
+      },
+      {
+        "name": "transport",
+        "items": [
+          {
+            "name": "rail",
+            "icon": "icon:icons/rail"
+          },
+          {
+            "name": "train-stop",
+            "icon": "icon:icons/train-stop"
+          },
+          {
+            "name": "rail-signal",
+            "icon": "icon:icons/rail-signal"
+          },
+          {
+            "name": "rail-chain-signal",
+            "icon": "icon:icons/rail-chain-signal"
+          },
+          {
+            "name": "locomotive",
+            "icon": "icon:icons/diesel-locomotive"
+          },
+          {
+            "name": "cargo-wagon",
+            "icon": "icon:icons/cargo-wagon"
+          },
+          {
+            "name": "fluid-wagon",
+            "icon": "icon:icons/fluid-wagon"
+          },
+          {
+            "name": "artillery-wagon",
+            "icon": "icon:icons/artillery-wagon"
+          },
+          {
+            "name": "car",
+            "icon": "icon:icons/car"
+          },
+          {
+            "name": "tank",
+            "icon": "icon:icons/tank"
+          }
+        ]
+      },
+      {
+        "name": "logistic-network",
+        "items": [
+          {
+            "name": "logistic-robot",
+            "icon": "icon:icons/logistic-robot"
+          },
+          {
+            "name": "construction-robot",
+            "icon": "icon:icons/construction-robot"
+          },
+          {
+            "name": "logistic-chest-active-provider",
+            "icon": "icon:icons/logistic-chest-active-provider"
+          },
+          {
+            "name": "logistic-chest-passive-provider",
+            "icon": "icon:icons/logistic-chest-passive-provider"
+          },
+          {
+            "name": "logistic-chest-storage",
+            "icon": "icon:icons/logistic-chest-storage"
+          },
+          {
+            "name": "logistic-chest-buffer",
+            "icon": "icon:icons/logistic-chest-buffer"
+          },
+          {
+            "name": "logistic-chest-requester",
+            "icon": "icon:icons/logistic-chest-requester"
+          },
+          {
+            "name": "roboport",
+            "icon": "icon:icons/roboport"
+          }
+        ]
+      },
+      {
+        "name": "circuit-network",
+        "items": [
+          {
+            "name": "small-lamp",
+            "icon": "icon:icons/small-lamp"
+          },
+          {
+            "name": "red-wire",
+            "icon": "icon:icons/red-wire"
+          },
+          {
+            "name": "green-wire",
+            "icon": "icon:icons/green-wire"
+          },
+          {
+            "name": "arithmetic-combinator",
+            "icon": "icon:icons/arithmetic-combinator"
+          },
+          {
+            "name": "decider-combinator",
+            "icon": "icon:icons/decider-combinator"
+          },
+          {
+            "name": "constant-combinator",
+            "icon": "icon:icons/constant-combinator"
+          },
+          {
+            "name": "power-switch",
+            "icon": "icon:icons/power-switch"
+          },
+          {
+            "name": "programmable-speaker",
+            "icon": "icon:icons/programmable-speaker"
+          }
+        ]
+      },
+      {
+        "name": "terrain",
+        "items": [
+          {
+            "name": "stone-brick",
+            "icon": "icon:icons/stone-brick"
+          },
+          {
+            "name": "concrete",
+            "icon": "icon:icons/concrete"
+          },
+          {
+            "name": "hazard-concrete",
+            "icon": "icon:icons/hazard-concrete"
+          },
+          {
+            "name": "refined-concrete",
+            "icon": "icon:icons/refined-concrete"
+          },
+          {
+            "name": "refined-hazard-concrete",
+            "icon": "icon:icons/refined-hazard-concrete"
+          },
+          {
+            "name": "landfill",
+            "icon": "icon:icons/landfill"
+          },
+          {
+            "name": "cliff-explosives",
+            "icon": "icon:icons/cliff-explosives"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "production",
+    "icon": "icon:item-group/production",
+    "subgroups": [
+      {
+        "name": "tool",
+        "items": [
+          {
+            "name": "iron-axe",
+            "icon": "icon:icons/iron-axe"
+          },
+          {
+            "name": "steel-axe",
+            "icon": "icon:icons/steel-axe"
+          },
+          {
+            "name": "repair-pack",
+            "icon": "icon:icons/repair-pack"
+          },
+          {
+            "name": "blueprint",
+            "icon": "icon:icons/blueprint"
+          },
+          {
+            "name": "deconstruction-planner",
+            "icon": "icon:icons/deconstruction-planner"
+          },
+          {
+            "name": "blueprint-book",
+            "icon": "icon:icons/blueprint-book"
+          }
+        ]
+      },
+      {
+        "name": "energy",
+        "items": [
+          {
+            "name": "boiler",
+            "icon": "icon:icons/boiler"
+          },
+          {
+            "name": "steam-engine",
+            "icon": "icon:icons/steam-engine"
+          },
+          {
+            "name": "steam-turbine",
+            "icon": "icon:icons/steam-turbine"
+          },
+          {
+            "name": "solar-panel",
+            "icon": "icon:icons/solar-panel"
+          },
+          {
+            "name": "accumulator",
+            "icon": "icon:icons/accumulator"
+          },
+          {
+            "name": "nuclear-reactor",
+            "icon": "icon:icons/nuclear-reactor"
+          },
+          {
+            "name": "heat-exchanger",
+            "icon": "icon:icons/heat-boiler"
+          },
+          {
+            "name": "heat-pipe",
+            "icon": "icon:icons/heat-pipe"
+          }
+        ]
+      },
+      {
+        "name": "extraction-machine",
+        "items": [
+          {
+            "name": "burner-mining-drill",
+            "icon": "icon:icons/burner-mining-drill"
+          },
+          {
+            "name": "electric-mining-drill",
+            "icon": "icon:icons/electric-mining-drill"
+          },
+          {
+            "name": "offshore-pump",
+            "icon": "icon:icons/offshore-pump"
+          },
+          {
+            "name": "pumpjack",
+            "icon": "icon:icons/pumpjack"
+          }
+        ]
+      },
+      {
+        "name": "smelting-machine",
+        "items": [
+          {
+            "name": "stone-furnace",
+            "icon": "icon:icons/stone-furnace"
+          },
+          {
+            "name": "steel-furnace",
+            "icon": "icon:icons/steel-furnace"
+          },
+          {
+            "name": "electric-furnace",
+            "icon": "icon:icons/electric-furnace"
+          }
+        ]
+      },
+      {
+        "name": "production-machine",
+        "items": [
+          {
+            "name": "assembling-machine-1",
+            "icon": "icon:icons/assembling-machine-1"
+          },
+          {
+            "name": "assembling-machine-2",
+            "icon": "icon:icons/assembling-machine-2"
+          },
+          {
+            "name": "assembling-machine-3",
+            "icon": "icon:icons/assembling-machine-3"
+          },
+          {
+            "name": "oil-refinery",
+            "icon": "icon:icons/oil-refinery"
+          },
+          {
+            "name": "chemical-plant",
+            "icon": "icon:icons/chemical-plant"
+          },
+          {
+            "name": "centrifuge",
+            "icon": "icon:icons/centrifuge"
+          },
+          {
+            "name": "lab",
+            "icon": "icon:icons/lab"
+          }
+        ]
+      },
+      {
+        "name": "module",
+        "items": [
+          {
+            "name": "beacon",
+            "icon": "icon:icons/beacon"
+          },
+          {
+            "name": "speed-module",
+            "icon": "icon:icons/speed-module"
+          },
+          {
+            "name": "speed-module-2",
+            "icon": "icon:icons/speed-module-2"
+          },
+          {
+            "name": "speed-module-3",
+            "icon": "icon:icons/speed-module-3"
+          },
+          {
+            "name": "effectivity-module",
+            "icon": "icon:icons/effectivity-module"
+          },
+          {
+            "name": "effectivity-module-2",
+            "icon": "icon:icons/effectivity-module-2"
+          },
+          {
+            "name": "effectivity-module-3",
+            "icon": "icon:icons/effectivity-module-3"
+          },
+          {
+            "name": "productivity-module",
+            "icon": "icon:icons/productivity-module"
+          },
+          {
+            "name": "productivity-module-2",
+            "icon": "icon:icons/productivity-module-2"
+          },
+          {
+            "name": "productivity-module-3",
+            "icon": "icon:icons/productivity-module-3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "intermediate-products",
+    "icon": "icon:item-group/intermediate-products",
+    "subgroups": [
+      {
+        "name": "fluid-recipes",
+        "items": [
+          {
+            "name": "basic-oil-processing",
+            "icon": "icon:fluid/basic-oil-processing"
+          },
+          {
+            "name": "advanced-oil-processing",
+            "icon": "icon:fluid/advanced-oil-processing"
+          },
+          {
+            "name": "coal-liquefaction",
+            "icon": "icon:fluid/coal-liquefaction"
+          },
+          {
+            "name": "heavy-oil-cracking",
+            "icon": "icon:fluid/heavy-oil-cracking"
+          },
+          {
+            "name": "light-oil-cracking",
+            "icon": "icon:fluid/light-oil-cracking"
+          },
+          {
+            "name": "solid-fuel-from-light-oil",
+            "icon": "icon:icons/solid-fuel-from-light-oil"
+          },
+          {
+            "name": "solid-fuel-from-petroleum-gas",
+            "icon": "icon:icons/solid-fuel-from-petroleum-gas"
+          },
+          {
+            "name": "solid-fuel-from-heavy-oil",
+            "icon": "icon:icons/solid-fuel-from-heavy-oil"
+          }
+        ]
+      },
+      {
+        "name": "raw-resource",
+        "items": [
+          {
+            "name": "raw-wood",
+            "icon": "icon:icons/raw-wood"
+          },
+          {
+            "name": "coal",
+            "icon": "icon:icons/coal"
+          },
+          {
+            "name": "stone",
+            "icon": "icon:icons/stone"
+          },
+          {
+            "name": "iron-ore",
+            "icon": "icon:icons/iron-ore"
+          },
+          {
+            "name": "copper-ore",
+            "icon": "icon:icons/copper-ore"
+          },
+          {
+            "name": "uranium-ore",
+            "icon": "icon:icons/uranium-ore"
+          },
+          {
+            "name": "raw-fish",
+            "icon": "icon:icons/fish"
+          }
+        ]
+      },
+      {
+        "name": "raw-material",
+        "items": [
+          {
+            "name": "wood",
+            "icon": "icon:icons/wood"
+          },
+          {
+            "name": "iron-plate",
+            "icon": "icon:icons/iron-plate"
+          },
+          {
+            "name": "copper-plate",
+            "icon": "icon:icons/copper-plate"
+          },
+          {
+            "name": "solid-fuel",
+            "icon": "icon:icons/solid-fuel"
+          },
+          {
+            "name": "steel-plate",
+            "icon": "icon:icons/steel-plate"
+          },
+          {
+            "name": "plastic-bar",
+            "icon": "icon:icons/plastic-bar"
+          },
+          {
+            "name": "sulfur",
+            "icon": "icon:icons/sulfur"
+          },
+          {
+            "name": "battery",
+            "icon": "icon:icons/battery"
+          },
+          {
+            "name": "explosives",
+            "icon": "icon:icons/explosives"
+          },
+          {
+            "name": "uranium-processing",
+            "icon": "icon:icons/uranium-processing"
+          }
+        ]
+      },
+      {
+        "name": "fill-barrel",
+        "items": [
+          {
+            "name": "crude-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/empty-barrel"
+              },
+              {
+                "icon": "icon:barreling/barrel-side-mask",
+                "tint": {
+                  "r": 0,
+                  "g": 0,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-hoop-top-mask",
+                "tint": {
+                  "r": 0.5,
+                  "g": 0.5,
+                  "b": 0.5,
+                  "a": 0.75
+                }
+              }
+            ]
+          },
+          {
+            "name": "fill-crude-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-fill"
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-side-mask",
+                "tint": {
+                  "r": 0,
+                  "g": 0,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-top-mask",
+                "tint": {
+                  "r": 0.5,
+                  "g": 0.5,
+                  "b": 0.5,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/crude-oil",
+                "scale": 0.5,
+                "shift": [
+                  4,
+                  -8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fill-heavy-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-fill"
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-side-mask",
+                "tint": {
+                  "r": 0.5,
+                  "g": 0.04,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-top-mask",
+                "tint": {
+                  "r": 0.85,
+                  "g": 0.6,
+                  "b": 0.3,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/heavy-oil",
+                "scale": 0.5,
+                "shift": [
+                  4,
+                  -8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fill-light-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-fill"
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-side-mask",
+                "tint": {
+                  "r": 0.57,
+                  "g": 0.33,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-top-mask",
+                "tint": {
+                  "r": 1,
+                  "g": 0.73,
+                  "b": 0.07,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/light-oil",
+                "scale": 0.5,
+                "shift": [
+                  4,
+                  -8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fill-lubricant-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-fill"
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-side-mask",
+                "tint": {
+                  "r": 0.15,
+                  "g": 0.32,
+                  "b": 0.03,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-top-mask",
+                "tint": {
+                  "r": 0.43,
+                  "g": 0.75,
+                  "b": 0.31,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/lubricant",
+                "scale": 0.5,
+                "shift": [
+                  4,
+                  -8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fill-petroleum-gas-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-fill"
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-side-mask",
+                "tint": {
+                  "r": 0.3,
+                  "g": 0.1,
+                  "b": 0.3,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-top-mask",
+                "tint": {
+                  "r": 0.8,
+                  "g": 0.8,
+                  "b": 0.8,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/petroleum-gas",
+                "scale": 0.5,
+                "shift": [
+                  4,
+                  -8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fill-sulfuric-acid-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-fill"
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-side-mask",
+                "tint": {
+                  "r": 0.75,
+                  "g": 0.65,
+                  "b": 0.1,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-top-mask",
+                "tint": {
+                  "r": 0.7,
+                  "g": 1,
+                  "b": 0.1,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/sulfuric-acid",
+                "scale": 0.5,
+                "shift": [
+                  4,
+                  -8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fill-water-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-fill"
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-side-mask",
+                "tint": {
+                  "r": 0,
+                  "g": 0.34,
+                  "b": 0.6,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-fill-top-mask",
+                "tint": {
+                  "r": 0.7,
+                  "g": 0.7,
+                  "b": 0.7,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/water",
+                "scale": 0.5,
+                "shift": [
+                  4,
+                  -8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "heavy-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/empty-barrel"
+              },
+              {
+                "icon": "icon:barreling/barrel-side-mask",
+                "tint": {
+                  "r": 0.5,
+                  "g": 0.04,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-hoop-top-mask",
+                "tint": {
+                  "r": 0.85,
+                  "g": 0.6,
+                  "b": 0.3,
+                  "a": 0.75
+                }
+              }
+            ]
+          },
+          {
+            "name": "light-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/empty-barrel"
+              },
+              {
+                "icon": "icon:barreling/barrel-side-mask",
+                "tint": {
+                  "r": 0.57,
+                  "g": 0.33,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-hoop-top-mask",
+                "tint": {
+                  "r": 1,
+                  "g": 0.73,
+                  "b": 0.07,
+                  "a": 0.75
+                }
+              }
+            ]
+          },
+          {
+            "name": "lubricant-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/empty-barrel"
+              },
+              {
+                "icon": "icon:barreling/barrel-side-mask",
+                "tint": {
+                  "r": 0.15,
+                  "g": 0.32,
+                  "b": 0.03,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-hoop-top-mask",
+                "tint": {
+                  "r": 0.43,
+                  "g": 0.75,
+                  "b": 0.31,
+                  "a": 0.75
+                }
+              }
+            ]
+          },
+          {
+            "name": "petroleum-gas-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/empty-barrel"
+              },
+              {
+                "icon": "icon:barreling/barrel-side-mask",
+                "tint": {
+                  "r": 0.3,
+                  "g": 0.1,
+                  "b": 0.3,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-hoop-top-mask",
+                "tint": {
+                  "r": 0.8,
+                  "g": 0.8,
+                  "b": 0.8,
+                  "a": 0.75
+                }
+              }
+            ]
+          },
+          {
+            "name": "sulfuric-acid-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/empty-barrel"
+              },
+              {
+                "icon": "icon:barreling/barrel-side-mask",
+                "tint": {
+                  "r": 0.75,
+                  "g": 0.65,
+                  "b": 0.1,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-hoop-top-mask",
+                "tint": {
+                  "r": 0.7,
+                  "g": 1,
+                  "b": 0.1,
+                  "a": 0.75
+                }
+              }
+            ]
+          },
+          {
+            "name": "water-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/empty-barrel"
+              },
+              {
+                "icon": "icon:barreling/barrel-side-mask",
+                "tint": {
+                  "r": 0,
+                  "g": 0.34,
+                  "b": 0.6,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-hoop-top-mask",
+                "tint": {
+                  "r": 0.7,
+                  "g": 0.7,
+                  "b": 0.7,
+                  "a": 0.75
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "empty-barrel",
+        "items": [
+          {
+            "name": "empty-crude-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-empty"
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-side-mask",
+                "tint": {
+                  "r": 0,
+                  "g": 0,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-top-mask",
+                "tint": {
+                  "r": 0.5,
+                  "g": 0.5,
+                  "b": 0.5,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/crude-oil",
+                "scale": 0.5,
+                "shift": [
+                  7,
+                  8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "empty-heavy-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-empty"
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-side-mask",
+                "tint": {
+                  "r": 0.5,
+                  "g": 0.04,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-top-mask",
+                "tint": {
+                  "r": 0.85,
+                  "g": 0.6,
+                  "b": 0.3,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/heavy-oil",
+                "scale": 0.5,
+                "shift": [
+                  7,
+                  8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "empty-light-oil-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-empty"
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-side-mask",
+                "tint": {
+                  "r": 0.57,
+                  "g": 0.33,
+                  "b": 0,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-top-mask",
+                "tint": {
+                  "r": 1,
+                  "g": 0.73,
+                  "b": 0.07,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/light-oil",
+                "scale": 0.5,
+                "shift": [
+                  7,
+                  8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "empty-lubricant-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-empty"
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-side-mask",
+                "tint": {
+                  "r": 0.15,
+                  "g": 0.32,
+                  "b": 0.03,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-top-mask",
+                "tint": {
+                  "r": 0.43,
+                  "g": 0.75,
+                  "b": 0.31,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/lubricant",
+                "scale": 0.5,
+                "shift": [
+                  7,
+                  8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "empty-petroleum-gas-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-empty"
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-side-mask",
+                "tint": {
+                  "r": 0.3,
+                  "g": 0.1,
+                  "b": 0.3,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-top-mask",
+                "tint": {
+                  "r": 0.8,
+                  "g": 0.8,
+                  "b": 0.8,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/petroleum-gas",
+                "scale": 0.5,
+                "shift": [
+                  7,
+                  8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "empty-sulfuric-acid-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-empty"
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-side-mask",
+                "tint": {
+                  "r": 0.75,
+                  "g": 0.65,
+                  "b": 0.1,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-top-mask",
+                "tint": {
+                  "r": 0.7,
+                  "g": 1,
+                  "b": 0.1,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/sulfuric-acid",
+                "scale": 0.5,
+                "shift": [
+                  7,
+                  8
+                ]
+              }
+            ]
+          },
+          {
+            "name": "empty-water-barrel",
+            "icons": [
+              {
+                "icon": "icon:barreling/barrel-empty"
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-side-mask",
+                "tint": {
+                  "r": 0,
+                  "g": 0.34,
+                  "b": 0.6,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:barreling/barrel-empty-top-mask",
+                "tint": {
+                  "r": 0.7,
+                  "g": 0.7,
+                  "b": 0.7,
+                  "a": 0.75
+                }
+              },
+              {
+                "icon": "icon:fluid/water",
+                "scale": 0.5,
+                "shift": [
+                  7,
+                  8
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "intermediate-product",
+        "items": [
+          {
+            "name": "copper-cable",
+            "icon": "icon:icons/copper-cable"
+          },
+          {
+            "name": "iron-stick",
+            "icon": "icon:icons/iron-stick"
+          },
+          {
+            "name": "iron-gear-wheel",
+            "icon": "icon:icons/iron-gear-wheel"
+          },
+          {
+            "name": "empty-barrel",
+            "icon": "icon:barreling/empty-barrel"
+          },
+          {
+            "name": "electronic-circuit",
+            "icon": "icon:icons/electronic-circuit"
+          },
+          {
+            "name": "advanced-circuit",
+            "icon": "icon:icons/advanced-circuit"
+          },
+          {
+            "name": "processing-unit",
+            "icon": "icon:icons/processing-unit"
+          },
+          {
+            "name": "engine-unit",
+            "icon": "icon:icons/engine-unit"
+          },
+          {
+            "name": "electric-engine-unit",
+            "icon": "icon:icons/electric-engine-unit"
+          },
+          {
+            "name": "flying-robot-frame",
+            "icon": "icon:icons/flying-robot-frame"
+          },
+          {
+            "name": "satellite",
+            "icon": "icon:icons/satellite"
+          },
+          {
+            "name": "rocket-control-unit",
+            "icon": "icon:icons/rocket-control-unit"
+          },
+          {
+            "name": "low-density-structure",
+            "icon": "icon:icons/rocket-structure"
+          },
+          {
+            "name": "rocket-fuel",
+            "icon": "icon:icons/rocket-fuel"
+          },
+          {
+            "name": "nuclear-fuel",
+            "icon": "icon:icons/nuclear-fuel"
+          },
+          {
+            "name": "uranium-235",
+            "icon": "icon:icons/uranium-235"
+          },
+          {
+            "name": "uranium-238",
+            "icon": "icon:icons/uranium-238"
+          },
+          {
+            "name": "uranium-fuel-cell",
+            "icon": "icon:icons/uranium-fuel-cell"
+          },
+          {
+            "name": "nuclear-fuel-reprocessing",
+            "icon": "icon:icons/nuclear-fuel-reprocessing"
+          },
+          {
+            "name": "kovarex-enrichment-process",
+            "icon": "icon:icons/kovarex-enrichment-process"
+          },
+          {
+            "name": "used-up-uranium-fuel-cell",
+            "icon": "icon:icons/used-up-uranium-fuel-cell"
+          }
+        ]
+      },
+      {
+        "name": "science-pack",
+        "items": [
+          {
+            "name": "science-pack-1",
+            "icon": "icon:icons/science-pack-1"
+          },
+          {
+            "name": "science-pack-2",
+            "icon": "icon:icons/science-pack-2"
+          },
+          {
+            "name": "science-pack-3",
+            "icon": "icon:icons/science-pack-3"
+          },
+          {
+            "name": "military-science-pack",
+            "icon": "icon:icons/military-science-pack"
+          },
+          {
+            "name": "production-science-pack",
+            "icon": "icon:icons/production-science-pack"
+          },
+          {
+            "name": "high-tech-science-pack",
+            "icon": "icon:icons/high-tech-science-pack"
+          },
+          {
+            "name": "space-science-pack",
+            "icon": "icon:icons/space-science-pack"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "combat",
+    "icon": "icon:item-group/military",
+    "subgroups": [
+      {
+        "name": "gun",
+        "items": [
+          {
+            "name": "pistol",
+            "icon": "icon:icons/pistol"
+          },
+          {
+            "name": "submachine-gun",
+            "icon": "icon:icons/submachine-gun"
+          },
+          {
+            "name": "shotgun",
+            "icon": "icon:icons/shotgun"
+          },
+          {
+            "name": "combat-shotgun",
+            "icon": "icon:icons/combat-shotgun"
+          },
+          {
+            "name": "rocket-launcher",
+            "icon": "icon:icons/rocket-launcher"
+          },
+          {
+            "name": "flamethrower",
+            "icon": "icon:icons/flamethrower"
+          },
+          {
+            "name": "land-mine",
+            "icon": "icon:icons/land-mine"
+          }
+        ]
+      },
+      {
+        "name": "ammo",
+        "items": [
+          {
+            "name": "firearm-magazine",
+            "icon": "icon:icons/firearm-magazine"
+          },
+          {
+            "name": "piercing-rounds-magazine",
+            "icon": "icon:icons/piercing-rounds-magazine"
+          },
+          {
+            "name": "uranium-rounds-magazine",
+            "icon": "icon:icons/uranium-rounds-magazine"
+          },
+          {
+            "name": "shotgun-shell",
+            "icon": "icon:icons/shotgun-shell"
+          },
+          {
+            "name": "piercing-shotgun-shell",
+            "icon": "icon:icons/piercing-shotgun-shell"
+          },
+          {
+            "name": "cannon-shell",
+            "icon": "icon:icons/cannon-shell"
+          },
+          {
+            "name": "explosive-cannon-shell",
+            "icon": "icon:icons/explosive-cannon-shell"
+          },
+          {
+            "name": "uranium-cannon-shell",
+            "icon": "icon:icons/uranium-cannon-shell"
+          },
+          {
+            "name": "explosive-uranium-cannon-shell",
+            "icon": "icon:icons/explosive-uranium-cannon-shell"
+          },
+          {
+            "name": "artillery-shell",
+            "icon": "icon:icons/artillery-shell"
+          },
+          {
+            "name": "rocket",
+            "icon": "icon:icons/rocket"
+          },
+          {
+            "name": "explosive-rocket",
+            "icon": "icon:icons/explosive-rocket"
+          },
+          {
+            "name": "atomic-bomb",
+            "icon": "icon:icons/atomic-bomb"
+          },
+          {
+            "name": "flamethrower-ammo",
+            "icon": "icon:icons/flamethrower-ammo"
+          }
+        ]
+      },
+      {
+        "name": "capsule",
+        "items": [
+          {
+            "name": "grenade",
+            "icon": "icon:icons/grenade"
+          },
+          {
+            "name": "cluster-grenade",
+            "icon": "icon:icons/cluster-grenade"
+          },
+          {
+            "name": "poison-capsule",
+            "icon": "icon:icons/poison-capsule"
+          },
+          {
+            "name": "slowdown-capsule",
+            "icon": "icon:icons/slowdown-capsule"
+          },
+          {
+            "name": "defender-capsule",
+            "icon": "icon:icons/defender"
+          },
+          {
+            "name": "distractor-capsule",
+            "icon": "icon:icons/distractor"
+          },
+          {
+            "name": "destroyer-capsule",
+            "icon": "icon:icons/destroyer"
+          },
+          {
+            "name": "discharge-defense-remote",
+            "icon": "icon:equipment/discharge-defense-equipment-ability"
+          },
+          {
+            "name": "artillery-targeting-remote",
+            "icon": "icon:icons/artillery-targeting-remote"
+          }
+        ]
+      },
+      {
+        "name": "armor",
+        "items": [
+          {
+            "name": "light-armor",
+            "icon": "icon:icons/light-armor"
+          },
+          {
+            "name": "heavy-armor",
+            "icon": "icon:icons/heavy-armor"
+          },
+          {
+            "name": "modular-armor",
+            "icon": "icon:icons/modular-armor"
+          },
+          {
+            "name": "power-armor",
+            "icon": "icon:icons/power-armor"
+          },
+          {
+            "name": "power-armor-mk2",
+            "icon": "icon:icons/power-armor-mk2"
+          }
+        ]
+      },
+      {
+        "name": "equipment",
+        "items": [
+          {
+            "name": "solar-panel-equipment",
+            "icon": "icon:icons/solar-panel-equipment"
+          },
+          {
+            "name": "fusion-reactor-equipment",
+            "icon": "icon:icons/fusion-reactor-equipment"
+          },
+          {
+            "name": "energy-shield-equipment",
+            "icon": "icon:icons/energy-shield-equipment"
+          },
+          {
+            "name": "energy-shield-mk2-equipment",
+            "icon": "icon:icons/energy-shield-mk2-equipment"
+          },
+          {
+            "name": "battery-equipment",
+            "icon": "icon:icons/battery-equipment"
+          },
+          {
+            "name": "battery-mk2-equipment",
+            "icon": "icon:icons/battery-mk2-equipment"
+          },
+          {
+            "name": "personal-laser-defense-equipment",
+            "icon": "icon:icons/personal-laser-defense-equipment"
+          },
+          {
+            "name": "discharge-defense-equipment",
+            "icon": "icon:icons/discharge-defense-equipment"
+          },
+          {
+            "name": "exoskeleton-equipment",
+            "icon": "icon:icons/exoskeleton-equipment"
+          },
+          {
+            "name": "personal-roboport-equipment",
+            "icon": "icon:icons/personal-roboport-equipment"
+          },
+          {
+            "name": "personal-roboport-mk2-equipment",
+            "icon": "icon:icons/personal-roboport-mk2-equipment"
+          },
+          {
+            "name": "night-vision-equipment",
+            "icon": "icon:icons/night-vision-equipment"
+          }
+        ]
+      },
+      {
+        "name": "defensive-structure",
+        "items": [
+          {
+            "name": "stone-wall",
+            "icon": "icon:icons/stone-wall"
+          },
+          {
+            "name": "gate",
+            "icon": "icon:icons/gate"
+          },
+          {
+            "name": "gun-turret",
+            "icon": "icon:icons/gun-turret"
+          },
+          {
+            "name": "laser-turret",
+            "icon": "icon:icons/laser-turret"
+          },
+          {
+            "name": "flamethrower-turret",
+            "icon": "icon:icons/flamethrower-turret"
+          },
+          {
+            "name": "artillery-turret",
+            "icon": "icon:icons/artillery-turret"
+          },
+          {
+            "name": "radar",
+            "icon": "icon:icons/radar"
+          },
+          {
+            "name": "rocket-silo",
+            "icon": "icon:icons/rocket-silo"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "fluids",
+    "icon": "icon:item-group/fluids",
+    "subgroups": [
+      {
+        "name": "fluid",
+        "items": [
+          {
+            "name": "water",
+            "icon": "icon:fluid/water"
+          },
+          {
+            "name": "crude-oil",
+            "icon": "icon:fluid/crude-oil"
+          },
+          {
+            "name": "steam",
+            "icon": "icon:fluid/steam"
+          },
+          {
+            "name": "heavy-oil",
+            "icon": "icon:fluid/heavy-oil"
+          },
+          {
+            "name": "light-oil",
+            "icon": "icon:fluid/light-oil"
+          },
+          {
+            "name": "petroleum-gas",
+            "icon": "icon:fluid/petroleum-gas"
+          },
+          {
+            "name": "sulfuric-acid",
+            "icon": "icon:fluid/sulfuric-acid"
+          },
+          {
+            "name": "lubricant",
+            "icon": "icon:fluid/lubricant"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "signals",
+    "icon": "icon:item-group/signals",
+    "subgroups": [
+      {
+        "name": "virtual-signal-special",
+        "items": [
+          {
+            "name": "signal-everything",
+            "icon": "icon:signal/signal_everything"
+          },
+          {
+            "name": "signal-anything",
+            "icon": "icon:signal/signal_anything"
+          },
+          {
+            "name": "signal-each",
+            "icon": "icon:signal/signal_each"
+          }
+        ]
+      },
+      {
+        "name": "virtual-signal-number",
+        "items": [
+          {
+            "name": "signal-0",
+            "icon": "icon:signal/signal_0"
+          },
+          {
+            "name": "signal-1",
+            "icon": "icon:signal/signal_1"
+          },
+          {
+            "name": "signal-2",
+            "icon": "icon:signal/signal_2"
+          },
+          {
+            "name": "signal-3",
+            "icon": "icon:signal/signal_3"
+          },
+          {
+            "name": "signal-4",
+            "icon": "icon:signal/signal_4"
+          },
+          {
+            "name": "signal-5",
+            "icon": "icon:signal/signal_5"
+          },
+          {
+            "name": "signal-6",
+            "icon": "icon:signal/signal_6"
+          },
+          {
+            "name": "signal-7",
+            "icon": "icon:signal/signal_7"
+          },
+          {
+            "name": "signal-8",
+            "icon": "icon:signal/signal_8"
+          },
+          {
+            "name": "signal-9",
+            "icon": "icon:signal/signal_9"
+          }
+        ]
+      },
+      {
+        "name": "virtual-signal-letter",
+        "items": [
+          {
+            "name": "signal-A",
+            "icon": "icon:signal/signal_A"
+          },
+          {
+            "name": "signal-B",
+            "icon": "icon:signal/signal_B"
+          },
+          {
+            "name": "signal-C",
+            "icon": "icon:signal/signal_C"
+          },
+          {
+            "name": "signal-D",
+            "icon": "icon:signal/signal_D"
+          },
+          {
+            "name": "signal-E",
+            "icon": "icon:signal/signal_E"
+          },
+          {
+            "name": "signal-F",
+            "icon": "icon:signal/signal_F"
+          },
+          {
+            "name": "signal-G",
+            "icon": "icon:signal/signal_G"
+          },
+          {
+            "name": "signal-H",
+            "icon": "icon:signal/signal_H"
+          },
+          {
+            "name": "signal-I",
+            "icon": "icon:signal/signal_I"
+          },
+          {
+            "name": "signal-J",
+            "icon": "icon:signal/signal_J"
+          },
+          {
+            "name": "signal-K",
+            "icon": "icon:signal/signal_K"
+          },
+          {
+            "name": "signal-L",
+            "icon": "icon:signal/signal_L"
+          },
+          {
+            "name": "signal-M",
+            "icon": "icon:signal/signal_M"
+          },
+          {
+            "name": "signal-N",
+            "icon": "icon:signal/signal_N"
+          },
+          {
+            "name": "signal-O",
+            "icon": "icon:signal/signal_O"
+          },
+          {
+            "name": "signal-P",
+            "icon": "icon:signal/signal_P"
+          },
+          {
+            "name": "signal-Q",
+            "icon": "icon:signal/signal_Q"
+          },
+          {
+            "name": "signal-R",
+            "icon": "icon:signal/signal_R"
+          },
+          {
+            "name": "signal-S",
+            "icon": "icon:signal/signal_S"
+          },
+          {
+            "name": "signal-T",
+            "icon": "icon:signal/signal_T"
+          },
+          {
+            "name": "signal-U",
+            "icon": "icon:signal/signal_U"
+          },
+          {
+            "name": "signal-V",
+            "icon": "icon:signal/signal_V"
+          },
+          {
+            "name": "signal-W",
+            "icon": "icon:signal/signal_W"
+          },
+          {
+            "name": "signal-X",
+            "icon": "icon:signal/signal_X"
+          },
+          {
+            "name": "signal-Y",
+            "icon": "icon:signal/signal_Y"
+          },
+          {
+            "name": "signal-Z",
+            "icon": "icon:signal/signal_Z"
+          }
+        ]
+      },
+      {
+        "name": "virtual-signal-color",
+        "items": [
+          {
+            "name": "signal-red",
+            "icon": "icon:signal/signal_red"
+          },
+          {
+            "name": "signal-green",
+            "icon": "icon:signal/signal_green"
+          },
+          {
+            "name": "signal-blue",
+            "icon": "icon:signal/signal_blue"
+          },
+          {
+            "name": "signal-yellow",
+            "icon": "icon:signal/signal_yellow"
+          },
+          {
+            "name": "signal-pink",
+            "icon": "icon:signal/signal_pink"
+          },
+          {
+            "name": "signal-cyan",
+            "icon": "icon:signal/signal_cyan"
+          },
+          {
+            "name": "signal-white",
+            "icon": "icon:signal/signal_white"
+          },
+          {
+            "name": "signal-grey",
+            "icon": "icon:signal/signal_grey"
+          },
+          {
+            "name": "signal-black",
+            "icon": "icon:signal/signal_black"
+          }
+        ]
+      },
+      {
+        "name": "virtual-signal",
+        "items": []
+      }
+    ]
+  }
+]
