@@ -1,0 +1,1110 @@
+{
+  "frames": {
+    "icon:item-group/logistics": {
+      "frame": { "x": 1, "y": 1, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 }
+    },
+    "icon:item-group/production": {
+      "frame": { "x": 67, "y": 1, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 }
+    },
+    "icon:item-group/intermediate-products": {
+      "frame": { "x": 1, "y": 67, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 }
+    },
+    "icon:item-group/military": {
+      "frame": { "x": 67, "y": 67, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 }
+    },
+    "icon:item-group/fluids": {
+      "frame": { "x": 133, "y": 1, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 }
+    },
+    "icon:item-group/signals": {
+      "frame": { "x": 133, "y": 67, "w": 64, "h": 64 },
+      "sourceSize": { "w": 64, "h": 64 }
+    },
+    "icon:icons/flying-robot-frame": {
+      "frame": { "x": 1, "y": 133, "w": 37, "h": 34 },
+      "sourceSize": { "w": 37, "h": 34 }
+    },
+    "icon:icons/wooden-chest": {
+      "frame": { "x": 40, "y": 133, "w": 32, "h": 34 },
+      "sourceSize": { "w": 32, "h": 34 }
+    },
+    "icon:icons/iron-chest": {
+      "frame": { "x": 74, "y": 133, "w": 33, "h": 32 },
+      "sourceSize": { "w": 33, "h": 32 }
+    },
+    "icon:icons/fast-underground-belt": {
+      "frame": { "x": 109, "y": 133, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/express-underground-belt": {
+      "frame": { "x": 143, "y": 133, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/splitter": {
+      "frame": { "x": 199, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/fast-splitter": {
+      "frame": { "x": 199, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/express-splitter": {
+      "frame": { "x": 199, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/burner-inserter": {
+      "frame": { "x": 199, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/inserter": {
+      "frame": { "x": 1, "y": 169, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/long-handed-inserter": {
+      "frame": { "x": 35, "y": 169, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/fast-inserter": {
+      "frame": { "x": 69, "y": 169, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/filter-inserter": {
+      "frame": { "x": 103, "y": 169, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/stack-inserter": {
+      "frame": { "x": 137, "y": 169, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/stack-filter-inserter": {
+      "frame": { "x": 171, "y": 169, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/small-electric-pole": {
+      "frame": { "x": 233, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/medium-electric-pole": {
+      "frame": { "x": 233, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/big-electric-pole": {
+      "frame": { "x": 233, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/substation": {
+      "frame": { "x": 233, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/pipe": {
+      "frame": { "x": 233, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/pipe-to-ground": {
+      "frame": { "x": 1, "y": 203, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/pump": {
+      "frame": { "x": 35, "y": 203, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rail": {
+      "frame": { "x": 69, "y": 203, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/train-stop": {
+      "frame": { "x": 103, "y": 203, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rail-signal": {
+      "frame": { "x": 137, "y": 203, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rail-chain-signal": {
+      "frame": { "x": 171, "y": 203, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/diesel-locomotive": {
+      "frame": { "x": 205, "y": 203, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/cargo-wagon": {
+      "frame": { "x": 267, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/fluid-wagon": {
+      "frame": { "x": 267, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/artillery-wagon": {
+      "frame": { "x": 267, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/car": {
+      "frame": { "x": 267, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/tank": {
+      "frame": { "x": 267, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/logistic-robot": {
+      "frame": { "x": 267, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/construction-robot": {
+      "frame": { "x": 1, "y": 237, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/logistic-chest-active-provider": {
+      "frame": { "x": 35, "y": 237, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/logistic-chest-passive-provider": {
+      "frame": { "x": 69, "y": 237, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/logistic-chest-storage": {
+      "frame": { "x": 103, "y": 237, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/logistic-chest-buffer": {
+      "frame": { "x": 137, "y": 237, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/logistic-chest-requester": {
+      "frame": { "x": 171, "y": 237, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/roboport": {
+      "frame": { "x": 205, "y": 237, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/small-lamp": {
+      "frame": { "x": 239, "y": 237, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/red-wire": {
+      "frame": { "x": 301, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/green-wire": {
+      "frame": { "x": 301, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/arithmetic-combinator": {
+      "frame": { "x": 301, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/decider-combinator": {
+      "frame": { "x": 301, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/constant-combinator": {
+      "frame": { "x": 301, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/power-switch": {
+      "frame": { "x": 301, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/programmable-speaker": {
+      "frame": { "x": 301, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/stone-brick": {
+      "frame": { "x": 1, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/concrete": {
+      "frame": { "x": 35, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/hazard-concrete": {
+      "frame": { "x": 69, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/refined-concrete": {
+      "frame": { "x": 103, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/refined-hazard-concrete": {
+      "frame": { "x": 137, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/landfill": {
+      "frame": { "x": 171, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/cliff-explosives": {
+      "frame": { "x": 205, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_black": {
+      "frame": { "x": 239, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/iron-axe": {
+      "frame": { "x": 273, "y": 271, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/steel-axe": {
+      "frame": { "x": 335, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/repair-pack": {
+      "frame": { "x": 335, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/blueprint": {
+      "frame": { "x": 335, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/deconstruction-planner": {
+      "frame": { "x": 335, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/blueprint-book": {
+      "frame": { "x": 335, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/boiler": {
+      "frame": { "x": 335, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/steam-engine": {
+      "frame": { "x": 335, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/steam-turbine": {
+      "frame": { "x": 335, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/solar-panel": {
+      "frame": { "x": 1, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/accumulator": {
+      "frame": { "x": 35, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/nuclear-reactor": {
+      "frame": { "x": 69, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/heat-boiler": {
+      "frame": { "x": 103, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/heat-pipe": {
+      "frame": { "x": 137, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/burner-mining-drill": {
+      "frame": { "x": 171, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/electric-mining-drill": {
+      "frame": { "x": 205, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/offshore-pump": {
+      "frame": { "x": 239, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/pumpjack": {
+      "frame": { "x": 273, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/stone-furnace": {
+      "frame": { "x": 307, "y": 305, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/steel-furnace": {
+      "frame": { "x": 369, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/electric-furnace": {
+      "frame": { "x": 369, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/assembling-machine-1": {
+      "frame": { "x": 369, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/assembling-machine-2": {
+      "frame": { "x": 369, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/assembling-machine-3": {
+      "frame": { "x": 369, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/oil-refinery": {
+      "frame": { "x": 369, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/chemical-plant": {
+      "frame": { "x": 369, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/centrifuge": {
+      "frame": { "x": 369, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/lab": {
+      "frame": { "x": 369, "y": 273, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/beacon": {
+      "frame": { "x": 1, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/speed-module": {
+      "frame": { "x": 35, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/speed-module-2": {
+      "frame": { "x": 69, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/speed-module-3": {
+      "frame": { "x": 103, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/effectivity-module": {
+      "frame": { "x": 137, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/effectivity-module-2": {
+      "frame": { "x": 171, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/effectivity-module-3": {
+      "frame": { "x": 205, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/productivity-module": {
+      "frame": { "x": 239, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/productivity-module-2": {
+      "frame": { "x": 273, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/productivity-module-3": {
+      "frame": { "x": 307, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/steel-chest": {
+      "frame": { "x": 341, "y": 339, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/basic-oil-processing": {
+      "frame": { "x": 403, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/advanced-oil-processing": {
+      "frame": { "x": 403, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/coal-liquefaction": {
+      "frame": { "x": 403, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/heavy-oil-cracking": {
+      "frame": { "x": 403, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/light-oil-cracking": {
+      "frame": { "x": 403, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/solid-fuel-from-light-oil": {
+      "frame": { "x": 403, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/solid-fuel-from-petroleum-gas": {
+      "frame": { "x": 403, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/solid-fuel-from-heavy-oil": {
+      "frame": { "x": 403, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/raw-wood": {
+      "frame": { "x": 403, "y": 273, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/coal": {
+      "frame": { "x": 403, "y": 307, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/stone": {
+      "frame": { "x": 1, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/iron-ore": {
+      "frame": { "x": 35, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/copper-ore": {
+      "frame": { "x": 69, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/uranium-ore": {
+      "frame": { "x": 103, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/fish": {
+      "frame": { "x": 137, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/wood": {
+      "frame": { "x": 171, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/iron-plate": {
+      "frame": { "x": 205, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/copper-plate": {
+      "frame": { "x": 239, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/solid-fuel": {
+      "frame": { "x": 273, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/steel-plate": {
+      "frame": { "x": 307, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/plastic-bar": {
+      "frame": { "x": 341, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/sulfur": {
+      "frame": { "x": 375, "y": 373, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/battery": {
+      "frame": { "x": 437, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/explosives": {
+      "frame": { "x": 437, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/uranium-processing": {
+      "frame": { "x": 437, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/empty-barrel": {
+      "frame": { "x": 437, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/barrel-side-mask": {
+      "frame": { "x": 437, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/barrel-hoop-top-mask": {
+      "frame": { "x": 437, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/barrel-fill": {
+      "frame": { "x": 437, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/barrel-fill-side-mask": {
+      "frame": { "x": 437, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/barrel-fill-top-mask": {
+      "frame": { "x": 437, "y": 273, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/crude-oil": {
+      "frame": { "x": 437, "y": 307, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/heavy-oil": {
+      "frame": { "x": 437, "y": 341, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/light-oil": {
+      "frame": { "x": 1, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/lubricant": {
+      "frame": { "x": 35, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/petroleum-gas": {
+      "frame": { "x": 69, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/sulfuric-acid": {
+      "frame": { "x": 103, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/storage-tank": {
+      "frame": { "x": 137, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/barrel-empty": {
+      "frame": { "x": 171, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/barrel-empty-side-mask": {
+      "frame": { "x": 205, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:barreling/barrel-empty-top-mask": {
+      "frame": { "x": 239, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/copper-cable": {
+      "frame": { "x": 273, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/iron-stick": {
+      "frame": { "x": 307, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/iron-gear-wheel": {
+      "frame": { "x": 341, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/electronic-circuit": {
+      "frame": { "x": 375, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/advanced-circuit": {
+      "frame": { "x": 409, "y": 407, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/processing-unit": {
+      "frame": { "x": 471, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/engine-unit": {
+      "frame": { "x": 471, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/electric-engine-unit": {
+      "frame": { "x": 471, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/transport-belt": {
+      "frame": { "x": 471, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/satellite": {
+      "frame": { "x": 471, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rocket-control-unit": {
+      "frame": { "x": 471, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rocket-structure": {
+      "frame": { "x": 471, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rocket-fuel": {
+      "frame": { "x": 471, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/nuclear-fuel": {
+      "frame": { "x": 471, "y": 273, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/uranium-235": {
+      "frame": { "x": 471, "y": 307, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/uranium-238": {
+      "frame": { "x": 471, "y": 341, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/uranium-fuel-cell": {
+      "frame": { "x": 471, "y": 375, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/nuclear-fuel-reprocessing": {
+      "frame": { "x": 1, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/kovarex-enrichment-process": {
+      "frame": { "x": 35, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/used-up-uranium-fuel-cell": {
+      "frame": { "x": 69, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/science-pack-1": {
+      "frame": { "x": 103, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/science-pack-2": {
+      "frame": { "x": 137, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/science-pack-3": {
+      "frame": { "x": 171, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/military-science-pack": {
+      "frame": { "x": 205, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/production-science-pack": {
+      "frame": { "x": 239, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/high-tech-science-pack": {
+      "frame": { "x": 273, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/space-science-pack": {
+      "frame": { "x": 307, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/fast-transport-belt": {
+      "frame": { "x": 341, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/pistol": {
+      "frame": { "x": 375, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/submachine-gun": {
+      "frame": { "x": 409, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/shotgun": {
+      "frame": { "x": 443, "y": 441, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/combat-shotgun": {
+      "frame": { "x": 505, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rocket-launcher": {
+      "frame": { "x": 505, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/flamethrower": {
+      "frame": { "x": 505, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/land-mine": {
+      "frame": { "x": 505, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/firearm-magazine": {
+      "frame": { "x": 505, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/piercing-rounds-magazine": {
+      "frame": { "x": 505, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/uranium-rounds-magazine": {
+      "frame": { "x": 505, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/shotgun-shell": {
+      "frame": { "x": 505, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/piercing-shotgun-shell": {
+      "frame": { "x": 505, "y": 273, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/cannon-shell": {
+      "frame": { "x": 505, "y": 307, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/explosive-cannon-shell": {
+      "frame": { "x": 505, "y": 341, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/uranium-cannon-shell": {
+      "frame": { "x": 505, "y": 375, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/explosive-uranium-cannon-shell": {
+      "frame": { "x": 505, "y": 409, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/artillery-shell": {
+      "frame": { "x": 1, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rocket": {
+      "frame": { "x": 35, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/explosive-rocket": {
+      "frame": { "x": 69, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/atomic-bomb": {
+      "frame": { "x": 103, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/flamethrower-ammo": {
+      "frame": { "x": 137, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/grenade": {
+      "frame": { "x": 171, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/cluster-grenade": {
+      "frame": { "x": 205, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/poison-capsule": {
+      "frame": { "x": 239, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/slowdown-capsule": {
+      "frame": { "x": 273, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/defender": {
+      "frame": { "x": 307, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/distractor": {
+      "frame": { "x": 341, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/destroyer": {
+      "frame": { "x": 375, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:equipment/discharge-defense-equipment-ability": {
+      "frame": { "x": 409, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/artillery-targeting-remote": {
+      "frame": { "x": 443, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/light-armor": {
+      "frame": { "x": 477, "y": 475, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/heavy-armor": {
+      "frame": { "x": 539, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/modular-armor": {
+      "frame": { "x": 539, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/power-armor": {
+      "frame": { "x": 539, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/power-armor-mk2": {
+      "frame": { "x": 539, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/solar-panel-equipment": {
+      "frame": { "x": 539, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/fusion-reactor-equipment": {
+      "frame": { "x": 539, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/energy-shield-equipment": {
+      "frame": { "x": 539, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/energy-shield-mk2-equipment": {
+      "frame": { "x": 539, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/battery-equipment": {
+      "frame": { "x": 539, "y": 273, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/battery-mk2-equipment": {
+      "frame": { "x": 539, "y": 307, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/personal-laser-defense-equipment": {
+      "frame": { "x": 539, "y": 341, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/discharge-defense-equipment": {
+      "frame": { "x": 539, "y": 375, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/exoskeleton-equipment": {
+      "frame": { "x": 539, "y": 409, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/personal-roboport-equipment": {
+      "frame": { "x": 539, "y": 443, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/personal-roboport-mk2-equipment": {
+      "frame": { "x": 1, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/night-vision-equipment": {
+      "frame": { "x": 35, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/stone-wall": {
+      "frame": { "x": 69, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/gate": {
+      "frame": { "x": 103, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/gun-turret": {
+      "frame": { "x": 137, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/laser-turret": {
+      "frame": { "x": 171, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/flamethrower-turret": {
+      "frame": { "x": 205, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/artillery-turret": {
+      "frame": { "x": 239, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/radar": {
+      "frame": { "x": 273, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/rocket-silo": {
+      "frame": { "x": 307, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/express-transport-belt": {
+      "frame": { "x": 341, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/steam": {
+      "frame": { "x": 375, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:icons/underground-belt": {
+      "frame": { "x": 409, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_everything": {
+      "frame": { "x": 443, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_anything": {
+      "frame": { "x": 477, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_each": {
+      "frame": { "x": 511, "y": 509, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_0": {
+      "frame": { "x": 573, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_1": {
+      "frame": { "x": 573, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_2": {
+      "frame": { "x": 573, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_3": {
+      "frame": { "x": 573, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_4": {
+      "frame": { "x": 573, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_5": {
+      "frame": { "x": 573, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_6": {
+      "frame": { "x": 573, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_7": {
+      "frame": { "x": 573, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_8": {
+      "frame": { "x": 573, "y": 273, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_9": {
+      "frame": { "x": 573, "y": 307, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_A": {
+      "frame": { "x": 573, "y": 341, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_B": {
+      "frame": { "x": 573, "y": 375, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_C": {
+      "frame": { "x": 573, "y": 409, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_D": {
+      "frame": { "x": 573, "y": 443, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_E": {
+      "frame": { "x": 573, "y": 477, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_F": {
+      "frame": { "x": 1, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_G": {
+      "frame": { "x": 35, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_H": {
+      "frame": { "x": 69, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_I": {
+      "frame": { "x": 103, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_J": {
+      "frame": { "x": 137, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_K": {
+      "frame": { "x": 171, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_L": {
+      "frame": { "x": 205, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_M": {
+      "frame": { "x": 239, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_N": {
+      "frame": { "x": 273, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_O": {
+      "frame": { "x": 307, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_P": {
+      "frame": { "x": 341, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_Q": {
+      "frame": { "x": 375, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_R": {
+      "frame": { "x": 409, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_S": {
+      "frame": { "x": 443, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_T": {
+      "frame": { "x": 477, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_U": {
+      "frame": { "x": 511, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_V": {
+      "frame": { "x": 545, "y": 543, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_W": {
+      "frame": { "x": 607, "y": 1, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_X": {
+      "frame": { "x": 607, "y": 35, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_Y": {
+      "frame": { "x": 607, "y": 69, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_Z": {
+      "frame": { "x": 607, "y": 103, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_red": {
+      "frame": { "x": 607, "y": 137, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_green": {
+      "frame": { "x": 607, "y": 171, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_blue": {
+      "frame": { "x": 607, "y": 205, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_yellow": {
+      "frame": { "x": 607, "y": 239, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_pink": {
+      "frame": { "x": 607, "y": 273, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_cyan": {
+      "frame": { "x": 607, "y": 307, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_white": {
+      "frame": { "x": 607, "y": 341, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:signal/signal_grey": {
+      "frame": { "x": 607, "y": 375, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    },
+    "icon:fluid/water": {
+      "frame": { "x": 607, "y": 409, "w": 32, "h": 32 },
+      "sourceSize": { "w": 32, "h": 32 }
+    }
+    
+  },
+  "meta": { "image": "iconSprites.png" }
+}
