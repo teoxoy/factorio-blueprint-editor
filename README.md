@@ -2,6 +2,8 @@
 
 A [Factorio](https://www.factorio.com/) blueprint editor and renderer webapp
 
+You can find the working website here: https://teoxoy.github.io/factorio-blueprint-editor/
+
 # TODO:
 - ctrl + click to add modules
 - implement more entity settings (filters, conditions)
