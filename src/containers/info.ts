@@ -3,7 +3,7 @@ import G from '../globals'
 export class InfoContainer extends PIXI.Container {
 
     iWidth = 32 * 18
-    iHeight = 32 * 24
+    iHeight = 32 * 25
 
     constructor() {
         super()
@@ -103,19 +103,22 @@ export class InfoContainer extends PIXI.Container {
             'I don\'t show network or parsing errors in the app yet, you can open the console',
             '    (F12) to check if something is wrong.',
             'Entities with placeable-off-grid flag will not be added to the positionGrid',
-            '    (ex. landmine).',
-            '',
-            'Factorio assets come directly from the Factorio game files, and are subject to',
-            '    all copyright policies associated with the game.'
+            '    (ex. landmine).'
         ], { x: 4, y: 500 })
+
+        this.writeColumn([
+            'Copyright © 2018 Tanasoaia Teodor Andrei',
+            'All art assets, spritesheets and other Factorio game data used in this project',
+            'belong to Wube Software Ltd and are not for redistribution.'
+        ], { x: this.iWidth / 2, y: 730 }, 0.5, true, 14)
     }
 
-    writeColumn(data: string[], offset: IPoint, anchorX = 0, bold = false) {
+    writeColumn(data: string[], offset: IPoint, anchorX = 0, bold = false, fontSize = 16) {
         let nextY = 0
         for (const str of data) {
             const text = new PIXI.Text(str)
             text.position.set(offset.x, nextY++ * 20 + offset.y)
-            text.style.fontSize = 16
+            text.style.fontSize = fontSize
             if (bold) text.style.fontWeight = 'bold'
             text.style.fill = 0xFFFFFF
             text.anchor.set(anchorX, 0)
