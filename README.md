@@ -1,8 +1,31 @@
 # factorio-blueprint-editor
 
-A [Factorio](https://www.factorio.com/) blueprint editor and renderer webapp
+A [Factorio](https://www.factorio.com) blueprint editor and renderer webapp
 
-You can find the working website here: https://teoxoy.github.io/factorio-blueprint-editor/
+You can find the working website here: https://teoxoy.github.io/factorio-blueprint-editor
+
+# Changing the keybinds
+
+### Configurable keybinds and their default values:
+- rotate: 'r'
+- pippete: 'q'
+- undo: 'modifier+z'
+- redo: 'modifier+y'
+- picture: 'shift+s'
+- clear: 'shift+n'
+- overlay: 'alt'
+- closeWindow: 'esc'
+- inventory: 'e'
+- focus: 'f'
+- w: 'w'
+- a: 'a'
+- s: 's'
+- d: 'd'
+
+### How to change them:
+Add `keybinds:ACTION=KEY,ACTION=KEY,ACTION=KEY` as a parameter to the URL
+
+Example: `https://teoxoy.github.io/factorio-blueprint-editor?keybinds:rotate=t,pippete=p`
 
 # TODO:
 - ctrl + click to add modules

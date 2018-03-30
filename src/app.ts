@@ -20,7 +20,37 @@ import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
 
-G.renderOnly = window.location.search.slice(1).split('&').includes('renderOnly')
+const params = window.location.search.slice(1).split('&')
+
+G.renderOnly = params.includes('renderOnly')
+
+const keybinds = {
+    rotate: 'r',
+    pippete: 'q',
+    undo: 'modifier+z',
+    redo: 'modifier+y',
+    picture: 'shift+s',
+    clear: 'shift+n',
+    overlay: 'alt',
+    closeWindow: 'esc',
+    inventory: 'e',
+    focus: 'f',
+    w: 'w',
+    a: 'a',
+    s: 's',
+    d: 'd'
+}
+
+for (const p of params) {
+    if (p.includes('keybinds')) {
+        const parts = p.split(':')[1].split(',')
+        for (const part of parts) {
+            const pa = part.split('=')
+            keybinds[pa[0]] = pa[1]
+        }
+        break
+    }
+}
 
 G.app = new PIXI.Application({
     autoStart: false,
@@ -115,30 +145,29 @@ function loadBpFromSource(source: string) {
     }
 }
 
-window.addEventListener('copy', e => {
+document.addEventListener('copy', e => {
     e.preventDefault()
-
     e.clipboardData.setData('text/plain', BPString.encode(G.bp))
-
     console.log('Copied BP String')
 })
 
-window.addEventListener('paste', e => {
+document.addEventListener('paste', e => {
     e.preventDefault()
-
     G.app.renderer.view.style.display = 'none'
     loadBpFromSource(e.clipboardData.getData('text')).then(() => G.app.renderer.view.style.display = 'block')
 })
 
-keyboardJS.bind('shift + n', () => {
+keyboardJS.bind('', e => {
+    if (!(e.pressedKeys.includes('modifier') && (e.pressedKeys.includes('c') || e.pressedKeys.includes('v')))) e.preventDefault()
+})
+
+keyboardJS.bind(keybinds.clear, () => {
     G.BPC.clearData()
     G.bp = new Blueprint()
     G.BPC.initBP()
 })
 
-keyboardJS.bind('modifier + s', e => {
-    e.preventDefault()
-
+keyboardJS.bind(keybinds.picture, () => {
     G.BPC.centerViewport()
     if (G.renderOnly) G.BPC.cacheAsBitmap = false
     const t = G.app.renderer.generateTexture(G.BPC)
@@ -156,16 +185,15 @@ keyboardJS.bind('modifier + s', e => {
 
 keyboardJS.bind('shift', () => G.keyboard.shift = true, () => G.keyboard.shift = false)
 
-keyboardJS.bind('alt', e => {
-    e.preventDefault()
+keyboardJS.bind(keybinds.overlay, () => {
     G.BPC.overlayContainer.overlay.visible = !G.BPC.overlayContainer.overlay.visible
 })
 
 keyboardJS.bind('i', () => infoContainer.toggle())
 
-keyboardJS.bind('esc', () => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
+keyboardJS.bind(keybinds.closeWindow, () => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
 
-keyboardJS.bind('e', () => {
+keyboardJS.bind(keybinds.inventory, () => {
     if (G.currentMouseState !== G.mouseStates.MOVING && G.currentMouseState !== G.mouseStates.PAINTING && !G.renderOnly) {
         if (G.openedGUIWindow) {
             G.openedGUIWindow.close()
@@ -175,9 +203,9 @@ keyboardJS.bind('e', () => {
     }
 })
 
-keyboardJS.bind('f', () => G.BPC.centerViewport())
+keyboardJS.bind(keybinds.focus, () => G.BPC.centerViewport())
 
-keyboardJS.bind('r', () => {
+keyboardJS.bind(keybinds.rotate, () => {
     if (G.BPC.hoverContainer &&
         (G.currentMouseState === G.mouseStates.NONE || G.currentMouseState === G.mouseStates.MOVING)
     ) {
@@ -187,7 +215,7 @@ keyboardJS.bind('r', () => {
     }
 })
 
-keyboardJS.bind('q', () => {
+keyboardJS.bind(keybinds.pippete, () => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.currentMouseState = G.mouseStates.PAINTING
 
@@ -210,14 +238,14 @@ keyboardJS.bind('q', () => {
     }
 })
 
-keyboardJS.bind('modifier + z', () => {
+keyboardJS.bind(keybinds.undo, () => {
     G.bp.undo(
         hist => pre(hist, 'add'),
         hist => post(hist, 'del')
     )
 })
 
-keyboardJS.bind('modifier + y', () => {
+keyboardJS.bind(keybinds.redo, () => {
     G.bp.redo(
         hist => pre(hist, 'del'),
         hist => post(hist, 'add')
@@ -283,7 +311,7 @@ function post(hist: any, addDel: string) {
     G.BPC.updateViewportCulling()
 }
 
-keyboardJS.bind('w', () => G.keyboard.w = true, () => G.keyboard.w = false)
-keyboardJS.bind('a', () => G.keyboard.a = true, () => G.keyboard.a = false)
-keyboardJS.bind('s', () => G.keyboard.s = true, () => G.keyboard.s = false)
-keyboardJS.bind('d', () => G.keyboard.d = true, () => G.keyboard.d = false)
+keyboardJS.bind(keybinds.w, () => G.keyboard.w = true, () => G.keyboard.w = false)
+keyboardJS.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = false)
+keyboardJS.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
+keyboardJS.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)

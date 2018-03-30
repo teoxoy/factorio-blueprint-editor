@@ -94,6 +94,7 @@ export class InfoContainer extends PIXI.Container {
         ], { x: this.iWidth / 2 + 4, y: 40 })
 
         this.writeColumn([
+            'If you want to rebind the keybinds, check out the readme on github',
             'You can load a blueprint from a bp string, pastebin, hastebin, gist, gitlab,',
             '    factorioprints, google docs or text webpages.',
             'You can also add ?source=<BPSTRING_OR_URL_TO_BPSTRING> to the url',
