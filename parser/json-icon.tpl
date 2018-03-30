@@ -7,5 +7,5 @@
     }<% if (idx !== layout.images.length - 1) { %>,<% } %>
     <% }); %>
   },
-  "meta": { "image": "iconSprites.png" }
+  "meta": { "image": "iconSpritesheet.png" }
 }

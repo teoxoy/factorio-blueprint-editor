@@ -7,5 +7,5 @@
     }<% if (idx !== layout.images.length - 1) { %>,<% } %>
     <% }); %>
   },
-  "meta": { "image": "entitySprites.png" }
+  "meta": { "image": "entitySpritesheet.png" }
 }
