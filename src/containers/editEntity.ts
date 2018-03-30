@@ -109,9 +109,11 @@ export class EditEntityContainer extends PIXI.Container {
                     if (e.data.button === 0) {
                         G.inventoryContainer.toggle(entity.acceptedModules, name => {
                             G.openedGUIWindow = this
-                            if (modules && modules[i] !== name) {
-                                modules[modules.length] = name
-                                entity.modulesList = modules
+                            if (modules) {
+                                if (modules[i] !== name) {
+                                    modules[modules[i] ? i : modules.length] = name
+                                    entity.modulesList = modules
+                                }
                             } else {
                                 entity.modulesList = [name]
                             }
