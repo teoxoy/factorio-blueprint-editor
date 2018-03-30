@@ -83,7 +83,7 @@ export class InfoContainer extends PIXI.Container {
             'copy/paste bpstring',
             'generate bp picture',
             'clear bp',
-            'copy/paste recipe',
+            'copy/paste recipe and modules',
             'toggle overlay',
             'close active window',
             'open inventory or close active window',

@@ -56,7 +56,8 @@ const keyboard = {
 let currentMouseState = mouseStates.NONE
 
 const copyData = {
-    recipe: ''
+    recipe: '',
+    modules: []
 }
 
 let renderOnly = false

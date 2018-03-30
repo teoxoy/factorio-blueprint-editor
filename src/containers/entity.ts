@@ -199,7 +199,7 @@ export class EntityContainer extends PIXI.Container {
             if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow && !G.keyboard.shift) {
                 G.editEntityContainer.create(this.entity_number)
             }
-            if (G.keyboard.shift) this.pasteRecipe()
+            if (G.keyboard.shift) this.pasteData()
         } else if (e.data.button === 1) {
             if (this !== G.BPC.movingContainer && G.currentMouseState === G.mouseStates.NONE) {
                 G.bp.entityPositionGrid.removeTileData(this.entity_number, false)
@@ -235,6 +235,7 @@ export class EntityContainer extends PIXI.Container {
         } else if (e.data.button === 2 && G.currentMouseState === G.mouseStates.NONE) {
             if (G.keyboard.shift) {
                 G.copyData.recipe = G.bp.entity(this.entity_number).recipe
+                G.copyData.modules = G.bp.entity(this.entity_number).modulesList
             } else {
                 G.BPC.holdingRightClick = true
                 this.removeContainer()
@@ -252,10 +253,24 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
-    pasteRecipe() {
+    pasteData() {
         const entity = G.bp.entity(this.entity_number)
-        if (!entity.entityData.crafting_categories) return
-        const RECIPE = G.copyData.recipe && entity.acceptedRecipes.includes(G.copyData.recipe) ? G.copyData.recipe : undefined
+
+        const aR = entity.acceptedRecipes
+        const RECIPE = G.copyData.recipe && aR && aR.includes(G.copyData.recipe) ? G.copyData.recipe : undefined
+
+        const aM = entity.acceptedModules
+        if (aM && G.copyData.modules && G.copyData.modules.length !== 0) {
+            const filteredModules = []
+            for (const m of G.copyData.modules) {
+                if (aM.includes(m)) filteredModules.push(m)
+            }
+            const maxSlots = entity.entityData.module_specification.module_slots
+            entity.modulesList = filteredModules.length > maxSlots ? filteredModules.slice(0, maxSlots) : filteredModules
+        } else {
+            entity.modulesList = []
+        }
+        if (aM) this.redrawEntityInfo()
         if (entity.recipe !== RECIPE) this.changeRecipe(RECIPE)
     }
 

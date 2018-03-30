@@ -301,7 +301,7 @@ export class BlueprintContainer extends PIXI.Container {
         if (newGridCoordsOfCursor.x !== G.gridCoordsOfCursor.x || newGridCoordsOfCursor.y !== G.gridCoordsOfCursor.y) {
             if (this.hoverContainer) {
                 if (this.holdingRightClick) this.hoverContainer.removeContainer()
-                if (this.holdingLeftClick && G.keyboard.shift) this.hoverContainer.pasteRecipe()
+                if (this.holdingLeftClick && G.keyboard.shift) this.hoverContainer.pasteData()
             }
             G.gridCoordsOfCursor = newGridCoordsOfCursor
             G.toolbarContainer.updateGridPos(G.gridCoordsOfCursor)

@@ -40,6 +40,7 @@ export default (BP: Blueprint) => {
             },
 
             get acceptedRecipes() {
+                if (!this.entityData.crafting_categories) return
                 const acceptedRecipes: string[] = []
                 const recipes = factorioData.getRecipes()
                 const cc = this.entityData.crafting_categories
@@ -57,6 +58,7 @@ export default (BP: Blueprint) => {
             },
 
             get acceptedModules() {
+                if (!this.entityData.module_specification) return
                 const ommitProductivityModules = this.name === 'beacon' ||
                     (this.recipe && !factorioData.getItem('productivity-module').limitation.includes(this.recipe))
                 const items = factorioData.getItems()

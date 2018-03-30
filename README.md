@@ -28,7 +28,6 @@ Add `keybinds:ACTION=KEY,ACTION=KEY,ACTION=KEY` as a parameter to the URL
 Example: `https://teoxoy.github.io/factorio-blueprint-editor?keybinds:rotate=t,pippete=p`
 
 # TODO:
-- ctrl + click to add modules
 - implement more entity settings (filters, conditions)
 - edit bp label and icons
 - put entityInfo icon backgrounds on another layer
