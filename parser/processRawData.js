@@ -280,6 +280,11 @@ function add_to_shift(shift, tab) {
     return tab
 }
 
+// Fix inconsistent radiuses
+entities['beacon'].supply_area_distance += 1
+entities['roboport'].construction_radius += 4
+entities['roboport'].logistics_radius += 4
+
 console.log('Entities: ' + Object.keys(entities).length)
 fse.writeFileSync(outDir + 'entityBundle.json', JSON.stringify(entities, null, 2).replace(/"((__base__|__core__)\/.+?)"/g, function(match, capture) {
     return '"entity:' + nameMapping(capture) + '"'

@@ -41910,8 +41910,8 @@
     "recharge_minimum": "40MJ",
     "energy_usage": "50kW",
     "charging_energy": "1000kW",
-    "logistics_radius": 25,
-    "construction_radius": 55,
+    "logistics_radius": 29,
+    "construction_radius": 59,
     "charge_approach_distance": 5,
     "robot_slots_count": 7,
     "material_slots_count": 7,
@@ -48098,7 +48098,7 @@
       "width": 10,
       "height": 10
     },
-    "supply_area_distance": 3,
+    "supply_area_distance": 4,
     "energy_source": {
       "type": "electric",
       "usage_priority": "secondary-input"
