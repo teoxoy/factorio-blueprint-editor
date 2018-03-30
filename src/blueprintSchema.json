@@ -123,7 +123,7 @@
 					"items": {
 						"type": "object",
 						"required": ["entity_number", "name", "position"],
-						"additionalProperties": false,
+						"additionalProperties": true,
 						"properties": {
 							"entity_number": { "type": "integer" },
 							"name": {
