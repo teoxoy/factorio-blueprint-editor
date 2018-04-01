@@ -20,6 +20,12 @@ import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
 
+if (PIXI.utils.isMobile.any) {
+    const text = 'This application is not compatible with mobile devices.'
+    document.getElementById('loadingMsg').innerHTML = text
+    throw new Error(text)
+}
+
 const params = window.location.search.slice(1).split('&')
 
 G.renderOnly = params.includes('renderOnly')
