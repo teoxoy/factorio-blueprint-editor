@@ -3,14 +3,14 @@ import G from '../globals'
 export class InfoContainer extends PIXI.Container {
 
     iWidth = 32 * 18
-    iHeight = 32 * 25
+    iHeight = 32 * 27
 
     constructor() {
         super()
 
         this.visible = false
         this.interactive = false
-        this.interactiveChildren = false
+        this.interactiveChildren = true
 
         this.setPosition()
         window.addEventListener('resize', () => this.setPosition(), false)
@@ -107,10 +107,34 @@ export class InfoContainer extends PIXI.Container {
         ], { x: 4, y: 500 })
 
         this.writeColumn([
+            'Please leave your suggestions, ideas, new features or bug reports here:'
+        ], { x: this.iWidth / 2, y: 710 }, 0.5, true)
+
+        const link = new PIXI.Text('Reddit Post')
+        link.interactive = true
+        link.buttonMode = true
+        link.on('click', () => window.open('https://redd.it/87zysk', '_blank'))
+        link.position.set(this.iWidth / 2, 730)
+        link.style.fontSize = 16
+        link.style.fill = 0x079DD8
+        link.anchor.set(0.5, 0)
+        this.addChild(link)
+
+        const link2 = new PIXI.Text('Github Page')
+        link2.interactive = true
+        link2.buttonMode = true
+        link2.on('click', () => window.open('https://github.com/Teoxoy/factorio-blueprint-editor', '_blank'))
+        link2.position.set(this.iWidth / 2, 750)
+        link2.style.fontSize = 16
+        link2.style.fill = 0x0AA0DB
+        link2.anchor.set(0.5, 0)
+        this.addChild(link2)
+
+        this.writeColumn([
             'Copyright © 2018 Tanasoaia Teodor Andrei',
             'All art assets, spritesheets and other Factorio game data used in this project',
             'belong to Wube Software Ltd and are not for redistribution.'
-        ], { x: this.iWidth / 2, y: 730 }, 0.5, true, 14)
+        ], { x: this.iWidth / 2, y: 790 }, 0.5, true, 14)
     }
 
     writeColumn(data: string[], offset: IPoint, anchorX = 0, bold = false, fontSize = 16) {
