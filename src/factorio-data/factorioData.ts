@@ -200,7 +200,7 @@ function generateConnection(e: any, data: any, out: any[]) {
         if (e.circuit_connector_sprites) {
             const temp = e.circuit_connector_sprites instanceof Array ?
                 e.circuit_connector_sprites[
-                    e.circuit_connector_sprites.length === 8 ? (7 - data.dir) : (3 - data.dir / 2)
+                    e.circuit_connector_sprites.length === 8 ? data.dir : data.dir / 2
                 ] : e.circuit_connector_sprites
             out.push(temp.connector_main)
             out.push(temp.wire_pins)

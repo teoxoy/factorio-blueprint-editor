@@ -1,11 +1,10 @@
 const fse = require('fs-extra')
-const lua_parser = require('./luajs/lua_parser_umd').parser
+const lua2js = require('lua2js')
 const execSync = require('child_process').execSync
 //const factorioDirectory = 'C:/SteamLibrary/steamapps/common/Factorio/data/'
 const factorioDirectory = 'C:/_Programs/Steam/steamapps/common/Factorio/data/'
 
 //run /c game.write_file("defines.lua", serpent.block(_G.defines, {comments=false}))
-//_tree_data_320 -> _tree_data_1
 
 // Load Order:
 // data.lua
@@ -95,15 +94,10 @@ mainFileData = fse.readFileSync('./defines.lua').toString() + mainFileData
 
 fse.writeFileSync('./temp.lua', mainFileData)
 
-let parsedData = lua_parser.parse(mainFileData).replace(/_tree_data_320/g, '_tree_data_1')
-
-let script = "var fs = require('fs');\n" +
-    fse.readFileSync('./luajs/lua.js').toString() + "\n" +
-    "var lua_script = (function() {\n" +
-    "  " + parsedData.split("\n").join("\n  ") + "\n" +
-    "})()[0];\n" +
-    "fs.writeFileSync('./temp.json', JSON.stringify(lua_tabletoJson(lua_tableget(lua_tableget(lua_script, 'data'), 'raw')), null, 2))"
-
-fse.writeFileSync('./temp.js', script)
-
+const data = lua2js.parser.parse(mainFileData)
+fse.writeFileSync('./temp.js', `
+require("lua2js").runtime;
+${data}
+require("fs").writeFileSync('./temp.json', JSON.stringify(Tget($get($, 'data'), 'raw').toObject(), null, 2));
+`)
 execSync('node temp.js')

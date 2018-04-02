@@ -310,12 +310,12 @@ export default (BP: Blueprint) => {
                     ].wire[color]
                 }
                 if (e.circuit_wire_connection_points.length === 8) {
-                    return e.circuit_wire_connection_points[7 - this.direction].wire[color]
+                    return e.circuit_wire_connection_points[this.direction].wire[color]
                 }
                 if (this.name === 'constant-combinator') {
                     return e.circuit_wire_connection_points[this.direction / 2].wire[color]
                 }
-                return e.circuit_wire_connection_points[3 - this.direction / 2].wire[color]
+                return e.circuit_wire_connection_points[this.direction / 2].wire[color]
             },
 
             toJS() {
