@@ -1,3 +1,9 @@
+<img src="./src/logo.svg" width="128" align="right">
+
+<br/>
+<br/>
+<br/>
+
 # factorio-blueprint-editor
 
 A [Factorio](https://www.factorio.com) blueprint editor and renderer webapp
