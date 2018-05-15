@@ -56,7 +56,7 @@ export class InfoContainer extends PIXI.Container {
             '',
             'ctrl + Z/Y',
             'ctrl + C/V',
-            'ctrl + S',
+            'shift + S',
             'shift + N',
             'shift + right/left click',
             'alt',
