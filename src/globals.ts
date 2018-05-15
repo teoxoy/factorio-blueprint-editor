@@ -62,6 +62,12 @@ const copyData = {
 
 let renderOnly = false
 
+let UIColors = {
+    primary: 0x303030,
+    secondary: 0x181818,
+    text: 0xFFFFFF
+}
+
 export default {
     renderOnly,
     copyData,
@@ -81,5 +87,6 @@ export default {
     gridCoords16,
     bp,
     mouseStates,
-    currentMouseState
+    currentMouseState,
+    UIColors
 }

@@ -65,7 +65,7 @@ export class InventoryContainer extends PIXI.Container {
         this.addChild(this.inventoryContents)
 
         this.itemTooltip = new PIXI.Text('')
-        this.itemTooltip.style.fill = 0xFFFFFF
+        this.itemTooltip.style.fill = G.UIColors.text
         this.itemTooltip.y = 352
         this.addChild(this.itemTooltip)
 
@@ -221,7 +221,7 @@ export class InventoryContainer extends PIXI.Container {
         const text = new PIXI.Text(`=${time}s>`)
         text.style.fontSize = 13
         text.style.fontWeight = 'bold'
-        text.style.fill = 0xFFFFFF
+        text.style.fill = G.UIColors.text
         text.anchor.set(0.5, 0.5)
         text.x = nextX++ * 36
         this.recipeVisualization.addChild(text)
@@ -237,7 +237,7 @@ export class InventoryContainer extends PIXI.Container {
             const text = new PIXI.Text(amount)
             text.style.fontSize = 13
             text.style.fontWeight = 'bold'
-            text.style.fill = 0xFFFFFF
+            text.style.fill = G.UIColors.text
             text.anchor.set(1, 1)
             text.position.set(nextX * 36 + 16, 16)
             return text

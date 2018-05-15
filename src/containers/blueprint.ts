@@ -48,9 +48,9 @@ export class BlueprintContainer extends PIXI.Container {
         for (let i = 0, l = G.sizeBPContainer.width; i < l; i += G.cellSize) {
             for (let j = 0, l2 = G.sizeBPContainer.height; j < l2; j += G.cellSize) {
                 if ((i + j) / G.cellSize % 2) {
-                    ggrid.beginFill(0x303030)
+                    ggrid.beginFill(G.UIColors.primary)
                 } else {
-                    ggrid.beginFill(0x181818)
+                    ggrid.beginFill(G.UIColors.secondary)
                 }
                 ggrid.drawRect(i, j, G.cellSize, G.cellSize)
                 ggrid.endFill()

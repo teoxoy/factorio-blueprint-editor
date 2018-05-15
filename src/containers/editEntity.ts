@@ -87,7 +87,7 @@ export class EditEntityContainer extends PIXI.Container {
                 this.iWidth / 2,
                 this.iHeight / 2 - 18
             )
-            recipeText.style.fill = 0xFFFFFF
+            recipeText.style.fill = G.UIColors.text
             this.content.addChild(recipeText)
         }
 
@@ -149,7 +149,7 @@ export class EditEntityContainer extends PIXI.Container {
                 this.iWidth / 2,
                 this.iHeight / 2 + 18
             )
-            recipeText.style.fill = 0xFFFFFF
+            recipeText.style.fill = G.UIColors.text
             this.content.addChild(recipeText)
         }
 

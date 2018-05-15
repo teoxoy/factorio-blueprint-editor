@@ -30,6 +30,11 @@ const params = window.location.search.slice(1).split('&')
 
 G.renderOnly = params.includes('renderOnly')
 
+if (params.includes('lightTheme')) {
+    G.UIColors.primary = 0xAAAAAA
+    G.UIColors.secondary = 0xCCCCCC
+}
+
 const keybinds = {
     rotate: 'r',
     pippete: 'q',
