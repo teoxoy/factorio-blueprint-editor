@@ -26,23 +26,6 @@ if (PIXI.utils.isMobile.any) {
     throw new Error(text)
 }
 
-const params = window.location.search.slice(1).split('&')
-
-G.renderOnly = params.includes('renderOnly')
-
-if (params.includes('lightTheme')) {
-    G.UIColors.primary = 0xAAAAAA
-    G.UIColors.secondary = 0xCCCCCC
-}
-
-let bpIndex = 0
-for (const p of params) {
-    if (p.includes('index')) {
-        bpIndex = Number(p.split('=')[1])
-        break
-    }
-}
-
 const keybinds = {
     rotate: 'r',
     pippete: 'q',
@@ -60,14 +43,30 @@ const keybinds = {
     d: 'd'
 }
 
+const params = window.location.search.slice(1).split('&')
+
+G.renderOnly = params.includes('renderOnly')
+
+if (params.includes('lightTheme')) {
+    G.UIColors.primary = 0xAAAAAA
+    G.UIColors.secondary = 0xCCCCCC
+}
+
+let bpSource = sampleBP
+let bpIndex = 0
 for (const p of params) {
+    if (p.includes('source')) {
+        bpSource = p.split('=')[1]
+    }
+    if (p.includes('index')) {
+        bpIndex = Number(p.split('=')[1])
+    }
     if (p.includes('keybinds')) {
         const parts = p.split(':')[1].split(',')
         for (const part of parts) {
             const pa = part.split('=')
             keybinds[pa[0]] = pa[1]
         }
-        break
     }
 }
 
@@ -126,14 +125,7 @@ PIXI.loader
 })
 
 function setup() {
-    let initialSource: string
-    for (const a of window.location.search.slice(1).split('&')) {
-        if (a.includes('source')) {
-            initialSource = a.split('=')[1]
-            break
-        }
-    }
-    loadBpFromSource(initialSource ? initialSource : sampleBP).then(() => {
+    loadBpFromSource(bpSource).then(() => {
 
         if (!G.bp) G.bp = new Blueprint()
         G.BPC.centerViewport()
