@@ -10,6 +10,12 @@ A [Factorio](https://www.factorio.com) blueprint editor and renderer webapp
 
 You can find the working website here: https://teoxoy.github.io/factorio-blueprint-editor
 
+Example link that uses url query parameters: https://teoxoy.github.io/factorio-blueprint-editor/?lightTheme&keybinds:rotate=t,pippete=p&index=1&source=https://pastebin.com/Xp9u7NaA
+
+# Contributing
+
+Feel free to contribute to this project, if you have any questions you can contact me on discord (Teoxoy#6734).
+
 # Changing the keybinds
 
 ### Configurable keybinds and their default values:
