@@ -98,7 +98,7 @@ export class InfoContainer extends PIXI.Container {
             'You can load a blueprint from a bp string, pastebin, hastebin, gist, gitlab,',
             '    factorioprints, google docs or text webpages.',
             'You can also add ?source=<BPSTRING_OR_URL_TO_BPSTRING> to the url',
-            '    to make sharing easier.',
+            '    to make sharing easier. You can also pass in the index if the string is a book.',
             'Adding renderOnly as an url query parameter will only render the bp.',
             'You can also add lightTheme as an url query parameter.',
             'I don\'t show network or parsing errors in the app yet, you can open the console',

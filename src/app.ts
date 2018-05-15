@@ -35,6 +35,14 @@ if (params.includes('lightTheme')) {
     G.UIColors.secondary = 0xCCCCCC
 }
 
+let bpIndex = 0
+for (const p of params) {
+    if (p.includes('index')) {
+        bpIndex = Number(p.split('=')[1])
+        break
+    }
+}
+
 const keybinds = {
     rotate: 'r',
     pippete: 'q',
@@ -148,7 +156,7 @@ function loadBpFromSource(source: string) {
         const res = BPString.decode(bpString)
         // TODO: Handle decode errors
         if ((res as {error: any}).error) throw (res as {error: any}).error
-        G.bp = res instanceof Book ? res.getBlueprint() : res
+        G.bp = res instanceof Book ? res.getBlueprint(bpIndex) : res
 
         G.BPC.clearData()
         G.BPC.initBP()
