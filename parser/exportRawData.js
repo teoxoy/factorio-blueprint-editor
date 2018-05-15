@@ -1,8 +1,8 @@
 const fse = require('fs-extra')
 const lua2js = require('lua2js')
 const execSync = require('child_process').execSync
-//const factorioDirectory = 'C:/SteamLibrary/steamapps/common/Factorio/data/'
-const factorioDirectory = 'C:/_Programs/Steam/steamapps/common/Factorio/data/'
+
+const factorioDirectory = process.argv[2]
 
 //run /c game.write_file("defines.lua", serpent.block(_G.defines, {comments=false}))
 

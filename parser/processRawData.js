@@ -2,10 +2,10 @@ const fse = require('fs-extra')
 const nsg = require('node-sprite-generator')
 const Jimp = require('jimp')
 const util = require('util')
-//const factorioDirectory = 'C:/SteamLibrary/steamapps/common/Factorio/data/'
-const factorioDirectory = 'C:/_Programs/Steam/steamapps/common/Factorio/data/'
-const outDir = '../src/bundles/'
-const spritesheetsOutDir = '../src/spritesheets/'
+
+const factorioDirectory = process.argv[2]
+const bundlesOutDir = process.argv[3] + 'bundles/'
+const spritesheetsOutDir = process.argv[3] + 'spritesheets/'
 
 function nameMapping(imagePath) {
     const sP = imagePath.split('/')
@@ -25,10 +25,10 @@ for (const k in rawData.tile) {
     if (rawData.tile[k].minable) tiles[k] = rawData.tile[k]
 }
 console.log('Tiles: ' + Object.keys(tiles).length)
-fse.writeFileSync(outDir + 'tileBundle.json', JSON.stringify(tiles, null, 2).replace(/__base__|__core__/g, 'factorio-data'))
+fse.writeFileSync(bundlesOutDir + 'tileBundle.json', JSON.stringify(tiles, null, 2).replace(/__base__|__core__/g, 'factorio-data'))
 
 console.log('Recipes: ' + Object.keys(rawData.recipe).length)
-fse.writeFileSync(outDir + 'recipeBundle.json', JSON.stringify(rawData.recipe, null, 2).replace(/__base__|__core__/g, 'factorio-data'))
+fse.writeFileSync(bundlesOutDir + 'recipeBundle.json', JSON.stringify(rawData.recipe, null, 2).replace(/__base__|__core__/g, 'factorio-data'))
 
 let inventory = []
 let items = {}
@@ -96,7 +96,7 @@ function addItem(item) {
 }
 
 console.log('Items: ' + Object.keys(items).length)
-fse.writeFileSync(outDir + 'itemBundle.json', JSON.stringify(items, null, 2).replace(/"((__base__|__core__)\/.+?)"/g, function(match, capture) {
+fse.writeFileSync(bundlesOutDir + 'itemBundle.json', JSON.stringify(items, null, 2).replace(/"((__base__|__core__)\/.+?)"/g, function(match, capture) {
     return '"icon:' + nameMapping(capture) + '"'
 }))
 
@@ -128,7 +128,7 @@ function removeExtraInfo(obj) {
     }
 }
 
-fse.writeFileSync(outDir + 'inventoryBundle.json', JSON.stringify(inventory, null, 2).replace(/"((__base__|__core__)\/.+?)"/g, function(match, capture) {
+fse.writeFileSync(bundlesOutDir + 'inventoryBundle.json', JSON.stringify(inventory, null, 2).replace(/"((__base__|__core__)\/.+?)"/g, function(match, capture) {
     return '"icon:' + nameMapping(capture) + '"'
 }))
 
@@ -286,7 +286,7 @@ entities['roboport'].construction_radius += 4
 entities['roboport'].logistics_radius += 4
 
 console.log('Entities: ' + Object.keys(entities).length)
-fse.writeFileSync(outDir + 'entityBundle.json', JSON.stringify(entities, null, 2).replace(/"((__base__|__core__)\/.+?)"/g, function(match, capture) {
+fse.writeFileSync(bundlesOutDir + 'entityBundle.json', JSON.stringify(entities, null, 2).replace(/"((__base__|__core__)\/.+?)"/g, function(match, capture) {
     return '"entity:' + nameMapping(capture) + '"'
 }))
 
