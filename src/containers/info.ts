@@ -1,4 +1,5 @@
 import G from '../globals'
+import { isArray } from 'util'
 
 export class InfoContainer extends PIXI.Container {
 
@@ -51,19 +52,19 @@ export class InfoContainer extends PIXI.Container {
             'R',
             'Q',
             '',
-            'left click recipe/module',
-            'right click recipe/module',
+            'left click recipe / module',
+            'right click recipe / module',
             '',
-            'ctrl + Z/Y',
-            'ctrl + C/V',
+            'ctrl / cmd + Z / Y',
+            ['ctrl / cmd + C / V', 0xFFEE00],
             'shift + S',
             'shift + N',
-            'shift + right/left click',
+            'shift + right / left click',
             'alt',
             'esc',
             'E',
             'F',
-            'W/A/S/D',
+            'W / A / S / D',
             'click + drag in blueprint area',
             'mouse wheel'
         ], { x: this.iWidth / 2 - 4, y: 40 }, 1)
@@ -74,32 +75,32 @@ export class InfoContainer extends PIXI.Container {
             'move',
             'remove',
             'rotate',
-            'pippete tool/clear cursor',
+            'pippete tool / clear cursor',
             '',
             'choose',
             'remove',
             '',
-            'undo/redo changes',
-            'copy/paste bpstring',
-            'generate bp picture',
-            'clear bp',
-            'copy/paste recipe and modules',
+            'undo / redo changes',
+            ['copy / paste BP string', 0xFFEE00],
+            'generate BP picture',
+            'clear BP',
+            'copy / paste recipe and modules',
             'toggle overlay',
             'close active window',
             'open inventory or close active window',
             'focuses viewport on blueprint',
             'move',
             'move',
-            'zoom in/out'
+            'zoom in / out'
         ], { x: this.iWidth / 2 + 4, y: 40 })
 
         this.writeColumn([
             'If you want to rebind the keybinds, check out the readme on github',
-            'You can load a blueprint from a bp string, pastebin, hastebin, gist, gitlab,',
+            'You can load a blueprint from a BP string, pastebin, hastebin, gist, gitlab,',
             '    factorioprints, google docs or text webpages.',
             'You can also add ?source=<BPSTRING_OR_URL_TO_BPSTRING> to the url',
             '    to make sharing easier. You can also pass in the index if the string is a book.',
-            'Adding renderOnly as an url query parameter will only render the bp.',
+            'Adding renderOnly as an url query parameter will only render the BP.',
             'You can also add lightTheme as an url query parameter.',
             'I don\'t show network or parsing errors in the app yet, you can open the console',
             '    (F12) to check if something is wrong.',
@@ -138,14 +139,15 @@ export class InfoContainer extends PIXI.Container {
         ], { x: this.iWidth / 2, y: 810 }, 0.5, true, 14)
     }
 
-    writeColumn(data: string[], offset: IPoint, anchorX = 0, bold = false, fontSize = 16) {
+    writeColumn(data: Array<string | [string, number]>, offset: IPoint, anchorX = 0, bold = false, fontSize = 16) {
         let nextY = 0
-        for (const str of data) {
+        for (const obj of data) {
+            const str = isArray(obj) ? obj[0] : obj
             const text = new PIXI.Text(str)
             text.position.set(offset.x, nextY++ * 20 + offset.y)
             text.style.fontSize = fontSize
             if (bold) text.style.fontWeight = 'bold'
-            text.style.fill = G.UIColors.text
+            text.style.fill = isArray(obj) ? obj[1] : G.UIColors.text
             text.anchor.set(anchorX, 0)
             this.addChild(text)
         }
