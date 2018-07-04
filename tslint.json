@@ -117,6 +117,7 @@
             "check-typecast",
             "check-type-operator",
             "check-preblock"
-        ]
+        ],
+        "linebreak-style": false
     }
 }
