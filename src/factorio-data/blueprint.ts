@@ -63,7 +63,7 @@ export class Blueprint {
             this.setTileIds()
 
             // TODO: if entity has placeable-off-grid flag then take the next one
-            const firstEntityTopLeft = this.entity(1).topLeft()
+            const firstEntityTopLeft = this.firstEntity().topLeft()
 
             const offsetX = G.sizeBPContainer.width / 64 - (firstEntityTopLeft.x % 1 !== 0 ? -0.5 : 0)
             const offsetY = G.sizeBPContainer.height / 64 - (firstEntityTopLeft.y % 1 !== 0 ? -0.5 : 0)
@@ -104,6 +104,10 @@ export class Blueprint {
         const e = this.rawEntities.get(entity_number)
         if (!e) return undefined
         return e.entity()
+    }
+
+    firstEntity() {
+        return this.rawEntities.first().entity()
     }
 
     undo(
@@ -338,11 +342,11 @@ export class Blueprint {
         return {
             x: [...this.rawEntities.keys()].reduce(
                 (best: number, ent: any) => xcomp(best, this.entity(ent)[f]().x),
-                this.rawEntities.first().entity()[f]().x
+                this.firstEntity()[f]().x
             ),
             y: [...this.rawEntities.keys()].reduce(
                 (best: number, ent: any) => ycomp(best, this.entity(ent)[f]().y),
-                this.rawEntities.first().entity()[f]().y
+                this.firstEntity()[f]().y
             )
         }
     }
@@ -362,7 +366,7 @@ export class Blueprint {
         // TODO: make this behave more like in Factorio
         const entities: Map<string, number> = new Map()
 
-        for (let i = 1; i <= this.rawEntities.size; i++) {
+        for (const i of [...this.rawEntities.keys()]) {
             const name = this.entity(i).name
 
             const value = entities.get(name)
