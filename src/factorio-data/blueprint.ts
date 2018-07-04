@@ -338,11 +338,11 @@ export class Blueprint {
         return {
             x: [...this.rawEntities.keys()].reduce(
                 (best: number, ent: any) => xcomp(best, this.entity(ent)[f]().x),
-                this.entity(1)[f]().x
+                this.rawEntities.first().entity()[f]().x
             ),
             y: [...this.rawEntities.keys()].reduce(
                 (best: number, ent: any) => ycomp(best, this.entity(ent)[f]().y),
-                this.entity(1)[f]().y
+                this.rawEntities.first().entity()[f]().y
             )
         }
     }
