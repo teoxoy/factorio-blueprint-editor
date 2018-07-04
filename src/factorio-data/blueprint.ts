@@ -358,18 +358,26 @@ export class Blueprint {
     bottomLeft() { return this.getPosition('bottomLeft', Math.min, Math.max) }
     bottomRight() { return this.getPosition('bottomRight', Math.max, Math.max) }
 
-    generateIcons(num = 2) {
-        // TODO: make this behave more like in factorio 2 icons default, the 2 most used items in the bp
-        const NUM = Math.min(this.rawEntities.size, Math.min(Math.max(num, 1), 4))
-        for (let i = 0; i < NUM; i++) {
-            this.icons[i] = this.rawEntities[i].name
+    generateIcons() {
+        // TODO: make this behave more like in Factorio
+        const entities: Map<string, number> = new Map()
+
+        for (let i = 1; i <= this.rawEntities.size; i++) {
+            const name = this.entity(i).name
+
+            const value = entities.get(name)
+            entities.set(name, value ? (value + 1) : 0)
         }
-        return this
+
+        const sortedEntities = [...entities.entries()].sort((a, b) => a[1] - b[1])
+
+        this.icons[0] = sortedEntities[0][0]
+        if (sortedEntities.length > 1) this.icons[1] = sortedEntities[1][0]
     }
 
     toObject() {
         this.setTileIds()
-        // if (!this.icons.length) this.generateIcons()
+        if (!this.icons.length) this.generateIcons()
         const entityInfo = this.rawEntities.valueSeq().toJS()
         const center = this.center()
         const fR = this.getFirstRail()
