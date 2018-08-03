@@ -4766,7 +4766,7 @@
       "result": "boiler"
     },
     "max_health": 200,
-    "corpse": "small-remnants",
+    "corpse": "medium-remnants",
     "vehicle_impact_sound": {
       "filename": "entity:sound/car-metal-impact",
       "volume": 0.65
@@ -5602,7 +5602,7 @@
       "result": "heat-exchanger"
     },
     "max_health": 200,
-    "corpse": "small-remnants",
+    "corpse": "medium-remnants",
     "vehicle_impact_sound": {
       "filename": "entity:sound/car-metal-impact",
       "volume": 0.65
@@ -41800,7 +41800,7 @@
         "sound": [
           {
             "filename": "entity:sound/silo-alarm",
-            "volume": 1.5
+            "volume": 1
           }
         ]
       }
@@ -41811,7 +41811,7 @@
         "sound": [
           {
             "filename": "entity:sound/silo-clamps-on",
-            "volume": 1.5
+            "volume": 1
           }
         ]
       }
@@ -41822,7 +41822,7 @@
         "sound": [
           {
             "filename": "entity:sound/silo-clamps-off",
-            "volume": 1.5
+            "volume": 1
           }
         ]
       }
@@ -41833,7 +41833,7 @@
         "sound": [
           {
             "filename": "entity:sound/silo-doors",
-            "volume": 1.5
+            "volume": 1
           }
         ]
       }
@@ -41844,7 +41844,7 @@
         "sound": [
           {
             "filename": "entity:sound/silo-raise-rocket",
-            "volume": 1.5
+            "volume": 1
           }
         ]
       }
@@ -42115,7 +42115,7 @@
         "type": "play-sound",
         "sound": {
           "filename": "entity:sound/roboport-door",
-          "volume": 1.2
+          "volume": 1
         }
       }
     ],
@@ -42602,6 +42602,7 @@
         "filename": "entity:sound/storage-tank",
         "volume": 0.8
       },
+      "match_volume_to_activity": true,
       "apparent_volume": 1.5,
       "max_sounds_per_type": 3
     },

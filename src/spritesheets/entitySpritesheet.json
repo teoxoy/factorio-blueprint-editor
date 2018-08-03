@@ -1724,7 +1724,7 @@
       "frame": { "x": 5765, "y": 311, "w": 2, "h": 2 },
       "sourceSize": { "w": 2, "h": 2 }
     }
-
+    
   },
   "meta": { "image": "entitySpritesheet.png" }
 }
