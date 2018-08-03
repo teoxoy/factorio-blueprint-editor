@@ -74,7 +74,7 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: 'src/spritesheets', to: 'spritesheets'/*'factorio-data/bundles/[name].[hash].[ext]'*/ }
         ]),
-        new CleanWebpackPlugin(['dist']),
+        new CleanWebpackPlugin(['dist/*.*'], { exclude: ['.git'] }),
         new ForkTsCheckerWebpackPlugin({
             tslint: true,
             watch: ['./src']

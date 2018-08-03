@@ -6,8 +6,8 @@
   "scripts": {
     "start": "webpack-dev-server --config webpack.dev.js --host 0.0.0.0 --open --useLocalIp",
     "build": "webpack --config webpack.prod.js",
-    "dist": "git worktree add dist gh-pages",
-    "deploy": "cd dist && git add --all && git commit -m \"new version\" && git push origin gh-pages"
+    "setupDist": "git worktree add dist gh-pages",
+    "deploy": "cd dist && git add --all && git reset -- stats && git commit -m \"new version\" && git push origin gh-pages"
   },
   "author": "Teoxoy",
   "license": "MIT",
