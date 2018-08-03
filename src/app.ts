@@ -94,6 +94,7 @@ document.body.appendChild(G.app.view)
 
 // PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 // PIXI.settings.GC_MODE = PIXI.GC_MODES.MANUAL
+PIXI.Graphics.CURVES.adaptive = true
 
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)
