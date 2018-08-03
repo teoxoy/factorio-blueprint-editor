@@ -433,17 +433,13 @@ async function graphicsBundle() {
         }
     }
 
-    //Jison.write doesn't return a Promise
-    //https://github.com/oliver-moran/jimp/issues/90
-    Jimp.prototype.writeAsync = util.promisify(Jimp.prototype.write)
-
-    let res = Promise.all(imagesToCrop.map(data => Jimp.read(data.path).then(img =>
-        img
-            .crop(0, 0, img.bitmap.width / cropImages[data.cropImgIndex][1], img.bitmap.height / cropImages[data.cropImgIndex][2])
-            .writeAsync(data.outPath)
-    )))
-
-    res.then(() => {
+    Promise.all(
+        imagesToCrop
+            .map(data => Jimp.read(data.path)
+            .then(img => img
+                .crop(0, 0, img.bitmap.width / cropImages[data.cropImgIndex][1], img.bitmap.height / cropImages[data.cropImgIndex][2])
+                .write(data.outPath)
+    ))).then(() => {
         console.log('Final entity images: ' + paths.length)
         nsg({
             src: paths,
