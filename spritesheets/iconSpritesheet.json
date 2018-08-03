@@ -1104,7 +1104,6 @@
       "frame": { "x": 607, "y": 409, "w": 32, "h": 32 },
       "sourceSize": { "w": 32, "h": 32 }
     }
-
   },
   "meta": { "image": "iconSpritesheet.png" }
 }
