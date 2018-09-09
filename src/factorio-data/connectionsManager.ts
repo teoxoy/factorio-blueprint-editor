@@ -25,17 +25,22 @@ export class ConnectionsManager {
                     if (entity.hasConnections) connections.set(entity_number, entity.connections)
                 }
                 connections.forEach((conn, k) => {
+                    const added: any = []
                     for (const side in conn) {
                         for (const color in conn[side]) {
                             for (const c of conn[side][color]) {
                                 if (!map.has(`${(c as any).entity_id}-${k}`)) {
-                                    let side2
+                                    let side2: string
                                     const conn2 = connections.get((c as any).entity_id)
                                     let found = false
                                     for (side2 in conn2) {
                                         for (const color2 in conn2[side2]) {
                                             for (const c2 of conn2[side2][color2]) {
-                                                if (color === color2 && (c2 as any).entity_id === k) {
+                                                if (color === color2 && (c2 as any).entity_id === k && !added.find((addedConn: any) =>
+                                                    addedConn.color === color &&
+                                                    addedConn.entity_number_2 === (c as any).entity_id &&
+                                                    addedConn.entity_side_2 === Number(side2))
+                                                ) {
                                                     found = true
                                                     break
                                                 }
@@ -54,6 +59,12 @@ export class ConnectionsManager {
                                         entity_side_1: Number(side),
                                         entity_side_2: Number(side2)
                                     })))
+
+                                    added.push({
+                                        color,
+                                        entity_number_2: (c as any).entity_id,
+                                        entity_side_2: Number(side2)
+                                    })
                                 }
                             }
                         }

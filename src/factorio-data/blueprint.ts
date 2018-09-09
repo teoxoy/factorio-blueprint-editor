@@ -226,9 +226,10 @@ export class Blueprint {
                     const color = entitiesToModify[i].color
                     const index = entitiesToModify[i].index
 
-                    const a = map.getIn([entity_number, 'connections']).size === 1
-                    const b = map.getIn([entity_number, 'connections', side]).size === 1
-                    const c = map.getIn([entity_number, 'connections', side, color]).size === 1
+                    const connections = this.entity(entity_number).connections
+                    const a = connections.size === 1
+                    const b = connections[side].size === 1
+                    const c = connections[side][color].size === 1
                     if (a && b && c) {
                         map.removeIn([entity_number, 'connections'])
                     } else if (b && c) {

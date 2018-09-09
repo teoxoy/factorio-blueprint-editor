@@ -145,18 +145,54 @@ export default (BP: Blueprint) => {
             },
 
             get hasConnections() {
-                return rawEntity.get('connections') !== undefined
+                return this.connections !== undefined
             },
 
             get connections() {
                 const c = rawEntity.get('connections')
-                return c ? c.toJS() : undefined
+                if (!c) return
+                const conn = c.toJS()
+
+                if (conn['Cu0']) {
+                    if (!conn['1']) conn['1'] = {}
+                    conn['1'].copper = conn['Cu0']
+                    delete conn.Cu0
+                }
+                if (conn['Cu1']) {
+                    if (!conn['2']) conn['2'] = {}
+                    conn['2'].copper = conn['Cu1']
+                    delete conn.Cu1
+                }
+
+                // TODO: Optimize this
+                if (this.type === 'electric-pole') {
+                    const copperConn: any[] = []
+
+                    BP.rawEntities.forEach((v, k) => {
+                        const entity = v.toJS()
+                        if (entity.name === 'power-switch' && entity.connections) {
+                            if (entity.connections.Cu0 && entity.connections.Cu0[0].entity_id === this.entity_number) {
+                                copperConn.push({ entity_id: k })
+                            }
+                            if (entity.connections.Cu1 && entity.connections.Cu1[0].entity_id === this.entity_number) {
+                                copperConn.push({ entity_id: k })
+                            }
+                        }
+                    })
+
+                    if (copperConn.length !== 0) {
+                        if (!conn['1']) conn['1'] = {}
+                        conn['1'].copper = copperConn
+                    }
+                }
+
+                return conn
             },
 
             get connectedEntities() {
-                const c = rawEntity.get('connections')
-                if (!c) return
-                const connections = c.toJS()
+                const connections = this.connections
+                if (!connections) return
+
                 const entities = []
                 for (const side in connections) {
                     for (const color in connections[side]) {
@@ -302,6 +338,11 @@ export default (BP: Blueprint) => {
                     if (side === 1) return e.input_connection_points[this.direction / 2].wire[color]
                     return e.output_connection_points[this.direction / 2].wire[color]
                 }
+
+                if (this.name === 'power-switch' && color === 'copper') {
+                    return e[(side === 1 ? 'left' : 'right') + '_wire_connection_point'].wire.copper
+                }
+
                 if (e.circuit_wire_connection_point) return e.circuit_wire_connection_point.wire[color]
 
                 if (this.type === 'transport-belt') {

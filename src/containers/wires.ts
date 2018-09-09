@@ -5,7 +5,9 @@ export class WiresContainer extends PIXI.Container {
 
     static createWire(p1: IPoint, p2: IPoint, color: string) {
         const wire = new PIXI.Graphics()
-        if (color === 'red') {
+        if (color === 'copper') {
+            wire.lineStyle(1.3, 0xCF7C00, 1, 0.5)
+        } else if (color === 'red') {
             wire.lineStyle(1.3, 0xC83718, 1, 0.5)
         } else {
             wire.lineStyle(1.3, 0x588C38, 1, 0.5)
