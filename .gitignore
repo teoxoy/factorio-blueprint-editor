@@ -1,5 +1,5 @@
 node_modules
-.wwp-cache
+.cache
 dist
 *.log
 parser/temp
