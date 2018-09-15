@@ -6,7 +6,7 @@
   "scripts": {
     "start": "parcel src/index.html --no-hmr",
     "prebuild": "rimraf dist/*",
-    "build": "parcel build src/index.html",
+    "build": "parcel build src/index.html --public-url ./",
     "setupDist": "git worktree add dist gh-pages",
     "deploy": "cd dist && git add --all && git reset -- stats && git commit -m \"new version\" && git push origin gh-pages"
   },
