@@ -1,6 +1,13 @@
 // tslint:disable:no-import-side-effect
 import 'normalize.css'
 
+import entitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
+import entitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
+import iconSpritesheetPNG from 'factorio-data/data/graphics/iconSpritesheet.png'
+import iconSpritesheetJSON from 'factorio-data/data/graphics/iconSpritesheet.json'
+import extra_iconSpritesheetPNG from './spritesheets/extra_iconSpritesheet.png'
+import extra_iconSpritesheetJSON from './spritesheets/extra_iconSpritesheet.json'
+
 import * as PIXI from 'pixi.js'
 import keyboardJS from 'keyboardjs'
 
@@ -71,7 +78,6 @@ for (const p of params) {
 }
 
 G.app = new PIXI.Application({
-    autoStart: false,
     antialias: true,
     resolution: window.devicePixelRatio
     // roundPixels: true
@@ -111,19 +117,18 @@ G.app.stage.addChild(G.toolbarContainer)
 const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
 
-PIXI.loader
-.add([
-    { name: 'extra_iconSpritesheet', url: 'spritesheets/extra_iconSpritesheet.json' },
-    { name: 'iconSpritesheet', url: 'spritesheets/iconSpritesheet.json' },
-    { name: 'entitySpritesheet', url: 'spritesheets/entitySpritesheet.json' }
-])
-.load((_: any, resources: any) => {
-    G.app.renderer.plugins.prepare
-    .add(resources.extra_iconSpritesheet.spritesheet.baseTexture)
-    .add(resources.iconSpritesheet.spritesheet.baseTexture)
-    .add(resources.entitySpritesheet.spritesheet.baseTexture)
-    .upload(setup)
-})
+Promise.all([
+    [ entitySpritesheetPNG, entitySpritesheetJSON ],
+    [ iconSpritesheetPNG, iconSpritesheetJSON ],
+    [ extra_iconSpritesheetPNG, extra_iconSpritesheetJSON ]
+].map(data =>
+    new Promise((resolve, reject) => {
+        const image = new Image()
+        image.src = data[0]
+        image.onload = () => new PIXI.Spritesheet(PIXI.BaseTexture.from(image), data[1]).parse(resolve)
+        image.onerror = reject
+    })
+)).then(setup)
 
 function setup() {
     loadBpFromSource(bpSource).then(() => {
@@ -135,7 +140,6 @@ function setup() {
             y: G.app.renderer.height / 2
         })
 
-        G.app.start()
         G.app.renderer.view.style.display = 'block'
     })
 }

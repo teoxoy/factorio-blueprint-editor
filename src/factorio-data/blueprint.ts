@@ -251,7 +251,7 @@ export class Blueprint {
     }
 
     getFirstRail() {
-        const fR = this.rawEntities.find(v => v.get('name') === 'straight-rail' || v.get('name') === 'curved-rail')
+        const fR = this.rawEntities.find(v => v.get('name') === 'straight_rail' || v.get('name') === 'curved_rail')
         return fR ? fR.toJS() : undefined
     }
 

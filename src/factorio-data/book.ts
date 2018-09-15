@@ -45,7 +45,7 @@ export class Book {
         return {
             blueprint_book: {
                 blueprints,
-                item: 'blueprint-book',
+                item: 'blueprint_book',
                 active_index: this.active_index,
                 version: 0
             }

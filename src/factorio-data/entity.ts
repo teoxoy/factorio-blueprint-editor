@@ -29,9 +29,9 @@ export default (BP: Blueprint) => {
                         map.setIn([this.entity_number, 'recipe'], recipeName)
 
                         const modules = this.modules
-                        if (modules && recipeName && !factorioData.getItem('productivity-module').limitation.includes(recipeName)) {
+                        if (modules && recipeName && !factorioData.getItem('productivity_module').limitation.includes(recipeName)) {
                             for (const k in modules) {
-                                if (k.includes('productivity-module')) delete modules[k]
+                                if (k.includes('productivity_module')) delete modules[k]
                             }
                             map.setIn([this.entity_number, 'items'], Object.keys(modules).length ? Immutable.fromJS(modules) : undefined)
                         }
@@ -47,8 +47,8 @@ export default (BP: Blueprint) => {
                 for (const k in recipes) {
                     if (cc.includes(recipes[k].category) || (cc.includes('crafting') && !recipes[k].category)) {
                         const recipe = (recipes[k].normal ? recipes[k].normal : recipes[k])
-                        if (!((this.name === 'assembling-machine-1' && recipe.ingredients.length > 2) ||
-                            (this.name === 'assembling-machine-2' && recipe.ingredients.length > 4))
+                        if (!((this.name === 'assembling_machine_1' && recipe.ingredients.length > 2) ||
+                            (this.name === 'assembling_machine_2' && recipe.ingredients.length > 4))
                         ) {
                             acceptedRecipes.push(k)
                         }
@@ -60,11 +60,11 @@ export default (BP: Blueprint) => {
             get acceptedModules() {
                 if (!this.entityData.module_specification) return
                 const ommitProductivityModules = this.name === 'beacon' ||
-                    (this.recipe && !factorioData.getItem('productivity-module').limitation.includes(this.recipe))
+                    (this.recipe && !factorioData.getItem('productivity_module').limitation.includes(this.recipe))
                 const items = factorioData.getItems()
                 const acceptedModules: string[] = []
                 for (const k in items) {
-                    if (items[k].type === 'module' && !(k.includes('productivity-module') && ommitProductivityModules)) acceptedModules.push(k)
+                    if (items[k].type === 'module' && !(k.includes('productivity_module') && ommitProductivityModules)) acceptedModules.push(k)
                 }
                 return acceptedModules
             },
@@ -165,12 +165,12 @@ export default (BP: Blueprint) => {
                 }
 
                 // TODO: Optimize this
-                if (this.type === 'electric-pole') {
+                if (this.type === 'electric_pole') {
                     const copperConn: any[] = []
 
                     BP.rawEntities.forEach((v, k) => {
                         const entity = v.toJS()
-                        if (entity.name === 'power-switch' && entity.connections) {
+                        if (entity.name === 'power_switch' && entity.connections) {
                             if (entity.connections.Cu0 && entity.connections.Cu0[0].entity_id === this.entity_number) {
                                 copperConn.push({ entity_id: k })
                             }
@@ -219,11 +219,11 @@ export default (BP: Blueprint) => {
             },
 
             get operator() {
-                if (this.name === 'decider-combinator') {
+                if (this.name === 'decider_combinator') {
                     const cb = rawEntity.get('control_behavior')
                     if (cb) return cb.getIn(['decider_conditions', 'comparator'])
                 }
-                if (this.name === 'arithmetic-combinator') {
+                if (this.name === 'arithmetic_combinator') {
                     const cb = rawEntity.get('control_behavior')
                     if (cb) return cb.getIn(['arithmetic_conditions', 'operation'])
                 }
@@ -261,19 +261,19 @@ export default (BP: Blueprint) => {
 
             rotate(notMoving: boolean, offset?: IPoint, pushToHistory = true, otherEntity?: number) {
                 if (!this.assemblerCraftsWithFluid &&
-                    (this.name === 'assembling-machine-2' || this.name === 'assembling-machine-3')) return false
+                    (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3')) return false
                 if (notMoving && BP.entityPositionGrid.sharesCell(this.getArea())) return false
                 const pr = this.entityData.possible_rotations
                 if (!pr) return false
                 const newDir = pr[(pr.indexOf(this.direction) +
-                    (notMoving && (this.size.x !== this.size.y || this.type === 'underground-belt') ? 2 : 1)
+                    (notMoving && (this.size.x !== this.size.y || this.type === 'underground_belt') ? 2 : 1)
                     ) % pr.length
                 ]
                 if (newDir === this.direction) return false
                 BP.operation(otherEntity ? [this.entity_number, otherEntity] : this.entity_number, 'Rotated entity',
                     entities => entities.withMutations(map => {
                         map.setIn([this.entity_number, 'direction'], newDir)
-                        if (notMoving && this.type === 'underground-belt') {
+                        if (notMoving && this.type === 'underground_belt') {
                             map.updateIn([this.entity_number, 'type'], directionType =>
                                 directionType === 'input' ? 'output' : 'input'
                             )
@@ -306,9 +306,9 @@ export default (BP: Blueprint) => {
 
             get assemblerCraftsWithFluid() {
                 return this.recipe &&
-                    factorioData.getRecipe(this.recipe).category === 'crafting-with-fluid' &&
+                    factorioData.getRecipe(this.recipe).category === 'crafting_with_fluid' &&
                     this.entityData.crafting_categories &&
-                    this.entityData.crafting_categories.includes('crafting-with-fluid')
+                    this.entityData.crafting_categories.includes('crafting_with_fluid')
             },
 
             get assemblerPipeDirection() {
@@ -339,13 +339,13 @@ export default (BP: Blueprint) => {
                     return e.output_connection_points[this.direction / 2].wire[color]
                 }
 
-                if (this.name === 'power-switch' && color === 'copper') {
+                if (this.name === 'power_switch' && color === 'copper') {
                     return e[(side === 1 ? 'left' : 'right') + '_wire_connection_point'].wire.copper
                 }
 
                 if (e.circuit_wire_connection_point) return e.circuit_wire_connection_point.wire[color]
 
-                if (this.type === 'transport-belt') {
+                if (this.type === 'transport_belt') {
                     return e.circuit_wire_connection_points[
                         factorioData.getBeltConnections2(BP, this.position, this.direction) * 4
                     ].wire[color]
@@ -353,7 +353,7 @@ export default (BP: Blueprint) => {
                 if (e.circuit_wire_connection_points.length === 8) {
                     return e.circuit_wire_connection_points[this.direction].wire[color]
                 }
-                if (this.name === 'constant-combinator') {
+                if (this.name === 'constant_combinator') {
                     return e.circuit_wire_connection_points[this.direction / 2].wire[color]
                 }
                 return e.circuit_wire_connection_points[this.direction / 2].wire[color]

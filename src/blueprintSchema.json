@@ -22,7 +22,7 @@
 						"version": { "type": "integer" },
 						"item": {
 							"type": "string",
-							"const": "blueprint-book"
+							"const": "blueprint_book"
 						},
 						"label": { "type": "string" },
 						"active_index": { "type": "integer" },

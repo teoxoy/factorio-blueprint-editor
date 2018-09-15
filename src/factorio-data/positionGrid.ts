@@ -57,7 +57,7 @@ export class PositionGrid {
             this.grid = this.grid.withMutations(map => {
                 for (const entity_number of entity_numbers) {
                     const entity = this.bp.entity(entity_number)
-                    if (!entity.entityData.flags.includes('placeable-off-grid')) {
+                    if (!entity.entityData.flags.includes('placeable_off_grid')) {
                         PositionGrid.tileDataAction(map, entity.getArea(), (key, cell) => {
                             if (cell) {
                                 if (isNumber(cell)) {
@@ -120,7 +120,7 @@ export class PositionGrid {
 
     setTileData(entity_number: number) {
         const entity = this.bp.entity(entity_number)
-        if (entity.entityData.flags.includes('placeable-off-grid')) return
+        if (entity.entityData.flags.includes('placeable_off_grid')) return
         this.operation(grid => grid.withMutations(map => {
             PositionGrid.tileDataAction(map, entity.getArea(), (key, cell) => {
                 if (cell) {
@@ -180,8 +180,8 @@ export class PositionGrid {
         if (!this.foreachOverlap(area, cell => {
             switch (this.bp.entity(cell).name) {
                 case 'gate': gateEnt = cell; break
-                case 'curved-rail': curRailEnt = cell; break
-                case 'straight-rail': allStrRailEnt.push(cell); strRailEnt = cell; break
+                case 'curved_rail': curRailEnt = cell; break
+                case 'straight_rail': allStrRailEnt.push(cell); strRailEnt = cell; break
                 default: otherEntities = true
             }
         })) return true
@@ -196,11 +196,11 @@ export class PositionGrid {
 
         if (
             (name === 'gate' && strRailEnt && allStrRailEnt.length === 1 && this.bp.entity(strRailEnt).direction !== direction && !gateEnt) ||
-            (name === 'straight-rail' && gateEnt && !strRailEnt && this.bp.entity(gateEnt).direction !== direction && !otherEntities) ||
-            (name === 'straight-rail' && strRailEnt && !sameDirStrRails && !gateEnt) ||
-            (name === 'curved-rail' && strRailEnt && !gateEnt) ||
-            (name === 'straight-rail' && curRailEnt) ||
-            (name === 'curved-rail' && curRailEnt && this.bp.entity(curRailEnt).direction !== direction)
+            (name === 'straight_rail' && gateEnt && !strRailEnt && this.bp.entity(gateEnt).direction !== direction && !otherEntities) ||
+            (name === 'straight_rail' && strRailEnt && !sameDirStrRails && !gateEnt) ||
+            (name === 'curved_rail' && strRailEnt && !gateEnt) ||
+            (name === 'straight_rail' && curRailEnt) ||
+            (name === 'curved_rail' && curRailEnt && this.bp.entity(curRailEnt).direction !== direction)
         ) return true
 
         return false
@@ -232,7 +232,7 @@ export class PositionGrid {
     }
 
     checkSameEntityAndDifferentDirection(name: string, direction: number, pos: IPoint) {
-        if (name === 'straight-rail') return false
+        if (name === 'straight_rail') return false
         const fd = factorioData.getEntity(name)
         const size = util.switchSizeBasedOnDirection(fd.size, direction)
         const area = new Area({

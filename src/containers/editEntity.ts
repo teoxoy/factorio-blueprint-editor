@@ -46,7 +46,7 @@ export class EditEntityContainer extends PIXI.Container {
         const entity = G.bp.entity(entity_number)
 
         const cc = entity.entityData.crafting_categories
-        if (cc && !cc.includes('rocket-building') && !cc.includes('smelting')) {
+        if (cc && !cc.includes('rocket_building') && !cc.includes('smelting')) {
             const recipeContainer = new PIXI.Container()
             const background = new PIXI.Sprite(PIXI.Texture.WHITE)
             background.anchor.set(0.5, 0.5)

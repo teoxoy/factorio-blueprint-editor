@@ -3,32 +3,32 @@ import factorioData from './factorio-data/factorioData'
 const updateGroups = [
     {
         is: [
-            'transport-belt',
-            'fast-transport-belt',
-            'express-transport-belt',
+            'transport_belt',
+            'fast_transport_belt',
+            'express_transport_belt',
             'splitter',
-            'fast-splitter',
-            'express-splitter',
-            'underground-belt',
-            'fast-underground-belt',
-            'express-underground-belt'
+            'fast_splitter',
+            'express_splitter',
+            'underground_belt',
+            'fast_underground_belt',
+            'express_underground_belt'
         ],
         updates: [
-            'transport-belt',
-            'fast-transport-belt',
-            'express-transport-belt'
+            'transport_belt',
+            'fast_transport_belt',
+            'express_transport_belt'
         ]
     },
     {
         is: [
-            'heat-pipe',
-            'nuclear-reactor',
-            'heat-exchanger'
+            'heat_pipe',
+            'nuclear_reactor',
+            'heat_exchanger'
         ],
         updates: [
-            'heat-pipe',
-            'nuclear-reactor',
-            'heat-exchanger'
+            'heat_pipe',
+            'nuclear_reactor',
+            'heat_exchanger'
         ]
     },
     {
@@ -45,14 +45,14 @@ const updateGroups = [
     },
     {
         is: [
-            'stone-wall',
+            'stone_wall',
             'gate',
-            'straight-rail'
+            'straight_rail'
         ],
         updates: [
-            'stone-wall',
+            'stone_wall',
             'gate',
-            'straight-rail'
+            'straight_rail'
         ]
     }
 ]

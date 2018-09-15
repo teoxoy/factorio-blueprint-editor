@@ -30,10 +30,10 @@ export class OverlayContainer extends PIXI.Container {
         const entity = G.bp.entity(entity_number)
         const entityInfo = new PIXI.Container()
 
-        if (entity.recipe && entity.recipe !== 'rocket-part') {
+        if (entity.recipe && entity.recipe !== 'rocket_part') {
             const recipeInfo = new PIXI.Container()
             createIconWithBackground(recipeInfo, entity.recipe)
-            const S = entity.name === 'oil-refinery' ? 1.5 : 0.9
+            const S = entity.name === 'oil_refinery' ? 1.5 : 0.9
             recipeInfo.scale.set(S, S)
             recipeInfo.position.set(0, -10)
             entityInfo.addChild(recipeInfo)
@@ -42,7 +42,7 @@ export class OverlayContainer extends PIXI.Container {
             const recipeData = factorioData.getRecipe(entity.recipe)
             const rD = recipeData.normal ? recipeData.normal : recipeData
             switch (recipeData.category) {
-                case 'oil-processing':
+                case 'oil_processing':
                 case 'chemistry':
                     const inputPositions: IPoint[] = []
                     const outputPositions: IPoint[] = []
@@ -74,7 +74,7 @@ export class OverlayContainer extends PIXI.Container {
                     createIconsForType('input')
                     if (rD.results) createIconsForType('output')
                     break
-                case 'crafting-with-fluid':
+                case 'crafting_with_fluid':
                     function createIconForType(type: string) {
                         for (const io of type === 'input' ? rD.ingredients : rD.results) {
                             if (io.type === 'fluid') {
@@ -179,7 +179,7 @@ export class OverlayContainer extends PIXI.Container {
             entityInfo.addChild(filterInfo)
         }
 
-        if (entity.name === 'arithmetic-combinator' || entity.name === 'decider-combinator') {
+        if (entity.name === 'arithmetic_combinator' || entity.name === 'decider_combinator') {
             const arrows = new PIXI.Container()
             arrows.addChild(createArrow({ x: 0, y: -48 }), createArrow({ x: 0, y: 48 }))
             arrows.rotation = entity.direction * Math.PI * 0.25
@@ -187,7 +187,7 @@ export class OverlayContainer extends PIXI.Container {
             entityInfo.addChild(arrows)
         }
 
-        if (entity.type === 'mining-drill' && entity.name !== 'pumpjack') {
+        if (entity.type === 'mining_drill' && entity.name !== 'pumpjack') {
             const arrows = new PIXI.Container()
             arrows.addChild(createArrow({
                 x: entity.entityData.vector_to_place_result[0] * 64,
@@ -198,8 +198,8 @@ export class OverlayContainer extends PIXI.Container {
             entityInfo.addChild(arrows)
         }
 
-        if (entity.name === 'pumpjack' || entity.name === 'pump' || entity.name === 'offshore-pump' || entity.type === 'boiler' ||
-            entity.type === 'generator' || entity.name === 'oil-refinery' || entity.name === 'chemical-plant' || entity.assemblerCraftsWithFluid
+        if (entity.name === 'pumpjack' || entity.name === 'pump' || entity.name === 'offshore_pump' || entity.type === 'boiler' ||
+            entity.type === 'generator' || entity.name === 'oil_refinery' || entity.name === 'chemical_plant' || entity.assemblerCraftsWithFluid
         ) {
             const arrows = new PIXI.Container()
             if (entity.entityData.fluid_boxes) {
@@ -210,7 +210,7 @@ export class OverlayContainer extends PIXI.Container {
                         y: c.pipe_connections[0].position[1]
                     })
                 } else {
-                    const dontConnectOutput = entity.name === 'chemical-plant' && entity.chemicalPlantDontConnectOutput
+                    const dontConnectOutput = entity.name === 'chemical_plant' && entity.chemicalPlantDontConnectOutput
                     for (const c of entity.entityData.fluid_boxes) {
                         // fluid_boxes are reversed
                         if (!(c.production_type === 'input' && dontConnectOutput)) {
@@ -228,7 +228,7 @@ export class OverlayContainer extends PIXI.Container {
                         f({
                             x: p.position[0],
                             y: p.position[1]
-                        }, entity.entityData.fluid_box.production_type === 'input-output' ? 2 : 1)
+                        }, entity.entityData.fluid_box.production_type === 'input_output' ? 2 : 1)
                     }
                 }
                 if (entity.entityData.output_fluid_box) {
@@ -242,7 +242,7 @@ export class OverlayContainer extends PIXI.Container {
             }
             function f(position: IPoint, type = 1) {
                 const offset = 0.5
-                if (entity.name === 'offshore-pump') position.y -= 2
+                if (entity.name === 'offshore_pump') position.y -= 2
                 const dir = Math.abs(position.x) > Math.abs(position.y) ?
                     (Math.sign(position.x) === 1 ? 2 : 6) :
                     (Math.sign(position.y) === 1 ? 4 : 0)
@@ -261,7 +261,7 @@ export class OverlayContainer extends PIXI.Container {
                 arrows.addChild(arrow)
             }
             if (entity.name !== 'pumpjack') {
-                arrows.rotation = (entity.name === 'oil-refinery' || entity.name === 'pump' || entity.type === 'boiler' ?
+                arrows.rotation = (entity.name === 'oil_refinery' || entity.name === 'pump' || entity.type === 'boiler' ?
                     entity.direction : (entity.direction + 4) % 8) * Math.PI * 0.25
             }
             arrows.scale.set(0.5, 0.5)
@@ -347,11 +347,11 @@ export class OverlayContainer extends PIXI.Container {
 
     updateUndergroundLines(name: string, position: IPoint, direction: number, searchDirection: number) {
         const fd = factorioData.getEntity(name)
-        if (fd.type === 'underground-belt' || name === 'pipe-to-ground') {
+        if (fd.type === 'underground_belt' || name === 'pipe_to_ground') {
             this.undergroundLines.removeChildren()
             const otherEntity = G.bp.entityPositionGrid.findEntityWithSameNameAndDirection(
                 name,
-                name === 'pipe-to-ground' ? searchDirection : direction,
+                name === 'pipe_to_ground' ? searchDirection : direction,
                 position,
                 searchDirection,
                 fd.max_distance || 10
@@ -359,13 +359,13 @@ export class OverlayContainer extends PIXI.Container {
             if (otherEntity) {
                 const oE = G.bp.entity(otherEntity)
                 // Return if directionTypes are the same
-                if (fd.type === 'underground-belt' &&
+                if (fd.type === 'underground_belt' &&
                     (oE.directionType === 'input' ? oE.direction : (oE.direction + 4 % 8)) === searchDirection) return
                 const distance = searchDirection % 4 === 0 ? Math.abs(oE.position.y - position.y) :
                     Math.abs(oE.position.x - position.x)
                 const sign = searchDirection === 0 || searchDirection === 6 ? -1 : 1
                 for (let i = 1; i < distance; i++) {
-                    const s = PIXI.Sprite.fromFrame('extra-icon:underground-lines-' + (name === 'pipe-to-ground' ? '0' : '1'))
+                    const s = PIXI.Sprite.fromFrame('extra-icon:underground-lines-' + (name === 'pipe_to_ground' ? '0' : '1'))
                     s.rotation = direction * Math.PI * 0.25
                     s.scale.set(0.5, 0.5)
                     s.anchor.set(0.5, 0.5)

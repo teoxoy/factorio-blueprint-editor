@@ -127,7 +127,7 @@ export class BlueprintContainer extends PIXI.Container {
         // TODO: maybe check for curved rails as well
         for (const entity_number of G.bp.rawEntities.keys()) {
             const entity = G.bp.entity(entity_number)
-            if (entity.name === 'straight-rail') {
+            if (entity.name === 'straight_rail') {
                 const x = Math.abs(entity.position.x)
                 const y = Math.abs(entity.position.y)
                 G.railMoveOffset = {

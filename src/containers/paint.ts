@@ -69,7 +69,7 @@ export class PaintContainer extends PIXI.Container {
 
     updateUndergroundBeltRotation() {
         const fd = factorioData.getEntity(this.name)
-        if (fd.type === 'underground-belt') {
+        if (fd.type === 'underground_belt') {
             const otherEntity = G.bp.entityPositionGrid.findEntityWithSameNameAndDirection(
                 this.name, (this.direction + 4) % 8, {
                     x: this.x / 32,
@@ -93,7 +93,7 @@ export class PaintContainer extends PIXI.Container {
             this.name,
             { x: this.position.x / 32, y: this.position.y / 32 },
             this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
-            this.name === 'pipe-to-ground' ? (this.direction + 4) % 8 : this.direction
+            this.name === 'pipe_to_ground' ? (this.direction + 4) % 8 : this.direction
         )
     }
 
@@ -164,9 +164,9 @@ export class PaintContainer extends PIXI.Container {
             if (this.holdingRightClick) this.removeContainer()
 
             switch (this.name) {
-                case 'straight-rail':
-                case 'curved-rail':
-                case 'train-stop':
+                case 'straight_rail':
+                case 'curved_rail':
+                case 'train_stop':
                     this.position.set(
                         newPosition.x - (newPosition.x + G.railMoveOffset.x * 32) % 64 + 32,
                         newPosition.y - (newPosition.y + G.railMoveOffset.y * 32) % 64 + 32
@@ -226,7 +226,7 @@ export class PaintContainer extends PIXI.Container {
             return
         }
 
-        const isUB = fd.type === 'underground-belt'
+        const isUB = fd.type === 'underground_belt'
         const res = G.bp.createEntity(this.name, position,
             isUB && this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
             isUB ? this.directionType : undefined
@@ -243,7 +243,7 @@ export class PaintContainer extends PIXI.Container {
             G.BPC.entities.addChild(ec)
             ec.redrawSurroundingEntities()
 
-            if (isUB || this.name === 'pipe-to-ground') {
+            if (isUB || this.name === 'pipe_to_ground') {
                 this.direction = (this.direction + 4) % 8
                 this.redraw()
                 G.BPC.overlayContainer.hideUndergroundLines()

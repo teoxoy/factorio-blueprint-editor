@@ -142,6 +142,15 @@ function findBPString(data: string) {
     }
 }
 
+function intToDir(i: number) {
+    switch (i) {
+        case 0: return 'north'
+        case 2: return 'east'
+        case 4: return 'south'
+        case 6: return 'west'
+    }
+}
+
 export default {
     findBPString,
     duplicate,
@@ -153,5 +162,6 @@ export default {
     duplicateAndSetPropertyUsing,
     rotatePointBasedOnDir,
     transformConnectionPosition,
-    switchSizeBasedOnDirection
+    switchSizeBasedOnDirection,
+    intToDir
 }

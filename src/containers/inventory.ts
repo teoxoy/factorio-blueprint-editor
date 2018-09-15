@@ -1,4 +1,4 @@
-import inventoryBundle from '../bundles/inventoryBundle.json'
+import inventoryBundle from 'factorio-data/data/prototypes/inventoryLayout'
 import factorioData from '../factorio-data/factorioData'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import util from '../util'
@@ -136,7 +136,7 @@ export class InventoryContainer extends PIXI.Container {
                             })
                         }
                         img.on('pointerover', () => {
-                            this.itemTooltip.text = item.name.split('-').map((s: any) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+                            this.itemTooltip.text = item.name.split('_').map((s: any) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
                             this.createRecipeVisualization(item.name)
                         })
                         img.on('pointerout', () => {

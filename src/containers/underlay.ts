@@ -18,7 +18,7 @@ export class UnderlayContainer extends PIXI.Container {
                 color: [0x83D937, undoBlendModeColorShift(0xFF8800, 0x83D937, 0.25)]
             }
         }
-        if (type === 'electric-pole') {
+        if (type === 'electric_pole') {
             return {
                 type: 'poles',
                 rKey: 'supply_area_distance',
@@ -32,7 +32,7 @@ export class UnderlayContainer extends PIXI.Container {
                 color: 0xD9C037
             }
         }
-        if (name === 'electric-mining-drill') {
+        if (name === 'electric_mining_drill') {
             return {
                 type: 'drills',
                 rKey: 'resource_searching_radius',
@@ -79,7 +79,7 @@ export class UnderlayContainer extends PIXI.Container {
         const ed = factorioData.getEntity(entityName)
         const data = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (data) if (isArray(data.type)) this.active.push(...data.type); else this.active.push(data.type)
-        if (ed.type === 'logistic-container') this.active.push('logistics0', 'logistics1')
+        if (ed.type === 'logistic_container') this.active.push('logistics0', 'logistics1')
         if (ed.energy_source && ed.energy_source.type === 'electric') this.active.push('poles')
         if (ed.module_specification) this.active.push('beacons')
 

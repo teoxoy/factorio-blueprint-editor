@@ -51,7 +51,7 @@ export class EntityContainer extends PIXI.Container {
         for (let i = 0, l = anims.length; i < l; i++) {
             const img = new EntitySprite(anims[i])
 
-            if (entity.name === 'straight-rail' || entity.name === 'curved-rail') {
+            if (entity.name === 'straight_rail' || entity.name === 'curved_rail') {
                 if (i < 2) {
                     img.zIndex = -10
                 } else if (i < 4) {
@@ -59,7 +59,7 @@ export class EntityContainer extends PIXI.Container {
                 } else {
                     img.zIndex = -8
                 }
-            } else if (entity.type === 'transport-belt' || entity.name === 'heat-pipe') {
+            } else if (entity.type === 'transport_belt' || entity.name === 'heat_pipe') {
                 img.zIndex = i === 0 ? -7 : -6
             } else {
                 img.zIndex = 0
@@ -142,7 +142,7 @@ export class EntityContainer extends PIXI.Container {
         }
         const entity = G.bp.entity(this.entity_number)
         let otherEntity
-        if (G.currentMouseState === G.mouseStates.NONE && entity.type === 'underground-belt') {
+        if (G.currentMouseState === G.mouseStates.NONE && entity.type === 'underground_belt') {
             otherEntity = G.bp.entityPositionGrid.findEntityWithSameNameAndDirection(
                 entity.name, entity.direction, entity.position,
                 entity.directionType === 'input' ? entity.direction : (entity.direction + 4) % 8,
@@ -189,7 +189,7 @@ export class EntityContainer extends PIXI.Container {
             entity.name,
             { x: this.position.x / 32, y: this.position.y / 32 },
             entity.direction,
-            entity.directionType === 'output' || entity.name === 'pipe-to-ground' ? (entity.direction + 4) % 8 : entity.direction
+            entity.directionType === 'output' || entity.name === 'pipe_to_ground' ? (entity.direction + 4) % 8 : entity.direction
         )
     }
 
@@ -247,7 +247,7 @@ export class EntityContainer extends PIXI.Container {
         const entity = G.bp.entity(this.entity_number)
         entity.recipe = recipeName
         this.redrawEntityInfo()
-        if (entity.name === 'chemical-plant' || entity.assemblerCraftsWithFluid || G.bp.entity(this.entity_number).assemblerCraftsWithFluid) {
+        if (entity.name === 'chemical_plant' || entity.assemblerCraftsWithFluid || G.bp.entity(this.entity_number).assemblerCraftsWithFluid) {
             this.redraw()
             this.redrawSurroundingEntities()
         }
@@ -277,10 +277,10 @@ export class EntityContainer extends PIXI.Container {
     redrawEntityInfo() {
         const entity = G.bp.entity(this.entity_number)
         if (entity.entityData.module_specification || entity.type === 'splitter' ||
-            entity.entityData.crafting_categories || entity.type === 'mining-drill' ||
+            entity.entityData.crafting_categories || entity.type === 'mining_drill' ||
             entity.type === 'boiler' || entity.type === 'generator' ||
-            entity.name === 'pump' || entity.name === 'offshore-pump' ||
-            entity.name === 'arithmetic-combinator' || entity.name === 'decider-combinator'
+            entity.name === 'pump' || entity.name === 'offshore_pump' ||
+            entity.name === 'arithmetic_combinator' || entity.name === 'decider_combinator'
         ) {
             if (this.entityInfo) this.entityInfo.destroy()
             this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.entity_number, this.position)
@@ -329,9 +329,9 @@ export class EntityContainer extends PIXI.Container {
             if (newCursorPos.x !== G.gridCoords16.x || newCursorPos.y !== G.gridCoords16.y) {
                 const entity = G.bp.entity(this.entity_number)
                 switch (entity.name) {
-                    case 'straight-rail':
-                    case 'curved-rail':
-                    case 'train-stop':
+                    case 'straight_rail':
+                    case 'curved_rail':
+                    case 'train_stop':
                         this.x = newPosition.x - (newPosition.x + G.railMoveOffset.x * 32) % 64 + 32
                         this.y = newPosition.y - (newPosition.y + G.railMoveOffset.y * 32) % 64 + 32
                         break
@@ -398,7 +398,7 @@ export class EntityContainer extends PIXI.Container {
         for (const updateGroup of updateGroups) {
             const j = updateGroup.is.indexOf(entity.name)
             if (j !== -1) {
-                if (entity.name === 'straight-rail') {
+                if (entity.name === 'straight_rail') {
                     G.bp.entityPositionGrid.foreachOverlap(entity.getArea(), (entnr: number) => {
                         const ent = G.bp.entity(entnr)
                         if (ent.name === 'gate' && !redrawnEntities.includes(entnr)) {

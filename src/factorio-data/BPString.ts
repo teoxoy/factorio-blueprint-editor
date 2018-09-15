@@ -43,7 +43,12 @@ export default {
     decode: (str: string) => {
         let data
         try {
-            data = JSON.parse(zlib.inflateSync(Buffer.from(str.slice(1), 'base64')).toString('utf8'))
+            data = JSON.parse(
+                zlib
+                .inflateSync(Buffer.from(str.slice(1), 'base64'))
+                .toString('utf8')
+                .replace(/("[^,]{3,}?")/g, (_, capture) => capture.replace(/-/g, '_'))
+            )
         } catch (e) {
             return { error: e }
         }
@@ -63,5 +68,9 @@ export default {
         if (data.blueprint_book === undefined) return new Blueprint(data.blueprint)
         return new Book(data)
     },
-    encode: (bPOrBook: any) => ('0' + zlib.deflateSync(JSON.stringify(bPOrBook.toObject())).toString('base64'))
+    encode: (bPOrBook: any) => ('0' +
+        zlib.deflateSync(JSON.stringify(bPOrBook.toObject()))
+        .toString('base64')
+        .replace(/(".+?")/g, (_, capture) => capture.replace(/_/g, '-'))
+    )
 }
