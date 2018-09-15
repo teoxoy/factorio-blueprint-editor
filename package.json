@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "parcel src/index.html",
-    "prebuild": "rimraf dist",
-    "build": "rimraf dist && cpx src/spritesheets/* dist/spritesheets && parcel build src/index.html",
+    "prebuild": "rimraf dist && cpx src/spritesheets/* dist/spritesheets",
+    "build": "parcel build src/index.html",
     "setupDist": "git worktree add dist gh-pages",
     "deploy": "cd dist && git add --all && git reset -- stats && git commit -m \"new version\" && git push origin gh-pages"
   },
