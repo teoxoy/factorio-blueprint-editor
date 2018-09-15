@@ -156,11 +156,11 @@ export class BlueprintContainer extends PIXI.Container {
 
     clearData() {
         const opt = { children: true }
-        this.underlayContainer.destroy(opt)
-        this.entitySprites.destroy(opt)
         this.entities.destroy(opt)
-        this.wiresContainer.destroy(opt)
+        this.entitySprites.destroy(opt)
+        this.underlayContainer.destroy(opt)
         this.overlayContainer.destroy(opt)
+        this.wiresContainer.destroy(opt)
 
         this.removeChildren()
 
