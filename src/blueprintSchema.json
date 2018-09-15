@@ -78,11 +78,12 @@
 				"additionalProperties": false,
 				"properties": {
 					"entity_id": { "type": "integer" },
-					"circuit_id": { "type": "integer" }
+					"circuit_id": { "type": "integer" },
+					"wire_id": { "type": "integer" }
 				}
 			}
 		},
-		"side": {
+		"connSide": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
@@ -262,8 +263,10 @@
 								"$comment": "wire connections",
 								"additionalProperties": false,
 								"properties": {
-									"1": { "$ref": "blueprintSchema.json#/definitions/side" },
-									"2": { "$ref": "blueprintSchema.json#/definitions/side" }
+									"1": { "$ref": "blueprintSchema.json#/definitions/connSide" },
+									"2": { "$ref": "blueprintSchema.json#/definitions/connSide" },
+									"Cu0": { "$ref": "blueprintSchema.json#/definitions/wireColor" },
+									"Cu1": { "$ref": "blueprintSchema.json#/definitions/wireColor" }
 								}
 							},
 							"control_behavior": {
