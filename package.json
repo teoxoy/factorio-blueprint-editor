@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel src/index.html",
+    "start": "parcel src/index.html --no-hmr",
     "prebuild": "rimraf dist",
     "build": "parcel build src/index.html",
     "setupDist": "git worktree add dist gh-pages",
