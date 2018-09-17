@@ -155,8 +155,8 @@ export class InfoContainer extends PIXI.Container {
 
     setPosition() {
         this.position.set(
-            G.app.renderer.width / 2 - this.iWidth / 2,
-            G.app.renderer.height / 2 - this.iHeight / 2
+            G.app.screen.width / 2 - this.iWidth / 2,
+            G.app.screen.height / 2 - this.iHeight / 2
         )
     }
 

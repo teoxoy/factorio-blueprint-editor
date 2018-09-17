@@ -92,7 +92,7 @@ G.app.renderer.autoResize = true
 G.app.renderer.resize(window.innerWidth, window.innerHeight)
 window.addEventListener('resize', () => {
     G.app.renderer.resize(window.innerWidth, window.innerHeight)
-    G.BPC.zoomPan.setViewPortSize(G.app.renderer.width, G.app.renderer.height)
+    G.BPC.zoomPan.setViewPortSize(G.app.screen.width, G.app.screen.height)
     G.BPC.zoomPan.updateTransform()
     G.BPC.updateViewportCulling()
 }, false)
@@ -136,8 +136,8 @@ function setup() {
         if (!G.bp) G.bp = new Blueprint()
         G.BPC.centerViewport()
         G.BPC.updateCursorPosition({
-            x: G.app.renderer.width / 2,
-            y: G.app.renderer.height / 2
+            x: G.app.screen.width / 2,
+            y: G.app.screen.height / 2
         })
 
         G.app.renderer.view.style.display = 'block'

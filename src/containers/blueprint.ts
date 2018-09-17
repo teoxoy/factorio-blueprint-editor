@@ -38,8 +38,8 @@ export class BlueprintContainer extends PIXI.Container {
         this.movementSpeed = 10
 
         this.zoomPan = new ZoomPan(this, G.sizeBPContainer, G.positionBPContainer, {
-            width: G.app.renderer.width,
-            height: G.app.renderer.height
+            width: G.app.screen.width,
+            height: G.app.screen.height
         }, 10)
 
         this.movingEntityFilter = new AdjustmentFilter({ red: 0.4, blue: 0.4, green: 1 })
@@ -279,8 +279,8 @@ export class BlueprintContainer extends PIXI.Container {
                 c.renderable =
                     b.x + b.width > G.positionBPContainer.x &&
                     b.y + b.height > G.positionBPContainer.y &&
-                    b.x < G.app.renderer.width &&
-                    b.y < G.app.renderer.height
+                    b.x < G.app.screen.width &&
+                    b.y < G.app.screen.height
             }
         }
     }
