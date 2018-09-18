@@ -125,7 +125,13 @@ Promise.all([
     new Promise((resolve, reject) => {
         const image = new Image()
         image.src = data[0]
-        image.onload = () => new PIXI.Spritesheet(PIXI.BaseTexture.from(image), data[1]).parse(resolve)
+        image.onload = () => {
+            const tempCanvas = document.createElement('canvas')
+            tempCanvas.width = Math.pow(2, Math.ceil(Math.log2(image.width)))
+            tempCanvas.height = Math.pow(2, Math.ceil(Math.log2(image.height)))
+            tempCanvas.getContext('2d').drawImage(image, 0, 0)
+            return new PIXI.Spritesheet(PIXI.BaseTexture.fromCanvas(tempCanvas), data[1]).parse(resolve)
+        }
         image.onerror = reject
     })
 )).then(setup)
