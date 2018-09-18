@@ -21,15 +21,17 @@
   "dependencies": {
     "@pixi/filter-adjustment": "^2.5.0",
     "ajv": "^6.5.2",
+    "factorio-data": "git+https://github.com/Teoxoy/factorio-data.git",
     "gown": "^0.1.6",
     "immutable": "^3.8.2",
     "keyboardjs": "^2.4.1",
     "normalize.css": "^8.0.0",
-    "pixi.js": "^4.8.1",
-    "factorio-data": "git+https://github.com/Teoxoy/factorio-data.git"
+    "pako": "^1.0.6",
+    "pixi.js": "^4.8.1"
   },
   "devDependencies": {
     "@types/keyboardjs": "^2.2.31",
+    "@types/pako": "^1.0.0",
     "@types/pixi.js": "^4.8.0",
     "cpx": "^1.5.0",
     "fs-extra": "^7.0.0",

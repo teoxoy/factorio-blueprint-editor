@@ -117,7 +117,8 @@ G.app.stage.addChild(G.toolbarContainer)
 const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
 
-Promise.all([
+Promise.all([util.findBPString(bpSource)]
+.concat([
     [ entitySpritesheetPNG, entitySpritesheetJSON ],
     [ iconSpritesheetPNG, iconSpritesheetJSON ],
     [ extra_iconSpritesheetPNG, extra_iconSpritesheetJSON ]
@@ -134,49 +135,52 @@ Promise.all([
         }
         image.onerror = reject
     })
-)).then(setup)
+)))
+.then(data => {
+    loadBp(data[0], false).then(() => {
 
-function setup() {
-    loadBpFromSource(bpSource).then(() => {
-
-        if (!G.bp) G.bp = new Blueprint()
         G.BPC.centerViewport()
         G.BPC.updateCursorPosition({
             x: G.app.screen.width / 2,
             y: G.app.screen.height / 2
         })
-
         G.app.renderer.view.style.display = 'block'
+
     })
-}
+})
+.catch(error => console.error(error))
 
-function loadBpFromSource(source: string) {
-    return util.findBPString(source).then(loadBp).catch(error => {
-        console.error(error)
-    })
+function loadBp(bpString: string, clearData = true) {
+    return BPString.decode(bpString)
+        .then(data => {
+            G.bp = data instanceof Book ? data.getBlueprint(bpIndex) : data
 
-    function loadBp(bpString: string) {
-        const res = BPString.decode(bpString)
-        // TODO: Handle decode errors
-        if ((res as {error: any}).error) throw (res as {error: any}).error
-        G.bp = res instanceof Book ? res.getBlueprint(bpIndex) : res
-
-        G.BPC.clearData()
-        G.BPC.initBP()
-        console.log('Loaded BP String')
-    }
+            if (clearData) G.BPC.clearData()
+            G.BPC.initBP()
+            console.log('Loaded BP String')
+        })
+        .catch(error => console.error(error))
 }
 
 document.addEventListener('copy', e => {
     e.preventDefault()
-    e.clipboardData.setData('text/plain', BPString.encode(G.bp))
-    console.log('Copied BP String')
+
+    BPString.encode(G.bp)
+        .then(data => {
+            e.clipboardData.setData('text/plain', data)
+            console.log('Copied BP String')
+        })
+        .catch(error => console.error(error))
 })
 
 document.addEventListener('paste', e => {
     e.preventDefault()
     G.app.renderer.view.style.display = 'none'
-    loadBpFromSource(e.clipboardData.getData('text')).then(() => G.app.renderer.view.style.display = 'block')
+
+    util.findBPString(e.clipboardData.getData('text'))
+        .catch(error => console.error(error))
+        .then(loadBp)
+        .then(() => G.app.renderer.view.style.display = 'block')
 })
 
 keyboardJS.bind('', e => {
