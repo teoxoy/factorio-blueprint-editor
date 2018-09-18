@@ -109,7 +109,8 @@ export class ZoomPan {
 
         const zoom = Math.min(
             (this.viewPortSize.width - this.viewPortPosition.x) / focusObjectSize.x,
-            (this.viewPortSize.height - this.viewPortPosition.y) / focusObjectSize.y
+            (this.viewPortSize.height - this.viewPortPosition.y) / focusObjectSize.y,
+            this.maxZoom
         )
         this.scaleX = zoom
         this.scaleY = zoom
