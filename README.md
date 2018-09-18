@@ -42,7 +42,6 @@ Example: `https://teoxoy.github.io/factorio-blueprint-editor?keybinds:rotate=t,p
 # TODO:
 - implement more entity settings (filters, conditions)
 - edit bp label and icons
-- put entityInfo icon backgrounds on another layer
 - pipe window
 - implement the other cursorBoxes
 - overlay for turrets
