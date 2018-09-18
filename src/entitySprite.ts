@@ -17,14 +17,19 @@ export class EntitySprite extends PIXI.Sprite {
         if (!data.divW) data.divW = 1
         if (!data.divH) data.divH = 1
 
-        const spriteData = PIXI.utils.TextureCache[data.filename]
-        // TODO: Cache the texture
-        super(new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
-            spriteData.frame.x + data.x,
-            spriteData.frame.y + data.y,
-            data.width / data.divW,
-            data.height / data.divH
-        )))
+        const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${data.height / data.divH}`
+        let texture = PIXI.utils.TextureCache[textureKey]
+        if (!texture) {
+            const spriteData = PIXI.Texture.fromFrame(data.filename)
+            texture = new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
+                spriteData.frame.x + data.x,
+                spriteData.frame.y + data.y,
+                data.width / data.divW,
+                data.height / data.divH
+            ))
+            PIXI.Texture.addToCache(texture, textureKey)
+        }
+        super(texture)
 
         this.interactive = false
         this.id = EntitySprite.nextID++
