@@ -236,6 +236,7 @@ export class EntityContainer extends PIXI.Container {
                 G.copyData.recipe = G.bp.entity(this.entity_number).recipe
                 G.copyData.modules = G.bp.entity(this.entity_number).modulesList
             } else {
+                e.stopPropagation()
                 G.BPC.holdingRightClick = true
                 this.removeContainer()
             }
