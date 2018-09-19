@@ -130,7 +130,7 @@ export class InventoryContainer extends PIXI.Container {
                                         y: newPosition.y - newPosition.y % 32 + (size.y % 2 * 16)
                                     })
                                     G.BPC.addChild(G.BPC.paintContainer)
-                                    this.visible = false
+                                    this.close()
                                 }
                             })
                         }
