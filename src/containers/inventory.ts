@@ -4,7 +4,6 @@ import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import util from '../util'
 import G from '../globals'
 import { PaintContainer } from './paint'
-import { isArray } from 'util'
 
 export class InventoryContainer extends PIXI.Container {
 
@@ -206,7 +205,7 @@ export class InventoryContainer extends PIXI.Container {
         const recipe = RECIPE.normal ? RECIPE.normal : RECIPE
         // TODO: maybe normalize the recipeBundle trough script and not here at runtime
         const time = (recipe.energy_required !== undefined ? recipe.energy_required : RECIPE.energy_required) || 0.5
-        const ingredients = recipe.ingredients.map((o: any) => isArray(o) ? o : [o.name, o.amount])
+        const ingredients = recipe.ingredients.map((o: any) => o instanceof Array ? o : [o.name, o.amount])
         const results = recipe.result ? [[recipe.result, recipe.result_count || 1]] :
             recipe.results.map((o: any) => [o.name, o.probability ? o.probability * o.amount : o.amount])
 

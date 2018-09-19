@@ -188,7 +188,7 @@ function getPipeCovers(e: any) {
     }
     if (e.fluid_boxes) {
         for (const fb of e.fluid_boxes) {
-            if (typeof fb === 'object') {
+            if (fb instanceof Object) {
                 return fb.pipe_covers
             }
         }
@@ -292,7 +292,7 @@ function getPipeConnectionPoints(e: any, dir: number, assemblerPipeDirection: st
         if (e.fluid_boxes) {
             const conn = []
             for (const fb of e.fluid_boxes) {
-                if (typeof fb === 'object') {
+                if (fb instanceof Object) {
                     conn.push(fb.pipe_connections[0])
                 }
             }

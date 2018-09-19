@@ -2,7 +2,6 @@ import { Blueprint } from './blueprint'
 import util from '../util'
 import factorioData from './factorioData'
 import Immutable from 'immutable'
-import { isNumber } from 'util'
 
 export class Area {
     y: number
@@ -60,7 +59,7 @@ export class PositionGrid {
                     if (!entity.entityData.flags.includes('placeable_off_grid')) {
                         PositionGrid.tileDataAction(map, entity.getArea(), (key, cell) => {
                             if (cell) {
-                                if (isNumber(cell)) {
+                                if (typeof cell === 'number') {
                                     map.set(key, Immutable.List([
                                         cell,
                                         entity_number
@@ -113,7 +112,7 @@ export class PositionGrid {
         const POS = position instanceof Array ? {x: position[0], y: position[1]} : position
         const cell = this.grid.get(`${Math.floor(POS.x)},${Math.floor(POS.y)}`)
         if (cell) {
-            if (isNumber(cell)) return cell
+            if (typeof cell === 'number') return cell
             else return cell.first()
         }
     }
@@ -124,7 +123,7 @@ export class PositionGrid {
         this.operation(grid => grid.withMutations(map => {
             PositionGrid.tileDataAction(map, entity.getArea(), (key, cell) => {
                 if (cell) {
-                    if (isNumber(cell)) {
+                    if (typeof cell === 'number') {
                         map.set(key, Immutable.List([
                             cell,
                             entity_number
@@ -142,7 +141,7 @@ export class PositionGrid {
     removeTileData(entity_number: number, pushToHistory?: boolean) {
         this.operation(grid => grid.withMutations(map => {
             PositionGrid.tileDataAction(map, this.bp.entity(entity_number).getArea(), (key, cell) => {
-                if (isNumber(cell)) {
+                if (typeof cell === 'number') {
                     if (cell === entity_number) map.delete(key)
                 } else {
                     const res = cell.findIndex(v => {
@@ -265,7 +264,7 @@ export class PositionGrid {
             const cell = this.grid.get(
                 `${position.x + (horizontal ? i * sign : 0)},${position.y + (!horizontal ? i * sign : 0)}`
             )
-            if (isNumber(cell)) {
+            if (typeof cell === 'number') {
                 const entity = this.bp.entity(cell)
                 if (entity.name === name) {
                     if (entity.direction === direction) return cell
@@ -291,7 +290,7 @@ export class PositionGrid {
     getFirstFromArea(area: Area, fn: (cell: number) => number): false | number {
         let output: boolean | number = false
         PositionGrid.tileDataAction(this.grid, area, (_, cell) => {
-            if (isNumber(cell)) {
+            if (typeof cell === 'number') {
                 output = fn(cell)
                 if (output) return true
             } else {
@@ -343,7 +342,7 @@ export class PositionGrid {
             const cell = this.grid.get(`${coordinate[1]},${coordinate[2]}`)
             const relDir = coordinate[0] / 2
             if (cell) {
-                if (isNumber(cell)) {
+                if (typeof cell === 'number') {
                     const o = fn(cell as number, coordinate[0], coordinate[1], coordinate[2])
                     if (o !== undefined) output[relDir] = o
                 } else {

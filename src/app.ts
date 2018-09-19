@@ -22,7 +22,6 @@ import { EntityContainer } from './containers/entity'
 import { PaintContainer } from './containers/paint'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './containers/toolbar'
-import { isNumber } from 'util'
 import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
@@ -310,7 +309,7 @@ function post(hist: any, addDel: string) {
             e.updateVisualStuff()
             break
         case 'upd':
-            if (isNumber(hist.entity_number)) {
+            if (typeof hist.entity_number === 'number') {
                 const e = EntityContainer.mappings.get(hist.entity_number)
                 e.redrawEntityInfo()
                 redrawEntityAndSurroundingEntities(hist.entity_number)

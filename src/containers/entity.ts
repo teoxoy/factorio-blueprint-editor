@@ -1,7 +1,6 @@
 import G from '../globals'
 import factorioData from '../factorio-data/factorioData'
 import { updateGroups } from '../updateGroups'
-import { isNumber } from 'util'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 
@@ -148,7 +147,7 @@ export class EntityContainer extends PIXI.Container {
                 entity.directionType === 'input' ? entity.direction : (entity.direction + 4) % 8,
                 entity.entityData.max_distance
             )
-            if (isNumber(otherEntity)) {
+            if (typeof otherEntity === 'number') {
                 const oe = G.bp.entity(otherEntity)
                 if (oe.directionType === entity.directionType) {
                     otherEntity = undefined

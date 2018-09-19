@@ -1,5 +1,4 @@
 import factorioData from '../factorio-data/factorioData'
-import { isArray } from 'util'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 
 export class UnderlayContainer extends PIXI.Container {
@@ -78,7 +77,7 @@ export class UnderlayContainer extends PIXI.Container {
     activateRelatedAreas(entityName: string) {
         const ed = factorioData.getEntity(entityName)
         const data = UnderlayContainer.getDataForVisualizationArea(entityName)
-        if (data) if (isArray(data.type)) this.active.push(...data.type); else this.active.push(data.type)
+        if (data) if (data.type instanceof Array) this.active.push(...data.type); else this.active.push(data.type)
         if (ed.type === 'logistic_container') this.active.push('logistics0', 'logistics1')
         if (ed.energy_source && ed.energy_source.type === 'electric') this.active.push('poles')
         if (ed.module_specification) this.active.push('beacons')
@@ -103,7 +102,7 @@ export class UnderlayContainer extends PIXI.Container {
         const aVData = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (aVData) {
             const ed = factorioData.getEntity(entityName)
-            if (isArray(aVData.type)) {
+            if (aVData.type instanceof Array) {
                 const aVs = []
                 for (let i = 0; i < aVData.type.length; i++) {
                     const areaVisualization = createVisualizationArea(ed[aVData.rKey[i]], aVData.color[i], position, 1)

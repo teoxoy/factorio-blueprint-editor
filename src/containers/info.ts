@@ -1,5 +1,4 @@
 import G from '../globals'
-import { isArray } from 'util'
 
 export class InfoContainer extends PIXI.Container {
 
@@ -142,12 +141,12 @@ export class InfoContainer extends PIXI.Container {
     writeColumn(data: Array<string | [string, number]>, offset: IPoint, anchorX = 0, bold = false, fontSize = 16) {
         let nextY = 0
         for (const obj of data) {
-            const str = isArray(obj) ? obj[0] : obj
+            const str = obj instanceof Array ? obj[0] : obj
             const text = new PIXI.Text(str)
             text.position.set(offset.x, nextY++ * 20 + offset.y)
             text.style.fontSize = fontSize
             if (bold) text.style.fontWeight = 'bold'
-            text.style.fill = isArray(obj) ? obj[1] : G.UIColors.text
+            text.style.fill = obj instanceof Array ? obj[1] : G.UIColors.text
             text.anchor.set(anchorX, 0)
             this.addChild(text)
         }
