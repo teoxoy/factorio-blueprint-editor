@@ -1,6 +1,8 @@
 import factorioData from '../factorio-data/factorioData'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 
+type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
+
 export class UnderlayContainer extends PIXI.Container {
 
     static getDataForVisualizationArea(name: string) {
@@ -12,28 +14,28 @@ export class UnderlayContainer extends PIXI.Container {
         }
         if (name === 'roboport') {
             return {
-                type: ['logistics0', 'logistics1'],
+                type: ['logistics0', 'logistics1'] as Type[],
                 rKey: ['construction_radius', 'logistics_radius'],
                 color: [0x83D937, undoBlendModeColorShift(0xFF8800, 0x83D937, 0.25)]
             }
         }
         if (type === 'electric_pole') {
             return {
-                type: 'poles',
+                type: 'poles' as Type,
                 rKey: 'supply_area_distance',
                 color: 0x33755D9
             }
         }
         if (name === 'beacon') {
             return {
-                type: 'beacons',
+                type: 'beacons' as Type,
                 rKey: 'supply_area_distance',
                 color: 0xD9C037
             }
         }
         if (name === 'electric_mining_drill') {
             return {
-                type: 'drills',
+                type: 'drills' as Type,
                 rKey: 'resource_searching_radius',
                 color: 0x4EAD9F
             }
@@ -47,7 +49,7 @@ export class UnderlayContainer extends PIXI.Container {
         }
     }
 
-    active: string[]
+    active: Type[]
     logistics0: PIXI.Container
     logistics1: PIXI.Container
     poles: PIXI.Container
@@ -105,13 +107,13 @@ export class UnderlayContainer extends PIXI.Container {
             if (aVData.type instanceof Array) {
                 const aVs = []
                 for (let i = 0; i < aVData.type.length; i++) {
-                    const areaVisualization = createVisualizationArea(ed[aVData.rKey[i]], aVData.color[i], position, 1)
+                    const areaVisualization = createVisualizationArea(ed[aVData.rKey[i]], (aVData.color as number[])[i], position, 1)
                     this[aVData.type[i]].addChild(areaVisualization)
                     aVs.push(areaVisualization)
                 }
                 return aVs
             } else {
-                const areaVisualization = createVisualizationArea(ed[aVData.rKey], aVData.color, position)
+                const areaVisualization = createVisualizationArea(ed[aVData.rKey as string], aVData.color as number, position)
                 this[aVData.type].addChild(areaVisualization)
                 return areaVisualization
             }

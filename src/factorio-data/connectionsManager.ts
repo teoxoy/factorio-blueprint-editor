@@ -29,16 +29,16 @@ export class ConnectionsManager {
                     for (const side in conn) {
                         for (const color in conn[side]) {
                             for (const c of conn[side][color]) {
-                                if (!map.has(`${(c as any).entity_id}-${k}`)) {
+                                if (!map.has(`${c.entity_id}-${k}`)) {
                                     let side2: string
-                                    const conn2 = connections.get((c as any).entity_id)
+                                    const conn2 = connections.get(c.entity_id)
                                     let found = false
                                     for (side2 in conn2) {
                                         for (const color2 in conn2[side2]) {
                                             for (const c2 of conn2[side2][color2]) {
-                                                if (color === color2 && (c2 as any).entity_id === k && !added.find((addedConn: any) =>
+                                                if (color === color2 && c2.entity_id === k && !added.find((addedConn: any) =>
                                                     addedConn.color === color &&
-                                                    addedConn.entity_number_2 === (c as any).entity_id &&
+                                                    addedConn.entity_number_2 === c.entity_id &&
                                                     addedConn.entity_side_2 === Number(side2))
                                                 ) {
                                                     found = true
@@ -49,20 +49,20 @@ export class ConnectionsManager {
                                         }
                                         if (found) break
                                     }
-                                    const key = `${k}-${(c as any).entity_id}`
+                                    const key = `${k}-${c.entity_id}`
                                     if (!map.has(key)) map.set(key, Immutable.List())
                                     map.set(key, map.get(key).push(Immutable.fromJS({
                                         color,
-                                        circuit_id: (c as any).circuit_id,
+                                        circuit_id: c.circuit_id,
                                         entity_number_1: k,
-                                        entity_number_2: (c as any).entity_id,
+                                        entity_number_2: c.entity_id,
                                         entity_side_1: Number(side),
                                         entity_side_2: Number(side2)
                                     })))
 
                                     added.push({
                                         color,
-                                        entity_number_2: (c as any).entity_id,
+                                        entity_number_2: c.entity_id,
                                         entity_side_2: Number(side2)
                                     })
                                 }

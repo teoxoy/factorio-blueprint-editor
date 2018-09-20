@@ -1,6 +1,15 @@
 import { EntityContainer } from './entity'
 import G from '../globals'
 
+interface IConnection {
+    circuit_id: number
+    color: string
+    entity_number_1: number
+    entity_number_2: number
+    entity_side_1: number
+    entity_side_2: number
+}
+
 export class WiresContainer extends PIXI.Container {
 
     static createWire(p1: IPoint, p2: IPoint, color: string) {
@@ -71,18 +80,17 @@ export class WiresContainer extends PIXI.Container {
                 if (first === entity_number) EntityContainer.mappings.get(second).redraw()
                 else if (second === entity_number) EntityContainer.mappings.get(first).redraw()
 
-                const paths: PIXI.Graphics[] = []
-                v.forEach(c => {
-                    paths.push(WiresContainer.createWire(
-                        WiresContainer.getFinalPos(c.get('entity_number_1') as number, c.get('color') as string, c.get('entity_side_1') as number),
-                        WiresContainer.getFinalPos(c.get('entity_number_2') as number, c.get('color') as string, c.get('entity_side_2') as number),
-                        c.get('color') as string
-                    ))
-                })
+                const paths = v.map(c => c.toJS()).map((c: IConnection) =>
+                    WiresContainer.createWire(
+                        WiresContainer.getFinalPos(c.entity_number_1, c.color, c.entity_side_1),
+                        WiresContainer.getFinalPos(c.entity_number_2, c.color, c.entity_side_2),
+                        c.color
+                    )
+                )
                 for (const p of paths) {
                     this.addChild(p)
                 }
-                this.entityWiresMapping.set(k, paths)
+                this.entityWiresMapping.set(k, paths.toArray())
             }
         })
     }
@@ -94,20 +102,18 @@ export class WiresContainer extends PIXI.Container {
                     this.removeChild(p)
                 }
             }
-            const paths: PIXI.Graphics[] = []
 
-            v.forEach(c => {
-                paths.push(WiresContainer.createWire(
-                    WiresContainer.getFinalPos(c.get('entity_number_1') as number, c.get('color') as string, c.get('entity_side_1') as number),
-                    WiresContainer.getFinalPos(c.get('entity_number_2') as number, c.get('color') as string, c.get('entity_side_2') as number),
-                    c.get('color') as string
-                ))
-            })
-
+            const paths = v.map(c => c.toJS()).map((c: IConnection) =>
+                WiresContainer.createWire(
+                    WiresContainer.getFinalPos(c.entity_number_1, c.color, c.entity_side_1),
+                    WiresContainer.getFinalPos(c.entity_number_2, c.color, c.entity_side_2),
+                    c.color
+                )
+            )
             for (const p of paths) {
                 this.addChild(p)
             }
-            this.entityWiresMapping.set(k, paths)
+            this.entityWiresMapping.set(k, paths.toArray())
         })
     }
 }

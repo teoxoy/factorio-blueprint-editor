@@ -23,7 +23,7 @@
     "ajv": "^6.5.2",
     "factorio-data": "git+https://github.com/Teoxoy/factorio-data.git",
     "gown": "^0.1.6",
-    "immutable": "^3.8.2",
+    "immutable": "^4.0.0-rc.10",
     "keyboardjs": "^2.4.1",
     "normalize.css": "^8.0.0",
     "pako": "^1.0.6",

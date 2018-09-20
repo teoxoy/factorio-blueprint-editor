@@ -1,3 +1,4 @@
+declare module '*.png'
 declare module '*.json' {
     const content: any
     export default content
@@ -22,4 +23,12 @@ interface IEntityData {
     assemblerCraftsWithFluid: boolean
     trainStopColor: { r: number; g: number; b: number; a: number}
     chemicalPlantDontConnectOutput: boolean
+}
+
+interface IHistoryObject {
+    entity_number: number
+    other_entity?: number
+    type: 'init' | 'add' | 'del' | 'mov' | 'upd'
+    annotation: string
+    rawEntities: Immutable.Map<number, any>
 }

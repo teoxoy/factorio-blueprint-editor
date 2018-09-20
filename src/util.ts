@@ -92,7 +92,7 @@ function transformConnectionPosition(position: IPoint, direction: number) {
     return rotatePointBasedOnDir(position, direction)
 }
 
-function switchSizeBasedOnDirection(defaultSize: { width: any; height: any }, direction: number) {
+function switchSizeBasedOnDirection(defaultSize: { width: number; height: number }, direction: number) {
     if (defaultSize.width !== defaultSize.height && (direction === 2 || direction === 6)) {
         return { x: defaultSize.height, y: defaultSize.width }
     }

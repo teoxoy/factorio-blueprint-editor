@@ -124,17 +124,11 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     initBP() {
-        // TODO: maybe check for curved rails as well
-        for (const entity_number of G.bp.rawEntities.keys()) {
-            const entity = G.bp.entity(entity_number)
-            if (entity.name === 'straight_rail') {
-                const x = Math.abs(entity.position.x)
-                const y = Math.abs(entity.position.y)
+        const firstRail = G.bp.getFirstRail()
+        if (firstRail) {
                 G.railMoveOffset = {
-                    x: x % 2 + 1,
-                    y: y % 2 + 1
-                }
-                break
+                x: Math.abs(firstRail.position.x) % 2 + 1,
+                y: Math.abs(firstRail.position.y) % 2 + 1
             }
         }
 

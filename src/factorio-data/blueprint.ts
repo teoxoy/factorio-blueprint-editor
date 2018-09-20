@@ -1,8 +1,9 @@
+// tslint:disable-next-line:no-import-side-effect
+import './entity'
 import factorioData from './factorioData'
 import { Tile } from './tile'
 import { PositionGrid } from './positionGrid'
 import Immutable from 'immutable'
-import initEntity from './entity'
 import G from '../globals'
 import { ConnectionsManager } from './connectionsManager'
 import { EntityContainer } from '../containers/entity'
@@ -17,18 +18,12 @@ export class Blueprint {
     connections: ConnectionsManager
     next_entity_number: number
     historyIndex: number
-    history: Array<{
-        entity_number: number | number[];
-        type: 'init' | 'add' | 'del' | 'mov' | 'upd';
-        annotation: string;
-        rawEntities: Immutable.Map<number, any>;
-    }>
+    history: IHistoryObject[]
     bp: Blueprint
     entityPositionGrid: PositionGrid
     rawEntities: Immutable.Map<number, any>
 
     constructor(data?: any) {
-        initEntity(this)
         this.name = 'Blueprint'
         this.icons = []
         this.rawEntities = Immutable.Map()
@@ -103,16 +98,16 @@ export class Blueprint {
     entity(entity_number: number) {
         const e = this.rawEntities.get(entity_number)
         if (!e) return undefined
-        return e.entity()
+        return e.getEntity(this)
     }
 
     firstEntity() {
-        return this.rawEntities.first().entity()
+        return this.rawEntities.first().getEntity()
     }
 
     undo(
-        pre: (hist: any) => void,
-        post: (hist: any) => void
+        pre: (hist: IHistoryObject) => void,
+        post: (hist: IHistoryObject) => void
     ) {
         if (this.historyIndex === 0) return
         const hist = this.history[this.historyIndex--]
@@ -128,14 +123,14 @@ export class Blueprint {
         this.rawEntities = this.history[this.historyIndex].rawEntities
         switch (hist.type) {
             case 'del':
-                if (this.entity(hist.entity_number as number).hasConnections) this.connections.undo()
+                if (this.entity(hist.entity_number).hasConnections) this.connections.undo()
         }
         post(hist)
     }
 
     redo(
-        pre: (hist: any) => void,
-        post: (hist: any) => void
+        pre: (hist: IHistoryObject) => void,
+        post: (hist: IHistoryObject) => void
     ) {
         if (this.historyIndex === this.history.length - 1) return
         const hist = this.history[++this.historyIndex]
@@ -149,7 +144,7 @@ export class Blueprint {
 
         pre(hist)
 
-        const entity = this.entity(hist.entity_number as number)
+        const entity = this.entity(hist.entity_number)
         switch (hist.type) {
             case 'del':
                 if (entity.hasConnections) this.connections.redo()
@@ -168,11 +163,12 @@ export class Blueprint {
     }
 
     operation(
-        entity_number: number | number[],
+        entity_number: number,
         annotation: string,
         fn: (entities: Immutable.Map<number, any>) => Immutable.Map<any, any>,
         type: 'add' | 'del' | 'mov' | 'upd' = 'upd',
-        pushToHistory = true
+        pushToHistory = true,
+        other_entity?: number
     ) {
         console.log(`${entity_number} - ${annotation}`)
         this.rawEntities = fn(this.rawEntities)
@@ -183,6 +179,7 @@ export class Blueprint {
             }
             this.history.push({
                 entity_number,
+                other_entity,
                 type,
                 annotation,
                 rawEntities: this.rawEntities
@@ -198,9 +195,10 @@ export class Blueprint {
             entity_number,
             name,
             position,
-            direction
+            direction,
+            type: directionType
         }
-        if (directionType) data.type = directionType
+        if (!directionType) delete data.type
         this.operation(entity_number, 'Added new entity',
             entities => entities.set(entity_number, Immutable.fromJS(data)),
             'add'

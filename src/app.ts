@@ -161,7 +161,7 @@ function loadBp(bpString: string, clearData = true) {
         .catch(error => console.error(error))
 }
 
-document.addEventListener('copy', e => {
+document.addEventListener('copy', (e: ClipboardEvent) => {
     e.preventDefault()
 
     BPString.encode(G.bp)
@@ -172,7 +172,7 @@ document.addEventListener('copy', e => {
         .catch(error => console.error(error))
 })
 
-document.addEventListener('paste', e => {
+document.addEventListener('paste', (e: ClipboardEvent) => {
     e.preventDefault()
     G.app.renderer.view.style.display = 'none'
 
@@ -277,7 +277,7 @@ keyboardJS.bind(keybinds.redo, () => {
     )
 })
 
-function pre(hist: any, addDel: string) {
+function pre(hist: IHistoryObject, addDel: string) {
     switch (hist.type) {
         case 'mov':
         case addDel:
@@ -291,7 +291,7 @@ function pre(hist: any, addDel: string) {
     }
 }
 
-function post(hist: any, addDel: string) {
+function post(hist: IHistoryObject, addDel: string) {
     function redrawEntityAndSurroundingEntities(entnr: number) {
         const e = EntityContainer.mappings.get(entnr)
         e.redraw()
@@ -309,7 +309,10 @@ function post(hist: any, addDel: string) {
             e.updateVisualStuff()
             break
         case 'upd':
-            if (typeof hist.entity_number === 'number') {
+            if (hist.other_entity) {
+                redrawEntityAndSurroundingEntities(hist.entity_number)
+                redrawEntityAndSurroundingEntities(hist.other_entity)
+            } else {
                 const e = EntityContainer.mappings.get(hist.entity_number)
                 e.redrawEntityInfo()
                 redrawEntityAndSurroundingEntities(hist.entity_number)
@@ -317,10 +320,6 @@ function post(hist: any, addDel: string) {
                 if (G.editEntityContainer.visible) {
                     if (G.inventoryContainer.visible) G.inventoryContainer.close()
                     G.editEntityContainer.create(hist.entity_number)
-                }
-            } else {
-                for (const entnr of hist.entity_number) {
-                    redrawEntityAndSurroundingEntities(entnr)
                 }
             }
             break

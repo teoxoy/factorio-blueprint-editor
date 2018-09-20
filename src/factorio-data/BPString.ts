@@ -52,7 +52,7 @@ export default {
             reject(e)
         }
     }),
-    encode: (bPOrBook: any) => new Promise((resolve, reject) => {
+    encode: (bPOrBook: any) => new Promise((resolve: (value: string) => void, reject) => {
         try {
             resolve('0' + btoa(pako.deflate(
                 JSON.stringify(bPOrBook.toObject())

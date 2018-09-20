@@ -1,3 +1,5 @@
+/// <reference path="../../node_modules/factorio-data/data/prototypes/inventoryLayout.js" />
+
 import inventoryBundle from 'factorio-data/data/prototypes/inventoryLayout'
 import factorioData from '../factorio-data/factorioData'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'

@@ -144,15 +144,14 @@ export class PositionGrid {
                 if (typeof cell === 'number') {
                     if (cell === entity_number) map.delete(key)
                 } else {
-                    const res = cell.findIndex(v => {
-                        if (v === entity_number) return true
-                    })
+                    const res = cell.findIndex(v => v === entity_number)
                     if (res !== -1) {
-                        if (map.get(key).count() === 1) {
+                        if (cell.count() === 1) {
                             map.delete(key)
+                        } else if (cell.count() === 2) {
+                            map.set(key, cell.find((_, k) => k !== res))
                         } else {
                             map.deleteIn([key, res])
-                            if (map.get(key).count() === 1) map.set(key, map.get(key).first())
                         }
                     }
                 }

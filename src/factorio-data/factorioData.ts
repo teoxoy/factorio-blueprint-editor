@@ -1,3 +1,8 @@
+/// <reference path="../../node_modules/factorio-data/data/prototypes/items.js" />
+/// <reference path="../../node_modules/factorio-data/data/prototypes/recipes.js" />
+/// <reference path="../../node_modules/factorio-data/data/prototypes/entities.js" />
+/// <reference path="../../node_modules/factorio-data/data/prototypes/tiles.js" />
+
 import itemBundle from 'factorio-data/data/prototypes/items'
 import recipeBundle from 'factorio-data/data/prototypes/recipes'
 import entityBundle from 'factorio-data/data/prototypes/entities'
@@ -516,10 +521,10 @@ function generateGraphics(e: any) {
         }
         case 'flamethrower_turret': return (data: IEntityData) => {
             const dir = data.dir
-            let pipe = entityBundle['pipe']
-            pipe = dir === 0 || dir === 4 ? pipe.pictures.straight_horizontal : pipe.pictures.straight_vertical
-            const p1 = util.add_to_shift(util.rotatePointBasedOnDir([0.5, 1], dir), util.duplicate(pipe))
-            const p2 = util.add_to_shift(util.rotatePointBasedOnDir([-0.5, 1], dir), util.duplicate(pipe))
+            const pipe = entityBundle['pipe']
+            const pipePicture = dir === 0 || dir === 4 ? pipe.pictures.straight_horizontal : pipe.pictures.straight_vertical
+            const p1 = util.add_to_shift(util.rotatePointBasedOnDir([0.5, 1], dir), util.duplicate(pipePicture))
+            const p2 = util.add_to_shift(util.rotatePointBasedOnDir([-0.5, 1], dir), util.duplicate(pipePicture))
             return [
                 p1,
                 p2,

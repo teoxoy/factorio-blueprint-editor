@@ -118,6 +118,8 @@
             "check-type-operator",
             "check-preblock"
         ],
-        "linebreak-style": false
+        "linebreak-style": false,
+        "no-submodule-imports": false,
+        "no-reference": false
     }
 }
