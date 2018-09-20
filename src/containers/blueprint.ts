@@ -222,15 +222,15 @@ export class BlueprintContainer extends PIXI.Container {
         }
     }
 
+    // For testing
     updateOverlay() {
-        return
-        const TEMP = G.bp.entityPositionGrid.getAllPositions()
-        this.pgOverlay.clear()
-        for (const t of TEMP) {
-            this.pgOverlay.beginFill(0x0080FF)
-            this.pgOverlay.drawRect(t.x * 32, t.y * 32, G.cellSize, G.cellSize)
-            this.pgOverlay.endFill()
-        }
+        // const TEMP = G.bp.entityPositionGrid.getAllPositions()
+        // this.pgOverlay.clear()
+        // for (const t of TEMP) {
+        //     this.pgOverlay.beginFill(0x0080FF)
+        //     this.pgOverlay.drawRect(t.x * 32, t.y * 32, G.cellSize, G.cellSize)
+        //     this.pgOverlay.endFill()
+        // }
     }
 
     centerViewport() {
