@@ -18,15 +18,17 @@ export class InfoContainer extends PIXI.Container {
         const background = new PIXI.Sprite(PIXI.Texture.WHITE)
         background.width = this.iWidth
         background.height = this.iHeight
-        background.tint = 0x3A3A3A
+        background.tint = G.UIColors.background
         background.alpha = 0.9
         this.addChild(background)
 
-        const text = new PIXI.Text('KEYBINDS')
+        const text = new PIXI.Text('KEYBINDS', {
+            fill: G.UIColors.text,
+            fontFamily: G.fontFamily,
+            fontWeight: '500',
+            fontSize: 24
+        })
         text.position.set(this.iWidth / 2, 4)
-        text.style.fontSize = 24
-        text.style.fontWeight = 'bold'
-        text.style.fill = G.UIColors.text
         text.anchor.set(0.5, 0)
         this.addChild(text)
 
@@ -55,7 +57,7 @@ export class InfoContainer extends PIXI.Container {
             'right click recipe / module',
             '',
             'ctrl / cmd + Z / Y',
-            ['ctrl / cmd + C / V', 0xFFEE00],
+            ['ctrl / cmd + C / V', G.UIColors.accent],
             'shift + S',
             'shift + N',
             'shift + right / left click',
@@ -80,7 +82,7 @@ export class InfoContainer extends PIXI.Container {
             'remove',
             '',
             'undo / redo changes',
-            ['copy / paste BP string', 0xFFEE00],
+            ['copy / paste BP string', G.UIColors.accent],
             'generate BP picture',
             'clear BP',
             'copy / paste recipe and modules',
@@ -117,7 +119,7 @@ export class InfoContainer extends PIXI.Container {
         link.on('click', () => window.open('https://redd.it/87zysk', '_blank'))
         link.position.set(this.iWidth / 2, 750)
         link.style.fontSize = 16
-        link.style.fill = 0x079DD8
+        link.style.fill = G.UIColors.link
         link.anchor.set(0.5, 0)
         this.addChild(link)
 
@@ -127,7 +129,7 @@ export class InfoContainer extends PIXI.Container {
         link2.on('click', () => window.open('https://github.com/Teoxoy/factorio-blueprint-editor', '_blank'))
         link2.position.set(this.iWidth / 2, 770)
         link2.style.fontSize = 16
-        link2.style.fill = 0x0AA0DB
+        link2.style.fill = G.UIColors.link
         link2.anchor.set(0.5, 0)
         this.addChild(link2)
 
@@ -142,11 +144,13 @@ export class InfoContainer extends PIXI.Container {
         let nextY = 0
         for (const obj of data) {
             const str = obj instanceof Array ? obj[0] : obj
-            const text = new PIXI.Text(str)
+            const text = new PIXI.Text(str, {
+                fill: obj instanceof Array ? obj[1] : G.UIColors.text,
+                fontFamily: G.fontFamily,
+                fontSize: fontSize,
+                fontWeight: bold ? '500' : 'normal'
+            })
             text.position.set(offset.x, nextY++ * 20 + offset.y)
-            text.style.fontSize = fontSize
-            if (bold) text.style.fontWeight = 'bold'
-            text.style.fill = obj instanceof Array ? obj[1] : G.UIColors.text
             text.anchor.set(anchorX, 0)
             this.addChild(text)
         }

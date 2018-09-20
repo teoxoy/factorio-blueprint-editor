@@ -25,7 +25,7 @@ export class EditEntityContainer extends PIXI.Container {
         const background = new PIXI.Sprite(PIXI.Texture.WHITE)
         background.width = this.iWidth
         background.height = this.iHeight
-        background.tint = 0x3A3A3A
+        background.tint = G.UIColors.background
         background.alpha = 0.9
         this.addChild(background)
 
@@ -52,7 +52,7 @@ export class EditEntityContainer extends PIXI.Container {
             background.anchor.set(0.5, 0.5)
             background.width = 32
             background.height = 32
-            background.tint = 0x9E9E9E
+            background.tint = G.UIColors.slot
             recipeContainer.addChild(background)
             if (entity.recipe) recipeContainer.addChild(InventoryContainer.createIcon(factorioData.getItem(entity.recipe)))
             recipeContainer.position.set(
@@ -81,13 +81,15 @@ export class EditEntityContainer extends PIXI.Container {
             })
             this.content.addChild(recipeContainer)
 
-            const recipeText = new PIXI.Text('Recipe ')
+            const recipeText = new PIXI.Text('Recipe ', {
+                fill: G.UIColors.text,
+                fontFamily: G.fontFamily
+            })
             recipeText.anchor.set(1, 0.5)
             recipeText.position.set(
                 this.iWidth / 2,
                 this.iHeight / 2 - 18
             )
-            recipeText.style.fill = G.UIColors.text
             this.content.addChild(recipeText)
         }
 
@@ -134,7 +136,7 @@ export class EditEntityContainer extends PIXI.Container {
                 background.anchor.set(0.5, 0.5)
                 background.width = 32
                 background.height = 32
-                background.tint = 0x9E9E9E
+                background.tint = G.UIColors.slot
                 slot.addChild(background)
 
                 if (modules && modules[i]) slot.addChild(InventoryContainer.createIcon(factorioData.getItem(modules[i])))
@@ -143,13 +145,15 @@ export class EditEntityContainer extends PIXI.Container {
             }
             this.content.addChild(moduleContainer)
 
-            const recipeText = new PIXI.Text('Modules ')
+            const recipeText = new PIXI.Text('Modules ', {
+                fill: G.UIColors.text,
+                fontFamily: G.fontFamily
+            })
             recipeText.anchor.set(1, 0.5)
             recipeText.position.set(
                 this.iWidth / 2,
                 this.iHeight / 2 + 18
             )
-            recipeText.style.fill = G.UIColors.text
             this.content.addChild(recipeText)
         }
 

@@ -4,6 +4,18 @@ declare module '*.json' {
     export default content
 }
 
+interface Window {
+    doorbellOptions: {
+        tags?: string
+        id: string
+        appKey: string
+        windowLoaded?: boolean
+        onShow?: () => void
+        onHide?: () => void
+        onInitialized?: () => void
+    }
+}
+
 interface IPoint {
     x: number
     y: number

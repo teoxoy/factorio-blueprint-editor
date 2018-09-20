@@ -1,0 +1,57 @@
+
+html
+    font-family: 'Roboto', sans-serif
+
+body
+    background-color: #181818
+
+#logo
+    position: fixed
+    width: 100%
+    height: 100%
+
+#loadingMsg
+    position: fixed
+    right: 0
+    bottom: 0
+    color: #FAFAFA
+    margin-right: 20px
+    text-align: center
+    font-weight: normal
+
+#doorbell-button
+#doorbell-submit-button
+    background-color: #1E88E5
+    border: 0
+    &:hover
+        background-color: #1976D2
+
+#doorbell-button
+    transition: all .5s cubic-bezier(0, 1, 0.5, 1)
+    &.closed
+        bottom: -50px !important
+
+#doorbell-form
+    box-shadow: none !important
+    border: 0
+    text-align: right
+    fieldset
+        text-align: center
+        #intro-text
+            margin-bottom: 10px
+
+#doorbell-tags
+    display: flex
+    justify-content: space-between
+    margin-bottom: 10px
+    div
+        font-weight: normal
+        cursor: pointer
+        border-radius: 4px
+        padding: 4px
+        border: 2px solid white
+        color: white
+        &:hover
+            opacity: 0.8
+        &.active
+            border: 2px solid black

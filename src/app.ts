@@ -1,5 +1,5 @@
-// tslint:disable:no-import-side-effect
 import 'normalize.css'
+import './style.styl'
 
 import entitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
 import entitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
@@ -25,6 +25,53 @@ import { ToolbarContainer } from './containers/toolbar'
 import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
+
+let doorbellButton: HTMLElement
+window.doorbellOptions = {
+    id: '9657',
+    appKey: 'z1scfSY8hpBNiIFWxBg50tkhjvFKhHMdhfGNMp6YCUZVttoLOqtrlhk4ca9asDCy',
+    windowLoaded: true,
+    onShow: () => keyboardJS.pause(),
+    onHide: () => keyboardJS.resume(),
+    onInitialized: () => {
+        doorbellButton = document.getElementById('doorbell-button')
+        doorbellButton.classList.add('closed')
+
+        let activeTag: HTMLElement
+        const tagsDiv = document.createElement('div')
+        tagsDiv.id = 'doorbell-tags';
+        [
+            { name: 'Other', color: '#757575' },
+            { name: 'Bug', color: '#e53935' },
+            { name: 'Enhancement', color: '#00ACC1' },
+            { name: 'Feature Request', color: '#FFB300' }
+        ]
+        .forEach((tag, i) => {
+            const tagEl = document.createElement('div')
+            tagEl.innerHTML = tag.name
+            tagEl.style.backgroundColor = tag.color
+            tagEl.onclick = () => {
+                activeTag.classList.remove('active')
+                activeTag = tagEl
+                tagEl.classList.add('active')
+                window.doorbellOptions.tags = tag.name
+            }
+            if (i === 0) {
+                activeTag = tagEl
+                tagEl.classList.add('active')
+            }
+            tagsDiv.appendChild(tagEl)
+        })
+        const fieldset = document.getElementById('doorbell-form').firstElementChild
+        fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
+    }
+}
+document.body.appendChild(Object.assign(document.createElement('script'), {
+    id: 'doorbellScript',
+    type: 'text/javascript',
+    async: true,
+    src: `https://embed.doorbell.io/button/${window.doorbellOptions['id']}?t=${Date.now()}`
+}))
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
@@ -144,7 +191,7 @@ Promise.all([util.findBPString(bpSource)]
             y: G.app.screen.height / 2
         })
         G.app.renderer.view.style.display = 'block'
-
+        setTimeout(() => doorbellButton.classList.remove('closed'), 30000)
     })
 })
 .catch(error => console.error(error))
@@ -175,11 +222,15 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
 document.addEventListener('paste', (e: ClipboardEvent) => {
     e.preventDefault()
     G.app.renderer.view.style.display = 'none'
+    doorbellButton.style.display = 'none'
 
     util.findBPString(e.clipboardData.getData('text'))
         .catch(error => console.error(error))
         .then(loadBp)
-        .then(() => G.app.renderer.view.style.display = 'block')
+        .then(() => {
+            G.app.renderer.view.style.display = 'block'
+            doorbellButton.style.display = 'block'
+        })
 })
 
 keyboardJS.bind('', e => {

@@ -62,11 +62,17 @@ const copyData = {
 
 let renderOnly = false
 
-let UIColors = {
+const UIColors = {
     primary: 0x303030,
     secondary: 0x181818,
-    text: 0xFFFFFF
+    text: 0xFAFAFA,
+    link: 0x03A9F4,
+    accent: 0xFF8A65,
+    background: 0x3A3A3A,
+    slot: 0x9E9E9E
 }
+
+const fontFamily = '\'Roboto\', sans-serif'
 
 export default {
     renderOnly,
@@ -88,5 +94,6 @@ export default {
     bp,
     mouseStates,
     currentMouseState,
-    UIColors
+    UIColors,
+    fontFamily
 }

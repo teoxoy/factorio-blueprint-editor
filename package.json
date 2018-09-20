@@ -36,6 +36,7 @@
     "cpx": "^1.5.0",
     "parcel-bundler": "^1.9.7",
     "rimraf": "^2.6.2",
+    "stylus": "^0.54.5",
     "typescript": "^3.0.3"
   }
 }

@@ -58,15 +58,17 @@ export class InventoryContainer extends PIXI.Container {
         const background = new PIXI.Sprite(PIXI.Texture.WHITE)
         background.width = this.iWidth
         background.height = this.iHeight
-        background.tint = 0x3A3A3A
+        background.tint = G.UIColors.background
         background.alpha = 0.9
         this.addChild(background)
 
         this.inventoryContents = new PIXI.Container()
         this.addChild(this.inventoryContents)
 
-        this.itemTooltip = new PIXI.Text('')
-        this.itemTooltip.style.fill = G.UIColors.text
+        this.itemTooltip = new PIXI.Text('', {
+            fill: G.UIColors.text,
+            fontFamily: G.fontFamily
+        })
         this.itemTooltip.y = 352
         this.addChild(this.itemTooltip)
 
@@ -219,10 +221,12 @@ export class InventoryContainer extends PIXI.Container {
             nextX++
         }
 
-        const text = new PIXI.Text(`=${time}s>`)
-        text.style.fontSize = 13
-        text.style.fontWeight = 'bold'
-        text.style.fill = G.UIColors.text
+        const text = new PIXI.Text(`=${time}s>`, {
+            fill: G.UIColors.text,
+            fontFamily: G.fontFamily,
+            fontWeight: '500',
+            fontSize: 13
+        })
         text.anchor.set(0.5, 0.5)
         text.x = nextX++ * 36
         this.recipeVisualization.addChild(text)
@@ -235,10 +239,12 @@ export class InventoryContainer extends PIXI.Container {
         }
 
         function createAmountText(amount: string) {
-            const text = new PIXI.Text(amount)
-            text.style.fontSize = 13
-            text.style.fontWeight = 'bold'
-            text.style.fill = G.UIColors.text
+            const text = new PIXI.Text(amount, {
+                fill: G.UIColors.text,
+                fontFamily: G.fontFamily,
+                fontWeight: '500',
+                fontSize: 13
+            })
             text.anchor.set(1, 1)
             text.position.set(nextX * 36 + 16, 16)
             return text
