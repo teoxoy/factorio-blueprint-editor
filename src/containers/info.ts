@@ -147,7 +147,7 @@ export class InfoContainer extends PIXI.Container {
             const text = new PIXI.Text(str, {
                 fill: obj instanceof Array ? obj[1] : G.UIColors.text,
                 fontFamily: G.fontFamily,
-                fontSize: fontSize,
+                fontSize,
                 fontWeight: bold ? '500' : 'normal'
             })
             text.position.set(offset.x, nextY++ * 20 + offset.y)

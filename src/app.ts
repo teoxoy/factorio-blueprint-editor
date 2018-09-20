@@ -1,3 +1,4 @@
+// tslint:disable:no-import-side-effect
 import 'normalize.css'
 import './style.styl'
 

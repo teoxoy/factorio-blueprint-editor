@@ -37,6 +37,7 @@
     "parcel-bundler": "^1.9.7",
     "rimraf": "^2.6.2",
     "stylus": "^0.54.5",
+    "tslint": "^5.11.0",
     "typescript": "^3.0.3"
   }
 }
