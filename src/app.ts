@@ -124,9 +124,9 @@ for (const p of params) {
 }
 
 G.app = new PIXI.Application({
-    antialias: true,
-    resolution: window.devicePixelRatio
-    // roundPixels: true
+    resolution: window.devicePixelRatio,
+    roundPixels: true
+    // antialias: true
 })
 
 // https://github.com/pixijs/pixi.js/issues/3928
@@ -144,6 +144,7 @@ window.addEventListener('resize', () => {
 }, false)
 document.body.appendChild(G.app.view)
 
+PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 // PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 // PIXI.settings.GC_MODE = PIXI.GC_MODES.MANUAL
 PIXI.Graphics.CURVES.adaptive = true

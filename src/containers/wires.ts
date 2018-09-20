@@ -12,14 +12,17 @@ interface IConnection {
 
 export class WiresContainer extends PIXI.Container {
 
+    static resolution = 2
+    static lineWidth = 2 * WiresContainer.resolution
+
     static createWire(p1: IPoint, p2: IPoint, color: string) {
         const wire = new PIXI.Graphics()
         if (color === 'copper') {
-            wire.lineStyle(1.3, 0xCF7C00, 1, 0.5)
+            wire.lineStyle(WiresContainer.lineWidth, 0xCF7C00, 1, 0.5)
         } else if (color === 'red') {
-            wire.lineStyle(1.3, 0xC83718, 1, 0.5)
+            wire.lineStyle(WiresContainer.lineWidth, 0xC83718, 1, 0.5)
         } else {
-            wire.lineStyle(1.3, 0x588C38, 1, 0.5)
+            wire.lineStyle(WiresContainer.lineWidth, 0x588C38, 1, 0.5)
         }
 
         const force = 0.25
@@ -30,12 +33,19 @@ export class WiresContainer extends PIXI.Container {
         const X = minX + dX / 2
         const Y = (dY / dX) * (X - minX) + minY + force * dX
 
-        wire.moveTo(p1.x, p1.y)
+        wire.moveTo(p1.x * WiresContainer.resolution, p1.y * WiresContainer.resolution)
         // TODO: make wires smoother, use 2 points instead of 1
         if (p1.x === p2.x) {
-            wire.lineTo(p2.x, p2.y)
+            wire.lineTo(p2.x * WiresContainer.resolution, p2.y * WiresContainer.resolution)
         } else {
-            wire.bezierCurveTo(X, Y, X, Y, p2.x, p2.y)
+            wire.bezierCurveTo(
+                X * WiresContainer.resolution,
+                Y * WiresContainer.resolution,
+                X * WiresContainer.resolution,
+                Y * WiresContainer.resolution,
+                p2.x * WiresContainer.resolution,
+                p2.y * WiresContainer.resolution
+            )
         }
         return wire
     }
@@ -57,6 +67,8 @@ export class WiresContainer extends PIXI.Container {
         this.interactiveChildren = false
 
         this.entityWiresMapping = new Map()
+
+        this.scale.set(1 / WiresContainer.resolution)
     }
 
     remove(entity_number: number) {
@@ -71,6 +83,7 @@ export class WiresContainer extends PIXI.Container {
     }
 
     update(entity_number: number) {
+        this.cacheAsBitmap = false
         if (!G.bp.entity(entity_number).hasConnections) return
         this.remove(entity_number)
         G.bp.connections.connections.forEach((v, k) => {
@@ -93,9 +106,11 @@ export class WiresContainer extends PIXI.Container {
                 this.entityWiresMapping.set(k, paths.toArray())
             }
         })
+        this.cacheAsBitmap = true
     }
 
     drawWires() {
+        this.cacheAsBitmap = false
         G.bp.connections.connections.forEach((v, k) => {
             if (this.entityWiresMapping.has(k)) {
                 for (const p of this.entityWiresMapping.get(k)) {
@@ -115,5 +130,6 @@ export class WiresContainer extends PIXI.Container {
             }
             this.entityWiresMapping.set(k, paths.toArray())
         })
+        this.cacheAsBitmap = true
     }
 }
