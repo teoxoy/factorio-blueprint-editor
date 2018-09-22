@@ -6,8 +6,8 @@ import entitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpriteshee
 import entitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
 import iconSpritesheetPNG from 'factorio-data/data/graphics/iconSpritesheet.png'
 import iconSpritesheetJSON from 'factorio-data/data/graphics/iconSpritesheet.json'
-import extra_iconSpritesheetPNG from './spritesheets/extra_iconSpritesheet.png'
-import extra_iconSpritesheetJSON from './spritesheets/extra_iconSpritesheet.json'
+import utilitySpritesheetPNG from 'factorio-data/data/graphics/utilitySpritesheet.png'
+import utilitySpritesheetJSON from 'factorio-data/data/graphics/utilitySpritesheet.json'
 
 import * as PIXI from 'pixi.js'
 import keyboardJS from 'keyboardjs'
@@ -169,7 +169,7 @@ Promise.all([util.findBPString(bpSource)]
 .concat([
     [ entitySpritesheetPNG, entitySpritesheetJSON ],
     [ iconSpritesheetPNG, iconSpritesheetJSON ],
-    [ extra_iconSpritesheetPNG, extra_iconSpritesheetJSON ]
+    [ utilitySpritesheetPNG, utilitySpritesheetJSON ]
 ].map(data =>
     new Promise((resolve, reject) => {
         const image = new Image()

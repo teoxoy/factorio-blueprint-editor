@@ -276,7 +276,7 @@ export class OverlayContainer extends PIXI.Container {
 
         function createIconWithBackground(container: PIXI.Container, itemName: string, position?: IPoint) {
             const icon = InventoryContainer.createIcon(factorioData.getItem(itemName))
-            const background = PIXI.Sprite.fromFrame('extra-icon:entity-info-dark-background')
+            const background = PIXI.Sprite.fromFrame('graphics/entity-info-dark-background.png')
             background.anchor.set(0.5, 0.5)
             if (position) {
                 icon.position.set(position.x , position.y)
@@ -290,8 +290,8 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         function createArrow(position: IPoint, type = 0) {
-            const arrow = PIXI.Sprite.fromFrame('extra-icon:' +
-                (type === 0 ? 'indication-arrow' : (type === 1 ? 'fluid-indication-arrow' : 'fluid-indication-arrow-both-ways'))
+            const arrow = PIXI.Sprite.fromFrame('graphics/arrows/' +
+                (type === 0 ? 'indication-arrow.png' : (type === 1 ? 'fluid-indication-arrow.png' : 'fluid-indication-arrow-both-ways.png'))
             )
             arrow.anchor.set(0.5, 0.5)
             arrow.position.set(position.x , position.y)
@@ -306,26 +306,36 @@ export class OverlayContainer extends PIXI.Container {
     updateCursorBoxSize(width: number, height: number) {
         this.cursorBox.removeChildren()
         if (width === 1 && height === 1) {
-            const s = PIXI.Sprite.fromFrame('extra-icon:cursor-boxes-32x32-0')
+            const spriteData = PIXI.Texture.fromFrame('graphics/cursor-boxes-32x32.png')
+            const frame = spriteData.frame.clone()
+            frame.width = 64
+            const s = new PIXI.Sprite(new PIXI.Texture(spriteData.baseTexture, frame))
             s.anchor.set(0.5, 0.5)
             this.cursorBox.addChild(s)
         } else {
             this.cursorBox.addChild(...createCorners(
-                'extra-icon:cursor-boxes-' + mapMinLengthToSpriteIndex(Math.min(width, height))
+                'graphics/cursor-boxes.png',
+                mapMinLengthToSpriteIndex(Math.min(width, height))
             ))
         }
         function mapMinLengthToSpriteIndex(minLength: number) {
-            if (minLength < 0.4) return '4'
-            if (minLength < 0.7) return '3'
-            if (minLength < 1.05) return '2'
-            if (minLength < 3.5) return '1'
-            return '0'
+            if (minLength < 0.4) return 256
+            if (minLength < 0.7) return 192
+            if (minLength < 1.05) return 128
+            if (minLength < 3.5) return 64
+            return 0
         }
-        function createCorners(spriteName: string) {
-            const c0 = PIXI.Sprite.fromFrame(spriteName)
-            const c1 = PIXI.Sprite.fromFrame(spriteName)
-            const c2 = PIXI.Sprite.fromFrame(spriteName)
-            const c3 = PIXI.Sprite.fromFrame(spriteName)
+        function createCorners(spriteName: string, offset: number) {
+            const spriteData = PIXI.Texture.fromFrame(spriteName)
+            const frame = spriteData.frame.clone()
+            frame.x += offset
+            frame.width = 63
+            frame.height = 63
+            const texture = new PIXI.Texture(spriteData.baseTexture, frame)
+            const c0 = new PIXI.Sprite(texture)
+            const c1 = new PIXI.Sprite(texture)
+            const c2 = new PIXI.Sprite(texture)
+            const c3 = new PIXI.Sprite(texture)
             c0.position.set(-width * 32, -height * 32)
             c1.position.set(width * 32, -height * 32)
             c2.position.set(-width * 32, height * 32)
@@ -365,7 +375,11 @@ export class OverlayContainer extends PIXI.Container {
                     Math.abs(oE.position.x - position.x)
                 const sign = searchDirection === 0 || searchDirection === 6 ? -1 : 1
                 for (let i = 1; i < distance; i++) {
-                    const s = PIXI.Sprite.fromFrame('extra-icon:underground-lines-' + (name === 'pipe_to_ground' ? '0' : '1'))
+                    const spriteData = PIXI.Texture.fromFrame('graphics/arrows/underground-lines.png')
+                    const frame = spriteData.frame.clone()
+                    frame.x += name === 'pipe_to_ground' ? 0 : 64
+                    frame.width = 64
+                    const s = new PIXI.Sprite(new PIXI.Texture(spriteData.baseTexture, frame))
                     s.rotation = direction * Math.PI * 0.25
                     s.scale.set(0.5, 0.5)
                     s.anchor.set(0.5, 0.5)
