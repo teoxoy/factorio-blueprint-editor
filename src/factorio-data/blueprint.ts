@@ -378,10 +378,28 @@ export class Blueprint {
         if (sortedEntities.length > 1) this.icons[1] = sortedEntities[1][0]
     }
 
+    getEntitiesForExport() {
+        const entityInfo = this.rawEntities.valueSeq().toJS()
+        let entitiesJSON = JSON.stringify(entityInfo)
+
+        // Tag changed ids with !
+        let ID = 0
+        entityInfo.forEach(e => {
+            entitiesJSON = entitiesJSON.replace(new RegExp(`"(entity_number|entity_id)":${e.entity_number},`, 'g'), (_, c) => `"${c}":!${ID},`)
+            ID++
+        })
+
+        // Remove tag and sort
+        return JSON.parse(
+            entitiesJSON.replace(/"(entity_number|entity_id)":\![0-9]+?,/g, s => s.replace('!', ''))
+        )
+        .sort((a: any, b: any) => a.entity_number - b.entity_number)
+    }
+
     toObject() {
         this.setTileIds()
         if (!this.icons.length) this.generateIcons()
-        const entityInfo = this.rawEntities.valueSeq().toJS()
+        const entityInfo = this.getEntitiesForExport()
         const center = this.center()
         const fR = this.getFirstRail()
         if (fR) {
