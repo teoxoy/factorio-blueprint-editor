@@ -11,7 +11,7 @@ import { PaintContainer } from './paint'
 export class BlueprintContainer extends PIXI.Container {
 
     holdingLeftClick: boolean
-    grid: PIXI.Sprite
+    grid: PIXI.extras.TilingSprite
     wiresContainer: WiresContainer
     overlayContainer: OverlayContainer
     underlayContainer: UnderlayContainer
@@ -44,19 +44,14 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.movingEntityFilter = new AdjustmentFilter({ red: 0.4, blue: 0.4, green: 1 })
 
-        const ggrid = new PIXI.Graphics()
-        for (let i = 0, l = G.sizeBPContainer.width; i < l; i += G.cellSize) {
-            for (let j = 0, l2 = G.sizeBPContainer.height; j < l2; j += G.cellSize) {
-                if ((i + j) / G.cellSize % 2) {
-                    ggrid.beginFill(G.UIColors.primary)
-                } else {
-                    ggrid.beginFill(G.UIColors.secondary)
-                }
-                ggrid.drawRect(i, j, G.cellSize, G.cellSize)
-                ggrid.endFill()
-            }
-        }
-        this.grid = new PIXI.Sprite(G.app.renderer.generateTexture(ggrid))
+        const gridTexture = new PIXI.Graphics()
+            .beginFill(G.UIColors.primary).drawRect(0, 0, 32, 32).endFill()
+            .beginFill(G.UIColors.primary).drawRect(32, 32, 32, 32).endFill()
+            .beginFill(G.UIColors.secondary).drawRect(0, 32, 32, 32).endFill()
+            .beginFill(G.UIColors.secondary).drawRect(32, 0, 32, 32).endFill()
+            .generateCanvasTexture()
+
+        this.grid = new PIXI.extras.TilingSprite(gridTexture, G.sizeBPContainer.width, G.sizeBPContainer.height)
         this.grid.interactive = false
         this.addChild(this.grid)
 

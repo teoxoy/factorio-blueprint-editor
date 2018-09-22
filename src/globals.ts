@@ -19,8 +19,6 @@ let railMoveOffset: IPoint = { x: 0, y: 0 }
 
 let openedGUIWindow: InventoryContainer | EditEntityContainer | undefined
 
-const cellSize = 32
-
 const positionBPContainer = {
     x: 0,
     y: 32
@@ -84,7 +82,6 @@ export default {
     app,
     keyboard,
     toolbarContainer,
-    cellSize,
     bpArea,
     positionBPContainer,
     sizeBPContainer,
