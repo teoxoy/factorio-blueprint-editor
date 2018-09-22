@@ -49,17 +49,22 @@ export class EntityContainer extends PIXI.Container {
         const parts: EntitySprite[] = []
         for (let i = 0, l = anims.length; i < l; i++) {
             const img = new EntitySprite(anims[i])
-
-            if (entity.name === 'straight_rail' || entity.name === 'curved_rail') {
+            if (anims[i].filename.includes('circuit-connector')) {
+                img.zIndex = 1
+            } else if (entity.name === 'artillery_turret' && i > 0) {
+                img.zIndex = 2
+            } else if ((entity.name === 'rail_signal' || entity.name === 'rail_chain_signal') && i === 0) {
+                img.zIndex = -8
+            } else if (entity.name === 'straight_rail' || entity.name === 'curved_rail') {
                 if (i < 2) {
                     img.zIndex = -10
                 } else if (i < 4) {
                     img.zIndex = -9
                 } else {
-                    img.zIndex = -8
+                    img.zIndex = -7
                 }
             } else if (entity.type === 'transport_belt' || entity.name === 'heat_pipe') {
-                img.zIndex = i === 0 ? -7 : -6
+                img.zIndex = i === 0 ? -6 : -5
             } else {
                 img.zIndex = 0
             }
