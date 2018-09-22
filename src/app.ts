@@ -176,8 +176,8 @@ Promise.all([util.findBPString(bpSource)]
         image.src = data[0]
         image.onload = () => {
             const tempCanvas = document.createElement('canvas')
-            tempCanvas.width = Math.pow(2, Math.ceil(Math.log2(image.width)))
-            tempCanvas.height = Math.pow(2, Math.ceil(Math.log2(image.height)))
+            tempCanvas.width = util.nearestPowerOf2(image.width)
+            tempCanvas.height = util.nearestPowerOf2(image.height)
             tempCanvas.getContext('2d').drawImage(image, 0, 0)
             return new PIXI.Spritesheet(PIXI.BaseTexture.fromCanvas(tempCanvas), data[1]).parse(resolve)
         }

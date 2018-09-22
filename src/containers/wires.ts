@@ -1,5 +1,6 @@
 import { EntityContainer } from './entity'
 import G from '../globals'
+import util from '../util'
 
 interface IConnection {
     circuit_id: number
@@ -12,42 +13,56 @@ interface IConnection {
 
 export class WiresContainer extends PIXI.Container {
 
-    static resolution = 2
-    static lineWidth = 2 * WiresContainer.resolution
+    static canvasRenderer = new PIXI.CanvasRenderer()
 
     static createWire(p1: IPoint, p2: IPoint, color: string) {
         const wire = new PIXI.Graphics()
-        if (color === 'copper') {
-            wire.lineStyle(WiresContainer.lineWidth, 0xCF7C00, 1, 0.5)
-        } else if (color === 'red') {
-            wire.lineStyle(WiresContainer.lineWidth, 0xC83718, 1, 0.5)
-        } else {
-            wire.lineStyle(WiresContainer.lineWidth, 0x588C38, 1, 0.5)
-        }
 
-        const force = 0.25
+        wire.lineWidth = 1.5
+        if (color === 'copper') wire.lineColor = 0xCF7C00
+        else if (color === 'red') wire.lineColor = 0xC83718
+        else wire.lineColor = 0x588C38
+
         const minX = Math.min(p1.x, p2.x)
         const minY = Math.min(p1.y, p2.y)
-        const dX = Math.max(p1.x, p2.x) - minX
-        const dY = Math.max(p1.y, p2.y) - minY
-        const X = minX + dX / 2
-        const Y = (dY / dX) * (X - minX) + minY + force * dX
 
-        wire.moveTo(p1.x * WiresContainer.resolution, p1.y * WiresContainer.resolution)
-        // TODO: make wires smoother, use 2 points instead of 1
         if (p1.x === p2.x) {
-            wire.lineTo(p2.x * WiresContainer.resolution, p2.y * WiresContainer.resolution)
+            wire.lineWidth = 3
+
+            wire.moveTo(p1.x - minX, p1.y - minY)
+            wire.lineTo(p2.x - minX, p2.y - minY)
         } else {
-            wire.bezierCurveTo(
-                X * WiresContainer.resolution,
-                Y * WiresContainer.resolution,
-                X * WiresContainer.resolution,
-                Y * WiresContainer.resolution,
-                p2.x * WiresContainer.resolution,
-                p2.y * WiresContainer.resolution
-            )
+            const force = 0.2
+            const dX = Math.max(p1.x, p2.x) - minX
+            const dY = Math.max(p1.y, p2.y) - minY
+            const X = dX / 2
+            const Y = (dY / dX) * X + force * dX
+
+            // TODO: make wires smoother, use 2 points instead of 1
+            wire.moveTo(p1.x - minX, p1.y - minY)
+            wire.bezierCurveTo(X, Y, X, Y, p2.x - minX, p2.y - minY)
         }
-        return wire
+
+        // Modified version of generateCanvasTexture, makes the texture a power of 2 so that it generates mipmaps
+        // https://github.com/pixijs/pixi.js/blob/c2bff5c07b5178ff4ca2b3b8ddcfa3e002cf598f/src/core/graphics/Graphics.js#L1268
+        function generateCanvasTexture(scaleMode: number, resolution = 1) {
+            const bounds = wire.getLocalBounds()
+            const canvasBuffer = PIXI.RenderTexture.create(
+                util.nearestPowerOf2(bounds.width),
+                util.nearestPowerOf2(bounds.height),
+                scaleMode,
+                resolution
+            )
+            WiresContainer.canvasRenderer.render(wire, canvasBuffer, true)
+            const texture = PIXI.Texture.fromCanvas(canvasBuffer.baseTexture._canvasRenderTarget.canvas, scaleMode, 'graphics')
+            texture.baseTexture.resolution = resolution
+            texture.baseTexture.update()
+            return texture
+        }
+
+        const s = new PIXI.Sprite(generateCanvasTexture(undefined, 2))
+        s.position.set(minX, minY)
+        return s
     }
 
     static getFinalPos(entity_number: number, color: string, side: number) {
@@ -58,7 +73,7 @@ export class WiresContainer extends PIXI.Container {
         }
     }
 
-    entityWiresMapping: Map<string, PIXI.Graphics[]>
+    entityWiresMapping: Map<string, PIXI.Sprite[]>
 
     constructor() {
         super()
@@ -67,8 +82,6 @@ export class WiresContainer extends PIXI.Container {
         this.interactiveChildren = false
 
         this.entityWiresMapping = new Map()
-
-        this.scale.set(1 / WiresContainer.resolution)
     }
 
     remove(entity_number: number) {
@@ -83,7 +96,6 @@ export class WiresContainer extends PIXI.Container {
     }
 
     update(entity_number: number) {
-        this.cacheAsBitmap = false
         if (!G.bp.entity(entity_number).hasConnections) return
         this.remove(entity_number)
         G.bp.connections.connections.forEach((v, k) => {
@@ -106,11 +118,9 @@ export class WiresContainer extends PIXI.Container {
                 this.entityWiresMapping.set(k, paths.toArray())
             }
         })
-        this.cacheAsBitmap = true
     }
 
     drawWires() {
-        this.cacheAsBitmap = false
         G.bp.connections.connections.forEach((v, k) => {
             if (this.entityWiresMapping.has(k)) {
                 for (const p of this.entityWiresMapping.get(k)) {
@@ -130,6 +140,5 @@ export class WiresContainer extends PIXI.Container {
             }
             this.entityWiresMapping.set(k, paths.toArray())
         })
-        this.cacheAsBitmap = true
     }
 }

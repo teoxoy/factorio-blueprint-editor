@@ -151,6 +151,10 @@ function intToDir(i: number) {
     }
 }
 
+function nearestPowerOf2(n: number) {
+    return Math.pow(2, Math.ceil(Math.log2(n)))
+}
+
 export default {
     findBPString,
     duplicate,
@@ -163,5 +167,6 @@ export default {
     rotatePointBasedOnDir,
     transformConnectionPosition,
     switchSizeBasedOnDirection,
-    intToDir
+    intToDir,
+    nearestPowerOf2
 }
