@@ -540,9 +540,17 @@ function generateGraphics(e: any) {
             e.cannon_base_pictures.layers[0].hr_version.filename = e.cannon_base_pictures.layers[0].hr_version.filenames[d]
             e.cannon_barrel_pictures.layers[0].filename = e.cannon_barrel_pictures.layers[0].filenames[d]
             e.cannon_barrel_pictures.layers[0].hr_version.filename = e.cannon_barrel_pictures.layers[0].hr_version.filenames[d]
+            function getShift() {
+                switch (data.dir) {
+                    case 0: return [0, 1]
+                    case 2: return [-1, 0.31]
+                    case 4: return [0, -0.4]
+                    case 6: return [1, 0.31]
+                }
+            }
             return [
                 e.base_picture.layers[0],
-                e.cannon_barrel_pictures.layers[0],
+                util.add_to_shift(getShift(), util.duplicate(e.cannon_barrel_pictures.layers[0])),
                 e.cannon_base_pictures.layers[0]
             ]
         }
