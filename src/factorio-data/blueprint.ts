@@ -335,6 +335,10 @@ export class Blueprint {
         return this
     }
 
+    isEmpty() {
+        return this.rawEntities.isEmpty() && this.tiles.length === 0
+    }
+
     // Get corner/center positions
     getPosition(f: string, xcomp: any, ycomp: any) {
         if (!this.rawEntities.size) return { x: 0, y: 0 }

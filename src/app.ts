@@ -26,6 +26,7 @@ import { ToolbarContainer } from './containers/toolbar'
 import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
+import FileSaver from 'file-saver'
 
 let doorbellButton: HTMLElement
 window.doorbellOptions = {
@@ -212,6 +213,7 @@ function loadBp(bpString: string, clearData = true) {
 
 document.addEventListener('copy', (e: ClipboardEvent) => {
     e.preventDefault()
+    if (G.bp.isEmpty()) return
 
     BPString.encode(G.bp)
         .then(data => {
@@ -246,19 +248,21 @@ keyboardJS.bind(keybinds.clear, () => {
 })
 
 keyboardJS.bind(keybinds.picture, () => {
-    G.BPC.centerViewport()
-    if (G.renderOnly) G.BPC.cacheAsBitmap = false
-    const t = G.app.renderer.generateTexture(G.BPC)
-    if (G.renderOnly) G.BPC.cacheAsBitmap = true
-    t.frame = G.BPC.entitySprites.getLocalBounds()
-    t._updateUvs()
-    const s = new PIXI.Sprite(t)
-    const image = G.app.renderer.plugins.extract.image(s)
-    const w = window.open()
-    w.focus()
-    w.document.write(image.outerHTML)
+    if (G.bp.isEmpty()) return
 
-    console.log('Saved BP Image')
+    G.BPC.enableRenderableOnChildren()
+    if (G.renderOnly) G.BPC.cacheAsBitmap = false
+    const texture = G.app.renderer.generateTexture(G.BPC)
+    if (G.renderOnly) G.BPC.cacheAsBitmap = true
+    G.BPC.updateViewportCulling()
+
+    texture.frame = G.BPC.getEntitySpritesBounds()
+    texture._updateUvs()
+
+    G.app.renderer.plugins.extract.canvas(new PIXI.Sprite(texture)).toBlob((blob: Blob) => {
+        FileSaver.saveAs(blob, G.bp.name)
+        console.log('Saved BP Image')
+    })
 })
 
 keyboardJS.bind('shift', () => G.keyboard.shift = true, () => G.keyboard.shift = false)

@@ -258,6 +258,26 @@ export class BlueprintContainer extends PIXI.Container {
         this.updateViewportCulling()
     }
 
+    getEntitySpritesBounds() {
+        const bounds = new PIXI.Bounds()
+        for (const sprite of this.entitySprites.children as PIXI.Sprite[]) {
+            const sB = new PIXI.Bounds()
+            const W = sprite.width * sprite.anchor.x
+            const H = sprite.height * sprite.anchor.y
+            sB.minX = sprite.x - W
+            sB.minY = sprite.y - H
+            sB.maxX = sprite.x + W
+            sB.maxY = sprite.y + H
+            bounds.addBounds(sB)
+        }
+        return bounds.getRectangle()
+    }
+
+    enableRenderableOnChildren() {
+        this.entitySprites.children.forEach(c => c.renderable = true)
+        this.overlayContainer.overlay.children.forEach(c => c.renderable = true)
+    }
+
     updateViewportCulling() {
         cullChildren(this.entitySprites.children)
         cullChildren(this.overlayContainer.overlay.children)
