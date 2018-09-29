@@ -56,7 +56,7 @@ export default {
         try {
             resolve('0' + btoa(pako.deflate(
                 JSON.stringify(bPOrBook.toObject())
-                    .replace(/(:".+?")/g, (_: string, capture: string) => capture.replace(/_/g, '-'))
+                    .replace(/(:".+?"|"[^"]+?module[^"].+?")/g, (_: string, capture: string) => capture.replace(/_/g, '-'))
                 , { to: 'string' }))
             )
         } catch (e) {
