@@ -356,8 +356,8 @@ export class Blueprint {
 
     center() {
         return {
-            x: (this.topLeft().x + this.topRight().x) / 2,
-            y: (this.topLeft().y + this.bottomLeft().y) / 2
+            x: Math.floor((this.topLeft().x + this.topRight().x) / 2) + 0.5,
+            y: Math.floor((this.topLeft().y + this.bottomLeft().y) / 2) + 0.5
         }
     }
     topLeft() { return this.getPosition('topLeft', Math.min, Math.min) }
