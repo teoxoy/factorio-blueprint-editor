@@ -1,5 +1,4 @@
-// tslint:disable-next-line:no-import-side-effect
-import './entity'
+import getEntity from './entity'
 import factorioData from './factorioData'
 import { Tile } from './tile'
 import { PositionGrid } from './positionGrid'
@@ -98,11 +97,11 @@ export class Blueprint {
     entity(entity_number: number) {
         const e = this.rawEntities.get(entity_number)
         if (!e) return undefined
-        return e.getEntity(this)
+        return getEntity(e, this)
     }
 
     firstEntity() {
-        return this.rawEntities.first().getEntity()
+        return getEntity(this.rawEntities.first(), this)
     }
 
     undo(
@@ -340,7 +339,7 @@ export class Blueprint {
     }
 
     // Get corner/center positions
-    getPosition(f: string, xcomp: any, ycomp: any) {
+    getPosition(f: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight', xcomp: any, ycomp: any) {
         if (!this.rawEntities.size) return { x: 0, y: 0 }
         return {
             x: [...this.rawEntities.keys()].reduce(
