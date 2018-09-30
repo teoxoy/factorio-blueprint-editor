@@ -1,8 +1,42 @@
 import G from '../globals'
 import factorioData from '../factorio-data/factorioData'
-import { updateGroups } from '../updateGroups'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
+import util from '../util'
+
+const updateGroups = [
+    {
+        is: [
+            'transport_belt', 'fast_transport_belt', 'express_transport_belt', 'splitter', 'fast_splitter',
+            'express_splitter', 'underground_belt', 'fast_underground_belt', 'express_underground_belt'
+        ],
+        updates: [ 'transport_belt', 'fast_transport_belt', 'express_transport_belt' ]
+    },
+    {
+        is: [ 'heat_pipe', 'nuclear_reactor', 'heat_exchanger' ],
+        updates: [ 'heat_pipe', 'nuclear_reactor', 'heat_exchanger' ]
+    },
+    {
+        has: [ 'fluid_box', 'output_fluid_box', 'fluid_boxes' ],
+        updates: [ 'fluid_box', 'output_fluid_box', 'fluid_boxes' ]
+    },
+    {
+        is: [ 'stone_wall', 'gate', 'straight_rail' ],
+        updates: [ 'stone_wall', 'gate', 'straight_rail' ]
+    }
+]
+.map(uG => {
+    if (!uG.has) return uG
+    const entities = Object.values(factorioData.getEntities())
+    return {
+        is: entities.filter(e => Object.keys(e).find(k => uG.has.includes(k))).map(e => e.name),
+        updates: entities.filter(e => Object.keys(e).find(k => uG.updates.includes(k))).map(e => e.name)
+    }
+})
+.reduce((pV, cV) => {
+    cV.is.forEach(k => pV[k] = pV[k] ? util.uniqueInArray(pV[k].concat(cV.updates)) : cV.updates)
+    return pV
+}, {} as any)
 
 export class EntityContainer extends PIXI.Container {
     static mappings: Map<number, EntityContainer> = new Map()
@@ -399,28 +433,23 @@ export class EntityContainer extends PIXI.Container {
 
     redrawSurroundingEntities() {
         const entity = G.bp.entity(this.entity_number)
-        const redrawnEntities: number[] = []
-        for (const updateGroup of updateGroups) {
-            const j = updateGroup.is.indexOf(entity.name)
-            if (j !== -1) {
-                if (entity.name === 'straight_rail') {
-                    G.bp.entityPositionGrid.foreachOverlap(entity.getArea(), (entnr: number) => {
-                        const ent = G.bp.entity(entnr)
-                        if (ent.name === 'gate' && !redrawnEntities.includes(entnr)) {
-                            EntityContainer.mappings.get(ent.entity_number).redraw()
-                            redrawnEntities.push(entnr)
-                        }
-                    })
-                } else {
-                    G.bp.entityPositionGrid.getSurroundingEntities(entity.getArea(), (entnr: number) => {
-                        const ent = G.bp.entity(entnr)
-                        if (updateGroup.updates.includes(ent.name) && !redrawnEntities.includes(entnr)) {
-                            EntityContainer.mappings.get(ent.entity_number).redraw()
-                            redrawnEntities.push(entnr)
-                        }
-                    })
-                }
-            }
+        if (!updateGroups[entity.name]) return
+        if (entity.name === 'straight_rail') {
+            G.bp.entityPositionGrid.foreachOverlap(entity.getArea(), (entnr: number) => {
+                const ent = G.bp.entity(entnr)
+                if (ent.name === 'gate') EntityContainer.mappings.get(ent.entity_number).redraw()
+            })
+        } else {
+            const redrawnEntities: number[] = []
+            updateGroups[entity.name].forEach((updateGroup: string[]) => {
+                G.bp.entityPositionGrid.getSurroundingEntities(entity.getArea(), (entnr: number) => {
+                    const ent = G.bp.entity(entnr)
+                    if (updateGroup.includes(ent.name) && !redrawnEntities.includes(entnr)) {
+                        EntityContainer.mappings.get(ent.entity_number).redraw()
+                        redrawnEntities.push(entnr)
+                    }
+                })
+            })
         }
     }
 

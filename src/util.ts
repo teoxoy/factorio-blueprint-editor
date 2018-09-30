@@ -155,6 +155,10 @@ function nearestPowerOf2(n: number) {
     return Math.pow(2, Math.ceil(Math.log2(n)))
 }
 
+function uniqueInArray(array: []) {
+    return [...new Set(array)]
+}
+
 export default {
     findBPString,
     duplicate,
@@ -168,5 +172,6 @@ export default {
     transformConnectionPosition,
     switchSizeBasedOnDirection,
     intToDir,
-    nearestPowerOf2
+    nearestPowerOf2,
+    uniqueInArray
 }
