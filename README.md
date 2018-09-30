@@ -10,6 +10,8 @@ A [Factorio](https://www.factorio.com) blueprint editor and renderer webapp
 
 You can find the working website here: https://teoxoy.github.io/factorio-blueprint-editor
 
+Sample blueprint: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/uc4n81GP
+
 Example link that uses url query parameters: https://teoxoy.github.io/factorio-blueprint-editor/?lightTheme&keybinds:rotate=t,pippete=p&index=1&source=https://pastebin.com/Xp9u7NaA
 
 # Contributing

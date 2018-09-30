@@ -14,7 +14,6 @@ import keyboardJS from 'keyboardjs'
 
 import { Book } from './factorio-data/book'
 import BPString from './factorio-data/BPString'
-import sampleBP from './sample-blueprint'
 
 import util from './util'
 import { InventoryContainer } from './containers/inventory'
@@ -107,7 +106,7 @@ if (params.includes('lightTheme')) {
     G.UIColors.secondary = 0xCCCCCC
 }
 
-let bpSource = sampleBP
+let bpSource: string
 let bpIndex = 0
 for (const p of params) {
     if (p.includes('source')) {
@@ -166,7 +165,7 @@ G.app.stage.addChild(G.toolbarContainer)
 const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
 
-Promise.all([util.findBPString(bpSource)]
+Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
 .concat([
     [ entitySpritesheetPNG, entitySpritesheetJSON ],
     [ iconSpritesheetPNG, iconSpritesheetJSON ],
@@ -180,14 +179,24 @@ Promise.all([util.findBPString(bpSource)]
             tempCanvas.width = util.nearestPowerOf2(image.width)
             tempCanvas.height = util.nearestPowerOf2(image.height)
             tempCanvas.getContext('2d').drawImage(image, 0, 0)
-            return new PIXI.Spritesheet(PIXI.BaseTexture.fromCanvas(tempCanvas), data[1]).parse(resolve)
+            const baseTexture = PIXI.BaseTexture.fromCanvas(tempCanvas)
+            new PIXI.Spritesheet(baseTexture, data[1]).parse(() =>
+                G.app.renderer.plugins.prepare.upload(baseTexture, resolve)
+            )
         }
         image.onerror = reject
     })
 )))
 .then(data => {
-    loadBp(data[0], false).then(() => {
+    if (!bpSource) {
+        G.bp = new Blueprint()
+        G.BPC.initBP()
+        finishSetup()
+    } else {
+        loadBp(data[0], false).then(finishSetup)
+    }
 
+    function finishSetup() {
         G.BPC.centerViewport()
         G.BPC.updateCursorPosition({
             x: G.app.screen.width / 2,
@@ -195,7 +204,7 @@ Promise.all([util.findBPString(bpSource)]
         })
         G.app.renderer.view.style.display = 'block'
         setTimeout(() => doorbellButton.classList.remove('closed'), 30000)
-    })
+    }
 })
 .catch(error => console.error(error))
 
