@@ -319,14 +319,18 @@ export class Blueprint {
         // Tag changed ids with !
         let ID = 0
         entityInfo.forEach(e => {
-            entitiesJSON = entitiesJSON.replace(new RegExp(`"(entity_number|entity_id)":${e.entity_number},`, 'g'), (_, c) => `"${c}":!${ID},`)
+            entitiesJSON = entitiesJSON.replace(
+                new RegExp(`"(entity_number|entity_id)":${e.entity_number}([,}])`, 'g'),
+                (_, c, c2) => `"${c}":!${ID}${c2}`
+            )
             ID++
         })
 
         // Remove tag and sort
-        return JSON.parse(
-            entitiesJSON.replace(/"(entity_number|entity_id)":\![0-9]+?,/g, s => s.replace('!', ''))
-        )
+        return JSON.parse(entitiesJSON.replace(
+            /"(entity_number|entity_id)":\![0-9]+?[,}]/g,
+            s => s.replace('!', '')
+        ))
         .sort((a: any, b: any) => a.entity_number - b.entity_number)
     }
 
