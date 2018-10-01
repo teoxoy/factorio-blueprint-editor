@@ -28,7 +28,7 @@ import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
 import FileSaver from 'file-saver'
-import { TilePaintContainer } from './containers/tilePaint';
+import { TilePaintContainer } from './containers/tilePaint'
 
 let doorbellButton: HTMLElement
 window.doorbellOptions = {
@@ -228,28 +228,40 @@ function loadBp(bpString: string, clearData = true) {
 
 document.addEventListener('copy', (e: ClipboardEvent) => {
     e.preventDefault()
+
     if (G.bp.isEmpty()) return
 
     BPString.encode(G.bp)
-        .then(data => {
-            e.clipboardData.setData('text/plain', data)
-            console.log('Copied BP String')
-        })
+        .then(writeToClipboard)
+        .then(() => console.log('Copied BP String'))
         .catch(error => console.error(error))
+
+    function writeToClipboard(s: string): Promise<void> {
+        if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(s)
+        e.clipboardData.setData('text/plain', s)
+        return Promise.resolve()
+    }
 })
 
 document.addEventListener('paste', (e: ClipboardEvent) => {
     e.preventDefault()
+
     G.app.renderer.view.style.display = 'none'
     doorbellButton.style.display = 'none'
 
-    util.findBPString(e.clipboardData.getData('text'))
-        .catch(error => console.error(error))
+    readFromClipboard()
+        .then(util.findBPString)
         .then(loadBp)
         .then(() => {
             G.app.renderer.view.style.display = 'block'
             doorbellButton.style.display = 'block'
         })
+        .catch(error => console.error(error))
+
+    function readFromClipboard() {
+        if (navigator.clipboard && navigator.clipboard.readText) return navigator.clipboard.readText()
+        return Promise.resolve(e.clipboardData.getData('text'))
+    }
 })
 
 keyboardJS.bind('', e => {

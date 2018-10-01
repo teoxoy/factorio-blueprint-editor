@@ -4,6 +4,13 @@ declare module '*.json' {
     export default content
 }
 
+interface Navigator {
+    clipboard: {
+        writeText?: (s: string) => Promise<void>
+        readText?: () => Promise<string>
+    }
+}
+
 interface Window {
     doorbellOptions: {
         tags?: string
