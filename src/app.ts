@@ -264,10 +264,6 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
     }
 })
 
-keyboardJS.bind('', e => {
-    if (!(e.pressedKeys.includes('modifier') && (e.pressedKeys.includes('c') || e.pressedKeys.includes('v')))) e.preventDefault()
-})
-
 keyboardJS.bind(keybinds.clear, () => {
     G.BPC.clearData()
     G.bp = new Blueprint()
@@ -435,3 +431,7 @@ keyboardJS.bind(keybinds.w, () => G.keyboard.w = true, () => G.keyboard.w = fals
 keyboardJS.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = false)
 keyboardJS.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
 keyboardJS.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)
+
+// hack for calling preventDefault() on all bound keys
+const keyCombos = keyboardJS._listeners.map((l: any) => l.keyCombo.sourceStr)
+keyboardJS.bind(keyCombos, e => e.preventDefault())
