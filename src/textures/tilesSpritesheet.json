@@ -1,0 +1,33 @@
+{
+    "frames": {
+        "stone_path": {
+            "frame": { "x": 0, "y": 0, "w": 512, "h": 512 },
+            "sourceSize": { "w": 512, "h": 512 }
+        },
+        "refined_concrete": {
+            "frame": { "x": 0, "y": 512, "w": 512, "h": 512 },
+            "sourceSize": { "w": 512, "h": 512 }
+        },
+        "concrete": {
+            "frame": { "x": 512, "y": 0, "w": 512, "h": 512 },
+            "sourceSize": { "w": 512, "h": 512 }
+        },
+        "hazard_concrete_left": {
+            "frame": { "x": 512, "y": 512, "w": 512, "h": 512 },
+            "sourceSize": { "w": 512, "h": 512 }
+        },
+        "hazard_concrete_right": {
+            "frame": { "x": 0, "y": 1024, "w": 512, "h": 512 },
+            "sourceSize": { "w": 512, "h": 512 }
+        },
+        "refined_hazard_concrete_left": {
+            "frame": { "x": 512, "y": 1024, "w": 512, "h": 512 },
+            "sourceSize": { "w": 512, "h": 512 }
+        },
+        "refined_hazard_concrete_right": {
+            "frame": { "x": 1024, "y": 0, "w": 512, "h": 512 },
+            "sourceSize": { "w": 512, "h": 512 }
+        }
+    },
+    "meta": { "image": "./tilesSpritesheet.png" }
+}

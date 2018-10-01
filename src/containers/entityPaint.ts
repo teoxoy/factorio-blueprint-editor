@@ -5,7 +5,7 @@ import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
 
-export class PaintContainer extends PIXI.Container {
+export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
     holdingRightClick: boolean
     directionType: string
@@ -139,7 +139,7 @@ export class PaintContainer extends PIXI.Container {
             this.placeEntityContainer()
         } else if (e.data.button === 2) {
             this.holdingRightClick = true
-            this.removeContainer()
+            this.removeContainerUnder()
         }
     }
 
@@ -161,7 +161,7 @@ export class PaintContainer extends PIXI.Container {
             y: (newPosition.y - newPosition.y % 16) / 16
         }
         if (newCursorPos.x !== G.gridCoords16.x || newCursorPos.y !== G.gridCoords16.y) {
-            if (this.holdingRightClick) this.removeContainer()
+            if (this.holdingRightClick) this.removeContainerUnder()
 
             switch (this.name) {
                 case 'straight_rail':
@@ -191,7 +191,7 @@ export class PaintContainer extends PIXI.Container {
         }
     }
 
-    removeContainer() {
+    removeContainerUnder() {
         const position = EntityContainer.getGridPosition(this.position)
         const c = EntityContainer.mappings.get(G.bp.entityPositionGrid.getCellAtPosition(position))
         if (c) {

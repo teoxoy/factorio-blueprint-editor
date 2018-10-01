@@ -1,6 +1,5 @@
 import getEntity from './entity'
 import factorioData from './factorioData'
-import { Tile } from './tile'
 import { PositionGrid } from './positionGrid'
 import Immutable from 'immutable'
 import G from '../globals'
@@ -11,8 +10,7 @@ export class Blueprint {
 
     name: string
     icons: any[]
-    tiles: Tile[]
-    tilePositionGrid: any
+    tiles: Immutable.Map<string, string>
     version: number
     connections: ConnectionsManager
     next_entity_number: number
@@ -26,35 +24,21 @@ export class Blueprint {
         this.name = 'Blueprint'
         this.icons = []
         this.rawEntities = Immutable.Map()
-        this.tiles = []
-        this.tilePositionGrid = {}
+        this.tiles = Immutable.Map()
         this.version = undefined
         this.next_entity_number = 1
 
         if (data) {
-            if (!data.tiles) data.tiles = []
-            if (!data.icons) data.icons = []
             this.name = data.label
             this.version = data.version
+            if (data.icons) data.icons.forEach((icon: any) => this.icons[icon.index - 1] = icon.signal.name)
 
             this.next_entity_number += data.entities.length
             this.rawEntities = this.rawEntities.withMutations(map => {
                 for (const entity of data.entities) {
                     map.set(entity.entity_number, Immutable.fromJS(entity))
-                    // this.entityPositionGrid.setTileData(entity.entity_number)
                 }
             })
-
-            data.tiles.forEach((tile: any) => {
-                this.createTile(tile.name, tile.position)
-            })
-
-            this.icons = []
-            data.icons.forEach((icon: any) => {
-                this.icons[icon.index - 1] = icon.signal.name
-            })
-
-            this.setTileIds()
 
             // TODO: if entity has placeable-off-grid flag then take the next one
             const firstEntityTopLeft = this.firstEntity().topLeft()
@@ -63,21 +47,19 @@ export class Blueprint {
             const offsetY = G.sizeBPContainer.height / 64 - (firstEntityTopLeft.y % 1 !== 0 ? -0.5 : 0)
 
             this.rawEntities = this.rawEntities.withMutations(map => {
-                map.keySeq().forEach(k => {
-                    // tslint:disable-next-line:no-parameter-reassignment
-                    map.updateIn([k, 'position', 'x'], (x: number) => x += offsetX)
-                    // tslint:disable-next-line:no-parameter-reassignment
-                    map.updateIn([k, 'position', 'y'], (y: number) => y += offsetY)
-                })
+                map.keySeq().forEach(k => map
+                    .updateIn([k, 'position', 'x'], x => x + offsetX)
+                    .updateIn([k, 'position', 'y'], y => y + offsetY)
+                )
             })
 
-            // tslint:disable-next-line:no-dynamic-delete
-            this.tiles.forEach(tile => delete this.tilePositionGrid[`${tile.position.x},${tile.position.y}`])
-            this.tiles.forEach(tile => {
-                tile.position.x += offsetX
-                tile.position.y += offsetY
-                this.tilePositionGrid[`${tile.position.x},${tile.position.y}`] = tile
-            })
+            if (data.tiles) {
+                this.tiles = this.tiles.withMutations(map =>
+                    data.tiles.forEach((tile: any) =>
+                        map.set(`${tile.position.x + offsetX + 0.5},${tile.position.y + offsetY + 0.5}`, tile.name)
+                    )
+                )
+            }
         }
 
         this.entityPositionGrid = new PositionGrid(this, [...this.rawEntities.keys()])
@@ -252,104 +234,43 @@ export class Blueprint {
         return fR ? fR.toJS() : undefined
     }
 
-    // placeBlueprint(bp, position, direction = 0, allowOverlap) { // direction is 0, 1, 2, or 3
-    //     const entitiesCreated = []
-    //     bp.entities.forEach(ent => {
-    //         const data = ent.getData()
-
-    //         data.direction += direction * 2
-    //         data.direction %= 8
-
-    //         if (direction === 3) data.position = { x: data.position.y, y: -data.position.x }
-    //         else if (direction === 2) data.position = { x: -data.position.x, y: -data.position.y }
-    //         else if (direction === 1) data.position = { x: -data.position.y, y: data.position.x }
-
-    //         data.position.x += position.x
-    //         data.position.y += position.y
-
-    //         entitiesCreated.push(this.createEntityWithData(data, allowOverlap, true, true))
-    //     })
-
-    //     entitiesCreated.forEach(e => {
-    //         e.place(this.entitiesCreated)
-    //     })
-
-    //     bp.tiles.forEach(tile => {
-    //         const data = tile.getData()
-
-    //         if (direction === 3) data.position = { x: data.position.y, y: -data.position.x }
-    //         else if (direction === 2) data.position = { x: -data.position.x, y: -data.position.y }
-    //         else if (direction === 1) data.position = { x: -data.position.y, y: data.position.x }
-
-    //         data.position.x += position.x
-    //         data.position.y += position.y
-
-    //         this.createTileWithData(data)
-    //     })
-
-    //     return this
-    // }
-
-    // createEntityWithData(data: any, allowOverlap: boolean, noPlace: boolean) {
-    //     const ent = new Entity(data, this)
-    //     if (allowOverlap || this.entityPositionGrid.checkNoOverlap(ent)) {
-    //         if (!noPlace) ent.place(this.entities)
-    //         this.entities.push(ent)
-    //         return ent
-    //     } else {
-    //         // const otherEnt = ent.getOverlap(this.entityPositionGrid)
-    //         // throw new Error('Entity ' + data.name + ' overlaps ' + otherEnt.name +
-    //         // ' entity (' + data.position.x + ', ' + data.position.y + ')')
-    //     }
-    // }
-
     createTile(name: string, position: IPoint) {
-        return this.createTileWithData({ name, position })
+        this.tiles = this.tiles.set(`${position.x},${position.y}`, name)
     }
 
-    createTileWithData(data: any) {
-        const tile = new Tile(data, this)
-        const key = `${data.position.x},${data.position.y}`
-        if (this.tilePositionGrid[key]) this.removeTile(this.tilePositionGrid[key])
-
-        this.tilePositionGrid[key] = tile
-        this.tiles.push(tile)
-        return tile
-    }
-
-    removeTile(tile: Tile) {
-        if (!tile) return false
-        else {
-            const index = this.tiles.indexOf(tile)
-            if (index === -1) return tile
-            this.tiles.splice(index, 1)
-            return tile
-        }
-    }
-
-    setTileIds() {
-        this.tiles.forEach((tile, i) => {
-            tile.id = i + 1
-        })
-        return this
+    removeTile(position: IPoint) {
+        this.tiles = this.tiles.remove(`${position.x},${position.y}`)
     }
 
     isEmpty() {
-        return this.rawEntities.isEmpty() && this.tiles.length === 0
+        return this.rawEntities.isEmpty() && this.tiles.isEmpty()
     }
 
     // Get corner/center positions
     getPosition(f: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight', xcomp: any, ycomp: any) {
-        if (!this.rawEntities.size) return { x: 0, y: 0 }
+        if (this.isEmpty()) return { x: 0, y: 0 }
+
+        const positions =
+            [...this.rawEntities.keys()]
+                .map(k => this.entity(k)[f]()).concat(
+            [...this.tiles.keys()]
+                .map(k => ({ x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
+                .map(p => tileCorners(p)[f]))
+
         return {
-            x: [...this.rawEntities.keys()].reduce(
-                (best: number, ent: any) => xcomp(best, this.entity(ent)[f]().x),
-                this.firstEntity()[f]().x
-            ),
-            y: [...this.rawEntities.keys()].reduce(
-                (best: number, ent: any) => ycomp(best, this.entity(ent)[f]().y),
-                this.firstEntity()[f]().y
-            )
+            // tslint:disable-next-line:no-unnecessary-callback-wrapper
+            x: positions.map(p => p.x).reduce((p, v) => xcomp(p, v), positions[0].x),
+            // tslint:disable-next-line:no-unnecessary-callback-wrapper
+            y: positions.map(p => p.y).reduce((p, v) => ycomp(p, v), positions[0].y)
+        }
+
+        function tileCorners(position: IPoint) {
+            return {
+                topLeft: { x: position.x - 0.5, y: position.y - 0.5 },
+                topRight: { x: position.x + 0.5, y: position.y - 0.5 },
+                bottomLeft: { x: position.x - 0.5, y: position.y + 0.5 },
+                bottomRight: { x: position.x + 0.5, y: position.y + 0.5 }
+            }
         }
     }
 
@@ -366,19 +287,29 @@ export class Blueprint {
 
     generateIcons() {
         // TODO: make this behave more like in Factorio
-        const entities: Map<string, number> = new Map()
+        if (!this.rawEntities.isEmpty()) {
+            const entities: Map<string, number> = new Map()
 
-        for (const i of [...this.rawEntities.keys()]) {
-            const name = this.entity(i).name
+            for (const i of [...this.rawEntities.keys()]) {
+                const name = this.entity(i).name
 
-            const value = entities.get(name)
-            entities.set(name, value ? (value + 1) : 0)
+                const value = entities.get(name)
+                entities.set(name, value ? (value + 1) : 0)
+            }
+
+            const sortedEntities = [...entities.entries()].sort((a, b) => a[1] - b[1])
+
+            this.icons[0] = sortedEntities[0][0]
+            if (sortedEntities.length > 1) this.icons[1] = sortedEntities[1][0]
+        } else {
+            this.icons[0] = factorioData.getTile(
+                [...Immutable.Seq(this.tiles)
+                    .reduce((acc, tile) =>
+                        acc.set(tile, acc.has(tile) ? (acc.get(tile) + 1) : 0)
+                    , new Map() as Map<string, number>).entries()]
+                .sort((a, b) => b[1] - a[1])[0][0]
+            ).minable.result
         }
-
-        const sortedEntities = [...entities.entries()].sort((a, b) => a[1] - b[1])
-
-        this.icons[0] = sortedEntities[0][0]
-        if (sortedEntities.length > 1) this.icons[1] = sortedEntities[1][0]
     }
 
     getEntitiesForExport() {
@@ -400,7 +331,6 @@ export class Blueprint {
     }
 
     toObject() {
-        this.setTileIds()
         if (!this.icons.length) this.generateIcons()
         const entityInfo = this.getEntitiesForExport()
         const center = this.center()
@@ -413,19 +343,18 @@ export class Blueprint {
             e.position.x -= center.x
             e.position.y -= center.y
         }
-        const tileInfo = this.tiles.map(tile => tile.getData())
-        for (const t of tileInfo) {
-            t.position.x -= center.x
-            t.position.y -= center.y
-        }
+        const tileInfo = this.tiles.map((v, k) => ({
+            position: { x: Number(k.split(',')[0]) - center.x - 0.5, y: Number(k.split(',')[1]) - center.y - 0.5 },
+            name: v
+        })).valueSeq().toArray()
         const iconData = this.icons.map((icon, i) => (
             { signal: { type: factorioData.getItemTypeForBp(icon), name: icon }, index: i + 1 }
         ))
         return {
             blueprint: {
                 icons: iconData,
-                entities: this.rawEntities.size ? entityInfo : undefined,
-                tiles: this.tiles.length ? tileInfo : undefined,
+                entities: this.rawEntities.isEmpty() ? undefined : entityInfo,
+                tiles: this.tiles.isEmpty() ? undefined : tileInfo,
                 item: 'blueprint',
                 version: this.version || 0,
                 label: this.name

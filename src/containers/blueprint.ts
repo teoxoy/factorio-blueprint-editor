@@ -6,7 +6,9 @@ import { EntitySprite } from '../entitySprite'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { EntityContainer } from './entity'
 import { OverlayContainer } from './overlay'
-import { PaintContainer } from './paint'
+import { EntityPaintContainer } from './entityPaint'
+import { TileContainer } from './tile'
+import { TilePaintContainer } from './tilePaint'
 
 export class BlueprintContainer extends PIXI.Container {
 
@@ -15,8 +17,10 @@ export class BlueprintContainer extends PIXI.Container {
     wiresContainer: WiresContainer
     overlayContainer: OverlayContainer
     underlayContainer: UnderlayContainer
+    tiles: PIXI.Container
     entities: PIXI.Container
     movingEntityFilter: AdjustmentFilter
+    tileSprites: PIXI.Container
     entitySprites: PIXI.Container
     movementSpeed: number
     zoomPan: ZoomPan
@@ -25,7 +29,7 @@ export class BlueprintContainer extends PIXI.Container {
     pgOverlay: PIXI.Graphics
     hoverContainer: undefined | EntityContainer
     movingContainer: undefined | EntityContainer
-    paintContainer: undefined | PaintContainer
+    paintContainer: undefined | EntityPaintContainer | TilePaintContainer
 
     constructor() {
         super()
@@ -62,10 +66,20 @@ export class BlueprintContainer extends PIXI.Container {
         this.underlayContainer = new UnderlayContainer()
         this.addChild(this.underlayContainer)
 
+        this.tileSprites = new PIXI.Container()
+        this.tileSprites.interactive = false
+        this.tileSprites.interactiveChildren = false
+        this.addChild(this.tileSprites)
+
         this.entitySprites = new PIXI.Container()
         this.entitySprites.interactive = false
         this.entitySprites.interactiveChildren = false
         this.addChild(this.entitySprites)
+
+        this.tiles = new PIXI.Container()
+        this.tiles.interactive = false
+        this.tiles.interactiveChildren = true
+        this.addChild(this.tiles)
 
         this.entities = new PIXI.Container()
         this.entities.interactive = false
@@ -131,6 +145,9 @@ export class BlueprintContainer extends PIXI.Container {
         for (const entity_number of G.bp.rawEntities.keys()) {
             this.entities.addChild(new EntityContainer(entity_number, false))
         }
+        G.bp.tiles.forEach((v, k) => {
+            this.tiles.addChild(new TileContainer(v, { x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
+        })
 
         this.sortEntities()
         this.wiresContainer.drawWires()
@@ -145,7 +162,9 @@ export class BlueprintContainer extends PIXI.Container {
 
     clearData() {
         const opt = { children: true }
+        this.tiles.destroy(opt)
         this.entities.destroy(opt)
+        this.tileSprites.destroy(opt)
         this.entitySprites.destroy(opt)
         this.underlayContainer.destroy(opt)
         this.overlayContainer.destroy(opt)
@@ -161,9 +180,17 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.underlayContainer = new UnderlayContainer()
 
+        this.tileSprites = new PIXI.Container()
+        this.tileSprites.interactive = false
+        this.tileSprites.interactiveChildren = false
+
         this.entitySprites = new PIXI.Container()
         this.entitySprites.interactive = false
         this.entitySprites.interactiveChildren = false
+
+        this.tiles = new PIXI.Container()
+        this.tiles.interactive = false
+        this.tiles.interactiveChildren = true
 
         this.entities = new PIXI.Container()
         this.entities.interactive = false
@@ -173,7 +200,10 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.overlayContainer = new OverlayContainer()
 
-        this.addChild(this.grid, this.underlayContainer, this.entitySprites, this.entities, this.wiresContainer, this.overlayContainer)
+        this.addChild(
+            this.grid, this.underlayContainer, this.tileSprites, this.entitySprites,
+            this.tiles, this.entities, this.wiresContainer, this.overlayContainer
+        )
 
         G.currentMouseState = G.mouseStates.NONE
     }
@@ -217,6 +247,11 @@ export class BlueprintContainer extends PIXI.Container {
         }
     }
 
+    transparentEntities(bool = true) {
+        this.entities.interactiveChildren = !bool
+        this.entitySprites.alpha = bool ? 0.5 : 1
+    }
+
     // For testing
     updateOverlay() {
         // const TEMP = G.bp.entityPositionGrid.getAllPositions()
@@ -229,7 +264,7 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     centerViewport() {
-        if (G.bp.rawEntities.size === 0) {
+        if (G.bp.isEmpty()) {
             this.zoomPan.setPosition(-G.sizeBPContainer.width / 2, -G.sizeBPContainer.height / 2)
             this.zoomPan.updateTransform()
             return
@@ -258,9 +293,10 @@ export class BlueprintContainer extends PIXI.Container {
         this.updateViewportCulling()
     }
 
-    getEntitySpritesBounds() {
+    getBlueprintBounds() {
         const bounds = new PIXI.Bounds()
-        for (const sprite of this.entitySprites.children as PIXI.Sprite[]) {
+        const sprites = this.entitySprites.children.concat(this.tileSprites.children) as PIXI.Sprite[]
+        for (const sprite of sprites) {
             const sB = new PIXI.Bounds()
             const W = sprite.width * sprite.anchor.x
             const H = sprite.height * sprite.anchor.y
@@ -274,11 +310,13 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     enableRenderableOnChildren() {
+        this.tileSprites.children.forEach(c => c.renderable = true)
         this.entitySprites.children.forEach(c => c.renderable = true)
         this.overlayContainer.overlay.children.forEach(c => c.renderable = true)
     }
 
     updateViewportCulling() {
+        cullChildren(this.tileSprites.children)
         cullChildren(this.entitySprites.children)
         cullChildren(this.overlayContainer.overlay.children)
 

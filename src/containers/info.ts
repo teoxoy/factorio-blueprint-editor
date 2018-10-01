@@ -67,7 +67,8 @@ export class InfoContainer extends PIXI.Container {
             'F',
             'W / A / S / D',
             'click + drag in blueprint area',
-            'mouse wheel'
+            'mouse wheel',
+            '[ / ]'
         ], { x: this.iWidth / 2 - 4, y: 40 }, 1)
 
         this.writeColumn([
@@ -92,7 +93,8 @@ export class InfoContainer extends PIXI.Container {
             'focuses viewport on blueprint',
             'move',
             'move',
-            'zoom in / out'
+            'zoom in / out',
+            'decrease / increase tile area'
         ], { x: this.iWidth / 2 + 4, y: 40 })
 
         this.writeColumn([
@@ -107,17 +109,17 @@ export class InfoContainer extends PIXI.Container {
             '    (F12) to check if something is wrong.',
             'Entities with placeable-off-grid flag will not be added to the positionGrid',
             '    (ex. landmine).'
-        ], { x: 4, y: 500 })
+        ], { x: 4, y: 520 })
 
         this.writeColumn([
             'Please leave your suggestions, ideas, new features or bug reports here:'
-        ], { x: this.iWidth / 2, y: 730 }, 0.5, true)
+        ], { x: this.iWidth / 2, y: 750 }, 0.5, true)
 
         const link = new PIXI.Text('Reddit Post')
         link.interactive = true
         link.buttonMode = true
         link.on('click', () => window.open('https://redd.it/87zysk', '_blank'))
-        link.position.set(this.iWidth / 2, 750)
+        link.position.set(this.iWidth / 2, 770)
         link.style.fontSize = 16
         link.style.fill = G.UIColors.link
         link.anchor.set(0.5, 0)
@@ -127,7 +129,7 @@ export class InfoContainer extends PIXI.Container {
         link2.interactive = true
         link2.buttonMode = true
         link2.on('click', () => window.open('https://github.com/Teoxoy/factorio-blueprint-editor', '_blank'))
-        link2.position.set(this.iWidth / 2, 770)
+        link2.position.set(this.iWidth / 2, 790)
         link2.style.fontSize = 16
         link2.style.fill = G.UIColors.link
         link2.anchor.set(0.5, 0)
@@ -137,7 +139,7 @@ export class InfoContainer extends PIXI.Container {
             'Copyright © 2018 Tanasoaia Teodor Andrei',
             'All art assets, spritesheets and other Factorio game data used in this project',
             'belong to Wube Software Ltd and are not for redistribution.'
-        ], { x: this.iWidth / 2, y: 810 }, 0.5, true, 14)
+        ], { x: this.iWidth / 2, y: 830 }, 0.5, true, 14)
     }
 
     writeColumn(data: Array<string | [string, number]>, offset: IPoint, anchorX = 0, bold = false, fontSize = 16) {

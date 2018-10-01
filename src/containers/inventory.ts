@@ -5,7 +5,9 @@ import factorioData from '../factorio-data/factorioData'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import util from '../util'
 import G from '../globals'
-import { PaintContainer } from './paint'
+import { EntityPaintContainer } from './entityPaint'
+import { EntityContainer } from './entity'
+import { TilePaintContainer } from './tilePaint'
 
 export class InventoryContainer extends PIXI.Container {
 
@@ -99,8 +101,10 @@ export class InventoryContainer extends PIXI.Container {
             let subgroupHasItem = false
             for (const subgroup of inventoryBundle[i].subgroups) {
                 for (const item of subgroup.items) {
-                    const placeResult = factorioData.getItem(item.name).place_result
-                    if ((!filteredItems && placeResult && factorioData.getEntity(placeResult)) ||
+                    const itemData = factorioData.getItem(item.name)
+                    const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
+                    const placeResult = itemData.place_result || tileResult
+                    if ((!filteredItems && placeResult && (factorioData.getEntity(placeResult) || factorioData.getTile(placeResult))) ||
                         filteredItems && filteredItems.includes(item.name)
                     ) {
                         const img = InventoryContainer.createIcon(item)
@@ -128,12 +132,28 @@ export class InventoryContainer extends PIXI.Container {
                                     G.currentMouseState = G.mouseStates.PAINTING
 
                                     const newPosition = e.data.getLocalPosition(G.BPC)
-                                    const size = util.switchSizeBasedOnDirection(factorioData.getEntity(placeResult).size, 0)
-                                    G.BPC.paintContainer = new PaintContainer(placeResult, 0, {
-                                        x: newPosition.x - newPosition.x % 32 + (size.x % 2 * 16),
-                                        y: newPosition.y - newPosition.y % 32 + (size.y % 2 * 16)
-                                    })
-                                    G.BPC.addChild(G.BPC.paintContainer)
+
+                                    if (tileResult) {
+                                        G.BPC.paintContainer = new TilePaintContainer(
+                                            placeResult,
+                                            EntityContainer.getPositionFromData(
+                                                newPosition,
+                                                { x: TilePaintContainer.size, y: TilePaintContainer.size }
+                                            )
+                                        )
+                                        G.BPC.tiles.addChild(G.BPC.paintContainer)
+                                    } else {
+                                        G.BPC.paintContainer = new EntityPaintContainer(
+                                            placeResult,
+                                            0,
+                                            EntityContainer.getPositionFromData(
+                                                newPosition,
+                                                util.switchSizeBasedOnDirection(factorioData.getEntity(placeResult).size, 0)
+                                            )
+                                        )
+                                        G.BPC.addChild(G.BPC.paintContainer)
+                                    }
+
                                     this.close()
                                 }
                             })

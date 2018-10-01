@@ -8,6 +8,8 @@ import iconSpritesheetPNG from 'factorio-data/data/graphics/iconSpritesheet.png'
 import iconSpritesheetJSON from 'factorio-data/data/graphics/iconSpritesheet.json'
 import utilitySpritesheetPNG from 'factorio-data/data/graphics/utilitySpritesheet.png'
 import utilitySpritesheetJSON from 'factorio-data/data/graphics/utilitySpritesheet.json'
+import tilesSpritesheetPNG from './textures/tilesSpritesheet.png'
+import tilesSpritesheetJSON from './textures/tilesSpritesheet.json'
 
 import * as PIXI from 'pixi.js'
 import keyboardJS from 'keyboardjs'
@@ -19,13 +21,14 @@ import util from './util'
 import { InventoryContainer } from './containers/inventory'
 import G from './globals'
 import { EntityContainer } from './containers/entity'
-import { PaintContainer } from './containers/paint'
+import { EntityPaintContainer } from './containers/entityPaint'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './containers/toolbar'
 import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
 import FileSaver from 'file-saver'
+import { TilePaintContainer } from './containers/tilePaint';
 
 let doorbellButton: HTMLElement
 window.doorbellOptions = {
@@ -94,7 +97,9 @@ const keybinds = {
     w: 'w',
     a: 'a',
     s: 's',
-    d: 'd'
+    d: 'd',
+    increaseTileArea: ']',
+    decreaseTileArea: '['
 }
 
 const params = window.location.search.slice(1).split('&')
@@ -169,7 +174,8 @@ Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
 .concat([
     [ entitySpritesheetPNG, entitySpritesheetJSON ],
     [ iconSpritesheetPNG, iconSpritesheetJSON ],
-    [ utilitySpritesheetPNG, utilitySpritesheetJSON ]
+    [ utilitySpritesheetPNG, utilitySpritesheetJSON ],
+    [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
 ].map(data =>
     new Promise((resolve, reject) => {
         const image = new Image()
@@ -265,7 +271,7 @@ keyboardJS.bind(keybinds.picture, () => {
     if (G.renderOnly) G.BPC.cacheAsBitmap = true
     G.BPC.updateViewportCulling()
 
-    texture.frame = G.BPC.getEntitySpritesBounds()
+    texture.frame = G.BPC.getBlueprintBounds()
     texture._updateUvs()
 
     G.app.renderer.plugins.extract.canvas(new PIXI.Sprite(texture)).toBlob((blob: Blob) => {
@@ -313,7 +319,7 @@ keyboardJS.bind(keybinds.pippete, () => {
         const hoverContainer = G.BPC.hoverContainer
         G.BPC.hoverContainer.pointerOutEventHandler()
         const entity = G.bp.entity(hoverContainer.entity_number)
-        G.BPC.paintContainer = new PaintContainer(entity.name,
+        G.BPC.paintContainer = new EntityPaintContainer(entity.name,
             entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction,
             hoverContainer.position)
         G.BPC.paintContainer.moveTo({
@@ -326,6 +332,18 @@ keyboardJS.bind(keybinds.pippete, () => {
         G.BPC.paintContainer = undefined
 
         G.currentMouseState = G.mouseStates.NONE
+    }
+})
+
+keyboardJS.bind(keybinds.increaseTileArea, () => {
+    if (G.BPC.paintContainer instanceof TilePaintContainer) {
+        G.BPC.paintContainer.increaseSize()
+    }
+})
+
+keyboardJS.bind(keybinds.decreaseTileArea, () => {
+    if (G.BPC.paintContainer instanceof TilePaintContainer) {
+        G.BPC.paintContainer.decreaseSize()
     }
 })
 

@@ -35,6 +35,8 @@ Feel free to contribute to this project, if you have any questions you can conta
 - a: 'a'
 - s: 's'
 - d: 'd'
+- increaseTileArea: ']'
+- decreaseTileArea: '['
 
 ### How to change them:
 Add `keybinds:ACTION=KEY,ACTION=KEY,ACTION=KEY` as a parameter to the URL
@@ -53,7 +55,6 @@ Example: `https://teoxoy.github.io/factorio-blueprint-editor?keybinds:rotate=t,p
 - throughput calculator/bp analyzer/bottleneck detector
 - highlight lone underground pipes/belts
 - train-stop station name
-- tiles support
 - poles range, wires and rotations
 - rotate bp
 - implement circuit_wire_max_distance with visualization ((x - center_x)^2 + (y - center_y)^2 <= radius^2)
@@ -61,3 +62,5 @@ Example: `https://teoxoy.github.io/factorio-blueprint-editor?keybinds:rotate=t,p
 - rail custom bounding box
 - rail rotations
 - belt endings
+- tile edges
+- tile history
