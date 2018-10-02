@@ -53,7 +53,7 @@ export default {
         }
     }),
     encode: (bPOrBook: any) => new Promise((resolve: (value: string) => void, reject) => {
-        const data = this.encodeSync()
+        const data = this.encodeSync(bPOrBook)
         if (data.value) resolve(data.value)
         else reject(data.error)
     }),
