@@ -38,8 +38,8 @@ const validate = new Ajv()
 })
 .compile(blueprintSchema)
 
-export default {
-    decode: (str: string) => new Promise((resolve, reject) => {
+function decode(str: string) {
+    return new Promise((resolve, reject) => {
         try {
             const data = JSON.parse(
                 pako.inflate(atob(str.slice(1)), { to: 'string' })
@@ -51,21 +51,31 @@ export default {
         } catch (e) {
             reject(e)
         }
-    }),
-    encode: (bPOrBook: any) => new Promise((resolve: (value: string) => void, reject) => {
-        const data = this.encodeSync(bPOrBook)
+    })
+}
+
+function encode(bPOrBook: any) {
+    return new Promise((resolve: (value: string) => void, reject) => {
+        const data = encodeSync(bPOrBook)
         if (data.value) resolve(data.value)
         else reject(data.error)
-    }),
-    encodeSync: (bPOrBook: any): { value?: string; error?: string } => {
-        try {
-            return { value: '0' + btoa(pako.deflate(
-                JSON.stringify(bPOrBook.toObject())
-                    .replace(/(:".+?"|"[^"]+?module[^"].+?")/g, (_: string, capture: string) => capture.replace(/_/g, '-'))
-                , { to: 'string' }))
-            }
-        } catch (e) {
-            return { error: e }
+    })
+}
+
+function encodeSync(bPOrBook: any): { value?: string; error?: string } {
+    try {
+        return { value: '0' + btoa(pako.deflate(
+            JSON.stringify(bPOrBook.toObject())
+                .replace(/(:".+?"|"[^"]+?module[^"].+?")/g, (_: string, capture: string) => capture.replace(/_/g, '-'))
+            , { to: 'string' }))
         }
+    } catch (e) {
+        return { error: e }
     }
+}
+
+export default {
+    decode,
+    encode,
+    encodeSync
 }
