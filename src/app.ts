@@ -242,15 +242,19 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
 
     if (G.bp.isEmpty()) return
 
-    BPString.encode(G.bp)
-        .then(writeToClipboard)
-        .then(() => console.log('Copied BP String'))
-        .catch(error => console.error(error))
-
-    function writeToClipboard(s: string): Promise<void> {
-        if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(s)
-        e.clipboardData.setData('text/plain', s)
-        return Promise.resolve()
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        BPString.encode(G.bp)
+            .then(s => navigator.clipboard.writeText(s))
+            .then(() => console.log('Copied BP String'))
+            .catch(error => console.error(error))
+    } else {
+        const data = BPString.encodeSync(G.bp)
+        if (data.value) {
+            e.clipboardData.setData('text/plain', data.value)
+            console.log('Copied BP String')
+        } else {
+            console.error(data.error)
+        }
     }
 })
 
@@ -260,19 +264,16 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
     G.app.renderer.view.style.display = 'none'
     doorbellButton.style.display = 'none'
 
-    readFromClipboard()
-        .then(util.findBPString)
-        .then(loadBp)
-        .then(() => {
-            G.app.renderer.view.style.display = 'block'
-            doorbellButton.style.display = 'block'
-        })
-        .catch(error => console.error(error))
-
-    function readFromClipboard() {
-        if (navigator.clipboard && navigator.clipboard.readText) return navigator.clipboard.readText()
-        return Promise.resolve(e.clipboardData.getData('text'))
-    }
+    navigator.clipboard && navigator.clipboard.writeText ?
+        navigator.clipboard.readText() :
+        Promise.resolve(e.clipboardData.getData('text'))
+            .then(util.findBPString)
+            .then(loadBp)
+            .then(() => {
+                G.app.renderer.view.style.display = 'block'
+                doorbellButton.style.display = 'block'
+            })
+            .catch(error => console.error(error))
 })
 
 keyboardJS.bind(keybinds.clear, () => {

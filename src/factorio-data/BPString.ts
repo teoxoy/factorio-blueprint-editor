@@ -53,14 +53,19 @@ export default {
         }
     }),
     encode: (bPOrBook: any) => new Promise((resolve: (value: string) => void, reject) => {
+        const data = this.encodeSync()
+        if (data.value) resolve(data.value)
+        else reject(data.error)
+    }),
+    encodeSync: (bPOrBook: any): { value?: string; error?: string } => {
         try {
-            resolve('0' + btoa(pako.deflate(
+            return { value: '0' + btoa(pako.deflate(
                 JSON.stringify(bPOrBook.toObject())
                     .replace(/(:".+?"|"[^"]+?module[^"].+?")/g, (_: string, capture: string) => capture.replace(/_/g, '-'))
                 , { to: 'string' }))
-            )
+            }
         } catch (e) {
-            reject(e)
+            return { error: e }
         }
-    })
+    }
 }
