@@ -71,7 +71,7 @@ export class TilePaintContainer extends PIXI.Container {
 
     reposition() {
         const pos = EntityContainer.getPositionFromData(
-            { x: G.gridCoords16.x * 16, y: G.gridCoords16.y * 16 },
+            G.gridData.position,
             { x: TilePaintContainer.size, y: TilePaintContainer.size }
         )
         this.position.set(pos.x, pos.y)
@@ -122,23 +122,17 @@ export class TilePaintContainer extends PIXI.Container {
         }
     }
 
-    moveTo(newPosition: IPoint) {
-        const newCursorPos = {
-            x: (newPosition.x - newPosition.x % 16) / 16,
-            y: (newPosition.y - newPosition.y % 16) / 16
-        }
-        if (newCursorPos.x !== G.gridCoords16.x || newCursorPos.y !== G.gridCoords16.y) {
-            if (this.holdingRightClick) this.removeContainerUnder()
+    moveAtCursor() {
+        const position = G.gridData.position
+        if (this.holdingRightClick) this.removeContainerUnder()
 
-            const pos = EntityContainer.getPositionFromData(
-                newPosition,
-                { x: TilePaintContainer.size, y: TilePaintContainer.size }
-            )
-            this.position.set(pos.x, pos.y)
+        const pos = EntityContainer.getPositionFromData(
+            position,
+            { x: TilePaintContainer.size, y: TilePaintContainer.size }
+        )
+        this.position.set(pos.x, pos.y)
 
-            if (this.holdingLeftClick) this.placeEntityContainer()
-            G.gridCoords16 = newCursorPos
-        }
+        if (this.holdingLeftClick) this.placeEntityContainer()
     }
 
     removeContainerUnder() {

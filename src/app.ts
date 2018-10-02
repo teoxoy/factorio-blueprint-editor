@@ -204,10 +204,9 @@ Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
 
     function finishSetup() {
         G.BPC.centerViewport()
-        G.BPC.updateCursorPosition({
-            x: G.app.screen.width / 2,
-            y: G.app.screen.height / 2
-        })
+
+        G.gridData.update(window.innerWidth / 2, window.innerHeight / 2, G.BPC)
+
         G.app.renderer.view.style.display = 'block'
         setTimeout(() => doorbellButton.classList.remove('closed'), 30000)
     }
@@ -225,6 +224,18 @@ function loadBp(bpString: string, clearData = true) {
         })
         .catch(error => console.error(error))
 }
+
+document.addEventListener('mousemove', e => {
+    G.gridData.update(e.clientX, e.clientY, G.BPC)
+
+    if (G.keyboard.movingViaWASD()) return
+
+    if (G.currentMouseState === G.mouseStates.PANNING) {
+        G.BPC.zoomPan.translateBy(e.movementX, e.movementY)
+        G.BPC.zoomPan.updateTransform()
+        G.BPC.updateViewportCulling()
+    }
+})
 
 document.addEventListener('copy', (e: ClipboardEvent) => {
     e.preventDefault()
@@ -330,10 +341,7 @@ keyboardJS.bind(keybinds.pippete, () => {
         G.BPC.paintContainer = new EntityPaintContainer(entity.name,
             entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction,
             hoverContainer.position)
-        G.BPC.paintContainer.moveTo({
-            x: G.gridCoordsOfCursor.x * 32,
-            y: G.gridCoordsOfCursor.y * 32
-        })
+        G.BPC.paintContainer.moveAtCursor()
         G.BPC.addChild(G.BPC.paintContainer)
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.destroy()

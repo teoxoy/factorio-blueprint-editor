@@ -25,7 +25,6 @@ export class BlueprintContainer extends PIXI.Container {
     movementSpeed: number
     zoomPan: ZoomPan
     holdingRightClick: boolean
-    lastCursorPos: IPoint
     pgOverlay: PIXI.Graphics
     hoverContainer: undefined | EntityContainer
     movingContainer: undefined | EntityContainer
@@ -37,7 +36,6 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.holdingLeftClick = false
         this.holdingRightClick = false
-        this.lastCursorPos = { x: 0, y: 0 }
 
         this.movementSpeed = 10
 
@@ -95,14 +93,14 @@ export class BlueprintContainer extends PIXI.Container {
         this.on('pointerdown', this.pointerDownEventHandler)
         this.on('pointerup', this.pointerUpEventHandler)
         this.on('pointerupoutside', this.pointerUpEventHandler)
-        this.on('pointermove', this.pointerMoveEventHandler)
 
         document.addEventListener('wheel', e => {
             e.preventDefault()
-            this.zoomPan.setScaleCenter(G.gridCoordsOfCursor.x * 32, G.gridCoordsOfCursor.y * 32)
+            this.zoomPan.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
             const z = Math.sign(-e.deltaY) * 0.1
             this.zoomPan.zoomBy(z, z)
             this.zoomPan.updateTransform()
+            G.gridData.recalculate(this)
             this.updateViewportCulling()
         }, false)
 
@@ -116,12 +114,7 @@ export class BlueprintContainer extends PIXI.Container {
                 )
                 this.zoomPan.updateTransform()
 
-                if (this.updateCursorPosition() && (this.movingContainer || this.paintContainer)) {
-                    (this.movingContainer || this.paintContainer).moveTo({
-                        x: G.gridCoordsOfCursor.x * 32,
-                        y: G.gridCoordsOfCursor.y * 32
-                    })
-                }
+                G.gridData.recalculate(this)
 
                 this.updateViewportCulling()
             }
@@ -130,6 +123,17 @@ export class BlueprintContainer extends PIXI.Container {
         if (G.renderOnly) {
             this.interactiveChildren = false
         }
+
+        G.gridData.onUpdate(() => {
+            if (this.movingContainer) this.movingContainer.moveAtCursor()
+            if (this.paintContainer) this.paintContainer.moveAtCursor()
+
+            if (G.keyboard.movingViaWASD()) return
+            if (this.hoverContainer) {
+                if (this.holdingRightClick) this.hoverContainer.removeContainer()
+                if (this.holdingLeftClick && G.keyboard.shift) this.hoverContainer.pasteData()
+            }
+        })
     }
 
     initBP() {
@@ -228,25 +232,6 @@ export class BlueprintContainer extends PIXI.Container {
         })
     }
 
-    updateCursorPosition(mousePosition?: IPoint) {
-        const mousePositionInBP = {
-            x: Math.abs(this.position.x - (mousePosition ? mousePosition.x : G.app.renderer.plugins.interaction.mouse.global.x))
-                / this.zoomPan.getCurrentScale(),
-            y: Math.abs(this.position.y - (mousePosition ? mousePosition.y : G.app.renderer.plugins.interaction.mouse.global.y))
-                / this.zoomPan.getCurrentScale()
-        }
-        const newGridCoordsOfCursor = {
-            x: (mousePositionInBP.x - mousePositionInBP.x % 32) / 32,
-            y: (mousePositionInBP.y - mousePositionInBP.y % 32) / 32
-        }
-        if (newGridCoordsOfCursor.x !== G.gridCoordsOfCursor.x || newGridCoordsOfCursor.y !== G.gridCoordsOfCursor.y) {
-            this.lastCursorPos = { ...(mousePosition ? mousePosition : G.app.renderer.plugins.interaction.mouse.global) }
-            G.gridCoordsOfCursor = newGridCoordsOfCursor
-            G.toolbarContainer.updateGridPos(G.gridCoordsOfCursor)
-            return true
-        }
-    }
-
     transparentEntities(bool = true) {
         this.entities.interactiveChildren = !bool
         this.entitySprites.alpha = bool ? 0.5 : 1
@@ -330,37 +315,6 @@ export class BlueprintContainer extends PIXI.Container {
                     b.y < G.app.screen.height
             }
         }
-    }
-
-    pointerMoveEventHandler(e: PIXI.interaction.InteractionEvent) {
-        // Update the position here to avoid calling all pointermove eventHandlers with
-        // G.app.renderer.plugins.interaction.moveWhenInside set to false
-        const newCursorPos = e.data.getLocalPosition(e.currentTarget)
-        if (this.movingContainer || this.paintContainer) {
-            (this.movingContainer || this.paintContainer).moveTo(newCursorPos)
-        }
-
-        if (G.keyboard.w !== G.keyboard.s || G.keyboard.a !== G.keyboard.d) return
-        const newGridCoordsOfCursor = {
-            x: (newCursorPos.x - newCursorPos.x % 32) / 32,
-            y: (newCursorPos.y - newCursorPos.y % 32) / 32
-        }
-        if (newGridCoordsOfCursor.x !== G.gridCoordsOfCursor.x || newGridCoordsOfCursor.y !== G.gridCoordsOfCursor.y) {
-            if (this.hoverContainer) {
-                if (this.holdingRightClick) this.hoverContainer.removeContainer()
-                if (this.holdingLeftClick && G.keyboard.shift) this.hoverContainer.pasteData()
-            }
-            G.gridCoordsOfCursor = newGridCoordsOfCursor
-            G.toolbarContainer.updateGridPos(G.gridCoordsOfCursor)
-        }
-        if (G.currentMouseState === G.mouseStates.PANNING) {
-            const dX = G.app.renderer.plugins.interaction.mouse.global.x - this.lastCursorPos.x
-            const dY = G.app.renderer.plugins.interaction.mouse.global.y - this.lastCursorPos.y
-            this.zoomPan.translateBy(dX, dY)
-            this.zoomPan.updateTransform()
-            this.updateViewportCulling()
-        }
-        this.lastCursorPos = { ...G.app.renderer.plugins.interaction.mouse.global }
     }
 
     pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {

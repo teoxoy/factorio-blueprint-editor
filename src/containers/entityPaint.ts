@@ -39,7 +39,6 @@ export class EntityPaintContainer extends PIXI.Container {
         this.on('pointerdown', this.pointerDownEventHandler)
         this.on('pointerup', this.pointerUpEventHandler)
         this.on('pointerupoutside', this.pointerUpEventHandler)
-        // this.on('pointermove', this.pointerMoveEventHandler)
 
         this.redraw()
     }
@@ -104,10 +103,9 @@ export class EntityPaintContainer extends PIXI.Container {
         this.redraw()
         const size = util.switchSizeBasedOnDirection(factorioData.getEntity(this.name).size, this.direction)
         if (size.x !== size.y) {
-            this.position.set(
-                this.x + ((this.x / 16 - G.gridCoords16.x) === 0 ? 0.5 : -0.5) * 32,
-                this.y + ((this.y / 16 - G.gridCoords16.y) === 0 ? 0.5 : -0.5) * 32
-            )
+            const offset = G.gridData.calculateRotationOffset(this.position)
+            this.x += offset.x * 32
+            this.y += offset.y * 32
 
             const pos = EntityContainer.getPositionFromData(this.position, size)
             this.position.set(pos.x, pos.y)
@@ -151,44 +149,34 @@ export class EntityPaintContainer extends PIXI.Container {
         }
     }
 
-    // pointerMoveEventHandler(e: PIXI.interaction.InteractionEvent) {
-    //     this.moveTo(e.data.getLocalPosition(this.parent))
-    // }
+    moveAtCursor() {
+        const position = G.gridData.position
+        if (this.holdingRightClick) this.removeContainerUnder()
 
-    moveTo(newPosition: IPoint) {
-        const newCursorPos = {
-            x: (newPosition.x - newPosition.x % 16) / 16,
-            y: (newPosition.y - newPosition.y % 16) / 16
+        switch (this.name) {
+            case 'straight_rail':
+            case 'curved_rail':
+            case 'train_stop':
+                this.position.set(
+                    position.x - (position.x + G.railMoveOffset.x * 32) % 64 + 32,
+                    position.y - (position.y + G.railMoveOffset.y * 32) % 64 + 32
+                )
+                break
+            default:
+                const size = util.switchSizeBasedOnDirection(factorioData.getEntity(this.name).size, this.direction)
+                const pos = EntityContainer.getPositionFromData(position, size)
+                this.position.set(pos.x, pos.y)
         }
-        if (newCursorPos.x !== G.gridCoords16.x || newCursorPos.y !== G.gridCoords16.y) {
-            if (this.holdingRightClick) this.removeContainerUnder()
 
-            switch (this.name) {
-                case 'straight_rail':
-                case 'curved_rail':
-                case 'train_stop':
-                    this.position.set(
-                        newPosition.x - (newPosition.x + G.railMoveOffset.x * 32) % 64 + 32,
-                        newPosition.y - (newPosition.y + G.railMoveOffset.y * 32) % 64 + 32
-                    )
-                    break
-                default:
-                    const size = util.switchSizeBasedOnDirection(factorioData.getEntity(this.name).size, this.direction)
-                    const pos = EntityContainer.getPositionFromData(newPosition, size)
-                    this.position.set(pos.x, pos.y)
-            }
+        this.updateUndergroundBeltRotation()
+        G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
+        this.updateUndergroundLines()
 
-            this.updateUndergroundBeltRotation()
-            G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
-            this.updateUndergroundLines()
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
 
-            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
+        if (this.holdingLeftClick) this.placeEntityContainer()
 
-            if (this.holdingLeftClick) this.placeEntityContainer()
-            G.gridCoords16 = newCursorPos
-
-            this.checkBuildable()
-        }
+        this.checkBuildable()
     }
 
     removeContainerUnder() {

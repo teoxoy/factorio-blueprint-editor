@@ -13,8 +13,50 @@ let editEntityContainer: EditEntityContainer
 let inventoryContainer: InventoryContainer
 let BPC: BlueprintContainer
 
-let gridCoordsOfCursor: IPoint = { x: 0, y: 0 }
-let gridCoords16: IPoint = { x: 0, y: 0 }
+const gridData = {
+    x: 0,
+    y: 0,
+    x16: 0,
+    y16: 0,
+    _callbacks: [] as Array<() => void>,
+    _lastMousePos: { x: 0, y: 0 },
+
+    onUpdate(cb: () => void) {
+        this._callbacks.push(cb)
+    },
+    get position() {
+        return { x: this.x16 * 16, y: this.y16 * 16 }
+    },
+    calculateRotationOffset(position: IPoint) {
+        return {
+            x: (position.x / 16 - this.x16) === 0 ? 0.5 : -0.5,
+            y: (position.y / 16 - this.y16) === 0 ? 0.5 : -0.5
+        }
+    },
+
+    recalculate(BPC: BlueprintContainer) {
+        this.update(this._lastMousePos.x, this._lastMousePos.y, BPC)
+    },
+    update(x: number, y: number, BPC: BlueprintContainer) {
+        this._lastMousePos = { x, y }
+        const mousePositionInBP = {
+            x: Math.abs(BPC.position.x - x) / BPC.zoomPan.getCurrentScale(),
+            y: Math.abs(BPC.position.y - y) / BPC.zoomPan.getCurrentScale()
+        }
+        const gridCoordsOfCursor16 = {
+            x: (mousePositionInBP.x - mousePositionInBP.x % 16) / 16,
+            y: (mousePositionInBP.y - mousePositionInBP.y % 16) / 16
+        }
+        if (gridCoordsOfCursor16.x !== this.x16 || gridCoordsOfCursor16.y !== this.y16) {
+            this.x = Math.floor(gridCoordsOfCursor16.x / 2)
+            this.y = Math.floor(gridCoordsOfCursor16.y / 2)
+            this.x16 = gridCoordsOfCursor16.x
+            this.y16 = gridCoordsOfCursor16.y
+            this._callbacks.forEach((cb: any) => cb())
+        }
+    }
+}
+
 let railMoveOffset: IPoint = { x: 0, y: 0 }
 
 let openedGUIWindow: InventoryContainer | EditEntityContainer | undefined
@@ -48,7 +90,10 @@ const keyboard = {
     a: false,
     s: false,
     d: false,
-    shift: false
+    shift: false,
+    movingViaWASD() {
+        return this.w !== this.s || this.a !== this.d
+    }
 }
 
 let currentMouseState = mouseStates.NONE
@@ -85,9 +130,8 @@ export default {
     bpArea,
     positionBPContainer,
     sizeBPContainer,
-    gridCoordsOfCursor,
+    gridData,
     railMoveOffset,
-    gridCoords16,
     bp,
     mouseStates,
     currentMouseState,

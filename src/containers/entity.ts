@@ -137,7 +137,6 @@ export class EntityContainer extends PIXI.Container {
         this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.entity_number, this.position)
 
         this.on('pointerdown', this.pointerDownEventHandler)
-        // this.on('pointermove', this.pointerMoveEventHandler)
         this.on('pointerover', this.pointerOverEventHandler)
         this.on('pointerout', this.pointerOutEventHandler)
 
@@ -174,10 +173,6 @@ export class EntityContainer extends PIXI.Container {
     }
 
     rotate() {
-        const offset = {
-            x: (this.x / 16 - G.gridCoords16.x) === 0 ? 0.5 : -0.5,
-            y: (this.y / 16 - G.gridCoords16.y) === 0 ? 0.5 : -0.5
-        }
         const entity = G.bp.entity(this.entity_number)
         let otherEntity
         if (G.currentMouseState === G.mouseStates.NONE && entity.type === 'underground_belt') {
@@ -197,6 +192,7 @@ export class EntityContainer extends PIXI.Container {
             }
         }
 
+        const offset = G.gridData.calculateRotationOffset(this.position)
         if (G.bp.entity(this.entity_number).rotate(G.currentMouseState === G.mouseStates.NONE, offset, true, otherEntity)) {
             const entity = G.bp.entity(this.entity_number)
             if (G.currentMouseState === G.mouseStates.MOVING && entity.size.x !== entity.size.y) {
@@ -253,11 +249,6 @@ export class EntityContainer extends PIXI.Container {
                 if (this.position.x !== pos.x || this.position.y !== pos.y) {
                     this.position.set(pos.x, pos.y)
                     this.updateVisualStuff()
-                }
-
-                G.gridCoords16 = {
-                    x: (newPosition.x - newPosition.x % 16) / 16,
-                    y: (newPosition.y - newPosition.y % 16) / 16
                 }
 
                 for (const s of this.entitySprites) s.moving = true
@@ -355,34 +346,23 @@ export class EntityContainer extends PIXI.Container {
         this.destroy()
     }
 
-    // pointerMoveEventHandler(e: PIXI.interaction.InteractionEvent) {
-    //     this.moveTo(e.data.getLocalPosition(this.parent))
-    // }
-
-    moveTo(newPosition: IPoint) {
+    moveAtCursor() {
+        const position = G.gridData.position
         if (G.BPC.movingContainer === this && G.currentMouseState === G.mouseStates.MOVING) {
-            const newCursorPos = {
-                x: (newPosition.x - newPosition.x % 16) / 16,
-                y: (newPosition.y - newPosition.y % 16) / 16
+            const entity = G.bp.entity(this.entity_number)
+            switch (entity.name) {
+                case 'straight_rail':
+                case 'curved_rail':
+                case 'train_stop':
+                    this.x = position.x - (position.x + G.railMoveOffset.x * 32) % 64 + 32
+                    this.y = position.y - (position.y + G.railMoveOffset.y * 32) % 64 + 32
+                    break
+                default:
+                    const pos = EntityContainer.getPositionFromData(position, entity.size)
+                    this.position.set(pos.x, pos.y)
             }
-            if (newCursorPos.x !== G.gridCoords16.x || newCursorPos.y !== G.gridCoords16.y) {
-                const entity = G.bp.entity(this.entity_number)
-                switch (entity.name) {
-                    case 'straight_rail':
-                    case 'curved_rail':
-                    case 'train_stop':
-                        this.x = newPosition.x - (newPosition.x + G.railMoveOffset.x * 32) % 64 + 32
-                        this.y = newPosition.y - (newPosition.y + G.railMoveOffset.y * 32) % 64 + 32
-                        break
-                    default:
-                        const pos = EntityContainer.getPositionFromData(newPosition, entity.size)
-                        this.position.set(pos.x, pos.y)
-                }
 
-                this.updateVisualStuff()
-
-                G.gridCoords16 = newCursorPos
-            }
+            this.updateVisualStuff()
         }
     }
 
