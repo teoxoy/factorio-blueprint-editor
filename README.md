@@ -6,6 +6,8 @@
 
 # factorio-blueprint-editor
 
+![Preview](./src/preview.png)
+
 A [Factorio](https://www.factorio.com) blueprint editor and renderer webapp
 
 You can find the working website here: https://teoxoy.github.io/factorio-blueprint-editor
