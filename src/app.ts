@@ -264,16 +264,18 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
     G.app.renderer.view.style.display = 'none'
     doorbellButton.style.display = 'none'
 
-    navigator.clipboard && navigator.clipboard.writeText ?
+    const promise = navigator.clipboard && navigator.clipboard.writeText ?
         navigator.clipboard.readText() :
         Promise.resolve(e.clipboardData.getData('text'))
-            .then(util.findBPString)
-            .then(loadBp)
-            .then(() => {
-                G.app.renderer.view.style.display = 'block'
-                doorbellButton.style.display = 'block'
-            })
-            .catch(error => console.error(error))
+
+    promise
+        .then(util.findBPString)
+        .then(loadBp)
+        .then(() => {
+            G.app.renderer.view.style.display = 'block'
+            doorbellButton.style.display = 'block'
+        })
+        .catch(error => console.error(error))
 })
 
 keyboardJS.bind(keybinds.clear, () => {
