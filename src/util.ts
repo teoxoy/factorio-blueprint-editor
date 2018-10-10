@@ -109,33 +109,40 @@ function findBPString(data: string) {
     //     catch (e) { return false }
     // }
 
+    // Other CORS Proxies:
+    // https://crossorigin.me/
+    // https://cors-anywhere.herokuapp.com/
+    const corsProxy = 'https://allorigins.me/get?method=raw&url='
+
+    // TODO: maybe add dropbox support https://www.dropbox.com/s/ID?raw=1
     return new Promise(resolve => resolve(new URL(DATA))).then((url: URL) => {
-        console.log(`Loading data from: ${url}`)
+        console.log(`Loading data from: ${url}`, url)
         const pathParts = url.pathname.slice(1).split('/')
         switch (url.hostname.split('.')[0]) {
             case 'pastebin':
+                return fetchData(`${corsProxy}https://pastebin/raw/${pathParts[0]}`).then(r => r.text())
             case 'hastebin':
-                return fetchData(`${url.hostname}/raw/${pathParts[0]}`).then(r => r.text())
+                return fetchData(`${corsProxy}https://hastebin/raw/${pathParts[0]}`).then(r => r.text())
             case 'gist':
-                return fetchData(`api.github.com/gists/${pathParts[1]}`).then(r =>
+                return fetchData(`https://api.github.com/gists/${pathParts[1]}`).then(r =>
                     r.json().then(data => data.files[Object.keys(data.files)[0]].content)
                 )
             case 'gitlab':
-                return fetchData(`${url}/raw`).then(r => r.text())
+                // https://gitlab.com/gitlab-org/gitlab-ce/issues/24596
+                return fetchData(`${corsProxy}https://gitlab.com/snippets/${pathParts[1]}/raw`).then(r => r.text())
             case 'factorioprints':
-                return fetchData(`facorio-blueprints.firebaseio.com/blueprints/${pathParts[1]}.json`).then(r =>
+                return fetchData(`https://facorio-blueprints.firebaseio.com/blueprints/${pathParts[1]}.json`).then(r =>
                     r.json().then(data => data.blueprintString)
                 )
             case 'docs':
-                return fetchData(`${url.toString().replace('/edit', '')}/export?format=txt`).then(r => r.text())
+                return fetchData(`https://docs.google.com/document/d/${pathParts[2]}/export?format=txt`).then(r => r.text())
             default:
                 return fetchData(url.toString()).then(r => r.text())
         }
-        // TODO: maybe add dropbox support https://www.dropbox.com/s/ID?raw=1
     })
 
     function fetchData(url: string) {
-        return fetch('https://allorigins.me/get?method=raw&url=' + url).then(response => {
+        return fetch(url).then(response => {
             if (response.ok) return response
             throw new Error('Network response was not ok.')
         })
