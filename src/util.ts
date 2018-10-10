@@ -120,9 +120,9 @@ function findBPString(data: string) {
         const pathParts = url.pathname.slice(1).split('/')
         switch (url.hostname.split('.')[0]) {
             case 'pastebin':
-                return fetchData(`${corsProxy}https://pastebin/raw/${pathParts[0]}`).then(r => r.text())
+                return fetchData(`${corsProxy}https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
             case 'hastebin':
-                return fetchData(`${corsProxy}https://hastebin/raw/${pathParts[0]}`).then(r => r.text())
+                return fetchData(`${corsProxy}https://hastebin.com/raw/${pathParts[0]}`).then(r => r.text())
             case 'gist':
                 return fetchData(`https://api.github.com/gists/${pathParts[1]}`).then(r =>
                     r.json().then(data => data.files[Object.keys(data.files)[0]].content)
