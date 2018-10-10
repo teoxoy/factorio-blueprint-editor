@@ -3,6 +3,7 @@ import { ToolbarContainer } from './containers/toolbar'
 import { BlueprintContainer } from './containers/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InventoryContainer } from './containers/inventory'
+import { Book } from './factorio-data/book'
 
 // tslint:disable:prefer-const
 
@@ -77,6 +78,7 @@ const sizeBPContainer = {
 }
 
 let bp: Blueprint
+let book: Book | undefined
 
 const mouseStates = {
     NONE: 0,
@@ -105,14 +107,29 @@ const copyData = {
 
 let renderOnly = false
 
-const UIColors = {
-    primary: 0x303030,
-    secondary: 0x181818,
-    text: 0xFAFAFA,
-    link: 0x03A9F4,
-    accent: 0xFF8A65,
-    background: 0x3A3A3A,
-    slot: 0x9E9E9E
+const colors = {
+    text: {
+        normal: 0xFAFAFA,
+        link: 0x03A9F4,
+        accent: 0xFF8A65
+    },
+    pannel: {
+        background: 0x3A3A3A,
+        slot: 0x9E9E9E
+    },
+    _darkTheme: true,
+    _tintsToChange: [] as PIXI.Sprite[],
+    get darkTheme() {
+        return this._darkTheme
+    },
+    set darkTheme(value: boolean) {
+        this._darkTheme = value
+        this._tintsToChange.forEach(s => s.tint = value ? 0x303030 : 0xC9C9C9)
+    },
+    addSpriteForAutomaticTintChange(sprite: PIXI.Sprite) {
+        sprite.tint = this.darkTheme ? 0x303030 : 0xC9C9C9
+        this._tintsToChange.push(sprite)
+    }
 }
 
 const fontFamily = '\'Roboto\', sans-serif'
@@ -133,8 +150,9 @@ export default {
     gridData,
     railMoveOffset,
     bp,
+    book,
     mouseStates,
     currentMouseState,
-    UIColors,
+    colors,
     fontFamily
 }

@@ -47,14 +47,13 @@ export class BlueprintContainer extends PIXI.Container {
         this.movingEntityFilter = new AdjustmentFilter({ red: 0.4, blue: 0.4, green: 1 })
 
         const gridTexture = new PIXI.Graphics()
-            .beginFill(G.UIColors.primary).drawRect(0, 0, 32, 32).endFill()
-            .beginFill(G.UIColors.primary).drawRect(32, 32, 32, 32).endFill()
-            .beginFill(G.UIColors.secondary).drawRect(0, 32, 32, 32).endFill()
-            .beginFill(G.UIColors.secondary).drawRect(32, 0, 32, 32).endFill()
+            .beginFill(0x808080).drawRect(0, 0, 32, 32).drawRect(32, 32, 32, 32).endFill()
+            .beginFill(0xFFFFFF).drawRect(0, 32, 32, 32).drawRect(32, 0, 32, 32).endFill()
             .generateCanvasTexture()
 
         this.grid = new PIXI.extras.TilingSprite(gridTexture, G.sizeBPContainer.width, G.sizeBPContainer.height)
         this.grid.interactive = false
+        G.colors.addSpriteForAutomaticTintChange(this.grid)
         this.addChild(this.grid)
 
         this.pgOverlay = new PIXI.Graphics()

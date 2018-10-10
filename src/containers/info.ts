@@ -18,12 +18,12 @@ export class InfoContainer extends PIXI.Container {
         const background = new PIXI.Sprite(PIXI.Texture.WHITE)
         background.width = this.iWidth
         background.height = this.iHeight
-        background.tint = G.UIColors.background
+        background.tint = G.colors.pannel.background
         background.alpha = 0.9
         this.addChild(background)
 
         const text = new PIXI.Text('KEYBINDS', {
-            fill: G.UIColors.text,
+            fill: G.colors.text.normal,
             fontFamily: G.fontFamily,
             fontWeight: '500',
             fontSize: 24
@@ -57,7 +57,7 @@ export class InfoContainer extends PIXI.Container {
             'right click recipe / module',
             '',
             'ctrl / cmd + Z / Y',
-            ['ctrl / cmd + C / V', G.UIColors.accent],
+            ['ctrl / cmd + C / V', G.colors.text.accent],
             'shift + S',
             'shift + N',
             'shift + right / left click',
@@ -83,7 +83,7 @@ export class InfoContainer extends PIXI.Container {
             'remove',
             '',
             'undo / redo changes',
-            ['copy / paste BP string', G.UIColors.accent],
+            ['copy / paste BP string', G.colors.text.accent],
             'generate BP picture',
             'clear BP',
             'copy / paste recipe and modules',
@@ -98,13 +98,11 @@ export class InfoContainer extends PIXI.Container {
         ], { x: this.iWidth / 2 + 4, y: 40 })
 
         this.writeColumn([
-            'If you want to rebind the keybinds, check out the readme on github',
             'You can load a blueprint from a BP string, pastebin, hastebin, gist, gitlab,',
             '    factorioprints, google docs or text webpages.',
             'You can also add ?source=<BPSTRING_OR_URL_TO_BPSTRING> to the url',
             '    to make sharing easier. You can also pass in the index if the string is a book.',
             'Adding renderOnly as an url query parameter will only render the BP.',
-            'You can also add lightTheme as an url query parameter.',
             'I don\'t show network or parsing errors in the app yet, you can open the console',
             '    (F12) to check if something is wrong.',
             'Entities with placeable-off-grid flag will not be added to the positionGrid',
@@ -121,7 +119,7 @@ export class InfoContainer extends PIXI.Container {
         link.on('click', () => window.open('https://redd.it/87zysk', '_blank'))
         link.position.set(this.iWidth / 2, 770)
         link.style.fontSize = 16
-        link.style.fill = G.UIColors.link
+        link.style.fill = G.colors.text.link
         link.anchor.set(0.5, 0)
         this.addChild(link)
 
@@ -131,7 +129,7 @@ export class InfoContainer extends PIXI.Container {
         link2.on('click', () => window.open('https://github.com/Teoxoy/factorio-blueprint-editor', '_blank'))
         link2.position.set(this.iWidth / 2, 790)
         link2.style.fontSize = 16
-        link2.style.fill = G.UIColors.link
+        link2.style.fill = G.colors.text.link
         link2.anchor.set(0.5, 0)
         this.addChild(link2)
 
@@ -147,7 +145,7 @@ export class InfoContainer extends PIXI.Container {
         for (const obj of data) {
             const str = obj instanceof Array ? obj[0] : obj
             const text = new PIXI.Text(str, {
-                fill: obj instanceof Array ? obj[1] : G.UIColors.text,
+                fill: obj instanceof Array ? obj[1] : G.colors.text.normal,
                 fontFamily: G.fontFamily,
                 fontSize,
                 fontWeight: bold ? '500' : 'normal'

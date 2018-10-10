@@ -116,7 +116,7 @@ function findBPString(data: string) {
 
     // TODO: maybe add dropbox support https://www.dropbox.com/s/ID?raw=1
     return new Promise(resolve => resolve(new URL(DATA))).then((url: URL) => {
-        console.log(`Loading data from: ${url}`, url)
+        console.log(`Loading data from: ${url}`)
         const pathParts = url.pathname.slice(1).split('/')
         switch (url.hostname.split('.')[0]) {
             case 'pastebin':

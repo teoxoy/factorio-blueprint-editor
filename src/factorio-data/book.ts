@@ -21,7 +21,7 @@ export class Book {
 
     getBlueprint(index?: number) {
         let INDEX = this.active_index
-        if (index) INDEX = (index < 0 || index > this.blueprints.length - 1) ? 0 : index
+        if (index !== undefined) INDEX = (index < 0 || index > this.blueprints.length - 1) ? 0 : index
         this.active_index = INDEX
 
         if (this.blueprints[INDEX].loaded) return this.blueprints[INDEX].loaded

@@ -22,11 +22,11 @@ export class ToolbarContainer extends PIXI.Container {
             this.info.position.set(G.app.screen.width - 100, background.height)
         }, false)
         background.height = 32
-        background.tint = G.UIColors.primary
+        G.colors.addSpriteForAutomaticTintChange(background)
         this.addChild(background)
 
         this.gridposGUIText = new PIXI.Text('', {
-            fill: G.UIColors.text,
+            fill: G.colors.text.normal,
             fontFamily: G.fontFamily
         })
         this.gridposGUIText.anchor.set(0, 0.5)
@@ -34,7 +34,7 @@ export class ToolbarContainer extends PIXI.Container {
         this.addChild(this.gridposGUIText)
 
         this.fpsGUIText = new PIXI.Text('', {
-            fill: G.UIColors.text,
+            fill: G.colors.text.normal,
             fontFamily: G.fontFamily
         })
         this.fpsGUIText.anchor.set(1, 0.5)
@@ -42,7 +42,7 @@ export class ToolbarContainer extends PIXI.Container {
         this.addChild(this.fpsGUIText)
 
         this.logo = new PIXI.Text('Factorio Blueprint Editor', {
-            fill: G.UIColors.text,
+            fill: G.colors.text.normal,
             fontFamily: G.fontFamily
         })
         this.logo.anchor.set(0.5, 0.5)
@@ -50,7 +50,7 @@ export class ToolbarContainer extends PIXI.Container {
         this.addChild(this.logo)
 
         this.info = new PIXI.Text('Press I for info', {
-            fill: G.UIColors.text,
+            fill: G.colors.text.normal,
             fontFamily: G.fontFamily,
             fontSize: 13
         })

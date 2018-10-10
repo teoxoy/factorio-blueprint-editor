@@ -38,7 +38,7 @@ const validate = new Ajv()
 })
 .compile(blueprintSchema)
 
-function decode(str: string) {
+function decode(str: string): Promise<Blueprint | Book> {
     return new Promise((resolve, reject) => {
         try {
             const data = JSON.parse(

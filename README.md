@@ -14,36 +14,11 @@ You can find the working website here: https://teoxoy.github.io/factorio-bluepri
 
 Sample blueprint: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/uc4n81GP
 
-Example link that uses url query parameters: https://teoxoy.github.io/factorio-blueprint-editor/?lightTheme&keybinds:rotate=t,pippete=p&index=1&source=https://pastebin.com/Xp9u7NaA
+Example link that uses url query parameters: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/Xp9u7NaA&index=1
 
 # Contributing
 
 Feel free to contribute to this project, if you have any questions you can contact me on discord (Teoxoy#6734).
-
-# Changing the keybinds
-
-### Configurable keybinds and their default values:
-- rotate: 'r'
-- pippete: 'q'
-- undo: 'modifier+z'
-- redo: 'modifier+y'
-- picture: 'shift+s'
-- clear: 'shift+n'
-- overlay: 'alt'
-- closeWindow: 'esc'
-- inventory: 'e'
-- focus: 'f'
-- w: 'w'
-- a: 'a'
-- s: 's'
-- d: 'd'
-- increaseTileArea: ']'
-- decreaseTileArea: '['
-
-### How to change them:
-Add `keybinds:ACTION=KEY,ACTION=KEY,ACTION=KEY` as a parameter to the URL
-
-Example: `https://teoxoy.github.io/factorio-blueprint-editor?keybinds:rotate=t,pippete=p`
 
 # TODO:
 - implement more entity settings (filters, conditions)

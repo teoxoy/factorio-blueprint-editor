@@ -60,7 +60,7 @@ export class InventoryContainer extends PIXI.Container {
         const background = new PIXI.Sprite(PIXI.Texture.WHITE)
         background.width = this.iWidth
         background.height = this.iHeight
-        background.tint = G.UIColors.background
+        background.tint = G.colors.pannel.background
         background.alpha = 0.9
         this.addChild(background)
 
@@ -68,7 +68,7 @@ export class InventoryContainer extends PIXI.Container {
         this.addChild(this.inventoryContents)
 
         this.itemTooltip = new PIXI.Text('', {
-            fill: G.UIColors.text,
+            fill: G.colors.text.normal,
             fontFamily: G.fontFamily
         })
         this.itemTooltip.y = 352
@@ -242,7 +242,7 @@ export class InventoryContainer extends PIXI.Container {
         }
 
         const text = new PIXI.Text(`=${time}s>`, {
-            fill: G.UIColors.text,
+            fill: G.colors.text.normal,
             fontFamily: G.fontFamily,
             fontWeight: '500',
             fontSize: 13
@@ -260,7 +260,7 @@ export class InventoryContainer extends PIXI.Container {
 
         function createAmountText(amount: string) {
             const text = new PIXI.Text(amount, {
-                fill: G.UIColors.text,
+                fill: G.colors.text.normal,
                 fontFamily: G.fontFamily,
                 fontWeight: '500',
                 fontSize: 13

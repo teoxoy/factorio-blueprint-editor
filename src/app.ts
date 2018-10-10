@@ -30,6 +30,49 @@ import { InfoContainer } from './containers/info'
 import FileSaver from 'file-saver'
 import { TilePaintContainer } from './containers/tilePaint'
 
+import * as dat from 'dat.gui'
+
+if (PIXI.utils.isMobile.any) {
+    const text = 'This application is not compatible with mobile devices.'
+    document.getElementById('loadingMsg').innerHTML = text
+    throw new Error(text)
+}
+
+const params = window.location.search.slice(1).split('&')
+
+G.renderOnly = params.includes('renderOnly')
+
+let bpSource: string
+let bpIndex = 0
+for (const p of params) {
+    if (p.includes('source')) {
+        bpSource = p.split('=')[1]
+    }
+    if (p.includes('index')) {
+        bpIndex = Number(p.split('=')[1])
+    }
+}
+
+const gui = new dat.GUI({
+    autoPlace: false,
+    hideable: false,
+    closeOnTop: true
+})
+// gui.closed = true
+document.body.appendChild(gui.domElement)
+
+const guiBPIndex = gui
+    .add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1)
+    .onFinishChange((value: number) => {
+        if (G.book) {
+            G.bp = G.book.getBlueprint(value)
+            G.BPC.clearData()
+            G.BPC.initBP()
+        }
+    })
+gui.add(G.colors, 'darkTheme')
+const guiKeybinds = gui.addFolder('Keybinds')
+
 let doorbellButton: HTMLElement
 window.doorbellOptions = {
     id: '9657',
@@ -77,13 +120,9 @@ document.body.appendChild(Object.assign(document.createElement('script'), {
     src: `https://embed.doorbell.io/button/${window.doorbellOptions['id']}?t=${Date.now()}`
 }))
 
-if (PIXI.utils.isMobile.any) {
-    const text = 'This application is not compatible with mobile devices.'
-    document.getElementById('loadingMsg').innerHTML = text
-    throw new Error(text)
-}
+const loadingScreen = document.getElementById('loadingScreen')
 
-const keybinds = {
+const keybinds = JSON.parse(localStorage.getItem('keybinds')) || {
     rotate: 'r',
     pippete: 'q',
     undo: 'modifier+z',
@@ -102,32 +141,23 @@ const keybinds = {
     decreaseTileArea: '['
 }
 
-const params = window.location.search.slice(1).split('&')
+const keybindsProxy = new Proxy(keybinds, {
+    set(obj: any, prop: string, value: string) {
+        if (!value) return true
+        changeKeybind(obj[prop], value)
+        obj[prop] = value
+        localStorage.setItem('keybinds', JSON.stringify(keybinds))
+        return true
 
-G.renderOnly = params.includes('renderOnly')
-
-if (params.includes('lightTheme')) {
-    G.UIColors.primary = 0xAAAAAA
-    G.UIColors.secondary = 0xCCCCCC
-}
-
-let bpSource: string
-let bpIndex = 0
-for (const p of params) {
-    if (p.includes('source')) {
-        bpSource = p.split('=')[1]
-    }
-    if (p.includes('index')) {
-        bpIndex = Number(p.split('=')[1])
-    }
-    if (p.includes('keybinds')) {
-        const parts = p.split(':')[1].split(',')
-        for (const part of parts) {
-            const pa = part.split('=')
-            keybinds[pa[0]] = pa[1]
+        function changeKeybind(old: string, val: string) {
+            keyboardJS._listeners.filter((k: any) => k.keyCombo.sourceStr === old).forEach((k: any) => {
+                keyboardJS.unbind(old, k.pressHandler, k.releaseHandler)
+                keyboardJS.bind(val, k.pressHandler, k.releaseHandler)
+            })
         }
     }
-}
+})
+Object.keys(keybinds).forEach(k => guiKeybinds.add(keybindsProxy, k))
 
 G.app = new PIXI.Application({
     resolution: window.devicePixelRatio,
@@ -138,8 +168,6 @@ G.app = new PIXI.Application({
 // https://github.com/pixijs/pixi.js/issues/3928
 G.app.renderer.plugins.interaction.moveWhenInside = true
 
-G.app.renderer.view.style.position = 'absolute'
-G.app.renderer.view.style.display = 'none'
 G.app.renderer.autoResize = true
 G.app.renderer.resize(window.innerWidth, window.innerHeight)
 window.addEventListener('resize', () => {
@@ -207,7 +235,7 @@ Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
 
         G.gridData.update(window.innerWidth / 2, window.innerHeight / 2, G.BPC)
 
-        G.app.renderer.view.style.display = 'block'
+        loadingScreen.classList.remove('active')
         setTimeout(() => doorbellButton.classList.remove('closed'), 30000)
     }
 })
@@ -216,7 +244,22 @@ Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
 function loadBp(bpString: string, clearData = true) {
     return BPString.decode(bpString)
         .then(data => {
-            G.bp = data instanceof Book ? data.getBlueprint(bpIndex) : data
+
+            if (data instanceof Book) {
+                G.book = data
+                G.bp = G.book.getBlueprint(bpIndex)
+
+                guiBPIndex
+                    .max(G.book.blueprints.length - 1)
+                    .setValue(bpIndex)
+            } else {
+                G.book = undefined
+                G.bp = data
+
+                guiBPIndex
+                    .setValue(0)
+                    .max(0)
+            }
 
             if (clearData) G.BPC.clearData()
             G.BPC.initBP()
@@ -261,8 +304,7 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
 document.addEventListener('paste', (e: ClipboardEvent) => {
     e.preventDefault()
 
-    G.app.renderer.view.style.display = 'none'
-    doorbellButton.style.display = 'none'
+    loadingScreen.classList.add('active')
 
     const promise = navigator.clipboard && navigator.clipboard.writeText ?
         navigator.clipboard.readText() :
@@ -271,10 +313,7 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
     promise
         .then(util.findBPString)
         .then(loadBp)
-        .then(() => {
-            G.app.renderer.view.style.display = 'block'
-            doorbellButton.style.display = 'block'
-        })
+        .then(() => loadingScreen.classList.remove('active'))
         .catch(error => console.error(error))
 })
 

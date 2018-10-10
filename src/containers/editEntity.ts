@@ -25,7 +25,7 @@ export class EditEntityContainer extends PIXI.Container {
         const background = new PIXI.Sprite(PIXI.Texture.WHITE)
         background.width = this.iWidth
         background.height = this.iHeight
-        background.tint = G.UIColors.background
+        background.tint = G.colors.pannel.background
         background.alpha = 0.9
         this.addChild(background)
 
@@ -52,7 +52,7 @@ export class EditEntityContainer extends PIXI.Container {
             background.anchor.set(0.5, 0.5)
             background.width = 32
             background.height = 32
-            background.tint = G.UIColors.slot
+            background.tint = G.colors.pannel.slot
             recipeContainer.addChild(background)
             if (entity.recipe) recipeContainer.addChild(InventoryContainer.createIcon(factorioData.getItem(entity.recipe)))
             recipeContainer.position.set(
@@ -82,7 +82,7 @@ export class EditEntityContainer extends PIXI.Container {
             this.content.addChild(recipeContainer)
 
             const recipeText = new PIXI.Text('Recipe ', {
-                fill: G.UIColors.text,
+                fill: G.colors.text.normal,
                 fontFamily: G.fontFamily
             })
             recipeText.anchor.set(1, 0.5)
@@ -136,7 +136,7 @@ export class EditEntityContainer extends PIXI.Container {
                 background.anchor.set(0.5, 0.5)
                 background.width = 32
                 background.height = 32
-                background.tint = G.UIColors.slot
+                background.tint = G.colors.pannel.slot
                 slot.addChild(background)
 
                 if (modules && modules[i]) slot.addChild(InventoryContainer.createIcon(factorioData.getItem(modules[i])))
@@ -146,7 +146,7 @@ export class EditEntityContainer extends PIXI.Container {
             this.content.addChild(moduleContainer)
 
             const recipeText = new PIXI.Text('Modules ', {
-                fill: G.UIColors.text,
+                fill: G.colors.text.normal,
                 fontFamily: G.fontFamily
             })
             recipeText.anchor.set(1, 0.5)
