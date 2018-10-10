@@ -73,7 +73,6 @@ const guiBPIndex = gui
 gui.add(G.colors, 'darkTheme')
 const guiKeybinds = gui.addFolder('Keybinds')
 
-let doorbellButton: HTMLElement
 window.doorbellOptions = {
     id: '9657',
     appKey: 'z1scfSY8hpBNiIFWxBg50tkhjvFKhHMdhfGNMp6YCUZVttoLOqtrlhk4ca9asDCy',
@@ -81,7 +80,7 @@ window.doorbellOptions = {
     onShow: () => keyboardJS.pause(),
     onHide: () => keyboardJS.resume(),
     onInitialized: () => {
-        doorbellButton = document.getElementById('doorbell-button')
+        const doorbellButton = document.getElementById('doorbell-button')
         doorbellButton.classList.add('closed')
 
         let activeTag: HTMLElement
@@ -106,11 +105,14 @@ window.doorbellOptions = {
             if (i === 0) {
                 activeTag = tagEl
                 tagEl.classList.add('active')
+                window.doorbellOptions.tags = tag.name
             }
             tagsDiv.appendChild(tagEl)
         })
         const fieldset = document.getElementById('doorbell-form').firstElementChild
         fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
+
+        doorbellButton.classList.remove('closed')
     }
 }
 document.body.appendChild(Object.assign(document.createElement('script'), {
@@ -236,7 +238,6 @@ Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
         G.gridData.update(window.innerWidth / 2, window.innerHeight / 2, G.BPC)
 
         loadingScreen.classList.remove('active')
-        setTimeout(() => doorbellButton.classList.remove('closed'), 30000)
     }
 })
 .catch(error => console.error(error))
