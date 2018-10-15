@@ -300,6 +300,8 @@ function loadBp(bpString: string, clearData = true) {
         .catch(error => console.error(error))
 }
 
+window.addEventListener('unload', () => G.app.destroy(true, true))
+
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
