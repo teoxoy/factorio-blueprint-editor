@@ -65,6 +65,7 @@ document.body.appendChild(gui.domElement)
 
 const guiBPIndex = gui
     .add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1)
+    .name('BP Index')
     .onFinishChange((value: number) => {
         if (G.book) {
             G.bp = G.book.getBlueprint(value)
@@ -74,7 +75,7 @@ const guiBPIndex = gui
     })
 
 if (localStorage.getItem('hr')) G.hr = localStorage.getItem('hr') === 'true'
-gui.add(G, 'hr').onChange((val: boolean) => {
+gui.add(G, 'hr').name('HR Entities').onChange((val: boolean) => {
     loadingScreen.classList.add('active')
     localStorage.setItem('hr', val.toString())
 
@@ -98,7 +99,7 @@ gui.add(G, 'hr').onChange((val: boolean) => {
 })
 
 if (localStorage.getItem('darkTheme')) G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
-gui.add(G.colors, 'darkTheme').onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
+gui.add(G.colors, 'darkTheme').name('Dark Theme').onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
 
 const guiKeybinds = gui.addFolder('Keybinds')
 
