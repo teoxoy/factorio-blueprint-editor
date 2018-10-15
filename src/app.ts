@@ -2,8 +2,10 @@
 import 'normalize.css'
 import './style.styl'
 
-import entitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
-import entitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
+import LRentitySpritesheetPNG from 'factorio-data/data/graphics/LREntitySpritesheet.png'
+import LRentitySpritesheetJSON from 'factorio-data/data/graphics/LREntitySpritesheet.json'
+import HRentitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
+import HRentitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
 import iconSpritesheetPNG from 'factorio-data/data/graphics/iconSpritesheet.png'
 import iconSpritesheetJSON from 'factorio-data/data/graphics/iconSpritesheet.json'
 import utilitySpritesheetPNG from 'factorio-data/data/graphics/utilitySpritesheet.png'
@@ -70,7 +72,34 @@ const guiBPIndex = gui
             G.BPC.initBP()
         }
     })
-gui.add(G.colors, 'darkTheme')
+
+if (localStorage.getItem('hr')) G.hr = localStorage.getItem('hr') === 'true'
+gui.add(G, 'hr').onChange((val: boolean) => {
+    loadingScreen.classList.add('active')
+    localStorage.setItem('hr', val.toString())
+
+    G.BPC.entities.children.forEach((eC: EntityContainer) => {
+        eC.entitySprites.forEach(eS => eS.destroy())
+        eC.entitySprites = []
+    })
+
+    Object.keys(PIXI.utils.TextureCache)
+        .filter(texture => texture.includes('graphics/entity/'))
+        .forEach(k => PIXI.utils.TextureCache[k].destroy(true))
+
+    loadSpritesheet(
+        G.hr ? HRentitySpritesheetPNG : LRentitySpritesheetPNG,
+        G.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
+    ).then(() => {
+        G.BPC.entities.children.forEach((eC: EntityContainer) => eC.redraw(false, false))
+        G.BPC.sortEntities()
+        loadingScreen.classList.remove('active')
+    })
+})
+
+if (localStorage.getItem('darkTheme')) G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
+gui.add(G.colors, 'darkTheme').onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
+
 const guiKeybinds = gui.addFolder('Keybinds')
 
 window.doorbellOptions = {
@@ -200,29 +229,31 @@ G.app.stage.addChild(G.toolbarContainer)
 const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
 
-Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
-.concat([
-    [ entitySpritesheetPNG, entitySpritesheetJSON ],
-    [ iconSpritesheetPNG, iconSpritesheetJSON ],
-    [ utilitySpritesheetPNG, utilitySpritesheetJSON ],
-    [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
-].map(data =>
-    new Promise((resolve, reject) => {
+function loadSpritesheet(src: string, json: any) {
+    return new Promise((resolve, reject) => {
         const image = new Image()
-        image.src = data[0]
+        image.src = src
         image.onload = () => {
             const tempCanvas = document.createElement('canvas')
             tempCanvas.width = util.nearestPowerOf2(image.width)
             tempCanvas.height = util.nearestPowerOf2(image.height)
             tempCanvas.getContext('2d').drawImage(image, 0, 0)
             const baseTexture = PIXI.BaseTexture.fromCanvas(tempCanvas)
-            new PIXI.Spritesheet(baseTexture, data[1]).parse(() =>
-                G.app.renderer.plugins.prepare.upload(baseTexture, resolve)
-            )
+            new PIXI.Spritesheet(baseTexture, json)
+                .parse(() => G.app.renderer.plugins.prepare.upload(baseTexture, resolve))
         }
         image.onerror = reject
     })
-)))
+}
+
+Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
+.concat([
+    G.hr ? [ HRentitySpritesheetPNG, HRentitySpritesheetJSON ] :
+    [ LRentitySpritesheetPNG, LRentitySpritesheetJSON ],
+    [ iconSpritesheetPNG, iconSpritesheetJSON ],
+    [ utilitySpritesheetPNG, utilitySpritesheetJSON ],
+    [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
+].map(data => loadSpritesheet(data[0], data[1]))))
 .then(data => {
     if (!bpSource) {
         G.bp = new Blueprint()

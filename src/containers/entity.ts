@@ -438,7 +438,7 @@ export class EntityContainer extends PIXI.Container {
 
         for (const s of this.entitySprites) s.destroy()
         this.entitySprites = []
-        for (const s of EntityContainer.getParts(entity, true, ignore_connections)) {
+        for (const s of EntityContainer.getParts(entity, G.hr, ignore_connections)) {
             if (G.BPC.movingContainer === this) s.moving = true
             s.setPosition(this.position)
             this.entitySprites.push(s)

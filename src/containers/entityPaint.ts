@@ -121,7 +121,7 @@ export class EntityPaintContainer extends PIXI.Container {
             name: this.name,
             direction: this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
             directionType: this.directionType
-        }, true, true))
+        }, G.hr, true))
         const size = util.switchSizeBasedOnDirection(factorioData.getEntity(this.name).size, this.direction)
         this.hitArea = new PIXI.Rectangle(
             -size.x * 16,

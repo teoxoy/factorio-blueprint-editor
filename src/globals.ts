@@ -7,6 +7,8 @@ import { Book } from './factorio-data/book'
 
 // tslint:disable:prefer-const
 
+let hr = false
+
 let app: PIXI.Application
 
 let toolbarContainer: ToolbarContainer
@@ -135,6 +137,7 @@ const colors = {
 const fontFamily = '\'Roboto\', sans-serif'
 
 export default {
+    hr,
     renderOnly,
     copyData,
     openedGUIWindow,
