@@ -317,7 +317,7 @@ export class Blueprint {
         let entitiesJSON = JSON.stringify(entityInfo)
 
         // Tag changed ids with !
-        let ID = 0
+        let ID = 1
         entityInfo.forEach(e => {
             entitiesJSON = entitiesJSON.replace(
                 new RegExp(`"(entity_number|entity_id)":${e.entity_number}([,}])`, 'g'),
