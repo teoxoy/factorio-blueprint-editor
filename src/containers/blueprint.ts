@@ -276,7 +276,13 @@ export class BlueprintContainer extends PIXI.Container {
             sB.maxY = sprite.y + H
             bounds.addBounds(sB)
         }
-        return bounds.getRectangle()
+        const rect = bounds.getRectangle()
+
+        const X = Math.floor(rect.x / 32) * 32
+        const Y = Math.floor(rect.y / 32) * 32
+        const W = Math.ceil((rect.width + rect.x - X) / 32) * 32
+        const H = Math.ceil((rect.height + rect.y - Y) / 32) * 32
+        return new PIXI.Rectangle(X, Y, W, H)
     }
 
     enableRenderableOnChildren() {
