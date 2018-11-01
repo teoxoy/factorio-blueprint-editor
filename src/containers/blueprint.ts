@@ -252,25 +252,13 @@ export class BlueprintContainer extends PIXI.Container {
             return
         }
 
-        const TL = G.bp.topLeft()
-        const TR = G.bp.topRight()
-        const BL = G.bp.bottomLeft()
-
-        const W = G.bpArea.width / 2
-        const H = G.bpArea.height / 2
-
-        const hor1 = Math.abs(TL.x - W)
-        const hor2 = TR.x - W
-
-        const ver1 = Math.abs(TL.y - H)
-        const ver2 = BL.y - H
-
+        const bounds = this.getBlueprintBounds()
         this.zoomPan.centerViewPort({
-            x: (hor1 + hor2) * 32,
-            y: (ver1 + ver2) * 32
+            x: bounds.width,
+            y: bounds.height
         }, {
-            x: (hor1 - hor2) * 16,
-            y: (ver1 - ver2) * 16
+            x: (G.sizeBPContainer.width - bounds.width) / 2 - bounds.x,
+            y: (G.sizeBPContainer.height - bounds.height) / 2 - bounds.y
         })
         this.updateViewportCulling()
     }
