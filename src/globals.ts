@@ -64,6 +64,8 @@ let railMoveOffset: IPoint = { x: 0, y: 0 }
 
 let openedGUIWindow: InventoryContainer | EditEntityContainer | undefined
 
+let moveSpeed = 10
+
 const positionBPContainer = {
     x: 0,
     y: 32
@@ -157,5 +159,6 @@ export default {
     mouseStates,
     currentMouseState,
     colors,
-    fontFamily
+    fontFamily,
+    moveSpeed
 }

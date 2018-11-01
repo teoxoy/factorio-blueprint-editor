@@ -101,6 +101,9 @@ gui.add(G, 'hr').name('HR Entities').onChange((val: boolean) => {
 if (localStorage.getItem('darkTheme')) G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
 gui.add(G.colors, 'darkTheme').name('Dark Theme').onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
 
+if (localStorage.getItem('moveSpeed')) G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
+gui.add(G, 'moveSpeed', 5, 20).name('Move Speed').onChange((val: boolean) => localStorage.setItem('moveSpeed', val.toString()))
+
 const guiKeybinds = gui.addFolder('Keybinds')
 
 window.doorbellOptions = {

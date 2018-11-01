@@ -22,7 +22,6 @@ export class BlueprintContainer extends PIXI.Container {
     movingEntityFilter: AdjustmentFilter
     tileSprites: PIXI.Container
     entitySprites: PIXI.Container
-    movementSpeed: number
     zoomPan: ZoomPan
     holdingRightClick: boolean
     pgOverlay: PIXI.Graphics
@@ -36,8 +35,6 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.holdingLeftClick = false
         this.holdingRightClick = false
-
-        this.movementSpeed = 10
 
         this.zoomPan = new ZoomPan(this, G.sizeBPContainer, G.positionBPContainer, {
             width: G.app.screen.width,
@@ -107,9 +104,10 @@ export class BlueprintContainer extends PIXI.Container {
             const WSXOR = G.keyboard.w !== G.keyboard.s
             const ADXOR = G.keyboard.a !== G.keyboard.d
             if (WSXOR || ADXOR) {
+                const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
                 this.zoomPan.translateBy(
-                    ADXOR ? (G.keyboard.a ? this.movementSpeed : -this.movementSpeed) : 0,
-                    WSXOR ? (G.keyboard.w ? this.movementSpeed : -this.movementSpeed) : 0
+                    (ADXOR ? (G.keyboard.a ? 1 : -1) : 0) * finalSpeed,
+                    (WSXOR ? (G.keyboard.w ? 1 : -1) : 0) * finalSpeed
                 )
                 this.zoomPan.updateTransform()
 
