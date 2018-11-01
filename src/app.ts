@@ -114,7 +114,6 @@ window.doorbellOptions = {
     onHide: () => keyboardJS.resume(),
     onInitialized: () => {
         const doorbellButton = document.getElementById('doorbell-button')
-        doorbellButton.classList.add('closed')
 
         let activeTag: HTMLElement
         const tagsDiv = document.createElement('div')
@@ -144,8 +143,6 @@ window.doorbellOptions = {
         })
         const fieldset = document.getElementById('doorbell-form').firstElementChild
         fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
-
-        doorbellButton.classList.remove('closed')
     }
 }
 document.body.appendChild(Object.assign(document.createElement('script'), {
