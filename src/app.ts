@@ -387,7 +387,7 @@ keyboardJS.bind('i', () => infoContainer.toggle())
 keyboardJS.bind(keybinds.closeWindow, () => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
 
 keyboardJS.bind(keybinds.inventory, () => {
-    if (G.currentMouseState !== G.mouseStates.MOVING && G.currentMouseState !== G.mouseStates.PAINTING && !G.renderOnly) {
+    if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
         if (G.openedGUIWindow) {
             G.openedGUIWindow.close()
         } else {

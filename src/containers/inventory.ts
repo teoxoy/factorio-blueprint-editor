@@ -131,6 +131,8 @@ export class InventoryContainer extends PIXI.Container {
                                 if (e.data.button === 0) {
                                     G.currentMouseState = G.mouseStates.PAINTING
 
+                                    if (G.BPC.paintContainer) G.BPC.paintContainer.destroy()
+
                                     const newPosition = e.data.getLocalPosition(G.BPC)
 
                                     if (tileResult) {
