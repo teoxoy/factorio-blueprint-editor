@@ -113,8 +113,6 @@ window.doorbellOptions = {
     onShow: () => keyboardJS.pause(),
     onHide: () => keyboardJS.resume(),
     onInitialized: () => {
-        const doorbellButton = document.getElementById('doorbell-button')
-
         let activeTag: HTMLElement
         const tagsDiv = document.createElement('div')
         tagsDiv.id = 'doorbell-tags';
