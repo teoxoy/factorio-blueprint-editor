@@ -374,7 +374,7 @@ keyboardJS.bind(keybinds.picture, () => {
     texture._updateUvs()
 
     G.app.renderer.plugins.extract.canvas(new PIXI.Sprite(texture)).toBlob((blob: Blob) => {
-        FileSaver.saveAs(blob, G.bp.name)
+        FileSaver.saveAs(blob, G.bp.name + '.png')
         console.log('Saved BP Image')
     })
 })
