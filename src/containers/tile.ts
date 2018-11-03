@@ -1,4 +1,5 @@
 import G from '../globals'
+import factorioData from '../factorio-data/factorioData'
 
 export class TileContainer extends PIXI.Container {
     static mappings: Map<string, TileContainer> = new Map()
@@ -10,7 +11,10 @@ export class TileContainer extends PIXI.Container {
         const textureKey = `${name}-${X}-${Y}`
         let texture = PIXI.utils.TextureCache[textureKey]
         if (!texture) {
-            const spriteData = PIXI.Texture.fromFrame(name)
+            const filename = name === 'stone_path' ? 'graphics/terrain/stone-path/stone-path.png' :
+                factorioData.getTile(name).variants.material_background.hr_version.picture
+            console.log(filename)
+            const spriteData = PIXI.Texture.fromFrame(filename)
             texture = new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
                 spriteData.frame.x + X * 64,
                 spriteData.frame.y + Y * 64,
