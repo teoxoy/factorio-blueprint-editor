@@ -13,7 +13,7 @@ export class TileContainer extends PIXI.Container {
         if (!texture) {
             const filename = name === 'stone_path' ? 'graphics/terrain/stone-path/stone-path.png' :
                 factorioData.getTile(name).variants.material_background.hr_version.picture
-            console.log(filename)
+
             const spriteData = PIXI.Texture.fromFrame(filename)
             texture = new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
                 spriteData.frame.x + X * 64,
