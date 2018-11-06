@@ -66,7 +66,7 @@ function encodeSync(bPOrBook: any): { value?: string; error?: string } {
     try {
         return { value: '0' + btoa(pako.deflate(
             JSON.stringify(bPOrBook.toObject())
-                .replace(/(:".+?"|"[^"]+?module[^"].+?")/g, (_: string, capture: string) => capture.replace(/_/g, '-'))
+                .replace(/(:".+?"|"[a-z]+?_module(|_[0-9])")/g, (_: string, capture: string) => capture.replace(/_/g, '-'))
             , { to: 'string' }))
         }
     } catch (e) {
