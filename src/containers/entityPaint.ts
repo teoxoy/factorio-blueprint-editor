@@ -201,6 +201,7 @@ export class EntityPaintContainer extends PIXI.Container {
             const c = EntityContainer.mappings.get(frgEntNr)
             c.redraw()
             c.redrawSurroundingEntities()
+            c.redrawEntityInfo()
             return
         }
         const snEntNr = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
@@ -211,6 +212,7 @@ export class EntityPaintContainer extends PIXI.Container {
             const c = EntityContainer.mappings.get(snEntNr)
             c.redraw()
             c.redrawSurroundingEntities()
+            c.redrawEntityInfo()
             return
         }
 
