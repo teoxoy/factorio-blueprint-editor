@@ -33,30 +33,37 @@ export class Blueprint {
             this.version = data.version
             if (data.icons) data.icons.forEach((icon: any) => this.icons[icon.index - 1] = icon.signal.name)
 
-            this.next_entity_number += data.entities.length
-            this.rawEntities = this.rawEntities.withMutations(map => {
-                for (const entity of data.entities) {
-                    map.set(entity.entity_number, Immutable.fromJS(entity))
-                }
-            })
+            const offset = {
+                x: G.sizeBPContainer.width / 64,
+                y: G.sizeBPContainer.height / 64
+            }
 
-            // TODO: if entity has placeable-off-grid flag then take the next one
-            const firstEntityTopLeft = this.firstEntity().topLeft()
+            if (data.entities) {
+                this.next_entity_number += data.entities.length
 
-            const offsetX = G.sizeBPContainer.width / 64 - (firstEntityTopLeft.x % 1 !== 0 ? -0.5 : 0)
-            const offsetY = G.sizeBPContainer.height / 64 - (firstEntityTopLeft.y % 1 !== 0 ? -0.5 : 0)
+                this.rawEntities = this.rawEntities.withMutations(map => {
+                    for (const entity of data.entities) {
+                        map.set(entity.entity_number, Immutable.fromJS(entity))
+                    }
+                })
 
-            this.rawEntities = this.rawEntities.withMutations(map => {
-                map.keySeq().forEach(k => map
-                    .updateIn([k, 'position', 'x'], x => x + offsetX)
-                    .updateIn([k, 'position', 'y'], y => y + offsetY)
-                )
-            })
+                // TODO: if entity has placeable-off-grid flag then take the next one
+                const firstEntityTopLeft = this.firstEntity().topLeft()
+                offset.x += (firstEntityTopLeft.x % 1 !== 0 ? 0.5 : 0)
+                offset.y += (firstEntityTopLeft.y % 1 !== 0 ? 0.5 : 0)
+
+                this.rawEntities = this.rawEntities.withMutations(map => {
+                    map.keySeq().forEach(k => map
+                        .updateIn([k, 'position', 'x'], x => x + offset.x)
+                        .updateIn([k, 'position', 'y'], y => y + offset.y)
+                    )
+                })
+            }
 
             if (data.tiles) {
                 this.tiles = this.tiles.withMutations(map =>
                     data.tiles.forEach((tile: any) =>
-                        map.set(`${tile.position.x + offsetX + 0.5},${tile.position.y + offsetY + 0.5}`, tile.name)
+                        map.set(`${tile.position.x + offset.x + 0.5},${tile.position.y + offset.y + 0.5}`, tile.name)
                     )
                 )
             }
