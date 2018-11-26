@@ -57,13 +57,13 @@ export class BlueprintContainer extends PIXI.Container {
         this.pgOverlay.alpha = 0.2
         // this.addChild(this.pgOverlay)
 
-        this.underlayContainer = new UnderlayContainer()
-        this.addChild(this.underlayContainer)
-
         this.tileSprites = new PIXI.Container()
         this.tileSprites.interactive = false
         this.tileSprites.interactiveChildren = false
         this.addChild(this.tileSprites)
+
+        this.underlayContainer = new UnderlayContainer()
+        this.addChild(this.underlayContainer)
 
         this.entitySprites = new PIXI.Container()
         this.entitySprites.interactive = false
@@ -179,11 +179,11 @@ export class BlueprintContainer extends PIXI.Container {
         this.movingContainer = undefined
         this.paintContainer = undefined
 
-        this.underlayContainer = new UnderlayContainer()
-
         this.tileSprites = new PIXI.Container()
         this.tileSprites.interactive = false
         this.tileSprites.interactiveChildren = false
+
+        this.underlayContainer = new UnderlayContainer()
 
         this.entitySprites = new PIXI.Container()
         this.entitySprites.interactive = false
@@ -202,7 +202,7 @@ export class BlueprintContainer extends PIXI.Container {
         this.overlayContainer = new OverlayContainer()
 
         this.addChild(
-            this.grid, this.underlayContainer, this.tileSprites, this.entitySprites,
+            this.grid, this.tileSprites, this.underlayContainer, this.entitySprites,
             this.tiles, this.entities, this.wiresContainer, this.overlayContainer
         )
 
