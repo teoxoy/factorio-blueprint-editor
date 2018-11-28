@@ -38,6 +38,14 @@ export class Blueprint {
                 y: G.sizeBPContainer.height / 64
             }
 
+            if (data.tiles) {
+                this.tiles = this.tiles.withMutations(map =>
+                    data.tiles.forEach((tile: any) =>
+                        map.set(`${tile.position.x + offset.x + 0.5},${tile.position.y + offset.y + 0.5}`, tile.name)
+                    )
+                )
+            }
+
             if (data.entities) {
                 this.next_entity_number += data.entities.length
 
@@ -58,14 +66,6 @@ export class Blueprint {
                         .updateIn([k, 'position', 'y'], y => y + offset.y)
                     )
                 })
-            }
-
-            if (data.tiles) {
-                this.tiles = this.tiles.withMutations(map =>
-                    data.tiles.forEach((tile: any) =>
-                        map.set(`${tile.position.x + offset.x + 0.5},${tile.position.y + offset.y + 0.5}`, tile.name)
-                    )
-                )
             }
         }
 
@@ -355,7 +355,7 @@ export class Blueprint {
             e.position.y -= center.y
         }
         const tileInfo = this.tiles.map((v, k) => ({
-            position: { x: Number(k.split(',')[0]) - center.x - 0.5, y: Number(k.split(',')[1]) - center.y - 0.5 },
+            position: { x: Number(k.split(',')[0]) - center.x + 0.5, y: Number(k.split(',')[1]) - center.y + 0.5 },
             name: v
         })).valueSeq().toArray()
         const iconData = this.icons.map((icon, i) => (
