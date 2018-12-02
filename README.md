@@ -19,3 +19,7 @@ Example link that uses url query parameters: https://teoxoy.github.io/factorio-b
 # Contributing
 
 Feel free to contribute to this project, if you have any questions you can contact me on discord (Teoxoy#6734).
+
+# Credits
+
+Thanks to the factorio player GamesDan for finding and reporting alot of bugs and issues via doorbell.
