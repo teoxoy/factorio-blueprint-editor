@@ -22,4 +22,4 @@ Feel free to contribute to this project, if you have any questions you can conta
 
 # Credits
 
-Thanks to the factorio player GamesDan for finding and reporting alot of bugs and issues via doorbell.
+Thanks to the factorio player GamesDan for finding and reporting a lot of bugs and issues via doorbell.
