@@ -43,15 +43,7 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.movingEntityFilter = new AdjustmentFilter({ red: 0.4, blue: 0.4, green: 1 })
 
-        const gridTexture = new PIXI.Graphics()
-            .beginFill(0x808080).drawRect(0, 0, 32, 32).drawRect(32, 32, 32, 32).endFill()
-            .beginFill(0xFFFFFF).drawRect(0, 32, 32, 32).drawRect(32, 0, 32, 32).endFill()
-            .generateCanvasTexture()
-
-        this.grid = new PIXI.extras.TilingSprite(gridTexture, G.sizeBPContainer.width, G.sizeBPContainer.height)
-        this.grid.interactive = false
-        G.colors.addSpriteForAutomaticTintChange(this.grid)
-        this.addChild(this.grid)
+        this.generateGrid(G.colors.pattern)
 
         this.pgOverlay = new PIXI.Graphics()
         this.pgOverlay.alpha = 0.2
@@ -131,6 +123,31 @@ export class BlueprintContainer extends PIXI.Container {
                 if (this.holdingLeftClick && G.keyboard.shift) this.hoverContainer.pasteData()
             }
         })
+    }
+
+    generateGrid(pattern: 'checker' | 'grid' = 'checker') {
+        const gridGraphics = pattern === 'checker'
+            ? new PIXI.Graphics()
+                .beginFill(0x808080).drawRect(0, 0, 32, 32).drawRect(32, 32, 32, 32).endFill()
+                .beginFill(0xFFFFFF).drawRect(0, 32, 32, 32).drawRect(32, 0, 32, 32).endFill()
+            : new PIXI.Graphics()
+                .beginFill(0x808080).drawRect(0, 0, 32, 32).endFill()
+                .beginFill(0xFFFFFF).drawRect(1, 1, 31, 31).endFill()
+
+        const grid = new PIXI.extras.TilingSprite(gridGraphics.generateCanvasTexture(), G.sizeBPContainer.width, G.sizeBPContainer.height)
+
+        grid.interactive = false
+        G.colors.addSpriteForAutomaticTintChange(grid)
+
+        if (this.grid) {
+            const index = this.getChildIndex(this.grid)
+            this.removeChild(this.grid)
+            this.addChildAt(grid, index)
+        } else {
+            this.addChild(grid)
+        }
+
+        this.grid = grid
     }
 
     initBP() {

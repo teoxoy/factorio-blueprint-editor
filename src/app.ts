@@ -101,11 +101,25 @@ gui.add(G, 'hr').name('HR Entities').onChange((val: boolean) => {
     })
 })
 
-if (localStorage.getItem('darkTheme')) G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
-gui.add(G.colors, 'darkTheme').name('Dark Theme').onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
-
 if (localStorage.getItem('moveSpeed')) G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
 gui.add(G, 'moveSpeed', 5, 20).name('Move Speed').onChange((val: boolean) => localStorage.setItem('moveSpeed', val.toString()))
+
+const guiTheme = gui.addFolder('Theme')
+
+if (localStorage.getItem('darkTheme')) G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
+guiTheme
+    .add(G.colors, 'darkTheme')
+    .name('Dark Mode')
+    .onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
+
+if (localStorage.getItem('pattern')) G.colors.pattern = localStorage.getItem('pattern')
+guiTheme
+    .add(G.colors, 'pattern', ['checker', 'grid'])
+    .name('Pattern')
+    .onChange((val: string) => {
+        G.BPC.generateGrid(val)
+        localStorage.setItem('pattern', val)
+    })
 
 const guiKeybinds = gui.addFolder('Keybinds')
 

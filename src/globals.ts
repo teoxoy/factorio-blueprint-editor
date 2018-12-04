@@ -123,6 +123,7 @@ const colors = {
     },
     _darkTheme: true,
     _tintsToChange: [] as PIXI.Sprite[],
+    pattern: 'checker',
     get darkTheme() {
         return this._darkTheme
     },
