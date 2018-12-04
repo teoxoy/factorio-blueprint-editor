@@ -1,3 +1,7 @@
+
+// https://github.com/parcel-bundler/parcel/issues/289#issuecomment-393106708
+if (module.hot) module.hot.dispose(() => { window.location.reload(); throw new Error('Reloading') })
+
 // tslint:disable:no-import-side-effect
 import 'normalize.css'
 import './style.styl'
