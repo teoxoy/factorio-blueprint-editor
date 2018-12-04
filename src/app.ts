@@ -60,7 +60,10 @@ const gui = new dat.GUI({
     hideable: false,
     closeOnTop: true
 })
-// gui.closed = true
+
+gui.closed = localStorage.getItem('dat.gui.closed') === 'true'
+window.addEventListener('unload', () => localStorage.setItem('dat.gui.closed', String(gui.closed)))
+
 document.body.appendChild(gui.domElement)
 
 const guiBPIndex = gui
