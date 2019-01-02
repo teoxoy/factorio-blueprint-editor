@@ -360,7 +360,7 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
 
     loadingScreen.classList.add('active')
 
-    const promise = navigator.clipboard && navigator.clipboard.writeText ?
+    const promise = navigator.clipboard && navigator.clipboard.readText ?
         navigator.clipboard.readText() :
         Promise.resolve(e.clipboardData.getData('text'))
 
