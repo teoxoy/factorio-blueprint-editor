@@ -30,6 +30,7 @@ import { EntityContainer } from './containers/entity'
 import { EntityPaintContainer } from './containers/entityPaint'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './containers/toolbar'
+import { ToolbeltContainer } from './containers/toolbelt'
 import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
@@ -189,7 +190,17 @@ const keybinds = JSON.parse(localStorage.getItem('keybinds')) || {
     s: 's',
     d: 'd',
     increaseTileArea: ']',
-    decreaseTileArea: '['
+    decreaseTileArea: '[',
+    toolbeltSlot01 : '1',
+    toolbeltSlot02 : '2',
+    toolbeltSlot03 : '3',
+    toolbeltSlot04 : '4',
+    toolbeltSlot05 : '5',
+    toolbeltSlot06 : 'shift+1',
+    toolbeltSlot07 : 'shift+2',
+    toolbeltSlot08 : 'shift+3',
+    toolbeltSlot09 : 'shift+4',
+    toolbeltSlot10 : 'shift+5',    
 }
 
 const keybindsProxy = new Proxy(keybinds, {
@@ -245,6 +256,9 @@ G.app.stage.addChild(G.inventoryContainer)
 
 G.toolbarContainer = new ToolbarContainer()
 G.app.stage.addChild(G.toolbarContainer)
+
+G.toolbeltContainer = new ToolbeltContainer()
+G.app.stage.addChild(G.toolbeltContainer)
 
 const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
@@ -535,6 +549,17 @@ keyboardJS.bind(keybinds.w, () => G.keyboard.w = true, () => G.keyboard.w = fals
 keyboardJS.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = false)
 keyboardJS.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
 keyboardJS.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)
+
+keyboardJS.bind(keybinds.toolbeltSlot01, null, () => G.toolbeltContainer.setSlot(0))
+keyboardJS.bind(keybinds.toolbeltSlot02, null, () => G.toolbeltContainer.setSlot(1))
+keyboardJS.bind(keybinds.toolbeltSlot03, null, () => G.toolbeltContainer.setSlot(2))
+keyboardJS.bind(keybinds.toolbeltSlot04, null, () => G.toolbeltContainer.setSlot(3))
+keyboardJS.bind(keybinds.toolbeltSlot05, null, () => G.toolbeltContainer.setSlot(4))
+keyboardJS.bind(keybinds.toolbeltSlot06, null, () => G.toolbeltContainer.setSlot(5))
+keyboardJS.bind(keybinds.toolbeltSlot07, null, () => G.toolbeltContainer.setSlot(6))
+keyboardJS.bind(keybinds.toolbeltSlot08, null, () => G.toolbeltContainer.setSlot(7))
+keyboardJS.bind(keybinds.toolbeltSlot09, null, () => G.toolbeltContainer.setSlot(8))
+keyboardJS.bind(keybinds.toolbeltSlot10, null, () => G.toolbeltContainer.setSlot(9))
 
 // hack for calling preventDefault() on all bound keys
 const keyCombos = keyboardJS._listeners.map((l: any) => l.keyCombo.sourceStr)

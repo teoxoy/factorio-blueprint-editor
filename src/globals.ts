@@ -1,5 +1,6 @@
 import { Blueprint } from './factorio-data/blueprint'
 import { ToolbarContainer } from './containers/toolbar'
+import { ToolbeltContainer } from './containers/toolbelt';
 import { BlueprintContainer } from './containers/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InventoryContainer } from './containers/inventory'
@@ -12,6 +13,7 @@ let hr = false
 let app: PIXI.Application
 
 let toolbarContainer: ToolbarContainer
+let toolbeltContainer: ToolbeltContainer
 let editEntityContainer: EditEntityContainer
 let inventoryContainer: InventoryContainer
 let BPC: BlueprintContainer
@@ -122,6 +124,7 @@ const colors = {
         slot: 0x808080,
         button: {
             background: 0x646464,
+            rollover: 0xCCCCCC,
             active: 0xB16925
         }
     },
@@ -154,6 +157,7 @@ export default {
     app,
     keyboard,
     toolbarContainer,
+    toolbeltContainer,
     bpArea,
     positionBPContainer,
     sizeBPContainer,
