@@ -49,38 +49,39 @@ export class InventoryContainer extends PIXI.Container {
         return 0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)
     }
 
-    static drawRect(width: number, height: number, background: number, border = 1, alpha = 1, active = false): PIXI.Graphics {
+    static drawRect(width: number, height: number, background: number, border = 1, alpha = 1, pressed = false): PIXI.Graphics {
         const rectangle = new PIXI.Graphics()
         rectangle.beginFill(background, alpha)
         if (border === 0) {
             rectangle.drawRect(0, 0, width, height)
         } else {
             if (border > 0) {
-                rectangle.lineStyle(1, InventoryContainer.shadeColor(background, active ? -20 : 20))
-                    .moveTo(0, height - 1)
+                rectangle
+                    .lineStyle(1, InventoryContainer.shadeColor(background, pressed ? -12.5 : 22.5), 1, 0)
+                    .moveTo(0, height)
                     .lineTo(0, 0)
-                    .lineTo(width - 1, 0)
-                    .lineStyle(1, InventoryContainer.shadeColor(background, active ? 20 : -15))
-                    .lineTo(width - 1, height - 1)
-                    .lineTo(0, height - 1)
+                    .lineTo(width, 0)
+                    .lineStyle(1, InventoryContainer.shadeColor(background, pressed ? 10 : -7.5), 1, 0)
+                    .lineTo(width, height)
+                    .lineTo(0, height)
             }
             if (border > 1) {
-                rectangle.lineStyle(1, InventoryContainer.shadeColor(background, active ? -10 : 10))
-                    .moveTo(1, height - 2)
+                rectangle.lineStyle(1, InventoryContainer.shadeColor(background, pressed ? -10 : 20), 1, 0)
+                    .moveTo(1, height - 1)
                     .lineTo(1, 1)
-                    .lineTo(width - 2, 1)
-                    .lineStyle(1, InventoryContainer.shadeColor(background, active ? 10 : -10))
-                    .lineTo(width - 2, height - 2)
-                    .lineTo(1, height - 2)
+                    .lineTo(width - 1, 1)
+                    .lineStyle(1, InventoryContainer.shadeColor(background, pressed ? 7.5 : -5), 1, 0)
+                    .lineTo(width - 1, height - 1)
+                    .lineTo(1, height - 1)
             }
             if (border > 2) {
-                rectangle.lineStyle(1, InventoryContainer.shadeColor(background, active ? -5 : 5))
-                    .moveTo(2, height - 3)
+                rectangle.lineStyle(1, InventoryContainer.shadeColor(background, pressed ? -7.5 : 17.5), 1, 0)
+                    .moveTo(2, height - 2)
                     .lineTo(2, 2)
-                    .lineTo(width - 3, 2)
-                    .lineStyle(1, InventoryContainer.shadeColor(background, active ? 5 : -5))
-                    .lineTo(width - 3, height - 3)
-                    .lineTo(2, height - 3)
+                    .lineTo(width - 2, 2)
+                    .lineStyle(1, InventoryContainer.shadeColor(background, pressed ? 5 : -2.5), 1, 0)
+                    .lineTo(width - 2, height - 2)
+                    .lineTo(2, height - 2)
             }
         }
         rectangle.endFill()
@@ -91,13 +92,13 @@ export class InventoryContainer extends PIXI.Container {
     static drawButton(width: number, height: number, item: any, group: boolean = false): PIXI.Container {
         const button = new PIXI.Container()
 
-        const back = InventoryContainer.drawRect(width, height, G.colors.pannel.button.background, group ? 3 : 1)
+        const back = InventoryContainer.drawRect(width, height, G.colors.pannel.button.background, group ? 3 : 2)
 
         const active = InventoryContainer.drawRect(width, height, G.colors.pannel.button.active, group ? 3 : 1, 1, true)
         active.name = 'active'
         active.visible = false
 
-        const over = InventoryContainer.drawRect(width - 1, height - 1, G.colors.pannel.button.active, 0, 0.6)
+        const over = InventoryContainer.drawRect(width, height, G.colors.pannel.button.active, 0, 0.6)
         over.visible = false
 
         const icon = InventoryContainer.createIcon(item)
@@ -105,6 +106,9 @@ export class InventoryContainer extends PIXI.Container {
 
         button.addChild(back, active, over, icon)
 
+        button.on('pointerdown', () => {
+            over.visible = false
+        })
         button.on('pointerover', () => {
             if (!active.visible) over.visible = true
         })
@@ -125,7 +129,7 @@ export class InventoryContainer extends PIXI.Container {
 
     // Cols
     // Space @ 0+12                         ->12
-    // Items @ 12+(10*(36+2))456            ->392
+    // Items @ 12+(10*(36+2))               ->392
     // Space @ 392+12                       ->404
     iWidth = 12 + (10 * (36 + 2)) + 12
 
@@ -135,7 +139,7 @@ export class InventoryContainer extends PIXI.Container {
     // Space   @ 34+12                      ->46
     // Groups  @ 46+68                      ->114
     // Space   @ 114+12                     ->126
-    // Items   @ (46+80)126+(8*(36+2))304   ->430
+    // Items   @ 126+(8*(36+2))             ->430
     // Space   @ 430+12                     ->442
     // Tooltip @ 442+24                     ->466
     // Space   @ 466+12                     ->478

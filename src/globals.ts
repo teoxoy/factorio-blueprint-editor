@@ -119,10 +119,10 @@ const colors = {
     },
     pannel: {
         background: 0x3A3A3A,
-        slot: 0x9E9E9E,
+        slot: 0x808080,
         button: {
-            background: 0x626262,
-            active: 0xC97E2B
+            background: 0x646464,
+            active: 0xB16925
         }
     },
     _darkTheme: true,

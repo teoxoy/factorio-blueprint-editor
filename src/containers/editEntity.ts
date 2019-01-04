@@ -7,7 +7,6 @@ export class EditEntityContainer extends PIXI.Container {
 
     content: PIXI.Container
     itemTooltip: PIXI.Text
-    iconGutter = 32
     inventoryActiveGroup: PIXI.Sprite
     inventoryGroup: Map<PIXI.Sprite, PIXI.Container> = new Map()
     iWidth = 404
@@ -45,16 +44,13 @@ export class EditEntityContainer extends PIXI.Container {
         const cc = entity.entityData.crafting_categories
         if (cc && !cc.includes('rocket_building') && !cc.includes('smelting')) {
             const recipeContainer = new PIXI.Container()
-            const background = new PIXI.Sprite(PIXI.Texture.WHITE)
-            background.anchor.set(0.5, 0.5)
-            background.width = 32
-            background.height = 32
-            background.tint = G.colors.pannel.slot
+            const background = InventoryContainer.drawRect(36, 36, G.colors.pannel.slot, 2, 1, true)
+            background.position.set(-18, -18)
             recipeContainer.addChild(background)
             if (entity.recipe) recipeContainer.addChild(InventoryContainer.createIcon(factorioData.getItem(entity.recipe)))
             recipeContainer.position.set(
                 this.iWidth / 2 + 16,
-                this.iHeight / 2 - 18
+                this.iHeight / 2 - 19
             )
             recipeContainer.interactive = true
             recipeContainer.buttonMode = true
@@ -94,13 +90,13 @@ export class EditEntityContainer extends PIXI.Container {
             const moduleContainer = new PIXI.Container()
             moduleContainer.position.set(
                 this.iWidth / 2 + 16,
-                this.iHeight / 2 + 18
+                this.iHeight / 2 + 19
             )
             const slots = entity.entityData.module_specification.module_slots
             const modules = entity.modulesList
             for (let i = 0; i < slots; i++) {
                 const slot = new PIXI.Container()
-                slot.position.set(i * 36, 0)
+                slot.position.set(i * 38, 0)
                 slot.interactive = true
                 slot.buttonMode = true
                 slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
@@ -129,8 +125,8 @@ export class EditEntityContainer extends PIXI.Container {
                     }
                 })
 
-                const background = InventoryContainer.drawRect(32, 32, G.colors.pannel.slot, 0)
-                background.position.set(-16, -16)
+                const background = InventoryContainer.drawRect(36, 36, G.colors.pannel.slot, 2, 1, true)
+                background.position.set(-18, -18)
                 slot.addChild(background)
 
                 if (modules && modules[i]) slot.addChild(InventoryContainer.createIcon(factorioData.getItem(modules[i])))
