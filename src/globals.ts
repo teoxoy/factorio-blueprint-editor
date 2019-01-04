@@ -119,7 +119,11 @@ const colors = {
     },
     pannel: {
         background: 0x3A3A3A,
-        slot: 0x9E9E9E
+        slot: 0x9E9E9E,
+        button: {
+            background: 0x626262,
+            active: 0xC97E2B
+        }
     },
     _darkTheme: true,
     _tintsToChange: [] as PIXI.Sprite[],

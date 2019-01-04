@@ -10,8 +10,9 @@ export class EditEntityContainer extends PIXI.Container {
     iconGutter = 32
     inventoryActiveGroup: PIXI.Sprite
     inventoryGroup: Map<PIXI.Sprite, PIXI.Container> = new Map()
-    iWidth = 32 * 12
-    iHeight = 32 * 13
+    iWidth = 404
+    iHeight = 526
+    active = false
 
     constructor() {
         super()
@@ -22,11 +23,7 @@ export class EditEntityContainer extends PIXI.Container {
         this.setPosition()
         window.addEventListener('resize', () => this.setPosition(), false)
 
-        const background = new PIXI.Sprite(PIXI.Texture.WHITE)
-        background.width = this.iWidth
-        background.height = this.iHeight
-        background.tint = G.colors.pannel.background
-        background.alpha = 0.9
+        const background = InventoryContainer.drawRect(this.iWidth, this.iHeight, G.colors.pannel.background, 2, 0.7)
         this.addChild(background)
 
         this.content = new PIXI.Container()
@@ -65,7 +62,7 @@ export class EditEntityContainer extends PIXI.Container {
             recipeContainer.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                 e.stopPropagation()
                 if (e.data.button === 0) {
-                    G.inventoryContainer.toggle(entity.acceptedRecipes, name => {
+                    G.inventoryContainer.toggle('Select Recipe', entity.acceptedRecipes, name => {
                         G.openedGUIWindow = this
                         if (entity.recipe !== name) {
                             EntityContainer.mappings.get(entity_number).changeRecipe(name)
@@ -109,7 +106,7 @@ export class EditEntityContainer extends PIXI.Container {
                 slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     e.stopPropagation()
                     if (e.data.button === 0) {
-                        G.inventoryContainer.toggle(entity.acceptedModules, name => {
+                        G.inventoryContainer.toggle('Select Module', entity.acceptedModules, name => {
                             G.openedGUIWindow = this
                             if (modules) {
                                 if (modules[i] !== name) {
@@ -132,11 +129,8 @@ export class EditEntityContainer extends PIXI.Container {
                     }
                 })
 
-                const background = new PIXI.Sprite(PIXI.Texture.WHITE)
-                background.anchor.set(0.5, 0.5)
-                background.width = 32
-                background.height = 32
-                background.tint = G.colors.pannel.slot
+                const background = InventoryContainer.drawRect(32, 32, G.colors.pannel.slot, 0)
+                background.position.set(-16, -16)
                 slot.addChild(background)
 
                 if (modules && modules[i]) slot.addChild(InventoryContainer.createIcon(factorioData.getItem(modules[i])))
@@ -159,6 +153,7 @@ export class EditEntityContainer extends PIXI.Container {
 
         if (this.content.children.length !== 0) {
             this.visible = true
+            this.active = true
             G.openedGUIWindow = this
         }
     }
@@ -168,6 +163,7 @@ export class EditEntityContainer extends PIXI.Container {
             G.openedGUIWindow.close()
         }
         this.visible = false
+        this.active = false
         G.openedGUIWindow = undefined
     }
 }

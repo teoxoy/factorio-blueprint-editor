@@ -1,4 +1,5 @@
 import G from '../globals'
+import { InventoryContainer } from './inventory'
 
 export class InfoContainer extends PIXI.Container {
 
@@ -15,11 +16,7 @@ export class InfoContainer extends PIXI.Container {
         this.setPosition()
         window.addEventListener('resize', () => this.setPosition(), false)
 
-        const background = new PIXI.Sprite(PIXI.Texture.WHITE)
-        background.width = this.iWidth
-        background.height = this.iHeight
-        background.tint = G.colors.pannel.background
-        background.alpha = 0.9
+        const background = InventoryContainer.drawRect(this.iWidth, this.iHeight, G.colors.pannel.background, 2, 0.9)
         this.addChild(background)
 
         const text = new PIXI.Text('KEYBINDS', {

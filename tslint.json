@@ -120,6 +120,7 @@
         ],
         "linebreak-style": false,
         "no-submodule-imports": false,
-        "no-reference": false
+        "no-reference": false,
+        "no-bitwise": false
     }
 }
