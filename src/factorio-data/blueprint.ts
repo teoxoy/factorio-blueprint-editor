@@ -355,7 +355,10 @@ export class Blueprint {
             e.position.y -= center.y
         }
         const tileInfo = this.tiles.map((v, k) => ({
-            position: { x: Number(k.split(',')[0]) - center.x + 0.5, y: Number(k.split(',')[1]) - center.y + 0.5 },
+            position: {
+                x: Number(k.split(',')[0]) - Math.floor(center.x) - 0.5,
+                y: Number(k.split(',')[1]) - Math.floor(center.y) - 0.5
+            },
             name: v
         })).valueSeq().toArray()
         const iconData = this.icons.map((icon, i) => (
