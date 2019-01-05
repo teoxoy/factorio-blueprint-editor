@@ -2,6 +2,8 @@ import G from '../globals'
 import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { TileContainer } from './tile'
+import factorioData from '../factorio-data/factorioData'
+import { InventoryContainer } from './inventory'
 
 export class TilePaintContainer extends PIXI.Container {
 
@@ -23,6 +25,7 @@ export class TilePaintContainer extends PIXI.Container {
     holdingLeftClick: boolean
     holdingRightClick: boolean
     filter: AdjustmentFilter
+    icon: PIXI.DisplayObject
 
     constructor(name: string, position: IPoint) {
         super()
@@ -41,6 +44,13 @@ export class TilePaintContainer extends PIXI.Container {
 
         this.holdingLeftClick = false
 
+        this.icon = InventoryContainer.createIcon(this.getItemName())
+        this.icon.visible = false
+        G.app.stage.addChild(this.icon)
+        this.changeIconPos = this.changeIconPos.bind(this)
+        window.addEventListener('mousemove', this.changeIconPos)
+        this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
+
         G.BPC.transparentEntities()
 
         this.on('pointerdown', this.pointerDownEventHandler)
@@ -50,9 +60,35 @@ export class TilePaintContainer extends PIXI.Container {
         this.redraw()
     }
 
+    changeIconPos(e: IPoint) {
+        this.icon.position.set(e.x + 16, e.y + 16)
+    }
+
+    hide() {
+        this.visible = false
+        G.BPC.transparentEntities(false)
+
+        this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
+        this.icon.visible = true
+    }
+
+    show() {
+        this.visible = true
+        G.BPC.transparentEntities()
+
+        this.icon.visible = false
+    }
+
     destroy() {
         G.BPC.transparentEntities(false)
         super.destroy()
+
+        window.removeEventListener('mousemove', this.changeIconPos)
+        this.icon.destroy()
+    }
+
+    getItemName() {
+        return factorioData.getTile(this.name).minable.result
     }
 
     increaseSize() {

@@ -3,15 +3,15 @@
 import inventoryBundle from 'factorio-data/data/prototypes/inventoryLayout'
 import factorioData from '../factorio-data/factorioData'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
-import util from '../util'
 import G from '../globals'
-import { EntityPaintContainer } from './entityPaint'
-import { EntityContainer } from './entity'
-import { TilePaintContainer } from './tilePaint'
 
 export class InventoryContainer extends PIXI.Container {
 
-    static createIcon(item: any) {
+    static createIcon(itemName: string) {
+        let item = factorioData.getItem(itemName)
+        // only needed for inventory group icon
+        if (!item) item = inventoryBundle.find(g => g.name === itemName)
+
         if (item.icon) {
             const icon = PIXI.Sprite.fromFrame(item.icon)
             icon.anchor.set(0.5, 0.5)
@@ -89,7 +89,7 @@ export class InventoryContainer extends PIXI.Container {
         return rectangle
     }
 
-    static drawButton(width: number, height: number, item: any, group: boolean = false): PIXI.Container {
+    static drawButton(width: number, height: number, itemName: string, group: boolean = false): PIXI.Container {
         const button = new PIXI.Container()
 
         const back = InventoryContainer.drawRect(width, height, G.colors.pannel.button.background, group ? 3 : 2)
@@ -101,7 +101,7 @@ export class InventoryContainer extends PIXI.Container {
         const over = InventoryContainer.drawRect(width, height, G.colors.pannel.button.active, 0, 0.6)
         over.visible = false
 
-        const icon = InventoryContainer.createIcon(item)
+        const icon = InventoryContainer.createIcon(itemName)
         icon.position.set(width / 2, height / 2)
 
         button.addChild(back, active, over, icon)
@@ -185,6 +185,9 @@ export class InventoryContainer extends PIXI.Container {
         this.recipeVisualization = new PIXI.Container()
         this.recipeVisualization.position.set(28, 478 + 16)
         this.addChild(this.recipeVisualization)
+
+        this.on('pointerover', () => { if (G.BPC.paintContainer) G.BPC.paintContainer.hide() })
+        this.on('pointerout',  () => { if (G.BPC.paintContainer) G.BPC.paintContainer.show() })
     }
 
     setPosition() {
@@ -217,7 +220,7 @@ export class InventoryContainer extends PIXI.Container {
                     if ((!filteredItems && placeResult && (factorioData.getEntity(placeResult) || factorioData.getTile(placeResult))) ||
                         filteredItems && filteredItems.includes(item.name)
                     ) {
-                        const img = InventoryContainer.drawButton(this.iconGutter, this.iconGutter, item)
+                        const img = InventoryContainer.drawButton(this.iconGutter, this.iconGutter, item.name)
 
                         if (nextK > 9) {
                             nextJ++
@@ -266,7 +269,7 @@ export class InventoryContainer extends PIXI.Container {
             }
 
             if (groupHasItem) {
-                const img = InventoryContainer.drawButton(68, 68, inventoryBundle[i], true)
+                const img = InventoryContainer.drawButton(68, 68, inventoryBundle[i].name, true)
                 img.x = nextI * 70
                 img.y = 0
                 img.interactive = true
@@ -305,6 +308,10 @@ export class InventoryContainer extends PIXI.Container {
             this.create(title, filteredItems, cb)
             this.visible = true
             G.openedGUIWindow = this
+
+            if (G.BPC.paintContainer && this.getBounds().contains(G.BPC.paintContainer.icon.x, G.BPC.paintContainer.icon.y)) {
+                G.BPC.paintContainer.hide()
+            }
         } else {
             this.close()
         }
@@ -317,6 +324,10 @@ export class InventoryContainer extends PIXI.Container {
             G.editEntityContainer.visible = true
         } else {
             G.openedGUIWindow = undefined
+        }
+
+        if (G.BPC.paintContainer) {
+            G.BPC.paintContainer.show()
         }
     }
 
@@ -334,7 +345,7 @@ export class InventoryContainer extends PIXI.Container {
 
         let nextX = 0
         for (const i of ingredients) {
-            const s = InventoryContainer.createIcon(factorioData.getItem(i[0]))
+            const s = InventoryContainer.createIcon(i[0])
             s.x = nextX * 36
             this.recipeVisualization.addChild(s, createAmountText(i[1]))
             nextX++
@@ -351,7 +362,7 @@ export class InventoryContainer extends PIXI.Container {
         this.recipeVisualization.addChild(text)
 
         for (const r of results) {
-            const s = InventoryContainer.createIcon(factorioData.getItem(r[0]))
+            const s = InventoryContainer.createIcon(r[0])
             s.x = nextX * 36
             this.recipeVisualization.addChild(s, createAmountText(r[1]))
             nextX++

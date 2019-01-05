@@ -1,5 +1,4 @@
 import G from '../globals'
-import factorioData from '../factorio-data/factorioData'
 import { InventoryContainer } from './inventory'
 
 export class ToolbeltSlot extends PIXI.Container {
@@ -32,12 +31,10 @@ export class ToolbeltSlot extends PIXI.Container {
     }
 
     public assignItem(itemName: string) {
-        let item = factorioData.getItem(itemName)
-        if (!item) item = factorioData.getItem(factorioData.getTile(itemName).minable.result)
-        this.itemName = item.name
+        this.itemName = itemName
 
         if (this.content) this.content.destroy()
-        this.content = InventoryContainer.createIcon(item)
+        this.content = InventoryContainer.createIcon(itemName)
         this.content.position.set(this.iWidth / 2, this.iHeight / 2)
         this.addChild(this.content)
     }
@@ -92,9 +89,8 @@ export class ToolbeltContainer extends PIXI.Container {
         const background = InventoryContainer.drawRect(this.iWidth, this.iHeight, G.colors.pannel.background, 2, 0.7)
         this.addChild(background)
 
-        // Hide paintContainer if the pointer is inside the ToolbeltContainer
-        this.on('pointerover', () => { if (G.BPC.paintContainer) G.BPC.paintContainer.visible = false })
-        this.on('pointerout',  () => { if (G.BPC.paintContainer) G.BPC.paintContainer.visible = true  })
+        this.on('pointerover', () => { if (G.BPC.paintContainer) G.BPC.paintContainer.hide() })
+        this.on('pointerout',  () => { if (G.BPC.paintContainer) G.BPC.paintContainer.show() })
 
         this.slotsContainer = new PIXI.Container()
         this.slotsContainer.position.set(12, 12)
@@ -128,16 +124,19 @@ export class ToolbeltContainer extends PIXI.Container {
                         // >> Mouse == Painting (UC1,UC2)
                         if (G.currentMouseState === G.mouseStates.PAINTING) {
                             // >> Slot == Empty (UC1)
-                            if (!toolbeltSlot.itemName) toolbeltSlot.assignItem(G.BPC.paintContainer.name)
+                            if (!toolbeltSlot.itemName) {
+                                toolbeltSlot.assignItem(G.BPC.paintContainer.getItemName())
                             // >> Slot == Item (UC2)
-                            else G.BPC.spawnEntityAtMouse(toolbeltSlot.itemName)
-                        } else {
-                            // >> Mouse == Empty (UC3,UC4)
-                            if (toolbeltSlot.itemName) { // >> Slot == Item (UC4)
-                                // Assign Slot Item to Mouse
+                            } else {
                                 G.BPC.spawnEntityAtMouse(toolbeltSlot.itemName)
+                                G.BPC.paintContainer.hide()
                             }
+                        // >> Slot == Item (UC4)
+                        } else if (toolbeltSlot.itemName) {
+                            G.BPC.spawnEntityAtMouse(toolbeltSlot.itemName)
+                            G.BPC.paintContainer.hide()
                         }
+
                     // >> Right Click (UC5)
                     } else if (e.data.button === 2) {
                         toolbeltSlot.unassignItem()
@@ -154,7 +153,7 @@ export class ToolbeltContainer extends PIXI.Container {
         const itemName = this.slots[slot].itemName
         if (!itemName) return
 
-        if (G.currentMouseState === G.mouseStates.PAINTING && G.BPC.paintContainer.name === itemName) {
+        if (G.currentMouseState === G.mouseStates.PAINTING && G.BPC.paintContainer.getItemName() === itemName) {
             G.BPC.paintContainer.destroy()
             G.BPC.paintContainer = undefined
             G.currentMouseState = G.mouseStates.NONE

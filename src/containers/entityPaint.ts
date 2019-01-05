@@ -4,6 +4,7 @@ import factorioData from '../factorio-data/factorioData'
 import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
+import { InventoryContainer } from './inventory'
 
 export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
@@ -12,6 +13,7 @@ export class EntityPaintContainer extends PIXI.Container {
     direction: number
     holdingLeftClick: boolean
     filter: AdjustmentFilter
+    icon: PIXI.DisplayObject
 
     constructor(name: string, direction: number, position: IPoint) {
         super()
@@ -29,6 +31,13 @@ export class EntityPaintContainer extends PIXI.Container {
 
         this.holdingLeftClick = false
 
+        this.icon = InventoryContainer.createIcon(name)
+        this.icon.visible = false
+        G.app.stage.addChild(this.icon)
+        this.changeIconPos = this.changeIconPos.bind(this)
+        window.addEventListener('mousemove', this.changeIconPos)
+        this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
+
         this.areaVisualization = G.BPC.underlayContainer.createNewArea(this.name)
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
             s.alpha += 0.25
@@ -43,11 +52,37 @@ export class EntityPaintContainer extends PIXI.Container {
         this.redraw()
     }
 
+    changeIconPos(e: MouseEvent) {
+        this.icon.position.set(e.x + 16, e.y + 16)
+    }
+
+    hide() {
+        this.visible = false
+        G.BPC.underlayContainer.deactivateActiveAreas()
+
+        this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
+        this.icon.visible = true
+    }
+
+    show() {
+        this.visible = true
+        G.BPC.underlayContainer.activateRelatedAreas(this.name)
+
+        this.icon.visible = false
+    }
+
     destroy() {
         super.destroy()
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
         G.BPC.overlayContainer.hideUndergroundLines()
+
+        window.removeEventListener('mousemove', this.changeIconPos)
+        this.icon.destroy()
+    }
+
+    getItemName() {
+        return this.name
     }
 
     checkBuildable() {

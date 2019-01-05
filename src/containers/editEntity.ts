@@ -1,4 +1,3 @@
-import factorioData from '../factorio-data/factorioData'
 import G from '../globals'
 import { InventoryContainer } from './inventory'
 import { EntityContainer } from './entity'
@@ -47,7 +46,7 @@ export class EditEntityContainer extends PIXI.Container {
             const background = InventoryContainer.drawRect(36, 36, G.colors.pannel.slot, 2, 1, true)
             background.position.set(-18, -18)
             recipeContainer.addChild(background)
-            if (entity.recipe) recipeContainer.addChild(InventoryContainer.createIcon(factorioData.getItem(entity.recipe)))
+            if (entity.recipe) recipeContainer.addChild(InventoryContainer.createIcon(entity.recipe))
             recipeContainer.position.set(
                 this.iWidth / 2 + 16,
                 this.iHeight / 2 - 19
@@ -129,7 +128,7 @@ export class EditEntityContainer extends PIXI.Container {
                 background.position.set(-18, -18)
                 slot.addChild(background)
 
-                if (modules && modules[i]) slot.addChild(InventoryContainer.createIcon(factorioData.getItem(modules[i])))
+                if (modules && modules[i]) slot.addChild(InventoryContainer.createIcon(modules[i]))
 
                 moduleContainer.addChild(slot)
             }

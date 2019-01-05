@@ -275,7 +275,7 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         function createIconWithBackground(container: PIXI.Container, itemName: string, position?: IPoint) {
-            const icon = InventoryContainer.createIcon(factorioData.getItem(itemName))
+            const icon = InventoryContainer.createIcon(itemName)
             const background = PIXI.Sprite.fromFrame('graphics/entity-info-dark-background.png')
             background.anchor.set(0.5, 0.5)
             if (position) {
