@@ -1,39 +1,24 @@
 import factorioData from '../factorio-data/factorioData'
 import G from '../globals'
+import F from '../controls/functions'
 import { InventoryContainer } from './inventory'
 import { EntityContainer } from './entity'
+import Dialog from '../controls/dialog'
+import Slot from '../controls/slot'
 
-export class EditEntityContainer extends PIXI.Container {
+export class EditEntityContainer extends Dialog {
 
     content: PIXI.Container
     itemTooltip: PIXI.Text
     inventoryActiveGroup: PIXI.Sprite
     inventoryGroup: Map<PIXI.Sprite, PIXI.Container> = new Map()
-    iWidth = 404
-    iHeight = 526
     active = false
 
     constructor() {
-        super()
-
-        this.visible = false
-        this.interactive = true
-
-        this.setPosition()
-        window.addEventListener('resize', () => this.setPosition(), false)
-
-        const background = InventoryContainer.drawRect(this.iWidth, this.iHeight, G.colors.pannel.background, 2, 0.7)
-        this.addChild(background)
+        super(404, 526)
 
         this.content = new PIXI.Container()
         this.addChild(this.content)
-    }
-
-    setPosition() {
-        this.position.set(
-            G.app.screen.width / 2 - this.iWidth / 2,
-            G.app.screen.height / 2 - this.iHeight / 2
-        )
     }
 
     // TODO: Refactor, optimize and make a layout system for this
@@ -43,18 +28,12 @@ export class EditEntityContainer extends PIXI.Container {
 
         const cc = entity.entityData.crafting_categories
         if (cc && !cc.includes('rocket_building') && !cc.includes('smelting')) {
-            const recipeContainer = new PIXI.Container()
-            const background = InventoryContainer.drawRect(36, 36, G.colors.pannel.slot, 2, 1, true)
-            background.position.set(-18, -18)
-            recipeContainer.addChild(background)
-            if (entity.recipe) recipeContainer.addChild(InventoryContainer.createIcon(factorioData.getItem(entity.recipe)))
+            const recipeContainer: Slot = new Slot(36, 36)
             recipeContainer.position.set(
-                this.iWidth / 2 + 16,
-                this.iHeight / 2 - 19
+                this.width / 2,
+                this.height / 2 - 37
             )
-            recipeContainer.interactive = true
-            recipeContainer.buttonMode = true
-
+            if (entity.recipe) recipeContainer.content = InventoryContainer.createIcon(factorioData.getItem(entity.recipe), false)
             recipeContainer.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                 e.stopPropagation()
                 if (e.data.button === 0) {
@@ -80,8 +59,8 @@ export class EditEntityContainer extends PIXI.Container {
             })
             recipeText.anchor.set(1, 0.5)
             recipeText.position.set(
-                this.iWidth / 2,
-                this.iHeight / 2 - 18
+                this.width / 2,
+                this.height / 2 - 18
             )
             this.content.addChild(recipeText)
         }
@@ -89,16 +68,14 @@ export class EditEntityContainer extends PIXI.Container {
         if (entity.entityData.module_specification) {
             const moduleContainer = new PIXI.Container()
             moduleContainer.position.set(
-                this.iWidth / 2 + 16,
-                this.iHeight / 2 + 19
+                this.width / 2,
+                this.height / 2 + 1
             )
             const slots = entity.entityData.module_specification.module_slots
             const modules = entity.modulesList
             for (let i = 0; i < slots; i++) {
-                const slot = new PIXI.Container()
+                const slot: Slot = new Slot(36, 36)
                 slot.position.set(i * 38, 0)
-                slot.interactive = true
-                slot.buttonMode = true
                 slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     e.stopPropagation()
                     if (e.data.button === 0) {
@@ -125,11 +102,7 @@ export class EditEntityContainer extends PIXI.Container {
                     }
                 })
 
-                const background = InventoryContainer.drawRect(36, 36, G.colors.pannel.slot, 2, 1, true)
-                background.position.set(-18, -18)
-                slot.addChild(background)
-
-                if (modules && modules[i]) slot.addChild(InventoryContainer.createIcon(factorioData.getItem(modules[i])))
+                if (modules && modules[i]) slot.content = InventoryContainer.createIcon(factorioData.getItem(modules[i]), false)
 
                 moduleContainer.addChild(slot)
             }
@@ -141,8 +114,8 @@ export class EditEntityContainer extends PIXI.Container {
             })
             recipeText.anchor.set(1, 0.5)
             recipeText.position.set(
-                this.iWidth / 2,
-                this.iHeight / 2 + 18
+                this.width / 2,
+                this.height / 2 + 18
             )
             this.content.addChild(recipeText)
         }
