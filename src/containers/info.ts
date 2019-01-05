@@ -1,23 +1,11 @@
 import G from '../globals'
-import { InventoryContainer } from './inventory'
+import Dialog from '../controls/dialog'
 
-export class InfoContainer extends PIXI.Container {
-
-    iWidth = 32 * 18
-    iHeight = 32 * 28
+/** Info Dialog will be displayed to user to show important information about Factorio Blueprint Editor */
+export class InfoContainer extends Dialog {
 
     constructor() {
-        super()
-
-        this.visible = false
-        this.interactive = false
-        this.interactiveChildren = true
-
-        this.setPosition()
-        window.addEventListener('resize', () => this.setPosition(), false)
-
-        const background = InventoryContainer.drawRect(this.iWidth, this.iHeight, G.colors.pannel.background, 2, 0.9)
-        this.addChild(background)
+        super(32 * 18, 32 * 28)
 
         const text = new PIXI.Text('KEYBINDS', {
             fill: G.colors.text.normal,
@@ -25,7 +13,7 @@ export class InfoContainer extends PIXI.Container {
             fontWeight: '500',
             fontSize: 24
         })
-        text.position.set(this.iWidth / 2, 4)
+        text.position.set(this.width / 2, 4)
         text.anchor.set(0.5, 0)
         this.addChild(text)
 
@@ -40,7 +28,7 @@ export class InfoContainer extends PIXI.Container {
             '',
             '',
             'Others'
-        ], { x: this.iWidth / 2, y: 40 }, 0.5, true)
+        ], { x: this.width / 2, y: 40 }, 0.5, true)
 
         this.writeColumn([
             '',
@@ -66,7 +54,7 @@ export class InfoContainer extends PIXI.Container {
             'click + drag in blueprint area',
             'mouse wheel',
             '[ / ]'
-        ], { x: this.iWidth / 2 - 4, y: 40 }, 1)
+        ], { x: this.width / 2 - 4, y: 40 }, 1)
 
         this.writeColumn([
             '',
@@ -92,7 +80,7 @@ export class InfoContainer extends PIXI.Container {
             'move',
             'zoom in / out',
             'decrease / increase tile area'
-        ], { x: this.iWidth / 2 + 4, y: 40 })
+        ], { x: this.width / 2 + 4, y: 40 })
 
         this.writeColumn([
             'You can load a blueprint from a BP string, pastebin, hastebin, gist, gitlab,',
@@ -111,13 +99,13 @@ export class InfoContainer extends PIXI.Container {
         this.writeColumn([
             'Please leave your suggestions, ideas, new features or bug reports',
             'inside the app via the Feedback button or on Github.'
-        ], { x: this.iWidth / 2, y: 750 }, 0.5, true)
+        ], { x: this.width / 2, y: 750 }, 0.5, true)
 
         const link = new PIXI.Text('Github Source')
         link.interactive = true
         link.buttonMode = true
         link.on('click', () => window.open('https://github.com/Teoxoy/factorio-blueprint-editor', '_blank'))
-        link.position.set(this.iWidth / 2, 790)
+        link.position.set(this.width / 2, 790)
         link.style.fontSize = 16
         link.style.fill = G.colors.text.link
         link.anchor.set(0.5, 0)
@@ -127,7 +115,7 @@ export class InfoContainer extends PIXI.Container {
             'Copyright © 2018 Tanasoaia Teodor Andrei',
             'All art assets, spritesheets and other Factorio game data used in this project',
             'belong to Wube Software Ltd and are not for redistribution.'
-        ], { x: this.iWidth / 2, y: 830 }, 0.5, true, 14)
+        ], { x: this.width / 2, y: 830 }, 0.5, true, 14)
     }
 
     writeColumn(data: Array<string | [string, number]>, offset: IPoint, anchorX = 0, bold = false, fontSize = 16) {
@@ -144,13 +132,6 @@ export class InfoContainer extends PIXI.Container {
             text.anchor.set(anchorX, 0)
             this.addChild(text)
         }
-    }
-
-    setPosition() {
-        this.position.set(
-            G.app.screen.width / 2 - this.iWidth / 2,
-            G.app.screen.height / 2 - this.iHeight / 2
-        )
     }
 
     toggle() {

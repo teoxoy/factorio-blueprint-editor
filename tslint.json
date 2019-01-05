@@ -75,6 +75,7 @@
         "triple-equals": true,
         "prefer-for-of": true,
         "prefer-const": true,
+        "prefer-function-over-method": [true, "allow-public", "allow-protected"],
         "curly": [true, "ignore-same-line"],
         "only-arrow-functions": [true, "allow-named-functions"],
         "no-console": false,
