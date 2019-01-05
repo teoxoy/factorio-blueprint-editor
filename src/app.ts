@@ -30,7 +30,7 @@ import { EntityContainer } from './containers/entity'
 import { EntityPaintContainer } from './containers/entityPaint'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './containers/toolbar'
-import { ToolbeltContainer } from './containers/toolbelt'
+import { QuickbarContainer } from './containers/quickbar'
 import { Blueprint } from './factorio-data/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InfoContainer } from './containers/info'
@@ -109,15 +109,15 @@ gui.add(G, 'hr').name('HR Entities').onChange((val: boolean) => {
 if (localStorage.getItem('moveSpeed')) G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
 gui.add(G, 'moveSpeed', 5, 20).name('Move Speed').onChange((val: boolean) => localStorage.setItem('moveSpeed', val.toString()))
 
-if (localStorage.getItem('toolbeltRows')) G.toolbeltRows = Number(localStorage.getItem('toolbeltRows'))
-gui.add(G, 'toolbeltRows', 1, 5, 1).name('Toolbelt Rows').onChange((val: number) => {
-    localStorage.setItem('toolbeltRows', val.toString())
+if (localStorage.getItem('quickbarRows')) G.quickbarRows = Number(localStorage.getItem('quickbarRows'))
+gui.add(G, 'quickbarRows', 1, 5, 1).name('Quickbar Rows').onChange((val: number) => {
+    localStorage.setItem('quickbarRows', val.toString())
 
-    const index = G.app.stage.getChildIndex(G.toolbeltContainer)
-    const itemNames = G.toolbeltContainer.getAllItemNames()
-    G.toolbeltContainer.destroy()
-    G.toolbeltContainer = new ToolbeltContainer(val, itemNames)
-    G.app.stage.addChildAt(G.toolbeltContainer, index)
+    const index = G.app.stage.getChildIndex(G.quickbarContainer)
+    const itemNames = G.quickbarContainer.getAllItemNames()
+    G.quickbarContainer.destroy()
+    G.quickbarContainer = new QuickbarContainer(val, itemNames)
+    G.app.stage.addChildAt(G.quickbarContainer, index)
 })
 
 const guiTheme = gui.addFolder('Theme')
@@ -202,17 +202,17 @@ const keybinds = JSON.parse(localStorage.getItem('keybinds')) || {
     d: 'd',
     increaseTileArea: ']',
     decreaseTileArea: '[',
-    toolbeltSlot01: '1',
-    toolbeltSlot02: '2',
-    toolbeltSlot03: '3',
-    toolbeltSlot04: '4',
-    toolbeltSlot05: '5',
-    toolbeltSlot06: 'shift+1',
-    toolbeltSlot07: 'shift+2',
-    toolbeltSlot08: 'shift+3',
-    toolbeltSlot09: 'shift+4',
-    toolbeltSlot10: 'shift+5',
-    changeActiveToolbelt: 'x'
+    quickbarSlot01: '1',
+    quickbarSlot02: '2',
+    quickbarSlot03: '3',
+    quickbarSlot04: '4',
+    quickbarSlot05: '5',
+    quickbarSlot06: 'shift+1',
+    quickbarSlot07: 'shift+2',
+    quickbarSlot08: 'shift+3',
+    quickbarSlot09: 'shift+4',
+    quickbarSlot10: 'shift+5',
+    changeActiveQuickbar: 'x'
 }
 
 const keybindsProxy = new Proxy(keybinds, {
@@ -269,8 +269,8 @@ G.app.stage.addChild(G.inventoryContainer)
 G.toolbarContainer = new ToolbarContainer()
 G.app.stage.addChild(G.toolbarContainer)
 
-G.toolbeltContainer = new ToolbeltContainer(G.toolbeltRows)
-G.app.stage.addChild(G.toolbeltContainer)
+G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
+G.app.stage.addChild(G.quickbarContainer)
 
 const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
@@ -301,10 +301,10 @@ Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
     [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
 ].map(data => loadSpritesheet(data[0], data[1]))))
 .then(data => {
-    // Load toolbeltItemNames from localStorage
-    if (localStorage.getItem('toolbeltItemNames')) {
-        const toolbeltItemNames = JSON.parse(localStorage.getItem('toolbeltItemNames'))
-        G.toolbeltContainer.generateSlots(toolbeltItemNames)
+    // Load quickbarItemNames from localStorage
+    if (localStorage.getItem('quickbarItemNames')) {
+        const quickbarItemNames = JSON.parse(localStorage.getItem('quickbarItemNames'))
+        G.quickbarContainer.generateSlots(quickbarItemNames)
     }
 
     if (!bpSource) {
@@ -353,7 +353,7 @@ function loadBp(bpString: string, clearData = true) {
 }
 
 window.addEventListener('unload', () => {
-    localStorage.setItem('toolbeltItemNames', JSON.stringify(G.toolbeltContainer.getAllItemNames()))
+    localStorage.setItem('quickbarItemNames', JSON.stringify(G.quickbarContainer.getAllItemNames()))
     G.app.destroy(true, true)
 })
 
@@ -571,17 +571,17 @@ keyboardJS.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = fals
 keyboardJS.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
 keyboardJS.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)
 
-keyboardJS.bind(keybinds.toolbeltSlot01, () => G.toolbeltContainer.bindKeyToSlot(0))
-keyboardJS.bind(keybinds.toolbeltSlot02, () => G.toolbeltContainer.bindKeyToSlot(1))
-keyboardJS.bind(keybinds.toolbeltSlot03, () => G.toolbeltContainer.bindKeyToSlot(2))
-keyboardJS.bind(keybinds.toolbeltSlot04, () => G.toolbeltContainer.bindKeyToSlot(3))
-keyboardJS.bind(keybinds.toolbeltSlot05, () => G.toolbeltContainer.bindKeyToSlot(4))
-keyboardJS.bind(keybinds.toolbeltSlot06, () => G.toolbeltContainer.bindKeyToSlot(5))
-keyboardJS.bind(keybinds.toolbeltSlot07, () => G.toolbeltContainer.bindKeyToSlot(6))
-keyboardJS.bind(keybinds.toolbeltSlot08, () => G.toolbeltContainer.bindKeyToSlot(7))
-keyboardJS.bind(keybinds.toolbeltSlot09, () => G.toolbeltContainer.bindKeyToSlot(8))
-keyboardJS.bind(keybinds.toolbeltSlot10, () => G.toolbeltContainer.bindKeyToSlot(9))
-keyboardJS.bind(keybinds.changeActiveToolbelt, () => G.toolbeltContainer.changeActiveToolbelt())
+keyboardJS.bind(keybinds.quickbarSlot01, () => G.quickbarContainer.bindKeyToSlot(0))
+keyboardJS.bind(keybinds.quickbarSlot02, () => G.quickbarContainer.bindKeyToSlot(1))
+keyboardJS.bind(keybinds.quickbarSlot03, () => G.quickbarContainer.bindKeyToSlot(2))
+keyboardJS.bind(keybinds.quickbarSlot04, () => G.quickbarContainer.bindKeyToSlot(3))
+keyboardJS.bind(keybinds.quickbarSlot05, () => G.quickbarContainer.bindKeyToSlot(4))
+keyboardJS.bind(keybinds.quickbarSlot06, () => G.quickbarContainer.bindKeyToSlot(5))
+keyboardJS.bind(keybinds.quickbarSlot07, () => G.quickbarContainer.bindKeyToSlot(6))
+keyboardJS.bind(keybinds.quickbarSlot08, () => G.quickbarContainer.bindKeyToSlot(7))
+keyboardJS.bind(keybinds.quickbarSlot09, () => G.quickbarContainer.bindKeyToSlot(8))
+keyboardJS.bind(keybinds.quickbarSlot10, () => G.quickbarContainer.bindKeyToSlot(9))
+keyboardJS.bind(keybinds.changeActiveQuickbar, () => G.quickbarContainer.changeActiveQuickbar())
 
 // hack for calling preventDefault() on all bound keys
 const keyCombos = keyboardJS._listeners.map((l: any) => l.keyCombo.sourceStr)

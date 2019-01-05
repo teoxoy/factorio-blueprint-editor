@@ -1,7 +1,7 @@
 import G from '../globals'
 import { InventoryContainer } from './inventory'
 
-export class ToolbeltSlot extends PIXI.Container {
+class QuickbarSlot extends PIXI.Container {
 
     public itemName: string
 
@@ -45,7 +45,7 @@ export class ToolbeltSlot extends PIXI.Container {
     }
 }
 
-export class ToolbeltContainer extends PIXI.Container {
+export class QuickbarContainer extends PIXI.Container {
 
     static createTriangleButton(width: number, height: number) {
         const button = new PIXI.Graphics()
@@ -70,7 +70,7 @@ export class ToolbeltContainer extends PIXI.Container {
     private iHeight: number
     private rows: number
 
-    private slots: ToolbeltSlot[]
+    private slots: QuickbarSlot[]
     private slotsContainer: PIXI.Container
 
     constructor(rows = 1, itemNames?: string[]) {
@@ -78,7 +78,7 @@ export class ToolbeltContainer extends PIXI.Container {
 
         this.rows = rows
         this.iHeight = 24 + rows * 38
-        this.slots = new Array<ToolbeltSlot>(rows * 10)
+        this.slots = new Array<QuickbarSlot>(rows * 10)
 
         this.interactive = true
         this.interactiveChildren = true
@@ -98,21 +98,21 @@ export class ToolbeltContainer extends PIXI.Container {
 
         this.generateSlots(itemNames)
 
-        const t = ToolbeltContainer.createTriangleButton(15, 14)
+        const t = QuickbarContainer.createTriangleButton(15, 14)
         t.position.set((this.iWidth - t.width) / 2, (this.iHeight - t.height) / 2)
-        t.on('pointerdown', () => this.changeActiveToolbelt())
+        t.on('pointerdown', () => this.changeActiveQuickbar())
         this.addChild(t)
     }
 
     generateSlots(itemNames?: string[]) {
         for (let r = 0; r < this.rows; r++) {
             for (let i = 0; i < 10; i++) {
-                const toolbeltSlot = new ToolbeltSlot()
-                toolbeltSlot.position.set(((36 + 2) * i) + (i > 4 ? 38 : 0), 38 * r)
+                const quickbarSlot = new QuickbarSlot()
+                quickbarSlot.position.set(((36 + 2) * i) + (i > 4 ? 38 : 0), 38 * r)
 
-                if (itemNames && itemNames[(r * 10) + i]) toolbeltSlot.assignItem(itemNames[(r * 10) + i])
+                if (itemNames && itemNames[(r * 10) + i]) quickbarSlot.assignItem(itemNames[(r * 10) + i])
 
-                toolbeltSlot.on('pointerup', (e: PIXI.interaction.InteractionEvent) => {
+                quickbarSlot.on('pointerup', (e: PIXI.interaction.InteractionEvent) => {
                     // Use Case 1: Left Click  & Slot=Empty & Mouse=Painting >> Assign Mouse Item to Slot
                     // Use Case 2: Left Click  & Slot=Item  & Mouse=Painting >> Assign Slot Item to Mouse
                     // Use Case 3: Left Click  & Slot=Empty & Mouse=Empty    >> Do Nothing
@@ -124,27 +124,27 @@ export class ToolbeltContainer extends PIXI.Container {
                         // >> Mouse == Painting (UC1,UC2)
                         if (G.currentMouseState === G.mouseStates.PAINTING) {
                             // >> Slot == Empty (UC1)
-                            if (!toolbeltSlot.itemName) {
-                                toolbeltSlot.assignItem(G.BPC.paintContainer.getItemName())
+                            if (!quickbarSlot.itemName) {
+                                quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
                             // >> Slot == Item (UC2)
                             } else {
-                                G.BPC.spawnEntityAtMouse(toolbeltSlot.itemName)
+                                G.BPC.spawnEntityAtMouse(quickbarSlot.itemName)
                                 G.BPC.paintContainer.hide()
                             }
                         // >> Slot == Item (UC4)
-                        } else if (toolbeltSlot.itemName) {
-                            G.BPC.spawnEntityAtMouse(toolbeltSlot.itemName)
+                        } else if (quickbarSlot.itemName) {
+                            G.BPC.spawnEntityAtMouse(quickbarSlot.itemName)
                             G.BPC.paintContainer.hide()
                         }
 
                     // >> Right Click (UC5)
                     } else if (e.data.button === 2) {
-                        toolbeltSlot.unassignItem()
+                        quickbarSlot.unassignItem()
                     }
                 })
 
-                this.slots[(r * 10) + i] = toolbeltSlot
-                this.slotsContainer.addChild(toolbeltSlot)
+                this.slots[(r * 10) + i] = quickbarSlot
+                this.slotsContainer.addChild(quickbarSlot)
             }
         }
     }
@@ -163,7 +163,7 @@ export class ToolbeltContainer extends PIXI.Container {
         G.BPC.spawnEntityAtMouse(itemName)
     }
 
-    public changeActiveToolbelt() {
+    public changeActiveQuickbar() {
         this.slotsContainer.removeChildren()
 
         let itemNames = this.getAllItemNames()
