@@ -122,12 +122,12 @@ const colors = {
     },
     button: {
         background: 0x646464,
-        rollover: 0xB16925,
+        hover: 0xB16925,
         active: 0xB16925
     },
     slot: {
         background: 0x646464,
-        rollover: 0xCCCCCC
+        hover: 0xCCCCCC
     },
     dialog: {
         background: 0x3A3A3A

@@ -13,7 +13,7 @@ export default class Button extends PIXI.Container {
     private readonly m_Active: PIXI.Graphics
 
     /** Rollover Graphic */
-    private readonly m_Rollover: PIXI.Graphics
+    private readonly m_Hover: PIXI.Graphics
 
     /** Content of Button */
     private m_Content: PIXI.DisplayObject
@@ -31,18 +31,18 @@ export default class Button extends PIXI.Container {
         this.m_Active.position = new PIXI.Point(0, 0)
         this.m_Active.visible = false
 
-        this.m_Rollover = F.DrawRectangle(width, height, this.rollover, 0.5, 0)
-        this.m_Rollover.position = new PIXI.Point(0, 1)
-        this.m_Rollover.visible = false
+        this.m_Hover = F.DrawRectangle(width, height, this.hover, 0.5, 0)
+        this.m_Hover.position = new PIXI.Point(0, 1)
+        this.m_Hover.visible = false
 
-        this.addChild(this.m_Background, this.m_Active, this.m_Rollover)
+        this.addChild(this.m_Background, this.m_Active, this.m_Hover)
 
         // Enable Rollover
         this.on('pointerover', () => {
-            if (!this.m_Active.visible) this.m_Rollover.visible = true
+            if (!this.m_Active.visible) this.m_Hover.visible = true
         })
         this.on('pointerout', () => {
-            this.m_Rollover.visible = false
+            this.m_Hover.visible = false
         })
     }
 
@@ -80,7 +80,7 @@ export default class Button extends PIXI.Container {
     protected get background(): number { return G.colors.button.background }
 
     /** Rollover color of the button (can be overriden) */
-    protected get rollover(): number { return  G.colors.button.rollover }
+    protected get hover(): number { return  G.colors.button.hover }
 
     /** Shall button be raised or pressed (can be overridden) */
     protected get pressed(): boolean { return false }

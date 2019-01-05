@@ -10,19 +10,19 @@ export default class Slot extends Button {
     get background() { return G.colors.slot.background }
 
     // Override Rollover Color of Button
-    get rollover() { return G.colors.slot.rollover }
+    get hover() { return G.colors.slot.hover }
 
     // Override Pressed appearance of Button
     get pressed(): boolean { return true }
 
     /** Field to hold any data for the Slot */
-    private m_Data: object = undefined
+    private m_Data: any = undefined
 
     constructor(width: number = 36, height: number = 36, border: number = 1) {
         super(width, height, border)
     }
 
     /** Slot Data */
-    public get data(): object { return this.m_Data }
-    public set data(value: object) { this.m_Data = value }
+    public get data(): any { return this.m_Data }
+    public set data(value: any) { this.m_Data = value }
 }

@@ -81,7 +81,10 @@ export class QuickbarContainer extends Panel {
                 const quickbarSlot = new QuickbarSlot()
                 quickbarSlot.position.set(((36 + 2) * i) + (i > 4 ? 38 : 0), 38 * r)
 
-                if (itemNames && itemNames[(r * 10) + i]) quickbarSlot.assignItem(itemNames[(r * 10) + i])
+                if (itemNames && itemNames[(r * 10) + i]) {
+                    quickbarSlot.content = InventoryContainer.createIcon(itemNames[(r * 10) + i], false)
+                    quickbarSlot.data = itemNames[(r * 10) + i]
+                }
 
                 quickbarSlot.on('pointerup', (e: PIXI.interaction.InteractionEvent) => {
                     // Use Case 1: Left Click  & Slot=Empty & Mouse=Painting >> Assign Mouse Item to Slot
@@ -96,7 +99,8 @@ export class QuickbarContainer extends Panel {
                         if (G.currentMouseState === G.mouseStates.PAINTING) {
                             // >> Slot == Empty (UC1)
                             if (!quickbarSlot.itemName) {
-                                quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
+                                quickbarSlot.content = InventoryContainer.createIcon(G.BPC.paintContainer.getItemName(), false)
+                                quickbarSlot.data = G.BPC.paintContainer.getItemName()
                             // >> Slot == Item (UC2)
                             } else {
                                 G.BPC.spawnEntityAtMouse(quickbarSlot.itemName)
@@ -110,7 +114,8 @@ export class QuickbarContainer extends Panel {
 
                     // >> Right Click (UC5)
                     } else if (e.data.button === 2) {
-                        quickbarSlot.unassignItem()
+                        quickbarSlot.content = undefined
+                        quickbarSlot.data = undefined
                     }
                 })
 
@@ -121,7 +126,7 @@ export class QuickbarContainer extends Panel {
     }
 
     public bindKeyToSlot(slot: number) {
-        const itemName = this.slots[slot].itemName
+        const itemName = this.slots[slot].data
         if (!itemName) return
 
         if (G.currentMouseState === G.mouseStates.PAINTING && G.BPC.paintContainer.getItemName() === itemName) {
@@ -144,7 +149,7 @@ export class QuickbarContainer extends Panel {
     }
 
     public getAllItemNames() {
-        return this.slots.map(s => s.itemName)
+        return this.slots.map(s => s.data)
     }
 
     setPosition() {
