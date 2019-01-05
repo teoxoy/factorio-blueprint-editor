@@ -1,5 +1,6 @@
 import { Blueprint } from './factorio-data/blueprint'
 import { ToolbarContainer } from './containers/toolbar'
+import { ToolbeltContainer } from './containers/toolbelt'
 import { BlueprintContainer } from './containers/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InventoryContainer } from './containers/inventory'
@@ -12,6 +13,7 @@ let hr = false
 let app: PIXI.Application
 
 let toolbarContainer: ToolbarContainer
+let toolbeltContainer: ToolbeltContainer
 let editEntityContainer: EditEntityContainer
 let inventoryContainer: InventoryContainer
 let BPC: BlueprintContainer
@@ -65,6 +67,7 @@ let railMoveOffset: IPoint = { x: 0, y: 0 }
 let openedGUIWindow: InventoryContainer | EditEntityContainer | undefined
 
 let moveSpeed = 10
+let toolbeltRows = 2
 
 const positionBPContainer = {
     x: 0,
@@ -122,6 +125,7 @@ const colors = {
         slot: 0x808080,
         button: {
             background: 0x646464,
+            rollover: 0xCCCCCC,
             active: 0xB16925
         }
     },
@@ -154,6 +158,7 @@ export default {
     app,
     keyboard,
     toolbarContainer,
+    toolbeltContainer,
     bpArea,
     positionBPContainer,
     sizeBPContainer,
@@ -165,5 +170,6 @@ export default {
     currentMouseState,
     colors,
     fontFamily,
-    moveSpeed
+    moveSpeed,
+    toolbeltRows
 }
