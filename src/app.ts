@@ -109,6 +109,17 @@ gui.add(G, 'hr').name('HR Entities').onChange((val: boolean) => {
 if (localStorage.getItem('moveSpeed')) G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
 gui.add(G, 'moveSpeed', 5, 20).name('Move Speed').onChange((val: boolean) => localStorage.setItem('moveSpeed', val.toString()))
 
+if (localStorage.getItem('toolbeltRows')) G.toolbeltRows = Number(localStorage.getItem('toolbeltRows'))
+gui.add(G, 'toolbeltRows', 1, 5, 1).name('Toolbelt Rows').onChange((val: number) => {
+    localStorage.setItem('toolbeltRows', val.toString())
+
+    const index = G.app.stage.getChildIndex(G.toolbeltContainer)
+    const itemNames = G.toolbeltContainer.getAllItemNames()
+    G.toolbeltContainer.destroy()
+    G.toolbeltContainer = new ToolbeltContainer(val, itemNames)
+    G.app.stage.addChildAt(G.toolbeltContainer, index)
+})
+
 const guiTheme = gui.addFolder('Theme')
 
 if (localStorage.getItem('darkTheme')) G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
@@ -191,16 +202,17 @@ const keybinds = JSON.parse(localStorage.getItem('keybinds')) || {
     d: 'd',
     increaseTileArea: ']',
     decreaseTileArea: '[',
-    toolbeltSlot01 : '1',
-    toolbeltSlot02 : '2',
-    toolbeltSlot03 : '3',
-    toolbeltSlot04 : '4',
-    toolbeltSlot05 : '5',
-    toolbeltSlot06 : 'shift+1',
-    toolbeltSlot07 : 'shift+2',
-    toolbeltSlot08 : 'shift+3',
-    toolbeltSlot09 : 'shift+4',
-    toolbeltSlot10 : 'shift+5',    
+    toolbeltSlot01: '1',
+    toolbeltSlot02: '2',
+    toolbeltSlot03: '3',
+    toolbeltSlot04: '4',
+    toolbeltSlot05: '5',
+    toolbeltSlot06: 'shift+1',
+    toolbeltSlot07: 'shift+2',
+    toolbeltSlot08: 'shift+3',
+    toolbeltSlot09: 'shift+4',
+    toolbeltSlot10: 'shift+5',
+    changeActiveToolbelt: 'x'
 }
 
 const keybindsProxy = new Proxy(keybinds, {
@@ -257,7 +269,7 @@ G.app.stage.addChild(G.inventoryContainer)
 G.toolbarContainer = new ToolbarContainer()
 G.app.stage.addChild(G.toolbarContainer)
 
-G.toolbeltContainer = new ToolbeltContainer()
+G.toolbeltContainer = new ToolbeltContainer(G.toolbeltRows)
 G.app.stage.addChild(G.toolbeltContainer)
 
 const infoContainer = new InfoContainer()
@@ -289,6 +301,12 @@ Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
     [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
 ].map(data => loadSpritesheet(data[0], data[1]))))
 .then(data => {
+    // Load toolbeltItemNames from localStorage
+    if (localStorage.getItem('toolbeltItemNames')) {
+        const toolbeltItemNames = JSON.parse(localStorage.getItem('toolbeltItemNames'))
+        G.toolbeltContainer.generateSlots(toolbeltItemNames)
+    }
+
     if (!bpSource) {
         G.bp = new Blueprint()
         G.BPC.initBP()
@@ -334,7 +352,10 @@ function loadBp(bpString: string, clearData = true) {
         .catch(error => console.error(error))
 }
 
-window.addEventListener('unload', () => G.app.destroy(true, true))
+window.addEventListener('unload', () => {
+    localStorage.setItem('toolbeltItemNames', JSON.stringify(G.toolbeltContainer.getAllItemNames()))
+    G.app.destroy(true, true)
+})
 
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
@@ -550,16 +571,17 @@ keyboardJS.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = fals
 keyboardJS.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
 keyboardJS.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)
 
-keyboardJS.bind(keybinds.toolbeltSlot01, null, () => G.toolbeltContainer.setSlot(0))
-keyboardJS.bind(keybinds.toolbeltSlot02, null, () => G.toolbeltContainer.setSlot(1))
-keyboardJS.bind(keybinds.toolbeltSlot03, null, () => G.toolbeltContainer.setSlot(2))
-keyboardJS.bind(keybinds.toolbeltSlot04, null, () => G.toolbeltContainer.setSlot(3))
-keyboardJS.bind(keybinds.toolbeltSlot05, null, () => G.toolbeltContainer.setSlot(4))
-keyboardJS.bind(keybinds.toolbeltSlot06, null, () => G.toolbeltContainer.setSlot(5))
-keyboardJS.bind(keybinds.toolbeltSlot07, null, () => G.toolbeltContainer.setSlot(6))
-keyboardJS.bind(keybinds.toolbeltSlot08, null, () => G.toolbeltContainer.setSlot(7))
-keyboardJS.bind(keybinds.toolbeltSlot09, null, () => G.toolbeltContainer.setSlot(8))
-keyboardJS.bind(keybinds.toolbeltSlot10, null, () => G.toolbeltContainer.setSlot(9))
+keyboardJS.bind(keybinds.toolbeltSlot01, () => G.toolbeltContainer.bindKeyToSlot(0))
+keyboardJS.bind(keybinds.toolbeltSlot02, () => G.toolbeltContainer.bindKeyToSlot(1))
+keyboardJS.bind(keybinds.toolbeltSlot03, () => G.toolbeltContainer.bindKeyToSlot(2))
+keyboardJS.bind(keybinds.toolbeltSlot04, () => G.toolbeltContainer.bindKeyToSlot(3))
+keyboardJS.bind(keybinds.toolbeltSlot05, () => G.toolbeltContainer.bindKeyToSlot(4))
+keyboardJS.bind(keybinds.toolbeltSlot06, () => G.toolbeltContainer.bindKeyToSlot(5))
+keyboardJS.bind(keybinds.toolbeltSlot07, () => G.toolbeltContainer.bindKeyToSlot(6))
+keyboardJS.bind(keybinds.toolbeltSlot08, () => G.toolbeltContainer.bindKeyToSlot(7))
+keyboardJS.bind(keybinds.toolbeltSlot09, () => G.toolbeltContainer.bindKeyToSlot(8))
+keyboardJS.bind(keybinds.toolbeltSlot10, () => G.toolbeltContainer.bindKeyToSlot(9))
+keyboardJS.bind(keybinds.changeActiveToolbelt, () => G.toolbeltContainer.changeActiveToolbelt())
 
 // hack for calling preventDefault() on all bound keys
 const keyCombos = keyboardJS._listeners.map((l: any) => l.keyCombo.sourceStr)

@@ -9,6 +9,8 @@ import { OverlayContainer } from './overlay'
 import { EntityPaintContainer } from './entityPaint'
 import { TileContainer } from './tile'
 import { TilePaintContainer } from './tilePaint'
+import util from '../util'
+import factorioData from '../factorio-data/factorioData'
 
 export class BlueprintContainer extends PIXI.Container {
 
@@ -322,6 +324,36 @@ export class BlueprintContainer extends PIXI.Container {
                     b.x < G.app.screen.width &&
                     b.y < G.app.screen.height
             }
+        }
+    }
+
+    spawnEntityAtMouse(itemName: string) {
+        const itemData = factorioData.getItem(itemName)
+        const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
+        const placeResult = itemData.place_result || tileResult
+
+        G.currentMouseState = G.mouseStates.PAINTING
+        if (this.paintContainer) this.paintContainer.destroy()
+
+        if (tileResult) {
+            this.paintContainer = new TilePaintContainer(
+                placeResult,
+                EntityContainer.getPositionFromData(
+                    G.gridData.position,
+                    { x: TilePaintContainer.size, y: TilePaintContainer.size }
+                )
+            )
+            this.tiles.addChild(this.paintContainer)
+        } else {
+            this.paintContainer = new EntityPaintContainer(
+                placeResult,
+                0,
+                EntityContainer.getPositionFromData(
+                    G.gridData.position,
+                    util.switchSizeBasedOnDirection(factorioData.getEntity(placeResult).size, 0)
+                )
+            )
+            this.addChild(this.paintContainer)
         }
     }
 

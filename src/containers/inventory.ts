@@ -156,32 +156,7 @@ export class InventoryContainer extends Dialog {
                         } else {
                             img.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                                 if (e.data.button === 0) {
-                                    G.currentMouseState = G.mouseStates.PAINTING
-
-                                    if (G.BPC.paintContainer) G.BPC.paintContainer.destroy()
-
-                                    const newPosition = e.data.getLocalPosition(G.BPC)
-
-                                    if (tileResult) {
-                                        G.BPC.paintContainer = new TilePaintContainer(
-                                            placeResult,
-                                            EntityContainer.getPositionFromData(
-                                                newPosition,
-                                                { x: TilePaintContainer.size, y: TilePaintContainer.size }
-                                            )
-                                        )
-                                        G.BPC.tiles.addChild(G.BPC.paintContainer)
-                                    } else {
-                                        G.BPC.paintContainer = new EntityPaintContainer(
-                                            placeResult,
-                                            0,
-                                            EntityContainer.getPositionFromData(
-                                                newPosition,
-                                                util.switchSizeBasedOnDirection(factorioData.getEntity(placeResult).size, 0)
-                                            )
-                                        )
-                                        G.BPC.addChild(G.BPC.paintContainer)
-                                    }
+                                    G.BPC.spawnEntityAtMouse(item.name)
 
                                     this.close()
                                 }
