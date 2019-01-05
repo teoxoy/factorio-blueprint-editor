@@ -4,17 +4,27 @@ import inventoryBundle from 'factorio-data/data/prototypes/inventoryLayout'
 import factorioData from '../factorio-data/factorioData'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import G from '../globals'
+import Dialog from '../controls/dialog'
+import Button from '../controls/button'
 
-export class InventoryContainer extends PIXI.Container {
+/**
+ * Inventory Dialog will be displayed to the user if there is a need to select an item
+ */
+export class InventoryContainer extends Dialog {
 
-    static createIcon(itemName: string) {
+    /**
+     * Create Icon from Sprite Item information
+     * @param item - Item to create Sprite from
+     * @param setAnchor - Temporar parameter to disable anchoring (this parameter may be removed again in the future)
+     */
+    static createIcon(itemName: string, setAnchor: boolean = true) {
         let item = factorioData.getItem(itemName)
         // only needed for inventory group icon
         if (!item) item = inventoryBundle.find(g => g.name === itemName)
 
         if (item.icon) {
             const icon = PIXI.Sprite.fromFrame(item.icon)
-            icon.anchor.set(0.5, 0.5)
+            if (setAnchor) icon.anchor.set(0.5, 0.5)
             return icon
         }
         if (item.icons) {
@@ -32,132 +42,47 @@ export class InventoryContainer extends PIXI.Container {
                         alpha: t.a
                     })]
                 }
-                sprite.anchor.set(0.5, 0.5)
+                if (setAnchor) sprite.anchor.set(0.5, 0.5)
                 img.addChild(sprite)
             }
             return img
         }
     }
 
-    // Pattern/Solution from https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
-    static shadeColor(color: number, percent: number): number {
-        const amt = Math.round(2.55 * percent)
-        const R = (color >> 16) + amt
-        const G = (color >> 8 & 0x00FF) + amt
-        const B = (color & 0x0000FF) + amt
-        // tslint:disable-next-line:whitespace
-        return 0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)
-    }
-
-    static drawRect(width: number, height: number, background: number, border = 1, alpha = 1, pressed = false): PIXI.Graphics {
-        const rectangle = new PIXI.Graphics()
-        rectangle.beginFill(background, alpha)
-        if (border === 0) {
-            rectangle.drawRect(0, 0, width, height)
-        } else {
-            if (border > 0) {
-                rectangle
-                    .lineStyle(1, InventoryContainer.shadeColor(background, pressed ? -12.5 : 22.5), 1, 0)
-                    .moveTo(0, height)
-                    .lineTo(0, 0)
-                    .lineTo(width, 0)
-                    .lineStyle(1, InventoryContainer.shadeColor(background, pressed ? 10 : -7.5), 1, 0)
-                    .lineTo(width, height)
-                    .lineTo(0, height)
-            }
-            if (border > 1) {
-                rectangle.lineStyle(1, InventoryContainer.shadeColor(background, pressed ? -10 : 20), 1, 0)
-                    .moveTo(1, height - 1)
-                    .lineTo(1, 1)
-                    .lineTo(width - 1, 1)
-                    .lineStyle(1, InventoryContainer.shadeColor(background, pressed ? 7.5 : -5), 1, 0)
-                    .lineTo(width - 1, height - 1)
-                    .lineTo(1, height - 1)
-            }
-            if (border > 2) {
-                rectangle.lineStyle(1, InventoryContainer.shadeColor(background, pressed ? -7.5 : 17.5), 1, 0)
-                    .moveTo(2, height - 2)
-                    .lineTo(2, 2)
-                    .lineTo(width - 2, 2)
-                    .lineStyle(1, InventoryContainer.shadeColor(background, pressed ? 5 : -2.5), 1, 0)
-                    .lineTo(width - 2, height - 2)
-                    .lineTo(2, height - 2)
-            }
-        }
-        rectangle.endFill()
-
-        return rectangle
-    }
-
-    static drawButton(width: number, height: number, itemName: string, group: boolean = false): PIXI.Container {
-        const button = new PIXI.Container()
-
-        const back = InventoryContainer.drawRect(width, height, G.colors.pannel.button.background, group ? 3 : 2)
-
-        const active = InventoryContainer.drawRect(width, height, G.colors.pannel.button.active, group ? 3 : 1, 1, true)
-        active.name = 'active'
-        active.visible = false
-
-        const over = InventoryContainer.drawRect(width, height, G.colors.pannel.button.active, 0, 0.6)
-        over.visible = false
-
-        const icon = InventoryContainer.createIcon(itemName)
-        icon.position.set(width / 2, height / 2)
-
-        button.addChild(back, active, over, icon)
-
-        button.on('pointerdown', () => {
-            over.visible = false
-        })
-        button.on('pointerover', () => {
-            if (!active.visible) over.visible = true
-        })
-        button.on('pointerout', () => {
-            over.visible = false
-        })
-
-        return button
-    }
-
     recipeVisualization: PIXI.Container
     inventoryContents: PIXI.Container
     itemTooltip: PIXI.Text
     iconGutter = 36
-    inventoryActiveGroup: PIXI.Container
-    inventoryGroup: Map<PIXI.Container, PIXI.Container> = new Map()
+    inventoryActiveGroup: Button
+    inventoryGroup: Map<Button, PIXI.Container> = new Map()
     title: PIXI.Text
 
-    // Cols
-    // Space @ 0+12                         ->12
-    // Items @ 12+(10*(36+2))               ->392
-    // Space @ 392+12                       ->404
-    iWidth = 12 + (10 * (36 + 2)) + 12
-
-    // Rows
-    // Space   @ 0+10                       ->10
-    // Title   @ 10+24                      ->34
-    // Space   @ 34+12                      ->46
-    // Groups  @ 46+68                      ->114
-    // Space   @ 114+12                     ->126
-    // Items   @ 126+(8*(36+2))             ->430
-    // Space   @ 430+12                     ->442
-    // Tooltip @ 442+24                     ->466
-    // Space   @ 466+12                     ->478
-    // Recipe  @ 478+36                     ->514
-    // Space   @ 514+12                     ->526
-    iHeight = 10 + 24 + 12 + 68 + 12 + (8 * (36 + 2)) + 12 + 24 + 12 + 36 + 12
-
+    /**
+     *
+     * Cols
+     * Space @ 0+12                         ->12
+     * Items @ 12+(10*(36+2))               ->392
+     * Space @ 392+12                       ->404
+     * Width : 12 + (10 * (36 + 2)) + 12,
+     *
+     * Rows
+     * Space   @ 0+10                       ->10
+     * Title   @ 10+24                      ->34
+     * Space   @ 34+12                      ->46
+     * Groups  @ 46+68                      ->114
+     * Space   @ 114+12                     ->126
+     * Items   @ 126+(8*(36+2))             ->430
+     * Space   @ 430+12                     ->442
+     * Tooltip @ 442+24                     ->466
+     * Space   @ 466+12                     ->478
+     * Recipe  @ 478+36                     ->514
+     * Space   @ 514+12                     ->526
+     * Height : 10 + 24 + 12 + 68 + 12 + (8 * (36 + 2)) + 12 + 24 + 12 + 36 + 12)
+     */
     constructor() {
-        super()
-
-        this.visible = false
-        this.interactive = true
-
-        this.setPosition()
-        window.addEventListener('resize', () => this.setPosition(), false)
-
-        const background = InventoryContainer.drawRect(this.iWidth, this.iHeight, G.colors.pannel.background, 2, 0.7)
-        this.addChild(background)
+        super(
+            /* Width  : */ 12 + (10 * (36 + 2)) + 12,
+            /* Height : */ 10 + 24 + 12 + 68 + 12 + (8 * (36 + 2)) + 12 + 24 + 12 + 36 + 12)
 
         const title = new PIXI.Text('Inventory', {
             fill: G.colors.text.normal,
@@ -190,13 +115,6 @@ export class InventoryContainer extends PIXI.Container {
         this.on('pointerout',  () => { if (G.BPC.paintContainer) G.BPC.paintContainer.show() })
     }
 
-    setPosition() {
-        this.position.set(
-            G.app.screen.width / 2 - this.iWidth / 2,
-            G.app.screen.height / 2 - this.iHeight / 2
-        )
-    }
-
     create(title?: string, filteredItems?: string[], cb?: (name: string) => void) {
         this.title.text = title ? title : 'Inventory'
 
@@ -220,7 +138,8 @@ export class InventoryContainer extends PIXI.Container {
                     if ((!filteredItems && placeResult && (factorioData.getEntity(placeResult) || factorioData.getTile(placeResult))) ||
                         filteredItems && filteredItems.includes(item.name)
                     ) {
-                        const img = InventoryContainer.drawButton(this.iconGutter, this.iconGutter, item.name)
+                        const img: Button = new Button(36, 36)
+                        img.content = InventoryContainer.createIcon(item.name, false)
 
                         if (nextK > 9) {
                             nextJ++
@@ -229,8 +148,6 @@ export class InventoryContainer extends PIXI.Container {
 
                         img.x = nextK * (this.iconGutter + 2)
                         img.y = 80 + nextJ * (this.iconGutter + 2)
-                        img.interactive = true
-                        img.buttonMode = true
 
                         if (filteredItems && filteredItems.includes(item.name)) {
                             img.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
@@ -269,26 +186,25 @@ export class InventoryContainer extends PIXI.Container {
             }
 
             if (groupHasItem) {
-                const img = InventoryContainer.drawButton(68, 68, inventoryBundle[i].name, true)
+                const img = new Button(68, 68, 3)
+                img.content = InventoryContainer.createIcon(inventoryBundle[i].name, false)
                 img.x = nextI * 70
                 img.y = 0
-                img.interactive = true
-                img.buttonMode = true
                 img.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     if (e.data.button === 0) {
                         if (img !== this.inventoryActiveGroup) {
                             this.inventoryGroup.get(this.inventoryActiveGroup).visible = false
-                            this.inventoryActiveGroup.getChildByName('active').visible = false
+                            this.inventoryActiveGroup.active = false
                             this.inventoryActiveGroup = img
                             this.inventoryGroup.get(img).visible = true
-                            this.inventoryActiveGroup.getChildByName('active').visible = true
+                            this.inventoryActiveGroup.active = true
                         }
                     }
                 })
 
                 if (nextI === 0) {
                     this.inventoryActiveGroup = img
-                    this.inventoryActiveGroup.getChildByName('active').visible = true
+                    this.inventoryActiveGroup.active = true
                 } else {
                     grObj.visible = false
                 }

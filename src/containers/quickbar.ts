@@ -1,41 +1,21 @@
 import G from '../globals'
 import { InventoryContainer } from './inventory'
+import Panel from '../controls/panel'
+import Slot from '../controls/slot'
 
-class QuickbarSlot extends PIXI.Container {
+export class QuickbarSlot extends Slot {
 
     public itemName: string
 
-    private iWidth = 36
-    private iHeight = 36
-
-    private background: PIXI.Container
-    private hoverEff: PIXI.Container
-    private content: PIXI.Container
-
     constructor() {
         super()
-
-        this.interactive = true
-        this.buttonMode = true
-
-        this.background = InventoryContainer.drawRect(this.iWidth, this.iHeight, G.colors.pannel.button.background, 1, 1, true)
-
-        // Hover Effect
-        this.hoverEff = InventoryContainer.drawRect(this.iWidth - 1, this.iHeight - 1, G.colors.pannel.button.rollover, 0, 0.5)
-        this.hoverEff.visible = false
-
-        this.on('pointerover', () => this.hoverEff.visible = true)
-        this.on('pointerout', () => this.hoverEff.visible = false)
-
-        this.addChild(this.background, this.hoverEff)
     }
 
     public assignItem(itemName: string) {
         this.itemName = itemName
 
         if (this.content) this.content.destroy()
-        this.content = InventoryContainer.createIcon(itemName)
-        this.content.position.set(this.iWidth / 2, this.iHeight / 2)
+        this.content = InventoryContainer.createIcon(itemName, false)
         this.addChild(this.content)
     }
 
@@ -45,7 +25,7 @@ class QuickbarSlot extends PIXI.Container {
     }
 }
 
-export class QuickbarContainer extends PIXI.Container {
+export class QuickbarContainer extends Panel {
 
     static createTriangleButton(width: number, height: number) {
         const button = new PIXI.Graphics()
@@ -74,20 +54,11 @@ export class QuickbarContainer extends PIXI.Container {
     private slotsContainer: PIXI.Container
 
     constructor(rows = 1, itemNames?: string[]) {
-        super()
+        super(442, 24 + rows * 38, G.colors.pannel.background, 0.7, 2)
 
         this.rows = rows
         this.iHeight = 24 + rows * 38
         this.slots = new Array<QuickbarSlot>(rows * 10)
-
-        this.interactive = true
-        this.interactiveChildren = true
-
-        this.setPosition()
-        window.addEventListener('resize', () => this.setPosition(), false)
-
-        const background = InventoryContainer.drawRect(this.iWidth, this.iHeight, G.colors.pannel.background, 2, 0.7)
-        this.addChild(background)
 
         this.on('pointerover', () => { if (G.BPC.paintContainer) G.BPC.paintContainer.hide() })
         this.on('pointerout',  () => { if (G.BPC.paintContainer) G.BPC.paintContainer.show() })
@@ -176,10 +147,10 @@ export class QuickbarContainer extends PIXI.Container {
         return this.slots.map(s => s.itemName)
     }
 
-    private setPosition() {
+    setPosition() {
         this.position.set(
-            G.app.screen.width / 2 - this.iWidth / 2,
-            G.app.screen.height - this.iHeight
+            G.app.screen.width / 2 - this.width / 2,
+            G.app.screen.height - this.height
         )
     }
 }

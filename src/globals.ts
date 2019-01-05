@@ -120,6 +120,18 @@ const colors = {
         link: 0x03A9F4,
         accent: 0xFF8A65
     },
+    button: {
+        background: 0x646464,
+        rollover: 0xB16925,
+        active: 0xB16925
+    },
+    slot: {
+        background: 0x646464,
+        rollover: 0xCCCCCC
+    },
+    dialog: {
+        background: 0x3A3A3A
+    },
     pannel: {
         background: 0x3A3A3A,
         slot: 0x808080,
