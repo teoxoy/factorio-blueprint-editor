@@ -1,6 +1,6 @@
 import { Blueprint } from './factorio-data/blueprint'
 import { ToolbarContainer } from './containers/toolbar'
-import { ToolbeltContainer } from './containers/toolbelt';
+import { ToolbeltContainer } from './containers/toolbelt'
 import { BlueprintContainer } from './containers/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InventoryContainer } from './containers/inventory'
@@ -67,6 +67,7 @@ let railMoveOffset: IPoint = { x: 0, y: 0 }
 let openedGUIWindow: InventoryContainer | EditEntityContainer | undefined
 
 let moveSpeed = 10
+let toolbeltRows = 2
 
 const positionBPContainer = {
     x: 0,
@@ -169,5 +170,6 @@ export default {
     currentMouseState,
     colors,
     fontFamily,
-    moveSpeed
+    moveSpeed,
+    toolbeltRows
 }
