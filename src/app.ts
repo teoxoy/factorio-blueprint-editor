@@ -98,7 +98,7 @@ const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
 
 Promise.all(
-    [bpSource ? util.findBPString(bpSource) : undefined]
+    [bpSource ? BPString.findBPString(bpSource) : undefined]
     .concat(spritesheetsLoader.getAllPromises())
 )
 .then(data => {
@@ -198,7 +198,7 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
         Promise.resolve(e.clipboardData.getData('text'))
 
     promise
-        .then(util.findBPString)
+        .then(BPString.findBPString)
         .then(loadBp)
         .then(() => loadingScreen.classList.remove('active'))
         .catch(error => console.error(error))
