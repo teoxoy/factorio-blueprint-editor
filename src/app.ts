@@ -155,7 +155,7 @@ window.addEventListener('unload', () => G.app.destroy(true, true))
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
-    if (G.keyboard.movingViaWASD()) return
+    if (keyboard.pressing.movingViaWASD) return
 
     if (G.currentMouseState === G.mouseStates.PANNING) {
         G.BPC.zoomPan.translateBy(e.movementX, e.movementY)
@@ -224,8 +224,6 @@ keyboard.bind(keybinds.picture, () => {
         console.log('Saved BP Image')
     })
 })
-
-keyboard.bind('shift', () => G.keyboard.shift = true, () => G.keyboard.shift = false)
 
 keyboard.bind(keybinds.overlay, () => {
     G.BPC.overlayContainer.overlay.visible = !G.BPC.overlayContainer.overlay.visible
@@ -361,10 +359,11 @@ function post(hist: IHistoryObject, addDel: string) {
     G.BPC.updateViewportCulling()
 }
 
-keyboard.bind(keybinds.w, () => G.keyboard.w = true, () => G.keyboard.w = false)
-keyboard.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = false)
-keyboard.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
-keyboard.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)
+keyboard.bind(keybinds.w, () => keyboard.pressing.w = true, () => keyboard.pressing.w = false)
+keyboard.bind(keybinds.a, () => keyboard.pressing.a = true, () => keyboard.pressing.a = false)
+keyboard.bind(keybinds.s, () => keyboard.pressing.s = true, () => keyboard.pressing.s = false)
+keyboard.bind(keybinds.d, () => keyboard.pressing.d = true, () => keyboard.pressing.d = false)
+keyboard.bind('shift', () => keyboard.pressing.shift = true, () => keyboard.pressing.shift = false)
 
 keyboard.bind(keybinds.quickbarSlot01, () => G.quickbarContainer.bindKeyToSlot(0))
 keyboard.bind(keybinds.quickbarSlot02, () => G.quickbarContainer.bindKeyToSlot(1))

@@ -11,6 +11,7 @@ import { TileContainer } from './tile'
 import { TilePaintContainer } from './tilePaint'
 import util from '../common/util'
 import factorioData from '../factorio-data/factorioData'
+import keyboard from '../keyboard'
 
 export class BlueprintContainer extends PIXI.Container {
 
@@ -95,13 +96,13 @@ export class BlueprintContainer extends PIXI.Container {
         }, false)
 
         G.app.ticker.add(() => {
-            const WSXOR = G.keyboard.w !== G.keyboard.s
-            const ADXOR = G.keyboard.a !== G.keyboard.d
+            const WSXOR = keyboard.pressing.w !== keyboard.pressing.s
+            const ADXOR = keyboard.pressing.a !== keyboard.pressing.d
             if (WSXOR || ADXOR) {
                 const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
                 this.zoomPan.translateBy(
-                    (ADXOR ? (G.keyboard.a ? 1 : -1) : 0) * finalSpeed,
-                    (WSXOR ? (G.keyboard.w ? 1 : -1) : 0) * finalSpeed
+                    (ADXOR ? (keyboard.pressing.a ? 1 : -1) : 0) * finalSpeed,
+                    (WSXOR ? (keyboard.pressing.w ? 1 : -1) : 0) * finalSpeed
                 )
                 this.zoomPan.updateTransform()
 
@@ -119,10 +120,10 @@ export class BlueprintContainer extends PIXI.Container {
             if (this.movingContainer) this.movingContainer.moveAtCursor()
             if (this.paintContainer) this.paintContainer.moveAtCursor()
 
-            if (G.keyboard.movingViaWASD()) return
+            if (keyboard.pressing.movingViaWASD) return
             if (this.hoverContainer) {
                 if (this.holdingRightClick) this.hoverContainer.removeContainer()
-                if (this.holdingLeftClick && G.keyboard.shift) this.hoverContainer.pasteData()
+                if (this.holdingLeftClick && keyboard.pressing.shift) this.hoverContainer.pasteData()
             }
         })
     }
@@ -360,7 +361,7 @@ export class BlueprintContainer extends PIXI.Container {
     pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
         if (G.currentMouseState === G.mouseStates.NONE) {
             if (e.data.button === 0) {
-                if (!G.openedGUIWindow && !G.keyboard.shift) {
+                if (!G.openedGUIWindow && !keyboard.pressing.shift) {
                     G.currentMouseState = G.mouseStates.PANNING
                 }
                 this.holdingLeftClick = true

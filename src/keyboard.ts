@@ -2,6 +2,17 @@ import keyboardJS from 'keyboardjs'
 
 // Wrapper for keyboardJS that adds some other functionality too
 
+const pressing = {
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+    shift: false,
+    get movingViaWASD() {
+        return this.w !== this.s || this.a !== this.d
+    }
+}
+
 let boundKeyCombos: Array<{
     keyCombo: string;
     pressHandler(e: keyboardJS.KeyEvent): void;
@@ -42,6 +53,7 @@ function changeKeyCombo(oldKeyCombo: string, newKeyCombo: string) {
 }
 
 export default {
+    pressing,
     bind,
     unbind: unbindKeyCombo,
     changeKeyCombo,

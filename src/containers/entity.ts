@@ -3,6 +3,7 @@ import factorioData from '../factorio-data/factorioData'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
+import keyboard from '../keyboard'
 
 const updateGroups = [
     {
@@ -230,10 +231,10 @@ export class EntityContainer extends PIXI.Container {
     pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
         console.log(G.bp.entity(this.entity_number).toJS())
         if (e.data.button === 0) {
-            if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow && !G.keyboard.shift) {
+            if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow && !keyboard.pressing.shift) {
                 G.editEntityContainer.create(this.entity_number)
             }
-            if (G.keyboard.shift) this.pasteData()
+            if (keyboard.pressing.shift) this.pasteData()
         } else if (e.data.button === 1) {
             if (this !== G.BPC.movingContainer && G.currentMouseState === G.mouseStates.NONE) {
                 G.bp.entityPositionGrid.removeTileData(this.entity_number, false)
@@ -262,7 +263,7 @@ export class EntityContainer extends PIXI.Container {
                 this.placeEntityContainerDown()
             }
         } else if (e.data.button === 2 && G.currentMouseState === G.mouseStates.NONE) {
-            if (G.keyboard.shift) {
+            if (keyboard.pressing.shift) {
                 G.copyData.recipe = G.bp.entity(this.entity_number).recipe
                 G.copyData.modules = G.bp.entity(this.entity_number).modulesList
             } else {

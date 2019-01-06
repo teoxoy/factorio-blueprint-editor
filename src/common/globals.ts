@@ -100,17 +100,6 @@ const mouseStates = {
     PANNING: 3
 }
 
-const keyboard = {
-    w: false,
-    a: false,
-    s: false,
-    d: false,
-    shift: false,
-    movingViaWASD() {
-        return this.w !== this.s || this.a !== this.d
-    }
-}
-
 let currentMouseState = mouseStates.NONE
 
 const copyData = {
@@ -174,7 +163,6 @@ export default {
     editEntityContainer,
     BPC,
     app,
-    keyboard,
     toolbarContainer,
     quickbarContainer,
     bpArea,
