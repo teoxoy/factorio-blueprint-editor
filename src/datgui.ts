@@ -122,6 +122,10 @@ export default function initDatGui() {
     })
     Object.keys(keybinds).forEach(k => keybindsFolder.add(keybindsProxy, k))
 
+    // Disables the keyboard shortcuts on mouseover
+    gui.domElement.addEventListener('mouseover', () => keyboard.pause())
+    gui.domElement.addEventListener('mouseout', () => keyboard.resume())
+
     return {
         guiBPIndex,
         keybinds
