@@ -5,23 +5,22 @@ import Slot from '../controls/slot'
 
 export class QuickbarSlot extends Slot {
 
-    public itemName: string
-
     constructor() {
         super()
     }
 
-    public assignItem(itemName: string) {
-        this.itemName = itemName
+    get itemName() {
+        return this.data
+    }
 
-        if (this.content) this.content.destroy()
+    public assignItem(itemName: string) {
+        this.data = itemName
         this.content = InventoryContainer.createIcon(itemName, false)
-        this.addChild(this.content)
     }
 
     public unassignItem() {
-        this.itemName = undefined
-        this.content.destroy()
+        this.data = undefined
+        this.content = undefined
     }
 }
 
@@ -81,10 +80,7 @@ export class QuickbarContainer extends Panel {
                 const quickbarSlot = new QuickbarSlot()
                 quickbarSlot.position.set(((36 + 2) * i) + (i > 4 ? 38 : 0), 38 * r)
 
-                if (itemNames && itemNames[(r * 10) + i]) {
-                    quickbarSlot.content = InventoryContainer.createIcon(itemNames[(r * 10) + i], false)
-                    quickbarSlot.data = itemNames[(r * 10) + i]
-                }
+                if (itemNames && itemNames[(r * 10) + i]) quickbarSlot.assignItem(itemNames[(r * 10) + i])
 
                 quickbarSlot.on('pointerup', (e: PIXI.interaction.InteractionEvent) => {
                     // Use Case 1: Left Click  & Slot=Empty & Mouse=Painting >> Assign Mouse Item to Slot
@@ -99,8 +95,7 @@ export class QuickbarContainer extends Panel {
                         if (G.currentMouseState === G.mouseStates.PAINTING) {
                             // >> Slot == Empty (UC1)
                             if (!quickbarSlot.itemName) {
-                                quickbarSlot.content = InventoryContainer.createIcon(G.BPC.paintContainer.getItemName(), false)
-                                quickbarSlot.data = G.BPC.paintContainer.getItemName()
+                                quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
                             // >> Slot == Item (UC2)
                             } else {
                                 G.BPC.spawnEntityAtMouse(quickbarSlot.itemName)
@@ -114,8 +109,7 @@ export class QuickbarContainer extends Panel {
 
                     // >> Right Click (UC5)
                     } else if (e.data.button === 2) {
-                        quickbarSlot.content = undefined
-                        quickbarSlot.data = undefined
+                        quickbarSlot.unassignItem()
                     }
                 })
 
@@ -126,7 +120,7 @@ export class QuickbarContainer extends Panel {
     }
 
     public bindKeyToSlot(slot: number) {
-        const itemName = this.slots[slot].data
+        const itemName = this.slots[slot].itemName
         if (!itemName) return
 
         if (G.currentMouseState === G.mouseStates.PAINTING && G.BPC.paintContainer.getItemName() === itemName) {
@@ -149,7 +143,7 @@ export class QuickbarContainer extends Panel {
     }
 
     public getAllItemNames() {
-        return this.slots.map(s => s.data)
+        return this.slots.map(s => s.itemName)
     }
 
     setPosition() {
