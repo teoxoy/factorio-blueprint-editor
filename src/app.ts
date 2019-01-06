@@ -23,7 +23,7 @@ import keyboardJS from 'keyboardjs'
 import { Book } from './factorio-data/book'
 import BPString from './factorio-data/BPString'
 
-import util from './util'
+import util from './common/util'
 import { InventoryContainer } from './panels/inventory'
 import G from './common/globals'
 import { EntityContainer } from './containers/entity'

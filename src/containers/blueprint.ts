@@ -9,7 +9,7 @@ import { OverlayContainer } from './overlay'
 import { EntityPaintContainer } from './entityPaint'
 import { TileContainer } from './tile'
 import { TilePaintContainer } from './tilePaint'
-import util from '../util'
+import util from '../common/util'
 import factorioData from '../factorio-data/factorioData'
 
 export class BlueprintContainer extends PIXI.Container {

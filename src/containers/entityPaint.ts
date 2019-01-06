@@ -1,5 +1,5 @@
 import G from '../common/globals'
-import util from '../util'
+import util from '../common/util'
 import factorioData from '../factorio-data/factorioData'
 import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'

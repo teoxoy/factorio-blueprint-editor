@@ -1,7 +1,7 @@
 import factorioData from '../factorio-data/factorioData'
 import { InventoryContainer } from '../panels/inventory'
 import G from '../common/globals'
-import util from '../util'
+import util from '../common/util'
 
 export class OverlayContainer extends PIXI.Container {
 

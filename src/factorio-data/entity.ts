@@ -1,7 +1,7 @@
 import { Blueprint } from './blueprint'
 import Immutable from 'immutable'
 import factorioData from './factorioData'
-import util from '../util'
+import util from '../common/util'
 import { Area } from './positionGrid'
 
 export default (rawEntity: any, BP: Blueprint) => ({
