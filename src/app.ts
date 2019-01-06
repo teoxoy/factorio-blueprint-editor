@@ -6,17 +6,6 @@ if (module.hot) module.hot.dispose(() => { window.location.reload(); throw new E
 import 'normalize.css'
 import './style.styl'
 
-import LRentitySpritesheetPNG from 'factorio-data/data/graphics/LREntitySpritesheet.png'
-import LRentitySpritesheetJSON from 'factorio-data/data/graphics/LREntitySpritesheet.json'
-import HRentitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
-import HRentitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
-import iconSpritesheetPNG from 'factorio-data/data/graphics/iconSpritesheet.png'
-import iconSpritesheetJSON from 'factorio-data/data/graphics/iconSpritesheet.json'
-import utilitySpritesheetPNG from 'factorio-data/data/graphics/utilitySpritesheet.png'
-import utilitySpritesheetJSON from 'factorio-data/data/graphics/utilitySpritesheet.json'
-import tilesSpritesheetPNG from 'factorio-data/data/graphics/tileSpritesheet.png'
-import tilesSpritesheetJSON from 'factorio-data/data/graphics/tileSpritesheet.json'
-
 import * as PIXI from 'pixi.js'
 import keyboardJS from 'keyboardjs'
 
@@ -38,6 +27,7 @@ import FileSaver from 'file-saver'
 import { TilePaintContainer } from './containers/tilePaint'
 import initDoorbell from './doorbell'
 import initDatGui from './datgui'
+import spritesheetsLoader from './spritesheetsLoader'
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
@@ -107,31 +97,10 @@ G.app.stage.addChild(G.quickbarContainer)
 const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
 
-function loadSpritesheet(src: string, json: any) {
-    return new Promise((resolve, reject) => {
-        const image = new Image()
-        image.src = src
-        image.onload = () => {
-            const tempCanvas = document.createElement('canvas')
-            tempCanvas.width = util.nearestPowerOf2(image.width)
-            tempCanvas.height = util.nearestPowerOf2(image.height)
-            tempCanvas.getContext('2d').drawImage(image, 0, 0)
-            const baseTexture = PIXI.BaseTexture.fromCanvas(tempCanvas)
-            new PIXI.Spritesheet(baseTexture, json)
-                .parse(() => G.app.renderer.plugins.prepare.upload(baseTexture, resolve))
-        }
-        image.onerror = reject
-    })
-}
-
-Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
-.concat([
-    G.hr ? [ HRentitySpritesheetPNG, HRentitySpritesheetJSON ] :
-    [ LRentitySpritesheetPNG, LRentitySpritesheetJSON ],
-    [ iconSpritesheetPNG, iconSpritesheetJSON ],
-    [ utilitySpritesheetPNG, utilitySpritesheetJSON ],
-    [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
-].map(data => loadSpritesheet(data[0], data[1]))))
+Promise.all(
+    [bpSource ? util.findBPString(bpSource) : undefined]
+    .concat(spritesheetsLoader.getAllPromises())
+)
 .then(data => {
     // Load quickbarItemNames from localStorage
     if (localStorage.getItem('quickbarItemNames')) {

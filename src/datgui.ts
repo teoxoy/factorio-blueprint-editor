@@ -2,16 +2,9 @@ import keyboardJS from 'keyboardjs'
 import G from './common/globals'
 import * as dat from 'dat.gui'
 import { QuickbarContainer } from './panels/quickbar'
-import { EntityContainer } from './containers/entity'
-
-import LRentitySpritesheetPNG from 'factorio-data/data/graphics/LREntitySpritesheet.png'
-import LRentitySpritesheetJSON from 'factorio-data/data/graphics/LREntitySpritesheet.json'
-import HRentitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
-import HRentitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
+import spritesheetsLoader from './spritesheetsLoader'
 
 export default function initDatGui() {
-    const loadingScreen = document.getElementById('loadingScreen')
-
     const gui = new dat.GUI({
         autoPlace: false,
         hideable: false,
@@ -39,26 +32,8 @@ export default function initDatGui() {
         .add(G, 'hr')
         .name('HR Entities')
         .onChange((val: boolean) => {
-            loadingScreen.classList.add('active')
             localStorage.setItem('hr', val.toString())
-
-            G.BPC.entities.children.forEach((eC: EntityContainer) => {
-                eC.entitySprites.forEach(eS => eS.destroy())
-                eC.entitySprites = []
-            })
-
-            Object.keys(PIXI.utils.TextureCache)
-                .filter(texture => texture.includes('graphics/entity/'))
-                .forEach(k => PIXI.utils.TextureCache[k].destroy(true))
-
-            loadSpritesheet(
-                G.hr ? HRentitySpritesheetPNG : LRentitySpritesheetPNG,
-                G.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
-            ).then(() => {
-                G.BPC.entities.children.forEach((eC: EntityContainer) => eC.redraw(false, false))
-                G.BPC.sortEntities()
-                loadingScreen.classList.remove('active')
-            })
+            spritesheetsLoader.changeQuality(G.hr)
         })
 
     if (localStorage.getItem('moveSpeed')) G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
