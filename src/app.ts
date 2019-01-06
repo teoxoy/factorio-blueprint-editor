@@ -37,8 +37,7 @@ import { InfoContainer } from './panels/info'
 import FileSaver from 'file-saver'
 import { TilePaintContainer } from './containers/tilePaint'
 import initDoorbell from './doorbell'
-
-import * as dat from 'dat.gui'
+import initDatGui from './datgui'
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
@@ -61,136 +60,10 @@ for (const p of params) {
     }
 }
 
-const gui = new dat.GUI({
-    autoPlace: false,
-    hideable: false,
-    closeOnTop: true
-})
-
-gui.closed = localStorage.getItem('dat.gui.closed') === 'true'
-window.addEventListener('unload', () => localStorage.setItem('dat.gui.closed', String(gui.closed)))
-
-document.body.appendChild(gui.domElement)
-
-const guiBPIndex = gui
-    .add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1)
-    .name('BP Index')
-    .onFinishChange((value: number) => {
-        if (G.book) {
-            G.bp = G.book.getBlueprint(value)
-            G.BPC.clearData()
-            G.BPC.initBP()
-        }
-    })
-
-if (localStorage.getItem('hr')) G.hr = localStorage.getItem('hr') === 'true'
-gui.add(G, 'hr').name('HR Entities').onChange((val: boolean) => {
-    loadingScreen.classList.add('active')
-    localStorage.setItem('hr', val.toString())
-
-    G.BPC.entities.children.forEach((eC: EntityContainer) => {
-        eC.entitySprites.forEach(eS => eS.destroy())
-        eC.entitySprites = []
-    })
-
-    Object.keys(PIXI.utils.TextureCache)
-        .filter(texture => texture.includes('graphics/entity/'))
-        .forEach(k => PIXI.utils.TextureCache[k].destroy(true))
-
-    loadSpritesheet(
-        G.hr ? HRentitySpritesheetPNG : LRentitySpritesheetPNG,
-        G.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
-    ).then(() => {
-        G.BPC.entities.children.forEach((eC: EntityContainer) => eC.redraw(false, false))
-        G.BPC.sortEntities()
-        loadingScreen.classList.remove('active')
-    })
-})
-
-if (localStorage.getItem('moveSpeed')) G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
-gui.add(G, 'moveSpeed', 5, 20).name('Move Speed').onChange((val: boolean) => localStorage.setItem('moveSpeed', val.toString()))
-
-if (localStorage.getItem('quickbarRows')) G.quickbarRows = Number(localStorage.getItem('quickbarRows'))
-gui.add(G, 'quickbarRows', 1, 5, 1).name('Quickbar Rows').onChange((val: number) => {
-    localStorage.setItem('quickbarRows', val.toString())
-
-    const index = G.app.stage.getChildIndex(G.quickbarContainer)
-    const itemNames = G.quickbarContainer.getAllItemNames()
-    G.quickbarContainer.destroy()
-    G.quickbarContainer = new QuickbarContainer(val, itemNames)
-    G.app.stage.addChildAt(G.quickbarContainer, index)
-})
-
-const guiTheme = gui.addFolder('Theme')
-
-if (localStorage.getItem('darkTheme')) G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
-guiTheme
-    .add(G.colors, 'darkTheme')
-    .name('Dark Mode')
-    .onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
-
-if (localStorage.getItem('pattern')) G.colors.pattern = localStorage.getItem('pattern')
-guiTheme
-    .add(G.colors, 'pattern', ['checker', 'grid'])
-    .name('Pattern')
-    .onChange((val: string) => {
-        G.BPC.generateGrid(val)
-        localStorage.setItem('pattern', val)
-    })
-
-const guiKeybinds = gui.addFolder('Keybinds')
-
+const { guiBPIndex, keybinds } = initDatGui()
 initDoorbell()
 
 const loadingScreen = document.getElementById('loadingScreen')
-
-const keybinds = JSON.parse(localStorage.getItem('keybinds')) || {
-    rotate: 'r',
-    pippete: 'q',
-    undo: 'modifier+z',
-    redo: 'modifier+y',
-    picture: 'shift+s',
-    clear: 'shift+n',
-    overlay: 'alt',
-    closeWindow: 'esc',
-    inventory: 'e',
-    focus: 'f',
-    w: 'w',
-    a: 'a',
-    s: 's',
-    d: 'd',
-    increaseTileArea: ']',
-    decreaseTileArea: '[',
-    quickbarSlot01: '1',
-    quickbarSlot02: '2',
-    quickbarSlot03: '3',
-    quickbarSlot04: '4',
-    quickbarSlot05: '5',
-    quickbarSlot06: 'shift+1',
-    quickbarSlot07: 'shift+2',
-    quickbarSlot08: 'shift+3',
-    quickbarSlot09: 'shift+4',
-    quickbarSlot10: 'shift+5',
-    changeActiveQuickbar: 'x'
-}
-
-const keybindsProxy = new Proxy(keybinds, {
-    set(obj: any, prop: string, value: string) {
-        if (!value) return true
-        changeKeybind(obj[prop], value)
-        obj[prop] = value
-        localStorage.setItem('keybinds', JSON.stringify(keybinds))
-        return true
-
-        function changeKeybind(old: string, val: string) {
-            keyboardJS._listeners.filter((k: any) => k.keyCombo.sourceStr === old).forEach((k: any) => {
-                keyboardJS.unbind(old, k.pressHandler, k.releaseHandler)
-                keyboardJS.bind(val, k.pressHandler, k.releaseHandler)
-            })
-        }
-    }
-})
-Object.keys(keybinds).forEach(k => guiKeybinds.add(keybindsProxy, k))
 
 G.app = new PIXI.Application({
     resolution: window.devicePixelRatio,
@@ -311,10 +184,7 @@ function loadBp(bpString: string, clearData = true) {
         .catch(error => console.error(error))
 }
 
-window.addEventListener('unload', () => {
-    localStorage.setItem('quickbarItemNames', JSON.stringify(G.quickbarContainer.getAllItemNames()))
-    G.app.destroy(true, true)
-})
+window.addEventListener('unload', () => G.app.destroy(true, true))
 
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
