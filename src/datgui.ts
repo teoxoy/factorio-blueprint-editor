@@ -1,4 +1,4 @@
-import keyboardJS from 'keyboardjs'
+import keyboard from './keyboard'
 import G from './common/globals'
 import * as dat from 'dat.gui'
 import { QuickbarContainer } from './panels/quickbar'
@@ -114,17 +114,10 @@ export default function initDatGui() {
     const keybindsProxy = new Proxy(keybinds, {
         set(obj: any, prop: string, value: string) {
             if (!value) return true
-            changeKeybind(obj[prop], value)
+            keyboard.changeKeyCombo(obj[prop], value)
             obj[prop] = value
             localStorage.setItem('keybinds', JSON.stringify(keybinds))
             return true
-
-            function changeKeybind(old: string, val: string) {
-                keyboardJS._listeners.filter((k: any) => k.keyCombo.sourceStr === old).forEach((k: any) => {
-                    keyboardJS.unbind(old, k.pressHandler, k.releaseHandler)
-                    keyboardJS.bind(val, k.pressHandler, k.releaseHandler)
-                })
-            }
         }
     })
     Object.keys(keybinds).forEach(k => keybindsFolder.add(keybindsProxy, k))

@@ -7,7 +7,6 @@ import 'normalize.css'
 import './style.styl'
 
 import * as PIXI from 'pixi.js'
-import keyboardJS from 'keyboardjs'
 
 import { Book } from './factorio-data/book'
 import BPString from './factorio-data/BPString'
@@ -25,6 +24,7 @@ import { InfoContainer } from './panels/info'
 import FileSaver from 'file-saver'
 import { TilePaintContainer } from './containers/tilePaint'
 import initDoorbell from './doorbell'
+import keyboard from './keyboard'
 import initDatGui from './datgui'
 import spritesheetsLoader from './spritesheetsLoader'
 
@@ -201,13 +201,13 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
         .catch(error => console.error(error))
 })
 
-keyboardJS.bind(keybinds.clear, () => {
+keyboard.bind(keybinds.clear, () => {
     G.BPC.clearData()
     G.bp = new Blueprint()
     G.BPC.initBP()
 })
 
-keyboardJS.bind(keybinds.picture, () => {
+keyboard.bind(keybinds.picture, () => {
     if (G.bp.isEmpty()) return
 
     G.BPC.enableRenderableOnChildren()
@@ -225,17 +225,17 @@ keyboardJS.bind(keybinds.picture, () => {
     })
 })
 
-keyboardJS.bind('shift', () => G.keyboard.shift = true, () => G.keyboard.shift = false)
+keyboard.bind('shift', () => G.keyboard.shift = true, () => G.keyboard.shift = false)
 
-keyboardJS.bind(keybinds.overlay, () => {
+keyboard.bind(keybinds.overlay, () => {
     G.BPC.overlayContainer.overlay.visible = !G.BPC.overlayContainer.overlay.visible
 })
 
-keyboardJS.bind('i', () => infoContainer.toggle())
+keyboard.bind('i', () => infoContainer.toggle())
 
-keyboardJS.bind(keybinds.closeWindow, () => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
+keyboard.bind(keybinds.closeWindow, () => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
 
-keyboardJS.bind(keybinds.inventory, () => {
+keyboard.bind(keybinds.inventory, () => {
     if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
         if (G.openedGUIWindow) {
             G.openedGUIWindow.close()
@@ -245,9 +245,9 @@ keyboardJS.bind(keybinds.inventory, () => {
     }
 })
 
-keyboardJS.bind(keybinds.focus, () => G.BPC.centerViewport())
+keyboard.bind(keybinds.focus, () => G.BPC.centerViewport())
 
-keyboardJS.bind(keybinds.rotate, () => {
+keyboard.bind(keybinds.rotate, () => {
     if (G.BPC.hoverContainer &&
         (G.currentMouseState === G.mouseStates.NONE || G.currentMouseState === G.mouseStates.MOVING)
     ) {
@@ -257,7 +257,7 @@ keyboardJS.bind(keybinds.rotate, () => {
     }
 })
 
-keyboardJS.bind(keybinds.pippete, () => {
+keyboard.bind(keybinds.pippete, () => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.currentMouseState = G.mouseStates.PAINTING
 
@@ -277,26 +277,26 @@ keyboardJS.bind(keybinds.pippete, () => {
     }
 })
 
-keyboardJS.bind(keybinds.increaseTileArea, () => {
+keyboard.bind(keybinds.increaseTileArea, () => {
     if (G.BPC.paintContainer instanceof TilePaintContainer) {
         G.BPC.paintContainer.increaseSize()
     }
 })
 
-keyboardJS.bind(keybinds.decreaseTileArea, () => {
+keyboard.bind(keybinds.decreaseTileArea, () => {
     if (G.BPC.paintContainer instanceof TilePaintContainer) {
         G.BPC.paintContainer.decreaseSize()
     }
 })
 
-keyboardJS.bind(keybinds.undo, () => {
+keyboard.bind(keybinds.undo, () => {
     G.bp.undo(
         hist => pre(hist, 'add'),
         hist => post(hist, 'del')
     )
 })
 
-keyboardJS.bind(keybinds.redo, () => {
+keyboard.bind(keybinds.redo, () => {
     G.bp.redo(
         hist => pre(hist, 'del'),
         hist => post(hist, 'add')
@@ -361,23 +361,19 @@ function post(hist: IHistoryObject, addDel: string) {
     G.BPC.updateViewportCulling()
 }
 
-keyboardJS.bind(keybinds.w, () => G.keyboard.w = true, () => G.keyboard.w = false)
-keyboardJS.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = false)
-keyboardJS.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
-keyboardJS.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)
+keyboard.bind(keybinds.w, () => G.keyboard.w = true, () => G.keyboard.w = false)
+keyboard.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = false)
+keyboard.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
+keyboard.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)
 
-keyboardJS.bind(keybinds.quickbarSlot01, () => G.quickbarContainer.bindKeyToSlot(0))
-keyboardJS.bind(keybinds.quickbarSlot02, () => G.quickbarContainer.bindKeyToSlot(1))
-keyboardJS.bind(keybinds.quickbarSlot03, () => G.quickbarContainer.bindKeyToSlot(2))
-keyboardJS.bind(keybinds.quickbarSlot04, () => G.quickbarContainer.bindKeyToSlot(3))
-keyboardJS.bind(keybinds.quickbarSlot05, () => G.quickbarContainer.bindKeyToSlot(4))
-keyboardJS.bind(keybinds.quickbarSlot06, () => G.quickbarContainer.bindKeyToSlot(5))
-keyboardJS.bind(keybinds.quickbarSlot07, () => G.quickbarContainer.bindKeyToSlot(6))
-keyboardJS.bind(keybinds.quickbarSlot08, () => G.quickbarContainer.bindKeyToSlot(7))
-keyboardJS.bind(keybinds.quickbarSlot09, () => G.quickbarContainer.bindKeyToSlot(8))
-keyboardJS.bind(keybinds.quickbarSlot10, () => G.quickbarContainer.bindKeyToSlot(9))
-keyboardJS.bind(keybinds.changeActiveQuickbar, () => G.quickbarContainer.changeActiveQuickbar())
-
-// hack for calling preventDefault() on all bound keys
-const keyCombos = keyboardJS._listeners.map((l: any) => l.keyCombo.sourceStr)
-keyboardJS.bind(keyCombos, e => e.preventDefault())
+keyboard.bind(keybinds.quickbarSlot01, () => G.quickbarContainer.bindKeyToSlot(0))
+keyboard.bind(keybinds.quickbarSlot02, () => G.quickbarContainer.bindKeyToSlot(1))
+keyboard.bind(keybinds.quickbarSlot03, () => G.quickbarContainer.bindKeyToSlot(2))
+keyboard.bind(keybinds.quickbarSlot04, () => G.quickbarContainer.bindKeyToSlot(3))
+keyboard.bind(keybinds.quickbarSlot05, () => G.quickbarContainer.bindKeyToSlot(4))
+keyboard.bind(keybinds.quickbarSlot06, () => G.quickbarContainer.bindKeyToSlot(5))
+keyboard.bind(keybinds.quickbarSlot07, () => G.quickbarContainer.bindKeyToSlot(6))
+keyboard.bind(keybinds.quickbarSlot08, () => G.quickbarContainer.bindKeyToSlot(7))
+keyboard.bind(keybinds.quickbarSlot09, () => G.quickbarContainer.bindKeyToSlot(8))
+keyboard.bind(keybinds.quickbarSlot10, () => G.quickbarContainer.bindKeyToSlot(9))
+keyboard.bind(keybinds.changeActiveQuickbar, () => G.quickbarContainer.changeActiveQuickbar())

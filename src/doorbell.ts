@@ -1,12 +1,12 @@
-import keyboardJS from 'keyboardjs'
+import keyboard from './keyboard'
 
 export default function initDoorbell() {
     window.doorbellOptions = {
         id: '9657',
         appKey: 'z1scfSY8hpBNiIFWxBg50tkhjvFKhHMdhfGNMp6YCUZVttoLOqtrlhk4ca9asDCy',
         windowLoaded: true,
-        onShow: () => keyboardJS.pause(),
-        onHide: () => keyboardJS.resume(),
+        onShow: () => keyboard.pause(),
+        onHide: () => keyboard.resume(),
         onInitialized: () => {
             let activeTag: HTMLElement
             const tagsDiv = document.createElement('div')
