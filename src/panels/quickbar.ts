@@ -1,4 +1,4 @@
-import G from '../globals'
+import G from '../common/globals'
 import { InventoryContainer } from './inventory'
 import Panel from '../controls/panel'
 import Slot from '../controls/slot'

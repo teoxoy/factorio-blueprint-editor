@@ -25,7 +25,7 @@ import BPString from './factorio-data/BPString'
 
 import util from './util'
 import { InventoryContainer } from './panels/inventory'
-import G from './globals'
+import G from './common/globals'
 import { EntityContainer } from './containers/entity'
 import { EntityPaintContainer } from './containers/entityPaint'
 import { BlueprintContainer } from './containers/blueprint'

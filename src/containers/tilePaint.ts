@@ -1,4 +1,4 @@
-import G from '../globals'
+import G from '../common/globals'
 import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { TileContainer } from './tile'

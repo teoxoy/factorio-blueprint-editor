@@ -1,4 +1,4 @@
-import G from '../globals'
+import G from '../common/globals'
 import { InventoryContainer } from './inventory'
 import { EntityContainer } from '../containers/entity'
 import Dialog from '../controls/dialog'

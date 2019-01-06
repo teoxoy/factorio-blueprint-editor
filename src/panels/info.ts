@@ -1,4 +1,4 @@
-import G from '../globals'
+import G from '../common/globals'
 import Dialog from '../controls/dialog'
 
 /** Info Dialog will be displayed to user to show important information about Factorio Blueprint Editor */

@@ -1,4 +1,4 @@
-import G from '../globals'
+import G from '../common/globals'
 import factorioData from '../factorio-data/factorioData'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'

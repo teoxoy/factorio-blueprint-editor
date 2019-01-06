@@ -1,4 +1,4 @@
-import G from '../globals'
+import G from '../common/globals'
 import { ZoomPan } from '../zoomPan'
 import { WiresContainer } from './wires'
 import { UnderlayContainer } from './underlay'

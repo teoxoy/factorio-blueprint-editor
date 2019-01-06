@@ -1,5 +1,5 @@
 import { EntityContainer } from './entity'
-import G from '../globals'
+import G from '../common/globals'
 import util from '../util'
 
 interface IConnection {

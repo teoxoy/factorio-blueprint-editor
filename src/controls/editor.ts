@@ -1,4 +1,4 @@
-import G from '../globals'
+import G from '../common/globals'
 import Dialog from './dialog'
 
 /** Editor */
