@@ -24,8 +24,7 @@ function getAllPromises() {
 }
 
 function changeQuality(hr: boolean) {
-    const loadingScreen = document.getElementById('loadingScreen')
-    loadingScreen.classList.add('active')
+    G.loadingScreen.show()
 
     G.BPC.entities.children.forEach((eC: EntityContainer) => {
         eC.entitySprites.forEach(eS => eS.destroy())
@@ -42,7 +41,7 @@ function changeQuality(hr: boolean) {
     ).then(() => {
         G.BPC.entities.children.forEach((eC: EntityContainer) => eC.redraw(false, false))
         G.BPC.sortEntities()
-        loadingScreen.classList.remove('active')
+        G.loadingScreen.hide()
     })
 }
 

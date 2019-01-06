@@ -12,7 +12,6 @@ import keyboardJS from 'keyboardjs'
 import { Book } from './factorio-data/book'
 import BPString from './factorio-data/BPString'
 
-import util from './common/util'
 import { InventoryContainer } from './panels/inventory'
 import G from './common/globals'
 import { EntityContainer } from './containers/entity'
@@ -52,8 +51,6 @@ for (const p of params) {
 
 const { guiBPIndex, keybinds } = initDatGui()
 initDoorbell()
-
-const loadingScreen = document.getElementById('loadingScreen')
 
 G.app = new PIXI.Application({
     resolution: window.devicePixelRatio,
@@ -121,7 +118,7 @@ Promise.all(
 
         G.gridData.update(window.innerWidth / 2, window.innerHeight / 2, G.BPC)
 
-        loadingScreen.classList.remove('active')
+        G.loadingScreen.hide()
     }
 })
 .catch(error => console.error(error))
@@ -191,7 +188,7 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
 document.addEventListener('paste', (e: ClipboardEvent) => {
     e.preventDefault()
 
-    loadingScreen.classList.add('active')
+    G.loadingScreen.show()
 
     const promise = navigator.clipboard && navigator.clipboard.readText ?
         navigator.clipboard.readText() :
@@ -200,7 +197,7 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
     promise
         .then(BPString.findBPString)
         .then(loadBp)
-        .then(() => loadingScreen.classList.remove('active'))
+        .then(() => G.loadingScreen.hide())
         .catch(error => console.error(error))
 })
 

@@ -18,6 +18,12 @@ let editEntityContainer: EditEntityContainer
 let inventoryContainer: InventoryContainer
 let BPC: BlueprintContainer
 
+const loadingScreen = {
+    el: document.getElementById('loadingScreen'),
+    show() { this.el.classList.add('active') },
+    hide() { this.el.classList.remove('active') }
+}
+
 const gridData = {
     x: 0,
     y: 0,
@@ -183,5 +189,6 @@ export default {
     colors,
     fontFamily,
     moveSpeed,
-    quickbarRows
+    quickbarRows,
+    loadingScreen
 }
