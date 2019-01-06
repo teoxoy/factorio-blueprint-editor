@@ -1,5 +1,5 @@
 import factorioData from '../factorio-data/factorioData'
-import { InventoryContainer } from './inventory'
+import { InventoryContainer } from '../panels/inventory'
 import G from '../globals'
 import util from '../util'
 

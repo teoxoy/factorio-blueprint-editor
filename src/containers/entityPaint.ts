@@ -4,7 +4,7 @@ import factorioData from '../factorio-data/factorioData'
 import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
-import { InventoryContainer } from './inventory'
+import { InventoryContainer } from '../panels/inventory'
 
 export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined

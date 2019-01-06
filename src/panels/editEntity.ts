@@ -1,6 +1,6 @@
 import G from '../globals'
 import { InventoryContainer } from './inventory'
-import { EntityContainer } from './entity'
+import { EntityContainer } from '../containers/entity'
 import Dialog from '../controls/dialog'
 import Slot from '../controls/slot'
 

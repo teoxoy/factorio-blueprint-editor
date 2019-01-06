@@ -3,7 +3,7 @@ import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { TileContainer } from './tile'
 import factorioData from '../factorio-data/factorioData'
-import { InventoryContainer } from './inventory'
+import { InventoryContainer } from '../panels/inventory'
 
 export class TilePaintContainer extends PIXI.Container {
 

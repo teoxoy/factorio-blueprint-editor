@@ -1,9 +1,9 @@
 import { Blueprint } from './factorio-data/blueprint'
-import { ToolbarContainer } from './containers/toolbar'
-import { QuickbarContainer } from './containers/quickbar'
+import { ToolbarContainer } from './panels/toolbar'
+import { QuickbarContainer } from './panels/quickbar'
 import { BlueprintContainer } from './containers/blueprint'
-import { EditEntityContainer } from './containers/editEntity'
-import { InventoryContainer } from './containers/inventory'
+import { EditEntityContainer } from './panels/editEntity'
+import { InventoryContainer } from './panels/inventory'
 import { Book } from './factorio-data/book'
 
 // tslint:disable:prefer-const
