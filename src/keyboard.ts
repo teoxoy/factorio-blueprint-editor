@@ -30,17 +30,13 @@ function unbindKeyCombo(keyCombo: string, pressHandler?: (e: keyboardJS.KeyEvent
         .filter(kc => kc.keyCombo !== keyCombo && kc.pressHandler !== pressHandler && kc.releaseHandler !== releaseHandler)
 }
 
-// Wrapper for bindKeyCombo that preventsDefault on the callbacks
+// Wrapper for bindKeyCombo that preventsDefault on the pressHandler
 function bind(keyCombo: string, pressHandler?: (e: keyboardJS.KeyEvent) => void, releaseHandler?: (e: keyboardJS.KeyEvent) => void) {
     const PRESSED = pressHandler
         ? (e: keyboardJS.KeyEvent) => { e.preventDefault(); pressHandler(e) }
         : undefined
 
-    const RELEASED = releaseHandler
-        ? (e: keyboardJS.KeyEvent) => { e.preventDefault(); releaseHandler(e) }
-        : undefined
-
-    bindKeyCombo(keyCombo, PRESSED, RELEASED)
+    bindKeyCombo(keyCombo, PRESSED, releaseHandler)
 }
 
 function changeKeyCombo(oldKeyCombo: string, newKeyCombo: string) {
