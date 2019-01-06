@@ -48,11 +48,15 @@ function changeKeyCombo(oldKeyCombo: string, newKeyCombo: string) {
         })
 }
 
+function disableOnElementFocus(element: HTMLElement) {
+    element.addEventListener('focus', keyboardJS.pause.bind(keyboardJS))
+    element.addEventListener('blur', keyboardJS.resume.bind(keyboardJS))
+}
+
 export default {
     pressing,
     bind,
     unbind: unbindKeyCombo,
     changeKeyCombo,
-    pause: keyboardJS.pause.bind(keyboardJS),
-    resume: keyboardJS.resume.bind(keyboardJS)
+    disableOnElementFocus
 }

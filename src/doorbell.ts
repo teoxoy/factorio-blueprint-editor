@@ -5,8 +5,6 @@ export default function initDoorbell() {
         id: '9657',
         appKey: 'z1scfSY8hpBNiIFWxBg50tkhjvFKhHMdhfGNMp6YCUZVttoLOqtrlhk4ca9asDCy',
         windowLoaded: true,
-        onShow: () => keyboard.pause(),
-        onHide: () => keyboard.resume(),
         onInitialized: () => {
             let activeTag: HTMLElement
             const tagsDiv = document.createElement('div')
@@ -38,6 +36,10 @@ export default function initDoorbell() {
 
             const fieldset = document.getElementById('doorbell-form').firstElementChild
             fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
+
+            // Disables the keyboard inside inputs
+            keyboard.disableOnElementFocus(document.getElementById('doorbell-feedback'))
+            keyboard.disableOnElementFocus(document.getElementById('doorbell-email'))
         }
     }
 
