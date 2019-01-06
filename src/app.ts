@@ -39,6 +39,10 @@ import { TilePaintContainer } from './containers/tilePaint'
 
 import * as dat from 'dat.gui'
 
+// Set the general application keyboard context
+// Needed to have seperate context's for input controls (i.e. Textbox)
+keyboardJS.setContext('app')
+
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
     document.getElementById('loadingMsg').innerHTML = text
