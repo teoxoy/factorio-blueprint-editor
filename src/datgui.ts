@@ -1,4 +1,4 @@
-import controls from './controls'
+import actions from './actions'
 import G from './common/globals'
 import * as dat from 'dat.gui'
 import { QuickbarContainer } from './panels/quickbar'
@@ -81,7 +81,7 @@ export default function initDatGui() {
     // Keybinds folder
     const keybindsFolder = gui.addFolder('Keybinds')
 
-    controls.forEachAction((action, actionName) => {
+    actions.forEachAction((action, actionName) => {
         keybindsFolder
             .add(action, 'keyCombo')
             .name(actionName.split(/(?=[A-Z1-9])/).join(' ').replace(/(\b\w)/, c => c.toUpperCase()))
@@ -90,13 +90,13 @@ export default function initDatGui() {
 
     keybindsFolder
         .add({
-            resetDefaults: () => controls.forEachAction(action => action.resetKeyCombo())
+            resetDefaults: () => actions.forEachAction(action => action.resetKeyCombo())
         }, 'resetDefaults')
         .name('Reset Defaults')
 
     // Disables the controls inside inputs
     for (const el of gui.domElement.getElementsByTagName('input')) {
-        controls.disableOnElementFocus(el)
+        actions.disableOnElementFocus(el)
     }
 
     return {

@@ -1,4 +1,4 @@
-import controls from './controls'
+import actions from './actions'
 
 export default function initDoorbell() {
     window.doorbellOptions = {
@@ -38,8 +38,8 @@ export default function initDoorbell() {
             fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
 
             // Disables the controls inside inputs
-            controls.disableOnElementFocus(document.getElementById('doorbell-feedback'))
-            controls.disableOnElementFocus(document.getElementById('doorbell-email'))
+            actions.disableOnElementFocus(document.getElementById('doorbell-feedback'))
+            actions.disableOnElementFocus(document.getElementById('doorbell-email'))
         }
     }
 

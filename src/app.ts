@@ -24,7 +24,7 @@ import { InfoContainer } from './panels/info'
 import FileSaver from 'file-saver'
 import { TilePaintContainer } from './containers/tilePaint'
 import initDoorbell from './doorbell'
-import controls from './controls'
+import actions from './actions'
 import initDatGui from './datgui'
 import spritesheetsLoader from './spritesheetsLoader'
 
@@ -155,7 +155,7 @@ window.addEventListener('unload', () => G.app.destroy(true, true))
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
-    if (controls.moving) return
+    if (actions.moving) return
 
     if (G.currentMouseState === G.mouseStates.PANNING) {
         G.BPC.zoomPan.translateBy(e.movementX, e.movementY)
@@ -201,13 +201,13 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
         .catch(error => console.error(error))
 })
 
-controls.actions.clear.bind(() => {
+actions.clear.bind(() => {
     G.BPC.clearData()
     G.bp = new Blueprint()
     G.BPC.initBP()
 })
 
-controls.actions.picture.bind(() => {
+actions.picture.bind(() => {
     if (G.bp.isEmpty()) return
 
     G.BPC.enableRenderableOnChildren()
@@ -225,15 +225,15 @@ controls.actions.picture.bind(() => {
     })
 })
 
-controls.actions.showInfo.bind(() => {
+actions.showInfo.bind(() => {
     G.BPC.overlayContainer.overlay.visible = !G.BPC.overlayContainer.overlay.visible
 })
 
-controls.actions.info.bind(() => infoContainer.toggle())
+actions.info.bind(() => infoContainer.toggle())
 
-controls.actions.closeWindow.bind(() => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
+actions.closeWindow.bind(() => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
 
-controls.actions.inventory.bind(() => {
+actions.inventory.bind(() => {
     if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
         if (G.openedGUIWindow) {
             G.openedGUIWindow.close()
@@ -243,9 +243,9 @@ controls.actions.inventory.bind(() => {
     }
 })
 
-controls.actions.focus.bind(() => G.BPC.centerViewport())
+actions.focus.bind(() => G.BPC.centerViewport())
 
-controls.actions.rotate.bind(() => {
+actions.rotate.bind(() => {
     if (G.BPC.hoverContainer &&
         (G.currentMouseState === G.mouseStates.NONE || G.currentMouseState === G.mouseStates.MOVING)
     ) {
@@ -255,7 +255,7 @@ controls.actions.rotate.bind(() => {
     }
 })
 
-controls.actions.pippete.bind(() => {
+actions.pippete.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.currentMouseState = G.mouseStates.PAINTING
 
@@ -275,26 +275,26 @@ controls.actions.pippete.bind(() => {
     }
 })
 
-controls.actions.increaseTileBuildingArea.bind(() => {
+actions.increaseTileBuildingArea.bind(() => {
     if (G.BPC.paintContainer instanceof TilePaintContainer) {
         G.BPC.paintContainer.increaseSize()
     }
 })
 
-controls.actions.decreaseTileBuildingArea.bind(() => {
+actions.decreaseTileBuildingArea.bind(() => {
     if (G.BPC.paintContainer instanceof TilePaintContainer) {
         G.BPC.paintContainer.decreaseSize()
     }
 })
 
-controls.actions.undo.bind(() => {
+actions.undo.bind(() => {
     G.bp.undo(
         hist => pre(hist, 'add'),
         hist => post(hist, 'del')
     )
 })
 
-controls.actions.redo.bind(() => {
+actions.redo.bind(() => {
     G.bp.redo(
         hist => pre(hist, 'del'),
         hist => post(hist, 'add')
@@ -359,14 +359,14 @@ function post(hist: IHistoryObject, addDel: string) {
     G.BPC.updateViewportCulling()
 }
 
-controls.actions.quickbar1.bind(() => G.quickbarContainer.bindKeyToSlot(0))
-controls.actions.quickbar2.bind(() => G.quickbarContainer.bindKeyToSlot(1))
-controls.actions.quickbar3.bind(() => G.quickbarContainer.bindKeyToSlot(2))
-controls.actions.quickbar4.bind(() => G.quickbarContainer.bindKeyToSlot(3))
-controls.actions.quickbar5.bind(() => G.quickbarContainer.bindKeyToSlot(4))
-controls.actions.quickbar6.bind(() => G.quickbarContainer.bindKeyToSlot(5))
-controls.actions.quickbar7.bind(() => G.quickbarContainer.bindKeyToSlot(6))
-controls.actions.quickbar8.bind(() => G.quickbarContainer.bindKeyToSlot(7))
-controls.actions.quickbar9.bind(() => G.quickbarContainer.bindKeyToSlot(8))
-controls.actions.quickbar10.bind(() => G.quickbarContainer.bindKeyToSlot(9))
-controls.actions.changeActiveQuickbar.bind(() => G.quickbarContainer.changeActiveQuickbar())
+actions.quickbar1.bind(() => G.quickbarContainer.bindKeyToSlot(0))
+actions.quickbar2.bind(() => G.quickbarContainer.bindKeyToSlot(1))
+actions.quickbar3.bind(() => G.quickbarContainer.bindKeyToSlot(2))
+actions.quickbar4.bind(() => G.quickbarContainer.bindKeyToSlot(3))
+actions.quickbar5.bind(() => G.quickbarContainer.bindKeyToSlot(4))
+actions.quickbar6.bind(() => G.quickbarContainer.bindKeyToSlot(5))
+actions.quickbar7.bind(() => G.quickbarContainer.bindKeyToSlot(6))
+actions.quickbar8.bind(() => G.quickbarContainer.bindKeyToSlot(7))
+actions.quickbar9.bind(() => G.quickbarContainer.bindKeyToSlot(8))
+actions.quickbar10.bind(() => G.quickbarContainer.bindKeyToSlot(9))
+actions.changeActiveQuickbar.bind(() => G.quickbarContainer.changeActiveQuickbar())

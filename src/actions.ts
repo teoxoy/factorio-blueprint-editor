@@ -119,18 +119,31 @@ const actions = {
     quickbar8: new Action('shift+3'),
     quickbar9: new Action('shift+4'),
     quickbar10: new Action('shift+5'),
-    changeActiveQuickbar: new Action('x')
-}
+    changeActiveQuickbar: new Action('x'),
 
-function moving() {
-    return  actions.moveUp.pressed !== actions.moveDown.pressed ||
-            actions.moveLeft.pressed !== actions.moveRight.pressed
+    moving() {
+        return this.moveUp.pressed !== this.moveDown.pressed ||
+            this.moveLeft.pressed !== this.moveRight.pressed
+    },
+
+    forEachAction(cb: (action: Action, actionName: string) => void) {
+        for (const actionName in this) {
+            if (this[actionName] instanceof Action) {
+                cb(this[actionName], actionName)
+            }
+        }
+    },
+
+    disableOnElementFocus(element: HTMLElement) {
+        element.addEventListener('focus', keyboardJS.pause.bind(keyboardJS))
+        element.addEventListener('blur', keyboardJS.resume.bind(keyboardJS))
+    }
 }
 
 function loadKeybinds() {
     const changedKeybinds = JSON.parse(localStorage.getItem('keybinds'))
     if (!changedKeybinds) return
-    forEachAction((action, actionName) => {
+    actions.forEachAction((action, actionName) => {
         if (changedKeybinds[actionName] !== undefined) {
             action.keyCombo = changedKeybinds[actionName]
         }
@@ -141,7 +154,7 @@ loadKeybinds()
 
 function saveKeybinds() {
     const changedKeybinds = {}
-    forEachAction((action, actionName) => {
+    actions.forEachAction((action, actionName) => {
         if (!action.usesDefaultKeyCombo) {
             changedKeybinds[actionName] = action.keyCombo
         }
@@ -155,20 +168,4 @@ function saveKeybinds() {
 
 window.addEventListener('unload', saveKeybinds)
 
-function disableOnElementFocus(element: HTMLElement) {
-    element.addEventListener('focus', keyboardJS.pause.bind(keyboardJS))
-    element.addEventListener('blur', keyboardJS.resume.bind(keyboardJS))
-}
-
-function forEachAction(cb: (action: Action, actionName: string) => void) {
-    for (const actionName in actions) {
-        cb(actions[actionName], actionName)
-    }
-}
-
-export default {
-    actions,
-    moving,
-    disableOnElementFocus,
-    forEachAction
-}
+export default actions
