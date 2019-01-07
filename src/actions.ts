@@ -121,7 +121,7 @@ const actions = {
     quickbar10: new Action('shift+5'),
     changeActiveQuickbar: new Action('x'),
 
-    moving() {
+    get moving() {
         return this.moveUp.pressed !== this.moveDown.pressed ||
             this.moveLeft.pressed !== this.moveRight.pressed
     },
