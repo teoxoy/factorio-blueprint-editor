@@ -11,7 +11,7 @@ import { TileContainer } from './tile'
 import { TilePaintContainer } from './tilePaint'
 import util from '../common/util'
 import factorioData from '../factorio-data/factorioData'
-import keyboard from '../keyboard'
+import controls from '../controls'
 
 export class BlueprintContainer extends PIXI.Container {
 
@@ -96,13 +96,13 @@ export class BlueprintContainer extends PIXI.Container {
         }, false)
 
         G.app.ticker.add(() => {
-            const WSXOR = keyboard.actions.moveUp.pressed !== keyboard.actions.moveDown.pressed
-            const ADXOR = keyboard.actions.moveLeft.pressed !== keyboard.actions.moveRight.pressed
+            const WSXOR = controls.actions.moveUp.pressed !== controls.actions.moveDown.pressed
+            const ADXOR = controls.actions.moveLeft.pressed !== controls.actions.moveRight.pressed
             if (WSXOR || ADXOR) {
                 const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
                 this.zoomPan.translateBy(
-                    (ADXOR ? (keyboard.actions.moveLeft.pressed ? 1 : -1) : 0) * finalSpeed,
-                    (WSXOR ? (keyboard.actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
+                    (ADXOR ? (controls.actions.moveLeft.pressed ? 1 : -1) : 0) * finalSpeed,
+                    (WSXOR ? (controls.actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
                 )
                 this.zoomPan.updateTransform()
 
@@ -120,10 +120,10 @@ export class BlueprintContainer extends PIXI.Container {
             if (this.movingContainer) this.movingContainer.moveAtCursor()
             if (this.paintContainer) this.paintContainer.moveAtCursor()
 
-            if (keyboard.moving) return
+            if (controls.moving) return
             if (this.hoverContainer) {
                 if (this.holdingRightClick) this.hoverContainer.removeContainer()
-                if (this.holdingLeftClick && keyboard.actions.copyPasteEntitySettings.pressed) this.hoverContainer.pasteData()
+                if (this.holdingLeftClick && controls.actions.copyPasteEntitySettings.pressed) this.hoverContainer.pasteData()
             }
         })
     }
@@ -361,7 +361,7 @@ export class BlueprintContainer extends PIXI.Container {
     pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
         if (G.currentMouseState === G.mouseStates.NONE) {
             if (e.data.button === 0) {
-                if (!G.openedGUIWindow && !keyboard.actions.copyPasteEntitySettings.pressed) {
+                if (!G.openedGUIWindow && !controls.actions.copyPasteEntitySettings.pressed) {
                     G.currentMouseState = G.mouseStates.PANNING
                 }
                 this.holdingLeftClick = true

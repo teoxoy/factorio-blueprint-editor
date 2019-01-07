@@ -1,4 +1,4 @@
-import keyboard from './keyboard'
+import controls from './controls'
 
 export default function initDoorbell() {
     window.doorbellOptions = {
@@ -37,9 +37,9 @@ export default function initDoorbell() {
             const fieldset = document.getElementById('doorbell-form').firstElementChild
             fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
 
-            // Disables the keyboard inside inputs
-            keyboard.disableOnElementFocus(document.getElementById('doorbell-feedback'))
-            keyboard.disableOnElementFocus(document.getElementById('doorbell-email'))
+            // Disables the controls inside inputs
+            controls.disableOnElementFocus(document.getElementById('doorbell-feedback'))
+            controls.disableOnElementFocus(document.getElementById('doorbell-email'))
         }
     }
 
