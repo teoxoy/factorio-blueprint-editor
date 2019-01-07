@@ -81,46 +81,18 @@ export default function initDatGui() {
     // Keybinds folder
     const keybindsFolder = gui.addFolder('Keybinds')
 
-    const keybinds = JSON.parse(localStorage.getItem('keybinds')) || {
-        rotate: 'r',
-        pippete: 'q',
-        undo: 'modifier+z',
-        redo: 'modifier+y',
-        picture: 'shift+s',
-        clear: 'shift+n',
-        overlay: 'alt',
-        closeWindow: 'esc',
-        inventory: 'e',
-        focus: 'f',
-        w: 'w',
-        a: 'a',
-        s: 's',
-        d: 'd',
-        increaseTileArea: ']',
-        decreaseTileArea: '[',
-        quickbarSlot01: '1',
-        quickbarSlot02: '2',
-        quickbarSlot03: '3',
-        quickbarSlot04: '4',
-        quickbarSlot05: '5',
-        quickbarSlot06: 'shift+1',
-        quickbarSlot07: 'shift+2',
-        quickbarSlot08: 'shift+3',
-        quickbarSlot09: 'shift+4',
-        quickbarSlot10: 'shift+5',
-        changeActiveQuickbar: 'x'
-    }
-
-    const keybindsProxy = new Proxy(keybinds, {
-        set(obj: any, prop: string, value: string) {
-            if (!value) return true
-            keyboard.changeKeyCombo(obj[prop], value)
-            obj[prop] = value
-            localStorage.setItem('keybinds', JSON.stringify(keybinds))
-            return true
-        }
+    keyboard.forEachAction((action, actionName) => {
+        keybindsFolder
+            .add(action, 'keyCombo')
+            .name(actionName.split(/(?=[A-Z1-9])/).join(' ').replace(/(\b\w)/, c => c.toUpperCase()))
+            .listen()
     })
-    Object.keys(keybinds).forEach(k => keybindsFolder.add(keybindsProxy, k))
+
+    keybindsFolder
+        .add({
+            resetDefaults: () => keyboard.forEachAction(action => action.resetKeyCombo())
+        }, 'resetDefaults')
+        .name('Reset Defaults')
 
     // Disables the keyboard inside inputs
     for (const el of gui.domElement.getElementsByTagName('input')) {
@@ -128,7 +100,6 @@ export default function initDatGui() {
     }
 
     return {
-        guiBPIndex,
-        keybinds
+        guiBPIndex
     }
 }

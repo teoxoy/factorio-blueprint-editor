@@ -231,10 +231,10 @@ export class EntityContainer extends PIXI.Container {
     pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
         console.log(G.bp.entity(this.entity_number).toJS())
         if (e.data.button === 0) {
-            if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow && !keyboard.pressing.shift) {
+            if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow && !keyboard.actions.copyPasteEntitySettings.pressed) {
                 G.editEntityContainer.create(this.entity_number)
             }
-            if (keyboard.pressing.shift) this.pasteData()
+            if (keyboard.actions.copyPasteEntitySettings.pressed) this.pasteData()
         } else if (e.data.button === 1) {
             if (this !== G.BPC.movingContainer && G.currentMouseState === G.mouseStates.NONE) {
                 G.bp.entityPositionGrid.removeTileData(this.entity_number, false)
@@ -263,7 +263,7 @@ export class EntityContainer extends PIXI.Container {
                 this.placeEntityContainerDown()
             }
         } else if (e.data.button === 2 && G.currentMouseState === G.mouseStates.NONE) {
-            if (keyboard.pressing.shift) {
+            if (keyboard.actions.copyPasteEntitySettings.pressed) {
                 G.copyData.recipe = G.bp.entity(this.entity_number).recipe
                 G.copyData.modules = G.bp.entity(this.entity_number).modulesList
             } else {

@@ -96,13 +96,13 @@ export class BlueprintContainer extends PIXI.Container {
         }, false)
 
         G.app.ticker.add(() => {
-            const WSXOR = keyboard.pressing.w !== keyboard.pressing.s
-            const ADXOR = keyboard.pressing.a !== keyboard.pressing.d
+            const WSXOR = keyboard.actions.moveUp.pressed !== keyboard.actions.moveDown.pressed
+            const ADXOR = keyboard.actions.moveLeft.pressed !== keyboard.actions.moveRight.pressed
             if (WSXOR || ADXOR) {
                 const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
                 this.zoomPan.translateBy(
-                    (ADXOR ? (keyboard.pressing.a ? 1 : -1) : 0) * finalSpeed,
-                    (WSXOR ? (keyboard.pressing.w ? 1 : -1) : 0) * finalSpeed
+                    (ADXOR ? (keyboard.actions.moveLeft.pressed ? 1 : -1) : 0) * finalSpeed,
+                    (WSXOR ? (keyboard.actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
                 )
                 this.zoomPan.updateTransform()
 
@@ -120,10 +120,10 @@ export class BlueprintContainer extends PIXI.Container {
             if (this.movingContainer) this.movingContainer.moveAtCursor()
             if (this.paintContainer) this.paintContainer.moveAtCursor()
 
-            if (keyboard.pressing.movingViaWASD) return
+            if (keyboard.moving) return
             if (this.hoverContainer) {
                 if (this.holdingRightClick) this.hoverContainer.removeContainer()
-                if (this.holdingLeftClick && keyboard.pressing.shift) this.hoverContainer.pasteData()
+                if (this.holdingLeftClick && keyboard.actions.copyPasteEntitySettings.pressed) this.hoverContainer.pasteData()
             }
         })
     }
@@ -361,7 +361,7 @@ export class BlueprintContainer extends PIXI.Container {
     pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
         if (G.currentMouseState === G.mouseStates.NONE) {
             if (e.data.button === 0) {
-                if (!G.openedGUIWindow && !keyboard.pressing.shift) {
+                if (!G.openedGUIWindow && !keyboard.actions.copyPasteEntitySettings.pressed) {
                     G.currentMouseState = G.mouseStates.PANNING
                 }
                 this.holdingLeftClick = true

@@ -49,7 +49,7 @@ for (const p of params) {
     }
 }
 
-const { guiBPIndex, keybinds } = initDatGui()
+const { guiBPIndex } = initDatGui()
 initDoorbell()
 
 G.app = new PIXI.Application({
@@ -155,7 +155,7 @@ window.addEventListener('unload', () => G.app.destroy(true, true))
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
-    if (keyboard.pressing.movingViaWASD) return
+    if (keyboard.moving) return
 
     if (G.currentMouseState === G.mouseStates.PANNING) {
         G.BPC.zoomPan.translateBy(e.movementX, e.movementY)
@@ -201,13 +201,13 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
         .catch(error => console.error(error))
 })
 
-keyboard.bind(keybinds.clear, () => {
+keyboard.actions.clear.bind(() => {
     G.BPC.clearData()
     G.bp = new Blueprint()
     G.BPC.initBP()
 })
 
-keyboard.bind(keybinds.picture, () => {
+keyboard.actions.picture.bind(() => {
     if (G.bp.isEmpty()) return
 
     G.BPC.enableRenderableOnChildren()
@@ -225,15 +225,15 @@ keyboard.bind(keybinds.picture, () => {
     })
 })
 
-keyboard.bind(keybinds.overlay, () => {
+keyboard.actions.showInfo.bind(() => {
     G.BPC.overlayContainer.overlay.visible = !G.BPC.overlayContainer.overlay.visible
 })
 
-keyboard.bind('i', () => infoContainer.toggle())
+keyboard.actions.info.bind(() => infoContainer.toggle())
 
-keyboard.bind(keybinds.closeWindow, () => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
+keyboard.actions.closeWindow.bind(() => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
 
-keyboard.bind(keybinds.inventory, () => {
+keyboard.actions.inventory.bind(() => {
     if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
         if (G.openedGUIWindow) {
             G.openedGUIWindow.close()
@@ -243,9 +243,9 @@ keyboard.bind(keybinds.inventory, () => {
     }
 })
 
-keyboard.bind(keybinds.focus, () => G.BPC.centerViewport())
+keyboard.actions.focus.bind(() => G.BPC.centerViewport())
 
-keyboard.bind(keybinds.rotate, () => {
+keyboard.actions.rotate.bind(() => {
     if (G.BPC.hoverContainer &&
         (G.currentMouseState === G.mouseStates.NONE || G.currentMouseState === G.mouseStates.MOVING)
     ) {
@@ -255,7 +255,7 @@ keyboard.bind(keybinds.rotate, () => {
     }
 })
 
-keyboard.bind(keybinds.pippete, () => {
+keyboard.actions.pippete.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.currentMouseState = G.mouseStates.PAINTING
 
@@ -275,26 +275,26 @@ keyboard.bind(keybinds.pippete, () => {
     }
 })
 
-keyboard.bind(keybinds.increaseTileArea, () => {
+keyboard.actions.increaseTileBuildingArea.bind(() => {
     if (G.BPC.paintContainer instanceof TilePaintContainer) {
         G.BPC.paintContainer.increaseSize()
     }
 })
 
-keyboard.bind(keybinds.decreaseTileArea, () => {
+keyboard.actions.decreaseTileBuildingArea.bind(() => {
     if (G.BPC.paintContainer instanceof TilePaintContainer) {
         G.BPC.paintContainer.decreaseSize()
     }
 })
 
-keyboard.bind(keybinds.undo, () => {
+keyboard.actions.undo.bind(() => {
     G.bp.undo(
         hist => pre(hist, 'add'),
         hist => post(hist, 'del')
     )
 })
 
-keyboard.bind(keybinds.redo, () => {
+keyboard.actions.redo.bind(() => {
     G.bp.redo(
         hist => pre(hist, 'del'),
         hist => post(hist, 'add')
@@ -359,20 +359,14 @@ function post(hist: IHistoryObject, addDel: string) {
     G.BPC.updateViewportCulling()
 }
 
-keyboard.bind(keybinds.w, () => keyboard.pressing.w = true, () => keyboard.pressing.w = false)
-keyboard.bind(keybinds.a, () => keyboard.pressing.a = true, () => keyboard.pressing.a = false)
-keyboard.bind(keybinds.s, () => keyboard.pressing.s = true, () => keyboard.pressing.s = false)
-keyboard.bind(keybinds.d, () => keyboard.pressing.d = true, () => keyboard.pressing.d = false)
-keyboard.bind('shift', () => keyboard.pressing.shift = true, () => keyboard.pressing.shift = false)
-
-keyboard.bind(keybinds.quickbarSlot01, () => G.quickbarContainer.bindKeyToSlot(0))
-keyboard.bind(keybinds.quickbarSlot02, () => G.quickbarContainer.bindKeyToSlot(1))
-keyboard.bind(keybinds.quickbarSlot03, () => G.quickbarContainer.bindKeyToSlot(2))
-keyboard.bind(keybinds.quickbarSlot04, () => G.quickbarContainer.bindKeyToSlot(3))
-keyboard.bind(keybinds.quickbarSlot05, () => G.quickbarContainer.bindKeyToSlot(4))
-keyboard.bind(keybinds.quickbarSlot06, () => G.quickbarContainer.bindKeyToSlot(5))
-keyboard.bind(keybinds.quickbarSlot07, () => G.quickbarContainer.bindKeyToSlot(6))
-keyboard.bind(keybinds.quickbarSlot08, () => G.quickbarContainer.bindKeyToSlot(7))
-keyboard.bind(keybinds.quickbarSlot09, () => G.quickbarContainer.bindKeyToSlot(8))
-keyboard.bind(keybinds.quickbarSlot10, () => G.quickbarContainer.bindKeyToSlot(9))
-keyboard.bind(keybinds.changeActiveQuickbar, () => G.quickbarContainer.changeActiveQuickbar())
+keyboard.actions.quickbar1.bind(() => G.quickbarContainer.bindKeyToSlot(0))
+keyboard.actions.quickbar2.bind(() => G.quickbarContainer.bindKeyToSlot(1))
+keyboard.actions.quickbar3.bind(() => G.quickbarContainer.bindKeyToSlot(2))
+keyboard.actions.quickbar4.bind(() => G.quickbarContainer.bindKeyToSlot(3))
+keyboard.actions.quickbar5.bind(() => G.quickbarContainer.bindKeyToSlot(4))
+keyboard.actions.quickbar6.bind(() => G.quickbarContainer.bindKeyToSlot(5))
+keyboard.actions.quickbar7.bind(() => G.quickbarContainer.bindKeyToSlot(6))
+keyboard.actions.quickbar8.bind(() => G.quickbarContainer.bindKeyToSlot(7))
+keyboard.actions.quickbar9.bind(() => G.quickbarContainer.bindKeyToSlot(8))
+keyboard.actions.quickbar10.bind(() => G.quickbarContainer.bindKeyToSlot(9))
+keyboard.actions.changeActiveQuickbar.bind(() => G.quickbarContainer.changeActiveQuickbar())
