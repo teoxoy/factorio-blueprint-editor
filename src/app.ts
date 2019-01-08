@@ -79,6 +79,9 @@ PIXI.Graphics.CURVES.adaptive = true
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)
 
+// Hack for plugging the mouse into keyboardJS
+actions.attachEventsToContainer(G.BPC)
+
 G.editEntityContainer = new EditEntityContainer()
 G.app.stage.addChild(G.editEntityContainer)
 
@@ -155,9 +158,7 @@ window.addEventListener('unload', () => G.app.destroy(true, true))
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
-    if (actions.moving) return
-
-    if (G.currentMouseState === G.mouseStates.PANNING) {
+    if (G.currentMouseState === G.mouseStates.PANNING && !actions.movingViaKeyboard) {
         G.BPC.zoomPan.translateBy(e.movementX, e.movementY)
         G.BPC.zoomPan.updateTransform()
         G.BPC.updateViewportCulling()
@@ -358,6 +359,62 @@ function post(hist: IHistoryObject, addDel: string) {
     G.BPC.updateOverlay()
     G.BPC.updateViewportCulling()
 }
+
+actions.pan.bind(() => {
+    if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.currentMouseState = G.mouseStates.PANNING
+    }
+}, () => {
+    if (G.currentMouseState === G.mouseStates.PANNING) {
+        G.currentMouseState = G.mouseStates.NONE
+    }
+})
+
+actions.build.bind(e => {
+    if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
+        G.BPC.paintContainer.placeEntityContainer()
+    }
+})
+
+actions.mine.bind(() => {
+    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.removeContainer()
+    }
+    if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
+        G.BPC.paintContainer.removeContainerUnder()
+    }
+})
+
+actions.moveEntity.bind(() => {
+    if (!G.BPC.movingContainer && G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.pickUpEntityContainer()
+        return
+    }
+    if (G.BPC.movingContainer) {
+        G.BPC.movingContainer.placeDownEntityContainer()
+    }
+})
+
+actions.openEntityGUI.bind(() => {
+    if (G.BPC.hoverContainer) {
+        console.log(G.bp.entity(G.BPC.hoverContainer.entity_number).toJS())
+
+        if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow) {
+            G.editEntityContainer.create(G.BPC.hoverContainer.entity_number)
+        }
+    }
+})
+
+actions.copyEntitySettings.bind(() => {
+    if (G.BPC.hoverContainer) {
+        G.copyData.recipe = G.bp.entity(G.BPC.hoverContainer.entity_number).recipe
+        G.copyData.modules = G.bp.entity(G.BPC.hoverContainer.entity_number).modulesList
+    }
+})
+
+actions.pasteEntitySettings.bind(() => {
+    if (G.BPC.hoverContainer) G.BPC.hoverContainer.pasteData()
+})
 
 actions.quickbar1.bind(() => G.quickbarContainer.bindKeyToSlot(0))
 actions.quickbar2.bind(() => G.quickbarContainer.bindKeyToSlot(1))

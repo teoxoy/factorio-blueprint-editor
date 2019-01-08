@@ -1,4 +1,5 @@
 import keyboardJS from 'keyboardjs'
+import G from './common/globals'
 
 class Action {
 
@@ -7,8 +8,8 @@ class Action {
     private m_active = true
     private m_keyCombo: string
     private handlers: Array<{
-        press(e: keyboardJS.KeyEvent): void;
-        release(e: keyboardJS.KeyEvent): void;
+        press(e?: keyboardJS.KeyEvent): void;
+        release(e?: keyboardJS.KeyEvent): void;
     }> = []
 
     constructor(defaultKeyCombo: string) {
@@ -61,7 +62,7 @@ class Action {
     bind(pressHandler?: (e: keyboardJS.KeyEvent) => void, releaseHandler?: (e: keyboardJS.KeyEvent) => void) {
         // Wrap pressHandler to preventDefault
         const PRESSED = pressHandler
-            ? (e: keyboardJS.KeyEvent) => { e.preventDefault(); pressHandler(e) }
+            ? (e: keyboardJS.KeyEvent) => { if (e && e.preventDefault) { e.preventDefault() } pressHandler(e) }
             : undefined
 
         if (this.active) keyboardJS.bind(this.keyCombo, PRESSED, releaseHandler)
@@ -74,6 +75,10 @@ class Action {
     unbind() {
         this.handlers.forEach(h => keyboardJS.unbind(this.keyCombo, h.press, h.release))
         this.handlers = []
+    }
+
+    call() {
+        this.handlers.forEach(h => h.press())
     }
 }
 
@@ -93,6 +98,8 @@ const actions = {
     undo: new Action('modifier+z'),
     redo: new Action('modifier+y'),
     info: new Action('i'),
+    pan: new Action('lclick'),
+    moveEntity: new Action('mclick'),
 
     moveUp: new ToggleAction('w'),
     moveLeft: new ToggleAction('a'),
@@ -100,7 +107,11 @@ const actions = {
     moveRight: new ToggleAction('d'),
 
     inventory: new Action('e'),
-    copyPasteEntitySettings: new ToggleAction('shift'),
+    build: new ToggleAction('lclick'),
+    mine: new ToggleAction('rclick'),
+    copyEntitySettings: new Action('shift+rclick'),
+    pasteEntitySettings: new ToggleAction('shift+lclick'),
+    openEntityGUI: new Action('lclick'),
     showInfo: new Action('alt'),
     pippete: new Action('q'),
     rotate: new Action('r'),
@@ -121,9 +132,10 @@ const actions = {
     quickbar10: new Action('shift+5'),
     changeActiveQuickbar: new Action('x'),
 
-    get moving() {
-        return this.moveUp.pressed !== this.moveDown.pressed ||
-            this.moveLeft.pressed !== this.moveRight.pressed
+    get movingViaKeyboard() {
+        return (this.moveUp.pressed !== this.moveDown.pressed ||
+            this.moveLeft.pressed !== this.moveRight.pressed) &&
+            G.currentMouseState !== G.mouseStates.PANNING
     },
 
     forEachAction(cb: (action: Action, actionName: string) => void) {
@@ -137,8 +149,25 @@ const actions = {
     disableOnElementFocus(element: HTMLElement) {
         element.addEventListener('focus', keyboardJS.pause.bind(keyboardJS))
         element.addEventListener('blur', keyboardJS.resume.bind(keyboardJS))
+    },
+
+    // Hack for plugging the mouse into keyboardJS
+    attachEventsToContainer(stage: PIXI.Container) {
+        stage.on('pointerdown', e => keyboardJS.pressKey(e.data.button + 300, e))
+        stage.on('pointerup', e => keyboardJS.releaseKey(e.data.button + 300, e))
     }
 }
+
+// Hack for plugging the mouse into keyboardJS
+keyboardJS._locale.bindKeyCode(300, ['lclick'])
+keyboardJS._locale.bindKeyCode(301, ['mclick'])
+keyboardJS._locale.bindKeyCode(302, ['rclick'])
+
+G.gridData.onUpdate(() => {
+    if (actions.build.pressed) actions.build.call()
+    if (actions.mine.pressed) actions.mine.call()
+    if (actions.pasteEntitySettings.pressed) actions.pasteEntitySettings.call()
+})
 
 function loadKeybinds() {
     const changedKeybinds = JSON.parse(localStorage.getItem('keybinds'))

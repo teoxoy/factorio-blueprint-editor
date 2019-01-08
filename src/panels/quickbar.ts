@@ -82,7 +82,7 @@ export class QuickbarContainer extends Panel {
 
                 if (itemNames && itemNames[(r * 10) + i]) quickbarSlot.assignItem(itemNames[(r * 10) + i])
 
-                quickbarSlot.on('pointerup', (e: PIXI.interaction.InteractionEvent) => {
+                quickbarSlot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     // Use Case 1: Left Click  & Slot=Empty & Mouse=Painting >> Assign Mouse Item to Slot
                     // Use Case 2: Left Click  & Slot=Item  & Mouse=Painting >> Assign Slot Item to Mouse
                     // Use Case 3: Left Click  & Slot=Empty & Mouse=Empty    >> Do Nothing

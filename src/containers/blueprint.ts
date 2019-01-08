@@ -15,7 +15,6 @@ import actions from '../actions'
 
 export class BlueprintContainer extends PIXI.Container {
 
-    holdingLeftClick: boolean
     grid: PIXI.extras.TilingSprite
     wiresContainer: WiresContainer
     overlayContainer: OverlayContainer
@@ -26,7 +25,6 @@ export class BlueprintContainer extends PIXI.Container {
     tileSprites: PIXI.Container
     entitySprites: PIXI.Container
     zoomPan: ZoomPan
-    holdingRightClick: boolean
     pgOverlay: PIXI.Graphics
     hoverContainer: undefined | EntityContainer
     movingContainer: undefined | EntityContainer
@@ -35,9 +33,6 @@ export class BlueprintContainer extends PIXI.Container {
     constructor() {
         super()
         this.interactive = true
-
-        this.holdingLeftClick = false
-        this.holdingRightClick = false
 
         this.zoomPan = new ZoomPan(this, G.sizeBPContainer, G.positionBPContainer, {
             width: G.app.screen.width,
@@ -81,10 +76,6 @@ export class BlueprintContainer extends PIXI.Container {
         this.overlayContainer = new OverlayContainer()
         this.addChild(this.overlayContainer)
 
-        this.on('pointerdown', this.pointerDownEventHandler)
-        this.on('pointerup', this.pointerUpEventHandler)
-        this.on('pointerupoutside', this.pointerUpEventHandler)
-
         document.addEventListener('wheel', e => {
             e.preventDefault()
             this.zoomPan.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
@@ -96,19 +87,21 @@ export class BlueprintContainer extends PIXI.Container {
         }, false)
 
         G.app.ticker.add(() => {
-            const WSXOR = actions.moveUp.pressed !== actions.moveDown.pressed
-            const ADXOR = actions.moveLeft.pressed !== actions.moveRight.pressed
-            if (WSXOR || ADXOR) {
-                const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
-                this.zoomPan.translateBy(
-                    (ADXOR ? (actions.moveLeft.pressed ? 1 : -1) : 0) * finalSpeed,
-                    (WSXOR ? (actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
-                )
-                this.zoomPan.updateTransform()
+            if (actions.movingViaKeyboard) {
+                const WSXOR = actions.moveUp.pressed !== actions.moveDown.pressed
+                const ADXOR = actions.moveLeft.pressed !== actions.moveRight.pressed
+                if (WSXOR || ADXOR) {
+                    const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
+                    this.zoomPan.translateBy(
+                        (ADXOR ? (actions.moveLeft.pressed ? 1 : -1) : 0) * finalSpeed,
+                        (WSXOR ? (actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
+                    )
+                    this.zoomPan.updateTransform()
 
-                G.gridData.recalculate(this)
+                    G.gridData.recalculate(this)
 
-                this.updateViewportCulling()
+                    this.updateViewportCulling()
+                }
             }
         })
 
@@ -119,12 +112,6 @@ export class BlueprintContainer extends PIXI.Container {
         G.gridData.onUpdate(() => {
             if (this.movingContainer) this.movingContainer.moveAtCursor()
             if (this.paintContainer) this.paintContainer.moveAtCursor()
-
-            if (actions.moving) return
-            if (this.hoverContainer) {
-                if (this.holdingRightClick) this.hoverContainer.removeContainer()
-                if (this.holdingLeftClick && actions.copyPasteEntitySettings.pressed) this.hoverContainer.pasteData()
-            }
         })
     }
 
@@ -193,8 +180,6 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.removeChildren()
 
-        this.holdingLeftClick = false
-        this.holdingRightClick = false
         this.hoverContainer = undefined
         this.movingContainer = undefined
         this.paintContainer = undefined
@@ -355,30 +340,6 @@ export class BlueprintContainer extends PIXI.Container {
                 )
             )
             this.addChild(this.paintContainer)
-        }
-    }
-
-    pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
-        if (G.currentMouseState === G.mouseStates.NONE) {
-            if (e.data.button === 0) {
-                if (!G.openedGUIWindow && !actions.copyPasteEntitySettings.pressed) {
-                    G.currentMouseState = G.mouseStates.PANNING
-                }
-                this.holdingLeftClick = true
-            } else if (e.data.button === 2) {
-                this.holdingRightClick = true
-            }
-        }
-    }
-
-    pointerUpEventHandler(e: PIXI.interaction.InteractionEvent) {
-        if (e.data.button === 0) {
-            if (G.currentMouseState === G.mouseStates.PANNING) {
-                G.currentMouseState = G.mouseStates.NONE
-            }
-            this.holdingLeftClick = false
-        } else if (e.data.button === 2) {
-            this.holdingRightClick = false
         }
     }
 }

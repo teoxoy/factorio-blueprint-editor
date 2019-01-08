@@ -22,8 +22,6 @@ export class TilePaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
     directionType: string
     direction: string
-    holdingLeftClick: boolean
-    holdingRightClick: boolean
     filter: AdjustmentFilter
     icon: PIXI.DisplayObject
 
@@ -42,8 +40,6 @@ export class TilePaintContainer extends PIXI.Container {
         this.interactiveChildren = false
         this.buttonMode = true
 
-        this.holdingLeftClick = false
-
         this.icon = InventoryContainer.createIcon(this.getItemName())
         this.icon.visible = false
         G.app.stage.addChild(this.icon)
@@ -52,10 +48,6 @@ export class TilePaintContainer extends PIXI.Container {
         this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
 
         G.BPC.transparentEntities()
-
-        this.on('pointerdown', this.pointerDownEventHandler)
-        this.on('pointerup', this.pointerUpEventHandler)
-        this.on('pointerupoutside', this.pointerUpEventHandler)
 
         this.redraw()
     }
@@ -140,35 +132,13 @@ export class TilePaintContainer extends PIXI.Container {
         )
     }
 
-    pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
-        if (e.data.button === 0) {
-            this.holdingLeftClick = true
-            this.placeEntityContainer()
-        } else if (e.data.button === 2) {
-            this.holdingRightClick = true
-            this.removeContainerUnder()
-        }
-    }
-
-    pointerUpEventHandler(e: PIXI.interaction.InteractionEvent) {
-        if (e.data.button === 0) {
-            this.holdingLeftClick = false
-        } else if (e.data.button === 2) {
-            this.holdingRightClick = false
-        }
-    }
-
     moveAtCursor() {
         const position = G.gridData.position
-        if (this.holdingRightClick) this.removeContainerUnder()
-
         const pos = EntityContainer.getPositionFromData(
             position,
             { x: TilePaintContainer.size, y: TilePaintContainer.size }
         )
         this.position.set(pos.x, pos.y)
-
-        if (this.holdingLeftClick) this.placeEntityContainer()
     }
 
     removeContainerUnder() {
