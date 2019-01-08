@@ -271,8 +271,6 @@ actions.pippete.bind(() => {
         G.BPC.addChild(G.BPC.paintContainer)
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.destroy()
-        G.BPC.paintContainer = undefined
-
         G.currentMouseState = G.mouseStates.NONE
     }
 })

@@ -68,9 +68,12 @@ export class EntityPaintContainer extends PIXI.Container {
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
         G.BPC.overlayContainer.hideUndergroundLines()
+        G.BPC.paintContainer = undefined
 
         window.removeEventListener('mousemove', this.changeIconPos)
         this.icon.destroy()
+
+        G.BPC.updateHoverContainer()
     }
 
     getItemName() {

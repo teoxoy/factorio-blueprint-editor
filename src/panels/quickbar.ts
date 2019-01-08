@@ -125,7 +125,6 @@ export class QuickbarContainer extends Panel {
 
         if (G.currentMouseState === G.mouseStates.PAINTING && G.BPC.paintContainer.getItemName() === itemName) {
             G.BPC.paintContainer.destroy()
-            G.BPC.paintContainer = undefined
             G.currentMouseState = G.mouseStates.NONE
             return
         }

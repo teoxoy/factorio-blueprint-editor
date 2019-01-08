@@ -74,9 +74,12 @@ export class TilePaintContainer extends PIXI.Container {
     destroy() {
         G.BPC.transparentEntities(false)
         super.destroy()
+        G.BPC.paintContainer = undefined
 
         window.removeEventListener('mousemove', this.changeIconPos)
         this.icon.destroy()
+
+        G.BPC.updateHoverContainer()
     }
 
     getItemName() {
