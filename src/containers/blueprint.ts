@@ -351,5 +351,7 @@ export class BlueprintContainer extends PIXI.Container {
             )
             this.addChild(this.paintContainer)
         }
+
+        if (this.hoverContainer) this.hoverContainer.pointerOutEventHandler()
     }
 }

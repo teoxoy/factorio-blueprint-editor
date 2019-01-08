@@ -272,6 +272,7 @@ actions.pippete.bind(() => {
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.destroy()
         G.currentMouseState = G.mouseStates.NONE
+        G.BPC.updateHoverContainer()
     }
 })
 

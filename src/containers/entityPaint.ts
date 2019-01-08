@@ -72,8 +72,6 @@ export class EntityPaintContainer extends PIXI.Container {
 
         window.removeEventListener('mousemove', this.changeIconPos)
         this.icon.destroy()
-
-        G.BPC.updateHoverContainer()
     }
 
     getItemName() {

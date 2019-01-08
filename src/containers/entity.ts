@@ -332,7 +332,7 @@ export class EntityContainer extends PIXI.Container {
     }
 
     pointerOutEventHandler() {
-        if (!G.BPC.movingContainer && !G.BPC.paintContainer && G.BPC.hoverContainer === this) {
+        if (G.BPC.hoverContainer === this) {
             G.BPC.hoverContainer = undefined
             G.BPC.overlayContainer.hideCursorBox()
             G.BPC.overlayContainer.hideUndergroundLines()
