@@ -136,9 +136,6 @@ export class EntityContainer extends PIXI.Container {
         this.areaVisualization = G.BPC.underlayContainer.createNewArea(entity.name, this.position)
         this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.entity_number, this.position)
 
-        this.on('pointerover', this.pointerOverEventHandler)
-        this.on('pointerout', this.pointerOutEventHandler)
-
         this.redraw(false, sort)
     }
 
@@ -320,8 +317,6 @@ export class EntityContainer extends PIXI.Container {
     }
 
     pointerOverEventHandler() {
-        // Pointer over is sometimes getting called before pointer out
-        if (G.BPC.hoverContainer && G.BPC.hoverContainer !== this) G.BPC.hoverContainer.pointerOutEventHandler()
         if (!G.BPC.movingContainer && !G.BPC.paintContainer) {
             G.BPC.hoverContainer = this
 

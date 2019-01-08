@@ -112,6 +112,12 @@ export class BlueprintContainer extends PIXI.Container {
         G.gridData.onUpdate(() => {
             if (this.movingContainer) this.movingContainer.moveAtCursor()
             if (this.paintContainer) this.paintContainer.moveAtCursor()
+
+            // Instead of decreasing the global interactionFrequency, call the over and out entity events here
+            const e = G.app.renderer.plugins.interaction.hitTest(G.gridData._lastMousePos, this.entities)
+            if (e && this.hoverContainer === e) return
+            if (this.hoverContainer) this.hoverContainer.pointerOutEventHandler()
+            if (e) e.pointerOverEventHandler()
         })
     }
 

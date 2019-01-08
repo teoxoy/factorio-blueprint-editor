@@ -59,7 +59,8 @@ G.app = new PIXI.Application({
 })
 
 // https://github.com/pixijs/pixi.js/issues/3928
-G.app.renderer.plugins.interaction.moveWhenInside = true
+// G.app.renderer.plugins.interaction.moveWhenInside = true
+// G.app.renderer.plugins.interaction.interactionFrequency = 1
 
 G.app.renderer.autoResize = true
 G.app.renderer.resize(window.innerWidth, window.innerHeight)
