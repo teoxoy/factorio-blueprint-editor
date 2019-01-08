@@ -124,6 +124,12 @@ const colors = {
         background: 0x646464,
         hover: 0xCCCCCC
     },
+    textbox: {
+        background: 0x646464,
+        foreground: 0x000000,
+        hover: 0xCCCCCC,
+        active: 0xEEEEEE
+    },
     dialog: {
         background: 0x3A3A3A
     },

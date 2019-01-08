@@ -27,7 +27,7 @@ export class EntityPaintContainer extends PIXI.Container {
         this.interactiveChildren = false
         this.buttonMode = true
 
-        this.icon = InventoryContainer.createIcon(name)
+        this.icon = InventoryContainer.createIcon(this.getItemName())
         this.icon.visible = false
         G.app.stage.addChild(this.icon)
         this.changeIconPos = this.changeIconPos.bind(this)
@@ -75,7 +75,7 @@ export class EntityPaintContainer extends PIXI.Container {
     }
 
     getItemName() {
-        return this.name
+        return factorioData.getEntity(this.name).minable.result
     }
 
     checkBuildable() {
