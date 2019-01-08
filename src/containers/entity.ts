@@ -4,6 +4,9 @@ import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../util'
 
+import * as Editors from '../editors/factory'
+import Editor from '../editors/editor';
+
 const updateGroups = [
     {
         is: [
@@ -230,8 +233,14 @@ export class EntityContainer extends PIXI.Container {
     pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
         console.log(G.bp.entity(this.entity_number).toJS())
         if (e.data.button === 0) {
-            if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow && !G.keyboard.shift) {
-                G.editEntityContainer.create(this.entity_number)
+            // if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow && !G.keyboard.shift) {
+            //     G.editEntityContainer.create(this.entity_number)
+            // }
+
+            if (G.currentMouseState === G.mouseStates.NONE
+                && G.openedGUIWindow === undefined
+                && !G.keyboard.shift) {
+                    G.openedGUIWindow = Editors.createEditor(this.entity_number)
             }
             if (G.keyboard.shift) this.pasteData()
         } else if (e.data.button === 1) {

@@ -5,6 +5,7 @@ import { BlueprintContainer } from './containers/blueprint'
 import { EditEntityContainer } from './containers/editEntity'
 import { InventoryContainer } from './containers/inventory'
 import { Book } from './factorio-data/book'
+import Dialog from './controls/dialog'
 
 // tslint:disable:prefer-const
 
@@ -64,7 +65,7 @@ const gridData = {
 
 let railMoveOffset: IPoint = { x: 0, y: 0 }
 
-let openedGUIWindow: InventoryContainer | EditEntityContainer | undefined
+let openedGUIWindow: InventoryContainer | EditEntityContainer | Dialog | undefined
 
 let moveSpeed = 10
 let quickbarRows = 2
