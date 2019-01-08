@@ -155,6 +155,7 @@ const actions = {
     attachEventsToContainer(stage: PIXI.Container) {
         stage.on('pointerdown', e => keyboardJS.pressKey(e.data.button + 300, e))
         stage.on('pointerup', e => keyboardJS.releaseKey(e.data.button + 300, e))
+        stage.on('pointerupoutside', e => keyboardJS.releaseKey(e.data.button + 300, e))
     }
 }
 
