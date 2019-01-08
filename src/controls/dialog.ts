@@ -29,4 +29,19 @@ export default class Dialog extends Panel {
             G.app.screen.height / 2 - this.height / 2
         )
     }
+
+    /** Show Dialog */
+    public show(): void {
+        this.visible = true
+    }
+
+    /** Close Dialog */
+    public close(): void {
+        if (this.visible && G.openedGUIWindow !== this) {
+            G.openedGUIWindow.close()
+        }
+        this.visible = false
+        this.destroy()
+        G.openedGUIWindow = undefined
+    }
 }

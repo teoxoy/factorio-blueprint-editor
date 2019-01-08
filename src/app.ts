@@ -27,6 +27,7 @@ import initDoorbell from './doorbell'
 import actions from './actions'
 import initDatGui from './datgui'
 import spritesheetsLoader from './spritesheetsLoader'
+import * as Editors from './editors/factory'
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
@@ -411,7 +412,7 @@ actions.openEntityGUI.bind(() => {
 
         if (G.currentMouseState === G.mouseStates.NONE) {
             if (G.openedGUIWindow) G.openedGUIWindow.close()
-            G.editEntityContainer.create(G.BPC.hoverContainer.entity_number)
+            G.openedGUIWindow = Editors.createEditor(G.BPC.hoverContainer.entity_number)
         }
     }
 })
