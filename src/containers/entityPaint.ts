@@ -1,17 +1,15 @@
-import G from '../globals'
-import util from '../util'
+import G from '../common/globals'
+import util from '../common/util'
 import factorioData from '../factorio-data/factorioData'
 import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
-import { InventoryContainer } from './inventory'
+import { InventoryContainer } from '../panels/inventory'
 
 export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
-    holdingRightClick: boolean
     directionType: string
     direction: number
-    holdingLeftClick: boolean
     filter: AdjustmentFilter
     icon: PIXI.DisplayObject
 
@@ -29,8 +27,6 @@ export class EntityPaintContainer extends PIXI.Container {
         this.interactiveChildren = false
         this.buttonMode = true
 
-        this.holdingLeftClick = false
-
         this.icon = InventoryContainer.createIcon(this.getItemName())
         this.icon.visible = false
         G.app.stage.addChild(this.icon)
@@ -44,10 +40,6 @@ export class EntityPaintContainer extends PIXI.Container {
             s.visible = true
         })
         G.BPC.underlayContainer.activateRelatedAreas(this.name)
-
-        this.on('pointerdown', this.pointerDownEventHandler)
-        this.on('pointerup', this.pointerUpEventHandler)
-        this.on('pointerupoutside', this.pointerUpEventHandler)
 
         this.redraw()
     }
@@ -76,6 +68,7 @@ export class EntityPaintContainer extends PIXI.Container {
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
         G.BPC.overlayContainer.hideUndergroundLines()
+        G.BPC.paintContainer = undefined
 
         window.removeEventListener('mousemove', this.changeIconPos)
         this.icon.destroy()
@@ -166,27 +159,8 @@ export class EntityPaintContainer extends PIXI.Container {
         )
     }
 
-    pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
-        if (e.data.button === 0) {
-            this.holdingLeftClick = true
-            this.placeEntityContainer()
-        } else if (e.data.button === 2) {
-            this.holdingRightClick = true
-            this.removeContainerUnder()
-        }
-    }
-
-    pointerUpEventHandler(e: PIXI.interaction.InteractionEvent) {
-        if (e.data.button === 0) {
-            this.holdingLeftClick = false
-        } else if (e.data.button === 2) {
-            this.holdingRightClick = false
-        }
-    }
-
     moveAtCursor() {
         const position = G.gridData.position
-        if (this.holdingRightClick) this.removeContainerUnder()
 
         switch (this.name) {
             case 'straight_rail':
@@ -208,8 +182,6 @@ export class EntityPaintContainer extends PIXI.Container {
         this.updateUndergroundLines()
 
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
-
-        if (this.holdingLeftClick) this.placeEntityContainer()
 
         this.checkBuildable()
     }

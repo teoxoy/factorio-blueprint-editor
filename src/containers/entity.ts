@@ -1,8 +1,8 @@
-import G from '../globals'
+import G from '../common/globals'
 import factorioData from '../factorio-data/factorioData'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
-import util from '../util'
+import util from '../common/util'
 
 const updateGroups = [
     {
@@ -136,10 +136,6 @@ export class EntityContainer extends PIXI.Container {
         this.areaVisualization = G.BPC.underlayContainer.createNewArea(entity.name, this.position)
         this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.entity_number, this.position)
 
-        this.on('pointerdown', this.pointerDownEventHandler)
-        this.on('pointerover', this.pointerOverEventHandler)
-        this.on('pointerout', this.pointerOutEventHandler)
-
         this.redraw(false, sort)
     }
 
@@ -225,52 +221,6 @@ export class EntityContainer extends PIXI.Container {
             entity.direction,
             entity.directionType === 'output' || entity.name === 'pipe_to_ground' ? (entity.direction + 4) % 8 : entity.direction
         )
-    }
-
-    pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
-        console.log(G.bp.entity(this.entity_number).toJS())
-        if (e.data.button === 0) {
-            if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow && !G.keyboard.shift) {
-                G.editEntityContainer.create(this.entity_number)
-            }
-            if (G.keyboard.shift) this.pasteData()
-        } else if (e.data.button === 1) {
-            if (this !== G.BPC.movingContainer && G.currentMouseState === G.mouseStates.NONE) {
-                G.bp.entityPositionGrid.removeTileData(this.entity_number, false)
-                this.redraw(true)
-                this.redrawSurroundingEntities()
-                G.BPC.movingContainer = this
-                G.currentMouseState = G.mouseStates.MOVING
-
-                // Move container to cursor
-                const newPosition = e.data.getLocalPosition(this.parent)
-                const pos = EntityContainer.getPositionFromData(newPosition, G.bp.entity(this.entity_number).size)
-
-                if (this.position.x !== pos.x || this.position.y !== pos.y) {
-                    this.position.set(pos.x, pos.y)
-                    this.updateVisualStuff()
-                }
-
-                for (const s of this.entitySprites) s.moving = true
-                G.BPC.sortEntities()
-                G.BPC.underlayContainer.activateRelatedAreas(G.bp.entity(this.entity_number).name)
-
-                G.BPC.updateOverlay()
-                return
-            }
-            if (this === G.BPC.movingContainer && G.currentMouseState === G.mouseStates.MOVING) {
-                this.placeEntityContainerDown()
-            }
-        } else if (e.data.button === 2 && G.currentMouseState === G.mouseStates.NONE) {
-            if (G.keyboard.shift) {
-                G.copyData.recipe = G.bp.entity(this.entity_number).recipe
-                G.copyData.modules = G.bp.entity(this.entity_number).modulesList
-            } else {
-                e.stopPropagation()
-                G.BPC.holdingRightClick = true
-                this.removeContainer()
-            }
-        }
     }
 
     changeRecipe(recipeName: string) {
@@ -367,8 +317,6 @@ export class EntityContainer extends PIXI.Container {
     }
 
     pointerOverEventHandler() {
-        // Pointer over is sometimes getting called before pointer out
-        if (G.BPC.hoverContainer && G.BPC.hoverContainer !== this) G.BPC.hoverContainer.pointerOutEventHandler()
         if (!G.BPC.movingContainer && !G.BPC.paintContainer) {
             G.BPC.hoverContainer = this
 
@@ -384,7 +332,7 @@ export class EntityContainer extends PIXI.Container {
     }
 
     pointerOutEventHandler() {
-        if (!G.BPC.movingContainer && !G.BPC.paintContainer && G.BPC.hoverContainer === this) {
+        if (G.BPC.hoverContainer === this) {
             G.BPC.hoverContainer = undefined
             G.BPC.overlayContainer.hideCursorBox()
             G.BPC.overlayContainer.hideUndergroundLines()
@@ -392,7 +340,28 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
-    placeEntityContainerDown() {
+    pickUpEntityContainer() {
+        G.bp.entityPositionGrid.removeTileData(this.entity_number, false)
+        this.redraw(true)
+        this.redrawSurroundingEntities()
+        G.BPC.movingContainer = this
+        G.currentMouseState = G.mouseStates.MOVING
+
+        // Move container to cursor
+        const pos = EntityContainer.getPositionFromData(G.gridData.position, G.bp.entity(this.entity_number).size)
+        if (this.position.x !== pos.x || this.position.y !== pos.y) {
+            this.position.set(pos.x, pos.y)
+            this.updateVisualStuff()
+        }
+
+        for (const s of this.entitySprites) s.moving = true
+        G.BPC.sortEntities()
+        G.BPC.underlayContainer.activateRelatedAreas(G.bp.entity(this.entity_number).name)
+
+        G.BPC.updateOverlay()
+    }
+
+    placeDownEntityContainer() {
         const entity = G.bp.entity(this.entity_number)
         const position = EntityContainer.getGridPosition(this.position)
         if (EntityContainer.isContainerOutOfBpArea(position, entity.size)) return

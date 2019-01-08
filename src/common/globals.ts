@@ -1,10 +1,10 @@
-import { Blueprint } from './factorio-data/blueprint'
-import { ToolbarContainer } from './containers/toolbar'
-import { QuickbarContainer } from './containers/quickbar'
-import { BlueprintContainer } from './containers/blueprint'
-import { EditEntityContainer } from './containers/editEntity'
-import { InventoryContainer } from './containers/inventory'
-import { Book } from './factorio-data/book'
+import { Blueprint } from '../factorio-data/blueprint'
+import { ToolbarContainer } from '../panels/toolbar'
+import { QuickbarContainer } from '../panels/quickbar'
+import { BlueprintContainer } from '../containers/blueprint'
+import { EditEntityContainer } from '../panels/editEntity'
+import { InventoryContainer } from '../panels/inventory'
+import { Book } from '../factorio-data/book'
 
 // tslint:disable:prefer-const
 
@@ -17,6 +17,12 @@ let quickbarContainer: QuickbarContainer
 let editEntityContainer: EditEntityContainer
 let inventoryContainer: InventoryContainer
 let BPC: BlueprintContainer
+
+const loadingScreen = {
+    el: document.getElementById('loadingScreen'),
+    show() { this.el.classList.add('active') },
+    hide() { this.el.classList.remove('active') }
+}
 
 const gridData = {
     x: 0,
@@ -45,8 +51,8 @@ const gridData = {
     update(x: number, y: number, BPC: BlueprintContainer) {
         this._lastMousePos = { x, y }
         const mousePositionInBP = {
-            x: Math.abs(BPC.position.x - x) / BPC.zoomPan.getCurrentScale(),
-            y: Math.abs(BPC.position.y - y) / BPC.zoomPan.getCurrentScale()
+            x: Math.abs(BPC.position.x - x) / BPC.viewport.getCurrentScale(),
+            y: Math.abs(BPC.position.y - y) / BPC.viewport.getCurrentScale()
         }
         const gridCoordsOfCursor16 = {
             x: (mousePositionInBP.x - mousePositionInBP.x % 16) / 16,
@@ -92,17 +98,6 @@ const mouseStates = {
     MOVING: 1,
     PAINTING: 2,
     PANNING: 3
-}
-
-const keyboard = {
-    w: false,
-    a: false,
-    s: false,
-    d: false,
-    shift: false,
-    movingViaWASD() {
-        return this.w !== this.s || this.a !== this.d
-    }
 }
 
 let currentMouseState = mouseStates.NONE
@@ -174,7 +169,6 @@ export default {
     editEntityContainer,
     BPC,
     app,
-    keyboard,
     toolbarContainer,
     quickbarContainer,
     bpArea,
@@ -189,5 +183,6 @@ export default {
     colors,
     fontFamily,
     moveSpeed,
-    quickbarRows
+    quickbarRows,
+    loadingScreen
 }

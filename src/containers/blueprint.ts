@@ -1,5 +1,5 @@
-import G from '../globals'
-import { ZoomPan } from '../zoomPan'
+import G from '../common/globals'
+import { Viewport } from '../viewport'
 import { WiresContainer } from './wires'
 import { UnderlayContainer } from './underlay'
 import { EntitySprite } from '../entitySprite'
@@ -9,12 +9,12 @@ import { OverlayContainer } from './overlay'
 import { EntityPaintContainer } from './entityPaint'
 import { TileContainer } from './tile'
 import { TilePaintContainer } from './tilePaint'
-import util from '../util'
+import util from '../common/util'
 import factorioData from '../factorio-data/factorioData'
+import actions from '../actions'
 
 export class BlueprintContainer extends PIXI.Container {
 
-    holdingLeftClick: boolean
     grid: PIXI.extras.TilingSprite
     wiresContainer: WiresContainer
     overlayContainer: OverlayContainer
@@ -24,8 +24,7 @@ export class BlueprintContainer extends PIXI.Container {
     movingEntityFilter: AdjustmentFilter
     tileSprites: PIXI.Container
     entitySprites: PIXI.Container
-    zoomPan: ZoomPan
-    holdingRightClick: boolean
+    viewport: Viewport
     pgOverlay: PIXI.Graphics
     hoverContainer: undefined | EntityContainer
     movingContainer: undefined | EntityContainer
@@ -35,10 +34,7 @@ export class BlueprintContainer extends PIXI.Container {
         super()
         this.interactive = true
 
-        this.holdingLeftClick = false
-        this.holdingRightClick = false
-
-        this.zoomPan = new ZoomPan(this, G.sizeBPContainer, G.positionBPContainer, {
+        this.viewport = new Viewport(this, G.sizeBPContainer, G.positionBPContainer, {
             width: G.app.screen.width,
             height: G.app.screen.height
         }, 5)
@@ -80,34 +76,32 @@ export class BlueprintContainer extends PIXI.Container {
         this.overlayContainer = new OverlayContainer()
         this.addChild(this.overlayContainer)
 
-        this.on('pointerdown', this.pointerDownEventHandler)
-        this.on('pointerup', this.pointerUpEventHandler)
-        this.on('pointerupoutside', this.pointerUpEventHandler)
-
         document.addEventListener('wheel', e => {
             e.preventDefault()
-            this.zoomPan.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
+            this.viewport.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
             const z = Math.sign(-e.deltaY) * 0.1
-            this.zoomPan.zoomBy(z, z)
-            this.zoomPan.updateTransform()
+            this.viewport.zoomBy(z, z)
+            this.viewport.updateTransform()
             G.gridData.recalculate(this)
             this.updateViewportCulling()
         }, false)
 
         G.app.ticker.add(() => {
-            const WSXOR = G.keyboard.w !== G.keyboard.s
-            const ADXOR = G.keyboard.a !== G.keyboard.d
-            if (WSXOR || ADXOR) {
-                const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
-                this.zoomPan.translateBy(
-                    (ADXOR ? (G.keyboard.a ? 1 : -1) : 0) * finalSpeed,
-                    (WSXOR ? (G.keyboard.w ? 1 : -1) : 0) * finalSpeed
-                )
-                this.zoomPan.updateTransform()
+            if (actions.movingViaKeyboard) {
+                const WSXOR = actions.moveUp.pressed !== actions.moveDown.pressed
+                const ADXOR = actions.moveLeft.pressed !== actions.moveRight.pressed
+                if (WSXOR || ADXOR) {
+                    const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
+                    this.viewport.translateBy(
+                        (ADXOR ? (actions.moveLeft.pressed ? 1 : -1) : 0) * finalSpeed,
+                        (WSXOR ? (actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
+                    )
+                    this.viewport.updateTransform()
 
-                G.gridData.recalculate(this)
+                    G.gridData.recalculate(this)
 
-                this.updateViewportCulling()
+                    this.updateViewportCulling()
+                }
             }
         })
 
@@ -119,12 +113,16 @@ export class BlueprintContainer extends PIXI.Container {
             if (this.movingContainer) this.movingContainer.moveAtCursor()
             if (this.paintContainer) this.paintContainer.moveAtCursor()
 
-            if (G.keyboard.movingViaWASD()) return
-            if (this.hoverContainer) {
-                if (this.holdingRightClick) this.hoverContainer.removeContainer()
-                if (this.holdingLeftClick && G.keyboard.shift) this.hoverContainer.pasteData()
-            }
+            // Instead of decreasing the global interactionFrequency, call the over and out entity events here
+            this.updateHoverContainer()
         })
+    }
+
+    updateHoverContainer() {
+        const e = G.app.renderer.plugins.interaction.hitTest(G.gridData._lastMousePos, this.entities)
+        if (e && this.hoverContainer === e) return
+        if (this.hoverContainer) this.hoverContainer.pointerOutEventHandler()
+        if (e) e.pointerOverEventHandler()
     }
 
     generateGrid(pattern: 'checker' | 'grid' = 'checker') {
@@ -192,8 +190,6 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.removeChildren()
 
-        this.holdingLeftClick = false
-        this.holdingRightClick = false
         this.hoverContainer = undefined
         this.movingContainer = undefined
         this.paintContainer = undefined
@@ -266,13 +262,13 @@ export class BlueprintContainer extends PIXI.Container {
 
     centerViewport() {
         if (G.bp.isEmpty()) {
-            this.zoomPan.setPosition(-G.sizeBPContainer.width / 2, -G.sizeBPContainer.height / 2)
-            this.zoomPan.updateTransform()
+            this.viewport.setPosition(-G.sizeBPContainer.width / 2, -G.sizeBPContainer.height / 2)
+            this.viewport.updateTransform()
             return
         }
 
         const bounds = this.getBlueprintBounds()
-        this.zoomPan.centerViewPort({
+        this.viewport.centerViewPort({
             x: bounds.width,
             y: bounds.height
         }, {
@@ -355,29 +351,7 @@ export class BlueprintContainer extends PIXI.Container {
             )
             this.addChild(this.paintContainer)
         }
-    }
 
-    pointerDownEventHandler(e: PIXI.interaction.InteractionEvent) {
-        if (G.currentMouseState === G.mouseStates.NONE) {
-            if (e.data.button === 0) {
-                if (!G.openedGUIWindow && !G.keyboard.shift) {
-                    G.currentMouseState = G.mouseStates.PANNING
-                }
-                this.holdingLeftClick = true
-            } else if (e.data.button === 2) {
-                this.holdingRightClick = true
-            }
-        }
-    }
-
-    pointerUpEventHandler(e: PIXI.interaction.InteractionEvent) {
-        if (e.data.button === 0) {
-            if (G.currentMouseState === G.mouseStates.PANNING) {
-                G.currentMouseState = G.mouseStates.NONE
-            }
-            this.holdingLeftClick = false
-        } else if (e.data.button === 2) {
-            this.holdingRightClick = false
-        }
+        if (this.hoverContainer) this.hoverContainer.pointerOutEventHandler()
     }
 }

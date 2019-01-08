@@ -1,6 +1,6 @@
 import { EntityContainer } from './entity'
-import G from '../globals'
-import util from '../util'
+import G from '../common/globals'
+import util from '../common/util'
 
 interface IConnection {
     circuit_id: number

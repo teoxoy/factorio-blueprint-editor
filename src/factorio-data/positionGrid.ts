@@ -1,5 +1,5 @@
 import { Blueprint } from './blueprint'
-import util from '../util'
+import util from '../common/util'
 import factorioData from './factorioData'
 import Immutable from 'immutable'
 

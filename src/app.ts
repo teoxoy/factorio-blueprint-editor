@@ -6,38 +6,27 @@ if (module.hot) module.hot.dispose(() => { window.location.reload(); throw new E
 import 'normalize.css'
 import './style.styl'
 
-import LRentitySpritesheetPNG from 'factorio-data/data/graphics/LREntitySpritesheet.png'
-import LRentitySpritesheetJSON from 'factorio-data/data/graphics/LREntitySpritesheet.json'
-import HRentitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
-import HRentitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
-import iconSpritesheetPNG from 'factorio-data/data/graphics/iconSpritesheet.png'
-import iconSpritesheetJSON from 'factorio-data/data/graphics/iconSpritesheet.json'
-import utilitySpritesheetPNG from 'factorio-data/data/graphics/utilitySpritesheet.png'
-import utilitySpritesheetJSON from 'factorio-data/data/graphics/utilitySpritesheet.json'
-import tilesSpritesheetPNG from 'factorio-data/data/graphics/tileSpritesheet.png'
-import tilesSpritesheetJSON from 'factorio-data/data/graphics/tileSpritesheet.json'
-
 import * as PIXI from 'pixi.js'
-import keyboardJS from 'keyboardjs'
 
 import { Book } from './factorio-data/book'
 import BPString from './factorio-data/BPString'
 
-import util from './util'
-import { InventoryContainer } from './containers/inventory'
-import G from './globals'
+import { InventoryContainer } from './panels/inventory'
+import G from './common/globals'
 import { EntityContainer } from './containers/entity'
 import { EntityPaintContainer } from './containers/entityPaint'
 import { BlueprintContainer } from './containers/blueprint'
-import { ToolbarContainer } from './containers/toolbar'
-import { QuickbarContainer } from './containers/quickbar'
+import { ToolbarContainer } from './panels/toolbar'
+import { QuickbarContainer } from './panels/quickbar'
 import { Blueprint } from './factorio-data/blueprint'
-import { EditEntityContainer } from './containers/editEntity'
-import { InfoContainer } from './containers/info'
+import { EditEntityContainer } from './panels/editEntity'
+import { InfoContainer } from './panels/info'
 import FileSaver from 'file-saver'
 import { TilePaintContainer } from './containers/tilePaint'
-
-import * as dat from 'dat.gui'
+import initDoorbell from './doorbell'
+import actions from './actions'
+import initDatGui from './datgui'
+import spritesheetsLoader from './spritesheetsLoader'
 
 // Set the general application keyboard context
 // Needed to have seperate context's for input controls (i.e. Textbox)
@@ -64,178 +53,8 @@ for (const p of params) {
     }
 }
 
-const gui = new dat.GUI({
-    autoPlace: false,
-    hideable: false,
-    closeOnTop: true
-})
-
-gui.closed = localStorage.getItem('dat.gui.closed') === 'true'
-window.addEventListener('unload', () => localStorage.setItem('dat.gui.closed', String(gui.closed)))
-
-document.body.appendChild(gui.domElement)
-
-const guiBPIndex = gui
-    .add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1)
-    .name('BP Index')
-    .onFinishChange((value: number) => {
-        if (G.book) {
-            G.bp = G.book.getBlueprint(value)
-            G.BPC.clearData()
-            G.BPC.initBP()
-        }
-    })
-
-if (localStorage.getItem('hr')) G.hr = localStorage.getItem('hr') === 'true'
-gui.add(G, 'hr').name('HR Entities').onChange((val: boolean) => {
-    loadingScreen.classList.add('active')
-    localStorage.setItem('hr', val.toString())
-
-    G.BPC.entities.children.forEach((eC: EntityContainer) => {
-        eC.entitySprites.forEach(eS => eS.destroy())
-        eC.entitySprites = []
-    })
-
-    Object.keys(PIXI.utils.TextureCache)
-        .filter(texture => texture.includes('graphics/entity/'))
-        .forEach(k => PIXI.utils.TextureCache[k].destroy(true))
-
-    loadSpritesheet(
-        G.hr ? HRentitySpritesheetPNG : LRentitySpritesheetPNG,
-        G.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
-    ).then(() => {
-        G.BPC.entities.children.forEach((eC: EntityContainer) => eC.redraw(false, false))
-        G.BPC.sortEntities()
-        loadingScreen.classList.remove('active')
-    })
-})
-
-if (localStorage.getItem('moveSpeed')) G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
-gui.add(G, 'moveSpeed', 5, 20).name('Move Speed').onChange((val: boolean) => localStorage.setItem('moveSpeed', val.toString()))
-
-if (localStorage.getItem('quickbarRows')) G.quickbarRows = Number(localStorage.getItem('quickbarRows'))
-gui.add(G, 'quickbarRows', 1, 5, 1).name('Quickbar Rows').onChange((val: number) => {
-    localStorage.setItem('quickbarRows', val.toString())
-
-    const index = G.app.stage.getChildIndex(G.quickbarContainer)
-    const itemNames = G.quickbarContainer.getAllItemNames()
-    G.quickbarContainer.destroy()
-    G.quickbarContainer = new QuickbarContainer(val, itemNames)
-    G.app.stage.addChildAt(G.quickbarContainer, index)
-})
-
-const guiTheme = gui.addFolder('Theme')
-
-if (localStorage.getItem('darkTheme')) G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
-guiTheme
-    .add(G.colors, 'darkTheme')
-    .name('Dark Mode')
-    .onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
-
-if (localStorage.getItem('pattern')) G.colors.pattern = localStorage.getItem('pattern')
-guiTheme
-    .add(G.colors, 'pattern', ['checker', 'grid'])
-    .name('Pattern')
-    .onChange((val: string) => {
-        G.BPC.generateGrid(val)
-        localStorage.setItem('pattern', val)
-    })
-
-const guiKeybinds = gui.addFolder('Keybinds')
-
-window.doorbellOptions = {
-    id: '9657',
-    appKey: 'z1scfSY8hpBNiIFWxBg50tkhjvFKhHMdhfGNMp6YCUZVttoLOqtrlhk4ca9asDCy',
-    windowLoaded: true,
-    onShow: () => keyboardJS.pause(),
-    onHide: () => keyboardJS.resume(),
-    onInitialized: () => {
-        let activeTag: HTMLElement
-        const tagsDiv = document.createElement('div')
-        tagsDiv.id = 'doorbell-tags';
-        [
-            { name: 'Other', color: '#757575' },
-            { name: 'Bug', color: '#e53935' },
-            { name: 'Enhancement', color: '#00ACC1' },
-            { name: 'Feature Request', color: '#FFB300' }
-        ]
-        .forEach((tag, i) => {
-            const tagEl = document.createElement('div')
-            tagEl.innerHTML = tag.name
-            tagEl.style.backgroundColor = tag.color
-            tagEl.onclick = () => {
-                activeTag.classList.remove('active')
-                activeTag = tagEl
-                tagEl.classList.add('active')
-                window.doorbellOptions.tags = tag.name
-            }
-            if (i === 0) {
-                activeTag = tagEl
-                tagEl.classList.add('active')
-                window.doorbellOptions.tags = tag.name
-            }
-            tagsDiv.appendChild(tagEl)
-        })
-        const fieldset = document.getElementById('doorbell-form').firstElementChild
-        fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
-    }
-}
-document.body.appendChild(Object.assign(document.createElement('script'), {
-    id: 'doorbellScript',
-    type: 'text/javascript',
-    async: true,
-    src: `https://embed.doorbell.io/button/${window.doorbellOptions['id']}?t=${Date.now()}`
-}))
-
-const loadingScreen = document.getElementById('loadingScreen')
-
-const keybinds = JSON.parse(localStorage.getItem('keybinds')) || {
-    rotate: 'r',
-    pippete: 'q',
-    undo: 'modifier+z',
-    redo: 'modifier+y',
-    picture: 'shift+s',
-    clear: 'shift+n',
-    overlay: 'alt',
-    closeWindow: 'esc',
-    inventory: 'e',
-    focus: 'f',
-    w: 'w',
-    a: 'a',
-    s: 's',
-    d: 'd',
-    increaseTileArea: ']',
-    decreaseTileArea: '[',
-    quickbarSlot01: '1',
-    quickbarSlot02: '2',
-    quickbarSlot03: '3',
-    quickbarSlot04: '4',
-    quickbarSlot05: '5',
-    quickbarSlot06: 'shift+1',
-    quickbarSlot07: 'shift+2',
-    quickbarSlot08: 'shift+3',
-    quickbarSlot09: 'shift+4',
-    quickbarSlot10: 'shift+5',
-    changeActiveQuickbar: 'x'
-}
-
-const keybindsProxy = new Proxy(keybinds, {
-    set(obj: any, prop: string, value: string) {
-        if (!value) return true
-        changeKeybind(obj[prop], value)
-        obj[prop] = value
-        localStorage.setItem('keybinds', JSON.stringify(keybinds))
-        return true
-
-        function changeKeybind(old: string, val: string) {
-            keyboardJS._listeners.filter((k: any) => k.keyCombo.sourceStr === old).forEach((k: any) => {
-                keyboardJS.unbind(old, k.pressHandler, k.releaseHandler)
-                keyboardJS.bind(val, k.pressHandler, k.releaseHandler)
-            })
-        }
-    }
-})
-Object.keys(keybinds).forEach(k => guiKeybinds.add(keybindsProxy, k))
+const { guiBPIndex } = initDatGui()
+initDoorbell()
 
 G.app = new PIXI.Application({
     resolution: window.devicePixelRatio,
@@ -244,14 +63,15 @@ G.app = new PIXI.Application({
 })
 
 // https://github.com/pixijs/pixi.js/issues/3928
-G.app.renderer.plugins.interaction.moveWhenInside = true
+// G.app.renderer.plugins.interaction.moveWhenInside = true
+// G.app.renderer.plugins.interaction.interactionFrequency = 1
 
 G.app.renderer.autoResize = true
 G.app.renderer.resize(window.innerWidth, window.innerHeight)
 window.addEventListener('resize', () => {
     G.app.renderer.resize(window.innerWidth, window.innerHeight)
-    G.BPC.zoomPan.setViewPortSize(G.app.screen.width, G.app.screen.height)
-    G.BPC.zoomPan.updateTransform()
+    G.BPC.viewport.setSize(G.app.screen.width, G.app.screen.height)
+    G.BPC.viewport.updateTransform()
     G.BPC.updateViewportCulling()
 }, false)
 document.body.appendChild(G.app.view)
@@ -263,6 +83,9 @@ PIXI.Graphics.CURVES.adaptive = true
 
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)
+
+// Hack for plugging the mouse into keyboardJS
+actions.attachEventsToContainer(G.BPC)
 
 G.editEntityContainer = new EditEntityContainer()
 G.app.stage.addChild(G.editEntityContainer)
@@ -279,31 +102,10 @@ G.app.stage.addChild(G.quickbarContainer)
 const infoContainer = new InfoContainer()
 G.app.stage.addChild(infoContainer)
 
-function loadSpritesheet(src: string, json: any) {
-    return new Promise((resolve, reject) => {
-        const image = new Image()
-        image.src = src
-        image.onload = () => {
-            const tempCanvas = document.createElement('canvas')
-            tempCanvas.width = util.nearestPowerOf2(image.width)
-            tempCanvas.height = util.nearestPowerOf2(image.height)
-            tempCanvas.getContext('2d').drawImage(image, 0, 0)
-            const baseTexture = PIXI.BaseTexture.fromCanvas(tempCanvas)
-            new PIXI.Spritesheet(baseTexture, json)
-                .parse(() => G.app.renderer.plugins.prepare.upload(baseTexture, resolve))
-        }
-        image.onerror = reject
-    })
-}
-
-Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
-.concat([
-    G.hr ? [ HRentitySpritesheetPNG, HRentitySpritesheetJSON ] :
-    [ LRentitySpritesheetPNG, LRentitySpritesheetJSON ],
-    [ iconSpritesheetPNG, iconSpritesheetJSON ],
-    [ utilitySpritesheetPNG, utilitySpritesheetJSON ],
-    [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
-].map(data => loadSpritesheet(data[0], data[1]))))
+Promise.all(
+    [bpSource ? BPString.findBPString(bpSource) : undefined]
+    .concat(spritesheetsLoader.getAllPromises())
+)
 .then(data => {
     // Load quickbarItemNames from localStorage
     if (localStorage.getItem('quickbarItemNames')) {
@@ -324,7 +126,7 @@ Promise.all([bpSource ? util.findBPString(bpSource) : undefined]
 
         G.gridData.update(window.innerWidth / 2, window.innerHeight / 2, G.BPC)
 
-        loadingScreen.classList.remove('active')
+        G.loadingScreen.hide()
     }
 })
 .catch(error => console.error(error))
@@ -356,19 +158,14 @@ function loadBp(bpString: string, clearData = true) {
         .catch(error => console.error(error))
 }
 
-window.addEventListener('unload', () => {
-    localStorage.setItem('quickbarItemNames', JSON.stringify(G.quickbarContainer.getAllItemNames()))
-    G.app.destroy(true, true)
-})
+window.addEventListener('unload', () => G.app.destroy(true, true))
 
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
-    if (G.keyboard.movingViaWASD()) return
-
-    if (G.currentMouseState === G.mouseStates.PANNING) {
-        G.BPC.zoomPan.translateBy(e.movementX, e.movementY)
-        G.BPC.zoomPan.updateTransform()
+    if (G.currentMouseState === G.mouseStates.PANNING && !actions.movingViaKeyboard) {
+        G.BPC.viewport.translateBy(e.movementX, e.movementY)
+        G.BPC.viewport.updateTransform()
         G.BPC.updateViewportCulling()
     }
 })
@@ -397,26 +194,26 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
 document.addEventListener('paste', (e: ClipboardEvent) => {
     e.preventDefault()
 
-    loadingScreen.classList.add('active')
+    G.loadingScreen.show()
 
     const promise = navigator.clipboard && navigator.clipboard.readText ?
         navigator.clipboard.readText() :
         Promise.resolve(e.clipboardData.getData('text'))
 
     promise
-        .then(util.findBPString)
+        .then(BPString.findBPString)
         .then(loadBp)
-        .then(() => loadingScreen.classList.remove('active'))
+        .then(() => G.loadingScreen.hide())
         .catch(error => console.error(error))
 })
 
-keyboardJS.bind(keybinds.clear, () => {
+actions.clear.bind(() => {
     G.BPC.clearData()
     G.bp = new Blueprint()
     G.BPC.initBP()
 })
 
-keyboardJS.bind(keybinds.picture, () => {
+actions.picture.bind(() => {
     if (G.bp.isEmpty()) return
 
     G.BPC.enableRenderableOnChildren()
@@ -434,17 +231,15 @@ keyboardJS.bind(keybinds.picture, () => {
     })
 })
 
-keyboardJS.bind('shift', () => G.keyboard.shift = true, () => G.keyboard.shift = false)
-
-keyboardJS.bind(keybinds.overlay, () => {
+actions.showInfo.bind(() => {
     G.BPC.overlayContainer.overlay.visible = !G.BPC.overlayContainer.overlay.visible
 })
 
-keyboardJS.bind('i', () => infoContainer.toggle())
+actions.info.bind(() => infoContainer.toggle())
 
-keyboardJS.bind(keybinds.closeWindow, () => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
+actions.closeWindow.bind(() => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
 
-keyboardJS.bind(keybinds.inventory, () => {
+actions.inventory.bind(() => {
     if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
         if (G.openedGUIWindow) {
             G.openedGUIWindow.close()
@@ -454,9 +249,9 @@ keyboardJS.bind(keybinds.inventory, () => {
     }
 })
 
-keyboardJS.bind(keybinds.focus, () => G.BPC.centerViewport())
+actions.focus.bind(() => G.BPC.centerViewport())
 
-keyboardJS.bind(keybinds.rotate, () => {
+actions.rotate.bind(() => {
     if (G.BPC.hoverContainer &&
         (G.currentMouseState === G.mouseStates.NONE || G.currentMouseState === G.mouseStates.MOVING)
     ) {
@@ -466,7 +261,7 @@ keyboardJS.bind(keybinds.rotate, () => {
     }
 })
 
-keyboardJS.bind(keybinds.pippete, () => {
+actions.pippete.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.currentMouseState = G.mouseStates.PAINTING
 
@@ -480,32 +275,31 @@ keyboardJS.bind(keybinds.pippete, () => {
         G.BPC.addChild(G.BPC.paintContainer)
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.destroy()
-        G.BPC.paintContainer = undefined
-
         G.currentMouseState = G.mouseStates.NONE
+        G.BPC.updateHoverContainer()
     }
 })
 
-keyboardJS.bind(keybinds.increaseTileArea, () => {
+actions.increaseTileBuildingArea.bind(() => {
     if (G.BPC.paintContainer instanceof TilePaintContainer) {
         G.BPC.paintContainer.increaseSize()
     }
 })
 
-keyboardJS.bind(keybinds.decreaseTileArea, () => {
+actions.decreaseTileBuildingArea.bind(() => {
     if (G.BPC.paintContainer instanceof TilePaintContainer) {
         G.BPC.paintContainer.decreaseSize()
     }
 })
 
-keyboardJS.bind(keybinds.undo, () => {
+actions.undo.bind(() => {
     G.bp.undo(
         hist => pre(hist, 'add'),
         hist => post(hist, 'del')
     )
 })
 
-keyboardJS.bind(keybinds.redo, () => {
+actions.redo.bind(() => {
     G.bp.redo(
         hist => pre(hist, 'del'),
         hist => post(hist, 'add')
@@ -570,23 +364,70 @@ function post(hist: IHistoryObject, addDel: string) {
     G.BPC.updateViewportCulling()
 }
 
-keyboardJS.bind(keybinds.w, () => G.keyboard.w = true, () => G.keyboard.w = false)
-keyboardJS.bind(keybinds.a, () => G.keyboard.a = true, () => G.keyboard.a = false)
-keyboardJS.bind(keybinds.s, () => G.keyboard.s = true, () => G.keyboard.s = false)
-keyboardJS.bind(keybinds.d, () => G.keyboard.d = true, () => G.keyboard.d = false)
+actions.pan.bind(() => {
+    if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.currentMouseState = G.mouseStates.PANNING
+    }
+}, () => {
+    if (G.currentMouseState === G.mouseStates.PANNING) {
+        G.currentMouseState = G.mouseStates.NONE
+    }
+})
 
-keyboardJS.bind(keybinds.quickbarSlot01, () => G.quickbarContainer.bindKeyToSlot(0))
-keyboardJS.bind(keybinds.quickbarSlot02, () => G.quickbarContainer.bindKeyToSlot(1))
-keyboardJS.bind(keybinds.quickbarSlot03, () => G.quickbarContainer.bindKeyToSlot(2))
-keyboardJS.bind(keybinds.quickbarSlot04, () => G.quickbarContainer.bindKeyToSlot(3))
-keyboardJS.bind(keybinds.quickbarSlot05, () => G.quickbarContainer.bindKeyToSlot(4))
-keyboardJS.bind(keybinds.quickbarSlot06, () => G.quickbarContainer.bindKeyToSlot(5))
-keyboardJS.bind(keybinds.quickbarSlot07, () => G.quickbarContainer.bindKeyToSlot(6))
-keyboardJS.bind(keybinds.quickbarSlot08, () => G.quickbarContainer.bindKeyToSlot(7))
-keyboardJS.bind(keybinds.quickbarSlot09, () => G.quickbarContainer.bindKeyToSlot(8))
-keyboardJS.bind(keybinds.quickbarSlot10, () => G.quickbarContainer.bindKeyToSlot(9))
-keyboardJS.bind(keybinds.changeActiveQuickbar, () => G.quickbarContainer.changeActiveQuickbar())
+actions.build.bind(e => {
+    if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
+        G.BPC.paintContainer.placeEntityContainer()
+    }
+})
 
-// hack for calling preventDefault() on all bound keys
-const keyCombos = keyboardJS._listeners.map((l: any) => l.keyCombo.sourceStr)
-keyboardJS.bind(keyCombos, e => e.preventDefault())
+actions.mine.bind(() => {
+    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.removeContainer()
+    }
+    if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
+        G.BPC.paintContainer.removeContainerUnder()
+    }
+})
+
+actions.moveEntity.bind(() => {
+    if (!G.BPC.movingContainer && G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.pickUpEntityContainer()
+        return
+    }
+    if (G.BPC.movingContainer) {
+        G.BPC.movingContainer.placeDownEntityContainer()
+    }
+})
+
+actions.openEntityGUI.bind(() => {
+    if (G.BPC.hoverContainer) {
+        console.log(G.bp.entity(G.BPC.hoverContainer.entity_number).toJS())
+
+        if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow) {
+            G.editEntityContainer.create(G.BPC.hoverContainer.entity_number)
+        }
+    }
+})
+
+actions.copyEntitySettings.bind(() => {
+    if (G.BPC.hoverContainer) {
+        G.copyData.recipe = G.bp.entity(G.BPC.hoverContainer.entity_number).recipe
+        G.copyData.modules = G.bp.entity(G.BPC.hoverContainer.entity_number).modulesList
+    }
+})
+
+actions.pasteEntitySettings.bind(() => {
+    if (G.BPC.hoverContainer) G.BPC.hoverContainer.pasteData()
+})
+
+actions.quickbar1.bind(() => G.quickbarContainer.bindKeyToSlot(0))
+actions.quickbar2.bind(() => G.quickbarContainer.bindKeyToSlot(1))
+actions.quickbar3.bind(() => G.quickbarContainer.bindKeyToSlot(2))
+actions.quickbar4.bind(() => G.quickbarContainer.bindKeyToSlot(3))
+actions.quickbar5.bind(() => G.quickbarContainer.bindKeyToSlot(4))
+actions.quickbar6.bind(() => G.quickbarContainer.bindKeyToSlot(5))
+actions.quickbar7.bind(() => G.quickbarContainer.bindKeyToSlot(6))
+actions.quickbar8.bind(() => G.quickbarContainer.bindKeyToSlot(7))
+actions.quickbar9.bind(() => G.quickbarContainer.bindKeyToSlot(8))
+actions.quickbar10.bind(() => G.quickbarContainer.bindKeyToSlot(9))
+actions.changeActiveQuickbar.bind(() => G.quickbarContainer.changeActiveQuickbar())

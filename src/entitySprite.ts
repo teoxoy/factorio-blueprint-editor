@@ -1,4 +1,4 @@
-import G from './globals'
+import G from './common/globals'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 
 export class EntitySprite extends PIXI.Sprite {

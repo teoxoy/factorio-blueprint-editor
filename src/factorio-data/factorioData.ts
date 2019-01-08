@@ -8,7 +8,7 @@ import recipeBundle from 'factorio-data/data/prototypes/recipes'
 import entityBundle from 'factorio-data/data/prototypes/entities'
 import tileBundle from 'factorio-data/data/prototypes/tiles'
 import { Area } from './positionGrid'
-import util from '../util'
+import util from '../common/util'
 import { Blueprint } from './blueprint'
 
 // tslint:disable:max-file-line-count

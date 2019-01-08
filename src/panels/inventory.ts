@@ -3,7 +3,7 @@
 import inventoryBundle from 'factorio-data/data/prototypes/inventoryLayout'
 import factorioData from '../factorio-data/factorioData'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
-import G from '../globals'
+import G from '../common/globals'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'
 

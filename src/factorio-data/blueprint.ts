@@ -2,7 +2,7 @@ import getEntity from './entity'
 import factorioData from './factorioData'
 import { PositionGrid } from './positionGrid'
 import Immutable from 'immutable'
-import G from '../globals'
+import G from '../common/globals'
 import { ConnectionsManager } from './connectionsManager'
 import { EntityContainer } from '../containers/entity'
 
