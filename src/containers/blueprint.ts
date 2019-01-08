@@ -1,5 +1,5 @@
 import G from '../common/globals'
-import { ZoomPan } from '../zoomPan'
+import { Viewport } from '../viewport'
 import { WiresContainer } from './wires'
 import { UnderlayContainer } from './underlay'
 import { EntitySprite } from '../entitySprite'
@@ -24,7 +24,7 @@ export class BlueprintContainer extends PIXI.Container {
     movingEntityFilter: AdjustmentFilter
     tileSprites: PIXI.Container
     entitySprites: PIXI.Container
-    zoomPan: ZoomPan
+    viewport: Viewport
     pgOverlay: PIXI.Graphics
     hoverContainer: undefined | EntityContainer
     movingContainer: undefined | EntityContainer
@@ -34,7 +34,7 @@ export class BlueprintContainer extends PIXI.Container {
         super()
         this.interactive = true
 
-        this.zoomPan = new ZoomPan(this, G.sizeBPContainer, G.positionBPContainer, {
+        this.viewport = new Viewport(this, G.sizeBPContainer, G.positionBPContainer, {
             width: G.app.screen.width,
             height: G.app.screen.height
         }, 5)
@@ -78,10 +78,10 @@ export class BlueprintContainer extends PIXI.Container {
 
         document.addEventListener('wheel', e => {
             e.preventDefault()
-            this.zoomPan.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
+            this.viewport.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
             const z = Math.sign(-e.deltaY) * 0.1
-            this.zoomPan.zoomBy(z, z)
-            this.zoomPan.updateTransform()
+            this.viewport.zoomBy(z, z)
+            this.viewport.updateTransform()
             G.gridData.recalculate(this)
             this.updateViewportCulling()
         }, false)
@@ -92,11 +92,11 @@ export class BlueprintContainer extends PIXI.Container {
                 const ADXOR = actions.moveLeft.pressed !== actions.moveRight.pressed
                 if (WSXOR || ADXOR) {
                     const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
-                    this.zoomPan.translateBy(
+                    this.viewport.translateBy(
                         (ADXOR ? (actions.moveLeft.pressed ? 1 : -1) : 0) * finalSpeed,
                         (WSXOR ? (actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
                     )
-                    this.zoomPan.updateTransform()
+                    this.viewport.updateTransform()
 
                     G.gridData.recalculate(this)
 
@@ -252,13 +252,13 @@ export class BlueprintContainer extends PIXI.Container {
 
     centerViewport() {
         if (G.bp.isEmpty()) {
-            this.zoomPan.setPosition(-G.sizeBPContainer.width / 2, -G.sizeBPContainer.height / 2)
-            this.zoomPan.updateTransform()
+            this.viewport.setPosition(-G.sizeBPContainer.width / 2, -G.sizeBPContainer.height / 2)
+            this.viewport.updateTransform()
             return
         }
 
         const bounds = this.getBlueprintBounds()
-        this.zoomPan.centerViewPort({
+        this.viewport.centerViewPort({
             x: bounds.width,
             y: bounds.height
         }, {

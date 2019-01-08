@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 
-export class ZoomPan {
+export class Viewport {
 
     private container: PIXI.Container
     private size: any
@@ -127,7 +127,7 @@ export class ZoomPan {
         return this.transform
     }
 
-    setViewPortSize(width: number, height: number) {
+    setSize(width: number, height: number) {
         this.viewPortSize.width = width
         this.viewPortSize.height = height
         this.dirty = true

@@ -65,8 +65,8 @@ G.app.renderer.autoResize = true
 G.app.renderer.resize(window.innerWidth, window.innerHeight)
 window.addEventListener('resize', () => {
     G.app.renderer.resize(window.innerWidth, window.innerHeight)
-    G.BPC.zoomPan.setViewPortSize(G.app.screen.width, G.app.screen.height)
-    G.BPC.zoomPan.updateTransform()
+    G.BPC.viewport.setSize(G.app.screen.width, G.app.screen.height)
+    G.BPC.viewport.updateTransform()
     G.BPC.updateViewportCulling()
 }, false)
 document.body.appendChild(G.app.view)
@@ -159,8 +159,8 @@ document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
     if (G.currentMouseState === G.mouseStates.PANNING && !actions.movingViaKeyboard) {
-        G.BPC.zoomPan.translateBy(e.movementX, e.movementY)
-        G.BPC.zoomPan.updateTransform()
+        G.BPC.viewport.translateBy(e.movementX, e.movementY)
+        G.BPC.viewport.updateTransform()
         G.BPC.updateViewportCulling()
     }
 })

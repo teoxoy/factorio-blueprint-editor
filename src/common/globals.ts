@@ -51,8 +51,8 @@ const gridData = {
     update(x: number, y: number, BPC: BlueprintContainer) {
         this._lastMousePos = { x, y }
         const mousePositionInBP = {
-            x: Math.abs(BPC.position.x - x) / BPC.zoomPan.getCurrentScale(),
-            y: Math.abs(BPC.position.y - y) / BPC.zoomPan.getCurrentScale()
+            x: Math.abs(BPC.position.x - x) / BPC.viewport.getCurrentScale(),
+            y: Math.abs(BPC.position.y - y) / BPC.viewport.getCurrentScale()
         }
         const gridCoordsOfCursor16 = {
             x: (mousePositionInBP.x - mousePositionInBP.x % 16) / 16,
