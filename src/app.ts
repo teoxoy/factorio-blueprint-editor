@@ -409,7 +409,8 @@ actions.openEntityGUI.bind(() => {
     if (G.BPC.hoverContainer) {
         console.log(G.bp.entity(G.BPC.hoverContainer.entity_number).toJS())
 
-        if (G.currentMouseState === G.mouseStates.NONE && !G.openedGUIWindow) {
+        if (G.currentMouseState === G.mouseStates.NONE) {
+            if (G.openedGUIWindow) G.openedGUIWindow.close()
             G.editEntityContainer.create(G.BPC.hoverContainer.entity_number)
         }
     }
