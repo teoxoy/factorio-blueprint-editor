@@ -91,6 +91,8 @@ export default (rawEntity: any, BP: Blueprint) => ({
     },
 
     set modulesList(list: any) {
+        if (util.equalArrays(list, this.modulesList)) return
+
         const modules = {}
         for (const m of list) {
             if (Object.keys(modules).includes(m)) {

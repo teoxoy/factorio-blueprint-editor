@@ -116,6 +116,10 @@ function uniqueInArray(array: []) {
     return [...new Set(array)]
 }
 
+function equalArrays(array1: [], array2: []) {
+    return array1.length === array2.length && array1.sort().every((value, index) => value === array2.sort()[index])
+}
+
 export default {
     duplicate,
     set_shift,
@@ -129,5 +133,6 @@ export default {
     switchSizeBasedOnDirection,
     intToDir,
     nearestPowerOf2,
-    uniqueInArray
+    uniqueInArray,
+    equalArrays
 }
