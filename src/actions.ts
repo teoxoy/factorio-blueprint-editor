@@ -91,6 +91,10 @@ class ToggleAction extends Action {
     }
 }
 
+// Set the general application keyboard context
+// Needed to have seperate context's for input controls (i.e. Textbox)
+keyboardJS.setContext('app')
+
 const actions = {
     clear: new Action('shift+n'),
     focus: new Action('f'),

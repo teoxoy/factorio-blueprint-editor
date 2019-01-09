@@ -28,10 +28,6 @@ import actions from './actions'
 import initDatGui from './datgui'
 import spritesheetsLoader from './spritesheetsLoader'
 
-// Set the general application keyboard context
-// Needed to have seperate context's for input controls (i.e. Textbox)
-keyboardJS.setContext('app')
-
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
     document.getElementById('loadingMsg').innerHTML = text
