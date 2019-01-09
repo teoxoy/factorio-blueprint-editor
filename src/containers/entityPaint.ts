@@ -124,10 +124,10 @@ export class EntityPaintContainer extends PIXI.Container {
         )
     }
 
-    rotate() {
+    rotate(ccw = false) {
         const pr = factorioData.getEntity(this.name).possible_rotations
         if (!pr) return
-        this.direction = pr[ (pr.indexOf(this.direction) + 1) % pr.length ]
+        this.direction = pr[ (pr.indexOf(this.direction) + (ccw ? 3 : 1)) % pr.length ]
         this.redraw()
         const size = util.switchSizeBasedOnDirection(factorioData.getEntity(this.name).size, this.direction)
         if (size.x !== size.y) {

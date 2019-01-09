@@ -258,14 +258,16 @@ export default (rawEntity: any, BP: Blueprint) => ({
         return true
     },
 
-    rotate(notMoving: boolean, offset?: IPoint, pushToHistory = true, otherEntity?: number) {
+    rotate(notMoving: boolean, offset?: IPoint, pushToHistory = true, otherEntity?: number, ccw = false) {
         if (!this.assemblerCraftsWithFluid &&
             (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3')) return false
         if (notMoving && BP.entityPositionGrid.sharesCell(this.getArea())) return false
         const pr = this.entityData.possible_rotations
         if (!pr) return false
-        const newDir = pr[(pr.indexOf(this.direction) +
-            (notMoving && (this.size.x !== this.size.y || this.type === 'underground_belt') ? 2 : 1)
+        const newDir = pr[
+            (
+                pr.indexOf(this.direction) +
+                (notMoving && (this.size.x !== this.size.y || this.type === 'underground_belt') ? 2 : 1) * (ccw ? 3 : 1)
             ) % pr.length
         ]
         if (newDir === this.direction) return false

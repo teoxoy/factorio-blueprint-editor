@@ -119,6 +119,7 @@ const actions = {
     showInfo: new Action('alt'),
     pippete: new Action('q'),
     rotate: new Action('r'),
+    reverseRotate: new Action('shift+r'),
     closeWindow: new Action('esc'),
 
     increaseTileBuildingArea: new Action(']'),

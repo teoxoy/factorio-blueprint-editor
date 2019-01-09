@@ -168,7 +168,7 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
-    rotate() {
+    rotate(ccw = false) {
         const entity = G.bp.entity(this.entity_number)
         let otherEntity
         if (G.currentMouseState === G.mouseStates.NONE && entity.type === 'underground_belt') {
@@ -189,7 +189,7 @@ export class EntityContainer extends PIXI.Container {
         }
 
         const offset = G.gridData.calculateRotationOffset(this.position)
-        if (G.bp.entity(this.entity_number).rotate(G.currentMouseState === G.mouseStates.NONE, offset, true, otherEntity)) {
+        if (G.bp.entity(this.entity_number).rotate(G.currentMouseState === G.mouseStates.NONE, offset, true, otherEntity, ccw)) {
             const entity = G.bp.entity(this.entity_number)
             if (G.currentMouseState === G.mouseStates.MOVING && entity.size.x !== entity.size.y) {
                 this.x += offset.x * 32

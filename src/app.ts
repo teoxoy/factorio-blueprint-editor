@@ -257,6 +257,16 @@ actions.rotate.bind(() => {
     }
 })
 
+actions.reverseRotate.bind(() => {
+    if (G.BPC.hoverContainer &&
+        (G.currentMouseState === G.mouseStates.NONE || G.currentMouseState === G.mouseStates.MOVING)
+    ) {
+        G.BPC.hoverContainer.rotate(true)
+    } else if (G.currentMouseState === G.mouseStates.PAINTING) {
+        G.BPC.paintContainer.rotate(true)
+    }
+})
+
 actions.pippete.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.currentMouseState = G.mouseStates.PAINTING
