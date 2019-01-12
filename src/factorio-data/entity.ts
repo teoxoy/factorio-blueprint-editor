@@ -20,6 +20,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
     get recipe() { return rawEntity.get('recipe') },
 
     set recipe(recipeName: string) {
+        // TODO: Integrate check if recipe is actually changing
         BP.operation(this.entity_number, 'Changed recipe', entities => (
             entities.withMutations(map => {
                 map.setIn([this.entity_number, 'recipe'], recipeName)
@@ -72,33 +73,32 @@ export default (rawEntity: any, BP: Blueprint) => ({
         )
     },
 
-    get modules() {
-        const i = rawEntity.get('items')
-        return i ? i.toJS() : undefined
-    },
-
-    get modulesList() {
-        const i = rawEntity.get('items')
-        if (!i) return
-        const modules = i.toJS()
-        const moduleList = []
-        for (const n in modules) {
-            for (let i = 0; i < modules[n]; i++) {
-                moduleList.push(n)
+    // TODO: When changing 'entity.ts' to a class (if) handle the modules within the class differently
+    // >> This would be greatly helpful for improving the user experience as teh modules would stay at
+    //    the same place at least as long as the blueprint is edited.
+    // >> Currently not possible due to 'entity.ts' not being a real class / object
+    /** List of all modules */
+    get modules(): string[] {
+        const list: string[] = []
+        const data: Map<string, number> = rawEntity.get('items')
+        if (data !== undefined && data.size > 0) {
+            for (const item of data) {
+                for (let index = 0; index < item[1]; index++) {
+                    list.push(item[0])
+                }
             }
         }
-        return moduleList
+        return list
     },
-
-    set modulesList(list: any) {
-        if (util.equalArrays(list, this.modulesList)) return
-
-        const modules = {}
-        for (const m of list) {
-            if (Object.keys(modules).includes(m)) {
-                modules[m]++
-            } else {
-                modules[m] = 1
+    set modules(list: string[]) {
+        const modules: {[k: string]: number} = {}
+        for (const item of list) {
+            if (item !== undefined) {
+                if (Object.keys(modules).includes(item)) {
+                    modules[item]++
+                } else {
+                    modules[item] = 1
+                }
             }
         }
         BP.operation(this.entity_number, 'Changed modules',

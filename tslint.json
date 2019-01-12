@@ -122,6 +122,7 @@
         "linebreak-style": false,
         "no-submodule-imports": false,
         "no-reference": false,
-        "no-bitwise": false
+        "no-bitwise": false,
+        "no-void-expression": [true, "ignore-arrow-function-shorthand"]
     }
 }

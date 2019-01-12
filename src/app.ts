@@ -28,6 +28,7 @@ import actions from './actions'
 import initDatGui from './datgui'
 import spritesheetsLoader from './spritesheetsLoader'
 import * as Editors from './editors/factory'
+import Editor from './editors/editor'
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
@@ -87,8 +88,8 @@ actions.attachEventsToContainer(G.BPC)
 G.editEntityContainer = new EditEntityContainer()
 G.app.stage.addChild(G.editEntityContainer)
 
-G.inventoryContainer = new InventoryContainer()
-G.app.stage.addChild(G.inventoryContainer)
+// G.inventoryContainer = new InventoryContainer()
+// G.app.stage.addChild(G.inventoryContainer)
 
 G.toolbarContainer = new ToolbarContainer()
 G.app.stage.addChild(G.toolbarContainer)
@@ -238,11 +239,21 @@ actions.closeWindow.bind(() => { if (G.openedGUIWindow) G.openedGUIWindow.close(
 
 actions.inventory.bind(() => {
     if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
-        if (G.openedGUIWindow) {
-            G.openedGUIWindow.close()
+        if (G.openDialogs.length > 0) {
+            G.openDialogs[G.openDialogs.length - 1].close()
         } else {
-            G.inventoryContainer.toggle()
+            const inventory: InventoryContainer = new InventoryContainer('Inventory', undefined, (itemName: string) => {
+                inventory.close()
+                G.BPC.spawnEntityAtMouse(itemName)
+            })
+            inventory.show()
         }
+
+        // if (G.openedGUIWindow) {
+            // G.openedGUIWindow.close()
+        // } else {
+            // G.inventoryContainer.toggle()
+        // }
     }
 })
 
@@ -407,12 +418,18 @@ actions.moveEntity.bind(() => {
 })
 
 actions.openEntityGUI.bind(() => {
-    if (G.BPC.hoverContainer) {
+    if (G.BPC.hoverContainer !== undefined) {
         console.log(G.bp.entity(G.BPC.hoverContainer.entity_number).toJS())
 
         if (G.currentMouseState === G.mouseStates.NONE) {
-            if (G.openedGUIWindow) G.openedGUIWindow.close()
-            G.openedGUIWindow = Editors.createEditor(G.BPC.hoverContainer.entity_number)
+            if (G.openedGUIWindow !== undefined) {
+                G.openedGUIWindow.close()
+            }
+
+            const editor: Editor = Editors.createEditor(G.BPC.hoverContainer.entity_number)
+            editor.show()
+
+            G.openedGUIWindow = editor
         }
     }
 })
@@ -420,7 +437,7 @@ actions.openEntityGUI.bind(() => {
 actions.copyEntitySettings.bind(() => {
     if (G.BPC.hoverContainer) {
         G.copyData.recipe = G.bp.entity(G.BPC.hoverContainer.entity_number).recipe
-        G.copyData.modules = G.bp.entity(G.BPC.hoverContainer.entity_number).modulesList
+        G.copyData.modules = G.bp.entity(G.BPC.hoverContainer.entity_number).modules
     }
 })
 

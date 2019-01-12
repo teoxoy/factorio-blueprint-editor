@@ -18,6 +18,11 @@ const styles = {
             fontFamily: G.fontFamily,
             fontWeight: '500',
             fontSize: 20
+        }),
+        label: new PIXI.TextStyle({
+            fill: G.colors.text.normal,
+            fontFamily: G.fontFamily,
+            fontSize: 14
         })
     }
 }

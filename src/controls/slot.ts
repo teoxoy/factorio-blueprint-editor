@@ -15,14 +15,7 @@ export default class Slot extends Button {
     // Override Pressed appearance of Button
     get pressed(): boolean { return true }
 
-    /** Field to hold any data for the Slot */
-    private m_Data: any = undefined
-
     constructor(width: number = 36, height: number = 36, border: number = 1) {
         super(width, height, border)
     }
-
-    /** Slot Data */
-    public get data(): any { return this.m_Data }
-    public set data(value: any) { this.m_Data = value }
 }

@@ -4,6 +4,7 @@ import inventoryBundle from 'factorio-data/data/prototypes/inventoryLayout'
 import factorioData from '../factorio-data/factorioData'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import G from '../common/globals'
+import C from '../controls/common'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'
 
@@ -49,13 +50,17 @@ export class InventoryContainer extends Dialog {
         }
     }
 
-    recipeVisualization: PIXI.Container
-    inventoryContents: PIXI.Container
-    itemTooltip: PIXI.Text
-    iconGutter = 36
-    inventoryActiveGroup: Button
-    inventoryGroup: Map<Button, PIXI.Container> = new Map()
-    title: PIXI.Text
+    /** Container for Inventory Group Buttons */
+    private m_InventoryGroups: PIXI.Container
+
+    /** Container for Inventory Group Items */
+    private m_InventoryItems: PIXI.Container
+
+    /** Container for Recipe Tooltip */
+    private m_RecipeTooltip: PIXI.Container
+
+    /** Textbox for Title */
+    private readonly m_Tilte: PIXI.Text
 
     /**
      *
@@ -79,48 +84,113 @@ export class InventoryContainer extends Dialog {
      * Space   @ 514+12                     ->526
      * Height : 10 + 24 + 12 + 68 + 12 + (8 * (36 + 2)) + 12 + 24 + 12 + 36 + 12)
      */
-    constructor() {
+    constructor(title: string = 'Inventory', itemsFilter?: string[], selectedCallBack?: (selectedItem: string) => void) {
         super(
             /* Width  : */ 12 + (10 * (36 + 2)) + 12,
             /* Height : */ 10 + 24 + 12 + 68 + 12 + (8 * (36 + 2)) + 12 + 24 + 12 + 36 + 12)
 
-        const title = new PIXI.Text('Inventory', {
-            fill: G.colors.text.normal,
-            fontFamily: G.fontFamily,
-            fontWeight: '500',
-            fontSize: 20
-        })
-        title.position.set(12, 10)
-        this.title = title
-        this.addChild(title)
+        this.on('pointerover', () => { if (G.BPC.paintContainer !== undefined) G.BPC.paintContainer.hide() })
+        this.on('pointerout',  () => { if (G.BPC.paintContainer !== undefined) G.BPC.paintContainer.show() })
 
-        this.inventoryContents = new PIXI.Container()
-        this.inventoryContents.position.set(12, 46)
-        this.addChild(this.inventoryContents)
+        this.m_Tilte = new PIXI.Text(Dialog.capitalize(title), C.styles.dialog.title)
+        this.m_Tilte.position.set(12, 10)
+        this.addChild(this.m_Tilte)
 
-        this.itemTooltip = new PIXI.Text('', {
-            fill: G.colors.text.normal,
-            fontFamily: G.fontFamily,
-            fontWeight: '500',
-            fontSize: 20
-        })
-        this.itemTooltip.position.set(12, 442)
-        this.addChild(this.itemTooltip)
+        this.m_InventoryGroups = new PIXI.Container()
+        this.m_InventoryGroups.position.set(12, 46)
+        this.addChild(this.m_InventoryGroups)
 
-        this.recipeVisualization = new PIXI.Container()
-        this.recipeVisualization.position.set(28, 478 + 16)
-        this.addChild(this.recipeVisualization)
+        this.m_InventoryItems = new PIXI.Container()
+        this.m_InventoryItems.position.set(12, 126)
+        this.addChild(this.m_InventoryItems)
 
-        this.on('pointerover', () => { if (G.BPC.paintContainer) G.BPC.paintContainer.hide() })
-        this.on('pointerout',  () => { if (G.BPC.paintContainer) G.BPC.paintContainer.show() })
+        let groupIndex = 0
+        for (const group of inventoryBundle) {
+
+            const inventoryGroupItems = new PIXI.Container()
+            let itemColIndex = 0
+            let itemRowIndex = 0
+
+            for (const subgroup of group.subgroups) {
+
+                let subgroupHasItems = false
+
+                for (const item of subgroup.items) {
+
+                    const itemData = factorioData.getItem(item.name)
+                    if ((itemsFilter === undefined && (itemData.place_result !== undefined || itemData.place_as_tile !== undefined)) ||
+                        (itemsFilter !== undefined && itemsFilter.includes(item.name))) {
+
+                        const button: Button = new Button(36, 36)
+                        button.position.set(itemColIndex * 38, itemRowIndex * 38)
+                        button.content = InventoryContainer.createIcon(item.name, false)
+                        button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+                            if (e.data.button === 0) {
+                                selectedCallBack(item.name)
+                            }
+                        })
+                        button.on('pointerover', () => {
+                            // this.itemTooltip.text = item.name.split('_').map((s: any) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+                            // this.createRecipeVisualization(item.name)
+                        })
+                        button.on('pointerout', () => {
+                            // this.itemTooltip.text = ''
+                            // this.recipeVisualization.visible = false
+                        })
+
+                        inventoryGroupItems.addChild(button)
+
+                        if (itemColIndex > 9) {
+                            itemColIndex = 0
+                            itemRowIndex++
+                        } else {
+                            itemColIndex++
+                        }
+
+                        subgroupHasItems = true
+                    }
+                }
+
+                if (subgroupHasItems) {
+                    itemRowIndex++
+                    itemColIndex = 0
+                }
+            }
+
+            if (inventoryGroupItems.children.length > 0) {
+
+                inventoryGroupItems.visible = groupIndex === 0
+                this.m_InventoryItems.addChild(inventoryGroupItems)
+
+                const button = new Button(68, 68, 3)
+                button.active = groupIndex === 0
+                button.position.set(groupIndex * 70, 0)
+                button.content = InventoryContainer.createIcon(group.name, false)
+                button.data = inventoryGroupItems
+                button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+                    if (e.data.button === 0) {
+                        if (!button.active) {
+                            for (const inventoryGroup of this.m_InventoryGroups.children) {
+                                (inventoryGroup as Button).active = inventoryGroup === button
+                            }
+                        }
+                        const buttonData: PIXI.Container = button.data as PIXI.Container
+                        if (!buttonData.visible) {
+                            for (const inventoryGroupItems of this.m_InventoryItems.children) {
+                                inventoryGroupItems.visible = inventoryGroupItems === buttonData
+                            }
+                        }
+                    }
+                })
+
+                this.m_InventoryGroups.addChild(button)
+
+                groupIndex++
+            }
+        }
     }
 
-    create(title?: string, filteredItems?: string[], cb?: (name: string) => void) {
-        this.title.text = title ? title : 'Inventory'
-
-        this.itemTooltip.text = ''
-        this.recipeVisualization.visible = false
-        this.inventoryContents.removeChildren()
+    create() {
 
         let nextI = 0
         let groupHasItem = false
@@ -130,16 +200,18 @@ export class InventoryContainer extends Dialog {
             let nextK = 0
             let nextJ = 0
             let subgroupHasItem = false
+
             for (const subgroup of inventoryBundle[i].subgroups) {
                 for (const item of subgroup.items) {
                     const itemData = factorioData.getItem(item.name)
                     const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
                     const placeResult = itemData.place_result || tileResult
-                    if ((!filteredItems && placeResult && (factorioData.getEntity(placeResult) || factorioData.getTile(placeResult))) ||
-                        filteredItems && filteredItems.includes(item.name)
-                    ) {
+                    if ((itemsFilter === undefined && placeResult && (factorioData.getEntity(placeResult) || factorioData.getTile(placeResult))) ||
+                        itemsFilter && itemsFilter.includes(item.name)) {
+
                         const img: Button = new Button(36, 36)
                         img.content = InventoryContainer.createIcon(item.name, false)
+                        img.position.set(Math.floor( ))
 
                         if (nextK > 9) {
                             nextJ++
@@ -218,6 +290,7 @@ export class InventoryContainer extends Dialog {
         }
     }
 
+    /*
     toggle(title?: string, filteredItems?: string[], cb?: (name: string) => void) {
         if (!this.visible) {
             if (G.editEntityContainer.active) G.editEntityContainer.visible = false
@@ -246,6 +319,7 @@ export class InventoryContainer extends Dialog {
             G.BPC.paintContainer.show()
         }
     }
+    */
 
     createRecipeVisualization(recipeName: string) {
         const RECIPE = factorioData.getRecipe(recipeName)

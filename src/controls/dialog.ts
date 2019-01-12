@@ -12,6 +12,14 @@ import Panel from './panel'
  */
 export default class Dialog extends Panel {
 
+    /** Capitalize String */
+    protected static capitalize(text: string): string {
+        return text.split('_').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+    }
+
+    /** Private field to hold dialog index */
+    private m_OpenDialogIndex: number
+
     constructor(width: number, height: number) {
         super(width, height, G.colors.dialog.background, 0.7, 2)
 
@@ -32,16 +40,16 @@ export default class Dialog extends Panel {
 
     /** Show Dialog */
     public show(): void {
+        this.m_OpenDialogIndex = G.openDialogs.push(this)
+        G.app.stage.addChild(this)
         this.visible = true
     }
 
     /** Close Dialog */
     public close(): void {
-        if (this.visible && G.openedGUIWindow !== this) {
-            G.openedGUIWindow.close()
-        }
         this.visible = false
+        G.app.stage.removeChild(this)
+        G.openDialogs.splice(this.m_OpenDialogIndex - 1, 1)
         this.destroy()
-        G.openedGUIWindow = undefined
     }
 }

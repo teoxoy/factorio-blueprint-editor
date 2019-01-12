@@ -97,15 +97,15 @@ export class OverlayContainer extends PIXI.Container {
             if (fluidIcons.children.length !== 0) entityInfo.addChild(fluidIcons)
         }
 
-        if (entity.modules) {
+        const modules: string[] = entity.modules
+        if (modules !== undefined && modules.length > 0) {
             const moduleInfo = new PIXI.Container()
             const shift = entity.entityData.module_specification.module_info_icon_shift
-            const mL = entity.modulesList
-            for (let i = 0; i < mL.length; i++) {
-                createIconWithBackground(moduleInfo, mL[i], { x: i * 32, y: 0 })
+            for (let index = 0; index < modules.length; index++) {
+                createIconWithBackground(moduleInfo, modules[index], { x: index * 32, y: 0 })
             }
             moduleInfo.scale.set(0.5, 0.5)
-            moduleInfo.position.set((shift ? shift[0] : 0) * 32 - mL.length * 8 + 8, (shift ? shift[1] : 0.75) * 32)
+            moduleInfo.position.set((shift ? shift[0] : 0) * 32 - modules.length * 8 + 8, (shift ? shift[1] : 0.75) * 32)
             entityInfo.addChild(moduleInfo)
         }
 

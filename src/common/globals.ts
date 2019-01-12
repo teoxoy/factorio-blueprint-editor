@@ -73,6 +73,8 @@ let railMoveOffset: IPoint = { x: 0, y: 0 }
 
 let openedGUIWindow: InventoryContainer | EditEntityContainer | Dialog | undefined
 
+const openDialogs: Dialog[] = []
+
 let moveSpeed = 10
 let quickbarRows = 2
 
@@ -185,5 +187,6 @@ export default {
     fontFamily,
     moveSpeed,
     quickbarRows,
-    loadingScreen
+    loadingScreen,
+    openDialogs
 }

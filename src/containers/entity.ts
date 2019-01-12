@@ -246,9 +246,9 @@ export class EntityContainer extends PIXI.Container {
                 if (aM.includes(m)) filteredModules.push(m)
             }
             const maxSlots = entity.entityData.module_specification.module_slots
-            entity.modulesList = filteredModules.length > maxSlots ? filteredModules.slice(0, maxSlots) : filteredModules
+            entity.modules = filteredModules.length > maxSlots ? filteredModules.slice(0, maxSlots) : filteredModules
         } else {
-            entity.modulesList = []
+            entity.modules = []
         }
         if (aM) this.redrawEntityInfo()
         if (entity.recipe !== RECIPE) this.changeRecipe(RECIPE)

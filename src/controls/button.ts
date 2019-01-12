@@ -15,8 +15,11 @@ export default class Button extends PIXI.Container {
     /** Rollover Graphic */
     private readonly m_Hover: PIXI.Graphics
 
-    /** Content of Button */
+    /** Content of Control */
     private m_Content: PIXI.DisplayObject
+
+    /** Data of Control */
+    private m_Data: any
 
     constructor(width: number = 36, height: number = 36, border: number = 1) {
         super()
@@ -49,12 +52,13 @@ export default class Button extends PIXI.Container {
     /** Is button active */
     public get active(): boolean {
         return this.m_Active.visible
+        // this.on()
     }
     public set active(active: boolean) {
         this.m_Active.visible = active
     }
 
-    /** Content of the button */
+    /** Control Content */
     public get content(): PIXI.DisplayObject {
         return this.m_Content
     }
@@ -75,6 +79,10 @@ export default class Button extends PIXI.Container {
             this.addChild(this.m_Content)
         }
     }
+
+    /** Control Data */
+    public get data(): any { return this.m_Data }
+    public set data(value: any) { this.m_Data = value }
 
     /** Background color of the button (can be overriden) */
     protected get background(): number { return G.colors.button.background }
