@@ -36,6 +36,7 @@ export default class Recipe extends Slot {
                 inventory.close()
                 EntityContainer.mappings.get(this.m_Entity.entity_number).changeRecipe(name)
                 this.updateContent(name)
+                this.emit('changed')
             })
             inventory.show()
         } else if (e.data.button === 2) {
@@ -45,6 +46,7 @@ export default class Recipe extends Slot {
             if (this.m_Entity.recipe !== undefined) {
                 EntityContainer.mappings.get(this.m_Entity.entity_number).changeRecipe(undefined)
                 this.updateContent(undefined)
+                this.emit('changed')
             }
         }
     }
