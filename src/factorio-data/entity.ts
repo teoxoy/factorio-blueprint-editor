@@ -3,6 +3,7 @@ import Immutable from 'immutable'
 import factorioData from './factorioData'
 import util from '../common/util'
 import { Area } from './positionGrid'
+import { IFilter } from '../interfaces/iBlueprintEditor';
 
 export default (rawEntity: any, BP: Blueprint) => ({
     get entity_number() { return rawEntity.get('entity_number') },
@@ -37,7 +38,8 @@ export default (rawEntity: any, BP: Blueprint) => ({
         ))
     },
 
-    get acceptedRecipes() {
+    /** Recipes this entity can accept */
+    get acceptedRecipes(): string[] {
         if (!this.entityData.crafting_categories) return
         const acceptedRecipes: string[] = []
         const recipes = factorioData.getRecipes()
@@ -55,8 +57,9 @@ export default (rawEntity: any, BP: Blueprint) => ({
         return acceptedRecipes
     },
 
-    get acceptedModules() {
-        if (!this.entityData.module_specification) return
+    /** Modules this entity can accept */
+    get acceptedModules(): string[] {
+        if (!this.entityData.module_specification) return undefined
         const ommitProductivityModules = this.name === 'beacon' ||
             (this.recipe && !factorioData.getItem('productivity_module').limitation.includes(this.recipe))
         const items = factorioData.getItems()
@@ -65,6 +68,25 @@ export default (rawEntity: any, BP: Blueprint) => ({
             if (items[k].type === 'module' && !(k.includes('productivity_module') && ommitProductivityModules)) acceptedModules.push(k)
         }
         return acceptedModules
+    },
+
+    /** Filters this entity can accept (only splitters, inserters and logistic chests) */
+    get acceptedFilters(): string[] {
+        const filters: string[] = []
+        const items = factorioData.getItems()
+        for (const key in items) {
+            const item = items[key]
+            if (item.type !== 'fluid' &&
+                item.type !== 'virtual_signal' &&
+                item.subgroup !== 'fluid_recipes' &&
+                item.category !== 'centrifuging' &&
+                item.category !== 'crafting_with_fluid' &&
+                item.name.startsWith('fill_') === false) {
+                    filters.push(item.name)
+                }
+        }
+
+        return filters
     },
 
     set direction(direction: number) {
@@ -104,6 +126,96 @@ export default (rawEntity: any, BP: Blueprint) => ({
         BP.operation(this.entity_number, 'Changed modules',
             entities => entities.setIn([this.entity_number, 'items'], Immutable.fromJS(modules))
         )
+    },
+
+    /* Count of filter slots */
+    get filterSlots(): number {
+        const name: string = this.name
+        switch (name) {
+            case 'splitter':
+            case 'fast_splitter':
+            case 'express_splitter':
+            case 'stack_filter_inserter':
+            case 'logistic_chest_storage': {
+                return 1
+            }
+            case 'filter_inserter': {
+                return 5
+            }
+            case 'logistic_chest_requester':
+            case 'logistic_chest_buffer': {
+                return 12
+            }
+            default: {
+                return 0
+            }
+        }
+    },
+
+    /* List of all filter(s) for splitters, inserters and logistic chests */
+    get filters(): IFilter[] {
+        const name: string = this.name
+        switch (name) {
+            case 'splitter':
+            case 'fast_splitter':
+            case 'express_splitter': {
+                return [ { index: 1, name: this.splitterFilter, count: 0 } ]
+            }
+            case 'filter_inserter':
+            case 'stack_filter_inserter': {
+                return this.inserterFilters
+            }
+            case 'logistic_chest_storage':
+            case 'logistic_chest_requester':
+            case 'logistic_chest_buffer':
+                return this.logisticChestFilters
+            default: {
+                return undefined
+            }
+        }
+    },
+    set filters(list: IFilter[]) {
+        const name: string = this.name
+        switch (name) {
+            case 'splitter':
+            case 'fast_splitter':
+            case 'express_splitter': {
+                const filter: string = (list === undefined || list.length !== 1 || list[0].name === undefined) ? undefined : list[0].name
+                BP.operation(this.entity_number, 'Changed splitter filter',
+                    entities => entities.setIn([this.entity_number, 'filter'], Immutable.fromJS(filter))
+                )
+                return
+            }
+            case 'filter_inserter':
+            case 'stack_filter_inserter': {
+                let filters: Array<{ index: number; name: string }>
+                if (list === undefined || list.length === 0) {
+                    filters = undefined
+                } else {
+                    filters = []
+                    for (const item of list) {
+                        console.log(item)
+                        if (item.name === undefined) {
+                            continue
+                        }
+                        filters.push({index: item.index, name: item.name})
+                    }
+                }
+                BP.operation(this.entity_number, 'Changed inserter filter' + (list.length === 1 ? '' : '(s)'),
+                    entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
+                )
+                return
+            }
+            case 'logistic_chest_storage':
+            case 'logistic_chest_requester':
+            case 'logistic_chest_buffer': {
+                const filters = (list === undefined || list.length === 0) ? undefined : list
+                BP.operation(this.entity_number, 'Changed inserter filters',
+                    entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
+                )
+                return
+            }
+        }
     },
 
     get splitterInputPriority() {

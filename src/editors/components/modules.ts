@@ -59,7 +59,9 @@ export default class Modules extends  PIXI.Container {
             this.m_Modules[index] = undefined
             this.m_Entity.modules = this.m_Modules
             EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
-            slot.content.destroy()
+            if (slot.content !== undefined) {
+                slot.content.destroy()
+            }
             this.emit('changed')
         }
     }

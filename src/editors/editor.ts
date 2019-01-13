@@ -3,6 +3,7 @@ import Dialog from '../controls/dialog'
 import Preview from './components/preview'
 import Recipe from './components/recipe'
 import Modules from './components/modules'
+import Filters from './components/filters'
 import { IEntity } from '../interfaces/iBlueprintEditor'
 
 /** Editor */
@@ -87,5 +88,20 @@ export default class Editor extends Dialog {
 
         // Return component in case extension wants to use it
         return modules
+    }
+
+    /**
+     * Add Filter Slots to Editor
+     * @description Defined in Base Editor class so extensions can use it when they need to
+     * @param x - Horizontal position of Filter Slots from top left corner
+     * @param y - Vertical position of Filter Slots from top left corner
+     */
+    protected addFilters(x: number = 208, y: number = 83): Filters {
+        const filters: Filters = new Filters(this.m_Entity)
+        filters.position.set(x, y)
+        this.addChild(filters)
+
+        // Return component in case extension wants to use it
+        return filters
     }
 }

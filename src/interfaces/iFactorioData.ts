@@ -13,6 +13,7 @@ export interface IEntity {
     name: string
     icon: string
     module_specification: IModuleSpecification
+    filter_count: number
     /** @deprecated Use direct accessors instead */
     [key: string]: any
 }

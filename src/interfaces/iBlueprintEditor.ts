@@ -11,6 +11,16 @@ export interface IPoint {
     y: number
 }
 
+/** Blueprint Editor Filter Data */
+export interface IFilter {
+    /** Slot index (1 based ... not 0 like arrays) */
+    index: number,
+    /** Name of entity to be filtered */
+    name: string,
+    /** If stacking is allowed, how many shall be stacked */
+    count?: number,
+}
+
 /** Blueprint Editor Entity Data */
 export interface IEntity {
     entity_number: number,
@@ -34,4 +44,11 @@ export interface IEntity {
     acceptedModules: string[]
     /** Currently set modules of entity */
     modules: string[]
+
+    /** Filters this entity can accept (only splitters, inserters and logistic chests) */
+    acceptedFilters: string[]
+    /** Count of filter slots of entity (only splitters, inserters and logistic chests) */
+    filterSlots: number
+    /** Current set filters of entity (only splitters, inserters and logistic chests) */
+    filters: IFilter[]
 }
