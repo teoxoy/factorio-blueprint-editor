@@ -4,6 +4,9 @@ import { InventoryContainer } from '../../panels/inventory'
 import { EntityContainer } from '../../containers/entity'
 
 // TODO: Integrate showing stack size of slots for requester and buffer chest
+// TODO: Include modules filter settings in copye paste
+// TODO: Show splitter filter in editor preview
+// TODO: Show inserter filter in blueprint
 
 /** Module Slots for Entity */
 export default class Filters extends  PIXI.Container {

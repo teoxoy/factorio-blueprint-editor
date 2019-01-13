@@ -136,34 +136,54 @@ export class InventoryContainer extends Dialog {
                 for (const item of subgroup.items) {
 
                     const itemData = factorioData.getItem(item.name)
-                    if ((itemsFilter === undefined && (itemData.place_result !== undefined || itemData.place_as_tile !== undefined)) ||
-                        (itemsFilter !== undefined && itemsFilter.includes(item.name))) {
-
-                        if (itemColIndex === 10) {
-                            itemColIndex = 0
-                            itemRowIndex++
-                        }
-
-                        const button: Button = new Button(36, 36)
-                        button.position.set(itemColIndex * 38, itemRowIndex * 38)
-                        button.content = InventoryContainer.createIcon(item.name, false)
-                        button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
-                            if (e.data.button === 0) {
-                                selectedCallBack(item.name)
+                    if (itemsFilter === undefined) {
+                        const resultPlaceable = itemData.place_result !== undefined
+                        const entityFindable = resultPlaceable ? factorioData.getEntity(itemData.place_result) !== undefined : false
+                        if (!entityFindable) {
+                            const tilePlaceable = itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
+                            const tileFindable = (tilePlaceable) ? factorioData.getTile(itemData.place_as_tile.result) !== undefined : false
+                            if (!tileFindable) {
+                                continue
                             }
-                        })
-                        button.on('pointerover', () => {
-                            this.updateRecipeVisualization(item.name)
-                        })
-                        button.on('pointerout', () => {
-                            this.updateRecipeVisualization(undefined)
-                        })
-
-                        inventoryGroupItems.addChild(button)
-
-                        itemColIndex++
-                        subgroupHasItems = true
+                        }
+                    } else {
+                        if (!itemsFilter.includes(item.name)) {
+                            continue
+                        }
                     }
+
+                    // const tileResult = itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
+                    // const placeResult = itemData.place_result !== undefined || tileResult
+
+                    // if ((itemsFilter === undefined && placeResult && (itemData.place_result !== undefined || 
+                    //        itemData.place_as_tile !== undefined)) ||
+                    //    (itemsFilter !== undefined && itemsFilter.includes(item.name))) {
+
+                    if (itemColIndex === 10) {
+                        itemColIndex = 0
+                        itemRowIndex++
+                    }
+
+                    const button: Button = new Button(36, 36)
+                    button.position.set(itemColIndex * 38, itemRowIndex * 38)
+                    button.content = InventoryContainer.createIcon(item.name, false)
+                    button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+                        if (e.data.button === 0) {
+                            selectedCallBack(item.name)
+                        }
+                    })
+                    button.on('pointerover', () => {
+                        this.updateRecipeVisualization(item.name)
+                    })
+                    button.on('pointerout', () => {
+                        this.updateRecipeVisualization(undefined)
+                    })
+
+                    inventoryGroupItems.addChild(button)
+
+                    itemColIndex++
+                    subgroupHasItems = true
+                    // }
                 }
 
                 if (subgroupHasItems) {
