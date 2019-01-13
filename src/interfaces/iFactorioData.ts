@@ -18,14 +18,57 @@ export interface IEntity {
     [key: string]: any
 }
 
+/** Factorio Normal Recipe Meta Information from package "factorio-data" */
+export interface IRecipeNormal {
+    energy_required?: number
+    ingredients: any
+    result_count?: number
+}
+
 /** Factorio Recipe Meta Information from package "factorio-data" */
 export interface IRecipe {
-    type: string
     name: string
+    normal?: IRecipeNormal
+    energy_required: number
+    ingredients: any
+    result_count?: number
+    /** @deprecated Use direct accessors instead */
+    [key: string]: any
+}
+
+/** Factorio PlaceAsTile Meta Information from package "factorio-data" */
+export interface IPlaceAsTile {
+    result: string
+    condition_size: number,
+    condition: string[]
 }
 
 /** Factorio Item Meta Information from package "factorio-data" */
 export interface IItem {
     type: string
     name: string
+    icon: string
+    place_result: string
+    place_as_tile: IPlaceAsTile
+    /** @deprecated Use direct accessors instead */
+    [key: string]: any
+}
+
+/** Factorio Inventory Item Meta Information from package "factorio-data" */
+export interface IInventoryItem {
+    name: string
+    icon: string
+}
+
+/** Factorio Inventory Subgroup Meta Information from package "factorio-data" */
+export interface IInventorySubgroup {
+    name: string
+    items: IInventoryItem[]
+}
+
+/** Factorio Inventory Group Meta Information from package "factorio-data" */
+export interface IInventoryGroup {
+    name: string
+    icon: string
+    subgroups: IInventorySubgroup[]
 }

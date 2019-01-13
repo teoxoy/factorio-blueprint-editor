@@ -2,8 +2,6 @@ import { Blueprint } from '../factorio-data/blueprint'
 import { ToolbarContainer } from '../panels/toolbar'
 import { QuickbarContainer } from '../panels/quickbar'
 import { BlueprintContainer } from '../containers/blueprint'
-import { EditEntityContainer } from '../panels/editEntity'
-import { InventoryContainer } from '../panels/inventory'
 import { Book } from '../factorio-data/book'
 import Dialog from '../controls/dialog'
 
@@ -15,8 +13,6 @@ let app: PIXI.Application
 
 let toolbarContainer: ToolbarContainer
 let quickbarContainer: QuickbarContainer
-let editEntityContainer: EditEntityContainer
-let inventoryContainer: InventoryContainer
 let BPC: BlueprintContainer
 
 const loadingScreen = {
@@ -71,8 +67,6 @@ const gridData = {
 
 let railMoveOffset: IPoint = { x: 0, y: 0 }
 
-let openedGUIWindow: InventoryContainer | EditEntityContainer | Dialog | undefined
-
 const openDialogs: Dialog[] = []
 
 let moveSpeed = 10
@@ -118,33 +112,37 @@ const colors = {
         link: 0x03A9F4,
         accent: 0xFF8A65
     },
-    button: {
-        background: 0x646464,
-        hover: 0xB16925,
-        active: 0xB16925
-    },
-    slot: {
-        background: 0x646464,
-        hover: 0xCCCCCC
-    },
-    textbox: {
-        background: 0x646464,
-        foreground: 0x000000,
-        hover: 0xCCCCCC,
-        active: 0xEEEEEE
-    },
-    dialog: {
-        background: 0x3A3A3A
-    },
-    pannel: {
-        background: 0x3A3A3A,
-        slot: 0x808080,
+    controls : {
         button: {
-            background: 0x646464,
-            rollover: 0xCCCCCC,
-            active: 0xB16925
+            border: 1,
+            background: { color: 0x646464, alpha: 1 },
+            hover: { color: 0xB16925, alpha: 0.5 },
+            active: { color: 0xB16925, alpha: 1 }
+        },
+        panel: {
+            background: { color: 0x3A3A3A, alpha: 0.7, border: 2 }
+        },
+        slot : {
+            hover: { color: 0xCCCCCC }
+        },
+        textbox: {
+            foreground: { color: 0x000000 },
+            background: { color: 0x646464, alpha: 1 },
+            hover: { color: 0xCCCCCC, alpha: 0.5 },
+            active: { color: 0xEEEEEE, alpha: 1 }
         }
     },
+    dialog: {
+        background: { color: 0x3A3A3A, alpha: 0.7, border: 2 },
+        line: { background: { color: 0x646464, alpha: 0.7, border: 1 } }
+    },
+    editor: {
+        sprite: { background: { color: 0x646464, alpha: 0.7 } }
+    },
+    quickbar: {
+        background: { color: 0x3A3A3A, alpha: 0.7, border: 2 }
+    },
+
     _darkTheme: true,
     _tintsToChange: [] as PIXI.Sprite[],
     pattern: 'checker',
@@ -163,13 +161,46 @@ const colors = {
 
 const fontFamily = '\'Roboto\', sans-serif'
 
+const styles = {
+    controls: {
+        textbox: new PIXI.TextStyle({
+            fill: colors.controls.textbox.foreground.color,
+            fontFamily: [ fontFamily ],
+            fontWeight: '500',
+            fontSize: 14
+        })
+    },
+    dialog: {
+        title: new PIXI.TextStyle({
+            fill: colors.text.normal,
+            fontFamily: [ fontFamily ],
+            fontWeight: '500',
+            fontSize: 20
+        }),
+        label: new PIXI.TextStyle({
+            fill: colors.text.normal,
+            fontFamily: [ fontFamily ],
+            fontWeight: '500',
+            fontSize: 15
+        })
+    },
+    icon: {
+        amount: new PIXI.TextStyle({
+            fill: colors.text.normal,
+            fontFamily: [ fontFamily ],
+            fontWeight: '500',
+            fontSize: 13,
+            stroke: 0x000000,
+            strokeThickness: 2
+        })
+    }
+}
+
 export default {
     hr,
     renderOnly,
     copyData,
-    openedGUIWindow,
-    inventoryContainer,
-    editEntityContainer,
+    openDialogs,
     BPC,
     app,
     toolbarContainer,
@@ -183,10 +214,10 @@ export default {
     book,
     mouseStates,
     currentMouseState,
-    colors,
-    fontFamily,
     moveSpeed,
     quickbarRows,
     loadingScreen,
-    openDialogs
+    colors,
+    fontFamily,
+    styles
 }

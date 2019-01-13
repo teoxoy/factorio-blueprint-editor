@@ -1,4 +1,6 @@
 import G from '../common/globals'
+import C from './common'
+import F from './functions'
 import Panel from './panel'
 
 /**
@@ -20,17 +22,22 @@ export default class Dialog extends Panel {
     /** Private field to hold dialog index */
     private m_OpenDialogIndex: number
 
-    constructor(width: number, height: number) {
-        super(width, height, G.colors.dialog.background, 0.7, 2)
+    constructor(width: number, height: number, title?: string) {
+        super(width, height,
+            G.colors.dialog.background.color,
+            G.colors.dialog.background.alpha,
+            G.colors.dialog.background.border)
 
         this.visible = false
         this.interactive = true
         this.interactiveChildren = true
+
+        if (title !== undefined) {
+            this.addLabel(12, 10, title, G.styles.dialog.title)
+        }
     }
 
-    /**
-     * Automatically sets position of  dialog to center screen
-     */
+    /** Automatically sets position of dialog to center screen */
     setPosition() {
         this.position.set(
             G.app.screen.width / 2 - this.width / 2,
@@ -51,5 +58,47 @@ export default class Dialog extends Panel {
         G.app.stage.removeChild(this)
         G.openDialogs.splice(this.m_OpenDialogIndex - 1, 1)
         this.destroy()
+    }
+
+    /**
+     * Add Label to Dialog
+     * @description Defined in base dialog class so extensions of dialog can use it
+     * @param x - Horizontal position of label from top left corner
+     * @param y - Vertical position of label from top left corner
+     * @param text - Text for label
+     * @param style - Style of label
+     * @returns Reference to PIXI.Text for further usage
+     */
+    protected addLabel(x: number = 140, y: number = 56, text: string = 'Recipe:', style: PIXI.TextStyle = G.styles.dialog.label): PIXI.Text {
+        const label: PIXI.Text = new PIXI.Text(text, style)
+        label.position.set(x, y)
+        this.addChild(label)
+
+        // Return label in case extension wants to use it
+        return label
+    }
+
+    /**
+     * Add Visual Line to Dialog
+     * @description Defined in base dialog class so extensions of dialog can use it
+     * @param x - Horizontal position of line from top left corner
+     * @param y - Vertical position of line from top left corner
+     * @param width - Width from left to right of line
+     * @param style - Height from top to bottom of line
+     * @returns Reference to PIXI.Graphics for further usage
+     */
+    protected addLine(x: number, y: number, width: number, height: number, border: number = G.colors.dialog.line.background.border): PIXI.Graphics {
+        const line: PIXI.Graphics = F.DrawRectangle(
+            width,
+            height,
+            G.colors.dialog.line.background.color,
+            G.colors.dialog.line.background.alpha,
+            border,
+            true)
+        line.position.set(x, y)
+        this.addChild(line)
+
+        // Return line in case extension wants to use it
+        return line
     }
 }

@@ -11,18 +11,17 @@ import * as PIXI from 'pixi.js'
 import { Book } from './factorio-data/book'
 import BPString from './factorio-data/BPString'
 
-import { InventoryContainer } from './panels/inventory'
 import G from './common/globals'
+import { InventoryContainer } from './panels/inventory'
 import { EntityContainer } from './containers/entity'
 import { EntityPaintContainer } from './containers/entityPaint'
+import { TilePaintContainer } from './containers/tilePaint'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './panels/toolbar'
 import { QuickbarContainer } from './panels/quickbar'
-import { Blueprint } from './factorio-data/blueprint'
-import { EditEntityContainer } from './panels/editEntity'
 import { InfoContainer } from './panels/info'
+import { Blueprint } from './factorio-data/blueprint'
 import FileSaver from 'file-saver'
-import { TilePaintContainer } from './containers/tilePaint'
 import initDoorbell from './doorbell'
 import actions from './actions'
 import initDatGui from './datgui'
@@ -85,20 +84,11 @@ G.app.stage.addChild(G.BPC)
 // Hack for plugging the mouse into keyboardJS
 actions.attachEventsToContainer(G.BPC)
 
-G.editEntityContainer = new EditEntityContainer()
-G.app.stage.addChild(G.editEntityContainer)
-
-// G.inventoryContainer = new InventoryContainer()
-// G.app.stage.addChild(G.inventoryContainer)
-
 G.toolbarContainer = new ToolbarContainer()
 G.app.stage.addChild(G.toolbarContainer)
 
 G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
 G.app.stage.addChild(G.quickbarContainer)
-
-const infoContainer = new InfoContainer()
-G.app.stage.addChild(infoContainer)
 
 Promise.all(
     [bpSource ? BPString.findBPString(bpSource) : undefined]
@@ -233,12 +223,36 @@ actions.showInfo.bind(() => {
     G.BPC.overlayContainer.overlay.visible = !G.BPC.overlayContainer.overlay.visible
 })
 
-actions.info.bind(() => infoContainer.toggle())
+actions.info.bind(() => {
+    // Show Info Dialog (which contains help as top most dialog)
+    let alreadyOpen = false
+    // Check if Info Dialog is already open and if so close it (This should be done even
+    // if Info Dialog is not top most which should not have happened in the first place)
+    if (G.openDialogs.length > 0) {
+        for (const dialog of G.openDialogs) {
+            if (dialog instanceof InfoContainer) {
+                alreadyOpen = true
+                dialog.close()
+            }
+        }
+    }
+    // If Info Dialog was not open, open it
+    if (!alreadyOpen) {
+        const info: InfoContainer = new InfoContainer()
+        info.show()
+    }
+})
 
-actions.closeWindow.bind(() => { if (G.openedGUIWindow) G.openedGUIWindow.close() })
+actions.closeWindow.bind(() => {
+    // If there is a dialog open, close latest
+    if (G.openDialogs.length > 0) {
+        G.openDialogs[G.openDialogs.length - 1].close()
+    }
+})
 
 actions.inventory.bind(() => {
     if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
+        // If there is a dialog open, assume user wants to close it
         if (G.openDialogs.length > 0) {
             G.openDialogs[G.openDialogs.length - 1].close()
         } else {
@@ -248,12 +262,6 @@ actions.inventory.bind(() => {
             })
             inventory.show()
         }
-
-        // if (G.openedGUIWindow) {
-            // G.openedGUIWindow.close()
-        // } else {
-            // G.inventoryContainer.toggle()
-        // }
     }
 })
 
@@ -364,10 +372,13 @@ function post(hist: IHistoryObject, addDel: string) {
                 e.redrawEntityInfo()
                 redrawEntityAndSurroundingEntities(hist.entity_number)
                 G.BPC.wiresContainer.update(hist.entity_number)
+                // TODO: Improve this together with callback from entity (if entity changes or it is destroyed, also close the editor)
+                /*
                 if (G.editEntityContainer.visible) {
                     if (G.inventoryContainer.visible) G.inventoryContainer.close()
                     G.editEntityContainer.create(hist.entity_number)
                 }
+                */
             }
             break
         case addDel:
@@ -419,17 +430,16 @@ actions.moveEntity.bind(() => {
 
 actions.openEntityGUI.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
-        console.log(G.bp.entity(G.BPC.hoverContainer.entity_number).toJS())
-
         if (G.currentMouseState === G.mouseStates.NONE) {
-            if (G.openedGUIWindow !== undefined) {
-                G.openedGUIWindow.close()
+            // If there are dialogs open, close all of them
+            if (G.openDialogs.length > 0) {
+                while (G.openDialogs.length > 0) {
+                    G.openDialogs[G.openDialogs.length - 1].close()
+                }
             }
-
+            // Show entity relevant editor
             const editor: Editor = Editors.createEditor(G.BPC.hoverContainer.entity_number)
             editor.show()
-
-            G.openedGUIWindow = editor
         }
     }
 })

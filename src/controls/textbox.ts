@@ -14,9 +14,6 @@ export default class Textbox extends PIXI.Container {
     /** Textbox Active Graphic */
     private readonly m_Active: PIXI.Graphics
 
-    /** Text Style for Textbox */
-    private readonly m_Style: PIXI.TextStyle
-
     /** Text Metrics for Textbox */
     private readonly m_Metrics: PIXI.TextMetrics
 
@@ -50,44 +47,48 @@ export default class Textbox extends PIXI.Container {
      * @param length - Maximum length of text (0 will automatically make it the length of the provided @param text)
      * @param filter - Filter for allowed characters (e.g. '1234567890')
      */
-    constructor(width: number, size: number, text: string = '', length: number = 0, filter: string = '') {
+    constructor(width: number, text: string = '', length: number = 0, filter: string = '') {
         super()
 
         this.m_Text = text
         this.m_Length = length === 0 ? text.length : length
         this.m_Filter = filter
 
-        this.m_Style = new PIXI.TextStyle({
-            fill: G.colors.textbox.foreground,
-            fontFamily: G.fontFamily,
-            fontWeight: '500',
-            fontSize: size
-        })
-
-        this.m_Metrics = PIXI.TextMetrics.measureText(PIXI.TextMetrics.METRICS_STRING, this.m_Style)
+        this.m_Metrics = PIXI.TextMetrics.measureText(
+            PIXI.TextMetrics.METRICS_STRING,
+            G.styles.controls.textbox)
 
         // 1 (Border) + 2 (Space) + Text Height + 2 (Space) + 1 Border = Text Height + 6
         const height: number = this.m_Metrics.height + 6
 
-        this.m_Background = F.DrawRectangle(width, height, G.colors.textbox.background, 1, 1, true)
+        this.m_Background = F.DrawRectangle(width, height,
+            G.colors.controls.textbox.background.color,
+            G.colors.controls.textbox.background.alpha,
+            1, true)
         this.addChild(this.m_Background)
 
-        this.m_Hover = F.DrawRectangle(width, height, G.colors.textbox.hover, 0.5, 1, true)
+        this.m_Hover = F.DrawRectangle(width, height,
+            G.colors.controls.textbox.hover.color,
+            G.colors.controls.textbox.hover.alpha,
+            1, true)
         this.m_Hover.visible = false
         this.addChild(this.m_Hover)
 
-        this.m_Active = F.DrawRectangle(width, height, G.colors.textbox.active, 1, 1, true)
+        this.m_Active = F.DrawRectangle(width, height,
+            G.colors.controls.textbox.active.color,
+            G.colors.controls.textbox.active.alpha,
+            1, true)
         this.m_Active.visible = false
         this.addChild(this.m_Active)
 
-        this.m_Foreground = new PIXI.Text(this.m_Text, this.m_Style)
+        this.m_Foreground = new PIXI.Text(this.m_Text, G.styles.controls.textbox)
         this.m_Foreground.position.set(3, 3)
         this.addChild(this.m_Foreground)
 
         this.m_CaretPosition = text.length
 
         this.m_CaretGraphic = new PIXI.Graphics()
-        this.m_CaretGraphic.lineStyle(1, G.colors.textbox.foreground).moveTo(0, 0).lineTo(0, this.m_Metrics.height)
+        this.m_CaretGraphic.lineStyle(1, G.colors.controls.textbox.foreground.color).moveTo(0, 0).lineTo(0, this.m_Metrics.height)
         this.m_CaretGraphic.visible = false
         this.moveCaret(this.m_CaretPosition)
         this.addChild(this.m_CaretGraphic)
@@ -165,7 +166,9 @@ export default class Textbox extends PIXI.Container {
         if (position < 0 || position > this.m_Text.length) return
 
         this.m_CaretPosition = position
-        this.m_CaretGraphic.position.set(3 + PIXI.TextMetrics.measureText(this.m_Text.substr(0, this.m_CaretPosition), this.m_Style).width, 3)
+        this.m_CaretGraphic.position.set(
+            3 + PIXI.TextMetrics.measureText(this.m_Text.substr(0, this.m_CaretPosition), G.styles.controls.textbox).width,
+            3)
     }
 
     /**

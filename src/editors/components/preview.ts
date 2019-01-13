@@ -1,4 +1,3 @@
-import C from '../../controls/common'
 import G from '../../common/globals'
 import { IEntity } from '../../interfaces/iBlueprintEditor'
 import { EntityContainer } from '../../containers/entity'
@@ -24,7 +23,7 @@ export default class Preview extends PIXI.Container {
 
         // Background of entity preview
         const background = new PIXI.Graphics()
-            .beginFill(C.colors.editor.sprite.background.color, C.colors.editor.sprite.background.alpha)
+            .beginFill(G.colors.editor.sprite.background.color, G.colors.editor.sprite.background.alpha)
             .drawRect(0, 0, size, size)
             .endFill()
         this.addChild(background)

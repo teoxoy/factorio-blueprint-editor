@@ -133,8 +133,4 @@ export class InfoContainer extends Dialog {
             this.addChild(text)
         }
     }
-
-    toggle() {
-        this.visible = !this.visible
-    }
 }

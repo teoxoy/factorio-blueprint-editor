@@ -30,7 +30,7 @@ export class QuickbarContainer extends Panel {
         const button = new PIXI.Graphics()
 
         button
-            .beginFill(G.colors.pannel.slot)
+            .beginFill(G.colors.controls.button.background.color)
             .moveTo(0, height)
             .lineTo(width / 2, 0)
             .lineTo(width, height)
@@ -53,7 +53,11 @@ export class QuickbarContainer extends Panel {
     private slotsContainer: PIXI.Container
 
     constructor(rows = 1, itemNames?: string[]) {
-        super(442, 24 + rows * 38, G.colors.pannel.background, 0.7, 2)
+        super(442,
+              24 + rows * 38,
+              G.colors.quickbar.background.color,
+              G.colors.quickbar.background.alpha,
+              G.colors.quickbar.background.border)
 
         this.rows = rows
         this.iHeight = 24 + rows * 38

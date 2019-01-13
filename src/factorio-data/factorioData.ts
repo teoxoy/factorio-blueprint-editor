@@ -10,6 +10,7 @@ import tileBundle from 'factorio-data/data/prototypes/tiles'
 import { Area } from './positionGrid'
 import util from '../common/util'
 import { Blueprint } from './blueprint'
+import { IItem, IRecipe } from '../interfaces/iFactorioData'
 
 // tslint:disable:max-file-line-count
 export default {
@@ -134,12 +135,20 @@ function checkTileName(name: string) {
     return checkNameInBundle(name, tileBundle)
 }
 
-function getItem(name: string) {
-    return itemBundle[name] || undefined
+/**
+ * Returns item from itemBundle
+ * @param name - Name if item
+ */
+function getItem(name: string): IItem {
+    return itemBundle[name] as unknown as IItem
 }
 
-function getRecipe(name: string) {
-    return recipeBundle[name] || undefined
+/**
+ * Returns recipe from recipeBundle
+ * @param name - Name of recipe
+ */
+function getRecipe(name: string): IRecipe {
+    return recipeBundle[name] as unknown as IRecipe
 }
 
 function getEntity(name: string) {

@@ -21,21 +21,30 @@ export default class Button extends PIXI.Container {
     /** Data of Control */
     private m_Data: any
 
-    constructor(width: number = 36, height: number = 36, border: number = 1) {
+    constructor(width: number = 36, height: number = 36, border: number = G.colors.controls.button.border) {
         super()
 
         this.interactive = true
         this.buttonMode = true
 
-        this.m_Background = F.DrawRectangle(width, height, this.background, 1, border, this.pressed)
-        this.m_Background.position = new PIXI.Point(0, 0)
+        this.m_Background = F.DrawRectangle(width, height,
+            this.background,
+            G.colors.controls.button.background.alpha,
+            border, this.pressed)
+        this.m_Background.position.set(0, 0)
 
-        this.m_Active = F.DrawRectangle(width, height, G.colors.button.active, 1, border, !this.pressed)
-        this.m_Active.position = new PIXI.Point(0, 0)
+        this.m_Active = F.DrawRectangle(width, height,
+            G.colors.controls.button.active.color,
+            G.colors.controls.button.active.alpha,
+            border, !this.pressed)
+        this.m_Active.position.set(0, 0)
         this.m_Active.visible = false
 
-        this.m_Hover = F.DrawRectangle(width, height, this.hover, 0.5, 0)
-        this.m_Hover.position = new PIXI.Point(0, 1)
+        this.m_Hover = F.DrawRectangle(width, height,
+            G.colors.controls.button.hover.color,
+            G.colors.controls.button.hover.alpha,
+            0)
+        this.m_Hover.position.set(0, 1)
         this.m_Hover.visible = false
 
         this.addChild(this.m_Background, this.m_Active, this.m_Hover)
@@ -81,14 +90,14 @@ export default class Button extends PIXI.Container {
     }
 
     /** Control Data */
-    public get data(): any { return this.m_Data }
-    public set data(value: any) { this.m_Data = value }
+    public get data(): any { return this.m_Data }        /* tslint:disable-line */ // Need to use any to be able to assign anything
+    public set data(value: any) { this.m_Data = value }  /* tslint:disable-line */ // Need to use any to be able to assign anything
 
     /** Background color of the button (can be overriden) */
-    protected get background(): number { return G.colors.button.background }
+    protected get background(): number { return G.colors.controls.button.background.color }
 
     /** Rollover color of the button (can be overriden) */
-    protected get hover(): number { return  G.colors.button.hover }
+    protected get hover(): number { return  G.colors.controls.button.hover.color }
 
     /** Shall button be raised or pressed (can be overridden) */
     protected get pressed(): boolean { return false }

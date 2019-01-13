@@ -27,7 +27,11 @@ export default class Panel extends PIXI.Container {
      * @param alpha - Background Alpha of the Control (1...no transparency)
      * @param border - Border Width of the Control (0...no border)
      */
-    constructor(width: number, height: number, background: number = G.colors.pannel.background, alpha: number = 0.7, border: number = 2) {
+    constructor(width: number,
+                height: number,
+                background: number = G.colors.controls.panel.background.color,
+                alpha: number = G.colors.controls.panel.background.alpha,
+                border: number = G.colors.controls.panel.background.border) {
         super()
 
         window.addEventListener('resize', () => {

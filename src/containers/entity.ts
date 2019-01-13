@@ -140,7 +140,8 @@ export class EntityContainer extends PIXI.Container {
     }
 
     destroy() {
-        if (G.editEntityContainer.visible) G.editEntityContainer.close()
+        // TODO: Check if the following line is actually still necessary
+        // if (G.editEntityContainer.visible) G.editEntityContainer.close()
 
         for (const s of this.entitySprites) s.destroy()
 

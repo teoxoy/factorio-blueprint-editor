@@ -6,11 +6,8 @@ import Button from './button'
  */
 export default class Slot extends Button {
 
-    // Override Background Color of Button
-    get background() { return G.colors.slot.background }
-
     // Override Rollover Color of Button
-    get hover() { return G.colors.slot.hover }
+    get hover() { return G.colors.controls.slot.hover.color }
 
     // Override Pressed appearance of Button
     get pressed(): boolean { return true }

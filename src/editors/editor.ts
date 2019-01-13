@@ -1,4 +1,3 @@
-import C from '../controls/common'
 import Dialog from '../controls/dialog'
 import Preview from './components/preview'
 import Recipe from './components/recipe'
@@ -7,7 +6,7 @@ import Filters from './components/filters'
 import { IEntity } from '../interfaces/iBlueprintEditor'
 
 /** Editor */
-export default class Editor extends Dialog {
+export default abstract class Editor extends Dialog {
 
     /** Blueprint Editor Entity reference */
     protected readonly m_Entity: IEntity
@@ -20,29 +19,10 @@ export default class Editor extends Dialog {
      * @param entity - Reference to Entity Data
      */
     constructor(width: number, height: number, entity: IEntity) {
-        super(width, height)
+        super(width, height, Dialog.capitalize(entity.name))
 
+        /** Store reference to entity for later use */
         this.m_Entity = entity
-
-        // Add Title
-        this.addLabel(12, 10, Editor.capitalize(this.m_Entity.name), C.styles.dialog.title)
-    }
-
-    /**
-     * Add Label to Editor
-     * @description Defined in Base Editor class so extensions can use it when they need to
-     * @param x - Horizontal position of Label from top left corner
-     * @param y - Vertical position of Label from top left corner
-     * @param text - Text for Label
-     * @param style - Style of Label
-     */
-    protected addLabel(x: number = 140, y: number = 56, text: string = 'Recipe:', style: PIXI.TextStyle = C.styles.dialog.label): PIXI.Text {
-        const label: PIXI.Text = new PIXI.Text(text, style)
-        label.position.set(x, y)
-        this.addChild(label)
-
-        // Return component in case extension wants to use it
-        return label
     }
 
     /**
