@@ -194,7 +194,6 @@ export default (rawEntity: any, BP: Blueprint) => ({
                 } else {
                     filters = []
                     for (const item of list) {
-                        console.log(item)
                         if (item.name === undefined) {
                             continue
                         }
