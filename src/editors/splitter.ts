@@ -15,7 +15,7 @@ export default class SplitterEditor extends Editor {
 
         // Add Filters
         if (this.m_Entity.filterSlots > 0) {
-            this.addLabel(140, 56, 'Filters:', C.styles.dialog.label)
+            this.addLabel(140, 56, 'Filter:', C.styles.dialog.label)
             const filters: Filters = this.addFilters(208, 45)
             filters.on('changed', () => preview.redraw())
         }
