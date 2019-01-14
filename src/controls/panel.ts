@@ -12,8 +12,10 @@ import F from './functions'
  *  + automatically executes 'onBrowserResize()' on Browser Resizing
  *  + does not automatically set its position (hint: override onBrowserResize())
  */
-
 export default class Panel extends PIXI.Container {
+
+    /** Event string of browser resize */
+    private static readonly WINDOW_RESIZE_EVENT_STRING = 'browserResized'
 
     /** Background Graphic */
     private readonly m_Background: PIXI.Graphics
@@ -34,9 +36,10 @@ export default class Panel extends PIXI.Container {
                 border: number = G.colors.controls.panel.background.border) {
         super()
 
-        window.addEventListener('resize', () => {
-            this.onBrowserResize()
-        }, false)
+        // Subscribe to browser window resized to amit a panel contained event
+        window.addEventListener('resize', () => this.emit(Panel.WINDOW_RESIZE_EVENT_STRING, this))
+        // Based on panel event, fire protected method setPosition()
+        this.on(Panel.WINDOW_RESIZE_EVENT_STRING, () => this.setPosition())
 
         this.interactive = true
         this.interactiveChildren = true
@@ -57,16 +60,7 @@ export default class Panel extends PIXI.Container {
         return this.m_Background.height
     }
 
-    /**
-     * Called when the browser window is reseized
-     */
-    protected onBrowserResize(): void {
-        this.setPosition()
-    }
-
-    /**
-     * Called by onBrowserResize
-     */
+    /** Called by when the browser is resized */
     protected setPosition() {
         return
     }

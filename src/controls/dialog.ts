@@ -1,5 +1,4 @@
 import G from '../common/globals'
-import C from './common'
 import F from './functions'
 import Panel from './panel'
 
