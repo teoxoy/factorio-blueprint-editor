@@ -3,6 +3,8 @@ import Preview from './components/preview'
 import Filters from './components/filters'
 import { IEntity } from '../interfaces/iBlueprintEditor'
 
+// TODO: Implement Input and Output Priority (otherwise filters will not be shown)
+
 /** Splitter Editor */
 export default class SplitterEditor extends Editor {
 

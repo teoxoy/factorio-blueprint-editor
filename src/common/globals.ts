@@ -4,6 +4,7 @@ import { QuickbarContainer } from '../panels/quickbar'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
 import Dialog from '../controls/dialog'
+import { IEntity } from '../interfaces/iBlueprintEditor'
 
 // tslint:disable:prefer-const
 
@@ -99,10 +100,7 @@ const mouseStates = {
 
 let currentMouseState = mouseStates.NONE
 
-const copyData = {
-    recipe: '',
-    modules: []
-}
+let copyData: IEntity
 
 let renderOnly = false
 

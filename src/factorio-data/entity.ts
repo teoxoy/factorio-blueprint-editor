@@ -90,7 +90,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
     },
 
     set direction(direction: number) {
-        BP.operation(this.entity_number, 'Set entity direction to ' + direction,
+        BP.operation(this.entity_number, `Set entity direction to ${direction}`,
             entities => entities.setIn([this.entity_number, 'direction'], direction)
         )
     },

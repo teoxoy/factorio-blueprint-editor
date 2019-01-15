@@ -3,6 +3,7 @@ import factorioData from '../factorio-data/factorioData'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
+import { IEntity } from '../interfaces/iBlueprintEditor';
 
 const updateGroups = [
     {
@@ -234,16 +235,17 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
-    pasteData() {
-        const entity = G.bp.entity(this.entity_number)
+    /** Paste relevant data from source entity reference into target entity */
+    pasteData(sourceEntity: IEntity) {
+        const entity: IEntity = G.bp.entity(this.entity_number)
 
         const aR = entity.acceptedRecipes
-        const RECIPE = G.copyData.recipe && aR && aR.includes(G.copyData.recipe) ? G.copyData.recipe : undefined
+        const RECIPE = sourceEntity.recipe !== undefined && aR !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
 
         const aM = entity.acceptedModules
-        if (aM && G.copyData.modules && G.copyData.modules.length !== 0) {
+        if (aM !== undefined && sourceEntity.modules !== undefined && sourceEntity.modules.length !== 0) {
             const filteredModules = []
-            for (const m of G.copyData.modules) {
+            for (const m of sourceEntity.modules) {
                 if (aM.includes(m)) filteredModules.push(m)
             }
             const maxSlots = entity.entityData.module_specification.module_slots
@@ -251,19 +253,24 @@ export class EntityContainer extends PIXI.Container {
         } else {
             entity.modules = []
         }
-        if (aM) this.redrawEntityInfo()
+        if (aM !== undefined) this.redrawEntityInfo()
         if (entity.recipe !== RECIPE) this.changeRecipe(RECIPE)
     }
 
     redrawEntityInfo() {
-        const entity = G.bp.entity(this.entity_number)
-        if (entity.entityData.module_specification || entity.type === 'splitter' ||
-            entity.entityData.crafting_categories || entity.type === 'mining_drill' ||
+        const entity: IEntity = G.bp.entity(this.entity_number)
+        if (entity.entityData.module_specification !== undefined || entity.type === 'splitter' ||
+            entity.entityData.crafting_categories !== undefined || entity.type === 'mining_drill' ||
             entity.type === 'boiler' || entity.type === 'generator' ||
             entity.name === 'pump' || entity.name === 'offshore_pump' ||
-            entity.name === 'arithmetic_combinator' || entity.name === 'decider_combinator'
+            entity.name === 'arithmetic_combinator' || entity.name === 'decider_combinator' ||
+            entity.name === 'filter_inserter' || entity.name === 'stack_filter_inserter' ||
+            entity.name === 'splitter' || entity.name === 'fast_splitter' || entity.name === 'express_splitter'
+
         ) {
-            if (this.entityInfo) this.entityInfo.destroy()
+            if (this.entityInfo !== undefined) {
+                this.entityInfo.destroy()
+            }
             this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.entity_number, this.position)
         }
     }

@@ -445,14 +445,18 @@ actions.openEntityGUI.bind(() => {
 })
 
 actions.copyEntitySettings.bind(() => {
-    if (G.BPC.hoverContainer) {
-        G.copyData.recipe = G.bp.entity(G.BPC.hoverContainer.entity_number).recipe
-        G.copyData.modules = G.bp.entity(G.BPC.hoverContainer.entity_number).modules
+    if (G.BPC.hoverContainer !== undefined) {
+        // Store reference to source entity
+        G.copyData = G.bp.entity(G.BPC.hoverContainer.entity_number)
+        console.log(G.copyData)
     }
 })
 
 actions.pasteEntitySettings.bind(() => {
-    if (G.BPC.hoverContainer) G.BPC.hoverContainer.pasteData()
+    if (G.BPC.hoverContainer !== undefined) {
+        // Hand over reference of source entity to target entity for pasting data
+        G.BPC.hoverContainer.pasteData(G.copyData)
+    }
 })
 
 actions.quickbar1.bind(() => G.quickbarContainer.bindKeyToSlot(0))
