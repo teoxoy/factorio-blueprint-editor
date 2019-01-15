@@ -117,6 +117,12 @@ const colors = {
             hover: { color: 0xB16925, alpha: 0.5 },
             active: { color: 0xB16925, alpha: 1 }
         },
+        checkbox: {
+            foreground: {color: 0xCCCCCC },
+            background: {color: 0xCCCCCC, alpha: 0.5 },
+            checkmark: {color: 0x000000, alpha: 1 },
+            hover: { color: 0xB16925, alpha: 0.7 }
+        },
         panel: {
             background: { color: 0x3A3A3A, alpha: 0.7, border: 2 }
         },
@@ -166,6 +172,12 @@ const styles = {
             fontFamily: [ fontFamily ],
             fontWeight: '500',
             fontSize: 14
+        }),
+        checkbox: new PIXI.TextStyle({
+            fill: colors.controls.checkbox.foreground.color,
+            fontFamily: [ fontFamily ],
+            fontWeight: '100',
+            fontSize: 14
         })
     },
     dialog: {
@@ -178,8 +190,8 @@ const styles = {
         label: new PIXI.TextStyle({
             fill: colors.text.normal,
             fontFamily: [ fontFamily ],
-            fontWeight: '500',
-            fontSize: 15
+            fontWeight: '100',
+            fontSize: 14
         })
     },
     icon: {

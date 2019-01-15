@@ -220,9 +220,19 @@ export default (rawEntity: any, BP: Blueprint) => ({
     get splitterInputPriority() {
         return rawEntity.get('input_priority')
     },
+    set splitterInputPriority(priority: string) {
+        BP.operation(this.entity_number, 'Changed splitter output priority',
+            entities => entities.setIn([this.entity_number, 'input_priority'], Immutable.fromJS(priority))
+        )
+    },
 
     get splitterOutputPriority() {
         return rawEntity.get('output_priority')
+    },
+    set splitterOutputPriority(priority: string) {
+        BP.operation(this.entity_number, 'Changed splitter output priority',
+            entities => entities.setIn([this.entity_number, 'output_priority'], Immutable.fromJS(priority))
+        )
     },
 
     get splitterFilter() {

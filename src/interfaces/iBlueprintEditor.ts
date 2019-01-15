@@ -51,4 +51,7 @@ export interface IEntity {
     filterSlots: number
     /** Current set filters of entity (only splitters, inserters and logistic chests) */
     filters: IFilter[]
+
+    splitterInputPriority: string
+    splitterOutputPriority: string
 }
