@@ -3,7 +3,7 @@ import factorioData from '../factorio-data/factorioData'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
-import { IEntity } from '../interfaces/iBlueprintEditor';
+import { IEntity } from '../interfaces/iBlueprintEditor'
 
 const updateGroups = [
     {
