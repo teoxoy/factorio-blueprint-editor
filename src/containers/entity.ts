@@ -235,6 +235,7 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
+    // TODO: Optimze the following methods in terms of checking and redrawing
     /** Paste relevant data from source entity reference into target entity */
     pasteData(sourceEntity: IEntity) {
         const entity: IEntity = G.bp.entity(this.entity_number)
@@ -253,7 +254,17 @@ export class EntityContainer extends PIXI.Container {
         } else {
             entity.modules = []
         }
-        if (aM !== undefined) this.redrawEntityInfo()
+
+        const aF = entity.acceptedFilters
+        if (aF !== undefined && sourceEntity.filters !== undefined && sourceEntity.filters.length !== 0) {
+            const filteredFilters = []
+            for (const f of sourceEntity.filters) {
+                if (aF.includes(f.name)) filteredFilters.push(f)
+            }
+            entity.filters = filteredFilters.length > entity.filterSlots ? filteredFilters.slice(0, entity.filterSlots) : filteredFilters
+        }
+
+        if (aM !== undefined || aF !== undefined) this.redrawEntityInfo()
         if (entity.recipe !== RECIPE) this.changeRecipe(RECIPE)
     }
 
