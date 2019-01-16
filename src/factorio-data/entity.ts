@@ -445,7 +445,7 @@ export default class Entity {
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[
-                spriteDataBuilder.getBeltConnections2(BP, this.position, this.direction) * 4
+                spriteDataBuilder.getBeltConnections2(this.m_BP, this.position, this.direction) * 4
             ].wire[color]
         }
         if (e.circuit_wire_connection_points.length === 8) {
