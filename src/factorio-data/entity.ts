@@ -137,26 +137,10 @@ export default class Entity {
 
     /* Count of filter slots */
     get filterSlots(): number {
-        const name: string = this.name
-        switch (name) {
-            case 'splitter':
-            case 'fast_splitter':
-            case 'express_splitter':
-            case 'stack_filter_inserter':
-            case 'logistic_chest_storage': {
-                return 1
-            }
-            case 'filter_inserter': {
-                return 5
-            }
-            case 'logistic_chest_requester':
-            case 'logistic_chest_buffer': {
-                return 12
-            }
-            default: {
-                return 0
-            }
-        }
+        if (this.name.includes('splitter')) return 1
+        if (this.entityData.filter_count) return this.entityData.filter_count
+        if (this.entityData.logistic_slots_count) return this.entityData.logistic_slots_count
+        return 0
     }
 
     /* List of all filter(s) for splitters, inserters and logistic chests */
