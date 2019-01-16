@@ -41,7 +41,7 @@ export default class SplitterEditor extends Editor {
         this.addChild(inputCheckbox)
 
         // Add Output Priority
-        const outputLeft: Enable = new Enable(input === 'left', 'Left')
+        const outputLeft: Enable = new Enable(output === 'left', 'Left')
         outputLeft.position.set(280, 88)
         this.addChild(outputLeft)
 
@@ -49,7 +49,7 @@ export default class SplitterEditor extends Editor {
         outputSwitch.position.set(316, 88)
         this.addChild(outputSwitch)
 
-        const outputRight: Enable = new Enable(input === 'right', 'Right')
+        const outputRight: Enable = new Enable(output === 'right', 'Right')
         outputRight.position.set(364, 88)
         this.addChild(outputRight)
 
