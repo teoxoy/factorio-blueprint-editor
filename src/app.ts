@@ -403,7 +403,7 @@ actions.pan.bind(() => {
     }
 })
 
-actions.build.bind(e => {
+actions.build.bind(() => {
     if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.placeEntityContainer()
     }

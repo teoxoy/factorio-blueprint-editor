@@ -1,6 +1,6 @@
 import { Blueprint } from './blueprint'
 import util from '../common/util'
-import factorioData from './factorioData'
+import FD from 'factorio-data'
 import Immutable from 'immutable'
 
 export class Area {
@@ -160,7 +160,7 @@ export class PositionGrid {
     }
 
     checkNoOverlap(name: string, direction: number, pos: IPoint) {
-        const fd = factorioData.getEntity(name)
+        const fd = FD.entities[name]
         const size = util.switchSizeBasedOnDirection(fd.size, direction)
         const area = new Area({
             x: pos.x,
@@ -205,7 +205,7 @@ export class PositionGrid {
     }
 
     checkFastReplaceableGroup(name: string, direction: number, pos: IPoint) {
-        const fd = factorioData.getEntity(name)
+        const fd = FD.entities[name]
         const size = util.switchSizeBasedOnDirection(fd.size, direction)
         const area = new Area({
             x: pos.x,
@@ -231,7 +231,7 @@ export class PositionGrid {
 
     checkSameEntityAndDifferentDirection(name: string, direction: number, pos: IPoint) {
         if (name === 'straight_rail') return false
-        const fd = factorioData.getEntity(name)
+        const fd = FD.entities[name]
         const size = util.switchSizeBasedOnDirection(fd.size, direction)
         const area = new Area({
             x: pos.x,

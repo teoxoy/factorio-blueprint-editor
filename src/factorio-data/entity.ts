@@ -1,18 +1,19 @@
 import { Blueprint } from './blueprint'
 import Immutable from 'immutable'
 import factorioData from './factorioData'
+import FD from 'factorio-data'
 import util from '../common/util'
 import { Area } from './positionGrid'
-import { IFilter } from '../interfaces/iBlueprintEditor';
+import { IFilter } from '../interfaces/iBlueprintEditor'
 
 export default (rawEntity: any, BP: Blueprint) => ({
     get entity_number() { return rawEntity.get('entity_number') },
     get name() { return rawEntity.get('name') },
 
-    get type() { return factorioData.getEntity(this.name).type },
-    get entityData() { return factorioData.getEntity(this.name) },
-    get recipeData() { return factorioData.getRecipe(this.name) },
-    get itemData() { return factorioData.getItem(this.name) },
+    get type() { return FD.entities[this.name].type },
+    get entityData() { return FD.entities[this.name] },
+    get recipeData() { return FD.recipes[this.name] },
+    get itemData() { return FD.items[this.name] },
     get size() { return util.switchSizeBasedOnDirection(this.entityData.size, this.direction) },
 
     get position() { return rawEntity.get('position').toJS() },
@@ -27,7 +28,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
                 map.setIn([this.entity_number, 'recipe'], recipeName)
 
                 const modules = this.modules
-                if (modules && recipeName && !factorioData.getItem('productivity_module').limitation.includes(recipeName)) {
+                if (modules && recipeName && !FD.items['productivity_module'].limitation.includes(recipeName)) {
                     for (const k in modules) {
                         // tslint:disable-next-line:no-dynamic-delete
                         if (k.includes('productivity_module')) delete modules[k]
@@ -42,11 +43,10 @@ export default (rawEntity: any, BP: Blueprint) => ({
     get acceptedRecipes(): string[] {
         if (!this.entityData.crafting_categories) return
         const acceptedRecipes: string[] = []
-        const recipes = factorioData.getRecipes()
         const cc = this.entityData.crafting_categories
-        for (const k in recipes) {
-            if (cc.includes(recipes[k].category) || (cc.includes('crafting') && !recipes[k].category)) {
-                const recipe = (recipes[k].normal ? recipes[k].normal : recipes[k])
+        for (const k in FD.recipes) {
+            const recipe = FD.recipes[k]
+            if (cc.includes(recipe.category)) {
                 if (!((this.name === 'assembling_machine_1' && recipe.ingredients.length > 2) ||
                     (this.name === 'assembling_machine_2' && recipe.ingredients.length > 4))
                 ) {
@@ -61,8 +61,8 @@ export default (rawEntity: any, BP: Blueprint) => ({
     get acceptedModules(): string[] {
         if (!this.entityData.module_specification) return undefined
         const ommitProductivityModules = this.name === 'beacon' ||
-            (this.recipe && !factorioData.getItem('productivity_module').limitation.includes(this.recipe))
-        const items = factorioData.getItems()
+            (this.recipe && !FD.items['productivity_module'].limitation.includes(this.recipe))
+        const items = FD.items
         const acceptedModules: string[] = []
         for (const k in items) {
             if (items[k].type === 'module' && !(k.includes('productivity_module') && ommitProductivityModules)) acceptedModules.push(k)
@@ -73,15 +73,12 @@ export default (rawEntity: any, BP: Blueprint) => ({
     /** Filters this entity can accept (only splitters, inserters and logistic chests) */
     get acceptedFilters(): string[] {
         const filters: string[] = []
-        const items = factorioData.getItems()
+        const items = FD.items
         for (const key in items) {
             const item = items[key]
             if (item.type !== 'fluid' &&
-                item.type !== 'virtual_signal' &&
-                item.subgroup !== 'fluid_recipes' &&
-                item.category !== 'centrifuging' &&
-                item.category !== 'crafting_with_fluid' &&
-                item.name.startsWith('fill_') === false) {
+                item.type !== 'recipe' &&
+                item.type !== 'virtual_signal') {
                     filters.push(item.name)
                 }
         }
@@ -325,12 +322,8 @@ export default (rawEntity: any, BP: Blueprint) => ({
     },
 
     get chemicalPlantDontConnectOutput() {
-        const r = this.recipe
-        if (!r) return false
-        const rData = factorioData.getRecipe(r)
-        const recipe = (rData.normal ? rData.normal : rData)
-        if (recipe.result || recipe.results[0].type === 'item') return true
-        return false
+        if (!this.recipe) return false
+        return !FD.recipes[this.recipe].results.find(result => result.type === 'fluid')
     },
 
     get trainStopColor() {
@@ -429,27 +422,16 @@ export default (rawEntity: any, BP: Blueprint) => ({
 
     get assemblerCraftsWithFluid() {
         return this.recipe &&
-            factorioData.getRecipe(this.recipe).category === 'crafting_with_fluid' &&
+            FD.recipes[this.recipe].category === 'crafting_with_fluid' &&
             this.entityData.crafting_categories &&
             this.entityData.crafting_categories.includes('crafting_with_fluid')
     },
 
     get assemblerPipeDirection() {
         if (!this.recipe) return
-        const recipeData = factorioData.getRecipe(this.recipe)
-        const rD = recipeData.normal ? recipeData.normal : recipeData
-        for (const io of rD.ingredients) {
-            if (io.type === 'fluid') {
-                return 'input'
-            }
-        }
-        if (rD.results) {
-            for (const io of rD.results) {
-                if (io.type === 'fluid') {
-                    return 'output'
-                }
-            }
-        }
+        const recipe = FD.recipes[this.recipe]
+        if (recipe.ingredients.find(ingredient => ingredient.type === 'fluid')) return 'input'
+        if (recipe.results.find(result => result.type === 'fluid')) return 'output'
     },
 
     getWireConnectionPoint(color: string, side: number) {

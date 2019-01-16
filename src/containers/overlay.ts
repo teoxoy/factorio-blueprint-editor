@@ -1,4 +1,4 @@
-import factorioData from '../factorio-data/factorioData'
+import FD from 'factorio-data'
 import { InventoryContainer } from '../panels/inventory'
 import G from '../common/globals'
 import util from '../common/util'
@@ -39,9 +39,8 @@ export class OverlayContainer extends PIXI.Container {
             entityInfo.addChild(recipeInfo)
 
             const fluidIcons = new PIXI.Container()
-            const recipeData = factorioData.getRecipe(entity.recipe)
-            const rD = recipeData.normal ? recipeData.normal : recipeData
-            switch (recipeData.category) {
+            const recipe = FD.recipes[entity.recipe]
+            switch (recipe.category) {
                 case 'oil_processing':
                 case 'chemistry':
                     const inputPositions: IPoint[] = []
@@ -54,7 +53,7 @@ export class OverlayContainer extends PIXI.Container {
                     }
                     function createIconsForType(type: string) {
                         const iconNames: string[] = []
-                        for (const io of type === 'input' ? rD.ingredients : rD.results) {
+                        for (const io of type === 'input' ? recipe.ingredients : recipe.results) {
                             if (io.type === 'fluid') {
                                 iconNames.push(io.name)
                             }
@@ -72,11 +71,11 @@ export class OverlayContainer extends PIXI.Container {
                         }
                     }
                     createIconsForType('input')
-                    if (rD.results) createIconsForType('output')
+                    if (recipe.results) createIconsForType('output')
                     break
                 case 'crafting_with_fluid':
                     function createIconForType(type: string) {
-                        for (const io of type === 'input' ? rD.ingredients : rD.results) {
+                        for (const io of type === 'input' ? recipe.ingredients : recipe.results) {
                             if (io.type === 'fluid') {
                                 const position = util.rotatePointBasedOnDir(entity.entityData.fluid_boxes.find(
                                     (fb: any) => fb.production_type === type).pipe_connections[0].position,
@@ -356,7 +355,7 @@ export class OverlayContainer extends PIXI.Container {
     }
 
     updateUndergroundLines(name: string, position: IPoint, direction: number, searchDirection: number) {
-        const fd = factorioData.getEntity(name)
+        const fd = FD.entities[name]
         if (fd.type === 'underground_belt' || name === 'pipe_to_ground') {
             this.undergroundLines.removeChildren()
             const otherEntity = G.bp.entityPositionGrid.findEntityWithSameNameAndDirection(

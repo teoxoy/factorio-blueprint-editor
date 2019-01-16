@@ -1,4 +1,4 @@
-import factorioData from '../factorio-data/factorioData'
+import FD from 'factorio-data'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
@@ -6,7 +6,7 @@ type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
 export class UnderlayContainer extends PIXI.Container {
 
     static getDataForVisualizationArea(name: string) {
-        const type = factorioData.getEntity(name).type
+        const type = FD.entities[name].type
         function undoBlendModeColorShift(color0: number, color1: number, alpha: number) {
             // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendFunc
             // array[BLEND_MODES.NORMAL] = [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
@@ -77,7 +77,7 @@ export class UnderlayContainer extends PIXI.Container {
     }
 
     activateRelatedAreas(entityName: string) {
-        const ed = factorioData.getEntity(entityName)
+        const ed = FD.entities[entityName]
         const data = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (data) if (data.type instanceof Array) this.active.push(...data.type); else this.active.push(data.type)
         if (ed.type === 'logistic_container') this.active.push('logistics0', 'logistics1')
@@ -103,7 +103,7 @@ export class UnderlayContainer extends PIXI.Container {
     createNewArea(entityName: string, position?: PIXI.Point | PIXI.ObservablePoint) {
         const aVData = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (aVData) {
-            const ed = factorioData.getEntity(entityName)
+            const ed = FD.entities[entityName]
             if (aVData.type instanceof Array) {
                 const aVs = []
                 for (let i = 0; i < aVData.type.length; i++) {
