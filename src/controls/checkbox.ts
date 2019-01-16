@@ -1,67 +1,58 @@
 import G from '../common/globals'
 
+// TODO: combine drawing the checkbox background and cross into one graphic
+
 /** Base Checkbox */
 export default class Checkbox extends PIXI.Container {
 
     /** Checkmark Polygon */
     private static readonly CHECK_POLYGON: PIXI.Polygon = new PIXI.Polygon(
-         0,  0,  4,  0,  8,  4, 12,  4, 16,  0,
-        20,  0, 20,  4, 16,  8, 16, 12, 20, 16,
-        20, 20, 16, 20, 12, 16,  8, 16,  4, 20,
-         0, 20,  0, 16,  4, 12,  4,  8,  0,  4)
+         8,  8, 12,  8, 16, 12, 20, 12, 24,  8,
+        28,  8, 28, 12, 24, 16, 24, 20, 28, 24,
+        28, 28, 24, 28, 20, 24, 16, 24, 12, 28,
+         8, 28,  8, 24, 12, 20, 12, 16,  8, 12,
+         8,  8)
 
-    /** Checkmark Graphic */
-    private readonly m_Checkmark: PIXI.Graphics
+    /**
+     * Draw Checkbox Graphic
+     * @param checked - Whether the checkbox graphic shall be checked
+     * @param hover - Whether the checkbox graphic shall be shown hovered
+     */
+    private static drawGraphic(checked: boolean, hover: boolean, visible: boolean): PIXI.Graphics {
+        const graphic: PIXI.Graphics = new PIXI.Graphics()
+        graphic
+            .beginFill(G.colors.controls.checkbox.background.color, G.colors.controls.checkbox.background.alpha)
+            .drawRect(2, 2, 32, 32)
+            .beginFill(hover ? G.colors.controls.checkbox.hover.color : G.colors.controls.checkbox.background.color,
+                       hover ? G.colors.controls.checkbox.hover.alpha : G.colors.controls.checkbox.background.alpha)
+            .drawRoundedRect(0, 0, 36, 36, 10)
+            .lineStyle(2, G.colors.controls.checkbox.checkmark.color, G.colors.controls.checkbox.checkmark.alpha, 0.5)
+        if (checked) {
+            graphic
+                .beginFill(G.colors.controls.checkbox.checkmark.color, G.colors.controls.checkbox.checkmark.alpha)
+                .drawPolygon(Checkbox.CHECK_POLYGON)
+        }
+        graphic.cacheAsBitmap = true
+        graphic.scale.set(0.5, 0.5)
+        graphic.position.set(0, 0)
+        graphic.visible = visible
+        return graphic
+    }
 
-    /** Data of Control */
+    /** Checkbox Graphic */
+    private m_Checkbox: PIXI.Graphics
+
+    /** Checkbox Hover */
+    private m_Hover: PIXI.Graphics
+
+    /** Data of Checkbox */
     private m_Checked: boolean
 
     constructor(checked: boolean = false, text?: string) {
         super()
 
         this.interactive = true
-
-        this.m_Checked = checked
-
-        const checkBackground1: PIXI.Graphics = new PIXI.Graphics()
-        checkBackground1
-            .beginFill(G.colors.controls.checkbox.background.color, G.colors.controls.checkbox.background.alpha)
-            .drawRoundedRect(0, 0, 36, 34, 10)
-            .endFill()
-        checkBackground1.cacheAsBitmap = true
-        checkBackground1.scale.set(0.5, 0.5)
-        checkBackground1.position.set(0, 0)
-        this.addChild(checkBackground1)
-
-        const checkBackground2: PIXI.Graphics = new PIXI.Graphics()
-        checkBackground2
-            .beginFill(G.colors.controls.checkbox.background.color, G.colors.controls.checkbox.background.alpha)
-            .drawRect(0, 0, 16, 15)
-            .endFill()
-        checkBackground2.position.set(1, 1)
-        this.addChild(checkBackground2)
-
-        const checkHover: PIXI.Graphics = new PIXI.Graphics()
-        checkHover
-            .beginFill(G.colors.controls.checkbox.hover.color, G.colors.controls.checkbox.hover.alpha)
-            .drawRoundedRect(0, 0, 36, 34, 10)
-            .endFill()
-        checkHover.cacheAsBitmap = true
-        checkHover.scale.set(0.5, 0.5)
-        checkHover.position.set(0, 0)
-        checkHover.visible = false
-        this.addChild(checkHover)
-
-        this.m_Checkmark = new PIXI.Graphics()
-        this.m_Checkmark
-            .lineStyle(2, G.colors.controls.checkbox.checkmark.color, G.colors.controls.checkbox.checkmark.alpha, 0.5)
-            .beginFill(G.colors.controls.checkbox.checkmark.color, G.colors.controls.checkbox.checkmark.alpha)
-            .drawPolygon(Checkbox.CHECK_POLYGON)
-        this.m_Checkmark.cacheAsBitmap = true
-        this.m_Checkmark.scale.set(0.5, 0.5)
-        this.m_Checkmark.position.set(4, 3)
-        this.m_Checkmark.visible = this.m_Checked
-        this.addChild(this.m_Checkmark)
+        this.checked = checked
 
         if (text !== undefined) {
             const label: PIXI.Text = new PIXI.Text(text, G.styles.controls.checkbox)
@@ -74,23 +65,29 @@ export default class Checkbox extends PIXI.Container {
         })
 
         this.on('pointerover', () => {
-            checkHover.visible = true
+            this.m_Hover.visible = true
         })
         this.on('pointerout', () => {
-            checkHover.visible = false
+            this.m_Hover.visible = false
         })
     }
 
-    /** Is button active */
+    /** Is checkbox checked */
     public get checked(): boolean {
         return this.m_Checked
     }
     public set checked(checked: boolean) {
         if (this.m_Checked !== checked) {
             this.m_Checked = checked
-            this.m_Checkmark.visible = this.m_Checked
             this.emit('changed')
+
+            if (this.m_Checkbox !== undefined) this.removeChild(this.m_Checkbox)
+            this.m_Checkbox = Checkbox.drawGraphic(this.m_Checked, false, true)
+            this.addChild(this.m_Checkbox)
+
+            if (this.m_Hover !== undefined) this.removeChild(this.m_Hover)
+            this.m_Hover = Checkbox.drawGraphic(this.m_Checked, true, false)
+            this.addChild(this.m_Hover)
         }
     }
-
 }
