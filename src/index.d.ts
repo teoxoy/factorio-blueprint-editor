@@ -55,3 +55,12 @@ interface IHistoryObject {
     annotation: string
     rawEntities: Immutable.Map<number, any>
 }
+
+interface IFilter {
+    /** Slot index (1 based ... not 0 like arrays) */
+    index: number,
+    /** Name of entity to be filtered */
+    name: string,
+    /** If stacking is allowed, how many shall be stacked */
+    count?: number,
+}

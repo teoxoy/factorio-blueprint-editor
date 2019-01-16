@@ -1,11 +1,11 @@
 import G from '../common/globals'
 import Editor from './editor'
+import Entity from '../factorio-data/entity'
 import Preview from './components/preview'
 import Filters from './components/filters'
 import Checkbox from '../controls/checkbox'
 import Enable from '../controls/enable'
 import Switch from '../controls/switch'
-import { IEntity } from '../interfaces/iBlueprintEditor'
 import { EntityContainer } from '../containers/entity'
 
 /** Splitter Editor */
@@ -14,7 +14,7 @@ export default class SplitterEditor extends Editor {
     /** Reference to preview */
     private readonly m_Preview: Preview
 
-    constructor(entity: IEntity) {
+    constructor(entity: Entity) {
         super(504, 176, entity)
 
         const input: string = this.m_Entity.splitterInputPriority

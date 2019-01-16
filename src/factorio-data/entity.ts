@@ -1,33 +1,49 @@
 import { Blueprint } from './blueprint'
 import Immutable from 'immutable'
-import factorioData from './factorioData'
+import spriteDataBuilder from './spriteDataBuilder'
+import FD from 'factorio-data'
 import util from '../common/util'
 import { Area } from './positionGrid'
-import { IFilter } from '../interfaces/iBlueprintEditor';
 
-export default (rawEntity: any, BP: Blueprint) => ({
-    get entity_number() { return rawEntity.get('entity_number') },
-    get name() { return rawEntity.get('name') },
+export default class Entity {
 
-    get type() { return factorioData.getEntity(this.name).type },
-    get entityData() { return factorioData.getEntity(this.name) },
-    get recipeData() { return factorioData.getRecipe(this.name) },
-    get itemData() { return factorioData.getItem(this.name) },
-    get size() { return util.switchSizeBasedOnDirection(this.entityData.size, this.direction) },
+    private readonly m_rawEntity: Immutable.Map<string, any>
+    private readonly m_BP: Blueprint
 
-    get position() { return rawEntity.get('position').toJS() },
-    get direction() { return rawEntity.get('direction') || 0 },
-    get directionType() { return rawEntity.get('type') },
-    get recipe() { return rawEntity.get('recipe') },
+    constructor(m_rawEntity: any, BP: Blueprint) {
+        this.m_rawEntity = m_rawEntity
+        this.m_BP = BP
+    }
+
+    get entity_number() { return this.m_rawEntity.get('entity_number') }
+    get name() { return this.m_rawEntity.get('name') }
+
+    get type() { return FD.entities[this.name].type }
+    get entityData() { return FD.entities[this.name] }
+    get recipeData() { return FD.recipes[this.name] }
+    get itemData() { return FD.items[this.name] }
+    get size() { return util.switchSizeBasedOnDirection(this.entityData.size, this.direction) }
+
+    get position() { return this.m_rawEntity.get('position').toJS() }
+
+    get direction() { return this.m_rawEntity.get('direction') || 0 }
+    set direction(direction: number) {
+        this.m_BP.operation(this.entity_number, `Set entity direction to ${direction}`,
+            entities => entities.setIn([this.entity_number, 'direction'], direction)
+        )
+    }
+
+    get directionType() { return this.m_rawEntity.get('type') }
+    get recipe() { return this.m_rawEntity.get('recipe') }
 
     set recipe(recipeName: string) {
         // TODO: Integrate check if recipe is actually changing
-        BP.operation(this.entity_number, 'Changed recipe', entities => (
+        this.m_BP.operation(this.entity_number, 'Changed recipe', entities => (
             entities.withMutations(map => {
                 map.setIn([this.entity_number, 'recipe'], recipeName)
 
                 const modules = this.modules
-                if (modules && recipeName && !factorioData.getItem('productivity_module').limitation.includes(recipeName)) {
+                if (modules && recipeName && !FD.items['productivity_module'].limitation.includes(recipeName)) {
                     for (const k in modules) {
                         // tslint:disable-next-line:no-dynamic-delete
                         if (k.includes('productivity_module')) delete modules[k]
@@ -36,17 +52,16 @@ export default (rawEntity: any, BP: Blueprint) => ({
                 }
             })
         ))
-    },
+    }
 
     /** Recipes this entity can accept */
     get acceptedRecipes(): string[] {
         if (!this.entityData.crafting_categories) return
         const acceptedRecipes: string[] = []
-        const recipes = factorioData.getRecipes()
         const cc = this.entityData.crafting_categories
-        for (const k in recipes) {
-            if (cc.includes(recipes[k].category) || (cc.includes('crafting') && !recipes[k].category)) {
-                const recipe = (recipes[k].normal ? recipes[k].normal : recipes[k])
+        for (const k in FD.recipes) {
+            const recipe = FD.recipes[k]
+            if (cc.includes(recipe.category)) {
                 if (!((this.name === 'assembling_machine_1' && recipe.ingredients.length > 2) ||
                     (this.name === 'assembling_machine_2' && recipe.ingredients.length > 4))
                 ) {
@@ -55,45 +70,36 @@ export default (rawEntity: any, BP: Blueprint) => ({
             }
         }
         return acceptedRecipes
-    },
+    }
 
     /** Modules this entity can accept */
     get acceptedModules(): string[] {
         if (!this.entityData.module_specification) return undefined
         const ommitProductivityModules = this.name === 'beacon' ||
-            (this.recipe && !factorioData.getItem('productivity_module').limitation.includes(this.recipe))
-        const items = factorioData.getItems()
+            (this.recipe && !FD.items['productivity_module'].limitation.includes(this.recipe))
+        const items = FD.items
         const acceptedModules: string[] = []
         for (const k in items) {
             if (items[k].type === 'module' && !(k.includes('productivity_module') && ommitProductivityModules)) acceptedModules.push(k)
         }
         return acceptedModules
-    },
+    }
 
     /** Filters this entity can accept (only splitters, inserters and logistic chests) */
     get acceptedFilters(): string[] {
         const filters: string[] = []
-        const items = factorioData.getItems()
+        const items = FD.items
         for (const key in items) {
             const item = items[key]
             if (item.type !== 'fluid' &&
-                item.type !== 'virtual_signal' &&
-                item.subgroup !== 'fluid_recipes' &&
-                item.category !== 'centrifuging' &&
-                item.category !== 'crafting_with_fluid' &&
-                item.name.startsWith('fill_') === false) {
+                item.type !== 'recipe' &&
+                item.type !== 'virtual_signal') {
                     filters.push(item.name)
                 }
         }
 
         return filters
-    },
-
-    set direction(direction: number) {
-        BP.operation(this.entity_number, `Set entity direction to ${direction}`,
-            entities => entities.setIn([this.entity_number, 'direction'], direction)
-        )
-    },
+    }
 
     // TODO: When changing 'entity.ts' to a class (if) handle the modules within the class differently
     // >> This would be greatly helpful for improving the user experience as teh modules would stay at
@@ -102,7 +108,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
     /** List of all modules */
     get modules(): string[] {
         const list: string[] = []
-        const data: Map<string, number> = rawEntity.get('items')
+        const data: Map<string, number> = this.m_rawEntity.get('items')
         if (data !== undefined && data.size > 0) {
             for (const item of data) {
                 for (let index = 0; index < item[1]; index++) {
@@ -111,7 +117,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
             }
         }
         return list
-    },
+    }
     set modules(list: string[]) {
         const modules: {[k: string]: number} = {}
         for (const item of list) {
@@ -123,34 +129,18 @@ export default (rawEntity: any, BP: Blueprint) => ({
                 }
             }
         }
-        BP.operation(this.entity_number, 'Changed modules',
+        this.m_BP.operation(this.entity_number, 'Changed modules',
             entities => entities.setIn([this.entity_number, 'items'], Immutable.fromJS(modules))
         )
-    },
+    }
 
     /* Count of filter slots */
     get filterSlots(): number {
-        const name: string = this.name
-        switch (name) {
-            case 'splitter':
-            case 'fast_splitter':
-            case 'express_splitter':
-            case 'stack_filter_inserter':
-            case 'logistic_chest_storage': {
-                return 1
-            }
-            case 'filter_inserter': {
-                return 5
-            }
-            case 'logistic_chest_requester':
-            case 'logistic_chest_buffer': {
-                return 12
-            }
-            default: {
-                return 0
-            }
-        }
-    },
+        if (this.name.includes('splitter')) return 1
+        if (this.entityData.filter_count) return this.entityData.filter_count
+        if (this.entityData.logistic_slots_count) return this.entityData.logistic_slots_count
+        return 0
+    }
 
     /* List of all filter(s) for splitters, inserters and logistic chests */
     get filters(): IFilter[] {
@@ -173,7 +163,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
                 return undefined
             }
         }
-    },
+    }
     set filters(list: IFilter[]) {
         const name: string = this.name
         switch (name) {
@@ -181,7 +171,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
             case 'fast_splitter':
             case 'express_splitter': {
                 const filter: string = (list === undefined || list.length !== 1 || list[0].name === undefined) ? undefined : list[0].name
-                BP.operation(this.entity_number, 'Changed splitter filter',
+                this.m_BP.operation(this.entity_number, 'Changed splitter filter',
                     entities => entities.setIn([this.entity_number, 'filter'], Immutable.fromJS(filter))
                 )
                 return
@@ -200,7 +190,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
                         filters.push({index: item.index, name: item.name})
                     }
                 }
-                BP.operation(this.entity_number, 'Changed inserter filter' + (list.length === 1 ? '' : '(s)'),
+                this.m_BP.operation(this.entity_number, 'Changed inserter filter' + (list.length === 1 ? '' : '(s)'),
                     entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
                 )
                 return
@@ -209,67 +199,67 @@ export default (rawEntity: any, BP: Blueprint) => ({
             case 'logistic_chest_requester':
             case 'logistic_chest_buffer': {
                 const filters = (list === undefined || list.length === 0) ? undefined : list
-                BP.operation(this.entity_number, 'Changed inserter filters',
+                this.m_BP.operation(this.entity_number, 'Changed inserter filters',
                     entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
                 )
                 return
             }
         }
-    },
+    }
 
     get splitterInputPriority() {
-        return rawEntity.get('input_priority')
-    },
+        return this.m_rawEntity.get('input_priority')
+    }
     set splitterInputPriority(priority: string) {
-        BP.operation(this.entity_number, 'Changed splitter output priority',
+        this.m_BP.operation(this.entity_number, 'Changed splitter output priority',
             entities => entities.setIn([this.entity_number, 'input_priority'], Immutable.fromJS(priority))
         )
-    },
+    }
 
     get splitterOutputPriority() {
-        return rawEntity.get('output_priority')
-    },
+        return this.m_rawEntity.get('output_priority')
+    }
     set splitterOutputPriority(priority: string) {
-        BP.operation(this.entity_number, 'Changed splitter output priority',
+        this.m_BP.operation(this.entity_number, 'Changed splitter output priority',
             entities => entities.setIn([this.entity_number, 'output_priority'], Immutable.fromJS(priority))
         )
-    },
+    }
 
     get splitterFilter() {
-        return rawEntity.get('filter')
-    },
+        return this.m_rawEntity.get('filter')
+    }
 
     get inserterFilters() {
-        const f = rawEntity.get('filters')
+        const f = this.m_rawEntity.get('filters')
         return f ? f.toJS() : undefined
-    },
+    }
 
     get constantCombinatorFilters() {
-        const f = rawEntity.getIn(['control_behavior', 'filters'])
+        const f = this.m_rawEntity.getIn(['control_behavior', 'filters'])
         return f ? f.toJS() : undefined
-    },
+    }
 
     get logisticChestFilters() {
-        const f = rawEntity.get('request_filters')
+        const f = this.m_rawEntity.get('request_filters')
         return f ? f.toJS() : undefined
-    },
+    }
 
     get deciderCombinatorConditions() {
-        const c = rawEntity.getIn(['control_behavior', 'decider_conditions'])
+        const c = this.m_rawEntity.getIn(['control_behavior', 'decider_conditions'])
         return c ? c.toJS() : undefined
-    },
+    }
 
     get arithmeticCombinatorConditions() {
-        const c = rawEntity.getIn(['control_behavior', 'arithmetic_conditions'])
+        const c = this.m_rawEntity.getIn(['control_behavior', 'arithmetic_conditions'])
         return c ? c.toJS() : undefined
-    },
+    }
 
     get hasConnections() {
         return this.connections !== undefined
-    },
+    }
 
     get connections() {
-        const c = rawEntity.get('connections')
+        const c = this.m_rawEntity.get('connections')
         if (!c) return
         const conn = c.toJS()
 
@@ -288,7 +278,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
         if (this.type === 'electric_pole') {
             const copperConn: any[] = []
 
-            BP.rawEntities.forEach((v, k) => {
+            this.m_BP.rawEntities.forEach((v, k) => {
                 const entity = v.toJS()
                 if (entity.name === 'power_switch' && entity.connections) {
                     if (entity.connections.Cu0 && entity.connections.Cu0[0].entity_id === this.entity_number) {
@@ -307,7 +297,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
         }
 
         return conn
-    },
+    }
 
     get connectedEntities() {
         const connections = this.connections
@@ -322,33 +312,29 @@ export default (rawEntity: any, BP: Blueprint) => ({
             }
         }
         return entities
-    },
+    }
 
     get chemicalPlantDontConnectOutput() {
-        const r = this.recipe
-        if (!r) return false
-        const rData = factorioData.getRecipe(r)
-        const recipe = (rData.normal ? rData.normal : rData)
-        if (recipe.result || recipe.results[0].type === 'item') return true
-        return false
-    },
+        if (!this.recipe) return false
+        return !FD.recipes[this.recipe].results.find(result => result.type === 'fluid')
+    }
 
     get trainStopColor() {
-        const c = rawEntity.get('color')
+        const c = this.m_rawEntity.get('color')
         return c ? c.toJS() : undefined
-    },
+    }
 
     get operator() {
         if (this.name === 'decider_combinator') {
-            const cb = rawEntity.get('control_behavior')
+            const cb = this.m_rawEntity.get('control_behavior')
             if (cb) return cb.getIn(['decider_conditions', 'comparator'])
         }
         if (this.name === 'arithmetic_combinator') {
-            const cb = rawEntity.get('control_behavior')
+            const cb = this.m_rawEntity.get('control_behavior')
             if (cb) return cb.getIn(['arithmetic_conditions', 'operation'])
         }
         return undefined
-    },
+    }
 
     getArea(pos?: IPoint) {
         return new Area({
@@ -357,32 +343,32 @@ export default (rawEntity: any, BP: Blueprint) => ({
             width: this.size.x,
             height: this.size.y
         }, true)
-    },
+    }
 
     change(name: string, direction: number) {
-        BP.operation(this.entity_number, 'Changed Entity', entities => (
+        this.m_BP.operation(this.entity_number, 'Changed Entity', entities => (
             entities.withMutations(map => {
                 map.setIn([this.entity_number, 'name'], name)
                 map.setIn([this.entity_number, 'direction'], direction)
             })
         ))
-    },
+    }
 
     move(pos: IPoint) {
-        const entity = BP.entity(this.entity_number)
-        if (!BP.entityPositionGrid.checkNoOverlap(entity.name, entity.direction, pos)) return false
-        BP.operation(this.entity_number, 'Moved entity',
+        const entity = this.m_BP.entity(this.entity_number)
+        if (!this.m_BP.entityPositionGrid.checkNoOverlap(entity.name, entity.direction, pos)) return false
+        this.m_BP.operation(this.entity_number, 'Moved entity',
             entities => entities.setIn([this.entity_number, 'position'], Immutable.fromJS(pos)),
             'mov'
         )
-        BP.entityPositionGrid.setTileData(this.entity_number)
+        this.m_BP.entityPositionGrid.setTileData(this.entity_number)
         return true
-    },
+    }
 
     rotate(notMoving: boolean, offset?: IPoint, pushToHistory = true, otherEntity?: number, ccw = false) {
         if (!this.assemblerCraftsWithFluid &&
             (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3')) return false
-        if (notMoving && BP.entityPositionGrid.sharesCell(this.getArea())) return false
+        if (notMoving && this.m_BP.entityPositionGrid.sharesCell(this.getArea())) return false
         const pr = this.entityData.possible_rotations
         if (!pr) return false
         const newDir = pr[
@@ -392,7 +378,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
             ) % pr.length
         ]
         if (newDir === this.direction) return false
-        BP.operation(this.entity_number, 'Rotated entity',
+        this.m_BP.operation(this.entity_number, 'Rotated entity',
             entities => entities.withMutations(map => {
                 map.setIn([this.entity_number, 'direction'], newDir)
                 if (notMoving && this.type === 'underground_belt') {
@@ -412,45 +398,34 @@ export default (rawEntity: any, BP: Blueprint) => ({
             otherEntity
         )
         return true
-    },
+    }
 
     topLeft() {
         return { x: this.position.x - (this.size.x / 2), y: this.position.y - (this.size.y / 2) }
-    },
+    }
     topRight() {
         return { x: this.position.x + (this.size.x / 2), y: this.position.y - (this.size.y / 2) }
-    },
+    }
     bottomLeft() {
         return { x: this.position.x - (this.size.x / 2), y: this.position.y + (this.size.y / 2) }
-    },
+    }
     bottomRight() {
         return { x: this.position.x + (this.size.x / 2), y: this.position.y + (this.size.y / 2) }
-    },
+    }
 
     get assemblerCraftsWithFluid() {
         return this.recipe &&
-            factorioData.getRecipe(this.recipe).category === 'crafting_with_fluid' &&
+            FD.recipes[this.recipe].category === 'crafting_with_fluid' &&
             this.entityData.crafting_categories &&
             this.entityData.crafting_categories.includes('crafting_with_fluid')
-    },
+    }
 
     get assemblerPipeDirection() {
         if (!this.recipe) return
-        const recipeData = factorioData.getRecipe(this.recipe)
-        const rD = recipeData.normal ? recipeData.normal : recipeData
-        for (const io of rD.ingredients) {
-            if (io.type === 'fluid') {
-                return 'input'
-            }
-        }
-        if (rD.results) {
-            for (const io of rD.results) {
-                if (io.type === 'fluid') {
-                    return 'output'
-                }
-            }
-        }
-    },
+        const recipe = FD.recipes[this.recipe]
+        if (recipe.ingredients.find(ingredient => ingredient.type === 'fluid')) return 'input'
+        if (recipe.results.find(result => result.type === 'fluid')) return 'output'
+    }
 
     getWireConnectionPoint(color: string, side: number) {
         const e = this.entityData
@@ -470,7 +445,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[
-                factorioData.getBeltConnections2(BP, this.position, this.direction) * 4
+                spriteDataBuilder.getBeltConnections2(this.m_BP, this.position, this.direction) * 4
             ].wire[color]
         }
         if (e.circuit_wire_connection_points.length === 8) {
@@ -480,9 +455,9 @@ export default (rawEntity: any, BP: Blueprint) => ({
             return e.circuit_wire_connection_points[this.direction / 2].wire[color]
         }
         return e.circuit_wire_connection_points[this.direction / 2].wire[color]
-    },
+    }
 
     toJS() {
-        return rawEntity.toJS()
+        return this.m_rawEntity.toJS()
     }
-})
+}

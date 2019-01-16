@@ -9,7 +9,7 @@ import './style.styl'
 import * as PIXI from 'pixi.js'
 
 import { Book } from './factorio-data/book'
-import BPString from './factorio-data/BPString'
+import bpString from './factorio-data/bpString'
 
 import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
@@ -91,7 +91,7 @@ G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
 G.app.stage.addChild(G.quickbarContainer)
 
 Promise.all(
-    [bpSource ? BPString.findBPString(bpSource) : undefined]
+    [bpSource ? bpString.findBPString(bpSource) : undefined]
     .concat(spritesheetsLoader.getAllPromises())
 )
 .then(data => {
@@ -119,8 +119,8 @@ Promise.all(
 })
 .catch(error => console.error(error))
 
-function loadBp(bpString: string, clearData = true) {
-    return BPString.decode(bpString)
+function loadBp(bp: string, clearData = true) {
+    return bpString.decode(bp)
         .then(data => {
 
             if (data instanceof Book) {
@@ -164,12 +164,12 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
     if (G.bp.isEmpty()) return
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        BPString.encode(G.bp)
+        bpString.encode(G.bp)
             .then(s => navigator.clipboard.writeText(s))
             .then(() => console.log('Copied BP String'))
             .catch(error => console.error(error))
     } else {
-        const data = BPString.encodeSync(G.bp)
+        const data = bpString.encodeSync(G.bp)
         if (data.value) {
             e.clipboardData.setData('text/plain', data.value)
             console.log('Copied BP String')
@@ -189,7 +189,7 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
         Promise.resolve(e.clipboardData.getData('text'))
 
     promise
-        .then(BPString.findBPString)
+        .then(bpString.findBPString)
         .then(loadBp)
         .then(() => G.loadingScreen.hide())
         .catch(error => console.error(error))
@@ -403,7 +403,7 @@ actions.pan.bind(() => {
     }
 })
 
-actions.build.bind(e => {
+actions.build.bind(() => {
     if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.placeEntityContainer()
     }

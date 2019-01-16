@@ -1,13 +1,9 @@
-/// <reference path="../../node_modules/factorio-data/data/prototypes/inventoryLayout.js" />
-
-import inventoryBundle from 'factorio-data/data/prototypes/inventoryLayout'
-import factorioData from '../factorio-data/factorioData'
+import FD from 'factorio-data'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import G from '../common/globals'
 import F from '../controls/functions'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'
-import { IInventoryGroup, IRecipe, IRecipeNormal } from '../interfaces/iFactorioData'
 
 // TODO: Optimize showing recipe when hovering with mouse over button
 // TODO: Move methods createIcon() and createIconWithAmount() to common functions class
@@ -21,9 +17,9 @@ export class InventoryContainer extends Dialog {
      * @param setAnchor - Temporar parameter to disable anchoring (this parameter may be removed again in the future)
      */
     static createIcon(itemName: string, setAnchor: boolean = true): PIXI.DisplayObject {
-        let item = factorioData.getItem(itemName)
+        let item = FD.items[itemName]
         // only needed for inventory group icon
-        if (!item) item = inventoryBundle.find(g => g.name === itemName)
+        if (!item) item = FD.inventoryLayout.find(g => g.name === itemName)
 
         if (item.icon !== undefined) {
             const icon = PIXI.Sprite.fromFrame(item.icon)
@@ -123,7 +119,7 @@ export class InventoryContainer extends Dialog {
         this.addChild(this.m_InventoryItems)
 
         let groupIndex = 0
-        for (const group of inventoryBundle as unknown as IInventoryGroup[]) {
+        for (const group of FD.inventoryLayout) {
 
             const inventoryGroupItems = new PIXI.Container()
             let itemColIndex = 0
@@ -135,13 +131,13 @@ export class InventoryContainer extends Dialog {
 
                 for (const item of subgroup.items) {
 
-                    const itemData = factorioData.getItem(item.name)
+                    const itemData = FD.items[item.name]
                     if (itemsFilter === undefined) {
                         const resultPlaceable = itemData.place_result !== undefined
-                        const entityFindable = resultPlaceable ? factorioData.getEntity(itemData.place_result) !== undefined : false
+                        const entityFindable = resultPlaceable ? FD.entities[itemData.place_result] !== undefined : false
                         if (!entityFindable) {
                             const tilePlaceable = itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
-                            const tileFindable = (tilePlaceable) ? factorioData.getTile(itemData.place_as_tile.result) !== undefined : false
+                            const tileFindable = (tilePlaceable) ? FD.tiles[itemData.place_as_tile.result] !== undefined : false
                             if (!tileFindable) {
                                 continue
                             }
@@ -155,7 +151,7 @@ export class InventoryContainer extends Dialog {
                     // const tileResult = itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
                     // const placeResult = itemData.place_result !== undefined || tileResult
 
-                    // if ((itemsFilter === undefined && placeResult && (itemData.place_result !== undefined || 
+                    // if ((itemsFilter === undefined && placeResult && (itemData.place_result !== undefined ||
                     //        itemData.place_as_tile !== undefined)) ||
                     //    (itemsFilter !== undefined && itemsFilter.includes(item.name))) {
 
@@ -262,45 +258,26 @@ export class InventoryContainer extends Dialog {
         // Update Recipe Container
         this.m_RecipeContainer.removeChildren()
 
-        const recipe: IRecipe = factorioData.getRecipe(recipeName)
-        if (recipe === undefined) {
-            return
-        }
-
-        const normal: IRecipeNormal = Object.keys(recipe).includes('normal') ? recipe.normal : undefined
-
-        const ingredientsObject = Object.keys(recipe).includes('ingredients') ? recipe.ingredients :
-            (normal === undefined ? undefined :
-                (Object.keys(recipe.normal).includes('ingredients') ? recipe.normal.ingredients : undefined))
-        if (ingredientsObject === undefined) {
-            return
-        }
-
-        /* tslint:disable-next-line */ // This needs to be looked at in teh recipeBundle
-        const ingredients: Map<string, Number> = ingredientsObject.map((o: any) => o instanceof Array ? o : [ o.name, o.amount ])
+        const recipe = FD.recipes[recipeName]
+        if (recipe === undefined) return
 
         let nextX = 0
-        for (const ingredient of ingredients) {
-            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, ingredient[0], ingredient[1].toString())
+        for (const ingredient of recipe.ingredients) {
+            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, ingredient.name, ingredient.amount.toString())
             nextX += 36
         }
 
-        const time = Object.keys(recipe).includes('energy_required') ? recipe.energy_required :
-        (normal === undefined ? (0.5) :
-            (Object.keys(recipe.normal).includes('energy_required') ? recipe.normal.energy_required : (0.5)))
-
         nextX += 2
-        const timeText = `=${time}s>`
+        const timeText = `=${recipe.time}s>`
         const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, G.styles.dialog.label)
-        const timeObject: PIXI.Text = new PIXI.Text(`=${time}s>`, G.styles.dialog.label)
+        const timeObject: PIXI.Text = new PIXI.Text(timeText, G.styles.dialog.label)
         timeObject.position.set(nextX, 6)
         this.m_RecipeContainer.addChild(timeObject)
         nextX += timeSize.width + 6
 
-        const resultcount = Object.keys(recipe).includes('result_count') ? recipe.result_count :
-            (normal === undefined ? 1 :
-                (Object.keys(recipe.normal).includes('result_count') ? recipe.normal.result_count : 1))
-
-        InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, recipeName, resultcount.toString())
+        for (const result of recipe.results) {
+            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, result.name, result.amount.toString())
+            nextX += 36
+        }
     }
 }

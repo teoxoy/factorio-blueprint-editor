@@ -5,7 +5,6 @@ import InserterEditor from './inserter'
 import MachineEditor from './machine'
 import MiningEditor from './mining'
 import SplitterEditor from './splitter'
-import { IEntity } from '../interfaces/iBlueprintEditor'
 
 /**
  * Factory Function for creating Editor based on Entity Number
@@ -18,7 +17,7 @@ import { IEntity } from '../interfaces/iBlueprintEditor'
  * @param entityNumber - Entity Number for which to create Editor for
  */
 export function createEditor(entityNumber: number): Editor {
-    const entity: IEntity = G.bp.entity(entityNumber)
+    const entity = G.bp.entity(entityNumber)
 
     let editor: Editor
     switch (entity.name) {

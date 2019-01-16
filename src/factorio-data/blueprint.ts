@@ -1,5 +1,5 @@
-import getEntity from './entity'
-import factorioData from './factorioData'
+import Entity from './entity'
+import FD from 'factorio-data'
 import { PositionGrid } from './positionGrid'
 import Immutable from 'immutable'
 import G from '../common/globals'
@@ -86,11 +86,11 @@ export class Blueprint {
     entity(entity_number: number) {
         const e = this.rawEntities.get(entity_number)
         if (!e) return undefined
-        return getEntity(e, this)
+        return new Entity(e, this)
     }
 
     firstEntity() {
-        return getEntity(this.rawEntities.first(), this)
+        return new Entity(this.rawEntities.first(), this)
     }
 
     undo(
@@ -309,13 +309,13 @@ export class Blueprint {
             this.icons[0] = sortedEntities[0][0]
             if (sortedEntities.length > 1) this.icons[1] = sortedEntities[1][0]
         } else {
-            this.icons[0] = factorioData.getTile(
+            this.icons[0] = FD.tiles[
                 [...Immutable.Seq(this.tiles)
                     .reduce((acc, tile) =>
                         acc.set(tile, acc.has(tile) ? (acc.get(tile) + 1) : 0)
                     , new Map() as Map<string, number>).entries()]
                 .sort((a, b) => b[1] - a[1])[0][0]
-            ).minable.result
+            ].minable.result
         }
     }
 
@@ -361,9 +361,17 @@ export class Blueprint {
             },
             name: v
         })).valueSeq().toArray()
-        const iconData = this.icons.map((icon, i) => (
-            { signal: { type: factorioData.getItemTypeForBp(icon), name: icon }, index: i + 1 }
-        ))
+        const iconData = this.icons.map((icon, i) => {
+            return { signal: { type: getItemTypeForBp(icon), name: icon }, index: i + 1 }
+
+            function getItemTypeForBp(name: string) {
+                switch (FD.items[name].type) {
+                    case 'virtual_signal': return 'virtual'
+                    case 'fluid': return 'fluid'
+                    default: return 'item'
+                }
+            }
+        })
         return {
             blueprint: {
                 icons: iconData,

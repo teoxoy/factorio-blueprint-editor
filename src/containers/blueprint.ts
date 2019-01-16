@@ -10,7 +10,7 @@ import { EntityPaintContainer } from './entityPaint'
 import { TileContainer } from './tile'
 import { TilePaintContainer } from './tilePaint'
 import util from '../common/util'
-import factorioData from '../factorio-data/factorioData'
+import FD from 'factorio-data'
 import actions from '../actions'
 
 export class BlueprintContainer extends PIXI.Container {
@@ -324,7 +324,7 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     spawnEntityAtMouse(itemName: string) {
-        const itemData = factorioData.getItem(itemName)
+        const itemData = FD.items[itemName]
         const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
         const placeResult = itemData.place_result || tileResult
 
@@ -346,7 +346,7 @@ export class BlueprintContainer extends PIXI.Container {
                 0,
                 EntityContainer.getPositionFromData(
                     G.gridData.position,
-                    util.switchSizeBasedOnDirection(factorioData.getEntity(placeResult).size, 0)
+                    util.switchSizeBasedOnDirection(FD.entities[placeResult].size, 0)
                 )
             )
             this.addChild(this.paintContainer)

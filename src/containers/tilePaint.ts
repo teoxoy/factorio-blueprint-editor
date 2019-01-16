@@ -2,7 +2,7 @@ import G from '../common/globals'
 import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { TileContainer } from './tile'
-import factorioData from '../factorio-data/factorioData'
+import FD from 'factorio-data'
 import { InventoryContainer } from '../panels/inventory'
 
 export class TilePaintContainer extends PIXI.Container {
@@ -81,7 +81,7 @@ export class TilePaintContainer extends PIXI.Container {
     }
 
     getItemName() {
-        return factorioData.getTile(this.name).minable.result
+        return FD.tiles[this.name].minable.result
     }
 
     increaseSize() {

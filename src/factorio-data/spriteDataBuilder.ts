@@ -1,39 +1,35 @@
-/// <reference path="../../node_modules/factorio-data/data/prototypes/items.js" />
-/// <reference path="../../node_modules/factorio-data/data/prototypes/recipes.js" />
-/// <reference path="../../node_modules/factorio-data/data/prototypes/entities.js" />
-/// <reference path="../../node_modules/factorio-data/data/prototypes/tiles.js" />
-
-import itemBundle from 'factorio-data/data/prototypes/items'
-import recipeBundle from 'factorio-data/data/prototypes/recipes'
-import entityBundle from 'factorio-data/data/prototypes/entities'
-import tileBundle from 'factorio-data/data/prototypes/tiles'
+import FD from 'factorio-data'
 import { Area } from './positionGrid'
 import util from '../common/util'
 import { Blueprint } from './blueprint'
-import { IItem, IRecipe } from '../interfaces/iFactorioData'
 
-// tslint:disable:max-file-line-count
 export default {
     getSpriteData,
-    getTile,
-    getItem,
-    getRecipe,
-    getEntity,
-    getEntities,
-    getItems,
-    getRecipes,
-    getTiles,
-    getAll,
-    checkEntityName,
-    checkItemName,
-    checkRecipeName,
-    checkTileName,
-    getItemTypeForBp,
     getBeltConnections2
 }
 
-for (const e in entityBundle) {
-    const entity = entityBundle[e]
+function getSpriteData(entity: any, hr: boolean, bp: Blueprint) {
+    return entityToFunction.get(entity.name)({
+        hr,
+        dir: entity.direction,
+
+        bp,
+        position: entity.position,
+        hasConnections: entity.hasConnections,
+
+        dirType: entity.directionType,
+        operator: entity.operator,
+        assemblerCraftsWithFluid: entity.assemblerCraftsWithFluid,
+        assemblerPipeDirection: entity.assemblerPipeDirection,
+        trainStopColor: entity.trainStopColor,
+        chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput
+    })
+}
+
+const entityToFunction = new Map()
+
+for (const e in FD.entities) {
+    const entity = FD.entities[e]
     let func = generateGraphics(entity)
     if (hasPipeCoverFeature(entity)) {
         func = appendToFunc(entity, func)
@@ -42,7 +38,7 @@ for (const e in entityBundle) {
         func = appendToFunc2(entity, func)
     }
     func = appendToFunc3(func)
-    entity.generate = func
+    entityToFunction.set(entity.name, func)
 }
 
 function hasPipeCoverFeature(e: any) {
@@ -91,103 +87,6 @@ function appendToFunc3(func: (data: any) => any) {
         }
         return ret
     }
-}
-
-function getSpriteData(entity: any, hr: boolean, bp: Blueprint) {
-    return entityBundle[entity.name].generate({
-        hr,
-        dir: entity.direction,
-
-        bp,
-        position: entity.position,
-        hasConnections: entity.hasConnections,
-
-        dirType: entity.directionType,
-        operator: entity.operator,
-        assemblerCraftsWithFluid: entity.assemblerCraftsWithFluid,
-        assemblerPipeDirection: entity.assemblerPipeDirection,
-        trainStopColor: entity.trainStopColor,
-        chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput
-    })
-}
-
-function checkNameInBundle(name: string, bundle: any/*, bundleName*/) {
-    // if (typeof name !== 'string') throw new Error('Expected name to be a string, instead got ' + name)
-    // if (!bundle[name]) throw new Error(name + ' does not exist in ' + bundleName + '!')
-    // return name
-    if (bundle[name]) return true
-    return false
-}
-
-function checkItemName(name: string) {
-    return checkNameInBundle(name, itemBundle)
-}
-
-function checkRecipeName(name: string) {
-    return checkNameInBundle(name, recipeBundle)
-}
-
-function checkEntityName(name: string) {
-    return checkNameInBundle(name, entityBundle)
-}
-
-function checkTileName(name: string) {
-    return checkNameInBundle(name, tileBundle)
-}
-
-/**
- * Returns item from itemBundle
- * @param name - Name if item
- */
-function getItem(name: string): IItem {
-    return itemBundle[name] as unknown as IItem
-}
-
-/**
- * Returns recipe from recipeBundle
- * @param name - Name of recipe
- */
-function getRecipe(name: string): IRecipe {
-    return recipeBundle[name] as unknown as IRecipe
-}
-
-function getEntity(name: string) {
-    return entityBundle[name] || undefined
-}
-
-function getTile(name: string) {
-    return tileBundle[name] || undefined
-}
-
-function getItems() {
-    return itemBundle
-}
-
-function getRecipes() {
-    return recipeBundle
-}
-
-function getEntities() {
-    return entityBundle
-}
-
-function getTiles() {
-    return tileBundle
-}
-
-function getAll(name: string) {
-    return {
-        item: getItem(name),
-        recipe: getRecipe(name),
-        entity: getEntity(name)
-    }
-}
-
-function getItemTypeForBp(name: string) {
-    const type = getItem(name).type
-    if (type === 'virtual_signal') return 'virtual'
-    if (type === 'fluid') return 'fluid'
-    return 'item'
 }
 
 function getPipeCovers(e: any) {
@@ -530,8 +429,9 @@ function generateGraphics(e: any) {
         }
         case 'flamethrower_turret': return (data: IEntityData) => {
             const dir = data.dir
-            const pipe = entityBundle['pipe']
-            const pipePicture = dir === 0 || dir === 4 ? pipe.pictures.straight_horizontal : pipe.pictures.straight_vertical
+            const pipe = FD.entities['pipe']
+            const pipePictures = pipe.pictures as FD.PipePictures
+            const pipePicture = dir === 0 || dir === 4 ? pipePictures.straight_horizontal : pipePictures.straight_vertical
             const p1 = util.add_to_shift(util.rotatePointBasedOnDir([0.5, 1], dir), util.duplicate(pipePicture))
             const p2 = util.add_to_shift(util.rotatePointBasedOnDir([-0.5, 1], dir), util.duplicate(pipePicture))
             return [
@@ -617,7 +517,7 @@ function generateGraphics(e: any) {
                 if (gates) {
                     const railBases: any[] = []
                     function assignShiftAndPushPicture(shift: number[], picture: string) {
-                        railBases.push(util.add_to_shift(shift, util.duplicate(entityBundle['gate'][picture])))
+                        railBases.push(util.add_to_shift(shift, util.duplicate(FD.entities['gate'][picture])))
                     }
                     if (dir === 0) {
                         if (gates[0] || gates[2]) {
@@ -759,7 +659,7 @@ function generateGraphics(e: any) {
                 })
                 for (let i = 0; i < conn.length; i++) {
                     if (conn[i]) {
-                        const wp = entityBundle['gate'].wall_patch[util.intToDir((i * 2 + 4) % 8)].layers[0]
+                        const wp = FD.entities['gate'].wall_patch[util.intToDir((i * 2 + 4) % 8)].layers[0]
                         if (i === 0) {
                             out.unshift(wp)
                         } else {
@@ -849,7 +749,7 @@ function generateGraphics(e: any) {
             const nP = e.name.split('_')
             const beltType = nP.length === 1 ? '' : nP[0] + '_'
 
-            let belt = entityBundle[beltType + 'transport_belt']
+            let belt = FD.entities[beltType + 'transport_belt']
             belt = dir === 0 || dir === 4 ? belt.belt_vertical : belt.belt_horizontal
 
             belt = util.duplicate(belt)

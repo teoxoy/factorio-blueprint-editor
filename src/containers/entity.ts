@@ -1,9 +1,10 @@
 import G from '../common/globals'
-import factorioData from '../factorio-data/factorioData'
+import FD from 'factorio-data'
+import spriteDataBuilder from '../factorio-data/spriteDataBuilder'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
-import { IEntity } from '../interfaces/iBlueprintEditor'
+import Entity from '../factorio-data/entity'
 
 const updateGroups = [
     {
@@ -28,7 +29,7 @@ const updateGroups = [
 ]
 .map(uG => {
     if (!uG.has) return uG
-    const entities = Object.values(factorioData.getEntities())
+    const entities = Object.values(FD.entities)
     return {
         is: entities.filter(e => Object.keys(e).find(k => uG.has.includes(k))).map(e => e.name),
         updates: entities.filter(e => Object.keys(e).find(k => uG.updates.includes(k))).map(e => e.name)
@@ -74,9 +75,9 @@ export class EntityContainer extends PIXI.Container {
     }
 
     static getParts(entity: any, hr: boolean, ignore_connections?: boolean): EntitySprite[] {
-        const anims = factorioData.getSpriteData(entity, hr, ignore_connections ? undefined : G.bp)
+        const anims = spriteDataBuilder.getSpriteData(entity, hr, ignore_connections ? undefined : G.bp)
 
-        // const icon = new PIXI.Sprite(G.iconSprites['icon:' + factorioData.getEntity(entity.name).icon.split(':')[1]])
+        // const icon = new PIXI.Sprite(G.iconSprites['icon:' + FD.entities[entity.name].icon.split(':')[1]])
         // icon.x -= 16
         // icon.y -= 16
         // return [icon]
@@ -237,8 +238,8 @@ export class EntityContainer extends PIXI.Container {
 
     // TODO: Optimze the following methods in terms of checking and redrawing
     /** Paste relevant data from source entity reference into target entity */
-    pasteData(sourceEntity: IEntity) {
-        const entity: IEntity = G.bp.entity(this.entity_number)
+    pasteData(sourceEntity: Entity) {
+        const entity = G.bp.entity(this.entity_number)
 
         const aR = entity.acceptedRecipes
         const RECIPE = sourceEntity.recipe !== undefined && aR !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
@@ -269,7 +270,7 @@ export class EntityContainer extends PIXI.Container {
     }
 
     redrawEntityInfo() {
-        const entity: IEntity = G.bp.entity(this.entity_number)
+        const entity = G.bp.entity(this.entity_number)
         if (entity.entityData.module_specification !== undefined || entity.type === 'splitter' ||
             entity.entityData.crafting_categories !== undefined || entity.type === 'mining_drill' ||
             entity.type === 'boiler' || entity.type === 'generator' ||
