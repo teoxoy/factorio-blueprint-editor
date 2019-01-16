@@ -1,7 +1,5 @@
 import G from '../common/globals'
 
-// TODO: combine drawing the checkbox background and cross into one graphic
-
 /** Base Checkbox */
 export default class Checkbox extends PIXI.Container {
 
@@ -54,16 +52,17 @@ export default class Checkbox extends PIXI.Container {
         this.interactive = true
         this.checked = checked
 
+        // Draw text
         if (text !== undefined) {
             const label: PIXI.Text = new PIXI.Text(text, G.styles.controls.checkbox)
             label.position.set(24, 0)
             this.addChild(label)
         }
 
+        // Attach events
         this.on('pointerdown', () => {
             this.checked = !this.checked
         })
-
         this.on('pointerover', () => {
             this.m_Hover.visible = true
         })

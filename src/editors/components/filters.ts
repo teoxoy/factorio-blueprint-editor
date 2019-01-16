@@ -4,8 +4,6 @@ import { InventoryContainer } from '../../panels/inventory'
 import { EntityContainer } from '../../containers/entity'
 
 // TODO: Integrate showing stack size of slots for requester and buffer chest
-// TODO: Include modules filter settings in copye paste
-// TODO: Show splitter filter in editor preview << will only be shown when input and output priorty is set
 
 /** Module Slots for Entity */
 export default class Filters extends  PIXI.Container {
@@ -117,6 +115,20 @@ export default class Filters extends  PIXI.Container {
         }
     }
 
+    /** Clear currently set filter */
+    public clearSlot(slot?: Slot, index: number = 0) {
+        const slotReference = slot !== undefined ? slot : this.getChildAt(index) as Slot
+        const indexValue: number = slot.data as number
+
+        this.m_Filters[indexValue].name = undefined
+        this.m_Entity.filters = this.m_Filters
+        EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
+        if (slotReference.content !== undefined) {
+            slotReference.content.destroy()
+        }
+        this.emit('changed', false)
+    }
+
     /** Event handler for click on slot */
     private onSlotPointerDown(e: PIXI.interaction.InteractionEvent) {
         e.stopPropagation()
@@ -129,17 +141,11 @@ export default class Filters extends  PIXI.Container {
                 this.m_Entity.filters = this.m_Filters
                 EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
                 slot.content = InventoryContainer.createIcon(name, false)
-                this.emit('changed')
+                this.emit('changed', true)
             })
             inventory.show()
         } else if (e.data.button === 2) {
-            this.m_Filters[index].name = undefined
-            this.m_Entity.filters = this.m_Filters
-            EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
-            if (slot.content !== undefined) {
-                slot.content.destroy()
-            }
-            this.emit('changed')
+            this.clearSlot(slot)
         }
     }
 }
