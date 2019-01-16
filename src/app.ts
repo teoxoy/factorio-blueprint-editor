@@ -119,8 +119,8 @@ Promise.all(
 })
 .catch(error => console.error(error))
 
-function loadBp(bpString: string, clearData = true) {
-    return bpString.decode(bpString)
+function loadBp(bp: string, clearData = true) {
+    return bpString.decode(bp)
         .then(data => {
 
             if (data instanceof Book) {
