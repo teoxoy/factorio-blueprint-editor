@@ -8,6 +8,10 @@ declare module '*.json' {
     export default content
 }
 
+interface NodeModule {
+    hot: any
+}
+
 interface Navigator {
     clipboard: {
         writeText?: (s: string) => Promise<void>

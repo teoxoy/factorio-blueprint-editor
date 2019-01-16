@@ -159,13 +159,13 @@ const colors = {
 
     _darkTheme: true,
     _tintsToChange: [] as PIXI.Sprite[],
-    pattern: 'checker',
+    pattern: 'checker' as 'checker' | 'grid',
     get darkTheme() {
         return this._darkTheme
     },
     set darkTheme(value: boolean) {
         this._darkTheme = value
-        this._tintsToChange.forEach(s => s.tint = value ? 0x303030 : 0xC9C9C9)
+        this._tintsToChange.forEach((s: PIXI.Sprite) => s.tint = value ? 0x303030 : 0xC9C9C9)
     },
     addSpriteForAutomaticTintChange(sprite: PIXI.Sprite) {
         sprite.tint = this.darkTheme ? 0x303030 : 0xC9C9C9

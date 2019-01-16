@@ -438,7 +438,7 @@ export default class Entity {
         }
 
         if (this.name === 'power_switch' && color === 'copper') {
-            return e[(side === 1 ? 'left' : 'right') + '_wire_connection_point'].wire.copper
+            return side === 1 ? e.left_wire_connection_point.wire.copper : e.right_wire_connection_point.wire.copper
         }
 
         if (e.circuit_wire_connection_point) return e.circuit_wire_connection_point.wire[color]
