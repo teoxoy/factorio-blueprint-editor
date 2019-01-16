@@ -1,4 +1,4 @@
-import getEntity from './entity'
+import Entity from './entity'
 import FD from 'factorio-data'
 import { PositionGrid } from './positionGrid'
 import Immutable from 'immutable'
@@ -86,11 +86,11 @@ export class Blueprint {
     entity(entity_number: number) {
         const e = this.rawEntities.get(entity_number)
         if (!e) return undefined
-        return getEntity(e, this)
+        return new Entity(e, this)
     }
 
     firstEntity() {
-        return getEntity(this.rawEntities.first(), this)
+        return new Entity(this.rawEntities.first(), this)
     }
 
     undo(
