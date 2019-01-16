@@ -3,7 +3,6 @@ import { Area } from './positionGrid'
 import util from '../common/util'
 import { Blueprint } from './blueprint'
 
-// tslint:disable:max-file-line-count
 export default {
     getSpriteData,
     getBeltConnections2

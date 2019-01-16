@@ -1,6 +1,6 @@
 import G from '../common/globals'
 import FD from 'factorio-data'
-import factorioData from '../factorio-data/factorioData'
+import spriteDataBuilder from '../factorio-data/spriteDataBuilder'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
@@ -75,7 +75,7 @@ export class EntityContainer extends PIXI.Container {
     }
 
     static getParts(entity: any, hr: boolean, ignore_connections?: boolean): EntitySprite[] {
-        const anims = factorioData.getSpriteData(entity, hr, ignore_connections ? undefined : G.bp)
+        const anims = spriteDataBuilder.getSpriteData(entity, hr, ignore_connections ? undefined : G.bp)
 
         // const icon = new PIXI.Sprite(G.iconSprites['icon:' + FD.entities[entity.name].icon.split(':')[1]])
         // icon.x -= 16

@@ -1,6 +1,6 @@
 import { Blueprint } from './blueprint'
 import Immutable from 'immutable'
-import factorioData from './factorioData'
+import spriteDataBuilder from './spriteDataBuilder'
 import FD from 'factorio-data'
 import util from '../common/util'
 import { Area } from './positionGrid'
@@ -452,7 +452,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[
-                factorioData.getBeltConnections2(BP, this.position, this.direction) * 4
+                spriteDataBuilder.getBeltConnections2(BP, this.position, this.direction) * 4
             ].wire[color]
         }
         if (e.circuit_wire_connection_points.length === 8) {
