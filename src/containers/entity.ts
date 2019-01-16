@@ -4,7 +4,7 @@ import spriteDataBuilder from '../factorio-data/spriteDataBuilder'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
-import { IEntity } from '../interfaces/iBlueprintEditor'
+import Entity from '../factorio-data/entity'
 
 const updateGroups = [
     {
@@ -238,8 +238,8 @@ export class EntityContainer extends PIXI.Container {
 
     // TODO: Optimze the following methods in terms of checking and redrawing
     /** Paste relevant data from source entity reference into target entity */
-    pasteData(sourceEntity: IEntity) {
-        const entity: IEntity = G.bp.entity(this.entity_number)
+    pasteData(sourceEntity: Entity) {
+        const entity = G.bp.entity(this.entity_number)
 
         const aR = entity.acceptedRecipes
         const RECIPE = sourceEntity.recipe !== undefined && aR !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
@@ -270,7 +270,7 @@ export class EntityContainer extends PIXI.Container {
     }
 
     redrawEntityInfo() {
-        const entity: IEntity = G.bp.entity(this.entity_number)
+        const entity = G.bp.entity(this.entity_number)
         if (entity.entityData.module_specification !== undefined || entity.type === 'splitter' ||
             entity.entityData.crafting_categories !== undefined || entity.type === 'mining_drill' ||
             entity.type === 'boiler' || entity.type === 'generator' ||

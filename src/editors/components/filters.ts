@@ -1,7 +1,7 @@
 import Slot from '../../controls/slot'
-import { IEntity, IFilter } from '../../interfaces/iBlueprintEditor'
 import { InventoryContainer } from '../../panels/inventory'
 import { EntityContainer } from '../../containers/entity'
+import Entity from '../../factorio-data/entity'
 
 // TODO: Integrate showing stack size of slots for requester and buffer chest
 // TODO: Include modules filter settings in copye paste
@@ -75,12 +75,12 @@ export default class Filters extends  PIXI.Container {
     */
 
     /** Blueprint Editor Entity reference */
-    private readonly m_Entity: IEntity
+    private readonly m_Entity: Entity
 
     /** Field to hold data for module visualization */
     private readonly m_Filters: IFilter[]
 
-    constructor(entity: IEntity) {
+    constructor(entity: Entity) {
         super()
 
         // Store entity data reference for later usage
@@ -90,7 +90,7 @@ export default class Filters extends  PIXI.Container {
         const slots: number = this.m_Entity.filterSlots
         if (slots > 0) {
             this.m_Filters = new Array(slots)
-            const filters: IFilter[] = this.m_Entity.filters
+            const filters = this.m_Entity.filters
             if (filters !== undefined) {
                 for (const item of filters) {
                     this.m_Filters[item.index - 1] = item

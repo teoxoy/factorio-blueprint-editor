@@ -3,15 +3,15 @@ import Editor from './editor'
 import Preview from './components/preview'
 import Filters from './components/filters'
 import Checkbox from '../controls/checkbox'
-import { IEntity } from '../interfaces/iBlueprintEditor'
 import { EntityContainer } from '../containers/entity'
+import Entity from '../factorio-data/entity'
 
 // TODO: Add switch for selecting left/right on priorities
 
 /** Splitter Editor */
 export default class SplitterEditor extends Editor {
 
-    constructor(entity: IEntity) {
+    constructor(entity: Entity) {
         super(504, 176, entity)
 
         // Add Preview

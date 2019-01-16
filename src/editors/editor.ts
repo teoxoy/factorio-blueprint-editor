@@ -3,13 +3,13 @@ import Preview from './components/preview'
 import Recipe from './components/recipe'
 import Modules from './components/modules'
 import Filters from './components/filters'
-import { IEntity } from '../interfaces/iBlueprintEditor'
+import Entity from '../factorio-data/entity'
 
 /** Editor */
 export default abstract class Editor extends Dialog {
 
     /** Blueprint Editor Entity reference */
-    protected readonly m_Entity: IEntity
+    protected readonly m_Entity: Entity
 
     /**
      * Base Constructor for Editors
@@ -18,7 +18,7 @@ export default abstract class Editor extends Dialog {
      * @param height - Height of the Editor Dialog
      * @param entity - Reference to Entity Data
      */
-    constructor(width: number, height: number, entity: IEntity) {
+    constructor(width: number, height: number, entity: Entity) {
         super(width, height, Dialog.capitalize(entity.name))
 
         /** Store reference to entity for later use */

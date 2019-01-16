@@ -4,7 +4,6 @@ import spriteDataBuilder from './spriteDataBuilder'
 import FD from 'factorio-data'
 import util from '../common/util'
 import { Area } from './positionGrid'
-import { IFilter } from '../interfaces/iBlueprintEditor'
 
 export default class Entity {
 

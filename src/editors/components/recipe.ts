@@ -1,15 +1,15 @@
 import Slot from '../../controls/slot'
-import { IEntity } from '../../interfaces/iBlueprintEditor'
 import { InventoryContainer } from '../../panels/inventory'
 import { EntityContainer } from '../../containers/entity'
+import Entity from '../../factorio-data/entity'
 
 /** Module Slots for Entity */
 export default class Recipe extends Slot {
 
     /** Blueprint Editor Entity reference */
-    private readonly m_Entity: IEntity
+    private readonly m_Entity: Entity
 
-    constructor(entity: IEntity) {
+    constructor(entity: Entity) {
         super()
 
         this.m_Entity = entity

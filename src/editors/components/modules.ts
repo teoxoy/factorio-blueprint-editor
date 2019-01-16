@@ -1,18 +1,18 @@
 import Slot from '../../controls/slot'
-import { IEntity } from '../../interfaces/iBlueprintEditor'
 import { InventoryContainer } from '../../panels/inventory'
 import { EntityContainer } from '../../containers/entity'
+import Entity from '../../factorio-data/entity'
 
 /** Module Slots for Entity */
 export default class Modules extends  PIXI.Container {
 
     /** Blueprint Editor Entity reference */
-    private readonly m_Entity: IEntity
+    private readonly m_Entity: Entity
 
     /** Field to hold data for module visualization */
     private readonly m_Modules: string[]
 
-    constructor(entity: IEntity) {
+    constructor(entity: Entity) {
         super()
 
         // Store entity data reference for later usage

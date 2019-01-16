@@ -1,12 +1,12 @@
 import Editor from './editor'
 import Preview from './components/preview'
 import Filters from './components/filters'
-import { IEntity } from '../interfaces/iBlueprintEditor'
+import Entity from '../factorio-data/entity'
 
 /** Inserter Editor */
 export default class InserterEditor extends Editor {
 
-    constructor(entity: IEntity) {
+    constructor(entity: Entity) {
         super(440, 171, entity)
 
         // Add Preview

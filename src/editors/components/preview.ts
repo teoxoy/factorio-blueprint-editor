@@ -1,13 +1,13 @@
 import G from '../../common/globals'
-import { IEntity } from '../../interfaces/iBlueprintEditor'
 import { EntityContainer } from '../../containers/entity'
 import { OverlayContainer } from '../../containers/overlay'
+import Entity from '../../factorio-data/entity'
 
 /** Preview of Entity */
 export default class Preview extends PIXI.Container {
 
     /** Blueprint Editor Entity reference */
-    private readonly m_Entity: IEntity
+    private readonly m_Entity: Entity
 
     /** Field to store size for later usage */
     private readonly m_Size: number
@@ -15,7 +15,7 @@ export default class Preview extends PIXI.Container {
     /** Container to host preview */
     private m_Preview: PIXI.Container
 
-    constructor(entity: IEntity, size: number) {
+    constructor(entity: Entity, size: number) {
         super()
 
         this.m_Entity = entity

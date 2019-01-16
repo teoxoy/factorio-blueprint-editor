@@ -2,12 +2,12 @@ import Editor from './editor'
 import Preview from './components/preview'
 import Recipe from './components/recipe'
 import Modules from './components/modules'
-import { IEntity } from '../interfaces/iBlueprintEditor'
+import Entity from '../factorio-data/entity'
 
 /** Assembly Machines Editor */
 export default class MachineEditor extends Editor {
 
-    constructor(entity: IEntity) {
+    constructor(entity: Entity) {
         super(402, 171, entity)
 
         // Add Preview
