@@ -37,7 +37,7 @@ export class BlueprintContainer extends PIXI.Container {
         this.viewport = new Viewport(this, G.sizeBPContainer, G.positionBPContainer, {
             width: G.app.screen.width,
             height: G.app.screen.height
-        }, 5)
+        }, 3)
 
         this.movingEntityFilter = new AdjustmentFilter({ red: 0.4, blue: 0.4, green: 1 })
 
