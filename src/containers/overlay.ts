@@ -96,8 +96,8 @@ export class OverlayContainer extends PIXI.Container {
             if (fluidIcons.children.length !== 0) entityInfo.addChild(fluidIcons)
         }
 
-        const modules: string[] = entity.modules
-        if (modules !== undefined && modules.length > 0) {
+        const modules = entity.modules
+        if (modules.length !== 0) {
             const moduleInfo = new PIXI.Container()
             const shift = entity.entityData.module_specification.module_info_icon_shift
             for (let index = 0; index < modules.length; index++) {

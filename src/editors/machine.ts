@@ -18,9 +18,11 @@ export default class MachineEditor extends Editor {
         const recipe: Recipe = this.addRecipe(208, 45)
         recipe.on('changed', () => preview.redraw())
 
-        // Add Modules
-        this.addLabel(140, 94, 'Modules:')
-        const modules: Modules = this.addModules(208, 83)
-        modules.on('changed', () => preview.redraw())
+        if (entity.moduleSlots !== 0) {
+            // Add Modules
+            this.addLabel(140, 94, 'Modules:')
+            const modules: Modules = this.addModules(208, 83)
+            modules.on('changed', () => preview.redraw())
+        }
     }
 }

@@ -62,9 +62,9 @@ interface IHistoryObject {
 
 interface IFilter {
     /** Slot index (1 based ... not 0 like arrays) */
-    index: number,
+    index: number
     /** Name of entity to be filtered */
-    name: string,
+    name: string
     /** If stacking is allowed, how many shall be stacked */
-    count?: number,
+    count?: number
 }

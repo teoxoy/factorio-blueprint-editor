@@ -19,7 +19,7 @@ export default class Modules extends  PIXI.Container {
         this.m_Entity = entity
 
         // Get modules from entity
-        this.m_Modules = new Array(this.m_Entity.entityData.module_specification.module_slots)
+        this.m_Modules = new Array(this.m_Entity.moduleSlots)
         const modules = this.m_Entity.modules
         if (modules !== undefined) {
             for (let slotIndex = 0; slotIndex < this.m_Modules.length; slotIndex++) {

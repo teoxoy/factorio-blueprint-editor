@@ -37,52 +37,63 @@ export default class Entity {
     get recipe() { return this.m_rawEntity.get('recipe') }
 
     set recipe(recipeName: string) {
-        // TODO: Integrate check if recipe is actually changing
+        if (this.recipe === recipeName) return
+
         this.m_BP.operation(this.entity_number, 'Changed recipe', entities => (
             entities.withMutations(map => {
                 map.setIn([this.entity_number, 'recipe'], recipeName)
 
-                const modules = this.modules
-                if (modules && recipeName && !FD.items['productivity_module'].limitation.includes(recipeName)) {
-                    for (const k in modules) {
-                        // tslint:disable-next-line:no-dynamic-delete
-                        if (k.includes('productivity_module')) delete modules[k]
-                    }
-                    map.setIn([this.entity_number, 'items'], Object.keys(modules).length ? Immutable.fromJS(modules) : undefined)
-                }
+                const M = this.moduleArrayToImmutableMap(
+                    this.modules
+                        .map(k => FD.items[k])
+                        .filter(item => !(item.limitation && !item.limitation.includes(recipeName)))
+                        .map(item => item.name)
+                )
+
+                map.setIn([this.entity_number, 'items'], M)
             })
         ))
     }
 
     /** Recipes this entity can accept */
     get acceptedRecipes(): string[] {
-        if (!this.entityData.crafting_categories) return
-        const acceptedRecipes: string[] = []
-        const cc = this.entityData.crafting_categories
-        for (const k in FD.recipes) {
-            const recipe = FD.recipes[k]
-            if (cc.includes(recipe.category)) {
-                if (!((this.name === 'assembling_machine_1' && recipe.ingredients.length > 2) ||
-                    (this.name === 'assembling_machine_2' && recipe.ingredients.length > 4))
-                ) {
-                    acceptedRecipes.push(k)
-                }
-            }
-        }
-        return acceptedRecipes
+        if (!this.entityData.crafting_categories) return []
+
+        return Object.keys(FD.recipes)
+            .map(k => FD.recipes[k])
+            .filter(recipe => this.entityData.crafting_categories.includes(recipe.category))
+            // filter recipes based on entity ingredient_count
+            .filter(recipe =>
+                !this.entityData.ingredient_count ||
+                this.entityData.ingredient_count >= recipe.ingredients.length
+            )
+            .map(recipe => recipe.name)
+    }
+
+    /* Count of module slots */
+    get moduleSlots(): number {
+        if (!this.entityData.module_specification) return 0
+        return this.entityData.module_specification.module_slots
     }
 
     /** Modules this entity can accept */
     get acceptedModules(): string[] {
-        if (!this.entityData.module_specification) return undefined
-        const ommitProductivityModules = this.name === 'beacon' ||
-            (this.recipe && !FD.items['productivity_module'].limitation.includes(this.recipe))
-        const items = FD.items
-        const acceptedModules: string[] = []
-        for (const k in items) {
-            if (items[k].type === 'module' && !(k.includes('productivity_module') && ommitProductivityModules)) acceptedModules.push(k)
-        }
-        return acceptedModules
+        if (!this.entityData.module_specification) return []
+
+        return Object.keys(FD.items)
+            .map(k => FD.items[k])
+            .filter(item => item.type === 'module')
+            // filter modules based on module limitation
+            .filter(item =>
+                !this.recipe ||
+                !(item.limitation && !item.limitation.includes(this.recipe))
+            )
+            // filter modules based on entity allowed_effects (ex: beacons don't accept productivity effect)
+            .filter(item =>
+                !this.entityData.allowed_effects ||
+                Object.keys(item.effect).every(effect => this.entityData.allowed_effects.includes(effect))
+            )
+            .map(item => item.name)
     }
 
     /** Filters this entity can accept (only splitters, inserters and logistic chests) */
@@ -101,37 +112,42 @@ export default class Entity {
         return filters
     }
 
-    // TODO: When changing 'entity.ts' to a class (if) handle the modules within the class differently
-    // >> This would be greatly helpful for improving the user experience as teh modules would stay at
-    //    the same place at least as long as the blueprint is edited.
-    // >> Currently not possible due to 'entity.ts' not being a real class / object
+    // TODO: maybe handle the modules within the class differently so that modules
+    // would stay in the same place at least as long as the blueprint is edited.
     /** List of all modules */
     get modules(): string[] {
-        const list: string[] = []
-        const data: Map<string, number> = this.m_rawEntity.get('items')
-        if (data !== undefined && data.size > 0) {
-            for (const item of data) {
-                for (let index = 0; index < item[1]; index++) {
-                    list.push(item[0])
-                }
-            }
-        }
-        return list
+        const modules = this.m_rawEntity.get('items')
+        if (!modules) return []
+        const modulesObj = modules.toJS()
+        // transform the modules object into an array
+        return Object.keys(modulesObj).reduce((acc, k) => acc.concat(Array(modulesObj[k]).fill(k)), [])
     }
-    set modules(list: string[]) {
-        const modules: {[k: string]: number} = {}
-        for (const item of list) {
-            if (item !== undefined) {
-                if (Object.keys(modules).includes(item)) {
-                    modules[item]++
-                } else {
-                    modules[item] = 1
-                }
-            }
-        }
+
+    set modules(modules: string[]) {
+        const M = this.moduleArrayToImmutableMap(modules)
+
         this.m_BP.operation(this.entity_number, 'Changed modules',
-            entities => entities.setIn([this.entity_number, 'items'], Immutable.fromJS(modules))
+            entities => entities.setIn([this.entity_number, 'items'], M)
         )
+    }
+
+    /** Should be private but TSLint is going to complain about ordering */
+    moduleArrayToImmutableMap(modules: string[]): Immutable.Map<string, number> | undefined {
+        if (util.equalArrays(this.modules, modules)) return
+
+        // transform the modules array into an object
+        const modulesObj = modules.reduce(
+            (acc: { [key: string]: number }, moduleName) => {
+                if (!moduleName) return acc
+                acc[moduleName] = Object.keys(acc).includes(moduleName) ?
+                    acc[moduleName] + 1 :
+                    1
+                return acc
+            },
+            {}
+        )
+
+        return modules.length === 0 ? undefined : Immutable.fromJS(modulesObj)
     }
 
     /* Count of filter slots */
@@ -144,8 +160,7 @@ export default class Entity {
 
     /* List of all filter(s) for splitters, inserters and logistic chests */
     get filters(): IFilter[] {
-        const name: string = this.name
-        switch (name) {
+        switch (this.name) {
             case 'splitter':
             case 'fast_splitter':
             case 'express_splitter': {
@@ -165,15 +180,11 @@ export default class Entity {
         }
     }
     set filters(list: IFilter[]) {
-        const name: string = this.name
-        switch (name) {
+        switch (this.name) {
             case 'splitter':
             case 'fast_splitter':
             case 'express_splitter': {
-                const filter: string = (list === undefined || list.length !== 1 || list[0].name === undefined) ? undefined : list[0].name
-                this.m_BP.operation(this.entity_number, 'Changed splitter filter',
-                    entities => entities.setIn([this.entity_number, 'filter'], Immutable.fromJS(filter))
-                )
+                this.splitterFilter = (list === undefined || list.length !== 1 || list[0].name === undefined) ? undefined : list[0].name
                 return
             }
             case 'filter_inserter':
@@ -190,24 +201,19 @@ export default class Entity {
                         filters.push({index: item.index, name: item.name})
                     }
                 }
-                this.m_BP.operation(this.entity_number, 'Changed inserter filter' + (list.length === 1 ? '' : '(s)'),
-                    entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
-                )
+                this.inserterFilters = filters
                 return
             }
             case 'logistic_chest_storage':
             case 'logistic_chest_requester':
             case 'logistic_chest_buffer': {
-                const filters = (list === undefined || list.length === 0) ? undefined : list
-                this.m_BP.operation(this.entity_number, 'Changed inserter filters',
-                    entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
-                )
+                this.logisticChestFilters = (list === undefined || list.length === 0) ? undefined : list
                 return
             }
         }
     }
 
-    get splitterInputPriority() {
+    get splitterInputPriority(): string {
         return this.m_rawEntity.get('input_priority')
     }
     set splitterInputPriority(priority: string) {
@@ -216,7 +222,7 @@ export default class Entity {
         )
     }
 
-    get splitterOutputPriority() {
+    get splitterOutputPriority(): string {
         return this.m_rawEntity.get('output_priority')
     }
     set splitterOutputPriority(priority: string) {
@@ -225,22 +231,54 @@ export default class Entity {
         )
     }
 
-    get splitterFilter() {
+    get splitterFilter(): string {
         return this.m_rawEntity.get('filter')
     }
 
-    get inserterFilters() {
+    set splitterFilter(filter: string) {
+        if (this.splitterFilter === filter) return
+
+        this.m_BP.operation(this.entity_number, 'Changed splitter filter',
+            entities => entities.setIn([this.entity_number, 'filter'], Immutable.fromJS(filter))
+        )
+    }
+
+    get inserterFilters(): IFilter[] {
         const f = this.m_rawEntity.get('filters')
         return f ? f.toJS() : undefined
     }
 
-    get constantCombinatorFilters() {
-        const f = this.m_rawEntity.getIn(['control_behavior', 'filters'])
+    set inserterFilters(filters: IFilter[]) {
+        if (
+            filters &&
+            this.inserterFilters.length === filters.length &&
+            this.inserterFilters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
+        ) return
+
+        this.m_BP.operation(this.entity_number, 'Changed inserter filter' + (filters.length === 1 ? '' : '(s)'),
+            entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
+        )
+    }
+
+    get logisticChestFilters(): IFilter[] {
+        const f = this.m_rawEntity.get('request_filters')
         return f ? f.toJS() : undefined
     }
 
-    get logisticChestFilters() {
-        const f = this.m_rawEntity.get('request_filters')
+    set logisticChestFilters(filters: IFilter[]) {
+        if (
+            filters &&
+            this.inserterFilters.length === filters.length &&
+            this.inserterFilters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
+        ) return
+
+        this.m_BP.operation(this.entity_number, 'Changed inserter filters',
+            entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
+        )
+    }
+
+    get constantCombinatorFilters() {
+        const f = this.m_rawEntity.getIn(['control_behavior', 'filters'])
         return f ? f.toJS() : undefined
     }
 

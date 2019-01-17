@@ -242,15 +242,15 @@ export class EntityContainer extends PIXI.Container {
         const entity = G.bp.entity(this.entity_number)
 
         const aR = entity.acceptedRecipes
-        const RECIPE = sourceEntity.recipe !== undefined && aR !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
+        const RECIPE = sourceEntity.recipe !== undefined && aR.length !== 0 && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
 
         const aM = entity.acceptedModules
-        if (aM !== undefined && sourceEntity.modules !== undefined && sourceEntity.modules.length !== 0) {
+        if (aM.length !== 0 && sourceEntity.modules !== undefined && sourceEntity.modules.length !== 0) {
             const filteredModules = []
             for (const m of sourceEntity.modules) {
                 if (aM.includes(m)) filteredModules.push(m)
             }
-            const maxSlots = entity.entityData.module_specification.module_slots
+            const maxSlots = entity.moduleSlots
             entity.modules = filteredModules.length > maxSlots ? filteredModules.slice(0, maxSlots) : filteredModules
         } else {
             entity.modules = []
@@ -271,7 +271,7 @@ export class EntityContainer extends PIXI.Container {
 
     redrawEntityInfo() {
         const entity = G.bp.entity(this.entity_number)
-        if (entity.entityData.module_specification !== undefined || entity.type === 'splitter' ||
+        if (entity.moduleSlots !== 0 || entity.type === 'splitter' ||
             entity.entityData.crafting_categories !== undefined || entity.type === 'mining_drill' ||
             entity.type === 'boiler' || entity.type === 'generator' ||
             entity.name === 'pump' || entity.name === 'offshore_pump' ||
