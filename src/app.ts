@@ -444,18 +444,17 @@ actions.openEntityGUI.bind(() => {
     }
 })
 
+let entityNumberForCopyData: number
 actions.copyEntitySettings.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
         // Store reference to source entity
-        G.copyData = G.bp.entity(G.BPC.hoverContainer.entity_number)
-        console.log(G.copyData)
+        entityNumberForCopyData = G.BPC.hoverContainer.entity_number
     }
 })
-
 actions.pasteEntitySettings.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
         // Hand over reference of source entity to target entity for pasting data
-        G.BPC.hoverContainer.pasteData(G.copyData)
+        G.BPC.hoverContainer.pasteData(entityNumberForCopyData)
     }
 })
 

@@ -4,7 +4,6 @@ import { QuickbarContainer } from '../panels/quickbar'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
 import Dialog from '../controls/dialog'
-import Entity from '../factorio-data/entity'
 
 // tslint:disable:prefer-const
 
@@ -99,8 +98,6 @@ const mouseStates = {
 }
 
 let currentMouseState = mouseStates.NONE
-
-let copyData: Entity
 
 let renderOnly = false
 
@@ -239,7 +236,6 @@ const styles = {
 export default {
     hr,
     renderOnly,
-    copyData,
     openDialogs,
     BPC,
     app,

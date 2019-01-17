@@ -236,37 +236,46 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
-    // TODO: Optimze the following methods in terms of checking and redrawing
+    // TODO: this should be done in the entity class, the action of pastingData should be added as 1 action to the history
     /** Paste relevant data from source entity reference into target entity */
-    pasteData(sourceEntity: Entity) {
-        const entity = G.bp.entity(this.entity_number)
+    pasteData(sourceEntityNumber: number) {
+        const sourceEntity = G.bp.entity(sourceEntityNumber)
 
+        // PASTE RECIPE
+        let entity = G.bp.entity(this.entity_number)
         const aR = entity.acceptedRecipes
-        const RECIPE = sourceEntity.recipe !== undefined && aR.length !== 0 && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
+        if (aR.length) {
+            const RECIPE = sourceEntity.recipe && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
+            this.changeRecipe(RECIPE)
+        }
 
+        // PASTE MODULES
+        entity = G.bp.entity(this.entity_number)
         const aM = entity.acceptedModules
-        if (aM.length !== 0 && sourceEntity.modules !== undefined && sourceEntity.modules.length !== 0) {
-            const filteredModules = []
-            for (const m of sourceEntity.modules) {
-                if (aM.includes(m)) filteredModules.push(m)
+        if (aM.length) {
+            if (sourceEntity.modules.length) {
+                entity.modules = sourceEntity.modules
+                    .filter(m => aM.includes(m))
+                    .slice(0, entity.moduleSlots)
+            } else {
+                entity.modules = []
             }
-            const maxSlots = entity.moduleSlots
-            entity.modules = filteredModules.length > maxSlots ? filteredModules.slice(0, maxSlots) : filteredModules
-        } else {
-            entity.modules = []
         }
 
+        // TODO: pasting filters should be handled differently for each type of filer
+        // PASTE FILTERS
         const aF = entity.acceptedFilters
-        if (aF !== undefined && sourceEntity.filters !== undefined && sourceEntity.filters.length !== 0) {
-            const filteredFilters = []
-            for (const f of sourceEntity.filters) {
-                if (aF.includes(f.name)) filteredFilters.push(f)
+        if (aF.length) {
+            if (sourceEntity.filters.length) {
+                entity.filters = sourceEntity.filters
+                    .filter(f => aF.includes(f.name))
+                    .slice(0, entity.filterSlots)
+            } else {
+                entity.filters = []
             }
-            entity.filters = filteredFilters.length > entity.filterSlots ? filteredFilters.slice(0, entity.filterSlots) : filteredFilters
         }
 
-        if (aM !== undefined || aF !== undefined) this.redrawEntityInfo()
-        if (entity.recipe !== RECIPE) this.changeRecipe(RECIPE)
+        if (!!aM || !!aF) this.redrawEntityInfo()
     }
 
     redrawEntityInfo() {

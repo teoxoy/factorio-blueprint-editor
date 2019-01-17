@@ -43,14 +43,14 @@ export default class Entity {
             entities.withMutations(map => {
                 map.setIn([this.entity_number, 'recipe'], recipeName)
 
-                const M = this.moduleArrayToImmutableMap(
-                    this.modules
-                        .map(k => FD.items[k])
-                        .filter(item => !(item.limitation && !item.limitation.includes(recipeName)))
-                        .map(item => item.name)
-                )
+                const modules = this.modules
+                    .map(k => FD.items[k])
+                    .filter(item => !(item.limitation && !item.limitation.includes(recipeName)))
+                    .map(item => item.name)
 
-                map.setIn([this.entity_number, 'items'], M)
+                if (!util.equalArrays(this.modules, modules)) {
+                    map.setIn([this.entity_number, 'items'], this.moduleArrayToImmutableMap(modules))
+                }
             })
         ))
     }
@@ -98,18 +98,12 @@ export default class Entity {
 
     /** Filters this entity can accept (only splitters, inserters and logistic chests) */
     get acceptedFilters(): string[] {
-        const filters: string[] = []
-        const items = FD.items
-        for (const key in items) {
-            const item = items[key]
-            if (item.type !== 'fluid' &&
-                item.type !== 'recipe' &&
-                item.type !== 'virtual_signal') {
-                    filters.push(item.name)
-                }
-        }
+        if (this.filterSlots === 0) return []
 
-        return filters
+        return Object.keys(FD.items)
+            .map(k => FD.items[k])
+            .filter(item => !['fluid', 'recipe', 'virtual_signal'].includes(item.type))
+            .map(item => item.name)
     }
 
     // TODO: maybe handle the modules within the class differently so that modules
@@ -124,16 +118,15 @@ export default class Entity {
     }
 
     set modules(modules: string[]) {
-        const M = this.moduleArrayToImmutableMap(modules)
+        if (util.equalArrays(this.modules, modules)) return
 
         this.m_BP.operation(this.entity_number, 'Changed modules',
-            entities => entities.setIn([this.entity_number, 'items'], M)
+            entities => entities.setIn([this.entity_number, 'items'], this.moduleArrayToImmutableMap(modules))
         )
     }
 
     /** Should be private but TSLint is going to complain about ordering */
     moduleArrayToImmutableMap(modules: string[]): Immutable.Map<string, number> | undefined {
-        if (util.equalArrays(this.modules, modules)) return
 
         // transform the modules array into an object
         const modulesObj = modules.reduce(
