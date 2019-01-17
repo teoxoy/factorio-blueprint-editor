@@ -98,7 +98,7 @@ keyboardJS.setContext('app')
 const actions = {
     clear: new Action('shift+n'),
     focus: new Action('f'),
-    picture: new Action('shift+s'),
+    takePicture: new Action('shift+s'),
     undo: new Action('modifier+z'),
     redo: new Action('modifier+y'),
     info: new Action('i'),

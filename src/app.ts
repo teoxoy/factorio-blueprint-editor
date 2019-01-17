@@ -209,7 +209,7 @@ actions.clear.bind(() => {
     G.BPC.initBP()
 })
 
-actions.picture.bind(() => {
+actions.takePicture.bind(() => {
     if (G.bp.isEmpty()) return
 
     G.BPC.enableRenderableOnChildren()
