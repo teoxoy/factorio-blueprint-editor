@@ -166,9 +166,7 @@ document.addEventListener('mousemove', e => {
     }
 })
 
-document.addEventListener('copy', (e: ClipboardEvent) => {
-    e.preventDefault()
-
+actions.copyBPString.bind(e => {
     if (G.bp.isEmpty()) return
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -187,9 +185,7 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
     }
 })
 
-document.addEventListener('paste', (e: ClipboardEvent) => {
-    e.preventDefault()
-
+actions.pasteBPString.bind(e => {
     G.loadingScreen.show()
 
     const promise = navigator.clipboard && navigator.clipboard.readText ?

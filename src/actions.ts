@@ -137,6 +137,26 @@ const actions = {
     quickbar10: new Action('shift+5'),
     changeActiveQuickbar: new Action('x'),
 
+    copyBPString: {
+        bind: (pressHandler?: (e: ClipboardEvent) => void) => {
+            document.addEventListener('copy', (e: ClipboardEvent) => {
+                if (keyboardJS._paused) return
+                e.preventDefault()
+                pressHandler(e)
+            })
+        }
+    },
+
+    pasteBPString: {
+        bind: (pressHandler?: (e: ClipboardEvent) => void) => {
+            document.addEventListener('paste', (e: ClipboardEvent) => {
+                if (keyboardJS._paused) return
+                e.preventDefault()
+                pressHandler(e)
+            })
+        }
+    },
+
     get movingViaKeyboard() {
         return (this.moveUp.pressed !== this.moveDown.pressed ||
             this.moveLeft.pressed !== this.moveRight.pressed) &&
