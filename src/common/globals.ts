@@ -120,8 +120,18 @@ const colors = {
             checkmark: {color: 0x000000, alpha: 1 },
             hover: { color: 0xB16925, alpha: 0.7 }
         },
+        enable: {
+            text: { color: 0xFAFAFA },
+            hover: { color: 0xFFBA7A },
+            active: { color: 0xFF9E44 }
+        },
         panel: {
             background: { color: 0x3A3A3A, alpha: 0.7, border: 2 }
+        },
+        slider: {
+            slidebar: { color: 0xE2E2E2, p0: -95, p1: -80, p2: -10, p3: 0 },
+            button: { color: 0x58585A, p0: 15, p1: 5, p2: -10, p3: -50 },
+            hover: { color: 0xB16925, p0: 15, p1: 5, p2: -10, p3: -50 }
         },
         slot: {
             hover: { color: 0xCCCCCC }
@@ -136,11 +146,6 @@ const colors = {
             background: { color: 0x646464, alpha: 1 },
             hover: { color: 0xCCCCCC, alpha: 0.5 },
             active: { color: 0xEEEEEE, alpha: 1 }
-        },
-        enable: {
-            text: { color: 0xFAFAFA },
-            hover: { color: 0xFFBA7A },
-            active: { color: 0xFF9E44 }
         }
     },
     dialog: {
@@ -180,12 +185,6 @@ const styles = {
             fontWeight: '100',
             fontSize: 14
         }),
-        textbox: new PIXI.TextStyle({
-            fill: colors.controls.textbox.foreground.color,
-            fontFamily: [ fontFamily ],
-            fontWeight: '500',
-            fontSize: 14
-        }),
         enable: {
             text: new PIXI.TextStyle({
                 fill: colors.controls.enable.text.color,
@@ -205,7 +204,13 @@ const styles = {
                 fontWeight: '500',
                 fontSize: 14
             })
-        }
+        },
+        textbox: new PIXI.TextStyle({
+            fill: colors.controls.textbox.foreground.color,
+            fontFamily: [ fontFamily ],
+            fontWeight: '500',
+            fontSize: 14
+        })
     },
     dialog: {
         title: new PIXI.TextStyle({

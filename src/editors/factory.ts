@@ -5,6 +5,7 @@ import InserterEditor from './inserter'
 import MachineEditor from './machine'
 import MiningEditor from './mining'
 import SplitterEditor from './splitter'
+import ChestEditor from './chest'
 
 /**
  * Factory Function for creating Editor based on Entity Number
@@ -53,6 +54,11 @@ export function createEditor(entityNumber: number): Editor {
         case 'fast_splitter':
         case 'express_splitter': {
             editor = new SplitterEditor(entity)
+            break
+        }
+        // Chests
+        case 'logistic_chest_requester': {
+            editor = new ChestEditor(entity)
             break
         }
         default: {

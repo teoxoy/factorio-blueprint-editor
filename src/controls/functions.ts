@@ -63,7 +63,46 @@ function DrawRectangle(width: number, height: number, background: number, alpha 
     return rectangle
 }
 
+/**
+ * Draw Control Face
+ *
+ * @param w - Width
+ * @param h - Height
+ * @param f - Factor
+ * @param c - Background Color
+ * @param c - Background Alpha
+ * @param p0 - Percent shade for brightest border
+ * @param p1 - Percent shade for bright border
+ * @param p2 - Percent shade for dark border
+ * @param p3 - Percent shade for darkest border
+ */
+function DrawControlFace(w: number, h: number, f: number, c: number, a: number, p0: number, p1: number, p2: number, p3: number): PIXI.Graphics {
+    const wf = w * f
+    const hf = h * f
+
+    const mask: PIXI.Graphics = new PIXI.Graphics()
+    mask.beginFill(0x000000).drawRoundedRect(0, 0, wf, hf, 6).endFill()
+
+    const face: PIXI.Graphics = new PIXI.Graphics()
+    face
+        .beginFill(c, a).drawRect(0, 0, wf, hf).endFill()
+        .lineStyle(f, ShadeColor(c, p3), a, 0)
+        .moveTo(wf, 0).lineTo(wf, hf).lineTo(0, hf)
+        .lineStyle(f, ShadeColor(c, p2), a, 0)
+        .moveTo(wf - f, f).lineTo(wf - f, hf - f).lineTo(f, hf - f)
+        .lineStyle(f, ShadeColor(c, p1), a, 0)
+        .moveTo(wf - f, f).lineTo(f, f).lineTo(f, hf - f)
+        .lineStyle(f, ShadeColor(c, p0), a, 0)
+        .moveTo(wf, 0).lineTo(0, 0).lineTo(0, hf)
+    face.cacheAsBitmap = true
+    face.scale.set(1 / f, 1 / f)
+    face.mask = mask
+
+    return face
+}
+
 export default {
     ShadeColor,
-    DrawRectangle
+    DrawRectangle,
+    DrawControlFace
 }

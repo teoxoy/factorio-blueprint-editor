@@ -51,37 +51,22 @@ export default class Switch extends PIXI.Container {
         const buttonMask: PIXI.Graphics = new PIXI.Graphics()
         buttonMask.beginFill(0x000000).drawRoundedRect(0, 0, 32, 32, 6).endFill()
 
-        const buttonFace: PIXI.Graphics = new PIXI.Graphics()
-        buttonFace
-            .beginFill(G.colors.controls.switch.background.color).drawRect(0, 0, 32, 32).endFill()
-            .lineStyle(2, F.ShadeColor(G.colors.controls.switch.background.color, G.colors.controls.switch.background.p3), 1, 0)
-            .moveTo(32, 0).lineTo(32, 32).lineTo(0, 32)
-            .lineStyle(2, F.ShadeColor(G.colors.controls.switch.background.color, G.colors.controls.switch.background.p2), 1, 0)
-            .moveTo(30, 2).lineTo(30, 30).lineTo(2, 30)
-            .lineStyle(2, F.ShadeColor(G.colors.controls.switch.background.color, G.colors.controls.switch.background.p1), 1, 0)
-            .moveTo(30, 2).lineTo(2, 2).lineTo(2, 30)
-            .lineStyle(2, F.ShadeColor(G.colors.controls.switch.background.color, G.colors.controls.switch.background.p0), 1, 0)
-            .moveTo(32, 0).lineTo(0, 0).lineTo(0, 32)
-        buttonFace.cacheAsBitmap = true
-        buttonFace.scale.set(0.5, 0.5)
+        // Draw button
+        const buttonFace = F.DrawControlFace(16, 16, 2,
+            G.colors.controls.switch.background.color, 1,
+            G.colors.controls.switch.background.p0,
+            G.colors.controls.switch.background.p1,
+            G.colors.controls.switch.background.p2,
+            G.colors.controls.switch.background.p3)
         buttonFace.position.set(0, 0)
-        buttonFace.mask = buttonMask
 
-        const buttonHover: PIXI.Graphics = new PIXI.Graphics()
-        buttonHover
-            .beginFill(G.colors.controls.switch.hover.color).drawRect(0, 0, 32, 32).endFill()
-            .lineStyle(2, F.ShadeColor(G.colors.controls.switch.hover.color, G.colors.controls.switch.hover.p3), 1, 0)
-            .moveTo(32, 0).lineTo(32, 32).lineTo(0, 32)
-            .lineStyle(2, F.ShadeColor(G.colors.controls.switch.hover.color, G.colors.controls.switch.hover.p2), 1, 0)
-            .moveTo(30, 2).lineTo(30, 30).lineTo(2, 30)
-            .lineStyle(2, F.ShadeColor(G.colors.controls.switch.hover.color, G.colors.controls.switch.hover.p1), 1, 0)
-            .moveTo(30, 2).lineTo(2, 2).lineTo(2, 30)
-            .lineStyle(2, F.ShadeColor(G.colors.controls.switch.hover.color, G.colors.controls.switch.hover.p0), 1, 0)
-            .moveTo(32, 0).lineTo(0, 0).lineTo(0, 32)
-        buttonHover.cacheAsBitmap = true
-        buttonHover.scale.set(0.5, 0.5)
+        const buttonHover = F.DrawControlFace(16, 16, 2,
+            G.colors.controls.switch.hover.color, 1,
+            G.colors.controls.switch.hover.p0,
+            G.colors.controls.switch.hover.p1,
+            G.colors.controls.switch.hover.p2,
+            G.colors.controls.switch.hover.p3)
         buttonHover.position.set(0, 0)
-        buttonHover.mask = buttonMask
         buttonHover.visible = false
 
         this.m_Button = new PIXI.Container()
