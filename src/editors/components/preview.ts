@@ -2,6 +2,7 @@ import G from '../../common/globals'
 import { EntityContainer } from '../../containers/entity'
 import { OverlayContainer } from '../../containers/overlay'
 import Entity from '../../factorio-data/entity'
+import util from '../../common/util'
 
 /** Preview of Entity */
 export default class Preview extends PIXI.Container {
@@ -53,54 +54,22 @@ export default class Preview extends PIXI.Container {
         EntityContainer.getParts(this.m_Entity, G.hr, true).forEach(s => entityParts.addChild(s))
         this.addChild(entityParts)
 
-        // Insted of using entityParts.getBounds() to calculate the position and scale of entityParts
-        // we have to use the enity size and manually tinker with values to get the preview to look right.
-        // This is because the width and height of getBounds include the transparent padding of the entity parts.
         const actualSpriteSize = { x: this.m_Entity.size.x, y: this.m_Entity.size.y }
-        let offset = { x: 0, y: 0 }
+        const offset = { x: 0, y: 0 }
 
-        switch (this.m_Entity.name) {
-            case 'train_stop':
-                actualSpriteSize.x += 2
-                actualSpriteSize.y += 2
+        if (this.m_Entity.entityData.drawing_box) {
+            assignDataFromDrawingBox(this.m_Entity.entityData.drawing_box)
+        }
 
-                switch (this.m_Entity.direction) {
-                    case 0: offset = { x: 1, y: 0.5 }; break
-                    case 2: offset = { x: 0, y: 1.5 }; break
-                    case 4: offset = { x: -1, y: 1 }; break
-                    case 6: offset = { x: 0, y: -0.5 }
-                }
-                break
-            case 'beacon':
-            case 'centrifuge':
-                actualSpriteSize.y += 0.4
+        if (this.m_Entity.entityData.drawing_boxes) {
+            assignDataFromDrawingBox(this.m_Entity.entityData.drawing_boxes[util.intToDir(this.m_Entity.direction)])
+        }
 
-                offset = { x: 0, y: 0.4 }
-                break
-            case 'programmable_speaker':
-                offset = { x: 0, y: 1 }
-                break
-            case 'pumpjack':
-                actualSpriteSize.y += 0.15
-
-                offset = { x: 0, y: 0.15 }
-                break
-            case 'chemical_plant':
-                if (this.m_Entity.direction === 0 || this.m_Entity.direction === 4) {
-                    actualSpriteSize.y += 0.25
-
-                    offset = { x: 0, y: 0.25 }
-                }
-                break
-            case 'oil_refinery':
-                if (this.m_Entity.direction === 0 || this.m_Entity.direction === 6) {
-                    actualSpriteSize.y += 0.25
-
-                    offset = { x: 0, y: 0.25 }
-                }
-
-            case 'offshore_pump':
-                if (this.m_Entity.direction === 4) offset = { x: 0, y: -0.5 }
+        function assignDataFromDrawingBox(db: number[][]) {
+            actualSpriteSize.x = Math.abs(db[0][0]) + db[1][0]
+            actualSpriteSize.y = Math.abs(db[0][1]) + db[1][1]
+            offset.x = actualSpriteSize.x / 2 - db[1][0]
+            offset.y = actualSpriteSize.y / 2 - db[1][1]
         }
 
         const SCALE = (this.m_Size / (Math.max(actualSpriteSize.x, actualSpriteSize.y, 3) * 32 + 32))
