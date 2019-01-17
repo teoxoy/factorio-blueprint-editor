@@ -21,7 +21,7 @@
   "dependencies": {
     "@pixi/filter-adjustment": "^2.5.0",
     "ajv": "^6.5.4",
-    "dat.gui": "^0.7.3",
+    "dat.gui": "^0.7.5",
     "factorio-data": "git+https://github.com/Teoxoy/factorio-data.git#fdf486b",
     "file-saver": "^1.3.8",
     "gown": "^0.1.6",
