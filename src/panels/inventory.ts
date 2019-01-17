@@ -43,6 +43,12 @@ export class InventoryContainer extends Dialog {
                     })]
                 }
                 if (setAnchor) sprite.anchor.set(0.5, 0.5)
+
+                if (!setAnchor && icon.shift) {
+                    sprite.position.x += sprite.width / 2
+                    sprite.position.y += sprite.height / 2
+                }
+
                 img.addChild(sprite)
             }
             return img
