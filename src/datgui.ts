@@ -8,10 +8,10 @@ export default function initDatGui() {
     const gui = new dat.GUI({
         autoPlace: false,
         hideable: false,
-        closeOnTop: true
+        closeOnTop: true,
+        closed: localStorage.getItem('dat.gui.closed') === 'true'
     })
 
-    gui.closed = localStorage.getItem('dat.gui.closed') === 'true'
     window.addEventListener('unload', () => localStorage.setItem('dat.gui.closed', String(gui.closed)))
 
     document.body.appendChild(gui.domElement)
@@ -82,9 +82,22 @@ export default function initDatGui() {
     const keybindsFolder = gui.addFolder('Keybinds')
 
     actions.forEachAction((action, actionName) => {
+        const name = actionName.split(/(?=[A-Z1-9])/).join(' ').replace(/(\b\w)/, c => c.toUpperCase())
+        if (name.includes('Quickbar')) return
         keybindsFolder
             .add(action, 'keyCombo')
-            .name(actionName.split(/(?=[A-Z1-9])/).join(' ').replace(/(\b\w)/, c => c.toUpperCase()))
+            .name(name)
+            .listen()
+    })
+
+    const quickbarFolder = keybindsFolder.addFolder('Quickbar')
+
+    actions.forEachAction((action, actionName) => {
+        const name = actionName.split(/(?=[A-Z1-9])/).join(' ').replace(/(\b\w)/, c => c.toUpperCase())
+        if (!name.includes('Quickbar')) return
+        quickbarFolder
+            .add(action, 'keyCombo')
+            .name(name)
             .listen()
     })
 
