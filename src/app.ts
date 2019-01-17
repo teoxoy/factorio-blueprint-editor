@@ -431,14 +431,17 @@ actions.moveEntity.bind(() => {
 actions.openEntityGUI.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
         if (G.currentMouseState === G.mouseStates.NONE) {
+            const editor = Editors.createEditor(G.BPC.hoverContainer.entity_number)
+            if (!editor) return
+
             // If there are dialogs open, close all of them
             if (G.openDialogs.length > 0) {
                 while (G.openDialogs.length > 0) {
                     G.openDialogs[G.openDialogs.length - 1].close()
                 }
             }
+
             // Show entity relevant editor
-            const editor: Editor = Editors.createEditor(G.BPC.hoverContainer.entity_number)
             editor.show()
         }
     }
