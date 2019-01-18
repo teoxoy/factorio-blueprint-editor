@@ -143,7 +143,7 @@ const colors = {
         },
         textbox: {
             foreground: { color: 0x000000 },
-            background: { color: 0x646464, alpha: 1 },
+            background: { color: 0xE2E2E2, alpha: 1 },
             hover: { color: 0xCCCCCC, alpha: 0.5 },
             active: { color: 0xEEEEEE, alpha: 1 }
         }

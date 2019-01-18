@@ -26,7 +26,7 @@ export default class Slider extends PIXI.Container {
      * @param values - Possible values
      * @param value - Default value (If value is set to undefined - tri-state switch)
      */
-    constructor(value: number = 0) {
+    constructor(value: number = 1) {
         super()
 
         this.interactive = true
@@ -142,17 +142,22 @@ export default class Slider extends PIXI.Container {
     /** Update Button Position */
     private updateButtonPosition() {
         let x = 0
-        if (this.value >= 10000) {
-            x = (this.value / 10000) + 36
+        if (this.value >= 20000) {
+            x = Slider.SLIDER_WIDTH / 4
+        } else if (this.value >= 10000) {
+            x = this.value / 10000 + 35
         } else if (this.value >= 1000) {
-            x = (this.value / 1000) + 27
+            x = this.value / 1000 + 26
         } else if (this.value >= 100) {
-            x = (this.value / 100) + 18
+            x = this.value / 100 + 17
         } else if (this.value >= 10) {
-            x = (this.value / 10) + 9
+            x = this.value / 10 + 8
+        } else if (this.value <= 0) {
+            x = 0
         } else {
-            x = this.value
+            x = this.value - 1
         }
+        x *= 4
         if (this.m_Button.x !== x) {
             this.m_Button.x = x
         }

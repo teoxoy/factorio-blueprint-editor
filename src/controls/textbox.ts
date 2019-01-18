@@ -105,14 +105,36 @@ export default class Textbox extends PIXI.Container {
         this.on('pointerup', () => {
             keyboardjs.setContext('textbox')
             keyboardjs.bind(undefined, this.keyPressedCallback)
-            window.addEventListener('mouseup', this.releaseKeybindings, false)
+            window.addEventListener('mousedown', this.releaseKeybindings, false)
             this.m_Active.visible = true
             this.m_CaretGraphic.visible = true
         }, false)
     }
 
     /** Text of Textbox */
-    public get text(): string { return this.m_Text }
+    public get text(): string {
+        return this.m_Text
+    }
+    public set text(text: string) {
+        if (this.m_Text !== text) {
+            this.m_Text = text
+            this.emit('changed')
+            this.updateText()
+        }
+    }
+
+    /** Update text */
+    private updateText() {
+        if (this.m_Active.visible) {
+            return
+        }
+        this.m_Foreground.text = this.m_Text
+        this.m_CaretPosition = this.m_Text.length
+        this.m_CaretGraphic.position.set(
+            3 + PIXI.TextMetrics.measureText(this.m_Text.substr(0, this.m_CaretPosition), G.styles.controls.textbox).width,
+            3)
+        console.log([this.text, this.m_CaretPosition])
+    }
 
     /** Window Mouse Up Event Callback */
     private readonly releaseKeybindings: EventListener = () => {
@@ -182,7 +204,7 @@ export default class Textbox extends PIXI.Container {
             if (this.m_Filter.indexOf(character) < 0) return
         }
 
-        this.m_Text = this.m_Text.slice(0, this.m_CaretPosition) + character + this.m_Text.slice(this.m_CaretPosition)
+        this.text = this.m_Text.slice(0, this.m_CaretPosition) + character + this.m_Text.slice(this.m_CaretPosition)
         this.m_Foreground.text = this.m_Text
         this.moveCaret(this.m_CaretPosition + 1)
     }
@@ -194,11 +216,11 @@ export default class Textbox extends PIXI.Container {
     private removeCharacter(direction: number) {
         if (direction === -1) {
             if (this.m_CaretPosition < 1) return
-            this.m_Text = this.m_Text.slice(0, this.m_CaretPosition - 1) + this.m_Text.slice(this.m_CaretPosition)
+            this.text = this.m_Text.slice(0, this.m_CaretPosition - 1) + this.m_Text.slice(this.m_CaretPosition)
             this.m_Foreground.text = this.m_Text
             this.moveCaret(this.m_CaretPosition - 1)
         } else if (direction === 1) {
-            this.m_Text = this.m_Text.slice(0, this.m_CaretPosition) + this.m_Text.slice(this.m_CaretPosition + 1)
+            this.text = this.m_Text.slice(0, this.m_CaretPosition) + this.m_Text.slice(this.m_CaretPosition + 1)
             this.m_Foreground.text = this.m_Text
         }
     }

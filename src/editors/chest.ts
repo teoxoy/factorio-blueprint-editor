@@ -1,8 +1,8 @@
 import Editor from './editor'
 import Slider from '../controls/slider'
 import Preview from './components/preview'
-import Recipe from './components/recipe'
 import Entity from '../factorio-data/entity'
+import Textbox from '../controls/textbox'
 
 /** Assembly Machines Editor */
 export default class ChestEditor extends Editor {
@@ -18,9 +18,17 @@ export default class ChestEditor extends Editor {
         slider.position.set(140, 94)
         this.addChild(slider)
 
-        // Add Recipe
-        this.addLabel(140, 56, 'Recipe:')
-        const recipe: Recipe = this.addRecipe(208, 45)
-        recipe.on('changed', () => preview.redraw())
+        // Add Textbox
+        const textbox: Textbox = new Textbox(60, '1', 6, '1234567890')
+        textbox.position.set(320, 91)
+        this.addChild(textbox)
+
+        // Attach Events
+        slider.on('changed', () => {
+            textbox.text = slider.value.toString()
+        })
+        textbox.on('changed', () => {
+            slider.value = +textbox.text
+        })
     }
 }
