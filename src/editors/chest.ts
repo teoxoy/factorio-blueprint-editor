@@ -14,21 +14,21 @@ export default class ChestEditor extends Editor {
         const preview: Preview = this.addPreview()
 
         // Add Slider
-        const slider: Slider = new Slider()
+        const slider: Slider = new Slider(10)
         slider.position.set(140, 94)
         this.addChild(slider)
 
         // Add Textbox
-        const textbox: Textbox = new Textbox(60, '1', 6, '1234567890')
+        const textbox: Textbox = new Textbox(60, '10', 6, '1234567890')
         textbox.position.set(320, 91)
         this.addChild(textbox)
 
         // Attach Events
         slider.on('changed', () => {
-            textbox.text = slider.value.toString()
+            if (slider.value !== 0) textbox.text = slider.value.toString()
         })
         textbox.on('changed', () => {
-            slider.value = +textbox.text
+            slider.value = textbox.text === '' ? 0 : +textbox.text
         })
     }
 }
