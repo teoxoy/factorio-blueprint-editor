@@ -27,7 +27,6 @@ import actions from './actions'
 import initDatGui from './datgui'
 import spritesheetsLoader from './spritesheetsLoader'
 import * as Editors from './editors/factory'
-import Editor from './editors/editor'
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
