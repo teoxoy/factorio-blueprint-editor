@@ -87,7 +87,7 @@ function findBPString(data: string) {
     // Other CORS Proxies:
     // https://crossorigin.me/
     // https://cors-anywhere.herokuapp.com/
-    const corsProxy = 'https://api.allorigins.ml/get?method=raw&url='
+    const corsProxy = 'https://api.allorigins.ml/raw?url='
 
     // TODO: maybe add dropbox support https://www.dropbox.com/s/ID?raw=1
     return new Promise(resolve => resolve(new URL(DATA))).then((url: URL) => {
