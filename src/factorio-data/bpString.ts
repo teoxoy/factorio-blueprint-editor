@@ -118,7 +118,6 @@ function findBPString(data: string) {
 
     function fetchData(url: string) {
         return fetch(url).then(response => {
-            console.log(response.text())
             if (response.ok) return response
             throw new Error('Network response was not ok.')
         })
