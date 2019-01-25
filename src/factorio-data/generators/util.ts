@@ -1,10 +1,6 @@
 import Delaunator from 'delaunator'
 import range from 'ramda/es/range'
 
-Array.prototype.flatten = function() {
-    return this.reduce((acc: any[], val: any) => acc.concat(val), [])
-}
-
 const hashPoint = (p: IPoint) => `${p.x},${p.y}`
 
 const equalPoints = <T extends IPoint>(a: T) => (b: T) => a.x === b.x && a.y === b.y

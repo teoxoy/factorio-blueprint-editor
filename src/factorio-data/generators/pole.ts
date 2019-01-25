@@ -62,11 +62,11 @@ export default function generatePoles(
             })))
 
     const occupiedPositions = entityAreas
-        .flatten()
+        .reduce((acc, val) => acc.concat(val), [])
         .map(U.hashPoint)
         .reduce((map, key) => map.set(key, true), new Map())
 
-    // addVisualization(entityAreas.flatten())
+    // addVisualization(entityAreas.reduce((acc, val) => acc.concat(val), []))
 
     // GENERATE VALID POLE POSITIONS
     const validPolePositions = U.uniqPoints(entities
@@ -79,7 +79,7 @@ export default function generatePoles(
                     y: Math.floor(e.position.y) + (Math.floor(i / searchSize) - Math.floor(searchSize / 2))
                 }))
         })
-        .flatten())
+        .reduce((acc, val) => acc.concat(val), []))
         .filter(p => occupiedPositions.get(U.hashPoint(p)) !== true)
 
     // addVisualization(validPolePositions)
@@ -215,7 +215,7 @@ export default function generatePoles(
     poles.forEach(p => occupiedPositions.set(U.hashPoint(p), true))
 
     // groups
-    //     .map(g => g.poles.flatten())
+    //     .map(g => g.poles.reduce((acc, val) => acc.concat(val), []))
     //     .forEach(p => addVisualization(p, 32))
 
     const r2 = POLE_TO_POLE_RADIUS * 2 + 1

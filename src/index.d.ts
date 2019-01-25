@@ -27,10 +27,6 @@ interface Window {
     }
 }
 
-interface Array<T> {
-    flatten(): T
-}
-
 interface IPoint {
     x: number
     y: number

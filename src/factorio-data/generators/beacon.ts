@@ -52,7 +52,7 @@ export default function generateBeacons(
             })))
 
     const occupiedPositions = entityAreas
-        .flatten()
+        .reduce((acc, val) => acc.concat(val), [])
         .map(U.hashPoint)
         .reduce((map, key) => map.set(key, true), new Map())
 
@@ -67,7 +67,7 @@ export default function generateBeacons(
                     y: Math.floor(e.position.y) + (Math.floor(i / searchSize) - Math.floor(searchSize / 2))
                 }))
         })
-        .flatten())
+        .reduce((acc, val) => acc.concat(val), []))
         .filter(p => occupiedPositions.get(U.hashPoint(p)) !== true)
 
     const grid = validBeaconPositions
@@ -85,7 +85,7 @@ export default function generateBeacons(
         .filter(arr => arr.length === BEACON_SIZE * BEACON_SIZE)
 
     const pointToBeaconCount = possibleBeaconAreas
-        .flatten()
+        .reduce((acc, val) => acc.concat(val), [])
         .map(U.hashPoint)
         .reduce((map, key) => {
             const C = map.get(key)
@@ -137,7 +137,7 @@ export default function generateBeacons(
         })
         .filter(c => c.effectsGiven >= MIN_AFFECTED_ENTITIES)
 
-    // addVisualization(U.uniqPoints(possibleBeacons.map(c => c.collisionArea).flatten()))
+    // addVisualization(U.uniqPoints(possibleBeacons.map(c => c.collisionArea).reduce((acc, val) => acc.concat(val), [])))
 
     const pointToBeacons = possibleBeacons
         .reduce((map, b) => {

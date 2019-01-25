@@ -85,7 +85,7 @@ export default function generatePipes(
                 x: pos[0] + offset[0],
                 y: pos[1] + offset[1]
             })))
-        .flatten()
+        .reduce((acc, val) => acc.concat(val), [])
 
     const minX = globalCoords.reduce((pV, cV) => Math.min(pV, cV.x), Infinity)
     const minY = globalCoords.reduce((pV, cV) => Math.min(pV, cV.y), Infinity)
@@ -245,7 +245,7 @@ export default function generatePipes(
     }
 
     groups
-        .map(g => g.paths.flatten())
+        .map(g => g.paths.reduce((acc, val) => acc.concat(val), []))
         .forEach(p => addVisualization(p, 32, 0.5))
 
     // CONNECT GROUPS
@@ -315,13 +315,13 @@ export default function generatePipes(
         addVisualization(plug.path, 8, 0.5)
     }
 
-    let pipePositions = U.uniqPoints(finalGroup.paths.flatten())
+    let pipePositions = U.uniqPoints(finalGroup.paths.reduce((acc, val) => acc.concat(val), []))
 
     // GENERATE ALL INTERSECTION POINTS (WILL INCLUDE ALL PUMPJACKS PLUGS TOO)
     const intersectionPositions = U.uniqPoints(
         finalGroup.paths
             .map(p => PF.Util.compressPath(p.map(U.pointToArray)).map(U.arrayToPoint))
-            .flatten()
+            .reduce((acc, val) => acc.concat(val), [])
     )
     // addVisualization(intersectionPositions)
 
@@ -396,12 +396,12 @@ export default function generatePipes(
                     { ...PATH[segment.start], dir: HOR ? 6 : 0 },
                     { ...PATH[segment.end], dir: HOR ? 2 : 4 }
                 ])
-                .flatten()
+                .reduce((acc, val) => acc.concat(val), [])
         }, [])
-        .flatten()
+        .reduce((acc, val) => acc.concat(val), [])
         .map(localToGlobal)
 
-    const straightPathsCoords = straightPaths.flatten()
+    const straightPathsCoords = straightPaths.reduce((acc, val) => acc.concat(val), [])
     // addVisualization(straightPathsCoords)
 
     // GENERATE PIPE DATA
