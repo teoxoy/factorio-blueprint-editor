@@ -14,7 +14,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
     get itemData() { return factorioData.getItem(this.name) },
     get size() { return util.switchSizeBasedOnDirection(this.entityData.size, this.direction) },
 
-    get position() { return rawEntity.get('position').toJS() },
+    get position(): IPoint { return rawEntity.get('position').toJS() },
     get direction() { return rawEntity.get('direction') || 0 },
     get directionType() { return rawEntity.get('type') },
     get recipe() { return rawEntity.get('recipe') },

@@ -366,6 +366,10 @@ function post(hist: IHistoryObject, addDel: string) {
     G.BPC.updateViewportCulling()
 }
 
+actions.generateOilOutpost.bind(() => {
+    G.bp.generatePipes()
+})
+
 actions.pan.bind(() => {
     if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.currentMouseState = G.mouseStates.PANNING
@@ -376,7 +380,7 @@ actions.pan.bind(() => {
     }
 })
 
-actions.build.bind(e => {
+actions.build.bind(() => {
     if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.placeEntityContainer()
     }

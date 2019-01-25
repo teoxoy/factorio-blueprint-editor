@@ -50,7 +50,7 @@ function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (MAX - MIN)) + MIN
 }
 
-function rotatePointBasedOnDir(p: any, dir: number) {
+function rotatePointBasedOnDir(p: IPoint | number[], dir: number) {
     const point: IPoint = {x: 0, y: 0}
     const nP = p instanceof Array ? { x: p[0], y: p[1] } : { ...p }
     switch (dir) {
@@ -121,6 +121,17 @@ function equalArrays(array1: [], array2: []) {
         array1.sort().every((value, index) => value === array2.sort()[index])
 }
 
+function timer(name: string) {
+    const start = new Date()
+    return {
+        stop() {
+            const end = new Date()
+            const time = end.getTime() - start.getTime()
+            console.log('Timer:', name, 'finished in', time, 'ms')
+        }
+    }
+}
+
 export default {
     duplicate,
     set_shift,
@@ -135,5 +146,6 @@ export default {
     intToDir,
     nearestPowerOf2,
     uniqueInArray,
-    equalArrays
+    equalArrays,
+    timer
 }

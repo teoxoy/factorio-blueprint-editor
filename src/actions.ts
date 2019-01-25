@@ -104,6 +104,7 @@ const actions = {
     info: new Action('i'),
     pan: new Action('lclick'),
     moveEntity: new Action('mclick'),
+    generateOilOutpost: new Action('g'),
 
     moveUp: new ToggleAction('w'),
     moveLeft: new ToggleAction('a'),
