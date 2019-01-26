@@ -60,7 +60,7 @@ export class Blueprint {
             }
 
             if (data.entities !== undefined) {
-                this.next_entity_number = this.rawEntities.size
+                this.next_entity_number = this.rawEntities.size + 1
                 this.rawEntities = new Map<number, Entity>(data.entities.map(v => [v.entity_number, new Entity(v, this)] as [number, Entity]))
 
                 // TODO: if entity has placeable-off-grid flag then take the next one
