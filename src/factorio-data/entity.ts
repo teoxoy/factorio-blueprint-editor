@@ -4,19 +4,31 @@ import spriteDataBuilder from './spriteDataBuilder'
 import FD from 'factorio-data'
 import util from '../common/util'
 import { Area } from './positionGrid'
+import { EventEmitter } from 'events'
 
-export default class Entity {
+/** Entity Base Class */
+export default class Entity extends EventEmitter {
 
-    private readonly m_rawEntity: Immutable.Map<string, any>
+    /** Field to hold reference to blueprint */
     private readonly m_BP: Blueprint
 
+    /** Field to hold raw entity */
+    private m_rawEntity: any
+
     constructor(m_rawEntity: any, BP: Blueprint) {
-        this.m_rawEntity = m_rawEntity
+        super()
+        this.m_rawEntity = m_rawEntity /* tslint:disable-line:no-unsafe-any */
+
         this.m_BP = BP
+        //this.m_BP.on('undo', this.onBpHistory)
+        //this.m_BP.on('redo', this.onBpHistory)
     }
 
-    get entity_number() { return this.m_rawEntity.get('entity_number') }
-    get name() { return this.m_rawEntity.get('name') }
+    /** Entity Number */
+    get entity_number(): number { return this.m_rawEntity.entity_number }
+
+    /** Entity Name */
+    get name(): string { return this.m_rawEntity.name }
 
     get type() { return FD.entities[this.name].type }
     get entityData() { return FD.entities[this.name] }
@@ -24,23 +36,25 @@ export default class Entity {
     get itemData() { return FD.items[this.name] }
     get size() { return util.switchSizeBasedOnDirection(this.entityData.size, this.direction) }
 
-    get position() { return this.m_rawEntity.get('position').toJS() }
+    get position() { return this.m_rawEntity.position }
 
-    get direction() { return this.m_rawEntity.get('direction') || 0 }
+    get direction() { return this.m_rawEntity.direction || 0 }
     set direction(direction: number) {
-        this.m_BP.operation(this.entity_number, `Set entity direction to ${direction}`,
+        this.bpOperation(
+            `Set entity direction to ${direction}`,
             entities => entities.setIn([this.entity_number, 'direction'], direction)
         )
+        this.emit('direction', this)
     }
 
-    get directionType() { return this.m_rawEntity.get('type') }
-    get recipe() { return this.m_rawEntity.get('recipe') }
+    get directionType() { return this.m_rawEntity.type }
+    get recipe() { return this.m_rawEntity.recipe }
 
     set recipe(recipeName: string) {
         if (this.recipe === recipeName) return
 
-        this.m_BP.operation(this.entity_number, 'Changed recipe', entities => (
-            entities.withMutations(map => {
+        this.bpOperation(
+            'Changed recipe', entities => (entities.withMutations(map => {
                 map.setIn([this.entity_number, 'recipe'], recipeName)
 
                 const modules = this.modules
@@ -49,10 +63,11 @@ export default class Entity {
                     .map(item => item.name)
 
                 if (!util.equalArrays(this.modules, modules)) {
-                    map.setIn([this.entity_number, 'items'], this.moduleArrayToImmutableMap(modules))
+                    map.setIn([this.entity_number, 'items'], Entity.moduleArrayToImmutableMap(modules))
                 }
             })
-        ))
+            ))
+        this.emit('recipe', this)
     }
 
     /** Recipes this entity can accept */
@@ -110,37 +125,19 @@ export default class Entity {
     // would stay in the same place at least as long as the blueprint is edited.
     /** List of all modules */
     get modules(): string[] {
-        const modules = this.m_rawEntity.get('items')
-        if (!modules) return []
-        const modulesObj = modules.toJS()
-        // transform the modules object into an array
+        const modulesObj = this.m_rawEntity.items
+        if (modulesObj === undefined) return []
         return Object.keys(modulesObj).reduce((acc, k) => acc.concat(Array(modulesObj[k]).fill(k)), [])
     }
 
     set modules(modules: string[]) {
         if (util.equalArrays(this.modules, modules)) return
 
-        this.m_BP.operation(this.entity_number, 'Changed modules',
-            entities => entities.setIn([this.entity_number, 'items'], this.moduleArrayToImmutableMap(modules))
+        this.bpOperation(
+            'Changed modules',
+            entities => entities.setIn([this.entity_number, 'items'], Entity.moduleArrayToImmutableMap(modules))
         )
-    }
-
-    /** Should be private but TSLint is going to complain about ordering */
-    moduleArrayToImmutableMap(modules: string[]): Immutable.Map<string, number> | undefined {
-
-        // transform the modules array into an object
-        const modulesObj = modules.reduce(
-            (acc: { [key: string]: number }, moduleName) => {
-                if (!moduleName) return acc
-                acc[moduleName] = Object.keys(acc).includes(moduleName) ?
-                    acc[moduleName] + 1 :
-                    1
-                return acc
-            },
-            {}
-        )
-
-        return modules.length === 0 ? undefined : Immutable.fromJS(modulesObj)
+        this.emit('modules', this)
     }
 
     /* Count of filter slots */
@@ -157,7 +154,7 @@ export default class Entity {
             case 'splitter':
             case 'fast_splitter':
             case 'express_splitter': {
-                return [ { index: 1, name: this.splitterFilter, count: 0 } ]
+                return [{ index: 1, name: this.splitterFilter, count: 0 }]
             }
             case 'filter_inserter':
             case 'stack_filter_inserter': {
@@ -191,7 +188,7 @@ export default class Entity {
                         if (item.name === undefined) {
                             continue
                         }
-                        filters.push({index: item.index, name: item.name})
+                        filters.push({ index: item.index, name: item.name })
                     }
                 }
                 this.inserterFilters = filters
@@ -207,38 +204,43 @@ export default class Entity {
     }
 
     get splitterInputPriority(): string {
-        return this.m_rawEntity.get('input_priority')
+        return this.m_rawEntity.input_priority
     }
     set splitterInputPriority(priority: string) {
-        this.m_BP.operation(this.entity_number, 'Changed splitter output priority',
+        this.bpOperation(
+            'Changed splitter output priority',
             entities => entities.setIn([this.entity_number, 'input_priority'], Immutable.fromJS(priority))
         )
+        this.emit('splitterInputPriority', this)
     }
 
     get splitterOutputPriority(): string {
-        return this.m_rawEntity.get('output_priority')
+        return this.m_rawEntity.output_priority
     }
     set splitterOutputPriority(priority: string) {
-        this.m_BP.operation(this.entity_number, 'Changed splitter output priority',
+        this.bpOperation(
+            'Changed splitter output priority',
             entities => entities.setIn([this.entity_number, 'output_priority'], Immutable.fromJS(priority))
         )
+        this.emit('splitterOutputPriority', this)
     }
 
     get splitterFilter(): string {
-        return this.m_rawEntity.get('filter')
+        return this.m_rawEntity.filter
     }
 
     set splitterFilter(filter: string) {
         if (this.splitterFilter === filter) return
 
-        this.m_BP.operation(this.entity_number, 'Changed splitter filter',
+        this.bpOperation(
+            'Changed splitter filter',
             entities => entities.setIn([this.entity_number, 'filter'], Immutable.fromJS(filter))
         )
+        this.emit('splitterFilter', this)
     }
 
     get inserterFilters(): IFilter[] {
-        const f = this.m_rawEntity.get('filters')
-        return f ? f.toJS() : undefined
+        return this.m_rawEntity.filters
     }
 
     set inserterFilters(filters: IFilter[]) {
@@ -248,14 +250,15 @@ export default class Entity {
             this.inserterFilters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
         ) return
 
-        this.m_BP.operation(this.entity_number, 'Changed inserter filter' + (filters.length === 1 ? '' : '(s)'),
+        this.bpOperation(
+            'Changed inserter filter' + (filters.length === 1 ? '' : '(s)'),
             entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
         )
+        this.emit('inserterFilters', this)
     }
 
     get logisticChestFilters(): IFilter[] {
-        const f = this.m_rawEntity.get('request_filters')
-        return f ? f.toJS() : undefined
+        return this.m_rawEntity.request_filters
     }
 
     set logisticChestFilters(filters: IFilter[]) {
@@ -265,24 +268,23 @@ export default class Entity {
             this.inserterFilters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
         ) return
 
-        this.m_BP.operation(this.entity_number, 'Changed inserter filters',
+        this.bpOperation(
+            'Changed inserter filters',
             entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
         )
+        this.emit('logisticChestFilters', this)
     }
 
     get constantCombinatorFilters() {
-        const f = this.m_rawEntity.getIn(['control_behavior', 'filters'])
-        return f ? f.toJS() : undefined
+        return this.m_rawEntity.control_behavior === undefined ? undefined : this.m_rawEntity.control_behavior.filters
     }
 
     get deciderCombinatorConditions() {
-        const c = this.m_rawEntity.getIn(['control_behavior', 'decider_conditions'])
-        return c ? c.toJS() : undefined
+        return this.m_rawEntity.control_behavior === undefined ? undefined : this.m_rawEntity.control_behavior.decider_conditions
     }
 
     get arithmeticCombinatorConditions() {
-        const c = this.m_rawEntity.getIn(['control_behavior', 'arithmetic_conditions'])
-        return c ? c.toJS() : undefined
+        return this.m_rawEntity.control_behavior === undefined ? undefined : this.m_rawEntity.control_behavior.arithmetic_conditions
     }
 
     get hasConnections() {
@@ -290,9 +292,8 @@ export default class Entity {
     }
 
     get connections() {
-        const c = this.m_rawEntity.get('connections')
-        if (!c) return
-        const conn = c.toJS()
+        const conn = this.m_rawEntity.connections
+        if (conn === undefined) return
 
         if (conn['Cu0']) {
             if (!conn['1']) conn['1'] = {}
@@ -309,8 +310,7 @@ export default class Entity {
         if (this.type === 'electric_pole') {
             const copperConn: any[] = []
 
-            this.m_BP.rawEntities.forEach((v, k) => {
-                const entity = v.toJS()
+            this.m_BP.rawEntities.forEach((entity, k) => {
                 if (entity.name === 'power_switch' && entity.connections) {
                     if (entity.connections.Cu0 && entity.connections.Cu0[0].entity_id === this.entity_number) {
                         copperConn.push({ entity_id: k })
@@ -351,18 +351,17 @@ export default class Entity {
     }
 
     get trainStopColor() {
-        const c = this.m_rawEntity.get('color')
-        return c ? c.toJS() : undefined
+        return this.m_rawEntity.color
     }
 
     get operator() {
         if (this.name === 'decider_combinator') {
-            const cb = this.m_rawEntity.get('control_behavior')
-            if (cb) return cb.getIn(['decider_conditions', 'comparator'])
+            const cb = this.m_rawEntity.control_behavior
+            if (cb) return cb.decider_conditions === undefined ? undefined : cb.decider_conditions.comparator
         }
         if (this.name === 'arithmetic_combinator') {
-            const cb = this.m_rawEntity.get('control_behavior')
-            if (cb) return cb.getIn(['arithmetic_conditions', 'operation'])
+            const cb = this.m_rawEntity.control_behavior
+            if (cb) return cb.arithmetic_conditions === undefined ? undefined : cb.arithmetic_conditions.operation
         }
         return undefined
     }
@@ -377,21 +376,26 @@ export default class Entity {
     }
 
     change(name: string, direction: number) {
-        this.m_BP.operation(this.entity_number, 'Changed Entity', entities => (
-            entities.withMutations(map => {
+        this.bpOperation(
+            'Changed Entity',
+            entities => (entities.withMutations(map => {
                 map.setIn([this.entity_number, 'name'], name)
                 map.setIn([this.entity_number, 'direction'], direction)
             })
-        ))
+            ))
+        this.emit('name', this)
+        this.emit('direction', this)
     }
 
     move(pos: IPoint) {
         const entity = this.m_BP.entity(this.entity_number)
         if (!this.m_BP.entityPositionGrid.checkNoOverlap(entity.name, entity.direction, pos)) return false
-        this.m_BP.operation(this.entity_number, 'Moved entity',
+        this.bpOperation(
+            'Moved entity',
             entities => entities.setIn([this.entity_number, 'position'], Immutable.fromJS(pos)),
             'mov'
         )
+        this.emit('position', this)
         this.m_BP.entityPositionGrid.setTileData(this.entity_number)
         return true
     }
@@ -409,7 +413,8 @@ export default class Entity {
             ) % pr.length
         ]
         if (newDir === this.direction) return false
-        this.m_BP.operation(this.entity_number, 'Rotated entity',
+        this.bpOperation(
+            'Rotated entity',
             entities => entities.withMutations(map => {
                 map.setIn([this.entity_number, 'direction'], newDir)
                 if (notMoving && this.type === 'underground_belt') {
@@ -428,6 +433,9 @@ export default class Entity {
             notMoving && pushToHistory,
             otherEntity
         )
+        this.emit('direction', this)
+        this.emit('position', this)
+        this.emit('type', this)
         return true
     }
 
@@ -490,5 +498,30 @@ export default class Entity {
 
     toJS() {
         return this.m_rawEntity.toJS()
+    }
+
+    /**
+     * Method to re-update m_rawEntitiy after it has been changed in blueprint with bp.operation
+     * With executing this method (instead of directly calling bp.operation), it is ensured that
+     * the wrapped m_rawEntity is kept in sync with the blueprint m_rawEntities
+     */
+    private bpOperation(
+        annotation: string,
+        fn: (entities: Immutable.Map<number, any>) => Immutable.Map<any, any>,
+        type: 'add' | 'del' | 'mov' | 'upd' = 'upd',
+        pushToHistory = true,
+        other_entity?: number) {
+        this.m_BP.operation(this.entity_number, annotation, fn, type, pushToHistory, other_entity)
+        this.m_rawEntity = this.m_BP.rawEntities.get(this.entity_number) /* tslint:disable-line:no-unsafe-any */
+    }
+
+    /** Blueprint history undo/redo event callback */
+    private readonly onBpHistory = (entityNumber: number) => {
+        if (entityNumber !== this.entity_number) {
+            return
+        }
+
+        this.m_rawEntity = this.m_BP.rawEntities.get(this.entity_number) /* tslint:disable-line:no-unsafe-any */
+        this.emit('changed', this)
     }
 }

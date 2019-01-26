@@ -113,6 +113,8 @@ export class OverlayContainer extends PIXI.Container {
             const filterInfo = new PIXI.Container()
             for (let i = 0; i < filters.length; i++) {
                 if (i === 4) break
+                // TODO: Check if that is correct
+                if (filters[i].name === undefined) break
                 createIconWithBackground(
                     filterInfo,
                     filters[i].name || filters[i].signal.name,

@@ -5,6 +5,17 @@ import Immutable from 'immutable'
 import G from '../common/globals'
 import { ConnectionsManager } from './connectionsManager'
 import { EntityContainer } from '../containers/entity'
+import * as History from './history'
+
+//TODO: Check if the following prototype is actually needed
+Map.prototype.find = function(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V {
+
+    this.forEach((v, k) => {
+        if (predicate(v, k)) return v
+    })
+
+    return undefined
+}
 
 export class Blueprint {
 
@@ -16,14 +27,14 @@ export class Blueprint {
     next_entity_number: number
     historyIndex: number
     history: IHistoryObject[]
-    bp: Blueprint
     entityPositionGrid: PositionGrid
-    rawEntities: Immutable.Map<number, any>
+    rawEntities: Map<number, Entity>
 
     constructor(data?: any) {
+
         this.name = 'Blueprint'
         this.icons = []
-        this.rawEntities = Immutable.Map()
+        this.rawEntities = new Map()
         this.tiles = Immutable.Map()
         this.version = undefined
         this.next_entity_number = 1
@@ -46,25 +57,18 @@ export class Blueprint {
                 )
             }
 
-            if (data.entities) {
-                this.next_entity_number += data.entities.length
-
-                this.rawEntities = this.rawEntities.withMutations(map => {
-                    for (const entity of data.entities) {
-                        map.set(entity.entity_number, Immutable.fromJS(entity))
-                    }
-                })
+            if (data.entities !== undefined) {
+                this.next_entity_number = this.rawEntities.size
+                this.rawEntities = new Map<number, Entity>(data.entities.map(v => [v.entity_number, new Entity(v, this)] as [number, Entity]))
 
                 // TODO: if entity has placeable-off-grid flag then take the next one
-                const firstEntityTopLeft = this.firstEntity().topLeft()
+                const firstEntityTopLeft = this.rawEntities.values().next().value.topLeft()
                 offset.x += (firstEntityTopLeft.x % 1 !== 0 ? 0.5 : 0)
                 offset.y += (firstEntityTopLeft.y % 1 !== 0 ? 0.5 : 0)
 
-                this.rawEntities = this.rawEntities.withMutations(map => {
-                    map.keySeq().forEach(k => map
-                        .updateIn([k, 'position', 'x'], x => x + offset.x)
-                        .updateIn([k, 'position', 'y'], y => y + offset.y)
-                    )
+                this.rawEntities.forEach((v, k, m) => {
+                    v.position.x += offset.x
+                    v.position.y += offset.y
                 })
             }
         }
@@ -84,21 +88,12 @@ export class Blueprint {
     }
 
     entity(entity_number: number) {
-        const e = this.rawEntities.get(entity_number)
-        if (!e) return undefined
-        return new Entity(e, this)
+        return this.rawEntities.has(entity_number) ? this.rawEntities.get(entity_number) : undefined
     }
 
-    firstEntity() {
-        return new Entity(this.rawEntities.first(), this)
-    }
-
-    undo(
-        pre: (hist: IHistoryObject) => void,
-        post: (hist: IHistoryObject) => void
-    ) {
-        if (this.historyIndex === 0) return
-        const hist = this.history[this.historyIndex--]
+    undo() {
+        if (!History.canUndo()) return
+        const hist = History.getUndoPreview()
 
         switch (hist.type) {
             case 'add':
@@ -107,21 +102,20 @@ export class Blueprint {
                 this.entityPositionGrid.undo()
         }
 
-        pre(hist)
-        this.rawEntities = this.history[this.historyIndex].rawEntities
+        this.pre(hist, 'add')
+
+        History.undo()
+
         switch (hist.type) {
             case 'del':
                 if (this.entity(hist.entity_number).hasConnections) this.connections.undo()
         }
-        post(hist)
+        this.post(hist, 'del')
     }
 
-    redo(
-        pre: (hist: IHistoryObject) => void,
-        post: (hist: IHistoryObject) => void
-    ) {
-        if (this.historyIndex === this.history.length - 1) return
-        const hist = this.history[++this.historyIndex]
+    redo() {
+        if (!History.canRedo()) return
+        const hist = History.getRedoPreview()
 
         switch (hist.type) {
             case 'add':
@@ -130,7 +124,7 @@ export class Blueprint {
                 this.entityPositionGrid.redo()
         }
 
-        pre(hist)
+        this.pre(hist, 'del')
 
         const entity = this.entity(hist.entity_number)
         switch (hist.type) {
@@ -138,7 +132,7 @@ export class Blueprint {
                 if (entity.hasConnections) this.connections.redo()
         }
 
-        this.rawEntities = hist.rawEntities
+        History.redo()
 
         // TODO: Refactor this somehow
         if (hist.type === 'del' && entity.hasConnections && entity.connectedEntities) {
@@ -147,7 +141,70 @@ export class Blueprint {
             }
         }
 
-        post(hist)
+        this.post(hist, 'add')
+    }
+
+    redrawEntityAndSurroundingEntities(entnr: number) {
+        const e = EntityContainer.mappings.get(entnr)
+        e.redraw()
+        e.redrawSurroundingEntities()
+    }
+
+    pre(hist: History.IHistoryData, addDel: string) {
+        switch (hist.type) {
+            case 'mov':
+            case addDel:
+                const e = EntityContainer.mappings.get(hist.entity_number)
+                if (e === undefined) return
+                e.redrawSurroundingEntities()
+                if (hist.type === addDel) {
+                    G.BPC.wiresContainer.remove(hist.entity_number)
+                    e.destroy()
+                }
+                if (hist.type === 'mov') G.BPC.wiresContainer.update(hist.entity_number)
+        }
+    }
+
+    post(hist: History.IHistoryData, addDel: string) {
+        switch (hist.type) {
+            case 'mov':
+                this.redrawEntityAndSurroundingEntities(hist.entity_number)
+                const entity = G.bp.entity(hist.entity_number)
+                const e = EntityContainer.mappings.get(hist.entity_number)
+                e.position.set(
+                    entity.position.x * 32,
+                    entity.position.y * 32
+                )
+                e.updateVisualStuff()
+                break
+            case 'upd':
+                if (hist.other_entity) {
+                    this.redrawEntityAndSurroundingEntities(hist.entity_number)
+                    this.redrawEntityAndSurroundingEntities(hist.other_entity)
+                } else {
+                    const e = EntityContainer.mappings.get(hist.entity_number)
+                    e.redrawEntityInfo()
+                    this.redrawEntityAndSurroundingEntities(hist.entity_number)
+                    G.BPC.wiresContainer.update(hist.entity_number)
+                    // TODO: Improve this together with callback from entity (if entity changes or it is destroyed, also close the editor)
+                    /*
+                    if (G.editEntityContainer.visible) {
+                        if (G.inventoryContainer.visible) G.inventoryContainer.close()
+                        G.editEntityContainer.create(hist.entity_number)
+                    }
+                    */
+                }
+                break
+            case addDel:
+                const ec = new EntityContainer(hist.entity_number)
+                G.BPC.entities.addChild(ec)
+                ec.redrawSurroundingEntities()
+                G.BPC.wiresContainer.update(hist.entity_number)
+        }
+
+        // console.log(`${addDel === 'del' ? 'Undo' : 'Redo'} ${hist.entity_number} ${hist.annotation}`)
+        G.BPC.updateOverlay()
+        G.BPC.updateViewportCulling()
     }
 
     operation(
@@ -158,8 +215,8 @@ export class Blueprint {
         pushToHistory = true,
         other_entity?: number
     ) {
-        console.log(`${entity_number} - ${annotation}`)
-        this.rawEntities = fn(this.rawEntities)
+        // console.log(`${entity_number} - ${annotation}`)
+        // this.rawEntities = fn(this.rawEntities)
 
         if (pushToHistory) {
             if (this.historyIndex < this.history.length) {
@@ -177,67 +234,63 @@ export class Blueprint {
     }
 
     createEntity(name: string, position: IPoint, direction: number, directionType?: string) {
-        if (!this.entityPositionGrid.checkNoOverlap(name, direction, position)) return false
+
+        if (!this.entityPositionGrid.checkNoOverlap(name, direction, position)) {
+            return false
+        }
+
         const entity_number = this.next_entity_number++
-        const data = {
+        const entity_data = {
             entity_number,
             name,
             position,
             direction,
             type: directionType
         }
-        if (!directionType) delete data.type
-        this.operation(entity_number, 'Added new entity',
-            entities => entities.set(entity_number, Immutable.fromJS(data)),
-            'add'
-        )
+
+        if (directionType === undefined) delete entity_data.type
+
+        const entity: Entity = new Entity(entity_data, this)
+        History.updateMap(this.rawEntities, entity_number, entity, 'Added new entity', { entity_number, type: 'add' })
 
         this.entityPositionGrid.setTileData(entity_number)
 
-        return data.entity_number
+        return entity_data.entity_number
     }
 
     removeEntity(entity_number: number, redrawCb?: (entity_number: number) => void) {
         this.entityPositionGrid.removeTileData(entity_number)
-        let entitiesToModify: any[] = []
-        if (this.entity(entity_number).hasConnections) {
-            entitiesToModify = this.connections.removeConnectionData(entity_number)
+
+        const entitiesToModify = this.entity(entity_number).hasConnections ? this.connections.removeConnectionData(entity_number) : []
+
+        const link: number = History.updateMap(this.rawEntities, entity_number, undefined, 'Deleted entity', { entity_number, type: 'del' }, true)
+
+        for (const entityToModify of entitiesToModify) {
+            const connections = this.entity(entityToModify.entity_number).connections
+            const a = connections.size === 1
+            const b = connections[entityToModify.side].size === 1
+            const c = connections[entityToModify.side][entityToModify.color].size === 1
+            if (a && b && c) {
+                History.updateValue(this.entity(entity_number), [ 'connections' ],
+                                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true, link)
+            } else if (b && c) {
+                History.updateValue(this.entity(entity_number), [ 'connections' , entityToModify.side ],
+                                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true, link)
+            } else if (c) {
+                History.updateValue(this.entity(entity_number), [ 'connections' , entityToModify.side , entityToModify.color],
+                                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true, link)
+            } else {
+                History.updateValue(this.entity(entity_number), [ 'connections' , entityToModify.side , entityToModify.color , entityToModify.index],
+                                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true, link)
+            }
         }
-        this.operation(entity_number, 'Deleted entity',
-            entities => entities.withMutations(map => {
-
-                for (const i in entitiesToModify) {
-                    const entity_number = entitiesToModify[i].entity_number
-                    const side = entitiesToModify[i].side
-                    const color = entitiesToModify[i].color
-                    const index = entitiesToModify[i].index
-
-                    const connections = this.entity(entity_number).connections
-                    const a = connections.size === 1
-                    const b = connections[side].size === 1
-                    const c = connections[side][color].size === 1
-                    if (a && b && c) {
-                        map.removeIn([entity_number, 'connections'])
-                    } else if (b && c) {
-                        map.removeIn([entity_number, 'connections', side])
-                    } else if (c) {
-                        map.removeIn([entity_number, 'connections', side, color])
-                    } else {
-                        map.removeIn([entity_number, 'connections', side, color, index])
-                    }
-                }
-
-                map.delete(entity_number)
-            }),
-            'del'
-        )
-        for (const i in entitiesToModify) {
-            redrawCb(entitiesToModify[i].entity_number)
+        for (const entityToModify of entitiesToModify) {
+            redrawCb(entityToModify.entity_number)
         }
     }
 
     getFirstRail() {
-        const fR = this.rawEntities.find(v => v.get('name') === 'straight_rail' || v.get('name') === 'curved_rail')
+        const fR = this.rawEntities.find(v => v.name === 'straight_rail' || v.name === 'curved_rail')
         return fR ? fR.toJS() : undefined
     }
 
@@ -250,7 +303,7 @@ export class Blueprint {
     }
 
     isEmpty() {
-        return this.rawEntities.isEmpty() && this.tiles.isEmpty()
+        return (this.rawEntities.size === undefined || this.rawEntities.size === 0) && this.tiles.isEmpty()
     }
 
     // Get corner/center positions
@@ -260,9 +313,9 @@ export class Blueprint {
         const positions =
             [...this.rawEntities.keys()]
                 .map(k => this.entity(k)[f]()).concat(
-            [...this.tiles.keys()]
-                .map(k => ({ x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
-                .map(p => tileCorners(p)[f]))
+                    [...this.tiles.keys()]
+                        .map(k => ({ x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
+                        .map(p => tileCorners(p)[f]))
 
         return {
             // tslint:disable-next-line:no-unnecessary-callback-wrapper
@@ -313,8 +366,8 @@ export class Blueprint {
                 [...Immutable.Seq(this.tiles)
                     .reduce((acc, tile) =>
                         acc.set(tile, acc.has(tile) ? (acc.get(tile) + 1) : 0)
-                    , new Map() as Map<string, number>).entries()]
-                .sort((a, b) => b[1] - a[1])[0][0]
+                        , new Map() as Map<string, number>).entries()]
+                    .sort((a, b) => b[1] - a[1])[0][0]
             ].minable.result
         }
     }
@@ -338,7 +391,7 @@ export class Blueprint {
             /"(entity_number|entity_id)":\![0-9]+?[,}]/g,
             s => s.replace('!', '')
         ))
-        .sort((a: any, b: any) => a.entity_number - b.entity_number)
+            .sort((a: any, b: any) => a.entity_number - b.entity_number)
     }
 
     toObject() {

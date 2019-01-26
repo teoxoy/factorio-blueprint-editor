@@ -318,79 +318,12 @@ actions.decreaseTileBuildingArea.bind(() => {
 })
 
 actions.undo.bind(() => {
-    G.bp.undo(
-        hist => pre(hist, 'add'),
-        hist => post(hist, 'del')
-    )
+    G.bp.undo()
 })
 
 actions.redo.bind(() => {
-    G.bp.redo(
-        hist => pre(hist, 'del'),
-        hist => post(hist, 'add')
-    )
+    G.bp.redo()
 })
-
-function pre(hist: IHistoryObject, addDel: string) {
-    switch (hist.type) {
-        case 'mov':
-        case addDel:
-            const e = EntityContainer.mappings.get(hist.entity_number)
-            e.redrawSurroundingEntities()
-            if (hist.type === addDel) {
-                G.BPC.wiresContainer.remove(hist.entity_number)
-                e.destroy()
-            }
-            if (hist.type === 'mov') G.BPC.wiresContainer.update(hist.entity_number)
-    }
-}
-
-function post(hist: IHistoryObject, addDel: string) {
-    function redrawEntityAndSurroundingEntities(entnr: number) {
-        const e = EntityContainer.mappings.get(entnr)
-        e.redraw()
-        e.redrawSurroundingEntities()
-    }
-    switch (hist.type) {
-        case 'mov':
-            redrawEntityAndSurroundingEntities(hist.entity_number)
-            const entity = G.bp.entity(hist.entity_number)
-            const e = EntityContainer.mappings.get(hist.entity_number)
-            e.position.set(
-                entity.position.x * 32,
-                entity.position.y * 32
-            )
-            e.updateVisualStuff()
-            break
-        case 'upd':
-            if (hist.other_entity) {
-                redrawEntityAndSurroundingEntities(hist.entity_number)
-                redrawEntityAndSurroundingEntities(hist.other_entity)
-            } else {
-                const e = EntityContainer.mappings.get(hist.entity_number)
-                e.redrawEntityInfo()
-                redrawEntityAndSurroundingEntities(hist.entity_number)
-                G.BPC.wiresContainer.update(hist.entity_number)
-                // TODO: Improve this together with callback from entity (if entity changes or it is destroyed, also close the editor)
-                /*
-                if (G.editEntityContainer.visible) {
-                    if (G.inventoryContainer.visible) G.inventoryContainer.close()
-                    G.editEntityContainer.create(hist.entity_number)
-                }
-                */
-            }
-            break
-        case addDel:
-            const ec = new EntityContainer(hist.entity_number)
-            G.BPC.entities.addChild(ec)
-            ec.redrawSurroundingEntities()
-            G.BPC.wiresContainer.update(hist.entity_number)
-    }
-
-    console.log(`${addDel === 'del' ? 'Undo' : 'Redo'} ${hist.entity_number} ${hist.annotation}`)
-    G.BPC.updateOverlay()
-    G.BPC.updateViewportCulling()
-}
 
 actions.pan.bind(() => {
     if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
