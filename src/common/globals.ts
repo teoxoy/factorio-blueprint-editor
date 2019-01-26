@@ -238,6 +238,16 @@ const styles = {
     }
 }
 
+const oilOutpostSettings = {
+    DEBUG: false,
+    PUMPJACK_MODULE: 'productivity_module_3',
+    MIN_GAP_BETWEEN_UNDERGROUNDS: 1,
+    BEACONS: true,
+    MIN_AFFECTED_ENTITIES: 1,
+    BEACON_MODULE: 'speed_module_3',
+    lastGeneratedEntNrs: [] as number[]
+}
+
 export default {
     hr,
     renderOnly,
@@ -260,5 +270,6 @@ export default {
     loadingScreen,
     colors,
     fontFamily,
-    styles
+    styles,
+    oilOutpostSettings
 }

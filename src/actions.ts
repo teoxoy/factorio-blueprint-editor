@@ -98,12 +98,13 @@ keyboardJS.setContext('app')
 const actions = {
     clear: new Action('shift+n'),
     focus: new Action('f'),
-    picture: new Action('shift+s'),
+    takePicture: new Action('shift+s'),
     undo: new Action('modifier+z'),
     redo: new Action('modifier+y'),
     info: new Action('i'),
     pan: new Action('lclick'),
     moveEntity: new Action('mclick'),
+    generateOilOutpost: new Action('g'),
 
     moveUp: new ToggleAction('w'),
     moveLeft: new ToggleAction('a'),
@@ -136,6 +137,26 @@ const actions = {
     quickbar9: new Action('shift+4'),
     quickbar10: new Action('shift+5'),
     changeActiveQuickbar: new Action('x'),
+
+    copyBPString: {
+        bind: (pressHandler?: (e: ClipboardEvent) => void) => {
+            document.addEventListener('copy', (e: ClipboardEvent) => {
+                if (keyboardJS._paused) return
+                e.preventDefault()
+                pressHandler(e)
+            })
+        }
+    },
+
+    pasteBPString: {
+        bind: (pressHandler?: (e: ClipboardEvent) => void) => {
+            document.addEventListener('paste', (e: ClipboardEvent) => {
+                if (keyboardJS._paused) return
+                e.preventDefault()
+                pressHandler(e)
+            })
+        }
+    },
 
     get movingViaKeyboard() {
         return (this.moveUp.pressed !== this.moveDown.pressed ||

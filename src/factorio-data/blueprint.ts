@@ -5,6 +5,8 @@ import Immutable from 'immutable'
 import G from '../common/globals'
 import { ConnectionsManager } from './connectionsManager'
 import { EntityContainer } from '../containers/entity'
+import generators from './generators'
+import util from '../common/util'
 import * as History from './history'
 
 //TODO: Check if the following prototype is actually needed
@@ -345,6 +347,166 @@ export class Blueprint {
     bottomLeft() { return this.getPosition('bottomLeft', Math.min, Math.max) }
     bottomRight() { return this.getPosition('bottomRight', Math.max, Math.max) }
 
+    generatePipes() {
+        const DEBUG = G.oilOutpostSettings.DEBUG
+        const PUMPJACK_MODULE = G.oilOutpostSettings.PUMPJACK_MODULE
+        const MIN_GAP_BETWEEN_UNDERGROUNDS = G.oilOutpostSettings.MIN_GAP_BETWEEN_UNDERGROUNDS
+        const BEACONS = G.oilOutpostSettings.BEACONS
+        const MIN_AFFECTED_ENTITIES = G.oilOutpostSettings.MIN_AFFECTED_ENTITIES
+        const BEACON_MODULE = G.oilOutpostSettings.BEACON_MODULE
+        let lastGeneratedEntNrs = G.oilOutpostSettings.lastGeneratedEntNrs
+
+        const pumpjacks = this.rawEntities
+            .valueSeq()
+            .filter(e => e.get('name') === 'pumpjack')
+            .toJS()
+
+        if (pumpjacks.length < 2 || pumpjacks.length > 200) {
+            console.error('There should be between 2 and 200 pumpjacks in the BP Area!')
+            return
+        }
+
+        if (pumpjacks.length !== this.rawEntities.filter((_, k) => !lastGeneratedEntNrs.includes(k)).count()) {
+            console.error('BP Area should only contain pumpjacks!')
+            return
+        }
+
+        console.log('Generating pipes...')
+
+        const T = util.timer('Total generation')
+
+        const GPT = util.timer('Pipe generation')
+
+        // I wrapped generatePipes into a Web Worker but for some reason it sometimes takes x2 time to run the function
+        // Usualy when there are more than 100 pumpjacks the function will block the main thread
+        // which is not great but the user should wait for the generated entities anyway
+        const GP = generators.generatePipes(pumpjacks, MIN_GAP_BETWEEN_UNDERGROUNDS)
+
+        console.log('Pipes:', GP.info.nrOfPipes)
+        console.log('Underground Pipes:', GP.info.nrOfUPipes)
+        console.log('Pipes replaced by underground pipes:', GP.info.nrOfPipesReplacedByUPipes)
+        console.log('Ratio (pipes replaced/underground pipes):', GP.info.nrOfPipesReplacedByUPipes / GP.info.nrOfUPipes)
+        GPT.stop()
+
+        const GBT = util.timer('Beacon generation')
+
+        const entitiesForBeaconGen = [
+            ...pumpjacks.map(p => ({ ...p, size: 3, effect: true })),
+            ...GP.pipes.map(p => ({ ...p, size: 1, effect: false }))
+        ]
+
+        const GB = BEACONS ? generators.generateBeacons(entitiesForBeaconGen, MIN_AFFECTED_ENTITIES) : undefined
+
+        if (BEACONS) {
+            console.log('Beacons:', GB.info.totalBeacons)
+            console.log('Effects given by beacons:', GB.info.effectsGiven)
+        }
+        GBT.stop()
+
+        const GPOT = util.timer('Pole generation')
+
+        const entitiesForPoleGen = [
+            ...pumpjacks.map(p => ({ ...p, size: 3, power: true })),
+            ...GP.pipes.map(p => ({ ...p, size: 1, power: false })),
+            ...(BEACONS ? GB.beacons.map(p => ({ ...p, size: 3, power: true })) : [])
+        ]
+
+        const GPO = generators.generatePoles(entitiesForPoleGen)
+
+        console.log('Power Poles:', GPO.info.totalPoles)
+        GPOT.stop()
+
+        T.stop()
+
+        this.operation(0, 'Generated Pipes!',
+            entities => entities.withMutations(map => {
+                GP.pumpjacksToRotate.forEach(p => {
+                    map.setIn([p.entity_number, 'direction'], p.direction)
+                    if (PUMPJACK_MODULE) map.setIn([p.entity_number, 'items', PUMPJACK_MODULE], 2)
+                })
+
+                if (lastGeneratedEntNrs) {
+                    lastGeneratedEntNrs.forEach(id => {
+                        if (map.has(id)) {
+                            map.delete(id)
+                            this.entityPositionGrid.removeTileData(id)
+                            EntityContainer.mappings.get(id).destroy()
+                        }
+                    })
+                }
+                lastGeneratedEntNrs = []
+
+                GP.pipes.forEach(pipe => {
+                    const entity_number = this.next_entity_number++
+                    map.set(entity_number, Immutable.fromJS({ entity_number, ...pipe }))
+                    lastGeneratedEntNrs.push(entity_number)
+                })
+
+                if (BEACONS) {
+                    GB.beacons.forEach(beacon => {
+                        const entity_number = this.next_entity_number++
+                        map.set(entity_number, Immutable.fromJS({ entity_number, ...beacon, items: { [BEACON_MODULE]: 2 } }))
+                        lastGeneratedEntNrs.push(entity_number)
+                    })
+                }
+
+                GPO.poles.forEach(pole => {
+                    const entity_number = this.next_entity_number++
+                    map.set(entity_number, Immutable.fromJS({ entity_number, ...pole }))
+                    lastGeneratedEntNrs.push(entity_number)
+                })
+            }),
+            'upd',
+            false
+        )
+
+        GP.pumpjacksToRotate.forEach(p => {
+            const eC = EntityContainer.mappings.get(p.entity_number)
+            eC.redraw()
+            eC.redrawEntityInfo()
+        })
+
+        G.oilOutpostSettings.lastGeneratedEntNrs = lastGeneratedEntNrs
+
+        lastGeneratedEntNrs.forEach(id => this.entityPositionGrid.setTileData(id))
+        lastGeneratedEntNrs.forEach(id => G.BPC.entities.addChild(new EntityContainer(id, false)))
+        G.BPC.sortEntities()
+
+        if (!DEBUG) return
+
+        // TODO: make a container special for debugging purposes
+        G.BPC.wiresContainer.children = []
+
+        const timePerVis = 1000
+        ;
+        [
+            GP.visualizations,
+            BEACONS ? GB.visualizations : [],
+            GPO.visualizations
+        ]
+        .filter(vis => vis.length)
+        .forEach((vis, i) => {
+            vis.forEach((v, j, arr) => {
+                setTimeout(() => {
+                    const tint = v.color ? v.color : 0xFFFFFF * Math.random()
+                    v.path.forEach((p, k) => {
+                        setTimeout(() => {
+                            const s = new PIXI.Sprite(PIXI.Texture.WHITE)
+                            s.tint = tint
+                            s.anchor.set(0.5)
+                            s.alpha = v.alpha
+                            s.width = v.size
+                            s.height = v.size
+                            s.position.set(p.x * 32, p.y * 32)
+                            G.BPC.wiresContainer.addChild(s)
+                        }, k * ((timePerVis / arr.length) / v.path.length))
+                    })
+                }, j * (timePerVis / arr.length) + i * timePerVis)
+            })
+        })
+
+    }
+
     generateIcons() {
         // TODO: make this behave more like in Factorio
         if (!this.rawEntities.isEmpty()) {
@@ -365,10 +527,12 @@ export class Blueprint {
             this.icons[0] = FD.tiles[
                 [...Immutable.Seq(this.tiles)
                     .reduce((acc, tile) =>
-                        acc.set(tile, acc.has(tile) ? (acc.get(tile) + 1) : 0)
-                        , new Map() as Map<string, number>).entries()]
-                    .sort((a, b) => b[1] - a[1])[0][0]
-            ].minable.result
+                        acc.set(tile, acc.has(tile) ? (acc.get(tile) + 1) : 0),
+                        new Map() as Map<string, number>)
+                    .entries()
+                ]
+                .sort((a, b) => b[1] - a[1])[0][0]
+            ).minable.result
         }
     }
 

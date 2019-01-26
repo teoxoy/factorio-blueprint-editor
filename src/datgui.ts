@@ -8,10 +8,11 @@ export default function initDatGui() {
     const gui = new dat.GUI({
         autoPlace: false,
         hideable: false,
-        closeOnTop: true
+        closeOnTop: true,
+        closed: localStorage.getItem('dat.gui.closed') === 'true',
+        width: 300
     })
 
-    gui.closed = localStorage.getItem('dat.gui.closed') === 'true'
     window.addEventListener('unload', () => localStorage.setItem('dat.gui.closed', String(gui.closed)))
 
     document.body.appendChild(gui.domElement)
@@ -78,13 +79,56 @@ export default function initDatGui() {
             localStorage.setItem('pattern', val)
         })
 
+    const oilOutpostFolder = gui.addFolder('Oil Outpost Generator Settings')
+    oilOutpostFolder
+        .add(G.oilOutpostSettings, 'DEBUG')
+        .name('Debug')
+    oilOutpostFolder
+        .add(G.oilOutpostSettings, 'PUMPJACK_MODULE', [
+            'speed_module_3', 'speed_module_2', 'speed_module',
+            'productivity_module_3', 'productivity_module_2', 'productivity_module',
+            'effectivity_module_3', 'effectivity_module_2', 'effectivity_module'
+        ])
+        .name('Pumpjack Modules')
+    oilOutpostFolder
+        .add(G.oilOutpostSettings, 'MIN_GAP_BETWEEN_UNDERGROUNDS', 1, 9, 1)
+        .name('Min Gap > < UPipes')
+    oilOutpostFolder
+        .add(G.oilOutpostSettings, 'BEACONS')
+        .name('Beacons')
+    oilOutpostFolder
+        .add(G.oilOutpostSettings, 'MIN_AFFECTED_ENTITIES', 1, 12, 1)
+        .name('Min Affect. Pumpjacks')
+    oilOutpostFolder
+        .add(G.oilOutpostSettings, 'BEACON_MODULE', [
+            'speed_module_3', 'speed_module_2', 'speed_module',
+            'effectivity_module_3', 'effectivity_module_2', 'effectivity_module'
+        ])
+        .name('Beacon Modules')
+    oilOutpostFolder
+        .add(actions.generateOilOutpost, 'call')
+        .name('Generate (g)')
+
     // Keybinds folder
     const keybindsFolder = gui.addFolder('Keybinds')
 
     actions.forEachAction((action, actionName) => {
+        const name = actionName.split(/(?=[A-Z1-9])/).join(' ').replace(/(\b\w)/, c => c.toUpperCase())
+        if (name.includes('Quickbar')) return
         keybindsFolder
             .add(action, 'keyCombo')
-            .name(actionName.split(/(?=[A-Z1-9])/).join(' ').replace(/(\b\w)/, c => c.toUpperCase()))
+            .name(name)
+            .listen()
+    })
+
+    const quickbarFolder = keybindsFolder.addFolder('Quickbar')
+
+    actions.forEachAction((action, actionName) => {
+        const name = actionName.split(/(?=[A-Z1-9])/).join(' ').replace(/(\b\w)/, c => c.toUpperCase())
+        if (!name.includes('Quickbar')) return
+        quickbarFolder
+            .add(action, 'keyCombo')
+            .name(name)
             .listen()
     })
 

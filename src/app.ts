@@ -13,7 +13,6 @@ import bpString from './factorio-data/bpString'
 
 import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
-import { EntityContainer } from './containers/entity'
 import { EntityPaintContainer } from './containers/entityPaint'
 import { TilePaintContainer } from './containers/tilePaint'
 import { BlueprintContainer } from './containers/blueprint'
@@ -157,9 +156,7 @@ document.addEventListener('mousemove', e => {
     }
 })
 
-document.addEventListener('copy', (e: ClipboardEvent) => {
-    e.preventDefault()
-
+actions.copyBPString.bind(e => {
     if (G.bp.isEmpty()) return
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -178,9 +175,7 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
     }
 })
 
-document.addEventListener('paste', (e: ClipboardEvent) => {
-    e.preventDefault()
-
+actions.pasteBPString.bind(e => {
     G.loadingScreen.show()
 
     const promise = navigator.clipboard && navigator.clipboard.readText ?
@@ -200,7 +195,7 @@ actions.clear.bind(() => {
     G.BPC.initBP()
 })
 
-actions.picture.bind(() => {
+actions.takePicture.bind(() => {
     if (G.bp.isEmpty()) return
 
     G.BPC.enableRenderableOnChildren()

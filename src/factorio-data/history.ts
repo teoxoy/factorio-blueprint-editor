@@ -132,7 +132,7 @@ function updateValue<T, V>(target: T, path: string[], value: V, text?: string, d
     }
 }
 
-/** Perform adding object to map and store in history */
+/** Perform change to map and store in history */
 function updateMap<K, V>(targetMap: Map<K, V>, key: K, value: V, text?: string, data?: IHistoryData, remove: boolean = false): number {
 
     console.log(s_HistoryIndex)
