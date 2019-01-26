@@ -13,7 +13,7 @@ export default class Entity extends EventEmitter {
     private readonly m_BP: Blueprint
 
     /** Field to hold raw entity */
-    private m_rawEntity: any
+    private m_rawEntity: BPS.IEntity
 
     constructor(m_rawEntity: any, BP: Blueprint) {
         super()
