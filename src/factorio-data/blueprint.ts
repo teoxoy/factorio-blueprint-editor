@@ -369,7 +369,10 @@ export class Blueprint {
             entities => entities.withMutations(map => {
                 GP.pumpjacksToRotate.forEach(p => {
                     map.setIn([p.entity_number, 'direction'], p.direction)
-                    if (PUMPJACK_MODULE) map.setIn([p.entity_number, 'items', PUMPJACK_MODULE], 2)
+                    if (PUMPJACK_MODULE) {
+                        map.deleteIn([p.entity_number, 'items'])
+                        map.setIn([p.entity_number, 'items', PUMPJACK_MODULE], 2)
+                    }
                 })
 
                 if (lastGeneratedEntNrs) {
