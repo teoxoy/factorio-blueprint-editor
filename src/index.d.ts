@@ -8,6 +8,10 @@ declare module '*.json' {
     export default content
 }
 
+declare interface Map {
+    find<V, K>(predicate: (value: V, key: K) => boolean): V
+}
+
 interface NodeModule {
     hot: any
 }
