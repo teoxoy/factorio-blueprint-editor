@@ -421,6 +421,7 @@ export class Blueprint {
         lastGeneratedEntNrs.forEach(id => this.entityPositionGrid.setTileData(id))
         lastGeneratedEntNrs.forEach(id => G.BPC.entities.addChild(new EntityContainer(id, false)))
         G.BPC.sortEntities()
+        G.BPC.wiresContainer.updatePassiveWires()
 
         if (!DEBUG) return
 

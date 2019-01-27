@@ -362,6 +362,7 @@ function post(hist: IHistoryObject, addDel: string) {
     }
 
     console.log(`${addDel === 'del' ? 'Undo' : 'Redo'} ${hist.entity_number} ${hist.annotation}`)
+    G.BPC.wiresContainer.updatePassiveWires()
     G.BPC.updateOverlay()
     G.BPC.updateViewportCulling()
 }

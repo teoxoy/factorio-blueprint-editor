@@ -240,6 +240,8 @@ export class EntityPaintContainer extends PIXI.Container {
             G.BPC.entities.addChild(ec)
             ec.redrawSurroundingEntities()
 
+            if (fd.type === 'electric_pole') G.BPC.wiresContainer.updatePassiveWires()
+
             if (isUB || this.name === 'pipe_to_ground') {
                 this.direction = (this.direction + 4) % 8
                 this.redraw()

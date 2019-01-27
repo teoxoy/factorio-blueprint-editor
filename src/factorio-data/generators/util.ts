@@ -1,6 +1,8 @@
 import Delaunator from 'delaunator'
 import range from 'ramda/es/range'
 
+// TODO: maybe merge this file with the main util file
+
 const hashPoint = (p: IPoint) => `${p.x},${p.y}`
 
 const equalPoints = <T extends IPoint>(a: T) => (b: T) => a.x === b.x && a.y === b.y
@@ -36,6 +38,7 @@ export default {
     euclideanDistance,
     pointInCircle,
     pointsToLines,
+    pointsToTriangles,
     range
 }
 
@@ -65,12 +68,48 @@ function pointsToLines<T extends IPoint>(nodes: T[]): T[][] {
 
     const delaunay = Delaunator.from(filteredNodes.map(pointToArray))
 
+    // Return lines from delaunay data
     return delaunay.triangles
-        // Transform triangle indexes into lines
         .reduce((pV, _, i, arr) => {
             if (i <= delaunay.halfedges[i]) return pV
             const p = filteredNodes[arr[i]]
             const q = filteredNodes[arr[(i % 3 === 2) ? i - 2 : i + 1]]
             return pV.concat([[p, q]])
         }, [] as T[][])
+}
+
+/**
+ * Creates triangles between points based on delaunay triangulation
+ *
+ * If triangles can not be formed, it's going to return lines
+ */
+function pointsToTriangles<T extends IPoint>(nodes: T[]): T[][] {
+    const filteredNodes = uniqPoints(nodes)
+
+    if (filteredNodes.length === 1) return [[filteredNodes[0], filteredNodes[0]]]
+    if (filteredNodes.length === 2) return [filteredNodes]
+
+    // Check that nodes are not collinear
+    let lastSlope = 0
+    for (let i = 0; i < filteredNodes.length; i++) {
+        if (i === filteredNodes.length - 1) {
+            return filteredNodes.reduce((pV, _, i, arr) => {
+                if (i === 0) return pV
+                return pV.concat([[arr[i - 1], arr[i]]])
+            }, [] as T[][])
+        }
+        const node = filteredNodes[i]
+        const next = filteredNodes[i + 1]
+        const dX = Math.abs(node.x - next.x)
+        const dY = Math.abs(node.y - next.y)
+        if (i === 0) lastSlope = dY / dX
+        else if (lastSlope !== dY / dX) break
+    }
+
+    const delaunay = Delaunator.from(filteredNodes.map(pointToArray))
+
+    // Return triangles from delaunay data
+    return range(0, delaunay.triangles.length / 3)
+        .map(t => [3 * t, 3 * t + 1, 3 * t + 2]
+            .map(e => filteredNodes[delaunay.triangles[e]]))
 }
