@@ -9,8 +9,8 @@ import generators from './generators'
 import util from '../common/util'
 import * as History from './history'
 
-// TODO: Check if the following prototype is actually needed
-Map.prototype.find = function <K, V>(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V {
+//TODO: Check if the following prototype is actually needed
+Map.prototype.find = function(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V {
 
     this.forEach((v, k) => {
         if (predicate(v, k)) return v
