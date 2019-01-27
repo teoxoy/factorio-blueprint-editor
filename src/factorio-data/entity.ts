@@ -149,8 +149,8 @@ export default (rawEntity: any, BP: Blueprint) => ({
 
     get connections() {
         const c = rawEntity.get('connections')
-        if (!c) return
-        const conn = c.toJS()
+        // if (!c) return
+        const conn = c ? c.toJS() : {}
 
         if (conn['Cu0']) {
             if (!conn['1']) conn['1'] = {}
@@ -185,7 +185,7 @@ export default (rawEntity: any, BP: Blueprint) => ({
             }
         }
 
-        return conn
+        return Object.keys(conn).length ? conn : undefined
     },
 
     get connectedEntities() {
