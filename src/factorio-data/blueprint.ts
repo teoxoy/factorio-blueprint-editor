@@ -9,8 +9,14 @@ import generators from './generators'
 import util from '../common/util'
 import * as History from './history'
 
-// TODO: Check if the following prototype is actually needed
-Map.prototype.find = function<K, V>(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V {
+// TODO: Check if the following extensions for map can be moved to a better place (e.g. extensions/map.ts)
+declare global {
+    interface Map<K, V> { /* tslint:disable-line:interface-name */
+        find(predicate: (value: V, key: K) => boolean): V
+        filter(predicate: (value: V, key: K) => boolean): V[]
+    }
+}
+Map.prototype.find = function <K, V>(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V {
 
     this.forEach((v, k) => {
         if (predicate(v, k)) return v
@@ -18,8 +24,19 @@ Map.prototype.find = function<K, V>(this: Map<K, V>, predicate: (value: V, key: 
 
     return undefined
 }
+Map.prototype.filter = function <K, V>(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V[] {
 
-export class Blueprint {
+    const result: V[] = []
+
+    this.forEach((v, k) => {
+        if (predicate(v, k)) result.push(v)
+    })
+
+    return result
+}
+
+/** Blueprint base class */
+export default class Blueprint {
 
     name: string
     icons: any[]
@@ -198,7 +215,7 @@ export class Blueprint {
                 }
                 break
             case addDel:
-                const ec = new EntityContainer(hist.entity_number)
+                const ec = new EntityContainer(this.entity(hist.entity_number))
                 G.BPC.entities.addChild(ec)
                 ec.redrawSurroundingEntities()
                 G.BPC.wiresContainer.update(hist.entity_number)
@@ -252,7 +269,7 @@ export class Blueprint {
 
         if (directionType === undefined) delete entity_data.type
 
-        const entity: Entity = new Entity(entity_data, this)
+        const entity: Entity = new Entity(entity_data as BPS.IEntity, this)
         History.updateMap(this.rawEntities, entity_number, entity, 'Added new entity', { entity_number, type: 'add' })
 
         this.entityPositionGrid.setTileData(entity_number)
@@ -265,27 +282,33 @@ export class Blueprint {
 
         const entitiesToModify = this.entity(entity_number).hasConnections ? this.connections.removeConnectionData(entity_number) : []
 
-        const link: number = History.updateMap(this.rawEntities, entity_number, undefined, 'Deleted entity', { entity_number, type: 'del' }, true)
-
+        History.startTransaction('Deleted entity')
+        History.updateMap(this.rawEntities, entity_number, undefined, 'Deleted entity', { entity_number, type: 'del' }, true)
         for (const entityToModify of entitiesToModify) {
             const connections = this.entity(entityToModify.entity_number).connections
             const a = connections.size === 1
             const b = connections[entityToModify.side].size === 1
             const c = connections[entityToModify.side][entityToModify.color].size === 1
             if (a && b && c) {
-                History.updateValue(this.entity(entity_number), [ 'connections' ],
-                                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true, link)
+                History.updateValue(this.entity(entity_number),
+                    ['connections'],
+                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true)
             } else if (b && c) {
-                History.updateValue(this.entity(entity_number), [ 'connections' , entityToModify.side ],
-                                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true, link)
+                History.updateValue(this.entity(entity_number),
+                    ['connections', entityToModify.side],
+                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true)
             } else if (c) {
-                History.updateValue(this.entity(entity_number), [ 'connections' , entityToModify.side , entityToModify.color],
-                                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true, link)
+                History.updateValue(this.entity(entity_number),
+                    ['connections', entityToModify.side, entityToModify.color],
+                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true)
             } else {
-                History.updateValue(this.entity(entity_number), [ 'connections' , entityToModify.side , entityToModify.color , entityToModify.index],
-                                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true, link)
+                History.updateValue(this.entity(entity_number),
+                    ['connections', entityToModify.side, entityToModify.color, entityToModify.index.toString()],
+                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true)
             }
         }
+        History.commitTransaction()
+
         for (const entityToModify of entitiesToModify) {
             redrawCb(entityToModify.entity_number)
         }
@@ -356,17 +379,14 @@ export class Blueprint {
         const BEACON_MODULE = G.oilOutpostSettings.BEACON_MODULE
         let lastGeneratedEntNrs = G.oilOutpostSettings.lastGeneratedEntNrs
 
-        const pumpjacks = this.rawEntities
-            .valueSeq()
-            .filter(e => e.get('name') === 'pumpjack')
-            .toJS()
+        const pumpjacks = this.rawEntities.filter(v => v.name === 'pumpjack')
 
         if (pumpjacks.length < 2 || pumpjacks.length > 200) {
             console.error('There should be between 2 and 200 pumpjacks in the BP Area!')
             return
         }
 
-        if (pumpjacks.length !== this.rawEntities.filter((_, k) => !lastGeneratedEntNrs.includes(k)).count()) {
+        if (pumpjacks.length !== this.rawEntities.filter((_, k) => !lastGeneratedEntNrs.includes(k)).length) {
             console.error('BP Area should only contain pumpjacks!')
             return
         }
@@ -469,7 +489,7 @@ export class Blueprint {
         G.oilOutpostSettings.lastGeneratedEntNrs = lastGeneratedEntNrs
 
         lastGeneratedEntNrs.forEach(id => this.entityPositionGrid.setTileData(id))
-        lastGeneratedEntNrs.forEach(id => G.BPC.entities.addChild(new EntityContainer(id, false)))
+        lastGeneratedEntNrs.forEach(id => G.BPC.entities.addChild(new EntityContainer(this.entity(id), false)))
         G.BPC.sortEntities()
 
         if (!DEBUG) return
@@ -478,32 +498,32 @@ export class Blueprint {
         G.BPC.wiresContainer.children = []
 
         const timePerVis = 1000
-        ;
+            ;
         [
             GP.visualizations,
             BEACONS ? GB.visualizations : [],
             GPO.visualizations
         ]
-        .filter(vis => vis.length)
-        .forEach((vis, i) => {
-            vis.forEach((v, j, arr) => {
-                setTimeout(() => {
-                    const tint = v.color ? v.color : 0xFFFFFF * Math.random()
-                    v.path.forEach((p, k) => {
-                        setTimeout(() => {
-                            const s = new PIXI.Sprite(PIXI.Texture.WHITE)
-                            s.tint = tint
-                            s.anchor.set(0.5)
-                            s.alpha = v.alpha
-                            s.width = v.size
-                            s.height = v.size
-                            s.position.set(p.x * 32, p.y * 32)
-                            G.BPC.wiresContainer.addChild(s)
-                        }, k * ((timePerVis / arr.length) / v.path.length))
-                    })
-                }, j * (timePerVis / arr.length) + i * timePerVis)
+            .filter(vis => vis.length)
+            .forEach((vis, i) => {
+                vis.forEach((v, j, arr) => {
+                    setTimeout(() => {
+                        const tint = v.color ? v.color : 0xFFFFFF * Math.random()
+                        v.path.forEach((p, k) => {
+                            setTimeout(() => {
+                                const s = new PIXI.Sprite(PIXI.Texture.WHITE)
+                                s.tint = tint
+                                s.anchor.set(0.5)
+                                s.alpha = v.alpha
+                                s.width = v.size
+                                s.height = v.size
+                                s.position.set(p.x * 32, p.y * 32)
+                                G.BPC.wiresContainer.addChild(s)
+                            }, k * ((timePerVis / arr.length) / v.path.length))
+                        })
+                    }, j * (timePerVis / arr.length) + i * timePerVis)
+                })
             })
-        })
 
     }
 
@@ -531,7 +551,7 @@ export class Blueprint {
                         new Map() as Map<string, number>)
                     .entries()
                 ]
-                .sort((a, b) => b[1] - a[1])[0][0]
+                    .sort((a, b) => b[1] - a[1])[0][0]
             ).minable.result
         }
     }

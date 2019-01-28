@@ -1,4 +1,3 @@
-import G from '../common/globals'
 import Editor from './editor'
 import BeaconEditor from './beacon'
 import InserterEditor from './inserter'
@@ -6,6 +5,7 @@ import MachineEditor from './machine'
 import MiningEditor from './mining'
 import SplitterEditor from './splitter'
 import ChestEditor from './chest'
+import Entity from '../factorio-data/entity'
 
 /**
  * Factory Function for creating Editor based on Entity Number
@@ -17,9 +17,7 @@ import ChestEditor from './chest'
  *
  * @param entityNumber - Entity Number for which to create Editor for
  */
-export function createEditor(entityNumber: number): Editor {
-    const entity = G.bp.entity(entityNumber)
-
+export function createEditor(entity: Entity): Editor {
     let editor: Editor
     switch (entity.name) {
         // Assembly Machines

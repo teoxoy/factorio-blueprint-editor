@@ -1,4 +1,4 @@
-import { Blueprint } from '../factorio-data/blueprint'
+import Blueprint from '../factorio-data/blueprint'
 import { ToolbarContainer } from '../panels/toolbar'
 import { QuickbarContainer } from '../panels/quickbar'
 import { BlueprintContainer } from '../containers/blueprint'

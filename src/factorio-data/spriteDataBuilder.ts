@@ -1,7 +1,7 @@
 import FD from 'factorio-data'
 import { Area } from './positionGrid'
 import util from '../common/util'
-import { Blueprint } from './blueprint'
+import Blueprint from './blueprint'
 
 export default {
     getSpriteData,
@@ -29,7 +29,7 @@ function getSpriteData(entity: any, hr: boolean, bp: Blueprint) {
 const entityToFunction = new Map()
 
 for (const e in FD.entities) {
-    const entity = FD.entities[e]
+    const entity: FD.Entity = FD.entities[e]
     let func = generateGraphics(entity)
     if (hasPipeCoverFeature(entity)) {
         func = appendToFunc(entity, func)

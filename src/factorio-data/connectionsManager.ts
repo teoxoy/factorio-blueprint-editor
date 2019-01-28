@@ -1,4 +1,4 @@
-import { Blueprint } from './blueprint'
+import Blueprint from './blueprint'
 import Immutable from 'immutable'
 
 export class ConnectionsManager {

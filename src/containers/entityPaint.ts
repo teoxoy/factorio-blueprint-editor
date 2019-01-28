@@ -229,7 +229,7 @@ export class EntityPaintContainer extends PIXI.Container {
             isUB ? this.directionType : undefined
         )
         if (res) {
-            const ec = new EntityContainer(res)
+            const ec = new EntityContainer(G.bp.entity(res))
             if (ec.areaVisualization) {
                 if (ec.areaVisualization instanceof PIXI.Sprite) {
                     ec.areaVisualization.visible = true

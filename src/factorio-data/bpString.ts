@@ -2,7 +2,7 @@ import pako from 'pako'
 import Ajv from 'ajv'
 import blueprintSchema from '../blueprintSchema.json'
 import FD from 'factorio-data'
-import { Blueprint } from './blueprint'
+import Blueprint from './blueprint'
 import { Book } from './book'
 
 const validate = new Ajv()

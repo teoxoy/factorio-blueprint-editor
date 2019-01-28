@@ -1,10 +1,11 @@
-import { Blueprint } from './blueprint'
+import Blueprint from './blueprint'
 import Immutable from 'immutable'
 import spriteDataBuilder from './spriteDataBuilder'
 import FD from 'factorio-data'
 import util from '../common/util'
 import { Area } from './positionGrid'
 import { EventEmitter } from 'events'
+import * as History from './history'
 
 /** Entity Base Class */
 export default class Entity extends EventEmitter {
@@ -15,13 +16,20 @@ export default class Entity extends EventEmitter {
     /** Field to hold raw entity */
     private m_rawEntity: BPS.IEntity
 
-    constructor(m_rawEntity: any, BP: Blueprint) {
+    /**
+     * Construct Entity Base Class
+     * @param rawEntity Raw entity object
+     * @param blueprint Reference to blueprint
+     */
+    constructor(rawEntity: BPS.IEntity, blueprint: Blueprint) {
         super()
-        this.m_rawEntity = m_rawEntity /* tslint:disable-line:no-unsafe-any */
+        this.m_rawEntity = rawEntity
+        this.m_BP = blueprint
+    }
 
-        this.m_BP = BP
-        //this.m_BP.on('undo', this.onBpHistory)
-        //this.m_BP.on('redo', this.onBpHistory)
+    /** Return reference to blueprint */
+    public get Blueprint(): Blueprint {
+        return this.m_BP
     }
 
     /** Entity Number */
@@ -30,36 +38,58 @@ export default class Entity extends EventEmitter {
     /** Entity Name */
     get name(): string { return this.m_rawEntity.name }
 
-    get type() { return FD.entities[this.name].type }
-    get entityData() { return FD.entities[this.name] }
-    get recipeData() { return FD.recipes[this.name] }
-    get itemData() { return FD.items[this.name] }
+    get type(): string { return FD.entities[this.name].type }
+    get entityData(): FD.Entity { return FD.entities[this.name] }
+    get recipeData(): FD.Recipe { return FD.recipes[this.name] }
+    get itemData(): FD.Item { return FD.items[this.name] }
     get size() { return util.switchSizeBasedOnDirection(this.entityData.size, this.direction) }
 
     get position() { return this.m_rawEntity.position }
 
     get direction() { return this.m_rawEntity.direction || 0 }
     set direction(direction: number) {
-        this.bpOperation(
-            `Set entity direction to ${direction}`,
-            entities => entities.setIn([this.entity_number, 'direction'], direction)
-        )
-        this.emit('direction', this)
+        if (this.m_rawEntity.direction === direction) {
+            return
+        }
+
+        History
+            .updateValue(this.m_rawEntity, ['direction'], direction, `Changed direction to '${direction}'`,
+                { entity_number: this.entity_number, type: 'upd' })
+            .emit(() => this.emit('direction'))
     }
 
+    /** Direction Type (input|output) for underground belts */
     get directionType() { return this.m_rawEntity.type }
+    set directionType(type: 'input' | 'output') {
+        if (this.m_rawEntity.type === type) {
+            return
+        }
+
+        History
+            .updateValue(this.m_rawEntity, ['type'], type, `Changed direction type to '${type}'`,
+                { entity_number: this.m_rawEntity.entity_number, type: 'upd' }, false)
+            .emit(() => this.emit('directionType'))
+    }
+
+    /** Entity recipe */
     get recipe() { return this.m_rawEntity.recipe }
+    set recipe(recipe: string) {
+        if (this.m_rawEntity.recipe === recipe) {
+            return
+        }
 
-    set recipe(recipeName: string) {
-        if (this.recipe === recipeName) return
+        History.updateValue(this.m_rawEntity, ['recipe'], recipe, `Changed recipe to '${recipe}`,
+            { type: 'upd', entity_number: this.entity_number })
+        this.emit('recipe')
 
+        /*
         this.bpOperation(
             'Changed recipe', entities => (entities.withMutations(map => {
-                map.setIn([this.entity_number, 'recipe'], recipeName)
+                map.setIn([this.entity_number, 'recipe'], recipe)
 
                 const modules = this.modules
                     .map(k => FD.items[k])
-                    .filter(item => !(item.limitation && !item.limitation.includes(recipeName)))
+                    .filter(item => !(item.limitation && !item.limitation.includes(recipe)))
                     .map(item => item.name)
 
                 if (!util.equalArrays(this.modules, modules)) {
@@ -67,7 +97,7 @@ export default class Entity extends EventEmitter {
                 }
             })
             ))
-        this.emit('recipe', this)
+        */
     }
 
     /** Recipes this entity can accept */
@@ -137,7 +167,7 @@ export default class Entity extends EventEmitter {
             'Changed modules',
             entities => entities.setIn([this.entity_number, 'items'], Entity.moduleArrayToImmutableMap(modules))
         )
-        this.emit('modules', this)
+        // this.emit('modules', this)
     }
 
     /* Count of filter slots */
@@ -211,7 +241,7 @@ export default class Entity extends EventEmitter {
             'Changed splitter output priority',
             entities => entities.setIn([this.entity_number, 'input_priority'], Immutable.fromJS(priority))
         )
-        this.emit('splitterInputPriority', this)
+        // this.emit('splitterInputPriority', this)
     }
 
     get splitterOutputPriority(): string {
@@ -222,7 +252,7 @@ export default class Entity extends EventEmitter {
             'Changed splitter output priority',
             entities => entities.setIn([this.entity_number, 'output_priority'], Immutable.fromJS(priority))
         )
-        this.emit('splitterOutputPriority', this)
+        // this.emit('splitterOutputPriority', this)
     }
 
     get splitterFilter(): string {
@@ -236,7 +266,7 @@ export default class Entity extends EventEmitter {
             'Changed splitter filter',
             entities => entities.setIn([this.entity_number, 'filter'], Immutable.fromJS(filter))
         )
-        this.emit('splitterFilter', this)
+        // this.emit('splitterFilter', this)
     }
 
     get inserterFilters(): IFilter[] {
@@ -254,7 +284,7 @@ export default class Entity extends EventEmitter {
             'Changed inserter filter' + (filters.length === 1 ? '' : '(s)'),
             entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
         )
-        this.emit('inserterFilters', this)
+        // this.emit('inserterFilters', this)
     }
 
     get logisticChestFilters(): IFilter[] {
@@ -272,7 +302,7 @@ export default class Entity extends EventEmitter {
             'Changed inserter filters',
             entities => entities.setIn([this.entity_number, 'filters'], Immutable.fromJS(filters))
         )
-        this.emit('logisticChestFilters', this)
+        // this.emit('logisticChestFilters', this)
     }
 
     get constantCombinatorFilters() {
@@ -383,8 +413,8 @@ export default class Entity extends EventEmitter {
                 map.setIn([this.entity_number, 'direction'], direction)
             })
             ))
-        this.emit('name', this)
-        this.emit('direction', this)
+        // this.emit('name', this)
+        // this.emit('direction', this)
     }
 
     move(pos: IPoint) {
@@ -395,7 +425,7 @@ export default class Entity extends EventEmitter {
             entities => entities.setIn([this.entity_number, 'position'], Immutable.fromJS(pos)),
             'mov'
         )
-        this.emit('position', this)
+        // this.emit('position', this)
         this.m_BP.entityPositionGrid.setTileData(this.entity_number)
         return true
     }
@@ -405,7 +435,7 @@ export default class Entity extends EventEmitter {
             (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3')) return false
         if (notMoving && this.m_BP.entityPositionGrid.sharesCell(this.getArea())) return false
         const pr = this.entityData.possible_rotations
-        if (!pr) return false
+        if (pr === undefined) return false
         const newDir = pr[
             (
                 pr.indexOf(this.direction) +
@@ -413,29 +443,21 @@ export default class Entity extends EventEmitter {
             ) % pr.length
         ]
         if (newDir === this.direction) return false
-        this.bpOperation(
-            'Rotated entity',
-            entities => entities.withMutations(map => {
-                map.setIn([this.entity_number, 'direction'], newDir)
-                if (notMoving && this.type === 'underground_belt') {
-                    map.updateIn([this.entity_number, 'type'], directionType =>
-                        directionType === 'input' ? 'output' : 'input'
-                    )
-                }
-                if (!notMoving && this.size.x !== this.size.y) {
-                    // tslint:disable-next-line:no-parameter-reassignment
-                    map.updateIn([this.entity_number, 'position', 'x'], x => x += offset.x)
-                    // tslint:disable-next-line:no-parameter-reassignment
-                    map.updateIn([this.entity_number, 'position', 'y'], y => y += offset.y)
-                }
-            }),
-            'upd',
-            notMoving && pushToHistory,
-            otherEntity
-        )
-        this.emit('direction', this)
-        this.emit('position', this)
-        this.emit('type', this)
+
+        History.startTransaction('Rotated entity')
+        this.direction = newDir
+
+        if (notMoving && this.type === 'underground_belt') {
+            this.directionType = this.directionType === 'input' ? 'output' : 'input'
+        }
+        if (!notMoving && this.size.x !== this.size.y) {
+            History.updateValue(this.m_rawEntity, ['position', 'x'], this.m_rawEntity.position.x += offset.x, undefined,
+                { entity_number: this.m_rawEntity.entity_number, type: 'upd' }, false)
+            History.updateValue(this.m_rawEntity, ['position', 'y'], this.m_rawEntity.position.y += offset.y, undefined,
+                { entity_number: this.m_rawEntity.entity_number, type: 'upd' }, false)
+        }
+        History.commitTransaction()
+
         return true
     }
 
@@ -522,6 +544,6 @@ export default class Entity extends EventEmitter {
         }
 
         this.m_rawEntity = this.m_BP.rawEntities.get(this.entity_number) /* tslint:disable-line:no-unsafe-any */
-        this.emit('changed', this)
+        // this.emit('changed', this)
     }
 }

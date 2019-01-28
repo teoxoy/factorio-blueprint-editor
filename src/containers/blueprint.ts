@@ -161,7 +161,7 @@ export class BlueprintContainer extends PIXI.Container {
 
         // Render Bp
         for (const entity_number of G.bp.rawEntities.keys()) {
-            this.entities.addChild(new EntityContainer(entity_number, false))
+            this.entities.addChild(new EntityContainer(G.bp.entity(entity_number), false))
         }
         G.bp.tiles.forEach((v, k) => {
             this.tiles.addChild(new TileContainer(v, { x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))

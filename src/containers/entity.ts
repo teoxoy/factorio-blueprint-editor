@@ -4,6 +4,7 @@ import spriteDataBuilder from '../factorio-data/spriteDataBuilder'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
+import Entity from '../factorio-data/entity'
 
 const updateGroups = [
     {
@@ -73,7 +74,7 @@ export class EntityContainer extends PIXI.Container {
             newPos.y + size.y / 2 > G.bpArea.height
     }
 
-    static getParts(entity: any, hr: boolean, ignore_connections?: boolean): EntitySprite[] {
+    static getParts(entity: Entity, hr: boolean, ignore_connections?: boolean): EntitySprite[] {
         const anims = spriteDataBuilder.getSpriteData(entity, hr, ignore_connections ? undefined : G.bp)
 
         // const icon = new PIXI.Sprite(G.iconSprites['icon:' + FD.entities[entity.name].icon.split(':')[1]])
@@ -111,21 +112,21 @@ export class EntityContainer extends PIXI.Container {
         return parts
     }
 
-    entity_number: number
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
     entityInfo: PIXI.Container
     entitySprites: EntitySprite[]
 
-    constructor(entity_number: number, sort = true) {
+    private readonly m_Entity: Entity
+
+    constructor(entity: Entity, sort = true) {
         super()
-        this.entity_number = entity_number
+        this.m_Entity = entity
 
-        EntityContainer.mappings.set(entity_number, this)
+        EntityContainer.mappings.set(this.m_Entity.entity_number, this)
 
-        const entity = G.bp.entity(entity_number)
         this.position.set(
-            entity.position.x * 32,
-            entity.position.y * 32
+            this.m_Entity.position.x * 32,
+            this.m_Entity.position.y * 32
         )
 
         this.interactive = true
@@ -134,10 +135,14 @@ export class EntityContainer extends PIXI.Container {
 
         this.entitySprites = []
 
-        this.areaVisualization = G.BPC.underlayContainer.createNewArea(entity.name, this.position)
-        this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.entity_number, this.position)
+        this.areaVisualization = G.BPC.underlayContainer.createNewArea(this.m_Entity.name, this.position)
+        this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entity_number, this.position)
 
         this.redraw(false, sort)
+    }
+
+    public get entity(): Entity {
+        return this.m_Entity
     }
 
     destroy() {
@@ -147,20 +152,19 @@ export class EntityContainer extends PIXI.Container {
         for (const s of this.entitySprites) s.destroy()
 
         super.destroy()
-        EntityContainer.mappings.delete(this.entity_number)
+        EntityContainer.mappings.delete(this.m_Entity.entity_number)
 
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.overlayContainer.hideCursorBox()
         G.BPC.overlayContainer.hideUndergroundLines()
 
-        if (this.entityInfo) this.entityInfo.destroy()
+        if (this.entityInfo !== undefined) this.entityInfo.destroy()
     }
 
     checkBuildable() {
         const position = EntityContainer.getGridPosition(this.position)
-        const entity = G.bp.entity(this.entity_number)
-        if (!EntityContainer.isContainerOutOfBpArea(position, entity.size) &&
-            G.bp.entityPositionGrid.checkNoOverlap(entity.name, entity.direction, position)
+        if (!EntityContainer.isContainerOutOfBpArea(position, this.m_Entity.size) &&
+            G.bp.entityPositionGrid.checkNoOverlap(this.m_Entity.name, this.m_Entity.direction, position)
         ) {
             G.BPC.movingEntityFilter.red = 0.4
             G.BPC.movingEntityFilter.green = 1
@@ -171,17 +175,16 @@ export class EntityContainer extends PIXI.Container {
     }
 
     rotate(ccw = false) {
-        const entity = G.bp.entity(this.entity_number)
-        let otherEntity
-        if (G.currentMouseState === G.mouseStates.NONE && entity.type === 'underground_belt') {
+        let otherEntity: number
+        if (G.currentMouseState === G.mouseStates.NONE && this.m_Entity.type === 'underground_belt') {
             otherEntity = G.bp.entityPositionGrid.findEntityWithSameNameAndDirection(
-                entity.name, entity.direction, entity.position,
-                entity.directionType === 'input' ? entity.direction : (entity.direction + 4) % 8,
-                entity.entityData.max_distance
+                this.m_Entity.name, this.m_Entity.direction, this.m_Entity.position,
+                this.m_Entity.directionType === 'input' ? this.m_Entity.direction : (this.m_Entity.direction + 4) % 8,
+                this.m_Entity.entityData.max_distance
             )
-            if (typeof otherEntity === 'number') {
+            if (otherEntity !== undefined) {
                 const oe = G.bp.entity(otherEntity)
-                if (oe.directionType === entity.directionType) {
+                if (oe.directionType === this.m_Entity.directionType) {
                     otherEntity = undefined
                 } else {
                     oe.rotate(G.currentMouseState === G.mouseStates.NONE, { x: 0, y: 0 }, false)
@@ -191,12 +194,11 @@ export class EntityContainer extends PIXI.Container {
         }
 
         const offset = G.gridData.calculateRotationOffset(this.position)
-        if (G.bp.entity(this.entity_number).rotate(G.currentMouseState === G.mouseStates.NONE, offset, true, otherEntity, ccw)) {
-            const entity = G.bp.entity(this.entity_number)
-            if (G.currentMouseState === G.mouseStates.MOVING && entity.size.x !== entity.size.y) {
+        if (this.m_Entity.rotate(G.currentMouseState === G.mouseStates.NONE, offset, true, otherEntity, ccw)) {
+            if (G.currentMouseState === G.mouseStates.MOVING && this.m_Entity.size.x !== this.m_Entity.size.y) {
                 this.x += offset.x * 32
                 this.y += offset.y * 32
-                const pos = EntityContainer.getPositionFromData(this.position, entity.size)
+                const pos = EntityContainer.getPositionFromData(this.position, this.m_Entity.size)
                 this.position.set(pos.x, pos.y)
 
                 G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
@@ -205,31 +207,31 @@ export class EntityContainer extends PIXI.Container {
             this.redraw(G.currentMouseState === G.mouseStates.MOVING)
             if (G.currentMouseState === G.mouseStates.NONE) this.redrawSurroundingEntities()
 
-            G.BPC.overlayContainer.updateCursorBoxSize(entity.size.x, entity.size.y)
+            G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
             this.updateUndergroundLines()
 
             if (G.BPC.movingContainer === this) this.checkBuildable()
 
             this.redrawEntityInfo()
-            G.BPC.wiresContainer.update(this.entity_number)
+            G.BPC.wiresContainer.update(this.m_Entity.entity_number)
         }
     }
 
     updateUndergroundLines() {
-        const entity = G.bp.entity(this.entity_number)
         G.BPC.overlayContainer.updateUndergroundLines(
-            entity.name,
+            this.m_Entity.name,
             { x: this.position.x / 32, y: this.position.y / 32 },
-            entity.direction,
-            entity.directionType === 'output' || entity.name === 'pipe_to_ground' ? (entity.direction + 4) % 8 : entity.direction
+            this.m_Entity.direction,
+            this.m_Entity.directionType === 'output' || this.m_Entity.name === 'pipe_to_ground' ?
+                (this.m_Entity.direction + 4) % 8 :
+                this.m_Entity.direction
         )
     }
 
     changeRecipe(recipeName: string) {
-        const entity = G.bp.entity(this.entity_number)
-        entity.recipe = recipeName
+        this.m_Entity.recipe = recipeName
         this.redrawEntityInfo()
-        if (entity.name === 'chemical_plant' || entity.assemblerCraftsWithFluid || G.bp.entity(this.entity_number).assemblerCraftsWithFluid) {
+        if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.assemblerCraftsWithFluid || this.m_Entity.assemblerCraftsWithFluid) {
             this.redraw()
             this.redrawSurroundingEntities()
         }
@@ -241,57 +243,53 @@ export class EntityContainer extends PIXI.Container {
         const sourceEntity = G.bp.entity(sourceEntityNumber)
 
         // PASTE RECIPE
-        let entity = G.bp.entity(this.entity_number)
-        const aR = entity.acceptedRecipes
-        if (aR.length) {
-            const RECIPE = sourceEntity.recipe && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
+        const aR = this.m_Entity.acceptedRecipes
+        if (aR.length > 0) {
+            const RECIPE = sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
             this.changeRecipe(RECIPE)
         }
 
         // PASTE MODULES
-        entity = G.bp.entity(this.entity_number)
-        const aM = entity.acceptedModules
-        if (aM.length) {
-            if (sourceEntity.modules.length) {
-                entity.modules = sourceEntity.modules
+        const aM = this.m_Entity.acceptedModules
+        if (aM.length > 0) {
+            if (sourceEntity.modules.length > 0) {
+                this.m_Entity.modules = sourceEntity.modules
                     .filter(m => aM.includes(m))
-                    .slice(0, entity.moduleSlots)
+                    .slice(0, this.m_Entity.moduleSlots)
             } else {
-                entity.modules = []
+                this.m_Entity.modules = []
             }
         }
 
         // TODO: pasting filters should be handled differently for each type of filer
         // PASTE FILTERS
-        const aF = entity.acceptedFilters
-        if (aF.length) {
-            if (sourceEntity.filters.length) {
-                entity.filters = sourceEntity.filters
+        const aF = this.m_Entity.acceptedFilters
+        if (aF.length > 0) {
+            if (sourceEntity.filters.length > 0) {
+                this.m_Entity.filters = sourceEntity.filters
                     .filter(f => aF.includes(f.name))
-                    .slice(0, entity.filterSlots)
+                    .slice(0, this.m_Entity.filterSlots)
             } else {
-                entity.filters = []
+                this.m_Entity.filters = []
             }
         }
 
-        if (!!aM || !!aF) this.redrawEntityInfo()
+        this.redrawEntityInfo()
     }
 
     redrawEntityInfo() {
-        const entity = G.bp.entity(this.entity_number)
-        if (entity.moduleSlots !== 0 || entity.type === 'splitter' ||
-            entity.entityData.crafting_categories !== undefined || entity.type === 'mining_drill' ||
-            entity.type === 'boiler' || entity.type === 'generator' ||
-            entity.name === 'pump' || entity.name === 'offshore_pump' ||
-            entity.name === 'arithmetic_combinator' || entity.name === 'decider_combinator' ||
-            entity.name === 'filter_inserter' || entity.name === 'stack_filter_inserter' ||
-            entity.name === 'splitter' || entity.name === 'fast_splitter' || entity.name === 'express_splitter'
-
+        if (this.m_Entity.moduleSlots !== 0 || this.m_Entity.type === 'splitter' ||
+            this.m_Entity.entityData.crafting_categories !== undefined || this.m_Entity.type === 'mining_drill' ||
+            this.m_Entity.type === 'boiler' || this.m_Entity.type === 'generator' ||
+            this.m_Entity.name === 'pump' || this.m_Entity.name === 'offshore_pump' ||
+            this.m_Entity.name === 'arithmetic_combinator' || this.m_Entity.name === 'decider_combinator' ||
+            this.m_Entity.name === 'filter_inserter' || this.m_Entity.name === 'stack_filter_inserter' ||
+            this.m_Entity.name === 'splitter' || this.m_Entity.name === 'fast_splitter' || this.m_Entity.name === 'express_splitter'
         ) {
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()
             }
-            this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.entity_number, this.position)
+            this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entity_number, this.position)
         }
     }
 
@@ -300,22 +298,22 @@ export class EntityContainer extends PIXI.Container {
 
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
 
-        if (this.entityInfo) this.entityInfo.position = this.position
+        if (this.entityInfo !== undefined) this.entityInfo.position = this.position
 
         G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
         G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
         this.updateUndergroundLines()
 
-        G.BPC.wiresContainer.update(this.entity_number)
+        G.BPC.wiresContainer.update(this.m_Entity.entity_number)
 
         this.checkBuildable()
     }
 
     removeContainer() {
-        G.BPC.wiresContainer.remove(this.entity_number)
-        G.bp.entityPositionGrid.removeTileData(this.entity_number, false)
+        G.BPC.wiresContainer.remove(this.m_Entity.entity_number)
+        G.bp.entityPositionGrid.removeTileData(this.m_Entity.entity_number, false)
         this.redrawSurroundingEntities()
-        G.bp.removeEntity(this.entity_number,
+        G.bp.removeEntity(this.m_Entity.entity_number,
             entity_number => EntityContainer.mappings.get(entity_number).redraw()
         )
         G.BPC.hoverContainer = undefined
@@ -327,8 +325,7 @@ export class EntityContainer extends PIXI.Container {
     moveAtCursor() {
         const position = G.gridData.position
         if (G.BPC.movingContainer === this && G.currentMouseState === G.mouseStates.MOVING) {
-            const entity = G.bp.entity(this.entity_number)
-            switch (entity.name) {
+            switch (this.m_Entity.name) {
                 case 'straight_rail':
                 case 'curved_rail':
                 case 'train_stop':
@@ -336,7 +333,7 @@ export class EntityContainer extends PIXI.Container {
                     this.y = position.y - (position.y + G.railMoveOffset.y * 32) % 64 + 32
                     break
                 default:
-                    const pos = EntityContainer.getPositionFromData(position, entity.size)
+                    const pos = EntityContainer.getPositionFromData(position, this.m_Entity.size)
                     this.position.set(pos.x, pos.y)
             }
 
@@ -348,8 +345,7 @@ export class EntityContainer extends PIXI.Container {
         if (!G.BPC.movingContainer && !G.BPC.paintContainer) {
             G.BPC.hoverContainer = this
 
-            const entity = G.bp.entity(this.entity_number)
-            G.BPC.overlayContainer.updateCursorBoxSize(entity.size.x, entity.size.y)
+            G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
             G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
             G.BPC.overlayContainer.showCursorBox()
             G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
@@ -369,14 +365,14 @@ export class EntityContainer extends PIXI.Container {
     }
 
     pickUpEntityContainer() {
-        G.bp.entityPositionGrid.removeTileData(this.entity_number, false)
+        G.bp.entityPositionGrid.removeTileData(this.m_Entity.entity_number, false)
         this.redraw(true)
         this.redrawSurroundingEntities()
         G.BPC.movingContainer = this
         G.currentMouseState = G.mouseStates.MOVING
 
         // Move container to cursor
-        const pos = EntityContainer.getPositionFromData(G.gridData.position, G.bp.entity(this.entity_number).size)
+        const pos = EntityContainer.getPositionFromData(G.gridData.position, this.m_Entity.size)
         if (this.position.x !== pos.x || this.position.y !== pos.y) {
             this.position.set(pos.x, pos.y)
             this.updateVisualStuff()
@@ -384,16 +380,15 @@ export class EntityContainer extends PIXI.Container {
 
         for (const s of this.entitySprites) s.moving = true
         G.BPC.sortEntities()
-        G.BPC.underlayContainer.activateRelatedAreas(G.bp.entity(this.entity_number).name)
+        G.BPC.underlayContainer.activateRelatedAreas(this.m_Entity.name)
 
         G.BPC.updateOverlay()
     }
 
     placeDownEntityContainer() {
-        const entity = G.bp.entity(this.entity_number)
         const position = EntityContainer.getGridPosition(this.position)
-        if (EntityContainer.isContainerOutOfBpArea(position, entity.size)) return
-        if (G.currentMouseState === G.mouseStates.MOVING && entity.move(position)) {
+        if (EntityContainer.isContainerOutOfBpArea(position, this.m_Entity.size)) return
+        if (G.currentMouseState === G.mouseStates.MOVING && this.m_Entity.move(position)) {
             G.BPC.movingContainer = undefined
             G.currentMouseState = G.mouseStates.NONE
 
@@ -409,17 +404,16 @@ export class EntityContainer extends PIXI.Container {
     }
 
     redrawSurroundingEntities() {
-        const entity = G.bp.entity(this.entity_number)
-        if (!updateGroups[entity.name]) return
-        if (entity.name === 'straight_rail') {
-            G.bp.entityPositionGrid.foreachOverlap(entity.getArea(), (entnr: number) => {
+        if (!updateGroups[this.m_Entity.name]) return
+        if (this.m_Entity.name === 'straight_rail') {
+            G.bp.entityPositionGrid.foreachOverlap(this.m_Entity.getArea(), (entnr: number) => {
                 const ent = G.bp.entity(entnr)
                 if (ent.name === 'gate') EntityContainer.mappings.get(ent.entity_number).redraw()
             })
         } else {
             const redrawnEntities: number[] = []
-            updateGroups[entity.name].forEach((updateGroup: string[]) => {
-                G.bp.entityPositionGrid.getSurroundingEntities(entity.getArea(), (entnr: number) => {
+            updateGroups[this.m_Entity.name].forEach((updateGroup: string[]) => {
+                G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea(), (entnr: number) => {
                     const ent = G.bp.entity(entnr)
                     if (updateGroup.includes(ent.name) && !redrawnEntities.includes(entnr)) {
                         EntityContainer.mappings.get(ent.entity_number).redraw()
@@ -431,11 +425,9 @@ export class EntityContainer extends PIXI.Container {
     }
 
     redraw(ignore_connections?: boolean, sort = true) {
-        const entity = G.bp.entity(this.entity_number)
-
         for (const s of this.entitySprites) s.destroy()
         this.entitySprites = []
-        for (const s of EntityContainer.getParts(entity, G.hr, ignore_connections)) {
+        for (const s of EntityContainer.getParts(this.m_Entity, G.hr, ignore_connections)) {
             if (G.BPC.movingContainer === this) s.moving = true
             s.setPosition(this.position)
             this.entitySprites.push(s)
@@ -444,10 +436,10 @@ export class EntityContainer extends PIXI.Container {
         if (sort) G.BPC.sortEntities()
 
         this.hitArea = new PIXI.Rectangle(
-            -entity.size.x * 16,
-            -entity.size.y * 16,
-            entity.size.x * 32,
-            entity.size.y * 32
+            -this.m_Entity.size.x * 16,
+            -this.m_Entity.size.y * 16,
+            this.m_Entity.size.x * 32,
+            this.m_Entity.size.y * 32
         )
     }
 }

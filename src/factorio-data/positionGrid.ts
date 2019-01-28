@@ -1,4 +1,4 @@
-import { Blueprint } from './blueprint'
+import Blueprint from './blueprint'
 import util from '../common/util'
 import FD from 'factorio-data'
 import Immutable from 'immutable'
@@ -251,7 +251,7 @@ export class PositionGrid {
         return ent
     }
 
-    findEntityWithSameNameAndDirection(name: string, direction: number, pos: IPoint, searchDirection: number, maxDistance: number) {
+    findEntityWithSameNameAndDirection(name: string, direction: number, pos: IPoint, searchDirection: number, maxDistance: number): number {
         const position = {
             x: Math.floor(pos.x),
             y: Math.floor(pos.y)
@@ -267,12 +267,12 @@ export class PositionGrid {
                 const entity = this.bp.entity(cell)
                 if (entity.name === name) {
                     if (entity.direction === direction) return cell
-                    if ((entity.direction + 4) % 8 === direction) return false
+                    if ((entity.direction + 4) % 8 === direction) return undefined
                 }
             }
         }
 
-        return false
+        return undefined
     }
 
     sharesCell(area: Area) {

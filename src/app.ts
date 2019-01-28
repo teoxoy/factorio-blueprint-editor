@@ -19,7 +19,7 @@ import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './panels/toolbar'
 import { QuickbarContainer } from './panels/quickbar'
 import { InfoContainer } from './panels/info'
-import { Blueprint } from './factorio-data/blueprint'
+import Blueprint from './factorio-data/blueprint'
 import FileSaver from 'file-saver'
 import initDoorbell from './doorbell'
 import actions from './actions'
@@ -358,8 +358,8 @@ actions.moveEntity.bind(() => {
 actions.openEntityGUI.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
         if (G.currentMouseState === G.mouseStates.NONE) {
-            const editor = Editors.createEditor(G.BPC.hoverContainer.entity_number)
-            if (!editor) return
+            const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
+            if (editor === undefined) return
 
             // If there are dialogs open, close all of them
             if (G.openDialogs.length > 0) {
