@@ -1,7 +1,3 @@
-import { remove } from "immutable";
-import { type } from "os";
-import T from "ramda/es/T";
-
 /*
  * Component to store history for undo / redo in the user interface
  * ====================================================================================================
