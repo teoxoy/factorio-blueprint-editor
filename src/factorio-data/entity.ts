@@ -322,8 +322,7 @@ export default class Entity extends EventEmitter {
     }
 
     get connections() {
-        const conn = this.m_rawEntity.connections
-        if (conn === undefined) return
+        const conn = this.m_rawEntity.connections !== undefined ? this.m_rawEntity.connections : {}
 
         if (conn['Cu0']) {
             if (!conn['1']) conn['1'] = {}
@@ -357,7 +356,7 @@ export default class Entity extends EventEmitter {
             }
         }
 
-        return conn
+        return Object.keys(conn).length ? conn : undefined
     }
 
     get connectedEntities() {

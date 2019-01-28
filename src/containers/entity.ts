@@ -318,6 +318,8 @@ export class EntityContainer extends PIXI.Container {
         )
         G.BPC.hoverContainer = undefined
 
+        G.BPC.wiresContainer.updatePassiveWires()
+
         G.BPC.updateOverlay()
         this.destroy()
     }

@@ -168,6 +168,7 @@ export class BlueprintContainer extends PIXI.Container {
         })
 
         this.sortEntities()
+        this.wiresContainer.updatePassiveWires()
         this.wiresContainer.drawWires()
         this.updateOverlay()
         this.centerViewport()

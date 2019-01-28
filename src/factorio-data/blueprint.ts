@@ -9,32 +9,6 @@ import generators from './generators'
 import util from '../common/util'
 import * as History from './history'
 
-// TODO: Check if the following extensions for map can be moved to a better place (e.g. extensions/map.ts)
-declare global {
-    interface Map<K, V> { /* tslint:disable-line:interface-name */
-        find(predicate: (value: V, key: K) => boolean): V
-        filter(predicate: (value: V, key: K) => boolean): V[]
-    }
-}
-Map.prototype.find = function <K, V>(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V {
-
-    this.forEach((v, k) => {
-        if (predicate(v, k)) return v
-    })
-
-    return undefined
-}
-Map.prototype.filter = function <K, V>(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V[] {
-
-    const result: V[] = []
-
-    this.forEach((v, k) => {
-        if (predicate(v, k)) result.push(v)
-    })
-
-    return result
-}
-
 /** Blueprint base class */
 export default class Blueprint {
 
@@ -442,7 +416,10 @@ export default class Blueprint {
             entities => entities.withMutations(map => {
                 GP.pumpjacksToRotate.forEach(p => {
                     map.setIn([p.entity_number, 'direction'], p.direction)
-                    if (PUMPJACK_MODULE) map.setIn([p.entity_number, 'items', PUMPJACK_MODULE], 2)
+                    if (PUMPJACK_MODULE) {
+                        map.deleteIn([p.entity_number, 'items'])
+                        map.setIn([p.entity_number, 'items', PUMPJACK_MODULE], 2)
+                    }
                 })
 
                 if (lastGeneratedEntNrs) {
@@ -491,6 +468,7 @@ export default class Blueprint {
         lastGeneratedEntNrs.forEach(id => this.entityPositionGrid.setTileData(id))
         lastGeneratedEntNrs.forEach(id => G.BPC.entities.addChild(new EntityContainer(this.entity(id), false)))
         G.BPC.sortEntities()
+        G.BPC.wiresContainer.updatePassiveWires()
 
         if (!DEBUG) return
 
