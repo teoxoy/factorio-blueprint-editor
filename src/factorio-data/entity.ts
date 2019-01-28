@@ -53,8 +53,7 @@ export default class Entity extends EventEmitter {
         }
 
         History
-            .updateValue(this.m_rawEntity, ['direction'], direction, `Changed direction to '${direction}'`,
-                { entity_number: this.entity_number, type: 'upd' })
+            .updateValue(this.m_rawEntity, ['direction'], direction, `Changed direction to '${direction}'`)
             .emit(() => this.emit('direction'))
     }
 
@@ -66,8 +65,7 @@ export default class Entity extends EventEmitter {
         }
 
         History
-            .updateValue(this.m_rawEntity, ['type'], type, `Changed direction type to '${type}'`,
-                { entity_number: this.m_rawEntity.entity_number, type: 'upd' }, false)
+            .updateValue(this.m_rawEntity, ['type'], type, `Changed direction type to '${type}'`)
             .emit(() => this.emit('directionType'))
     }
 
@@ -78,9 +76,9 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.updateValue(this.m_rawEntity, ['recipe'], recipe, `Changed recipe to '${recipe}`,
-            { type: 'upd', entity_number: this.entity_number })
-        this.emit('recipe')
+        History
+            .updateValue(this.m_rawEntity, ['recipe'], recipe, `Changed recipe to '${recipe}`)
+            .emit(() => this.emit('recipe'))
 
         /*
         this.bpOperation(
@@ -443,17 +441,14 @@ export default class Entity extends EventEmitter {
         ]
         if (newDir === this.direction) return false
 
-        History.startTransaction('Rotated entity')
+        History.startTransaction(`Rotated entity: ${this.type}`)
         this.direction = newDir
-
         if (notMoving && this.type === 'underground_belt') {
             this.directionType = this.directionType === 'input' ? 'output' : 'input'
         }
         if (!notMoving && this.size.x !== this.size.y) {
-            History.updateValue(this.m_rawEntity, ['position', 'x'], this.m_rawEntity.position.x += offset.x, undefined,
-                { entity_number: this.m_rawEntity.entity_number, type: 'upd' }, false)
-            History.updateValue(this.m_rawEntity, ['position', 'y'], this.m_rawEntity.position.y += offset.y, undefined,
-                { entity_number: this.m_rawEntity.entity_number, type: 'upd' }, false)
+            History.updateValue(this.m_rawEntity, ['position', 'x'], this.m_rawEntity.position.x += offset.x)
+            History.updateValue(this.m_rawEntity, ['position', 'y'], this.m_rawEntity.position.y += offset.y)
         }
         History.commitTransaction()
 

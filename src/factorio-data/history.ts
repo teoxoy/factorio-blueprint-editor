@@ -1,3 +1,7 @@
+import { remove } from "immutable";
+import { type } from "os";
+import T from "ramda/es/T";
+
 /*
  * Component to store history for undo / redo in the user interface
  * ====================================================================================================
@@ -20,7 +24,7 @@
  * @example Update item of map
  * const m: Map<number, string> = new Map()
  * m.push(1, 'fff')
- * History.updateMap(m, 1, undefined, 'Updated Map Item')
+ * History.updateMap(m, 1, 'updated fff', 'Updated Map Item')
  *
  * @example Transaction of 2 actions and naming of transaction
  * const o = { firstName: 'test first name', lastName: 'test last name'}
@@ -57,20 +61,49 @@ interface IValueInfo<V> {
     exists: boolean
 }
 
+/** Private interface to be able to use the entity_number from provided object */
+interface IEntityNumber {
+    entity_number: number
+}
+
 /** Interface for providing additional data for action */
 interface IHistoryData {
-    readonly type: 'init' | 'add' | 'del' | 'mov' | 'upd'
     readonly entity_number: number
+    readonly type: 'init' | 'add' | 'del' | 'mov' | 'upd'
     readonly other_entity?: number
 }
 
-/** Interface for emitting follow-up actions */
-interface IHistoryEmit {
-    emit(f: () => void): IHistoryEmit
+/** Interface for further enhancing actions */
+interface IHistoryOptions {
+    /** Change type of action */
+    type(type: 'init' | 'add' | 'del' | 'mov' | 'upd'): IHistoryOptions
+
+    /** Privde other/related entity number */
+    other_entity(other_entity: number): IHistoryOptions
+
+    /** Emit function after executing action */
+    emit(f: () => void): IHistoryOptions
+}
+
+/** Implementation for IHistoryData interface */
+class HistoryData implements IHistoryData {
+
+    /** Entity number */
+    public entity_number: number
+
+    /** Action type */
+    public type: 'init' | 'add' | 'del' | 'mov' | 'upd' = 'upd'
+
+    /** Other entity */
+    public other_entity?: number
+
+    constructor(entity_number: number) {
+        this.entity_number = entity_number
+    }
 }
 
 /** Private class for historical actions */
-class HistoryAction<V> implements IHistoryAction, IHistoryEmit {
+class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
 
     /** Field to store old value (=overwritten value) */
     private readonly m_OldValue: IValueInfo<V>
@@ -79,7 +112,7 @@ class HistoryAction<V> implements IHistoryAction, IHistoryEmit {
     private readonly m_NewValue: IValueInfo<V>
 
     /** Field to store data associated with historical change */
-    private readonly m_Data: IHistoryData
+    private readonly m_Data: HistoryData
 
     /** Field to store apply value action */
     private readonly m_Apply: (value: IValueInfo<V>) => void
@@ -87,7 +120,7 @@ class HistoryAction<V> implements IHistoryAction, IHistoryEmit {
     /** Field to store functions to emit after execution of action */
     private readonly m_Emits: Array<(() => void)>
 
-    constructor(oldValue: IValueInfo<V>, newValue: IValueInfo<V>, data: IHistoryData, apply: (value: IValueInfo<V>) => void) {
+    constructor(oldValue: IValueInfo<V>, newValue: IValueInfo<V>, data: HistoryData, apply: (value: IValueInfo<V>) => void) {
         this.m_OldValue = oldValue
         this.m_NewValue = newValue
         this.m_Data = data
@@ -114,8 +147,20 @@ class HistoryAction<V> implements IHistoryAction, IHistoryEmit {
         return this.m_Data
     }
 
-    /** Assign function to execute (emit) after exeuction of action */
-    public emit(f: () => void): IHistoryEmit {
+    /** Change type of action */
+    public type(type: 'init' | 'add' | 'del' | 'mov' | 'upd'): IHistoryOptions {
+        this.m_Data.type = type
+        return this
+    }
+
+    /** Privde other/related entity number */
+    public other_entity(other_entity: number): IHistoryOptions {
+        this.m_Data.other_entity = other_entity
+        return this
+    }
+
+    /** Emit function after executing action */
+    public emit(f: () => void): IHistoryOptions {
         this.m_Emits.push(f)
         return this
     }
@@ -192,11 +237,12 @@ const s_HistoryEntries: HistoryEntry[] = []
 let s_Transaction: HistoryEntry
 
 /** Perform update value action on object and store in history  */
-function updateValue<T, V>(target: T, path: string[], value: V, text?: string, data?: IHistoryData, remove: boolean = false): IHistoryEmit {
+function updateValue<T extends IEntityNumber, V>(
+    target: T, path: string[], value: V, text?: string, remove: boolean = false): IHistoryOptions {
 
     const oldValue: IValueInfo<V> = s_GetValue<V>(target, path)
-    const newValue: IValueInfo<V> = { value, exists: remove ? false : true }
-
+    const newValue: IValueInfo<V> = { value, exists: !remove }
+    const data: HistoryData = new HistoryData(target.entity_number)
     const transaction: HistoryEntry = (s_Transaction !== undefined) ? s_Transaction : new HistoryEntry(text)
 
     const historyAction: HistoryAction<V> = new HistoryAction(oldValue, newValue, data, (v: IValueInfo<V>) => {
@@ -224,22 +270,23 @@ function updateValue<T, V>(target: T, path: string[], value: V, text?: string, d
 }
 
 /** Perform change to map and store in history */
-function updateMap<K, V>(targetMap: Map<K, V>, key: K, value: V, text?: string, data?: IHistoryData, remove: boolean = false): IHistoryEmit {
+function updateMap<K extends number, V extends IEntityNumber>(
+    target: Map<K, V>, key: K, value: V, text?: string, remove: boolean = false): IHistoryOptions {
 
-    const oldValue: IValueInfo<V> = targetMap.has(key) ?
-        { value: targetMap.get(key), exists: true } :
+    const oldValue: IValueInfo<V> = target.has(key) ?
+        { value: target.get(key), exists: true } :
         { value: undefined, exists: false }
-    const newValue: IValueInfo<V> = { value, exists: remove ? false : true }
-
+    const newValue: IValueInfo<V> = { value, exists: !remove }
+    const data: IHistoryData = new HistoryData(key)
     const transaction: HistoryEntry = (s_Transaction !== undefined) ? s_Transaction : new HistoryEntry(text)
 
     const historyAction: HistoryAction<V> = new HistoryAction(oldValue, newValue, data, (v: IValueInfo<V>) => {
         if (!v.exists) {
-            if (targetMap.has(key)) {
-                targetMap.delete(key)
+            if (target.has(key)) {
+                target.delete(key)
             }
         } else {
-            targetMap.set(key, v.value)
+            target.set(key, v.value)
         }
     })
     transaction.push(historyAction)
@@ -359,7 +406,7 @@ function s_CommitTransaction(transaction: HistoryEntry) {
 
 export {
     IHistoryData,
-    IHistoryEmit,
+    IHistoryOptions,
     updateValue,
     updateMap,
     canUndo,

@@ -244,7 +244,7 @@ export default class Blueprint {
         if (directionType === undefined) delete entity_data.type
 
         const entity: Entity = new Entity(entity_data as BPS.IEntity, this)
-        History.updateMap(this.rawEntities, entity_number, entity, 'Added new entity', { entity_number, type: 'add' })
+        History.updateMap(this.rawEntities, entity_number, entity, `Added entity: ${entity.type}`).type('add')
 
         this.entityPositionGrid.setTileData(entity_number)
 
@@ -254,10 +254,11 @@ export default class Blueprint {
     removeEntity(entity_number: number, redrawCb?: (entity_number: number) => void) {
         this.entityPositionGrid.removeTileData(entity_number)
 
-        const entitiesToModify = this.entity(entity_number).hasConnections ? this.connections.removeConnectionData(entity_number) : []
+        const entity: Entity = this.entity(entity_number)
+        const entitiesToModify = entity.hasConnections ? this.connections.removeConnectionData(entity_number) : []
 
-        History.startTransaction('Deleted entity')
-        History.updateMap(this.rawEntities, entity_number, undefined, 'Deleted entity', { entity_number, type: 'del' }, true)
+        History.startTransaction(`Deleted entity: ${entity.type}`)
+        History.updateMap(this.rawEntities, entity_number, undefined, undefined, true).type('del')
         for (const entityToModify of entitiesToModify) {
             const connections = this.entity(entityToModify.entity_number).connections
             const a = connections.size === 1
@@ -265,20 +266,16 @@ export default class Blueprint {
             const c = connections[entityToModify.side][entityToModify.color].size === 1
             if (a && b && c) {
                 History.updateValue(this.entity(entity_number),
-                    ['connections'],
-                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true)
+                    ['connections'], undefined, undefined, true)
             } else if (b && c) {
                 History.updateValue(this.entity(entity_number),
-                    ['connections', entityToModify.side],
-                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true)
+                    ['connections', entityToModify.side], undefined, undefined, true)
             } else if (c) {
                 History.updateValue(this.entity(entity_number),
-                    ['connections', entityToModify.side, entityToModify.color],
-                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true)
+                    ['connections', entityToModify.side, entityToModify.color], undefined, undefined, true)
             } else {
                 History.updateValue(this.entity(entity_number),
-                    ['connections', entityToModify.side, entityToModify.color, entityToModify.index.toString()],
-                    undefined, undefined, { entity_number: entityToModify.entity_number, type: 'upd' }, true)
+                    ['connections', entityToModify.side, entityToModify.color, entityToModify.index.toString()], undefined, undefined, true)
             }
         }
         History.commitTransaction()
