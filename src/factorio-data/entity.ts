@@ -3,6 +3,8 @@ import Immutable from 'immutable'
 import factorioData from './factorioData'
 import util from '../common/util'
 import { Area } from './positionGrid'
+import U from './generators/util'
+import G from '../common/globals'
 
 export default (rawEntity: any, BP: Blueprint) => ({
     get entity_number() { return rawEntity.get('entity_number') },
@@ -15,7 +17,41 @@ export default (rawEntity: any, BP: Blueprint) => ({
     get size() { return util.switchSizeBasedOnDirection(this.entityData.size, this.direction) },
 
     get position(): IPoint { return rawEntity.get('position').toJS() },
-    get direction() { return rawEntity.get('direction') || 0 },
+    get direction() {
+        // TODO: find a better way of handling passive wires
+        // maybe generate the connections in blueprint.ts and
+        // store them in the entity.
+        if (this.type === 'electric_pole') {
+            if (!G.BPC.wiresContainer.entNrToConnectedEntNrs) return 0
+            const entNrArr = G.BPC.wiresContainer.entNrToConnectedEntNrs.get(this.entity_number)
+            if (!entNrArr) return 0
+            return getPowerPoleRotation(
+                this.position,
+                entNrArr.map(entNr => BP.entity(entNr).position)
+            )
+        }
+
+        return rawEntity.get('direction') || 0
+
+        function getPowerPoleRotation(centre: IPoint, points: IPoint[]) {
+            const sectorSum = points
+                .map(p => U.getAngle(0, 0, p.x - centre.x, (p.y - centre.y) * -1 /* invert Y axis */))
+                .map(angleToSector)
+                .reduce((acc, sec) => acc + sec, 0)
+
+            return Math.floor(sectorSum / points.length) * 2
+
+            function angleToSector(angle: number) {
+                const cwAngle = 360 - angle
+                const sectorAngle = 360 / 8
+                const offset = sectorAngle * 1.5
+                let newAngle = cwAngle - offset
+                if (Math.sign(newAngle) === -1) newAngle = 360 + newAngle
+                const sector = Math.floor(newAngle / sectorAngle)
+                return (sector % 4) as 0 | 1 | 2 | 3
+            }
+        }
+    },
     get directionType() { return rawEntity.get('type') },
     get recipe() { return rawEntity.get('recipe') },
 

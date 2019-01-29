@@ -39,7 +39,38 @@ export default {
     pointInCircle,
     pointsToLines,
     pointsToTriangles,
-    range
+    range,
+    getAngle,
+    getReflectedPoint,
+    point: findSide
+}
+
+// https://stackoverflow.com/a/38024982
+/** Returns the angle (0-360) anticlockwise from the horizontal for a point on a circle */
+function getAngle(cX: number, cY: number, pX: number, pY: number) {
+    const x = pX - cX
+    const y = pY - cY
+    if (x === 0 && y === 0) return 0
+    const angle = Math.acos(x / Math.sqrt(x * x + y * y)) * 180 / Math.PI
+    if (y < 0) return 360 - angle
+    return angle
+}
+
+function getReflectedPoint(p: IPoint, lp0: IPoint, lp1: IPoint) {
+    // get m and b from 2 points (y = xm + b)
+    const m = (lp0.y - lp1.y) / (lp0.x - lp1.x)
+    const b = lp0.y - lp0.x * m
+
+    const d = (p.x + (p.y - b) * m) / (1 + m ** 2)
+    return {
+        x: 2 * d - p.x,
+        y: 2 * d * m - p.y + 2 * b
+    }
+}
+
+/** Returns 0 if p is on the line, +1 on one side and -1 on the other side. */
+function findSide(p: IPoint, lp0: IPoint, lp1: IPoint) {
+    return Math.sign((lp1.x - lp0.x) * (p.y - lp0.y) - (lp1.y - lp0.y) * (p.x - lp0.x))
 }
 
 /** Creates lines between points based on delaunay triangulation */

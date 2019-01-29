@@ -830,10 +830,12 @@ function generateGraphics(e: any) {
     }
 
     switch (e.type) {
-        case 'electric_pole': return () => [e.pictures]
         case 'furnace': return () => [e.animation.layers[0]]
         case 'container':
         case 'logistic_container': return () => [e.picture]
+
+        case 'electric_pole': return (data: IEntityData) =>
+            [util.duplicateAndSetPropertyUsing(e.pictures, 'x', 'width', data.dir / 2)]
 
         case 'splitter': return (data: IEntityData) => {
             const dir = data.dir
