@@ -85,6 +85,7 @@ export class WiresContainer extends PIXI.Container {
 
     entityWiresMapping: Map<string, PIXI.Sprite[]>
     passiveWiresMapping: Map<string, PIXI.Sprite>
+    entNrToConnectedEntNrs: Map<number, number[]>
 
     constructor() {
         super()
@@ -173,7 +174,8 @@ export class WiresContainer extends PIXI.Container {
         const poles: IPole[] = G.bp.rawEntities
             .filter(e => poleNames.includes(e.name))
             .map(e => ({
-                ...e,
+                entity_number: e.entity_number,
+                name: e.name,
                 x: EntityContainer.mappings.get(e.entity_number).position.x / 32,
                 y: EntityContainer.mappings.get(e.entity_number).position.y / 32
             }))
@@ -228,24 +230,71 @@ export class WiresContainer extends PIXI.Container {
             }
         }
 
+        this.entNrToConnectedEntNrs = finalLines
+            .reduce((map: Map<number, number[]>, line) => {
+                const eNr0 = line[0].entity_number
+                const eNr1 = line[1].entity_number
+
+                const arr0 = map.get(eNr0)
+                if (arr0 && !arr0.includes(eNr1)) arr0.push(eNr1)
+                if (!arr0) map.set(eNr0, [eNr1])
+
+                const arr1 = map.get(eNr1)
+                if (arr1 && !arr1.includes(eNr0)) arr1.push(eNr0)
+                if (!arr1) map.set(eNr1, [eNr0])
+
+                return map
+            }, new Map<number, number[]>())
+
         const finalLinesHashes = finalLines
             .reduce((map, line) => map.set(lineHash(line), line), new Map())
         const toAdd = Array.from(finalLinesHashes.keys()).filter(k => !this.passiveWiresMapping.get(k))
         const toDel = Array.from(this.passiveWiresMapping.keys()).filter(k => !finalLinesHashes.get(k))
 
+        // update rotations
+        const toUpdate: number[] = [...toAdd, ...toDel]
+            .reduce((arr, hash) => {
+                const entNr0 = Number(hash.split('-')[0])
+                const entNr1 = Number(hash.split('-')[1])
+                if (!arr.includes(entNr0)) arr.push(entNr0)
+                if (!arr.includes(entNr1)) arr.push(entNr1)
+                return arr
+            }, [])
+
+        const addWire = (hash: string) => {
+            const sprite = WiresContainer.getWireSprite(Number(hash.split('-')[0]), Number(hash.split('-')[1]), 'copper')
+            this.addChild(sprite)
+            this.passiveWiresMapping.set(hash, sprite)
+        }
+
+        const removeWire = (hash: string) => {
+            this.passiveWiresMapping.get(hash).destroy()
+            this.passiveWiresMapping.delete(hash)
+        }
+
+        toUpdate.forEach(entNr => {
+            const ec = EntityContainer.mappings.get(entNr)
+            if (ec) {
+                // redraw to update direction
+                ec.redraw()
+
+                // redraw connected wires
+                if (this.entNrToConnectedEntNrs.get(entNr)) {
+                    this.entNrToConnectedEntNrs.get(entNr)
+                        .forEach((eNr: number) => {
+                            const hash = lineHash([{ entity_number: eNr }, { entity_number: entNr }])
+                            if (this.passiveWiresMapping.get(hash)) {
+                                removeWire(hash)
+                                addWire(hash)
+                            }
+                        })
+                }
+            }
+        })
+
         // console.log(toAdd, toDel)
 
-        toAdd
-            .forEach(hash => {
-                const sprite = WiresContainer.getWireSprite(Number(hash.split('-')[0]), Number(hash.split('-')[1]), 'copper')
-                this.addChild(sprite)
-                this.passiveWiresMapping.set(hash, sprite)
-            })
-
-        toDel
-            .forEach(hash => {
-                this.passiveWiresMapping.get(hash).destroy()
-                this.passiveWiresMapping.delete(hash)
-            })
+        toAdd.forEach(addWire)
+        toDel.forEach(removeWire)
     }
 }

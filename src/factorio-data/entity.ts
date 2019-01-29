@@ -5,6 +5,8 @@ import Blueprint from './blueprint'
 import spriteDataBuilder from './spriteDataBuilder'
 import { Area } from './positionGrid'
 import * as History from './history'
+import U from './generators/util'
+import G from '../common/globals'
 
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
 // TODO: Optimize within connections property the way how the connections to other entities are found (Try Counter: 0)
@@ -71,7 +73,41 @@ export default class Entity extends EventEmitter {
     }
 
     /** Entity direction */
-    get direction(): number { return this.m_rawEntity.direction !== undefined ? this.m_rawEntity.direction : 0 }
+    get direction(): number {
+        // TODO: find a better way of handling passive wires
+        // maybe generate the connections in blueprint.ts and
+        // store them in the entity.
+        if (this.type === 'electric_pole') {
+            if (!G.BPC.wiresContainer.entNrToConnectedEntNrs) return 0
+            const entNrArr = G.BPC.wiresContainer.entNrToConnectedEntNrs.get(this.entity_number)
+            if (!entNrArr) return 0
+            return getPowerPoleRotation(
+                this.position,
+                entNrArr.map(entNr => this.m_BP.entity(entNr).position)
+            )
+        }
+
+        return this.m_rawEntity.direction !== undefined ? this.m_rawEntity.direction : 0
+
+        function getPowerPoleRotation(centre: IPoint, points: IPoint[]) {
+            const sectorSum = points
+                .map(p => U.getAngle(0, 0, p.x - centre.x, (p.y - centre.y) * -1 /* invert Y axis */))
+                .map(angleToSector)
+                .reduce((acc, sec) => acc + sec, 0)
+
+            return Math.floor(sectorSum / points.length) * 2
+
+            function angleToSector(angle: number) {
+                const cwAngle = 360 - angle
+                const sectorAngle = 360 / 8
+                const offset = sectorAngle * 1.5
+                let newAngle = cwAngle - offset
+                if (Math.sign(newAngle) === -1) newAngle = 360 + newAngle
+                const sector = Math.floor(newAngle / sectorAngle)
+                return (sector % 4) as 0 | 1 | 2 | 3
+            }
+        }
+    }
     set direction(direction: number) {
         if (this.m_rawEntity.direction === direction) { return }
 
