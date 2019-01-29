@@ -48,26 +48,6 @@ for (const p of params) {
     }
 }
 
-// TODO: Check if the following extensions for map can be moved to a better place (e.g. extensions/map.ts)
-Map.prototype.find = function <K, V>(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V {
-
-    this.forEach((v, k) => {
-        if (predicate(v, k)) return v
-    })
-
-    return undefined
-}
-Map.prototype.filter = function <K, V>(this: Map<K, V>, predicate: (value: V, key: K) => boolean): V[] {
-
-    const result: V[] = []
-
-    this.forEach((v, k) => {
-        if (predicate(v, k)) result.push(v)
-    })
-
-    return result
-}
-
 const { guiBPIndex } = initDatGui()
 initDoorbell()
 

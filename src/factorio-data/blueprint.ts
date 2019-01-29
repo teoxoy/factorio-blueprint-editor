@@ -9,6 +9,24 @@ import generators from './generators'
 import util from '../common/util'
 import * as History from './history'
 
+class EntityCollection extends Map<number, Entity> {
+
+    find(predicate: (value: Entity, key: number) => boolean): Entity {
+        this.forEach((v, k) => {
+            if (predicate(v, k)) return v
+        })
+        return undefined
+    }
+
+    filter(predicate: (value: Entity, key: number) => boolean): Entity[] {
+        const result: Entity[] = []
+        this.forEach((v, k) => {
+            if (predicate(v, k)) result.push(v)
+        })
+        return result
+    }
+}
+
 /** Blueprint base class */
 export default class Blueprint {
 
@@ -21,13 +39,13 @@ export default class Blueprint {
     historyIndex: number
     history: IHistoryObject[]
     entityPositionGrid: PositionGrid
-    rawEntities: Map<number, Entity>
+    rawEntities: EntityCollection
 
-    constructor(data?: any) {
+    constructor(data?: BPS.IBlueprint) {
 
         this.name = 'Blueprint'
         this.icons = []
-        this.rawEntities = new Map()
+        this.rawEntities = new EntityCollection()
         this.tiles = Immutable.Map()
         this.version = undefined
         this.next_entity_number = 1
@@ -52,7 +70,8 @@ export default class Blueprint {
 
             if (data.entities !== undefined) {
                 this.next_entity_number = this.rawEntities.size + 1
-                this.rawEntities = new Map<number, Entity>(data.entities.map(v => [v.entity_number, new Entity(v, this)] as [number, Entity]))
+                this.rawEntities = new EntityCollection(data.entities
+                    .map(ent => [ent.entity_number, new Entity(ent, this)] as [number, Entity]))
 
                 // TODO: if entity has placeable-off-grid flag then take the next one
                 const firstEntityTopLeft = this.rawEntities.values().next().value.topLeft()

@@ -317,11 +317,3 @@ namespace BPS {
         label?: string
     }
 }
-
-// TODO: Check if the following extensions for map can be moved to a better place (e.g. extensions/map.ts)
-declare interface Map<K, V> { /* tslint:disable-line:interface-name */
-    find(predicate: (value: V, key: K) => boolean): V
-    filter(predicate: (value: V, key: K) => boolean): V[]
-}
-
-

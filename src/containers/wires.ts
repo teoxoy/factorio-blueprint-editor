@@ -163,7 +163,7 @@ export class WiresContainer extends PIXI.Container {
     updatePassiveWires() {
         interface IPole extends IPoint {
             entity_number: number
-            name: number
+            name: string
         }
 
         const poleNames = Object.keys(FD.entities)
