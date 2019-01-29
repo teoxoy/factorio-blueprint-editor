@@ -789,8 +789,14 @@ function generateGraphics(e: any) {
                 if (conn[1] && conn[2] && conn[3]) return [e.pictures.t_down]
                 if (conn[0] && conn[1] && conn[2]) return [e.pictures.t_right]
                 if (conn[0] && conn[2] && conn[3]) return [e.pictures.t_left]
-                if (conn[0] && conn[2]) return [e.pictures.straight_vertical]
-                if (conn[1] && conn[3]) return [e.pictures.straight_horizontal]
+                if (conn[0] && conn[2]) {
+                    return Math.floor(data.position.y) % 2 === 0 ? [e.pictures.straight_vertical] :
+                        [e.pictures.vertical_window_background, e.pictures.straight_vertical_window]
+                }
+                if (conn[1] && conn[3]) {
+                    return Math.floor(data.position.x) % 2 === 0 ? [e.pictures.straight_horizontal] :
+                        [e.pictures.horizontal_window_background, e.pictures.straight_horizontal_window]
+                }
                 if (conn[0] && conn[1]) return [e.pictures.corner_up_right]
                 if (conn[0] && conn[3]) return [e.pictures.corner_up_left]
                 if (conn[1] && conn[2]) return [e.pictures.corner_down_right]
