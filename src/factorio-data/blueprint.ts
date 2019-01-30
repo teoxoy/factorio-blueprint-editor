@@ -40,7 +40,7 @@ export default class Blueprint {
 
     name: string
     icons: any[]
-    tiles: Immutable.Map<string, string>
+    tiles: Map<string, string>
     version: number
     connections: ConnectionsManager
     next_entity_number: number
@@ -54,14 +54,14 @@ export default class Blueprint {
         this.name = 'Blueprint'
         this.icons = []
         this.entities = new EntityCollection()
-        this.tiles = Immutable.Map()
+        this.tiles = new Map()
         this.version = undefined
         this.next_entity_number = 1
 
         if (data) {
             this.name = data.label
             this.version = data.version
-            if (data.icons) data.icons.forEach((icon: any) => this.icons[icon.index - 1] = icon.signal.name)
+            if (data.icons) data.icons.forEach(icon => this.icons[icon.index - 1] = icon.signal.name)
 
             const offset = {
                 x: G.sizeBPContainer.width / 64,
@@ -69,11 +69,8 @@ export default class Blueprint {
             }
 
             if (data.tiles) {
-                this.tiles = this.tiles.withMutations(map =>
-                    data.tiles.forEach((tile: any) =>
-                        map.set(`${tile.position.x + offset.x + 0.5},${tile.position.y + offset.y + 0.5}`, tile.name)
-                    )
-                )
+                this.tiles = new Map(data.tiles.map(tile =>
+                    [`${tile.position.x + offset.x + 0.5},${tile.position.y + offset.y + 0.5}`, tile.name] as [string, string]))
             }
 
             if (data.entities !== undefined) {
@@ -314,27 +311,28 @@ export default class Blueprint {
     }
 
     createTile(name: string, position: IPoint) {
-        this.tiles = this.tiles.set(`${position.x},${position.y}`, name)
+        this.tiles.set(`${position.x},${position.y}`, name)
     }
 
     removeTile(position: IPoint) {
-        this.tiles = this.tiles.remove(`${position.x},${position.y}`)
+        this.tiles.delete(`${position.x},${position.y}`)
     }
 
     isEmpty() {
-        return this.entities.isEmpty() && this.tiles.isEmpty()
+        return this.entities.isEmpty() && this.tiles.size === 0
     }
 
     // Get corner/center positions
     getPosition(f: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight', xcomp: any, ycomp: any) {
         if (this.isEmpty()) return { x: 0, y: 0 }
 
-        const positions =
-            [...this.entities.keys()]
-                .map(k => this.entities.get(k)[f]()).concat(
-                    [...this.tiles.keys()]
-                        .map(k => ({ x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
-                        .map(p => tileCorners(p)[f]))
+        const positions = [
+            ...[...this.entities.keys()]
+                .map(k => this.entities.get(k)[f]()),
+            ...[...this.tiles.keys()]
+                .map(k => ({ x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
+                .map(p => tileCorners(p)[f])
+        ]
 
         return {
             // tslint:disable-next-line:no-unnecessary-callback-wrapper
@@ -544,15 +542,11 @@ export default class Blueprint {
             this.icons[0] = sortedEntities[0][0]
             if (sortedEntities.length > 1) this.icons[1] = sortedEntities[1][0]
         } else {
-            this.icons[0] = FD.tiles[
-                [...Immutable.Seq(this.tiles)
-                    .reduce((acc, tile) =>
-                        acc.set(tile, acc.has(tile) ? (acc.get(tile) + 1) : 0),
-                        new Map() as Map<string, number>)
-                    .entries()
-                ]
+            const tileName = Array.from(Array.from(this.tiles)
+                .reduce((map, [_, tile]) => map.set(tile, map.has(tile) ? (map.get(tile) + 1) : 0), new Map()))
                     .sort((a, b) => b[1] - a[1])[0][0]
-            ).minable.result
+
+            this.icons[0] = FD.tiles[tileName].minable.result
         }
     }
 
@@ -591,13 +585,14 @@ export default class Blueprint {
             e.position.x -= center.x
             e.position.y -= center.y
         }
-        const tileInfo = this.tiles.map((v, k) => ({
-            position: {
-                x: Number(k.split(',')[0]) - Math.floor(center.x) - 0.5,
-                y: Number(k.split(',')[1]) - Math.floor(center.y) - 0.5
-            },
-            name: v
-        })).valueSeq().toArray()
+        const tileInfo = Array.from(this.tiles)
+            .map(([v, k]) => ({
+                position: {
+                    x: Number(k.split(',')[0]) - Math.floor(center.x) - 0.5,
+                    y: Number(k.split(',')[1]) - Math.floor(center.y) - 0.5
+                },
+                name: v
+            }))
         const iconData = this.icons.map((icon, i) => {
             return { signal: { type: getItemTypeForBp(icon), name: icon }, index: i + 1 }
 
@@ -613,7 +608,7 @@ export default class Blueprint {
             blueprint: {
                 icons: iconData,
                 entities: this.entities.isEmpty() ? undefined : entityInfo,
-                tiles: this.tiles.isEmpty() ? undefined : tileInfo,
+                tiles: this.tiles.size === 0 ? undefined : tileInfo,
                 item: 'blueprint',
                 version: this.version || 0,
                 label: this.name
