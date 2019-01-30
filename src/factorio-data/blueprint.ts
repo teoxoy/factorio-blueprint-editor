@@ -370,6 +370,7 @@ export default class Blueprint {
         let lastGeneratedEntNrs = G.oilOutpostSettings.lastGeneratedEntNrs
 
         const pumpjacks = this.rawEntities.filter(v => v.name === 'pumpjack')
+            .map(p => ({ entity_number: p.entity_number, name: p.name, position: p.position }))
 
         if (pumpjacks.length < 2 || pumpjacks.length > 200) {
             console.error('There should be between 2 and 200 pumpjacks in the BP Area!')
@@ -428,50 +429,51 @@ export default class Blueprint {
 
         T.stop()
 
-        this.operation(0, 'Generated Pipes!',
-            entities => entities.withMutations(map => {
-                GP.pumpjacksToRotate.forEach(p => {
-                    map.setIn([p.entity_number, 'direction'], p.direction)
-                    if (PUMPJACK_MODULE) {
-                        map.deleteIn([p.entity_number, 'items'])
-                        map.setIn([p.entity_number, 'items', PUMPJACK_MODULE], 2)
-                    }
-                })
+        // TODO: Find out why undo doesn't work on this
+        // TEST BP: http://localhost:8080/?source=https://pastebin.com/3ca6a50V
+        History.startTransaction('Generated Oil Outpost!')
 
-                if (lastGeneratedEntNrs) {
-                    lastGeneratedEntNrs.forEach(id => {
-                        if (map.has(id)) {
-                            map.delete(id)
-                            this.entityPositionGrid.removeTileData(id)
-                            EntityContainer.mappings.get(id).destroy()
-                        }
-                    })
+        GP.pumpjacksToRotate.forEach(p => {
+            History.updateValue(this.entity(p.entity_number), ['direction'], p.direction)
+            if (PUMPJACK_MODULE) {
+                History.updateValue(this.entity(p.entity_number), ['items'], {})
+                History.updateValue(this.entity(p.entity_number), ['items', PUMPJACK_MODULE], 2)
+            }
+        })
+
+        if (lastGeneratedEntNrs) {
+            lastGeneratedEntNrs.forEach(entNr => {
+                if (this.rawEntities.has(entNr)) {
+                    History.updateMap(this.rawEntities, entNr, undefined, undefined, true).type('del')
+                    this.entityPositionGrid.removeTileData(entNr)
+                    EntityContainer.mappings.get(entNr).destroy()
                 }
-                lastGeneratedEntNrs = []
+            })
+        }
+        lastGeneratedEntNrs = []
 
-                GP.pipes.forEach(pipe => {
-                    const entity_number = this.next_entity_number++
-                    map.set(entity_number, Immutable.fromJS({ entity_number, ...pipe }))
-                    lastGeneratedEntNrs.push(entity_number)
-                })
+        GP.pipes.forEach(pipe => {
+            const entity_number = this.next_entity_number++
+            History.updateMap(this.rawEntities, entity_number, new Entity({ entity_number, ...pipe }, this)).type('add')
+            lastGeneratedEntNrs.push(entity_number)
+        })
 
-                if (BEACONS) {
-                    GB.beacons.forEach(beacon => {
-                        const entity_number = this.next_entity_number++
-                        map.set(entity_number, Immutable.fromJS({ entity_number, ...beacon, items: { [BEACON_MODULE]: 2 } }))
-                        lastGeneratedEntNrs.push(entity_number)
-                    })
-                }
+        if (BEACONS) {
+            GB.beacons.forEach(beacon => {
+                const entity_number = this.next_entity_number++
+                History.updateMap(this.rawEntities, entity_number,
+                    new Entity({ entity_number, ...beacon, items: { [BEACON_MODULE]: 2 } }, this)).type('add')
+                lastGeneratedEntNrs.push(entity_number)
+            })
+        }
 
-                GPO.poles.forEach(pole => {
-                    const entity_number = this.next_entity_number++
-                    map.set(entity_number, Immutable.fromJS({ entity_number, ...pole }))
-                    lastGeneratedEntNrs.push(entity_number)
-                })
-            }),
-            'upd',
-            false
-        )
+        GPO.poles.forEach(pole => {
+            const entity_number = this.next_entity_number++
+            History.updateMap(this.rawEntities, entity_number, new Entity({ entity_number, ...pole }, this)).type('add')
+            lastGeneratedEntNrs.push(entity_number)
+        })
+
+        History.commitTransaction()
 
         GP.pumpjacksToRotate.forEach(p => {
             const eC = EntityContainer.mappings.get(p.entity_number)

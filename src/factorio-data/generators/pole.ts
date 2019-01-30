@@ -46,7 +46,7 @@ interface IGroup extends IPoint {
     DT = using delaunay triangulation to form lines between x (for optimization)
 */
 export default function generatePoles(
-    entities: Array<{ entity_number: number; position: IPoint; size: number; power: boolean }>
+    entities: Array<{ position: IPoint; size: number; power: boolean }>
 ) {
     const visualizations: Array<{ path: IPoint[]; size: number; alpha: number; color?: number }> = []
     function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number) {

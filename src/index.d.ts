@@ -101,7 +101,7 @@ namespace BPS {
         position: IPoint
 
         /** direction, can be ommited if 0 */
-        direction?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+        direction?: number // 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
         /** direction type, only present if entity is of type underground-belt */
         type?: 'input' | 'output'
         /** recipe name, only present if entity is of type assembling-machine or has fixed_recipe */
@@ -154,14 +154,14 @@ namespace BPS {
             show_on_map?: boolean
         }
         /** only present if entity is programmable-speaker */
-        parameters: {
+        parameters?: {
             playback_volume?: number
             playback_globally?: boolean
             allow_polyphony?: boolean
         }
 
         /** wire connections */
-        connections: {
+        connections?: {
             1: IConnSide
             2: IConnSide
             Cu0: IWireColor[]
@@ -169,7 +169,7 @@ namespace BPS {
             [key: string]: IConnSide | IWireColor[]
         }
 
-        control_behavior: {
+        control_behavior?: {
             /** only present if entity is constant-combinator */
             is_on?: boolean
             /** only present if entity is constant-combinator */

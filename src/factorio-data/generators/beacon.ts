@@ -33,7 +33,7 @@ interface IBeacon extends IPoint {
         and removing beacons from the array that occupied the same area as the added beacon
 */
 export default function generateBeacons(
-    entities: Array<{ entity_number: number; position: IPoint; size: number; effect: boolean }>,
+    entities: Array<{ position: IPoint; size: number; effect: boolean }>,
     minAffectedEntities = MIN_AFFECTED_ENTITIES
 ) {
     MIN_AFFECTED_ENTITIES = minAffectedEntities
