@@ -23,7 +23,7 @@
     "ajv": "^6.5.4",
     "dat.gui": "^0.7.5",
     "delaunator": "^3.0.2",
-    "factorio-data": "git+https://github.com/Teoxoy/factorio-data.git#d63e524",
+    "factorio-data": "3.0.0",
     "file-saver": "^1.3.8",
     "gown": "^0.1.6",
     "immutable": "^4.0.0-rc.12",
