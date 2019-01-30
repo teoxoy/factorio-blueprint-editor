@@ -27,7 +27,10 @@ export default (rawEntity: any, BP: Blueprint) => ({
             if (!entNrArr) return 0
             return getPowerPoleRotation(
                 this.position,
-                entNrArr.map(entNr => BP.entity(entNr).position)
+                entNrArr
+                    .map(entNr => BP.entity(entNr))
+                    .filter(e => !!e)
+                    .map(ent => ent.position)
             )
         }
 

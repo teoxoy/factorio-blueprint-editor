@@ -275,7 +275,7 @@ export class WiresContainer extends PIXI.Container {
 
         toUpdate.forEach(entNr => {
             const ec = EntityContainer.mappings.get(entNr)
-            if (ec) {
+            if (G.bp.entity(entNr) && ec) {
                 // redraw to update direction
                 ec.redraw()
 
