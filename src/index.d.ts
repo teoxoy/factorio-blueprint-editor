@@ -57,14 +57,6 @@ interface IEntityData {
     chemicalPlantDontConnectOutput: boolean
 }
 
-interface IHistoryObject {
-    entity_number: number
-    other_entity?: number
-    type: 'init' | 'add' | 'del' | 'mov' | 'upd'
-    annotation: string
-    rawEntities: Immutable.Map<number, any>
-}
-
 interface IFilter {
     /** Slot index (1 based ... not 0 like arrays) */
     index: number

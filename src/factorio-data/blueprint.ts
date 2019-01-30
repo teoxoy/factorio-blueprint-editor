@@ -1,7 +1,6 @@
 import Entity from './entity'
 import FD from 'factorio-data'
 import { PositionGrid } from './positionGrid'
-import Immutable from 'immutable'
 import G from '../common/globals'
 import { ConnectionsManager } from './connectionsManager'
 import { EntityContainer } from '../containers/entity'
@@ -44,8 +43,6 @@ export default class Blueprint {
     version: number
     connections: ConnectionsManager
     next_entity_number: number
-    historyIndex: number
-    history: IHistoryObject[]
     entityPositionGrid: PositionGrid
     entities: EntityCollection
 
@@ -93,14 +90,6 @@ export default class Blueprint {
 
         this.entityPositionGrid = new PositionGrid(this, [...this.entities.keys()])
         this.connections = new ConnectionsManager(this, [...this.entities.keys()])
-
-        this.historyIndex = 0
-        this.history = [{
-            entity_number: 0,
-            type: 'init',
-            annotation: '',
-            rawEntities: this.entities
-        }]
 
         return this
     }
@@ -219,32 +208,6 @@ export default class Blueprint {
         // console.log(`${addDel === 'del' ? 'Undo' : 'Redo'} ${hist.entity_number} ${hist.annotation}`)
         G.BPC.updateOverlay()
         G.BPC.updateViewportCulling()
-    }
-
-    operation(
-        entity_number: number,
-        annotation: string,
-        fn: (entities: Immutable.Map<number, any>) => Immutable.Map<any, any>,
-        type: 'add' | 'del' | 'mov' | 'upd' = 'upd',
-        pushToHistory = true,
-        other_entity?: number
-    ) {
-        // console.log(`${entity_number} - ${annotation}`)
-        // this.rawEntities = fn(this.rawEntities)
-
-        if (pushToHistory) {
-            if (this.historyIndex < this.history.length) {
-                this.history = this.history.slice(0, this.historyIndex + 1)
-            }
-            this.history.push({
-                entity_number,
-                other_entity,
-                type,
-                annotation,
-                rawEntities: this.entities
-            })
-            this.historyIndex++
-        }
     }
 
     createEntity(name: string, position: IPoint, direction: number, directionType?: string) {
