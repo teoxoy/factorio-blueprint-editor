@@ -545,7 +545,7 @@ export default class Entity extends EventEmitter {
         return e.circuit_wire_connection_points[this.direction / 2].wire[color]
     }
 
-    toJS() {
-        return this.m_rawEntity.toJS()
+    getRawData() {
+        return this.m_rawEntity
     }
 }

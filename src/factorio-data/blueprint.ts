@@ -11,6 +11,10 @@ import * as History from './history'
 
 class EntityCollection extends Map<number, Entity> {
 
+    isEmpty() {
+        return this.size === 0
+    }
+
     find(predicate: (value: Entity, key: number) => boolean): Entity {
         this.forEach((v, k) => {
             if (predicate(v, k)) return v
@@ -24,6 +28,10 @@ class EntityCollection extends Map<number, Entity> {
             if (predicate(v, k)) result.push(v)
         })
         return result
+    }
+
+    getRawEntities() {
+        return Array.from(this.values()).map(e => e.getRawData())
     }
 }
 
@@ -69,18 +77,19 @@ export default class Blueprint {
             }
 
             if (data.entities !== undefined) {
-                this.next_entity_number = this.rawEntities.size + 1
                 this.rawEntities = new EntityCollection(data.entities
                     .map(ent => [ent.entity_number, new Entity(ent, this)] as [number, Entity]))
+
+                this.next_entity_number += this.rawEntities.size
 
                 // TODO: if entity has placeable-off-grid flag then take the next one
                 const firstEntityTopLeft = this.rawEntities.values().next().value.topLeft()
                 offset.x += (firstEntityTopLeft.x % 1 !== 0 ? 0.5 : 0)
                 offset.y += (firstEntityTopLeft.y % 1 !== 0 ? 0.5 : 0)
 
-                this.rawEntities.forEach((v, k, m) => {
-                    v.position.x += offset.x
-                    v.position.y += offset.y
+                this.rawEntities.forEach(ent => {
+                    ent.position.x += offset.x
+                    ent.position.y += offset.y
                 })
             }
         }
@@ -305,8 +314,7 @@ export default class Blueprint {
     }
 
     getFirstRail() {
-        const fR = this.rawEntities.find(v => v.name === 'straight_rail' || v.name === 'curved_rail')
-        return fR ? fR.toJS() : undefined
+        return this.rawEntities.find(v => v.name === 'straight_rail' || v.name === 'curved_rail')
     }
 
     createTile(name: string, position: IPoint) {
@@ -318,7 +326,7 @@ export default class Blueprint {
     }
 
     isEmpty() {
-        return (this.rawEntities.size === undefined || this.rawEntities.size === 0) && this.tiles.isEmpty()
+        return this.rawEntities.isEmpty() && this.tiles.isEmpty()
     }
 
     // Get corner/center positions
@@ -553,7 +561,7 @@ export default class Blueprint {
     }
 
     getEntitiesForExport() {
-        const entityInfo = this.rawEntities.valueSeq().toJS()
+        const entityInfo = this.rawEntities.getRawEntities()
         let entitiesJSON = JSON.stringify(entityInfo)
 
         // Tag changed ids with !
