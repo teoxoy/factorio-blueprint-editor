@@ -586,7 +586,7 @@ export default class Blueprint {
             e.position.y -= center.y
         }
         const tileInfo = Array.from(this.tiles)
-            .map(([v, k]) => ({
+            .map(([k, v]) => ({
                 position: {
                     x: Number(k.split(',')[0]) - Math.floor(center.x) - 0.5,
                     y: Number(k.split(',')[1]) - Math.floor(center.y) - 0.5
