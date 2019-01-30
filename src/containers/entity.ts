@@ -183,7 +183,7 @@ export class EntityContainer extends PIXI.Container {
                 this.m_Entity.entityData.max_distance
             )
             if (otherEntity !== undefined) {
-                const oe = G.bp.entity(otherEntity)
+                const oe = G.bp.entities.get(otherEntity)
                 if (oe.directionType === this.m_Entity.directionType) {
                     otherEntity = undefined
                 } else {
@@ -240,7 +240,7 @@ export class EntityContainer extends PIXI.Container {
     // TODO: this should be done in the entity class, the action of pastingData should be added as 1 action to the history
     /** Paste relevant data from source entity reference into target entity */
     pasteData(sourceEntityNumber: number) {
-        const sourceEntity = G.bp.entity(sourceEntityNumber)
+        const sourceEntity = G.bp.entities.get(sourceEntityNumber)
 
         // PASTE RECIPE
         const aR = this.m_Entity.acceptedRecipes
@@ -409,14 +409,14 @@ export class EntityContainer extends PIXI.Container {
         if (!updateGroups[this.m_Entity.name]) return
         if (this.m_Entity.name === 'straight_rail') {
             G.bp.entityPositionGrid.foreachOverlap(this.m_Entity.getArea(), (entnr: number) => {
-                const ent = G.bp.entity(entnr)
+                const ent = G.bp.entities.get(entnr)
                 if (ent.name === 'gate') EntityContainer.mappings.get(ent.entity_number).redraw()
             })
         } else {
             const redrawnEntities: number[] = []
             updateGroups[this.m_Entity.name].forEach((updateGroup: string[]) => {
                 G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea(), (entnr: number) => {
-                    const ent = G.bp.entity(entnr)
+                    const ent = G.bp.entities.get(entnr)
                     if (updateGroup.includes(ent.name) && !redrawnEntities.includes(entnr)) {
                         EntityContainer.mappings.get(ent.entity_number).redraw()
                         redrawnEntities.push(entnr)

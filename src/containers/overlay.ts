@@ -27,7 +27,7 @@ export class OverlayContainer extends PIXI.Container {
     }
 
     createEntityInfo(entity_number: number, position: IPoint) {
-        const entity = G.bp.entity(entity_number)
+        const entity = G.bp.entities.get(entity_number)
         const entityInfo = new PIXI.Container()
 
         if (entity.recipe && entity.recipe !== 'rocket_part') {
@@ -368,7 +368,7 @@ export class OverlayContainer extends PIXI.Container {
                 fd.max_distance || 10
             )
             if (otherEntity) {
-                const oE = G.bp.entity(otherEntity)
+                const oE = G.bp.entities.get(otherEntity)
                 // Return if directionTypes are the same
                 if (fd.type === 'underground_belt' &&
                     (oE.directionType === 'input' ? oE.direction : (oE.direction + 4 % 8)) === searchDirection) return

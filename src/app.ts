@@ -287,7 +287,7 @@ actions.pippete.bind(() => {
 
         const hoverContainer = G.BPC.hoverContainer
         G.BPC.hoverContainer.pointerOutEventHandler()
-        const entity = G.bp.entity(hoverContainer.entity_number)
+        const entity = G.bp.entities.get(hoverContainer.entity_number)
         G.BPC.paintContainer = new EntityPaintContainer(entity.name,
             entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction,
             hoverContainer.position)

@@ -106,7 +106,7 @@ export class EntityPaintContainer extends PIXI.Container {
                 fd.max_distance
             )
             if (otherEntity) {
-                const oe = G.bp.entity(otherEntity)
+                const oe = G.bp.entities.get(otherEntity)
                 this.directionType = oe.directionType === 'input' ? 'output' : 'input'
             } else {
                 if (this.directionType === 'output') this.directionType = 'input'
@@ -203,7 +203,7 @@ export class EntityPaintContainer extends PIXI.Container {
 
         const frgEntNr = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, this.direction, position)
         if (frgEntNr) {
-            const frgEnt = G.bp.entity(frgEntNr)
+            const frgEnt = G.bp.entities.get(frgEntNr)
             frgEnt.change(this.name, this.direction)
             const c = EntityContainer.mappings.get(frgEntNr)
             c.redraw()
@@ -215,7 +215,7 @@ export class EntityPaintContainer extends PIXI.Container {
             this.name, this.direction, position
         )
         if (snEntNr) {
-            G.bp.entity(snEntNr).direction = this.direction
+            G.bp.entities.get(snEntNr).direction = this.direction
             const c = EntityContainer.mappings.get(snEntNr)
             c.redraw()
             c.redrawSurroundingEntities()
@@ -229,7 +229,7 @@ export class EntityPaintContainer extends PIXI.Container {
             isUB ? this.directionType : undefined
         )
         if (res) {
-            const ec = new EntityContainer(G.bp.entity(res))
+            const ec = new EntityContainer(G.bp.entities.get(res))
             if (ec.areaVisualization) {
                 if (ec.areaVisualization instanceof PIXI.Sprite) {
                     ec.areaVisualization.visible = true

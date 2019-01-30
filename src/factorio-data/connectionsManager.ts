@@ -21,7 +21,7 @@ export class ConnectionsManager {
             this.connections = this.connections.withMutations(map => {
                 const connections = new Map()
                 for (const entity_number of entity_numbers) {
-                    const entity = this.bp.entity(entity_number)
+                    const entity = this.bp.entities.get(entity_number)
                     if (entity.hasConnections) connections.set(entity_number, entity.connections)
                 }
                 connections.forEach((conn, k) => {
@@ -114,7 +114,7 @@ export class ConnectionsManager {
                 if (isE1 || isE2) {
                     v.forEach(conn => {
                         const entNr2 = (isE1 ? conn.get('entity_number_2') : conn.get('entity_number_1')) as number
-                        const conn2 = this.bp.entity(entNr2).connections
+                        const conn2 = this.bp.entities.get(entNr2).connections
                         for (const side in conn2) {
                             for (const color in conn2[side]) {
                                 for (const i in conn2[side][color]) {

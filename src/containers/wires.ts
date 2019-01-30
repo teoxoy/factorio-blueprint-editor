@@ -75,7 +75,7 @@ export class WiresContainer extends PIXI.Container {
         )
 
         function getWirePos(entity_number: number, color: string, side: number) {
-            const point = G.bp.entity(entity_number).getWireConnectionPoint(color, side)
+            const point = G.bp.entities.get(entity_number).getWireConnectionPoint(color, side)
             return {
                 x: EntityContainer.mappings.get(entity_number).position.x + point[0] * 32,
                 y: EntityContainer.mappings.get(entity_number).position.y + point[1] * 32
@@ -107,7 +107,7 @@ export class WiresContainer extends PIXI.Container {
     }
 
     update(entity_number: number) {
-        if (G.bp.entity(entity_number).type === 'electric_pole') {
+        if (G.bp.entities.get(entity_number).type === 'electric_pole') {
             // Remove connection so that updatePassiveWires diffs correctly
             this.passiveWiresMapping.forEach((v, k) => {
                 if (k.includes(entity_number.toString())) {
@@ -119,7 +119,7 @@ export class WiresContainer extends PIXI.Container {
             this.updatePassiveWires()
         }
 
-        if (!G.bp.entity(entity_number).hasConnections) return
+        if (!G.bp.entities.get(entity_number).hasConnections) return
 
         this.remove(entity_number)
         G.bp.connections.connections.forEach((v, k) => {
@@ -171,7 +171,7 @@ export class WiresContainer extends PIXI.Container {
             .filter(e => e.type === 'electric_pole')
             .map(e => e.name)
 
-        const poles: IPole[] = G.bp.rawEntities
+        const poles: IPole[] = G.bp.entities
             .filter(e => poleNames.includes(e.name))
             .map(e => ({
                 entity_number: e.entity_number,

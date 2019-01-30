@@ -145,7 +145,7 @@ function generateCovers(e: any, data: IEntityData, out: any[]) {
                     y: Math.floor(data.position.y + connection.y)
                 }
 
-                const ent = data.bp.entity(data.bp.entityPositionGrid.getCellAtPosition(pos))
+                const ent = data.bp.entities.get(data.bp.entityPositionGrid.getCellAtPosition(pos))
                 if (!ent) return true
 
                 if (ent.name === 'chemical_plant' && ent.chemicalPlantDontConnectOutput &&
@@ -240,7 +240,7 @@ function getHeatConectionPoints(e: any) {
 
 function getHeatConnections(position: IPoint, bp: Blueprint) {
     return bp.entityPositionGrid.getSurroundingEntities(new Area(position), (entnr, _, X, Y) => {
-        const entity = bp.entity(entnr)
+        const entity = bp.entities.get(entnr)
         // tslint:disable-next-line:prefer-switch
         if (entity.name === 'heat_pipe') return true
         else if (entity.name === 'heat_exchanger' || entity.name === 'nuclear_reactor') {
@@ -256,7 +256,7 @@ function getHeatConnections(position: IPoint, bp: Blueprint) {
 
 function getBeltConnections2(bp: Blueprint, position: IPoint, dir: number) {
     const directions = bp.entityPositionGrid.getSurroundingEntities(new Area(position), entnr => {
-        const entity = bp.entity(entnr)
+        const entity = bp.entities.get(entnr)
         if (entity.type === 'transport_belt' ||
         entity.type === 'splitter' ||
         (entity.type === 'underground_belt' &&
@@ -511,7 +511,7 @@ function generateGraphics(e: any) {
                     width: size.x,
                     height: size.y
                 }, true), (entnr: number) => {
-                    const ent = data.bp.entity(entnr)
+                    const ent = data.bp.entities.get(entnr)
                     if (ent && ent.name === 'gate') return true
                 }, true)
                 if (gates) {
@@ -598,7 +598,7 @@ function generateGraphics(e: any) {
                 }
                 if (data.bp) {
                     const conn = data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: number, D: number) => {
-                        const entity = data.bp.entity(entnr)
+                        const entity = data.bp.entities.get(entnr)
                         if (entity.name === 'stone_wall' || (entity.name === 'gate' && entity.direction === D % 4)) return true
                     })
 
@@ -616,7 +616,7 @@ function generateGraphics(e: any) {
             if (data.bp) {
                 let found = false
                 data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: any, D: number) => {
-                    const entity = data.bp.entity(entnr)
+                    const entity = data.bp.entities.get(entnr)
                     if (entity.name === 'gate' && entity.direction === D % 4) found = true
                 })
                 if (found && !data.hasConnections) return [getBaseSprite(), e.wall_diode_red]
@@ -634,7 +634,7 @@ function generateGraphics(e: any) {
                         width: size.x,
                         height: size.y
                     }, true), (entnr: number) => {
-                        const ent = data.bp.entity(entnr)
+                        const ent = data.bp.entities.get(entnr)
                         if (ent.name === 'straight_rail') return ent
                     })
                     if (rail) {
@@ -654,7 +654,7 @@ function generateGraphics(e: any) {
             if (data.bp) {
                 const out = getBaseSprites()
                 const conn = data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: any, D: number) => {
-                    const entity = data.bp.entity(entnr)
+                    const entity = data.bp.entities.get(entnr)
                     if (entity.name === 'stone_wall' && dir === D % 4) return true
                 })
                 for (let i = 0; i < conn.length; i++) {
@@ -674,7 +674,7 @@ function generateGraphics(e: any) {
         case 'pipe': return (data: IEntityData) => {
             if (data.bp) {
                 const conn = data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: any, D: number) => {
-                    const entity = data.bp.entity(entnr)
+                    const entity = data.bp.entities.get(entnr)
                     if (entity.name === 'pipe') return true
                     if (entity.name === 'pipe_to_ground' && entity.direction === (D + 4) % 8) return true
                     if ((entity.name === 'assembling_machine_2' || entity.name === 'assembling_machine_3') &&
@@ -800,7 +800,7 @@ function generateGraphics(e: any) {
             const dir = data.dir
             function getBeltConnections() {
                 const directions = data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: number) => {
-                    const entity = data.bp.entity(entnr)
+                    const entity = data.bp.entities.get(entnr)
                     if (entity.type === 'transport_belt' ||
                         entity.type === 'splitter' ||
                         (entity.type === 'underground_belt' &&

@@ -83,7 +83,7 @@ export default class Entity extends EventEmitter {
             if (!entNrArr) return 0
             return getPowerPoleRotation(
                 this.position,
-                entNrArr.map(entNr => this.m_BP.entity(entNr).position)
+                entNrArr.map(entNr => this.m_BP.entities.get(entNr).position)
             )
         }
 
@@ -377,7 +377,7 @@ export default class Entity extends EventEmitter {
         if (this.type === 'electric_pole') {
             const copperConn: any[] = []
 
-            this.m_BP.rawEntities.forEach((entity, k) => {
+            this.m_BP.entities.forEach((entity, k) => {
                 if (entity.name === 'power_switch' && entity.connections) {
                     if (entity.connections.Cu0 && entity.connections.Cu0[0].entity_id === this.entity_number) {
                         copperConn.push({ entity_id: k })

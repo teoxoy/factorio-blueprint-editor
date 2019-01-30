@@ -55,7 +55,7 @@ export class PositionGrid {
         if (entity_numbers) {
             this.grid = this.grid.withMutations(map => {
                 for (const entity_number of entity_numbers) {
-                    const entity = this.bp.entity(entity_number)
+                    const entity = this.bp.entities.get(entity_number)
                     if (!entity.entityData.flags.includes('placeable_off_grid')) {
                         PositionGrid.tileDataAction(map, entity.getArea(), (key, cell) => {
                             if (cell) {
@@ -118,7 +118,7 @@ export class PositionGrid {
     }
 
     setTileData(entity_number: number) {
-        const entity = this.bp.entity(entity_number)
+        const entity = this.bp.entities.get(entity_number)
         if (entity.entityData.flags.includes('placeable_off_grid')) return
         this.operation(grid => grid.withMutations(map => {
             PositionGrid.tileDataAction(map, entity.getArea(), (key, cell) => {
@@ -140,7 +140,7 @@ export class PositionGrid {
 
     removeTileData(entity_number: number, pushToHistory?: boolean) {
         this.operation(grid => grid.withMutations(map => {
-            PositionGrid.tileDataAction(map, this.bp.entity(entity_number).getArea(), (key, cell) => {
+            PositionGrid.tileDataAction(map, this.bp.entities.get(entity_number).getArea(), (key, cell) => {
                 if (typeof cell === 'number') {
                     if (cell === entity_number) map.delete(key)
                 } else {
@@ -176,7 +176,7 @@ export class PositionGrid {
         let otherEntities = false
 
         if (!this.foreachOverlap(area, cell => {
-            switch (this.bp.entity(cell).name) {
+            switch (this.bp.entities.get(cell).name) {
                 case 'gate': gateEnt = cell; break
                 case 'curved_rail': curRailEnt = cell; break
                 case 'straight_rail': allStrRailEnt.push(cell); strRailEnt = cell; break
@@ -186,19 +186,19 @@ export class PositionGrid {
 
         let sameDirStrRails = false
         for (const k of allStrRailEnt) {
-            if (this.bp.entity(k).direction === direction) {
+            if (this.bp.entities.get(k).direction === direction) {
                 sameDirStrRails = true
                 break
             }
         }
 
         if (
-            (name === 'gate' && strRailEnt && allStrRailEnt.length === 1 && this.bp.entity(strRailEnt).direction !== direction && !gateEnt) ||
-            (name === 'straight_rail' && gateEnt && !strRailEnt && this.bp.entity(gateEnt).direction !== direction && !otherEntities) ||
+            (name === 'gate' && strRailEnt && allStrRailEnt.length === 1 && this.bp.entities.get(strRailEnt).direction !== direction && !gateEnt) ||
+            (name === 'straight_rail' && gateEnt && !strRailEnt && this.bp.entities.get(gateEnt).direction !== direction && !otherEntities) ||
             (name === 'straight_rail' && strRailEnt && !sameDirStrRails && !gateEnt) ||
             (name === 'curved_rail' && strRailEnt && !gateEnt) ||
             (name === 'straight_rail' && curRailEnt) ||
-            (name === 'curved_rail' && curRailEnt && this.bp.entity(curRailEnt).direction !== direction)
+            (name === 'curved_rail' && curRailEnt && this.bp.entities.get(curRailEnt).direction !== direction)
         ) return true
 
         return false
@@ -216,7 +216,7 @@ export class PositionGrid {
 
         if (this.sharesCell(area)) return false
         const ent = this.getFirstFromArea(area, cell => {
-            const ent = this.bp.entity(cell)
+            const ent = this.bp.entities.get(cell)
             if (ent.name !== name &&
                 ent.entityData.fast_replaceable_group &&
                 fd.fast_replaceable_group &&
@@ -224,8 +224,8 @@ export class PositionGrid {
                 fd.fast_replaceable_group
             ) return cell
         })
-        if (!ent || pos.x !== this.bp.entity(ent).position.x ||
-            pos.y !== this.bp.entity(ent).position.y) return false
+        if (!ent || pos.x !== this.bp.entities.get(ent).position.x ||
+            pos.y !== this.bp.entities.get(ent).position.y) return false
         return ent
     }
 
@@ -242,11 +242,11 @@ export class PositionGrid {
 
         if (this.sharesCell(area)) return false
         const ent = this.getFirstFromArea(area, cell => {
-            if (this.bp.entity(cell).name === name) return cell
+            if (this.bp.entities.get(cell).name === name) return cell
         })
 
         if (!ent) return false
-        const e = this.bp.entity(ent)
+        const e = this.bp.entities.get(ent)
         if (pos.x !== e.position.x || pos.y !== e.position.y || e.direction === direction) return false
         return ent
     }
@@ -264,7 +264,7 @@ export class PositionGrid {
                 `${position.x + (horizontal ? i * sign : 0)},${position.y + (!horizontal ? i * sign : 0)}`
             )
             if (typeof cell === 'number') {
-                const entity = this.bp.entity(cell)
+                const entity = this.bp.entities.get(cell)
                 if (entity.name === name) {
                     if (entity.direction === direction) return cell
                     if ((entity.direction + 4) % 8 === direction) return undefined
