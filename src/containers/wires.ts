@@ -1,7 +1,7 @@
 import { EntityContainer } from './entity'
 import G from '../common/globals'
 import util from '../common/util'
-import FD from 'factorio-data'
+import factorioData from '../factorio-data/factorioData'
 import U from '../factorio-data/generators/util'
 
 interface IConnection {
@@ -163,11 +163,11 @@ export class WiresContainer extends PIXI.Container {
     updatePassiveWires() {
         interface IPole extends IPoint {
             entity_number: number
-            name: number
+            name: string
         }
 
-        const poleNames = Object.keys(FD.entities)
-            .map(k => FD.entities[k])
+        const poleNames = Object.keys(factorioData.getEntities())
+            .map(k => factorioData.getEntity(k))
             .filter(e => e.type === 'electric_pole')
             .map(e => e.name)
 
@@ -194,8 +194,8 @@ export class WiresContainer extends PIXI.Container {
                 }, [] as IPole[][])
                 .filter(line =>
                     U.pointInCircle(line[0], line[1], Math.min(
-                        FD.entities[line[0].name].maximum_wire_distance,
-                        FD.entities[line[1].name].maximum_wire_distance
+                        factorioData.getEntity(line[0].name).maximum_wire_distance,
+                        factorioData.getEntity(line[1].name).maximum_wire_distance
                     ))
                 )
             )
