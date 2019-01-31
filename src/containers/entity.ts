@@ -163,6 +163,18 @@ export class EntityContainer extends PIXI.Container {
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity.entity_number)
         })
+
+        this.m_Entity.on('recipe', () => {
+            this.redrawEntityInfo()
+            if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.assemblerCraftsWithFluid || this.m_Entity.assemblerCraftsWithFluid) {
+                this.redraw()
+                this.redrawSurroundingEntities()
+            }
+        })
+
+        this.m_Entity.on('modules', () => {
+            this.redrawEntityInfo()
+        })
     }
 
     public get entity(): Entity {
@@ -215,25 +227,14 @@ export class EntityContainer extends PIXI.Container {
         )
     }
 
-    changeRecipe(recipeName: string) {
-        this.m_Entity.recipe = recipeName
-        this.redrawEntityInfo()
-        if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.assemblerCraftsWithFluid || this.m_Entity.assemblerCraftsWithFluid) {
-            this.redraw()
-            this.redrawSurroundingEntities()
-        }
-    }
-
     // TODO: this should be done in the entity class, the action of pastingData should be added as 1 action to the history
     /** Paste relevant data from source entity reference into target entity */
-    pasteData(sourceEntityNumber: number) {
-        const sourceEntity = G.bp.entities.get(sourceEntityNumber)
+    pasteData(sourceEntity: Entity) {
 
         // PASTE RECIPE
         const aR = this.m_Entity.acceptedRecipes
         if (aR.length > 0) {
-            const RECIPE = sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
-            this.changeRecipe(RECIPE)
+            this.m_Entity.recipe = sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
         }
 
         // PASTE MODULES

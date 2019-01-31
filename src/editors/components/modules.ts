@@ -1,6 +1,5 @@
 import Slot from '../../controls/slot'
 import { InventoryContainer } from '../../panels/inventory'
-import { EntityContainer } from '../../containers/entity'
 import Entity from '../../factorio-data/entity'
 
 /** Module Slots for Entity */
@@ -38,6 +37,25 @@ export default class Modules extends  PIXI.Container {
             }
             this.addChild(slot)
         }
+
+        this.m_Entity.on('modules', modules =>
+            [...modules, ...Array(this.m_Entity.moduleSlots - modules.length).fill(undefined)]
+                .forEach((m: string, i: number) => {
+                    this.m_Modules[i] = m
+                    this.updateContent(this.getChildAt(i) as Slot, m)
+                }))
+    }
+
+    /** Update Content Icon */
+    private updateContent(slot: Slot, module: string) {
+        if (module === undefined) {
+            if (slot.content !== undefined) {
+                slot.content = undefined
+            }
+        } else {
+            slot.content = InventoryContainer.createIcon(module, false)
+        }
+        this.emit('changed')
     }
 
     /** Event handler for click on slot */
@@ -50,19 +68,11 @@ export default class Modules extends  PIXI.Container {
                 inventory.close()
                 this.m_Modules[index] = name
                 this.m_Entity.modules = this.m_Modules
-                EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
-                slot.content = InventoryContainer.createIcon(name, false)
-                this.emit('changed')
             })
             inventory.show()
         } else if (e.data.button === 2) {
             this.m_Modules[index] = undefined
             this.m_Entity.modules = this.m_Modules
-            EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
-            if (slot.content !== undefined) {
-                slot.content.destroy()
-            }
-            this.emit('changed')
         }
     }
 }

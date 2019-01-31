@@ -45,6 +45,7 @@ export default class Entity extends EventEmitter {
         History
             .updateValue(this.m_rawEntity, ['name'], name, `Changed name to '${name}'`)
             .emit(() => this.emit('name'))
+            .commit()
     }
 
     /** Entity Type */
@@ -70,6 +71,7 @@ export default class Entity extends EventEmitter {
         History
             .updateValue(this.m_rawEntity, ['position'], position, `Changed position to '${position}'`)
             .emit(() => this.emit('position'))
+            .commit()
     }
 
     /** Entity direction */
@@ -114,6 +116,7 @@ export default class Entity extends EventEmitter {
         History
             .updateValue(this.m_rawEntity, ['direction'], direction, `Changed direction to '${direction}'`)
             .emit(() => this.emit('direction'))
+            .commit()
     }
 
     /** Direction Type (input|output) for underground belts */
@@ -124,6 +127,7 @@ export default class Entity extends EventEmitter {
         History
             .updateValue(this.m_rawEntity, ['type'], type, `Changed direction type to '${type}'`)
             .emit(() => this.emit('directionType'))
+            .commit()
     }
 
     /** Entity recipe */
@@ -132,16 +136,14 @@ export default class Entity extends EventEmitter {
         if (this.m_rawEntity.recipe === recipe) { return }
 
         History.startTransaction(`Changed recipe to '${recipe}'`)
-        History.updateValue(this.m_rawEntity, ['recipe'], recipe).emit(() => this.emit('recipe'))
 
-        const modules = this.modules
+        History.updateValue(this.m_rawEntity, ['recipe'], recipe).emit(r => this.emit('recipe', r))
+
+        // Some modules on the entity may not be compatible with the new selected recipe, filter those out
+        this.modules = this.modules
             .map(k => FD.items[k])
             .filter(item => !(item.limitation !== undefined && !item.limitation.includes(recipe)))
             .map(item => item.name)
-
-        if (!util.equalArrays(this.modules, modules)) {
-            History.updateValue(this.m_rawEntity, ['items'], modules).emit(() => this.emit('modules'))
-        }
 
         History.commitTransaction()
     }
@@ -200,24 +202,21 @@ export default class Entity extends EventEmitter {
     /** List of all modules */
     get modules(): string[] {
         const modulesObj = this.m_rawEntity.items
-        if (modulesObj === undefined) return []
+        if (modulesObj === undefined || Object.keys(modulesObj).length === 0) return []
         return Object.keys(modulesObj).reduce((acc, k) => acc.concat(Array(modulesObj[k]).fill(k)), [])
     }
     set modules(modules: string[]) {
         if (util.equalArrays(this.modules, modules)) { return }
 
-        const ms = {}
+        const ms: { [key: string]: number } = {}
         for (const m of modules) {
-            if (Object.keys(modules).includes(m)) {
-                ms[m]++
-            } else {
-                ms[m] = 1
-            }
+            if (m) ms[m] = ms[m] ? ms[m] + 1 : 1
         }
 
         History
             .updateValue(this.m_rawEntity, ['items'], ms, `Changed modules to '${modules}'`)
-            .emit(() => this.emit('modules'))
+            .emit(() => this.emit('modules', this.modules))
+            .commit()
     }
 
     /** Count of filter slots */
@@ -291,6 +290,7 @@ export default class Entity extends EventEmitter {
         History
             .updateValue(this.m_rawEntity, ['input_priority'], priority, `Changed splitter input priority to '${priority}'`)
             .emit(() => this.emit('splitterInputPriority'))
+            .commit()
     }
 
     /** Splitter output priority */
@@ -301,6 +301,7 @@ export default class Entity extends EventEmitter {
         History
             .updateValue(this.m_rawEntity, ['output_priority'], priority, `Changed splitter output priority to '${priority}'`)
             .emit(() => this.emit('splitterOutputPriority'))
+            .commit()
     }
 
     /** Splitter filter */
@@ -312,6 +313,7 @@ export default class Entity extends EventEmitter {
             .updateValue(this.m_rawEntity, ['filter'], filter, `Changed splitter filter to '${filter}'`)
             .emit(() => this.emit('splitterFilter'))
             .emit(() => this.emit('filters'))
+            .commit()
     }
 
     /** Inserter filter */
@@ -327,6 +329,7 @@ export default class Entity extends EventEmitter {
             .updateValue(this.m_rawEntity, ['filters'], filters, `Changed inserter filter${this.filterSlots === 1 ? '' : '(s)'} to '${filters}'`)
             .emit(() => this.emit('inserterFilters'))
             .emit(() => this.emit('filters'))
+            .commit()
     }
 
     /** Logistic chest filters */
@@ -342,6 +345,7 @@ export default class Entity extends EventEmitter {
             .updateValue(this.m_rawEntity, ['filters'], filters, `Changed chest filter${this.filterSlots === 1 ? '' : '(s)'} to '${filters}'`)
             .emit(() => this.emit('logisticChestFilters'))
             .emit(() => this.emit('filters'))
+            .commit()
     }
 
     get constantCombinatorFilters() {
@@ -456,6 +460,7 @@ export default class Entity extends EventEmitter {
         History
             .updateValue(this.m_rawEntity, ['position'], position, `Moved entity: ${this.type}`).type('mov')
             .emit(() => this.emit('position'))
+            .commit()
 
         this.m_BP.entityPositionGrid.setTileData(this.entity_number)
         return true
