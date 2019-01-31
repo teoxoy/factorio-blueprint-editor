@@ -228,7 +228,7 @@ export default class Blueprint {
         if (directionType === undefined) delete entity_data.type
 
         const entity: Entity = new Entity(entity_data as BPS.IEntity, this)
-        History.updateMap(this.entities, entity_number, entity, `Added entity: ${entity.type}`).type('add')
+        History.updateMap(this.entities, entity_number, entity, `Added entity: ${entity.type}`).type('add').commit()
 
         this.entityPositionGrid.setTileData(entity_number)
 
