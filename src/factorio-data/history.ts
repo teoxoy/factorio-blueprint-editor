@@ -78,7 +78,10 @@ interface IHistoryOptions {
     other_entity(other_entity: number): IHistoryOptions
 
     /** Emit function after executing action */
-    emit(f: () => void): IHistoryOptions
+    emit(f: (value: any) => void): IHistoryOptions
+
+    /** Commit action */
+    commit(): IHistoryOptions
 }
 
 /** Implementation for IHistoryData interface */
@@ -114,14 +117,35 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
     private readonly m_Apply: (value: IValueInfo<V>) => void
 
     /** Field to store functions to emit after execution of action */
-    private readonly m_Emits: Array<(() => void)>
+    private readonly m_Emits: Array<((value: any) => void)>
 
-    constructor(oldValue: IValueInfo<V>, newValue: IValueInfo<V>, data: HistoryData, apply: (value: IValueInfo<V>) => void) {
+    /** Field to store description */
+    private readonly m_Text: string
+
+    constructor(oldValue: IValueInfo<V>, newValue: IValueInfo<V>, data: HistoryData, apply: (value: IValueInfo<V>) => void, text?: string) {
         this.m_OldValue = oldValue
         this.m_NewValue = newValue
         this.m_Data = data
         this.m_Apply = apply
         this.m_Emits = []
+        this.m_Text = text
+    }
+
+    /**
+     * Commit the action to the history
+     * This allows for emits to be set up first
+     */
+    public commit() {
+        // If no transaction active, apply single history action trough transaction
+        if (s_Transaction === undefined) {
+            const transaction = new HistoryEntry(this.m_Text)
+            transaction.push(this)
+            s_CommitTransaction(transaction)
+
+            this.apply()
+        }
+
+        return this
     }
 
     /**
@@ -129,12 +153,16 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
      * @param value Whether to apply the new or the old value (Default: New)
      */
     public apply(value: HistoryValue = HistoryValue.New): number {
-        this.m_Apply(value === HistoryValue.New ? this.m_NewValue : this.m_OldValue)
+
+        const valueInfo = value === HistoryValue.New ? this.m_NewValue : this.m_OldValue
+        this.m_Apply(valueInfo)
+
         if (this.m_Emits.length > 0) {
             for (const f of this.m_Emits) {
-                f()
+                f(valueInfo.value)
             }
         }
+
         return this.m_Data.entity_number
     }
 
@@ -156,7 +184,7 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
     }
 
     /** Emit function after executing action */
-    public emit(f: () => void): IHistoryOptions {
+    public emit(f: (value: any) => void): IHistoryOptions {
         this.m_Emits.push(f)
         return this
     }
@@ -239,7 +267,6 @@ function updateValue<T extends IEntityNumber, V>(
     const oldValue: IValueInfo<V> = s_GetValue<V>(target, path)
     const newValue: IValueInfo<V> = { value, exists: !remove }
     const data: HistoryData = new HistoryData(target.entity_number)
-    const transaction: HistoryEntry = (s_Transaction !== undefined) ? s_Transaction : new HistoryEntry(text)
 
     const historyAction: HistoryAction<V> = new HistoryAction(oldValue, newValue, data, (v: IValueInfo<V>) => {
         if (!v.exists) {
@@ -250,17 +277,10 @@ function updateValue<T extends IEntityNumber, V>(
         } else {
             s_SetValue(target, path, v)
         }
-    })
-    transaction.push(historyAction)
+    }, text)
 
-    if (s_Transaction === undefined) {
-        // If no transaction active, apply single history action trough transaction and commit
-        transaction.apply()
-        s_CommitTransaction(transaction)
-    } else {
-        // If transaction active, apply only the history action
-        historyAction.apply()
-    }
+    // If transaction is active, add the new historyAction to it
+    if (s_Transaction) s_Transaction.push(historyAction)
 
     return historyAction
 }
@@ -274,7 +294,6 @@ function updateMap<K extends number, V extends IEntityNumber>(
         { value: undefined, exists: false }
     const newValue: IValueInfo<V> = { value, exists: !remove }
     const data: IHistoryData = new HistoryData(key)
-    const transaction: HistoryEntry = (s_Transaction !== undefined) ? s_Transaction : new HistoryEntry(text)
 
     const historyAction: HistoryAction<V> = new HistoryAction(oldValue, newValue, data, (v: IValueInfo<V>) => {
         if (!v.exists) {
@@ -284,17 +303,10 @@ function updateMap<K extends number, V extends IEntityNumber>(
         } else {
             target.set(key, v.value)
         }
-    })
-    transaction.push(historyAction)
+    }, text)
 
-    if (s_Transaction === undefined) {
-        // If no transaction active, apply single history action trough transaction and commit
-        transaction.apply()
-        s_CommitTransaction(transaction)
-    } else {
-        // If transaction is active, apply only the history action
-        historyAction.apply()
-    }
+    // If transaction is active, add the new historyAction to it
+    if (s_Transaction) s_Transaction.push(historyAction)
 
     return historyAction
 }
@@ -357,6 +369,7 @@ function commitTransaction() {
     }
 
     s_Transaction.log()
+    s_Transaction.apply()
     s_CommitTransaction(s_Transaction)
     s_Transaction = undefined
 }
