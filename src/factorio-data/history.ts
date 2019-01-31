@@ -207,13 +207,18 @@ class HistoryEntry {
     /**
      * Execute all actions and therfore apply all values of this transaction
      * @param value Whether to apply the new or the old values (Default: New)
+     * @returns False if there were no actions to be executed
      */
-    public apply(value: HistoryValue = HistoryValue.New) {
+    public apply(value: HistoryValue = HistoryValue.New): boolean {
+        if (this.m_Actions.length === 0) return false
+
         const entityNumbers: number[] = []
         for (const action of this.m_Actions) {
             entityNumbers.push(action.apply(value))
         }
         if (this.m_Text !== undefined) console.log(`[${entityNumbers.join(',')}]: ${this.m_Text}`)
+
+        return true
     }
 
     /** Undo all actions from this entry */
@@ -368,9 +373,11 @@ function commitTransaction() {
         return
     }
 
-    s_Transaction.log()
-    s_Transaction.apply()
-    s_CommitTransaction(s_Transaction)
+    if (s_Transaction.apply()) {
+        s_Transaction.log()
+        s_CommitTransaction(s_Transaction)
+    }
+
     s_Transaction = undefined
 }
 
