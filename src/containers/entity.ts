@@ -139,6 +139,30 @@ export class EntityContainer extends PIXI.Container {
         this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entity_number, this.position)
 
         this.redraw(false, sort)
+
+        this.m_Entity.on('rotate', offset => {
+            if (G.currentMouseState === G.mouseStates.MOVING && offset) {
+                const pos = EntityContainer.getPositionFromData({
+                    x: this.x + offset.x * 32,
+                    y: this.y + offset.y * 32
+                }, this.m_Entity.size)
+                this.position.set(pos.x, pos.y)
+
+                G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
+            }
+
+            this.redraw(G.currentMouseState === G.mouseStates.MOVING)
+
+            if (G.currentMouseState === G.mouseStates.NONE) this.redrawSurroundingEntities()
+
+            G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
+            this.updateUndergroundLines()
+
+            if (G.BPC.movingContainer === this) this.checkBuildable()
+
+            this.redrawEntityInfo()
+            G.BPC.wiresContainer.update(this.m_Entity.entity_number)
+        })
     }
 
     public get entity(): Entity {
@@ -175,46 +199,9 @@ export class EntityContainer extends PIXI.Container {
     }
 
     rotate(ccw = false) {
-        let otherEntity: number
-        if (G.currentMouseState === G.mouseStates.NONE && this.m_Entity.type === 'underground_belt') {
-            otherEntity = G.bp.entityPositionGrid.findEntityWithSameNameAndDirection(
-                this.m_Entity.name, this.m_Entity.direction, this.m_Entity.position,
-                this.m_Entity.directionType === 'input' ? this.m_Entity.direction : (this.m_Entity.direction + 4) % 8,
-                this.m_Entity.entityData.max_distance
-            )
-            if (otherEntity !== undefined) {
-                const oe = G.bp.entities.get(otherEntity)
-                if (oe.directionType === this.m_Entity.directionType) {
-                    otherEntity = undefined
-                } else {
-                    oe.rotate(G.currentMouseState === G.mouseStates.NONE, { x: 0, y: 0 }, false)
-                    EntityContainer.mappings.get(otherEntity).redraw()
-                }
-            }
-        }
-
+        const rotateOpposingEntity = G.currentMouseState === G.mouseStates.NONE && this.m_Entity.type === 'underground_belt'
         const offset = G.gridData.calculateRotationOffset(this.position)
-        if (this.m_Entity.rotate(G.currentMouseState === G.mouseStates.NONE, offset, true, otherEntity, ccw)) {
-            if (G.currentMouseState === G.mouseStates.MOVING && this.m_Entity.size.x !== this.m_Entity.size.y) {
-                this.x += offset.x * 32
-                this.y += offset.y * 32
-                const pos = EntityContainer.getPositionFromData(this.position, this.m_Entity.size)
-                this.position.set(pos.x, pos.y)
-
-                G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
-            }
-
-            this.redraw(G.currentMouseState === G.mouseStates.MOVING)
-            if (G.currentMouseState === G.mouseStates.NONE) this.redrawSurroundingEntities()
-
-            G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
-            this.updateUndergroundLines()
-
-            if (G.BPC.movingContainer === this) this.checkBuildable()
-
-            this.redrawEntityInfo()
-            G.BPC.wiresContainer.update(this.m_Entity.entity_number)
-        }
+        this.m_Entity.rotate(G.currentMouseState === G.mouseStates.NONE, offset, ccw, rotateOpposingEntity)
     }
 
     updateUndergroundLines() {
@@ -344,7 +331,7 @@ export class EntityContainer extends PIXI.Container {
     }
 
     pointerOverEventHandler() {
-        if (!G.BPC.movingContainer && !G.BPC.paintContainer) {
+        if (G.currentMouseState === G.mouseStates.NONE) {
             G.BPC.hoverContainer = this
 
             G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
@@ -358,7 +345,7 @@ export class EntityContainer extends PIXI.Container {
     }
 
     pointerOutEventHandler() {
-        if (G.BPC.hoverContainer === this) {
+        if (G.currentMouseState === G.mouseStates.NONE && G.BPC.hoverContainer === this) {
             G.BPC.hoverContainer = undefined
             G.BPC.overlayContainer.hideCursorBox()
             G.BPC.overlayContainer.hideUndergroundLines()

@@ -461,31 +461,50 @@ export default class Entity extends EventEmitter {
         return true
     }
 
-    rotate(notMoving: boolean, offset?: IPoint, pushToHistory = true, otherEntity?: number, ccw = false) {
+    rotate(notMoving: boolean, offset?: IPoint, ccw = false, rotateOpposingEntity = false) {
         if (!this.assemblerCraftsWithFluid &&
-            (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3')) return false
-        if (notMoving && this.m_BP.entityPositionGrid.sharesCell(this.getArea())) return false
-        const pr = this.entityData.possible_rotations
-        if (pr === undefined) return false
-        const newDir = pr[
+            (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3')) return
+
+        if (notMoving && this.m_BP.entityPositionGrid.sharesCell(this.getArea())) return
+
+        const PR = this.entityData.possible_rotations
+        if (!PR) return
+
+        const newDir = PR[
             (
-                pr.indexOf(this.direction) +
+                PR.indexOf(this.direction) +
                 (notMoving && (this.size.x !== this.size.y || this.type === 'underground_belt') ? 2 : 1) * (ccw ? 3 : 1)
-            ) % pr.length
+            )
+            % PR.length
         ]
-        if (newDir === this.direction) return false
+
+        if (newDir === this.direction) return
+
+        const otherEntity = rotateOpposingEntity
+            ? this.m_BP.entities.get(this.m_BP.entityPositionGrid.getOpposingEntity(
+                this.name, this.direction, this.position,
+                this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
+                this.entityData.max_distance
+            ))
+            : undefined
 
         History.startTransaction(`Rotated entity: ${this.type}`)
+
         this.direction = newDir
+
         if (notMoving && this.type === 'underground_belt') {
             this.directionType = this.directionType === 'input' ? 'output' : 'input'
         }
-        if (!notMoving && this.size.x !== this.size.y) {
+
+        if (!notMoving && this.size.x !== this.size.y && offset) {
             this.position = { x: this.m_rawEntity.position.x + offset.x, y: this.m_rawEntity.position.y + offset.y }
         }
+
+        if (otherEntity) otherEntity.rotate(notMoving)
+
         History.commitTransaction()
 
-        return true
+        this.emit('rotate', offset)
     }
 
     topLeft() {

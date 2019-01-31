@@ -360,7 +360,7 @@ export class OverlayContainer extends PIXI.Container {
         const fd = FD.entities[name]
         if (fd.type === 'underground_belt' || name === 'pipe_to_ground') {
             this.undergroundLines.removeChildren()
-            const otherEntity = G.bp.entityPositionGrid.findEntityWithSameNameAndDirection(
+            const otherEntity = G.bp.entityPositionGrid.getOpposingEntity(
                 name,
                 name === 'pipe_to_ground' ? searchDirection : direction,
                 position,

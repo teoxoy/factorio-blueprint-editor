@@ -251,7 +251,7 @@ export class PositionGrid {
         return ent
     }
 
-    findEntityWithSameNameAndDirection(name: string, direction: number, pos: IPoint, searchDirection: number, maxDistance: number): number {
+    getOpposingEntity(name: string, direction: number, pos: IPoint, searchDirection: number, maxDistance: number): number {
         const position = {
             x: Math.floor(pos.x),
             y: Math.floor(pos.y)

@@ -97,7 +97,7 @@ export class EntityPaintContainer extends PIXI.Container {
     updateUndergroundBeltRotation() {
         const fd = FD.entities[this.name]
         if (fd.type === 'underground_belt') {
-            const otherEntity = G.bp.entityPositionGrid.findEntityWithSameNameAndDirection(
+            const otherEntity = G.bp.entityPositionGrid.getOpposingEntity(
                 this.name, (this.direction + 4) % 8, {
                     x: this.x / 32,
                     y: this.y / 32
