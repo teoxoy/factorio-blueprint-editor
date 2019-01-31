@@ -34,6 +34,8 @@ if (PIXI.utils.isMobile.any) {
     throw new Error(text)
 }
 
+console.log('\n%cLooking for the source?\nhttps://github.com/Teoxoy/factorio-blueprint-editor\n', 'color: #1f79aa; font-weight: bold')
+
 const params = window.location.search.slice(1).split('&')
 
 G.renderOnly = params.includes('renderOnly')
