@@ -78,11 +78,15 @@ export default class Filters extends  PIXI.Container {
     /** Field to hold data for module visualization */
     private readonly m_Filters: IFilter[]
 
-    constructor(entity: Entity) {
+    /** Field to indicate whether counts can shall be shown (Used for 2 chests) */
+    private readonly m_Counts: boolean
+
+    constructor(entity: Entity, counts: boolean = false) {
         super()
 
         // Store entity data reference for later usage
         this.m_Entity = entity
+        this.m_Counts = counts
 
         // Get filters from entity
         const slots: number = this.m_Entity.filterSlots
@@ -105,7 +109,7 @@ export default class Filters extends  PIXI.Container {
         // Create slots for entity
         for (let slotIndex = 0; slotIndex < this.m_Filters.length; slotIndex++) {
             const slot: Slot = new Slot()
-            slot.position.set(slotIndex * 38, 0)
+            slot.position.set((slotIndex % 6) * 38, Math.floor(slotIndex / 6) * 38)
             slot.data = slotIndex
             slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => this.onSlotPointerDown(e))
             if (this.m_Filters[slotIndex].name !== undefined) {

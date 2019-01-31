@@ -75,9 +75,10 @@ export default abstract class Editor extends Dialog {
      * @description Defined in Base Editor class so extensions can use it when they need to
      * @param x - Horizontal position of Filter Slots from top left corner
      * @param y - Vertical position of Filter Slots from top left corner
+     * @param counts - Shall filter counts be shown
      */
-    protected addFilters(x: number = 208, y: number = 83): Filters {
-        const filters: Filters = new Filters(this.m_Entity)
+    protected addFilters(x: number = 208, y: number = 83, counts: boolean = false): Filters {
+        const filters: Filters = new Filters(this.m_Entity, counts)
         filters.position.set(x, y)
         this.addChild(filters)
 

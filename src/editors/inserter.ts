@@ -7,7 +7,7 @@ import Entity from '../factorio-data/entity'
 export default class InserterEditor extends Editor {
 
     constructor(entity: Entity) {
-        super(440, 171, entity)
+        super(446, 171, entity)
 
         // Add Preview
         const preview: Preview = this.addPreview()
