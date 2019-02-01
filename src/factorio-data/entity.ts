@@ -512,6 +512,44 @@ export default class Entity extends EventEmitter {
         this.emit('rotate', offset)
     }
 
+    /** Paste relevant data from source entity */
+    pasteSettings(sourceEntity: Entity) {
+        History.startTransaction(`Pasted settings to entity: ${this.type}`)
+
+        // PASTE RECIPE
+        const aR = this.acceptedRecipes
+        if (aR.length > 0) {
+            this.recipe = sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
+        }
+
+        // PASTE MODULES
+        const aM = this.acceptedModules
+        if (aM.length > 0) {
+            if (sourceEntity.modules.length > 0) {
+                this.modules = sourceEntity.modules
+                    .filter(m => aM.includes(m))
+                    .slice(0, this.moduleSlots)
+            } else {
+                this.modules = []
+            }
+        }
+
+        // TODO: pasting filters should be handled differently for each type of filer
+        // PASTE FILTERS
+        const aF = this.acceptedFilters
+        if (aF.length > 0) {
+            if (sourceEntity.filters.length > 0) {
+                this.filters = sourceEntity.filters
+                    .filter(f => aF.includes(f.name))
+                    .slice(0, this.filterSlots)
+            } else {
+                this.filters = []
+            }
+        }
+
+        History.commitTransaction()
+    }
+
     topLeft() {
         return { x: this.position.x - (this.size.x / 2), y: this.position.y - (this.size.y / 2) }
     }

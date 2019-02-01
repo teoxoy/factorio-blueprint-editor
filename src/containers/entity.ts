@@ -227,44 +227,6 @@ export class EntityContainer extends PIXI.Container {
         )
     }
 
-    // TODO: this should be done in the entity class, the action of pastingData should be added as 1 action to the history
-    /** Paste relevant data from source entity reference into target entity */
-    pasteData(sourceEntity: Entity) {
-
-        // PASTE RECIPE
-        const aR = this.m_Entity.acceptedRecipes
-        if (aR.length > 0) {
-            this.m_Entity.recipe = sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
-        }
-
-        // PASTE MODULES
-        const aM = this.m_Entity.acceptedModules
-        if (aM.length > 0) {
-            if (sourceEntity.modules.length > 0) {
-                this.m_Entity.modules = sourceEntity.modules
-                    .filter(m => aM.includes(m))
-                    .slice(0, this.m_Entity.moduleSlots)
-            } else {
-                this.m_Entity.modules = []
-            }
-        }
-
-        // TODO: pasting filters should be handled differently for each type of filer
-        // PASTE FILTERS
-        const aF = this.m_Entity.acceptedFilters
-        if (aF.length > 0) {
-            if (sourceEntity.filters.length > 0) {
-                this.m_Entity.filters = sourceEntity.filters
-                    .filter(f => aF.includes(f.name))
-                    .slice(0, this.m_Entity.filterSlots)
-            } else {
-                this.m_Entity.filters = []
-            }
-        }
-
-        this.redrawEntityInfo()
-    }
-
     redrawEntityInfo() {
         if (this.m_Entity.moduleSlots !== 0 || this.m_Entity.type === 'splitter' ||
             this.m_Entity.entityData.crafting_categories !== undefined || this.m_Entity.type === 'mining_drill' ||

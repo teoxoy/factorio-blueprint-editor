@@ -26,6 +26,7 @@ import actions from './actions'
 import initDatGui from './datgui'
 import spritesheetsLoader from './spritesheetsLoader'
 import * as Editors from './editors/factory'
+import Entity from './factorio-data/entity'
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
@@ -380,17 +381,17 @@ actions.openEntityGUI.bind(() => {
     }
 })
 
-let entityNumberForCopyData: number
+let entityForCopyData: Entity
 actions.copyEntitySettings.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
         // Store reference to source entity
-        entityNumberForCopyData = G.BPC.hoverContainer.entity_number
+        entityForCopyData = G.BPC.hoverContainer.entity
     }
 })
 actions.pasteEntitySettings.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
         // Hand over reference of source entity to target entity for pasting data
-        G.BPC.hoverContainer.pasteData(entityNumberForCopyData)
+        G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
     }
 })
 
