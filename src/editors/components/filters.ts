@@ -145,13 +145,14 @@ export default class Filters extends  PIXI.Container {
                     slot.content = undefined
                 }
             } else {
-                if (slot.content === undefined || (index !== undefined && index === slotIndex)) {
+                if (slot.content === undefined || slot.name !== slotFilter.name) {
                     if (this.m_Amount) {
                         slot.content = new PIXI.Container()
                         InventoryContainer.createIconWithAmount(slot.content as PIXI.Container, -16, -16, slotFilter.name, slotFilter.count)
                     } else {
                         slot.content = InventoryContainer.createIcon(slotFilter.name, false)
                     }
+                    slot.name = slotFilter.name
                 }
             }
         }
