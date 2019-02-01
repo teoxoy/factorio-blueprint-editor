@@ -11,11 +11,11 @@
  *
  * @example Update value of object with comment
  * const o = { name: 'test name'}
- * History.updateValue(o, ['name'], 'updated name', 'Updated Object Name')
+ * History.updateValue(o, ['name'], 'updated name', 'Updated Object Name').commit()
  *
  * @example Update value of nested object with comment
  * const o = { name: { nestedName: 'test name' } }
- * History.updateValue(o, ['name','nestedName'], 'updated name', 'Updated Object Name')
+ * History.updateValue(o, ['name','nestedName'], 'updated name', 'Updated Object Name').commit()
  *
  * @example Update item of map
  * const m: Map<number, string> = new Map()
@@ -25,13 +25,13 @@
  * @example Transaction of 2 actions and naming of transaction
  * const o = { firstName: 'test first name', lastName: 'test last name'}
  * History.startTransaction('Update 2 values')
- * History.updateValue(o, ['firstName'], 'updated first name')
- * History.updateValue(o, ['lastName'], 'updated last name')
+ * History.updateValue(o, ['firstName'], 'updated first name').commit()
+ * History.updateValue(o, ['lastName'], 'updated last name').commit()
  * History.commitTransaction()
  *
  * @example Emit function after action execution
  * const o = { name: 'test name'}
- * History.updateValue(o, ['name'], 'updated name', 'Updated Object Name').emit(() => console.log(o.name))
+ * History.updateValue(o, ['name'], 'updated name', 'Updated Object Name').emit(() => console.log(o.name)).commit()
  */
 
 /** Private enumaration to determine the value (new value or old value) should be applied during action */
@@ -262,6 +262,9 @@ let s_HistoryIndex = 0
 /** Static non-gloabl field to store historical entries */
 const s_HistoryEntries: HistoryEntry[] = []
 
+/** Count how many times a 'startTransaction' was called so we know when 'commitTransaction' actually needs to apply */
+let s_TransactionCount = 0
+
 /** Static non-global field to hold active transaction entry */
 let s_Transaction: HistoryEntry
 
@@ -356,9 +359,9 @@ function redo() {
  * @returns True if new transaction was started | False if there is an existing transaction in progress
  */
 function startTransaction(text?: string): boolean {
-    if (s_Transaction !== undefined) {
-        return false
-    }
+    s_TransactionCount++
+
+    if (s_Transaction !== undefined) return false
 
     s_Transaction = new HistoryEntry(text)
     return true
@@ -368,10 +371,12 @@ function startTransaction(text?: string): boolean {
  * Commit an in-progress transaction and push it into the history
  * @returns True if transaction was committed | False if there was not transaction in progress
  */
-function commitTransaction() {
-    if (s_Transaction === undefined) {
-        return
-    }
+function commitTransaction(force = false) {
+    s_TransactionCount--
+
+    if (s_TransactionCount !== 0 && !force) return false
+
+    if (s_Transaction === undefined) return false
 
     if (s_Transaction.apply()) {
         s_Transaction.log()
@@ -379,6 +384,7 @@ function commitTransaction() {
     }
 
     s_Transaction = undefined
+    return true
 }
 
 /** Private function to get value of an object from a specific object path */
