@@ -79,6 +79,7 @@ export default class Switch extends PIXI.Container {
         this.on('pointerdown', () => {
             const index: number = this.m_Value === undefined ? 1 : this.m_Values.indexOf(this.m_Value)
             this.value = this.m_Values[index === 0 ? 1 : 0]
+            this.emit('changed')
         })
         this.on('pointerover', () => {
             buttonHover.visible = true
@@ -95,7 +96,6 @@ export default class Switch extends PIXI.Container {
     public set value(value: string) {
         if (this.m_Value !== value) {
             this.m_Value = value
-            this.emit('changed')
             this.updateButtonPosition()
         }
     }

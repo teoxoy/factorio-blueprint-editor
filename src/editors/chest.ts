@@ -28,7 +28,7 @@ export default class ChestEditor extends Editor {
         if (this.m_Entity.filterSlots > 0) {
             this.addLabel(140, 56, `Filter${(this.m_Entity.filterSlots === 1 ? '' : 's')}:`)
             const filters: Filters = this.addFilters(208, 45, this.m_Amount)
-            filters.on('changed', () => { this.redrawEntity() })
+            filters.on('changed', () => this.m_Preview.redraw())
         }
 
         /** Remaining controls are not needed if amount shall not be shown */

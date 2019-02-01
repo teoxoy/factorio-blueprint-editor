@@ -46,6 +46,7 @@ export default class Enable extends PIXI.Container {
         this.on('pointerdown', () => {
             if (!this.active) {
                 this.active = true
+                this.emit('changed')
             }
         })
         this.on('pointerover', () => {
@@ -63,7 +64,6 @@ export default class Enable extends PIXI.Container {
     public set active(value: boolean) {
         if (this.m_Active !== value) {
             this.m_Active = value
-            this.emit('changed')
 
             this.m_TextText.visible = !this.active
             this.m_HoverText.visible = false

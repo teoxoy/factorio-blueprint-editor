@@ -12,7 +12,7 @@ export default class InserterEditor extends Editor {
         if (this.m_Entity.filterSlots > 0) {
             this.addLabel(140, 56, `Filter${(this.m_Entity.filterSlots === 1 ? '' : 's')}:`)
             const filters: Filters = this.addFilters(208, 45)
-            filters.on('changed', () => { this.redrawEntity() })
+            filters.on('changed', () => this.m_Preview.redraw())
         }
     }
 }

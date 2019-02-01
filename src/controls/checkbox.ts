@@ -62,6 +62,7 @@ export default class Checkbox extends PIXI.Container {
         // Attach events
         this.on('pointerdown', () => {
             this.checked = !this.checked
+            this.emit('changed')
         })
         this.on('pointerover', () => {
             this.m_Hover.visible = true
@@ -78,7 +79,6 @@ export default class Checkbox extends PIXI.Container {
     public set checked(checked: boolean) {
         if (this.m_Checked !== checked) {
             this.m_Checked = checked
-            this.emit('changed')
 
             if (this.m_Checkbox !== undefined) this.removeChild(this.m_Checkbox)
             this.m_Checkbox = Checkbox.drawGraphic(this.m_Checked, false, true)
