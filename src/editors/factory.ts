@@ -55,7 +55,9 @@ export function createEditor(entity: Entity): Editor {
             break
         }
         // Chests
-        case 'logistic_chest_requester': {
+        case 'logistic_chest_buffer':
+        case 'logistic_chest_requester':
+        case 'logistic_chest_storage': {
             editor = new ChestEditor(entity)
             break
         }
