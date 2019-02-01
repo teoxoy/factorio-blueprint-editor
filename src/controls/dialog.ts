@@ -13,13 +13,30 @@ import Panel from './panel'
  */
 export default class Dialog extends Panel {
 
+    /** Closes last open dialog */
+    static closeLast() {
+        if (Dialog.anyOpen()) {
+            Dialog.s_openDialogs[Dialog.s_openDialogs.length - 1].close()
+        }
+    }
+
+    /** Closes all open dialogs */
+    static closeAll() {
+        Dialog.s_openDialogs.forEach(d => d.close())
+    }
+
+    /** @returns True if there is at least one dialog open */
+    static anyOpen() {
+        return Dialog.s_openDialogs.length > 0
+    }
+
     /** Capitalize String */
     protected static capitalize(text: string): string {
         return text.split('_').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
     }
 
-    /** Private field to hold dialog index */
-    private m_OpenDialogIndex: number
+    /** Stores all open dialogs */
+    private static s_openDialogs: Dialog[] = []
 
     constructor(width: number, height: number, title?: string) {
         super(width, height,
@@ -46,16 +63,16 @@ export default class Dialog extends Panel {
 
     /** Show Dialog */
     public show(): void {
-        this.m_OpenDialogIndex = G.openDialogs.push(this)
+        Dialog.s_openDialogs.push(this)
         G.app.stage.addChild(this)
         this.visible = true
     }
 
     /** Close Dialog */
     public close(): void {
-        this.visible = false
-        G.app.stage.removeChild(this)
-        G.openDialogs.splice(this.m_OpenDialogIndex - 1, 1)
+        Dialog.s_openDialogs = Dialog.s_openDialogs
+            .filter(d => d !== this)
+
         this.destroy()
     }
 

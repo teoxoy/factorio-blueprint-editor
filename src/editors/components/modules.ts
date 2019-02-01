@@ -64,12 +64,11 @@ export default class Modules extends  PIXI.Container {
         const slot: Slot = e.target as Slot
         const index: number = slot.data as number
         if (e.data.button === 0) {
-            const inventory: InventoryContainer = new InventoryContainer('Select Module', this.m_Entity.acceptedModules, name => {
-                inventory.close()
+            new InventoryContainer('Select Module', this.m_Entity.acceptedModules, name => {
                 this.m_Modules[index] = name
                 this.m_Entity.modules = this.m_Modules
             })
-            inventory.show()
+            .show()
         } else if (e.data.button === 2) {
             this.m_Modules[index] = undefined
             this.m_Entity.modules = this.m_Modules

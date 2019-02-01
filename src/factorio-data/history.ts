@@ -379,7 +379,7 @@ function commitTransaction(force = false) {
     if (s_Transaction === undefined) return false
 
     if (s_Transaction.apply()) {
-        s_Transaction.log()
+        // s_Transaction.log()
         s_CommitTransaction(s_Transaction)
     }
 

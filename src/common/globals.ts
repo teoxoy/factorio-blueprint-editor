@@ -3,7 +3,7 @@ import { ToolbarContainer } from '../panels/toolbar'
 import { QuickbarContainer } from '../panels/quickbar'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
-import Dialog from '../controls/dialog'
+import Entity from '../factorio-data/entity'
 
 // tslint:disable:prefer-const
 
@@ -66,8 +66,6 @@ const gridData = {
 }
 
 let railMoveOffset: IPoint = { x: 0, y: 0 }
-
-const openDialogs: Dialog[] = []
 
 let moveSpeed = 10
 let quickbarRows = 2
@@ -245,13 +243,12 @@ const oilOutpostSettings = {
     BEACONS: true,
     MIN_AFFECTED_ENTITIES: 1,
     BEACON_MODULE: 'speed_module_3',
-    lastGeneratedEntNrs: [] as number[]
+    lastGeneratedEntities: [] as Entity[]
 }
 
 export default {
     hr,
     renderOnly,
-    openDialogs,
     BPC,
     app,
     toolbarContainer,

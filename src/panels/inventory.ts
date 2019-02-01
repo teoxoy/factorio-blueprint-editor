@@ -172,15 +172,12 @@ export class InventoryContainer extends Dialog {
                     button.content = InventoryContainer.createIcon(item.name, false)
                     button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                         if (e.data.button === 0) {
+                            this.close()
                             selectedCallBack(item.name)
                         }
                     })
-                    button.on('pointerover', () => {
-                        this.updateRecipeVisualization(item.name)
-                    })
-                    button.on('pointerout', () => {
-                        this.updateRecipeVisualization(undefined)
-                    })
+                    button.on('pointerover', () => this.updateRecipeVisualization(item.name))
+                    button.on('pointerout', () => this.updateRecipeVisualization(undefined))
 
                     inventoryGroupItems.addChild(button)
 

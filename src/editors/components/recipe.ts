@@ -34,11 +34,8 @@ export default class Recipe extends Slot {
     private onSlotPointerDown(e: PIXI.interaction.InteractionEvent) {
         e.stopPropagation()
         if (e.data.button === 0) {
-            const inventory = new InventoryContainer('Select Recipe', this.m_Entity.acceptedRecipes, name => {
-                inventory.close()
-                this.m_Entity.recipe = name
-            })
-            inventory.show()
+            new InventoryContainer('Select Recipe', this.m_Entity.acceptedRecipes, name => this.m_Entity.recipe = name)
+                .show()
         } else if (e.data.button === 2) {
             this.m_Entity.recipe = undefined
         }

@@ -27,6 +27,7 @@ import initDatGui from './datgui'
 import spritesheetsLoader from './spritesheetsLoader'
 import * as Editors from './editors/factory'
 import Entity from './factorio-data/entity'
+import Dialog from './controls/dialog'
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
@@ -219,43 +220,22 @@ actions.showInfo.bind(() => {
 })
 
 actions.info.bind(() => {
-    // Show Info Dialog (which contains help as top most dialog)
-    let alreadyOpen = false
-    // Check if Info Dialog is already open and if so close it (This should be done even
-    // if Info Dialog is not top most which should not have happened in the first place)
-    if (G.openDialogs.length > 0) {
-        for (const dialog of G.openDialogs) {
-            if (dialog instanceof InfoContainer) {
-                alreadyOpen = true
-                dialog.close()
-            }
-        }
-    }
-    // If Info Dialog was not open, open it
-    if (!alreadyOpen) {
-        const info: InfoContainer = new InfoContainer()
-        info.show()
-    }
+    Dialog.closeAll()
+    new InfoContainer().show()
 })
 
 actions.closeWindow.bind(() => {
-    // If there is a dialog open, close latest
-    if (G.openDialogs.length > 0) {
-        G.openDialogs[G.openDialogs.length - 1].close()
-    }
+    Dialog.closeLast()
 })
 
 actions.inventory.bind(() => {
     if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
         // If there is a dialog open, assume user wants to close it
-        if (G.openDialogs.length > 0) {
-            G.openDialogs[G.openDialogs.length - 1].close()
+        if (Dialog.anyOpen()) {
+            Dialog.closeLast()
         } else {
-            const inventory: InventoryContainer = new InventoryContainer('Inventory', undefined, (itemName: string) => {
-                inventory.close()
-                G.BPC.spawnEntityAtMouse(itemName)
-            })
-            inventory.show()
+            new InventoryContainer('Inventory', undefined, G.BPC.spawnEntityAtMouse.bind(G.BPC))
+                .show()
         }
     }
 })
@@ -345,7 +325,7 @@ actions.build.bind(() => {
 
 actions.mine.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
-        G.BPC.hoverContainer.removeContainer()
+        G.BPC.hoverContainer.entity.destroy()
     }
     if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.removeContainerUnder()
@@ -367,15 +347,7 @@ actions.openEntityGUI.bind(() => {
         if (G.currentMouseState === G.mouseStates.NONE) {
             const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
             if (editor === undefined) return
-
-            // If there are dialogs open, close all of them
-            if (G.openDialogs.length > 0) {
-                while (G.openDialogs.length > 0) {
-                    G.openDialogs[G.openDialogs.length - 1].close()
-                }
-            }
-
-            // Show entity relevant editor
+            Dialog.closeAll()
             editor.show()
         }
     }
