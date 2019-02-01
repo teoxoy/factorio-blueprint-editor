@@ -1,9 +1,6 @@
 import Slot from '../../controls/slot'
 import { InventoryContainer } from '../../panels/inventory'
-import { EntityContainer } from '../../containers/entity'
 import Entity from '../../factorio-data/entity'
-
-// TODO: Integrate showing stack size of slots for requester and buffer chest
 
 /** Module Slots for Entity */
 export default class Filters extends  PIXI.Container {
@@ -43,7 +40,7 @@ export default class Filters extends  PIXI.Container {
     // Filter Count: N/A >> Does not need to be written
     */
 
-    /* Blueprint Logist  Chests
+    /* Blueprint Logist Chests
     ########################
     entity_number: 2
     name: "logistic_chest_storage"
@@ -75,20 +72,48 @@ export default class Filters extends  PIXI.Container {
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 
-    /** Field to hold data for module visualization */
-    private readonly m_Filters: IFilter[]
-
     /** Field to indicate whether counts can shall be shown (Used for 2 chests) */
-    private readonly m_Counts: boolean
+    private readonly m_Amount: boolean
 
-    constructor(entity: Entity, counts: boolean = false) {
+    /** Field to hold data for module visualization */
+    private m_Filters: IFilter[]
+
+    constructor(entity: Entity, amount: boolean = false) {
         super()
 
         // Store entity data reference for later usage
         this.m_Entity = entity
-        this.m_Counts = counts
+        this.m_Amount = amount
 
         // Get filters from entity
+        this.m_UpdateFilters()
+
+        // Create slots for entity
+        for (let slotIndex = 0; slotIndex < this.m_Filters.length; slotIndex++) {
+            const slot: Slot = new Slot()
+            slot.position.set((slotIndex % 6) * 38, Math.floor(slotIndex / 6) * 38)
+            slot.data = slotIndex
+            slot.on('pointerdown', this.onSlotPointerDown)
+            this.addChild(slot)
+        }
+        this.m_UpdateSlots()
+
+        // Listen to filter changes on entity
+        this.m_Entity.on('filters', () => {
+            this.m_UpdateFilters()
+            this.m_UpdateSlots()
+        })
+    }
+
+    /** Clear currently set filter */
+    public clearSlot(index: number = 0) {
+        this.m_Filters[index].name = undefined
+        this.m_Entity.filters = this.m_Filters
+        this.emit('changed', false)
+    }
+
+    /** Update local filters array */
+    private m_UpdateFilters() {
         const slots: number = this.m_Entity.filterSlots
         if (slots > 0) {
             this.m_Filters = new Array(slots)
@@ -105,36 +130,35 @@ export default class Filters extends  PIXI.Container {
                     this.m_Filters[slotIndex]
             }
         }
+    }
 
-        // Create slots for entity
-        for (let slotIndex = 0; slotIndex < this.m_Filters.length; slotIndex++) {
-            const slot: Slot = new Slot()
-            slot.position.set((slotIndex % 6) * 38, Math.floor(slotIndex / 6) * 38)
-            slot.data = slotIndex
-            slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => this.onSlotPointerDown(e))
-            if (this.m_Filters[slotIndex].name !== undefined) {
-                slot.content = InventoryContainer.createIcon(this.m_Filters[slotIndex].name, false)
+    /** Update slot icons */
+    private m_UpdateSlots(index?: number) {
+        for (const slot of this.children) {
+            if (!(slot instanceof Slot)) continue
+
+            const slotIndex: number = slot.data as number
+            const slotFilter: IFilter = this.m_Filters[slotIndex]
+
+            if (slotFilter.name === undefined) {
+                if (slot.content !== undefined) {
+                    slot.content = undefined
+                }
+            } else {
+                if (slot.content === undefined || (index !== undefined && index === slotIndex)) {
+                    if (this.m_Amount) {
+                        slot.content = new PIXI.Container()
+                        InventoryContainer.createIconWithAmount(slot.content as PIXI.Container, -16, -16, slotFilter.name, slotFilter.count)
+                    } else {
+                        slot.content = InventoryContainer.createIcon(slotFilter.name, false)
+                    }
+                }
             }
-            this.addChild(slot)
         }
     }
 
-    /** Clear currently set filter */
-    public clearSlot(slot?: Slot, index: number = 0) {
-        const slotReference = slot !== undefined ? slot : this.getChildAt(index) as Slot
-        const indexValue: number = slot.data as number
-
-        this.m_Filters[indexValue].name = undefined
-        this.m_Entity.filters = this.m_Filters
-        EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
-        if (slotReference.content !== undefined) {
-            slotReference.content.destroy()
-        }
-        this.emit('changed', false)
-    }
-
-    /** Event handler for click on slot */
-    private onSlotPointerDown(e: PIXI.interaction.InteractionEvent) {
+    /** Slot pointer down event handler */
+    private readonly onSlotPointerDown = (e: PIXI.interaction.InteractionEvent) => {
         e.stopPropagation()
         const slot: Slot = e.target as Slot
         const index: number = slot.data as number
@@ -143,13 +167,11 @@ export default class Filters extends  PIXI.Container {
                 inventory.close()
                 this.m_Filters[index].name = name
                 this.m_Entity.filters = this.m_Filters
-                EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
-                slot.content = InventoryContainer.createIcon(name, false)
                 this.emit('changed', true)
             })
             inventory.show()
         } else if (e.data.button === 2) {
-            this.clearSlot(slot)
+            this.clearSlot(index)
         }
     }
 }

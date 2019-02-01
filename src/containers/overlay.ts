@@ -108,23 +108,38 @@ export class OverlayContainer extends PIXI.Container {
             entityInfo.addChild(moduleInfo)
         }
 
-        const filters = entity.inserterFilters || entity.logisticChestFilters || entity.constantCombinatorFilters
-        if (filters) {
+        const filters = entity.filters
+        if (filters !== undefined && (entity.type === 'inserter' || entity.type === 'logistic_container')) {
             const filterInfo = new PIXI.Container()
             for (let i = 0; i < filters.length; i++) {
                 if (i === 4) break
-                // TODO: Check if that is correct
                 if (filters[i].name === undefined) break
+
                 createIconWithBackground(
                     filterInfo,
-                    filters[i].name || filters[i].signal.name,
+                    filters[i].name,
                     { x: i % 2 * 32 - (filters.length !== 1 ? 16 : 0), y: filters.length < 3 ? 0 : (i < 2 ? -16 : 16)}
                 )
             }
             let S = 0.5
-            if (entity.inserterFilters && filters.length !== 1) S = 0.4
-            if (entity.logisticChestFilters && filters.length === 1) S = 0.6
+            if (entity.type === 'inserter' && filters.length !== 1) S = 0.4
+            if (entity.type === 'logistic_container' && filters.length === 1) S = 0.6
             filterInfo.scale.set(S, S)
+            entityInfo.addChild(filterInfo)
+        }
+
+        if (entity.constantCombinatorFilters !== undefined) {
+            const filters = entity.constantCombinatorFilters
+            const filterInfo = new PIXI.Container()
+            for (let i = 0; i < filters.length; i++) {
+                if (i === 4) break
+                createIconWithBackground(
+                    filterInfo,
+                    filters[i].signal.name,
+                    { x: i % 2 * 32 - (filters.length !== 1 ? 16 : 0), y: filters.length < 3 ? 0 : (i < 2 ? -16 : 16)}
+                )
+            }
+            filterInfo.scale.set(0.5, 0.5)
             entityInfo.addChild(filterInfo)
         }
 

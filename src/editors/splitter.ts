@@ -1,7 +1,6 @@
 import G from '../common/globals'
 import Editor from './editor'
 import Entity from '../factorio-data/entity'
-import Preview from './components/preview'
 import Filters from './components/filters'
 import Checkbox from '../controls/checkbox'
 import Enable from '../controls/enable'
@@ -11,17 +10,11 @@ import { EntityContainer } from '../containers/entity'
 /** Splitter Editor */
 export default class SplitterEditor extends Editor {
 
-    /** Reference to preview */
-    private readonly m_Preview: Preview
-
     constructor(entity: Entity) {
         super(504, 176, entity)
 
         const input: string = this.m_Entity.splitterInputPriority
         const output: string = this.m_Entity.splitterOutputPriority
-
-        // Add Preview
-        this.m_Preview = this.addPreview()
 
         // Add Input Priority
         const inputLeft: Enable = new Enable(input === 'left', 'Left')
@@ -75,14 +68,14 @@ export default class SplitterEditor extends Editor {
                 inputRight.active = false
                 this.m_Entity.splitterInputPriority = undefined
             }
-            this.redrawElements()
+            this.redrawEntity()
         })
         inputLeft.on('changed', () => {
             if (inputLeft.active) {
                 inputCheckbox.checked = true
                 inputSwitch.value = 'left'
                 inputRight.active = false
-                this.redrawElements()
+                this.redrawEntity()
             }
         })
         inputSwitch.on('changed', () => {
@@ -97,14 +90,14 @@ export default class SplitterEditor extends Editor {
                 inputRight.active = true
                 this.m_Entity.splitterInputPriority = 'right'
             }
-            this.redrawElements()
+            this.redrawEntity()
         })
         inputRight.on('changed', () => {
             if (inputRight.active) {
                 inputCheckbox.checked = true
                 inputLeft.active = false
                 inputSwitch.value = 'right'
-                this.redrawElements()
+                this.redrawEntity()
             }
         })
 
@@ -119,17 +112,17 @@ export default class SplitterEditor extends Editor {
                 outputLeft.active = false
                 outputSwitch.value = undefined
                 outputRight.active = false
-                filter.clearSlot()
+                filter.clearSlot(0)
                 this.m_Entity.splitterOutputPriority = undefined
             }
-            this.redrawElements()
+            this.redrawEntity()
         })
         outputLeft.on('changed', () => {
             if (outputLeft.active) {
                 outputCheckbox.checked = true
                 outputSwitch.value = 'left'
                 outputRight.active = false
-                this.redrawElements()
+                this.redrawEntity()
             }
         })
         outputSwitch.on('changed', () => {
@@ -144,14 +137,14 @@ export default class SplitterEditor extends Editor {
                 outputRight.active = true
                 this.m_Entity.splitterOutputPriority = 'right'
             }
-            this.redrawElements()
+            this.redrawEntity()
         })
         outputRight.on('changed', () => {
             if (outputRight.active) {
                 outputCheckbox.checked = true
                 outputLeft.active = false
                 outputSwitch.value = 'right'
-                this.redrawElements()
+                this.redrawEntity()
             }
         })
         filter.on('changed', (filled: boolean) => {
@@ -160,17 +153,11 @@ export default class SplitterEditor extends Editor {
                     outputCheckbox.checked = true
                     outputLeft.active = true
                     outputSwitch.value = 'left'
-                    this.redrawElements()
                 }
+                this.redrawEntity()
             } else {
-                this.redrawElements()
+                this.redrawEntity()
             }
         })
-    }
-
-    /** Kick off redraw of all relevant elements */
-    private redrawElements() {
-        EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
-        this.m_Preview.redraw()
     }
 }

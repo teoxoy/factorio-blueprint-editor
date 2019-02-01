@@ -336,13 +336,13 @@ export default class Entity extends EventEmitter {
     get logisticChestFilters(): IFilter[] { return this.m_rawEntity.request_filters }
     set logisticChestFilters(filters: IFilter[]) {
         if (filters !== undefined &&
-            this.m_rawEntity.filters !== undefined &&
-            this.m_rawEntity.filters.length === filters.length &&
-            this.m_rawEntity.filters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
+            this.m_rawEntity.request_filters !== undefined &&
+            this.m_rawEntity.request_filters.length === filters.length &&
+            this.m_rawEntity.request_filters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
         ) return
 
         History
-            .updateValue(this.m_rawEntity, ['filters'], filters, `Changed chest filter${this.filterSlots === 1 ? '' : '(s)'} to '${filters}'`)
+            .updateValue(this.m_rawEntity, ['request_filters'], filters, `Changed chest filter${this.filterSlots === 1 ? '' : '(s)'} to '${filters}'`)
             .emit(() => this.emit('logisticChestFilters'))
             .emit(() => this.emit('filters'))
             .commit()

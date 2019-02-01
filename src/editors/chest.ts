@@ -1,5 +1,4 @@
 import Editor from './editor'
-import Preview from './components/preview'
 import Filters from './components/filters'
 import Slider from '../controls/slider'
 import Entity from '../factorio-data/entity'
@@ -17,21 +16,25 @@ export default class ChestEditor extends Editor {
     // logistic_chest_storage
     // >> 1 Slot / No Count
 
+    /** Field to determine whether amount shall be shown or not */
+    private readonly m_Amount: boolean
+
     constructor(entity: Entity) {
         super(446, 171, entity)
 
-        // Add Preview
-        const preview: Preview = this.addPreview()
+        this.m_Amount = entity.name !== 'logistic_chest_storage'
 
         // Add Filters
         if (this.m_Entity.filterSlots > 0) {
             this.addLabel(140, 56, `Filter${(this.m_Entity.filterSlots === 1 ? '' : 's')}:`)
-            const filters: Filters = this.addFilters(208, 45, true)
-            filters.on('changed', () => preview.redraw())
+            const filters: Filters = this.addFilters(208, 45, this.m_Amount)
+            filters.on('changed', () => { this.redrawEntity() })
         }
 
-        /* Comment out the following for check-in
+        /** Remaining controls are not needed if amount shall not be shown */
+        if (!this.m_Amount) return
 
+        // Add Label
         this.addLabel(140, 131, 'Count:')
 
         // Add Slider
@@ -51,6 +54,5 @@ export default class ChestEditor extends Editor {
         textbox.on('changed', () => {
             slider.value = textbox.text === '' ? 0 : +textbox.text
         })
-        */
     }
 }

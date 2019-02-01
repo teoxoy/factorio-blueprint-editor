@@ -16,7 +16,7 @@ export class InventoryContainer extends Dialog {
      * @param item - Item to create Sprite from
      * @param setAnchor - Temporar parameter to disable anchoring (this parameter may be removed again in the future)
      */
-    static createIcon(itemName: string, setAnchor: boolean = true): PIXI.DisplayObject {
+    public static createIcon(itemName: string, setAnchor: boolean = true): PIXI.DisplayObject {
         let item = FD.items[itemName]
         // only needed for inventory group icon
         if (!item) item = FD.inventoryLayout.find(g => g.name === itemName)
@@ -62,13 +62,14 @@ export class InventoryContainer extends Dialog {
      * @param name - Name if item
      * @param amount - Amount to show
      */
-    private static createIconWithAmount(host: PIXI.Container, x: number, y: number, name: string, amount: string) {
+    public static createIconWithAmount(host: PIXI.Container, x: number, y: number, name: string, amount: number) {
         const icon: PIXI.DisplayObject = InventoryContainer.createIcon(name, false)
         icon.position.set(x, y)
         host.addChild(icon)
 
-        const size: PIXI.TextMetrics = PIXI.TextMetrics.measureText(amount, G.styles.icon.amount)
-        const text = new PIXI.Text(amount, G.styles.icon.amount)
+        const amountString: string = amount.toString()
+        const size: PIXI.TextMetrics = PIXI.TextMetrics.measureText(amountString, G.styles.icon.amount)
+        const text = new PIXI.Text(amountString, G.styles.icon.amount)
         text.position.set(x + 33 - size.width, y + 33 - size.height)
         host.addChild(text)
     }
@@ -269,7 +270,7 @@ export class InventoryContainer extends Dialog {
 
         let nextX = 0
         for (const ingredient of recipe.ingredients) {
-            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, ingredient.name, ingredient.amount.toString())
+            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, ingredient.name, ingredient.amount)
             nextX += 36
         }
 
@@ -282,7 +283,7 @@ export class InventoryContainer extends Dialog {
         nextX += timeSize.width + 6
 
         for (const result of recipe.results) {
-            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, result.name, result.amount.toString())
+            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, result.name, result.amount)
             nextX += 36
         }
     }

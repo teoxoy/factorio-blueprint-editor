@@ -72,8 +72,10 @@ export default class Button extends PIXI.Container {
         return this.m_Content
     }
     public set content(content: PIXI.DisplayObject) {
-        if (this.m_Content !== undefined) {
+        if (this.m_Content !== undefined || (this.m_Content !== undefined && content === undefined)) {
             this.removeChild(this.m_Content)
+            this.m_Content.destroy()
+            this.m_Content = undefined
         }
 
         if (content !== undefined) {
