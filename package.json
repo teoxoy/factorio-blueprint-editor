@@ -1,8 +1,13 @@
 {
   "name": "factorio-blueprint-editor",
   "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A Factorio blueprint editor and renderer webapp",
+  "author": "Teoxoy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Teoxoy/factorio-blueprint-editor.git"
+  },
   "scripts": {
     "start": "parcel src/index.html --port 8080",
     "prebuild": "rimraf dist/*",
@@ -10,8 +15,6 @@
     "setupDist": "git worktree add dist gh-pages",
     "deploy": "cd dist && git add --all && git reset -- stats && git commit -m \"new version\" && git push origin gh-pages"
   },
-  "author": "Teoxoy",
-  "license": "MIT",
   "browserslist": [
     "last 2 Chrome versions",
     "last 2 Firefox versions",
