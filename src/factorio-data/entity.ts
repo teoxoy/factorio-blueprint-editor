@@ -132,7 +132,10 @@ export default class Entity extends EventEmitter {
             if (!entNrArr) return 0
             return getPowerPoleRotation(
                 this.position,
-                entNrArr.map(entNr => this.m_BP.entities.get(entNr).position)
+                entNrArr
+                    .map(entNr => this.m_BP.entities.get(entNr))
+                    .filter(e => !!e)
+                    .map(ent => ent.position)
             )
         }
 
