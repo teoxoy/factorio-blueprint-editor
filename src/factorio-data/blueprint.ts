@@ -7,6 +7,7 @@ import { EntityContainer } from '../containers/entity'
 import generators from './generators'
 import util from '../common/util'
 import * as History from './history'
+import Editor from '../editors/editor';
 
 class EntityCollection extends Map<number, Entity> {
 
@@ -110,6 +111,13 @@ export default class Blueprint {
         History.undo()
 
         switch (hist.type) {
+            case 'add':
+                for (const dialog of G.openDialogs) {
+                    if (dialog instanceof Editor && dialog.entity_number === hist.entity_number) {
+                        dialog.close()
+                    }
+                }
+                break
             case 'del':
                 if (this.entities.get(hist.entity_number).hasConnections) this.connections.undo()
         }
@@ -507,7 +515,7 @@ export default class Blueprint {
         } else {
             const tileName = Array.from(Array.from(this.tiles)
                 .reduce((map, [_, tile]) => map.set(tile, map.has(tile) ? (map.get(tile) + 1) : 0), new Map()))
-                    .sort((a, b) => b[1] - a[1])[0][0]
+                .sort((a, b) => b[1] - a[1])[0][0]
 
             this.icons[0] = FD.tiles[tileName].minable.result
         }

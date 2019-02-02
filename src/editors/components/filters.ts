@@ -1,9 +1,10 @@
+import FD from 'factorio-data'
 import Slot from '../../controls/slot'
-import { InventoryContainer } from '../../panels/inventory'
 import Entity from '../../factorio-data/entity'
+import { InventoryContainer } from '../../panels/inventory'
 
 /** Module Slots for Entity */
-export default class Filters extends  PIXI.Container {
+export default class Filters extends PIXI.Container {
 
     /* Blueprint Splitters
     ########################
@@ -109,7 +110,30 @@ export default class Filters extends  PIXI.Container {
     public clearSlot(index: number = 0) {
         this.m_Filters[index].name = undefined
         this.m_Entity.filters = this.m_Filters
+        this.m_UpdateSlots()
         this.emit('changed', false)
+        if (this.m_Amount) this.emit('selected', -1, 0)
+    }
+
+    /**
+     * Update filter count
+     * @param index - Index of filter
+     * @param count - New count
+     */
+    public updateFilter(index: number, count: number) {
+        if (this.m_Filters[index].count === count) return
+        this.m_Filters[index].count = count
+        this.m_Entity.filters = this.m_Filters
+        this.emit('changed', false)
+        this.m_UpdateSlots()
+    }
+
+    /**
+     * Return filter count of specific filter
+     * @param index Index of filter
+     */
+    public getFilterCount(index: number) {
+        return this.m_Filters[index].count
     }
 
     /** Update local filters array */
@@ -120,20 +144,20 @@ export default class Filters extends  PIXI.Container {
             const filters = this.m_Entity.filters
             if (filters !== undefined) {
                 for (const item of filters) {
-                    this.m_Filters[item.index - 1] = item
+                    this.m_Filters[item.index - 1] = { index: item.index, name: item.name, count: item.count }
                 }
             }
             for (let slotIndex = 0; slotIndex < slots; slotIndex++) {
                 this.m_Filters[slotIndex] =
                     this.m_Filters[slotIndex] === undefined ?
-                    { index: slotIndex + 1, name: undefined } :
-                    this.m_Filters[slotIndex]
+                        { index: slotIndex + 1, name: undefined, count: undefined } :
+                        this.m_Filters[slotIndex]
             }
         }
     }
 
     /** Update slot icons */
-    private m_UpdateSlots(index?: number) {
+    private m_UpdateSlots() {
         for (const slot of this.children) {
             if (!(slot instanceof Slot)) continue
 
@@ -145,8 +169,14 @@ export default class Filters extends  PIXI.Container {
                     slot.content = undefined
                 }
             } else {
-                if (slot.content === undefined || slot.name !== slotFilter.name) {
+                if (slot.content === undefined || slot.name !== slotFilter.name || this.m_Amount) {
                     if (this.m_Amount) {
+                        if (slot.content !== undefined) {
+                            const text = slot.children[1] as PIXI.Text
+                            if (text.text !== slotFilter.count.toString()) {
+                                slot.content = undefined
+                            }
+                        }
                         slot.content = new PIXI.Container()
                         InventoryContainer.createIconWithAmount(slot.content as PIXI.Container, -16, -16, slotFilter.name, slotFilter.count)
                     } else {
@@ -164,15 +194,23 @@ export default class Filters extends  PIXI.Container {
         const slot: Slot = e.target as Slot
         const index: number = slot.data as number
         if (e.data.button === 0) {
-            const inventory: InventoryContainer = new InventoryContainer('Set the Filter', this.m_Entity.acceptedFilters, name => {
-                inventory.close()
-                this.m_Filters[index].name = name
-                this.m_Entity.filters = this.m_Filters
-                this.emit('changed', true)
-            })
-            inventory.show()
+            if (!this.m_Amount || this.m_Filters[index].name === undefined) {
+                const inventory: InventoryContainer = new InventoryContainer('Set the Filter', this.m_Entity.acceptedFilters, name => {
+                    inventory.close()
+                    this.m_Filters[index].name = name
+                    if (this.m_Amount) this.m_Filters[index].count = FD.items[name].stack_size
+                    this.m_Entity.filters = this.m_Filters
+                    this.m_UpdateSlots()
+                    this.emit('changed', true)
+                    if (this.m_Amount) this.emit('selected', index, this.m_Filters[index].count)
+                })
+                inventory.show()
+            } else {
+                if (this.m_Amount) this.emit('selected', index, this.m_Filters[index].count)
+            }
         } else if (e.data.button === 2) {
             this.clearSlot(index)
+            if (this.m_Amount) this.emit('selected', -1, 0)
         }
     }
 }

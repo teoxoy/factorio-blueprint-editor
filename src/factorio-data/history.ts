@@ -379,7 +379,6 @@ function commitTransaction(force = false) {
     if (s_Transaction === undefined) return false
 
     if (s_Transaction.apply()) {
-        s_Transaction.log()
         s_CommitTransaction(s_Transaction)
     }
 
@@ -421,6 +420,7 @@ function s_DeleteValue(obj: ITargetInfo, path: string[]) {
 
 /** Private central function to commit a transaction */
 function s_CommitTransaction(transaction: HistoryEntry) {
+    transaction.log()
     while (s_HistoryEntries.length > s_HistoryIndex) { s_HistoryEntries.pop() } // Slice would need value re-assignment - hence not used on purpose
     s_HistoryEntries.push(transaction)
     s_HistoryIndex++

@@ -34,6 +34,9 @@ export default abstract class Editor extends Dialog {
         this.addChild(this.m_Preview)
     }
 
+    /** Return entitiy number the editor is associated with */
+    public get entity_number(): number { return this.m_Entity.entity_number }
+
     /**
      * Add Recipe Slot to Editor
      * @description Defined in Base Editor class so extensions can use it when they need to

@@ -326,7 +326,7 @@ export default class Entity extends EventEmitter {
         ) return
 
         History
-            .updateValue(this.m_rawEntity, ['filters'], filters, `Changed inserter filter${this.filterSlots === 1 ? '' : '(s)'} to '${filters}'`)
+            .updateValue(this.m_rawEntity, ['filters'], filters, `Changed inserter filter${this.filterSlots === 1 ? '' : '(s)'}`)
             .emit(() => this.emit('inserterFilters'))
             .emit(() => this.emit('filters'))
             .commit()
@@ -335,6 +335,21 @@ export default class Entity extends EventEmitter {
     /** Logistic chest filters */
     get logisticChestFilters(): IFilter[] { return this.m_rawEntity.request_filters }
     set logisticChestFilters(filters: IFilter[]) {
+        // TODO: Check if it makes sense to ignore count changes for history - which can be done with the following routine
+        // if (this.m_rawEntity.request_filters === undefined && filters === undefined) return
+        // if (this.m_rawEntity.request_filters !== undefined && filters !== undefined) {
+        //     let equal = this.m_rawEntity.request_filters.length === filters.length
+        //     if (equal) {
+        //         for (let index = 0; index < this.m_rawEntity.request_filters.length; index++) {
+        //             if (!equal) continue
+        //             if (equal && this.m_rawEntity.request_filters[index].name !== filters[index].name) {
+        //                 equal = false
+        //             }
+        //         }
+        //     }
+        //     if (equal) return
+        // }
+
         if (filters !== undefined &&
             this.m_rawEntity.request_filters !== undefined &&
             this.m_rawEntity.request_filters.length === filters.length &&
@@ -342,9 +357,20 @@ export default class Entity extends EventEmitter {
         ) return
 
         History
-            .updateValue(this.m_rawEntity, ['request_filters'], filters, `Changed chest filter${this.filterSlots === 1 ? '' : '(s)'} to '${filters}'`)
+            .updateValue(this.m_rawEntity, ['request_filters'], filters, `Changed chest filter${this.filterSlots === 1 ? '' : '(s)'}`)
             .emit(() => this.emit('logisticChestFilters'))
             .emit(() => this.emit('filters'))
+            .commit()
+    }
+
+    /** Requester chest - request from buffer chest */
+    get requestFromBufferChest(): boolean { return this.m_rawEntity.request_from_buffers }
+    set requestFromBufferChest(request: boolean) {
+        if (this.m_rawEntity.request_from_buffers === request) { return }
+
+        History
+            .updateValue(this.m_rawEntity, ['request_from_buffers'], request, `Changed request from buffer chest to '${request}'`)
+            .emit(() => this.emit('requestFromBufferChest'))
             .commit()
     }
 
