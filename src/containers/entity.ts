@@ -139,14 +139,7 @@ export class EntityContainer extends PIXI.Container {
         this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entity_number, this.position)
 
         this.redraw(false, sort)
-
-        this.m_Entity.on('rotate', () => {
-            this.redraw()
-            this.redrawSurroundingEntities()
-            this.updateUndergroundLines()
-            this.redrawEntityInfo()
-            G.BPC.wiresContainer.update(this.m_Entity.entity_number)
-        })
+        if (sort) this.redrawSurroundingEntities()
 
         this.m_Entity.on('recipe', () => {
             this.redrawEntityInfo()
@@ -166,7 +159,11 @@ export class EntityContainer extends PIXI.Container {
 
         this.m_Entity.on('direction', () => {
             this.redraw()
+            this.redrawSurroundingEntities()
+
+            this.updateUndergroundLines()
             this.redrawEntityInfo()
+            G.BPC.wiresContainer.update(this.m_Entity.entity_number)
         })
 
         this.m_Entity.on('directionType', () => {
@@ -202,8 +199,6 @@ export class EntityContainer extends PIXI.Container {
     }
 
     destroy() {
-        G.BPC.wiresContainer.remove(this.m_Entity.entity_number)
-
         this.redrawSurroundingEntities()
 
         G.BPC.hoverContainer = undefined

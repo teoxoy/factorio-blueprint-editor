@@ -3,7 +3,6 @@ import { ToolbarContainer } from '../panels/toolbar'
 import { QuickbarContainer } from '../panels/quickbar'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
-import Entity from '../factorio-data/entity'
 
 // tslint:disable:prefer-const
 
@@ -241,8 +240,7 @@ const oilOutpostSettings = {
     MIN_GAP_BETWEEN_UNDERGROUNDS: 1,
     BEACONS: true,
     MIN_AFFECTED_ENTITIES: 1,
-    BEACON_MODULE: 'speed_module_3',
-    lastGeneratedEntities: [] as Entity[]
+    BEACON_MODULE: 'speed_module_3'
 }
 
 export default {

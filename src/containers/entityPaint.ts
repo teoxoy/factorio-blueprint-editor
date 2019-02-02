@@ -189,9 +189,9 @@ export class EntityPaintContainer extends PIXI.Container {
 
     removeContainerUnder() {
         const position = EntityContainer.getGridPosition(this.position)
-        const ent = G.bp.entities.get(G.bp.entityPositionGrid.getCellAtPosition(position))
-        if (ent) {
-            ent.destroy()
+        const entity = G.bp.entities.get(G.bp.entityPositionGrid.getCellAtPosition(position))
+        if (entity) {
+            G.bp.removeEntity(entity)
             this.checkBuildable()
         }
     }
@@ -228,16 +228,15 @@ export class EntityPaintContainer extends PIXI.Container {
         const direction = isUB && this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction
 
         if (G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)) {
-            const newEntity = new Entity({
+            const newEntity = G.bp.createEntity({
                 name: this.name,
                 position,
                 direction,
                 type: isUB ? this.directionType : undefined
-            }, G.bp)
+            })
 
-            const ec = new EntityContainer(newEntity)
+            const ec = EntityContainer.mappings.get(newEntity.entity_number)
             UnderlayContainer.modifyVisualizationArea(ec.areaVisualization, s => s.visible = true)
-            ec.redrawSurroundingEntities()
 
             if (fd.type === 'electric_pole') G.BPC.wiresContainer.updatePassiveWires()
 

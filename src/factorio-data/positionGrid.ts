@@ -104,7 +104,7 @@ export class PositionGrid {
     }
 
     removeTileData(entity: Entity) {
-        PositionGrid.tileDataAction(this.grid, this.bp.entities.get(entity.entity_number).getArea(), (key, cell) => {
+        PositionGrid.tileDataAction(this.grid, entity.getArea(), (key, cell) => {
             if (typeof cell === 'number') {
                 if (cell === entity.entity_number) this.grid.delete(key)
             } else {

@@ -158,6 +158,8 @@ export class BlueprintContainer extends PIXI.Container {
 
         G.bp.tiles.forEach((v, k) => new TileContainer(v, { x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
 
+        G.bp.on('create', entity => new EntityContainer(entity))
+
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()
         this.wiresContainer.drawWires()
@@ -221,8 +223,6 @@ export class BlueprintContainer extends PIXI.Container {
         );
 
         (this.entitySprites.children as EntitySprite[]).sort((a, b) => {
-            if (a.isMoving && !b.isMoving) return 1
-            if (b.isMoving && !a.isMoving) return -1
             const dZ = a.zIndex - b.zIndex
             if (dZ !== 0) return dZ
             const dY = (a.y - a.shift.y) - (b.y - b.shift.y)

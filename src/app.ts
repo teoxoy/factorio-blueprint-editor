@@ -28,6 +28,7 @@ import spritesheetsLoader from './spritesheetsLoader'
 import * as Editors from './editors/factory'
 import Entity from './factorio-data/entity'
 import Dialog from './controls/dialog'
+import * as History from './factorio-data/history'
 
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
@@ -292,11 +293,11 @@ actions.decreaseTileBuildingArea.bind(() => {
 })
 
 actions.undo.bind(() => {
-    G.bp.undo()
+    if (History.canUndo()) History.undo()
 })
 
 actions.redo.bind(() => {
-    G.bp.redo()
+    if (History.canRedo()) History.redo()
 })
 
 actions.generateOilOutpost.bind(() => {
@@ -321,7 +322,7 @@ actions.build.bind(() => {
 
 actions.mine.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
-        G.BPC.hoverContainer.entity.destroy()
+        G.bp.removeEntity(G.BPC.hoverContainer.entity)
     }
     if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.removeContainerUnder()

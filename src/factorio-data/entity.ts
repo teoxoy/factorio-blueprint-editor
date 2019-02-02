@@ -11,10 +11,6 @@ import G from '../common/globals'
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
 // TODO: Optimize within connections property the way how the connections to other entities are found (Try Counter: 0)
 
-interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
-    entity_number?: number
-}
-
 /** Entity Base Class */
 export default class Entity extends EventEmitter {
 
@@ -29,31 +25,19 @@ export default class Entity extends EventEmitter {
      * @param rawEntity Raw entity object
      * @param blueprint Reference to blueprint
      */
-    constructor(rawEntity: IEntityData, blueprint: Blueprint) {
+    constructor(rawEntity: BPS.IEntity, blueprint: Blueprint) {
         super()
         this.m_BP = blueprint
-
-        this.m_rawEntity = {
-            ...rawEntity,
-            entity_number: rawEntity.entity_number ? rawEntity.entity_number : this.m_BP.next_entity_number
-        }
-
-        History.updateMap(this.m_BP.entities, this.entity_number, this, `Added entity: ${this.type}`)
-            .type('add')
-            .commit()
-
-        this.m_BP.entityPositionGrid.setTileData(this)
-
-        // this.emit('create')
+        this.m_rawEntity = rawEntity
     }
 
     destroy() {
-        History.startTransaction(`Deleted entity: ${this.type}`)
+        this.emit('destroy')
 
-        this.m_BP.entityPositionGrid.removeTileData(this)
+        this.removeAllListeners()
+    }
 
-        History.updateMap(this.m_BP.entities, this.entity_number, undefined, undefined, true).type('del')
-
+    removeConnectionsToOtherEntities() {
         const entitiesToModify = this.hasConnections ? this.m_BP.connections.removeConnectionData(this.entity_number) : []
         for (const entityToModify of entitiesToModify) {
             const ent = this.m_BP.entities.get(entityToModify.entity_number)
@@ -77,10 +61,6 @@ export default class Entity extends EventEmitter {
 
             ent.emit('redraw')
         }
-
-        History.commitTransaction()
-
-        this.emit('destroy')
     }
 
     /** Return reference to blueprint */
@@ -508,7 +488,7 @@ export default class Entity extends EventEmitter {
         return Object.keys(conn).length ? conn : undefined
     }
 
-    get connectedEntities() {
+    get connectedEntities(): number[] {
         const connections = this.connections
         if (!connections) return
 
@@ -551,10 +531,6 @@ export default class Entity extends EventEmitter {
             width: this.size.x,
             height: this.size.y
         })
-    }
-
-    getOccupiedTiles() {
-        return
     }
 
     change(name: string, direction: number) {
@@ -601,8 +577,6 @@ export default class Entity extends EventEmitter {
         }
 
         History.commitTransaction()
-
-        this.emit('rotate')
     }
 
     /** Paste relevant data from source entity */

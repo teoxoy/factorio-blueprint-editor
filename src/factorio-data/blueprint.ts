@@ -7,6 +7,7 @@ import { EntityContainer } from '../containers/entity'
 import generators from './generators'
 import util from '../common/util'
 import * as History from './history'
+import { EventEmitter } from 'events'
 
 class EntityCollection extends Map<number, Entity> {
 
@@ -42,8 +43,12 @@ class EntityCollection extends Map<number, Entity> {
     }
 }
 
+interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
+    entity_number?: number
+}
+
 /** Blueprint base class */
-export default class Blueprint {
+export default class Blueprint extends EventEmitter {
 
     name: string
     icons: any[]
@@ -56,6 +61,7 @@ export default class Blueprint {
     private m_next_entity_number = 1
 
     constructor(data?: BPS.IBlueprint) {
+        super()
 
         this.name = 'Blueprint'
         this.icons = []
@@ -94,13 +100,13 @@ export default class Blueprint {
 
                 History.startTransaction()
 
-                this.entities = new EntityCollection(data.entities.map(e => new Entity({
-                        ...e,
-                        position: {
-                            x: e.position.x + offset.x,
-                            y: e.position.y + offset.y
-                        }
-                }, this)))
+                this.entities = new EntityCollection(data.entities.map(e => this.createEntity({
+                    ...e,
+                    position: {
+                        x: e.position.x + offset.x,
+                        y: e.position.y + offset.y
+                    }
+                })))
 
                 History.commitTransaction()
             }
@@ -111,117 +117,164 @@ export default class Blueprint {
         return this
     }
 
+    createEntity(rawData: IEntityData) {
+        const rawEntity = new Entity({
+            ...rawData,
+            entity_number: rawData.entity_number ? rawData.entity_number : this.next_entity_number
+        }, this)
+
+        History
+            .updateMap(this.entities, rawEntity.entity_number, rawEntity, `Added entity: ${rawEntity.name}`)
+            .type('add')
+            .emit(this.onCreateOrRemoveEntity.bind(this))
+            .commit()
+
+        return rawEntity
+    }
+
+    removeEntity(entity: Entity) {
+        History.startTransaction(`Deleted entity: ${entity.name}`)
+
+        entity.removeConnectionsToOtherEntities()
+
+        History
+            .updateMap(this.entities, entity.entity_number, undefined, undefined, true)
+            .type('del')
+            .emit(this.onCreateOrRemoveEntity.bind(this))
+
+        History.commitTransaction()
+    }
+
+    onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity) {
+        if (newValue === undefined) {
+            this.entityPositionGrid.removeTileData(oldValue)
+            G.BPC.wiresContainer.remove(oldValue.entity_number)
+            oldValue.destroy()
+        } else {
+            this.entityPositionGrid.setTileData(newValue)
+
+            if (newValue.hasConnections) {
+                newValue.connectedEntities
+                    .map(entNr => EntityContainer.mappings.get(entNr))
+                    .filter(ec => ec)
+                    .forEach(ec => ec.redraw())
+            }
+
+            this.emit('create', newValue)
+        }
+    }
+
     get next_entity_number() {
         return this.m_next_entity_number++
     }
 
-    undo() {
-        if (!History.canUndo()) return
-        const hist = History.getUndoPreview()
+    // undo() {
+    //     if (!History.canUndo()) return
+    //     const hist = History.getUndoPreview()
 
-        // switch (hist.type) {
-        //     case 'add':
-        //     case 'del':
-        //     case 'mov':
-        //         this.entityPositionGrid.undo()
-        // }
+    //     // switch (hist.type) {
+    //     //     case 'add':
+    //     //     case 'del':
+    //     //     case 'mov':
+    //     //         this.entityPositionGrid.undo()
+    //     // }
 
-        // this.pre(hist, 'add')
+    //     // this.pre(hist, 'add')
 
-        History.undo()
+    //     History.undo()
 
-        switch (hist.type) {
-            case 'del':
-                if (this.entities.get(hist.entity_number).hasConnections) this.connections.undo()
-        }
-        // this.post(hist, 'del')
-    }
+    //     // switch (hist.type) {
+    //     //     case 'del':
+    //     //         if (this.entities.get(hist.entity_number).hasConnections) this.connections.undo()
+    //     // }
+    //     // this.post(hist, 'del')
+    // }
 
-    redo() {
-        if (!History.canRedo()) return
-        const hist = History.getRedoPreview()
+    // redo() {
+    //     if (!History.canRedo()) return
+    //     const hist = History.getRedoPreview()
 
-        // switch (hist.type) {
-        //     case 'add':
-        //     case 'del':
-        //     case 'mov':
-        //         this.entityPositionGrid.redo()
-        // }
+    //     // switch (hist.type) {
+    //     //     case 'add':
+    //     //     case 'del':
+    //     //     case 'mov':
+    //     //         this.entityPositionGrid.redo()
+    //     // }
 
-        // this.pre(hist, 'del')
+    //     // this.pre(hist, 'del')
 
-        const entity = this.entities.get(hist.entity_number)
-        switch (hist.type) {
-            case 'del':
-                if (entity.hasConnections) this.connections.redo()
-        }
+    //     const entity = this.entities.get(hist.entity_number)
+    //     // switch (hist.type) {
+    //     //     case 'del':
+    //     //         if (entity.hasConnections) this.connections.redo()
+    //     // }
 
-        History.redo()
+    //     History.redo()
 
-        // TODO: Refactor this somehow
-        if (hist.type === 'del' && entity.hasConnections && entity.connectedEntities) {
-            for (const entNr of entity.connectedEntities) {
-                EntityContainer.mappings.get(entNr).redraw()
-            }
-        }
+    //     // TODO: Refactor this somehow
+    //     // if (hist.type === 'del' && entity.hasConnections && entity.connectedEntities) {
+    //     //     for (const entNr of entity.connectedEntities) {
+    //     //         EntityContainer.mappings.get(entNr).redraw()
+    //     //     }
+    //     // }
 
-        // this.post(hist, 'add')
-    }
+    //     // this.post(hist, 'add')
+    // }
 
-    redrawEntityAndSurroundingEntities(entnr: number) {
-        const e = EntityContainer.mappings.get(entnr)
-        e.redraw()
-        e.redrawSurroundingEntities()
-    }
+    // redrawEntityAndSurroundingEntities(entnr: number) {
+    //     const e = EntityContainer.mappings.get(entnr)
+    //     e.redraw()
+    //     e.redrawSurroundingEntities()
+    // }
 
-    pre(hist: History.IHistoryData, addDel: string) {
-        switch (hist.type) {
-            case 'mov':
-            case addDel:
-                const e = EntityContainer.mappings.get(hist.entity_number)
-                if (e === undefined) return
-                e.redrawSurroundingEntities()
-                if (hist.type === addDel) {
-                    G.BPC.wiresContainer.remove(hist.entity_number)
-                    e.destroy()
-                }
-                if (hist.type === 'mov') G.BPC.wiresContainer.update(hist.entity_number)
-        }
-    }
+    // pre(hist: History.IHistoryData, addDel: string) {
+    //     switch (hist.type) {
+    //         case 'mov':
+    //         case addDel:
+    //             const e = EntityContainer.mappings.get(hist.entity_number)
+    //             if (e === undefined) return
+    //             e.redrawSurroundingEntities()
+    //             if (hist.type === addDel) {
+    //                 G.BPC.wiresContainer.remove(hist.entity_number)
+    //                 e.destroy()
+    //             }
+    //             if (hist.type === 'mov') G.BPC.wiresContainer.update(hist.entity_number)
+    //     }
+    // }
 
-    post(hist: History.IHistoryData, addDel: string) {
-        switch (hist.type) {
-            case 'mov':
-                this.redrawEntityAndSurroundingEntities(hist.entity_number)
-                const entity = G.bp.entities.get(hist.entity_number)
-                const e = EntityContainer.mappings.get(hist.entity_number)
-                e.position.set(
-                    entity.position.x * 32,
-                    entity.position.y * 32
-                )
-                e.updateVisualStuff()
-                break
-            case 'upd':
-                if (hist.other_entity) {
-                    this.redrawEntityAndSurroundingEntities(hist.entity_number)
-                    this.redrawEntityAndSurroundingEntities(hist.other_entity)
-                } else {
-                    const e = EntityContainer.mappings.get(hist.entity_number)
-                    e.redrawEntityInfo()
-                    this.redrawEntityAndSurroundingEntities(hist.entity_number)
-                    G.BPC.wiresContainer.update(hist.entity_number)
-                }
-                break
-            case addDel:
-                const ec = new EntityContainer(this.entities.get(hist.entity_number))
-                ec.redrawSurroundingEntities()
-                G.BPC.wiresContainer.update(hist.entity_number)
-        }
+    // post(hist: History.IHistoryData, addDel: string) {
+    //     switch (hist.type) {
+    //         case 'mov':
+    //             this.redrawEntityAndSurroundingEntities(hist.entity_number)
+    //             const entity = G.bp.entities.get(hist.entity_number)
+    //             const e = EntityContainer.mappings.get(hist.entity_number)
+    //             e.position.set(
+    //                 entity.position.x * 32,
+    //                 entity.position.y * 32
+    //             )
+    //             e.updateVisualStuff()
+    //             break
+    //         case 'upd':
+    //             if (hist.other_entity) {
+    //                 this.redrawEntityAndSurroundingEntities(hist.entity_number)
+    //                 this.redrawEntityAndSurroundingEntities(hist.other_entity)
+    //             } else {
+    //                 const e = EntityContainer.mappings.get(hist.entity_number)
+    //                 e.redrawEntityInfo()
+    //                 this.redrawEntityAndSurroundingEntities(hist.entity_number)
+    //                 G.BPC.wiresContainer.update(hist.entity_number)
+    //             }
+    //             break
+    //         case addDel:
+    //             const ec = new EntityContainer(this.entities.get(hist.entity_number))
+    //             ec.redrawSurroundingEntities()
+    //             G.BPC.wiresContainer.update(hist.entity_number)
+    //     }
 
-        // console.log(`${addDel === 'del' ? 'Undo' : 'Redo'} ${hist.entity_number} ${hist.annotation}`)
-        G.BPC.updateOverlay()
-        G.BPC.updateViewportCulling()
-    }
+    //     // console.log(`${addDel === 'del' ? 'Undo' : 'Redo'} ${hist.entity_number} ${hist.annotation}`)
+    //     G.BPC.updateOverlay()
+    //     G.BPC.updateViewportCulling()
+    // }
 
     getFirstRail() {
         return this.entities.find(e => e.name === 'straight_rail' /* || e.name === 'curved_rail' */)
@@ -286,7 +339,6 @@ export default class Blueprint {
         const BEACONS = G.oilOutpostSettings.BEACONS
         const MIN_AFFECTED_ENTITIES = G.oilOutpostSettings.MIN_AFFECTED_ENTITIES
         const BEACON_MODULE = G.oilOutpostSettings.BEACON_MODULE
-        let lastGeneratedEntities = G.oilOutpostSettings.lastGeneratedEntities
 
         const pumpjacks = this.entities.filter(v => v.name === 'pumpjack')
             .map(p => ({ entity_number: p.entity_number, name: p.name, position: p.position }))
@@ -296,7 +348,7 @@ export default class Blueprint {
             return
         }
 
-        if (pumpjacks.length !== this.entities.filter(e => !lastGeneratedEntities.includes(e)).length) {
+        if (pumpjacks.length !== this.entities.size) {
             console.error('BP Area should only contain pumpjacks!')
             return
         }
@@ -348,26 +400,11 @@ export default class Blueprint {
 
         T.stop()
 
-        // TODO: Find out why undo doesn't work on this
-        // TEST BP: http://localhost:8080/?source=https://pastebin.com/3ca6a50V
         History.startTransaction('Generated Oil Outpost!')
 
-        lastGeneratedEntities.forEach(e => {
-            e.destroy()
-        })
-
-        lastGeneratedEntities = []
-
-        GP.pipes.forEach(pipe =>
-            lastGeneratedEntities.push(new Entity(pipe, this)))
-
-        if (BEACONS) {
-            GB.beacons.forEach(beacon =>
-                lastGeneratedEntities.push(new Entity({ ...beacon, items: { [BEACON_MODULE]: 2 } }, this)))
-        }
-
-        GPO.poles.forEach(pole =>
-            lastGeneratedEntities.push(new Entity(pole, this)))
+        GP.pipes.forEach(pipe => this.createEntity(pipe))
+        if (BEACONS) GB.beacons.forEach(beacon => this.createEntity({ ...beacon, items: { [BEACON_MODULE]: 2 } }))
+        GPO.poles.forEach(pole => this.createEntity(pole))
 
         GP.pumpjacksToRotate.forEach(p => {
             const entity = this.entities.get(p.entity_number)
@@ -377,10 +414,6 @@ export default class Blueprint {
 
         History.commitTransaction()
 
-        G.oilOutpostSettings.lastGeneratedEntities = lastGeneratedEntities
-
-        lastGeneratedEntities.forEach(e => new EntityContainer(e, false))
-        G.BPC.sortEntities()
         G.BPC.wiresContainer.updatePassiveWires()
 
         if (!DEBUG) return
