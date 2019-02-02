@@ -1,5 +1,4 @@
 import Delaunator from 'delaunator'
-import range from 'ramda/es/range'
 
 // TODO: maybe merge this file with the main util file
 
@@ -27,6 +26,9 @@ const euclideanDistance = (p0: IPoint, p1: IPoint) =>
 
 const pointInCircle = (point: IPoint, origin: IPoint, r: number) =>
     Math.pow(origin.x - point.x, 2) + Math.pow(origin.y - point.y, 2) <= r * r
+
+const range = (from: number, to: number) =>
+    [...Array(to - from).keys()].map(i => from + i)
 
 export default {
     hashPoint,
