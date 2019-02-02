@@ -383,10 +383,7 @@
 									"green_output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
 									"blue_output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
 
-									"output_signal": {
-										"$comment": "only present if entity is stone-wall or accumulator",
-										"$ref": "blueprintSchema.json#/definitions/signal"
-									},
+									"output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
 
 									"circuit_parameters": {
 										"type": "object",
