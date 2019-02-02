@@ -108,7 +108,7 @@ export class OverlayContainer extends PIXI.Container {
             entityInfo.addChild(moduleInfo)
         }
 
-        const filters = entity.filters
+        const filters = entity.filters === undefined ? undefined : entity.filters.filter(v => v.name !== undefined)
         if (filters !== undefined && (entity.type === 'inserter' || entity.type === 'logistic_container')) {
             const filterInfo = new PIXI.Container()
             for (let i = 0; i < filters.length; i++) {

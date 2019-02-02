@@ -437,7 +437,7 @@ export default class Blueprint {
         } else {
             const tileName = Array.from(Array.from(this.tiles)
                 .reduce((map, [_, tile]) => map.set(tile, map.has(tile) ? (map.get(tile) + 1) : 0), new Map()))
-                    .sort((a, b) => b[1] - a[1])[0][0]
+                .sort((a, b) => b[1] - a[1])[0][0]
 
             this.icons[0] = FD.tiles[tileName].minable.result
         }

@@ -67,7 +67,7 @@ export class InventoryContainer extends Dialog {
         icon.position.set(x, y)
         host.addChild(icon)
 
-        const amountString: string = amount.toString()
+        const amountString: string = amount < 1000 ? amount.toString() : `${Math.floor(amount / 1000)}k`
         const size: PIXI.TextMetrics = PIXI.TextMetrics.measureText(amountString, G.styles.icon.amount)
         const text = new PIXI.Text(amountString, G.styles.icon.amount)
         text.position.set(x + 33 - size.width, y + 33 - size.height)

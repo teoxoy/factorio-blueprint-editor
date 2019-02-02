@@ -33,11 +33,11 @@ export function createEditor(entity: Entity): Editor {
             break
         }
         // Inserters
-        case 'inserter':
-        case 'fast_inserter':
-        case 'long_handed_inserter':
+        // case 'inserter':             // Disabled for now as there are currently no entity settings
+        // case 'fast_inserter':        // Disabled for now as there are currently no entity settings
+        // case 'long_handed_inserter': // Disabled for now as there are currently no entity settings
+        // case 'stack_inserter':       // Disabled for now as there are currently no entity settings
         case 'filter_inserter':
-        case 'stack_inserter':
         case 'stack_filter_inserter': {
             editor = new InserterEditor(entity)
             break

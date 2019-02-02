@@ -1,8 +1,8 @@
 import G from '../../common/globals'
+import util from '../../common/util'
 import { EntityContainer } from '../../containers/entity'
 import { OverlayContainer } from '../../containers/overlay'
 import Entity from '../../factorio-data/entity'
-import util from '../../common/util'
 
 /** Preview of Entity */
 export default class Preview extends PIXI.Container {
@@ -39,12 +39,13 @@ export default class Preview extends PIXI.Container {
 
         // Create preview
         this.m_Preview = this.generatePreview()
-    }
 
-    /** Redraw the preview */
-    public redraw() {
-        this.m_Preview.destroy()
-        this.m_Preview = this.generatePreview()
+        // Attach events
+        this.m_Entity.on('recipe', this.onEntityChanged)
+        this.m_Entity.on('modules', this.onEntityChanged)
+        this.m_Entity.on('filters', this.onEntityChanged)
+        this.m_Entity.on('splitterInputPriority', this.onEntityChanged)
+        this.m_Entity.on('splitterOutputPriority', this.onEntityChanged)
     }
 
     /** Create the perview */
@@ -57,19 +58,22 @@ export default class Preview extends PIXI.Container {
         const actualSpriteSize = { x: this.m_Entity.size.x, y: this.m_Entity.size.y }
         const offset = { x: 0, y: 0 }
 
-        if (this.m_Entity.entityData.drawing_box) {
-            assignDataFromDrawingBox(this.m_Entity.entityData.drawing_box)
-        }
+        if (this.m_Entity.entityData !== undefined) {
+            /** Adjust sprite size and offset based on drawing box */
+            function assignDataFromDrawingBox(db: number[][]) {
+                actualSpriteSize.x = Math.abs(db[0][0]) + db[1][0]
+                actualSpriteSize.y = Math.abs(db[0][1]) + db[1][1]
+                offset.x = actualSpriteSize.x / 2 - db[1][0]
+                offset.y = actualSpriteSize.y / 2 - db[1][1]
+            }
 
-        if (this.m_Entity.entityData.drawing_boxes) {
-            assignDataFromDrawingBox(this.m_Entity.entityData.drawing_boxes[util.intToDir(this.m_Entity.direction)])
-        }
+            if (this.m_Entity.entityData.drawing_box !== undefined) {
+                assignDataFromDrawingBox(this.m_Entity.entityData.drawing_box)
+            }
 
-        function assignDataFromDrawingBox(db: number[][]) {
-            actualSpriteSize.x = Math.abs(db[0][0]) + db[1][0]
-            actualSpriteSize.y = Math.abs(db[0][1]) + db[1][1]
-            offset.x = actualSpriteSize.x / 2 - db[1][0]
-            offset.y = actualSpriteSize.y / 2 - db[1][1]
+            if (this.m_Entity.entityData.drawing_boxes !== undefined) {
+                assignDataFromDrawingBox(this.m_Entity.entityData.drawing_boxes[util.intToDir(this.m_Entity.direction)])
+            }
         }
 
         const SCALE = (this.m_Size / (Math.max(actualSpriteSize.x, actualSpriteSize.y, 3) * 32 + 32))
@@ -77,11 +81,17 @@ export default class Preview extends PIXI.Container {
         entityParts.position.set(this.m_Size / 2 + offset.x * 32 * SCALE, this.m_Size / 2 + offset.y * 32 * SCALE)
 
         const oc: OverlayContainer = new OverlayContainer()
-        const o: PIXI.Container = oc.createEntityInfo(this.m_Entity.entity_number, { x: 0, y: 0})
+        const o: PIXI.Container = oc.createEntityInfo(this.m_Entity.entity_number, { x: 0, y: 0 })
         if (o !== undefined) {
             entityParts.addChild(o)
         }
 
         return entityParts
+    }
+
+    /** Entity changed event callback */
+    private readonly onEntityChanged = () => {
+        this.m_Preview.destroy()
+        this.m_Preview = this.generatePreview()
     }
 }

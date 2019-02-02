@@ -85,7 +85,6 @@ export default class SplitterEditor extends Editor {
             inputSwitch.value = priority
             inputLeft.active = priority === 'left'
             inputRight.active = priority === 'right'
-            this.m_Preview.redraw()
         })
 
         this.m_Entity.on('splitterOutputPriority', priority => {
@@ -93,11 +92,6 @@ export default class SplitterEditor extends Editor {
             outputSwitch.value = priority
             outputLeft.active = priority === 'left'
             outputRight.active = priority === 'right'
-            this.m_Preview.redraw()
-        })
-
-        this.m_Entity.on('splitterFilter', () => {
-            this.m_Preview.redraw()
         })
     }
 }
