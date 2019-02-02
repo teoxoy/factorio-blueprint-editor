@@ -56,9 +56,6 @@ export default class ChestEditor extends Editor {
         this.addChild(textbox)
 
         // Attach Events
-        filters.on('changed', () => {
-            this.redrawEntity()
-        })
         filters.on('selected', (index: number, count: number) => {
             if (index < 0) {
                 label.visible = false

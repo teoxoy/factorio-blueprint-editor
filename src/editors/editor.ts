@@ -4,7 +4,6 @@ import Recipe from './components/recipe'
 import Modules from './components/modules'
 import Filters from './components/filters'
 import Entity from '../factorio-data/entity'
-import { EntityContainer } from '../containers/entity'
 
 /** Editor */
 export default abstract class Editor extends Dialog {
@@ -81,11 +80,5 @@ export default abstract class Editor extends Dialog {
 
         // Return component in case extension wants to use it
         return filters
-    }
-
-    /** Redraw Entity and Entity Preview */
-    protected redrawEntity() {
-        EntityContainer.mappings.get(this.m_Entity.entity_number).redrawEntityInfo()
-        this.m_Preview.redraw()
     }
 }

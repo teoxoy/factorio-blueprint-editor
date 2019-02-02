@@ -102,9 +102,6 @@ export default class SplitterEditor extends Editor {
                 if (!outputCheckbox.checked) {
                     this.m_Entity.splitterOutputPriority = 'left'
                 }
-                this.redrawEntity()
-            } else {
-                this.redrawEntity()
             }
         })
 
@@ -128,7 +125,6 @@ export default class SplitterEditor extends Editor {
                     inputSwitch.value = undefined
                     inputRight.active = false
             }
-            this.redrawEntity()
         })
 
         this.m_Entity.on('splitterOutputPriority', () => {
@@ -152,7 +148,6 @@ export default class SplitterEditor extends Editor {
                     outputRight.active = false
                     filter.clearSlot(0)
             }
-            this.redrawEntity()
         })
     }
 }

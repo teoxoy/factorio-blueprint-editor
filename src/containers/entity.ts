@@ -172,9 +172,10 @@ export class EntityContainer extends PIXI.Container {
             }
         })
 
-        this.m_Entity.on('modules', () => {
-            this.redrawEntityInfo()
-        })
+        this.m_Entity.on('modules', () => { this.redrawEntityInfo() })
+        this.m_Entity.on('filters', () => { this.redrawEntityInfo() })
+        this.m_Entity.on('splitterInputPriority', () => { this.redrawEntityInfo() })
+        this.m_Entity.on('splitterOutputPriority', () => { this.redrawEntityInfo() })
     }
 
     public get entity(): Entity {
@@ -234,7 +235,7 @@ export class EntityContainer extends PIXI.Container {
             this.m_Entity.name === 'pump' || this.m_Entity.name === 'offshore_pump' ||
             this.m_Entity.name === 'arithmetic_combinator' || this.m_Entity.name === 'decider_combinator' ||
             this.m_Entity.name === 'filter_inserter' || this.m_Entity.name === 'stack_filter_inserter' ||
-            this.m_Entity.name === 'splitter' || this.m_Entity.name === 'fast_splitter' || this.m_Entity.name === 'express_splitter'
+            this.m_Entity.type === 'splitter' || this.m_Entity.type === 'logistic_container'
         ) {
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()

@@ -1,8 +1,8 @@
 import G from '../../common/globals'
+import util from '../../common/util'
 import { EntityContainer } from '../../containers/entity'
 import { OverlayContainer } from '../../containers/overlay'
 import Entity from '../../factorio-data/entity'
-import util from '../../common/util'
 
 /** Preview of Entity */
 export default class Preview extends PIXI.Container {
@@ -39,12 +39,13 @@ export default class Preview extends PIXI.Container {
 
         // Create preview
         this.m_Preview = this.generatePreview()
-    }
 
-    /** Redraw the preview */
-    public redraw() {
-        this.m_Preview.destroy()
-        this.m_Preview = this.generatePreview()
+        // Attach events
+        this.m_Entity.on('recipe', this.onEntityChanged)
+        this.m_Entity.on('modules', this.onEntityChanged)
+        this.m_Entity.on('filters', this.onEntityChanged)
+        this.m_Entity.on('splitterInputPriority', this.onEntityChanged)
+        this.m_Entity.on('splitterOutputPriority', this.onEntityChanged)
     }
 
     /** Create the perview */
@@ -77,11 +78,17 @@ export default class Preview extends PIXI.Container {
         entityParts.position.set(this.m_Size / 2 + offset.x * 32 * SCALE, this.m_Size / 2 + offset.y * 32 * SCALE)
 
         const oc: OverlayContainer = new OverlayContainer()
-        const o: PIXI.Container = oc.createEntityInfo(this.m_Entity.entity_number, { x: 0, y: 0})
+        const o: PIXI.Container = oc.createEntityInfo(this.m_Entity.entity_number, { x: 0, y: 0 })
         if (o !== undefined) {
             entityParts.addChild(o)
         }
 
         return entityParts
+    }
+
+    /** Entity changed event callback */
+    private readonly onEntityChanged = () => {
+        this.m_Preview.destroy()
+        this.m_Preview = this.generatePreview()
     }
 }
