@@ -7,7 +7,7 @@ import { EntityContainer } from '../containers/entity'
 import generators from './generators'
 import util from '../common/util'
 import * as History from './history'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter3'
 
 class EntityCollection extends Map<number, Entity> {
 
