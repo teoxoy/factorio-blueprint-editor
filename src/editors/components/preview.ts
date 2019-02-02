@@ -58,19 +58,22 @@ export default class Preview extends PIXI.Container {
         const actualSpriteSize = { x: this.m_Entity.size.x, y: this.m_Entity.size.y }
         const offset = { x: 0, y: 0 }
 
-        if (this.m_Entity.entityData.drawing_box) {
-            assignDataFromDrawingBox(this.m_Entity.entityData.drawing_box)
-        }
+        if (this.m_Entity.entityData !== undefined) {
+            /** Adjust sprite size and offset based on drawing box */
+            function assignDataFromDrawingBox(db: number[][]) {
+                actualSpriteSize.x = Math.abs(db[0][0]) + db[1][0]
+                actualSpriteSize.y = Math.abs(db[0][1]) + db[1][1]
+                offset.x = actualSpriteSize.x / 2 - db[1][0]
+                offset.y = actualSpriteSize.y / 2 - db[1][1]
+            }
 
-        if (this.m_Entity.entityData.drawing_boxes) {
-            assignDataFromDrawingBox(this.m_Entity.entityData.drawing_boxes[util.intToDir(this.m_Entity.direction)])
-        }
+            if (this.m_Entity.entityData.drawing_box !== undefined) {
+                assignDataFromDrawingBox(this.m_Entity.entityData.drawing_box)
+            }
 
-        function assignDataFromDrawingBox(db: number[][]) {
-            actualSpriteSize.x = Math.abs(db[0][0]) + db[1][0]
-            actualSpriteSize.y = Math.abs(db[0][1]) + db[1][1]
-            offset.x = actualSpriteSize.x / 2 - db[1][0]
-            offset.y = actualSpriteSize.y / 2 - db[1][1]
+            if (this.m_Entity.entityData.drawing_boxes !== undefined) {
+                assignDataFromDrawingBox(this.m_Entity.entityData.drawing_boxes[util.intToDir(this.m_Entity.direction)])
+            }
         }
 
         const SCALE = (this.m_Size / (Math.max(actualSpriteSize.x, actualSpriteSize.y, 3) * 32 + 32))
