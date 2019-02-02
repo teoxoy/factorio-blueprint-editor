@@ -65,9 +65,9 @@ export default class Blueprint extends EventEmitter {
 
         this.name = 'Blueprint'
         this.icons = []
+        this.version = 68722819072
         this.entities = new EntityCollection()
         this.tiles = new Map()
-        this.version = undefined
         this.entityPositionGrid = new PositionGrid(this)
 
         if (data) {
@@ -536,7 +536,7 @@ export default class Blueprint extends EventEmitter {
                 entities: this.entities.isEmpty() ? undefined : entityInfo,
                 tiles: this.tiles.size === 0 ? undefined : tileInfo,
                 item: 'blueprint',
-                version: this.version || 0,
+                version: this.version,
                 label: this.name
             }
         }
