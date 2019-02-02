@@ -218,7 +218,7 @@ class HistoryEntry {
         for (const action of this.m_Actions) {
             entityNumbers.push(action.apply(value))
         }
-        if (this.m_Text !== undefined) console.log(`[${entityNumbers.join(',')}]: ${this.m_Text}`)
+        // if (this.m_Text !== undefined) console.log(`[${entityNumbers.join(',')}]: ${this.m_Text}`)
 
         return true
     }
