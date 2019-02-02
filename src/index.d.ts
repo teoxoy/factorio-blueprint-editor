@@ -68,6 +68,15 @@ interface IFilter {
     count?: number
 }
 
+interface IConnection {
+    circuit_id: number
+    color: string
+    entity_number_1: number
+    entity_number_2: number
+    entity_side_1: number
+    entity_side_2: number
+}
+
 /** Namespace for blueprint string interfaces */
 // tslint:disable-next-line:no-namespace
 namespace BPS {

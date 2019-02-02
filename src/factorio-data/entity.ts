@@ -38,7 +38,7 @@ export default class Entity extends EventEmitter {
     }
 
     removeConnectionsToOtherEntities() {
-        const entitiesToModify = this.hasConnections ? this.m_BP.connections.removeConnectionData(this.entity_number) : []
+        const entitiesToModify = this.hasConnections ? this.m_BP.connectionsManager.removeConnectionData(this.entity_number) : []
         for (const entityToModify of entitiesToModify) {
             const ent = this.m_BP.entities.get(entityToModify.entity_number)
             const connections = ent.connections

@@ -4,15 +4,6 @@ import util from '../common/util'
 import FD from 'factorio-data'
 import U from '../factorio-data/generators/util'
 
-interface IConnection {
-    circuit_id: number
-    color: string
-    entity_number_1: number
-    entity_number_2: number
-    entity_side_1: number
-    entity_side_2: number
-}
-
 export class WiresContainer extends PIXI.Container {
 
     static canvasRenderer = new PIXI.CanvasRenderer()
@@ -122,41 +113,35 @@ export class WiresContainer extends PIXI.Container {
         if (!G.bp.entities.get(entity_number).hasConnections) return
 
         this.remove(entity_number)
-        G.bp.connections.connections.forEach((v, k) => {
+        G.bp.connectionsManager.connections.forEach((v, k) => {
             const first = Number(k.split('-')[0])
             const second = Number(k.split('-')[1])
             if (first === entity_number || second === entity_number) {
                 if (first === entity_number) EntityContainer.mappings.get(second).redraw()
                 else if (second === entity_number) EntityContainer.mappings.get(first).redraw()
 
-                const sprites = v
-                    .map(c => c.toJS())
-                    .map((c: IConnection) =>
-                        WiresContainer.getWireSprite(c.entity_number_1, c.entity_number_2, c.color, c.entity_side_1, c.entity_side_2)
-                    )
+                const sprites = v.map(c =>
+                    WiresContainer.getWireSprite(c.entity_number_1, c.entity_number_2, c.color, c.entity_side_1, c.entity_side_2))
 
                 sprites.forEach(s => this.addChild(s))
-                this.entityWiresMapping.set(k, sprites.toArray())
+                this.entityWiresMapping.set(k, sprites)
             }
         })
     }
 
     drawWires() {
-        G.bp.connections.connections.forEach((v, k) => {
+        G.bp.connectionsManager.connections.forEach((v, k) => {
             if (this.entityWiresMapping.has(k)) {
                 for (const p of this.entityWiresMapping.get(k)) {
                     this.removeChild(p)
                 }
             }
 
-            const sprites = v
-                .map(c => c.toJS())
-                .map((c: IConnection) =>
-                    WiresContainer.getWireSprite(c.entity_number_1, c.entity_number_2, c.color, c.entity_side_1, c.entity_side_2)
-                )
+            const sprites = v.map(c =>
+                WiresContainer.getWireSprite(c.entity_number_1, c.entity_number_2, c.color, c.entity_side_1, c.entity_side_2))
 
             sprites.forEach(s => this.addChild(s))
-            this.entityWiresMapping.set(k, sprites.toArray())
+            this.entityWiresMapping.set(k, sprites)
         })
     }
 

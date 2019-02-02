@@ -54,7 +54,7 @@ export default class Blueprint extends EventEmitter {
     icons: any[]
     tiles: Map<string, string>
     version: number
-    connections: ConnectionsManager
+    connectionsManager: ConnectionsManager
     entityPositionGrid: PositionGrid
     entities: EntityCollection
 
@@ -112,7 +112,7 @@ export default class Blueprint extends EventEmitter {
             }
         }
 
-        this.connections = new ConnectionsManager(this, [...this.entities.keys()])
+        this.connectionsManager = new ConnectionsManager(this, [...this.entities.keys()])
 
         return this
     }
