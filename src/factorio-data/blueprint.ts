@@ -10,14 +10,22 @@ import * as History from './history'
 
 class EntityCollection extends Map<number, Entity> {
 
+    constructor(entities?: Entity[]) {
+        if (entities) {
+            super(entities.map(e => [e.entity_number, e] as [number, Entity]))
+        } else {
+            super()
+        }
+    }
+
     isEmpty() {
         return this.size === 0
     }
 
     find(predicate: (value: Entity, key: number) => boolean): Entity {
-        this.forEach((v, k) => {
+        for (const [ k, v ] of this) {
             if (predicate(v, k)) return v
-        })
+        }
         return undefined
     }
 
@@ -42,9 +50,10 @@ export default class Blueprint {
     tiles: Map<string, string>
     version: number
     connections: ConnectionsManager
-    next_entity_number: number
     entityPositionGrid: PositionGrid
     entities: EntityCollection
+
+    private m_next_entity_number = 1
 
     constructor(data?: BPS.IBlueprint) {
 
@@ -53,7 +62,7 @@ export default class Blueprint {
         this.entities = new EntityCollection()
         this.tiles = new Map()
         this.version = undefined
-        this.next_entity_number = 1
+        this.entityPositionGrid = new PositionGrid(this)
 
         if (data) {
             this.name = data.label
@@ -71,41 +80,53 @@ export default class Blueprint {
             }
 
             if (data.entities !== undefined) {
-                this.entities = new EntityCollection(data.entities
-                    .map(ent => [ent.entity_number, new Entity(ent, this)] as [number, Entity]))
+                this.m_next_entity_number += data.entities.length
 
-                this.next_entity_number += this.entities.size
+                const firstEntity = data.entities
+                    .find(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
+                const firstEntityTopLeft = {
+                    x: firstEntity.position.x - (FD.entities[firstEntity.name].size.width / 2),
+                    y: firstEntity.position.y - (FD.entities[firstEntity.name].size.height / 2)
+                }
 
-                // TODO: if entity has placeable-off-grid flag then take the next one
-                const firstEntityTopLeft = this.entities.values().next().value.topLeft()
                 offset.x += (firstEntityTopLeft.x % 1 !== 0 ? 0.5 : 0)
                 offset.y += (firstEntityTopLeft.y % 1 !== 0 ? 0.5 : 0)
 
-                this.entities.forEach(ent => {
-                    ent.position.x += offset.x
-                    ent.position.y += offset.y
-                })
+                History.startTransaction()
+
+                this.entities = new EntityCollection(data.entities.map(e => new Entity({
+                        ...e,
+                        position: {
+                            x: e.position.x + offset.x,
+                            y: e.position.y + offset.y
+                        }
+                }, this)))
+
+                History.commitTransaction()
             }
         }
 
-        this.entityPositionGrid = new PositionGrid(this, [...this.entities.keys()])
         this.connections = new ConnectionsManager(this, [...this.entities.keys()])
 
         return this
+    }
+
+    get next_entity_number() {
+        return this.m_next_entity_number++
     }
 
     undo() {
         if (!History.canUndo()) return
         const hist = History.getUndoPreview()
 
-        switch (hist.type) {
-            case 'add':
-            case 'del':
-            case 'mov':
-                this.entityPositionGrid.undo()
-        }
+        // switch (hist.type) {
+        //     case 'add':
+        //     case 'del':
+        //     case 'mov':
+        //         this.entityPositionGrid.undo()
+        // }
 
-        this.pre(hist, 'add')
+        // this.pre(hist, 'add')
 
         History.undo()
 
@@ -113,21 +134,21 @@ export default class Blueprint {
             case 'del':
                 if (this.entities.get(hist.entity_number).hasConnections) this.connections.undo()
         }
-        this.post(hist, 'del')
+        // this.post(hist, 'del')
     }
 
     redo() {
         if (!History.canRedo()) return
         const hist = History.getRedoPreview()
 
-        switch (hist.type) {
-            case 'add':
-            case 'del':
-            case 'mov':
-                this.entityPositionGrid.redo()
-        }
+        // switch (hist.type) {
+        //     case 'add':
+        //     case 'del':
+        //     case 'mov':
+        //         this.entityPositionGrid.redo()
+        // }
 
-        this.pre(hist, 'del')
+        // this.pre(hist, 'del')
 
         const entity = this.entities.get(hist.entity_number)
         switch (hist.type) {
@@ -144,7 +165,7 @@ export default class Blueprint {
             }
         }
 
-        this.post(hist, 'add')
+        // this.post(hist, 'add')
     }
 
     redrawEntityAndSurroundingEntities(entnr: number) {
@@ -189,18 +210,10 @@ export default class Blueprint {
                     e.redrawEntityInfo()
                     this.redrawEntityAndSurroundingEntities(hist.entity_number)
                     G.BPC.wiresContainer.update(hist.entity_number)
-                    // TODO: Improve this together with callback from entity (if entity changes or it is destroyed, also close the editor)
-                    /*
-                    if (G.editEntityContainer.visible) {
-                        if (G.inventoryContainer.visible) G.inventoryContainer.close()
-                        G.editEntityContainer.create(hist.entity_number)
-                    }
-                    */
                 }
                 break
             case addDel:
                 const ec = new EntityContainer(this.entities.get(hist.entity_number))
-                G.BPC.entities.addChild(ec)
                 ec.redrawSurroundingEntities()
                 G.BPC.wiresContainer.update(hist.entity_number)
         }
@@ -210,67 +223,8 @@ export default class Blueprint {
         G.BPC.updateViewportCulling()
     }
 
-    createEntity(name: string, position: IPoint, direction: number, directionType?: string) {
-
-        if (!this.entityPositionGrid.checkNoOverlap(name, direction, position)) {
-            return false
-        }
-
-        const entity_number = this.next_entity_number++
-        const entity_data = {
-            entity_number,
-            name,
-            position,
-            direction,
-            type: directionType
-        }
-
-        if (directionType === undefined) delete entity_data.type
-
-        const entity: Entity = new Entity(entity_data as BPS.IEntity, this)
-        History.updateMap(this.entities, entity_number, entity, `Added entity: ${entity.type}`).type('add').commit()
-
-        this.entityPositionGrid.setTileData(entity_number)
-
-        return entity_data.entity_number
-    }
-
-    removeEntity(entity_number: number, redrawCb?: (entity_number: number) => void) {
-        this.entityPositionGrid.removeTileData(entity_number)
-
-        const entity: Entity = this.entities.get(entity_number)
-        const entitiesToModify = entity.hasConnections ? this.connections.removeConnectionData(entity_number) : []
-
-        History.startTransaction(`Deleted entity: ${entity.type}`)
-        History.updateMap(this.entities, entity_number, undefined, undefined, true).type('del')
-        for (const entityToModify of entitiesToModify) {
-            const connections = this.entities.get(entityToModify.entity_number).connections
-            const a = connections.size === 1
-            const b = connections[entityToModify.side].size === 1
-            const c = connections[entityToModify.side][entityToModify.color].size === 1
-            if (a && b && c) {
-                History.updateValue(this.entities.get(entity_number),
-                    ['connections'], undefined, undefined, true)
-            } else if (b && c) {
-                History.updateValue(this.entities.get(entity_number),
-                    ['connections', entityToModify.side], undefined, undefined, true)
-            } else if (c) {
-                History.updateValue(this.entities.get(entity_number),
-                    ['connections', entityToModify.side, entityToModify.color], undefined, undefined, true)
-            } else {
-                History.updateValue(this.entities.get(entity_number),
-                    ['connections', entityToModify.side, entityToModify.color, entityToModify.index.toString()], undefined, undefined, true)
-            }
-        }
-        History.commitTransaction()
-
-        for (const entityToModify of entitiesToModify) {
-            redrawCb(entityToModify.entity_number)
-        }
-    }
-
     getFirstRail() {
-        return this.entities.find(v => v.name === 'straight_rail' || v.name === 'curved_rail')
+        return this.entities.find(e => e.name === 'straight_rail' /* || e.name === 'curved_rail' */)
     }
 
     createTile(name: string, position: IPoint) {
@@ -332,7 +286,7 @@ export default class Blueprint {
         const BEACONS = G.oilOutpostSettings.BEACONS
         const MIN_AFFECTED_ENTITIES = G.oilOutpostSettings.MIN_AFFECTED_ENTITIES
         const BEACON_MODULE = G.oilOutpostSettings.BEACON_MODULE
-        let lastGeneratedEntNrs = G.oilOutpostSettings.lastGeneratedEntNrs
+        let lastGeneratedEntities = G.oilOutpostSettings.lastGeneratedEntities
 
         const pumpjacks = this.entities.filter(v => v.name === 'pumpjack')
             .map(p => ({ entity_number: p.entity_number, name: p.name, position: p.position }))
@@ -342,7 +296,7 @@ export default class Blueprint {
             return
         }
 
-        if (pumpjacks.length !== this.entities.filter((_, k) => !lastGeneratedEntNrs.includes(k)).length) {
+        if (pumpjacks.length !== this.entities.filter(e => !lastGeneratedEntities.includes(e)).length) {
             console.error('BP Area should only contain pumpjacks!')
             return
         }
@@ -398,58 +352,34 @@ export default class Blueprint {
         // TEST BP: http://localhost:8080/?source=https://pastebin.com/3ca6a50V
         History.startTransaction('Generated Oil Outpost!')
 
-        GP.pumpjacksToRotate.forEach(p => {
-            History.updateValue(this.entities.get(p.entity_number), ['direction'], p.direction)
-            if (PUMPJACK_MODULE) {
-                History.updateValue(this.entities.get(p.entity_number), ['items'], {})
-                History.updateValue(this.entities.get(p.entity_number), ['items', PUMPJACK_MODULE], 2)
-            }
+        lastGeneratedEntities.forEach(e => {
+            e.destroy()
         })
 
-        if (lastGeneratedEntNrs) {
-            lastGeneratedEntNrs.forEach(entNr => {
-                if (this.entities.has(entNr)) {
-                    History.updateMap(this.entities, entNr, undefined, undefined, true).type('del')
-                    this.entityPositionGrid.removeTileData(entNr)
-                    EntityContainer.mappings.get(entNr).destroy()
-                }
-            })
-        }
-        lastGeneratedEntNrs = []
+        lastGeneratedEntities = []
 
-        GP.pipes.forEach(pipe => {
-            const entity_number = this.next_entity_number++
-            History.updateMap(this.entities, entity_number, new Entity({ entity_number, ...pipe }, this)).type('add')
-            lastGeneratedEntNrs.push(entity_number)
-        })
+        GP.pipes.forEach(pipe =>
+            lastGeneratedEntities.push(new Entity(pipe, this)))
 
         if (BEACONS) {
-            GB.beacons.forEach(beacon => {
-                const entity_number = this.next_entity_number++
-                History.updateMap(this.entities, entity_number,
-                    new Entity({ entity_number, ...beacon, items: { [BEACON_MODULE]: 2 } }, this)).type('add')
-                lastGeneratedEntNrs.push(entity_number)
-            })
+            GB.beacons.forEach(beacon =>
+                lastGeneratedEntities.push(new Entity({ ...beacon, items: { [BEACON_MODULE]: 2 } }, this)))
         }
 
-        GPO.poles.forEach(pole => {
-            const entity_number = this.next_entity_number++
-            History.updateMap(this.entities, entity_number, new Entity({ entity_number, ...pole }, this)).type('add')
-            lastGeneratedEntNrs.push(entity_number)
+        GPO.poles.forEach(pole =>
+            lastGeneratedEntities.push(new Entity(pole, this)))
+
+        GP.pumpjacksToRotate.forEach(p => {
+            const entity = this.entities.get(p.entity_number)
+            entity.direction = p.direction
+            if (PUMPJACK_MODULE) entity.modules = [PUMPJACK_MODULE, PUMPJACK_MODULE]
         })
 
         History.commitTransaction()
 
-        GP.pumpjacksToRotate.forEach(p => {
-            const eC = EntityContainer.mappings.get(p.entity_number)
-            eC.redraw()
-            eC.redrawEntityInfo()
-        })
+        G.oilOutpostSettings.lastGeneratedEntities = lastGeneratedEntities
 
-        G.oilOutpostSettings.lastGeneratedEntNrs = lastGeneratedEntNrs
-
-        lastGeneratedEntNrs.forEach(id => this.entityPositionGrid.setTileData(id))
-        lastGeneratedEntNrs.forEach(id => G.BPC.entities.addChild(new EntityContainer(this.entities.get(id), false)))
+        lastGeneratedEntities.forEach(e => new EntityContainer(e, false))
         G.BPC.sortEntities()
         G.BPC.wiresContainer.updatePassiveWires()
 

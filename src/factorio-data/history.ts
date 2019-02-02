@@ -78,7 +78,7 @@ interface IHistoryOptions {
     other_entity(other_entity: number): IHistoryOptions
 
     /** Emit function after executing action */
-    emit(f: (value: any) => void): IHistoryOptions
+    emit(f: (value: any, oldValue: any) => void): IHistoryOptions
 
     /** Commit action */
     commit(): IHistoryOptions
@@ -117,7 +117,7 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
     private readonly m_Apply: (value: IValueInfo<V>) => void
 
     /** Field to store functions to emit after execution of action */
-    private readonly m_Emits: Array<((value: any) => void)>
+    private readonly m_Emits: Array<((value: any, oldValue: any) => void)>
 
     /** Field to store description */
     private readonly m_Text: string
@@ -155,11 +155,13 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
     public apply(value: HistoryValue = HistoryValue.New): number {
 
         const valueInfo = value === HistoryValue.New ? this.m_NewValue : this.m_OldValue
+        const oldValueInfo = value === HistoryValue.New ? this.m_OldValue : this.m_NewValue
+
         this.m_Apply(valueInfo)
 
         if (this.m_Emits.length > 0) {
             for (const f of this.m_Emits) {
-                f(valueInfo.value)
+                f(valueInfo.value, oldValueInfo.value)
             }
         }
 
@@ -184,7 +186,7 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
     }
 
     /** Emit function after executing action */
-    public emit(f: (value: any) => void): IHistoryOptions {
+    public emit(f: (value: any, oldValue: any) => void): IHistoryOptions {
         this.m_Emits.push(f)
         return this
     }

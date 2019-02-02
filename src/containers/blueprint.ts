@@ -3,7 +3,6 @@ import { Viewport } from '../viewport'
 import { WiresContainer } from './wires'
 import { UnderlayContainer } from './underlay'
 import { EntitySprite } from '../entitySprite'
-import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { EntityContainer } from './entity'
 import { OverlayContainer } from './overlay'
 import { EntityPaintContainer } from './entityPaint'
@@ -21,13 +20,11 @@ export class BlueprintContainer extends PIXI.Container {
     underlayContainer: UnderlayContainer
     tiles: PIXI.Container
     entities: PIXI.Container
-    movingEntityFilter: AdjustmentFilter
     tileSprites: PIXI.Container
     entitySprites: PIXI.Container
     viewport: Viewport
     pgOverlay: PIXI.Graphics
     hoverContainer: undefined | EntityContainer
-    movingContainer: undefined | EntityContainer
     paintContainer: undefined | EntityPaintContainer | TilePaintContainer
 
     constructor() {
@@ -38,8 +35,6 @@ export class BlueprintContainer extends PIXI.Container {
             width: G.app.screen.width,
             height: G.app.screen.height
         }, 3)
-
-        this.movingEntityFilter = new AdjustmentFilter({ red: 0.4, blue: 0.4, green: 1 })
 
         this.generateGrid(G.colors.pattern)
 
@@ -110,7 +105,6 @@ export class BlueprintContainer extends PIXI.Container {
         }
 
         G.gridData.onUpdate(() => {
-            if (this.movingContainer) this.movingContainer.moveAtCursor()
             if (this.paintContainer) this.paintContainer.moveAtCursor()
 
             // Instead of decreasing the global interactionFrequency, call the over and out entity events here
@@ -153,19 +147,16 @@ export class BlueprintContainer extends PIXI.Container {
     initBP() {
         const firstRail = G.bp.getFirstRail()
         if (firstRail) {
-                G.railMoveOffset = {
+            G.railMoveOffset = {
                 x: Math.abs(firstRail.position.x) % 2 + 1,
                 y: Math.abs(firstRail.position.y) % 2 + 1
             }
         }
 
         // Render Bp
-        for (const entity_number of G.bp.entities.keys()) {
-            this.entities.addChild(new EntityContainer(G.bp.entities.get(entity_number), false))
-        }
-        G.bp.tiles.forEach((v, k) => {
-            this.tiles.addChild(new TileContainer(v, { x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
-        })
+        G.bp.entities.forEach(e => new EntityContainer(e, false))
+
+        G.bp.tiles.forEach((v, k) => new TileContainer(v, { x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
 
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()
@@ -192,7 +183,6 @@ export class BlueprintContainer extends PIXI.Container {
         this.removeChildren()
 
         this.hoverContainer = undefined
-        this.movingContainer = undefined
         this.paintContainer = undefined
 
         this.tileSprites = new PIXI.Container()

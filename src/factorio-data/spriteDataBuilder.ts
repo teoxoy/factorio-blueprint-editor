@@ -231,7 +231,7 @@ function getPipeConnectionPoints(e: any, dir: number, assemblerPipeDirection: st
     return positions
 }
 
-function getHeatConectionPoints(e: any) {
+function getHeatConectionPoints(e: FD.Entity) {
     // nuclear reactor
     if (e.heat_buffer) return e.heat_buffer.connections
     // heat exchanger
@@ -239,29 +239,37 @@ function getHeatConectionPoints(e: any) {
 }
 
 function getHeatConnections(position: IPoint, bp: Blueprint) {
-    return bp.entityPositionGrid.getSurroundingEntities(new Area(position), (entnr, _, X, Y) => {
-        const entity = bp.entities.get(entnr)
-        // tslint:disable-next-line:prefer-switch
-        if (entity.name === 'heat_pipe') return true
-        else if (entity.name === 'heat_exchanger' || entity.name === 'nuclear_reactor') {
-            const connections = getHeatConectionPoints(entity.entityData)
-            for (const connection of connections) {
-                const offset = util.rotatePointBasedOnDir(connection.position, entity.direction)
-                if (X === Math.floor(entity.position.x + offset.x) &&
-                    Y === Math.floor(entity.position.y + offset.y)) return true
+    return bp.entityPositionGrid.getNeighbourData(position)
+        .map(({ x, y, entity }) => {
+            if (!entity) return false
+
+            if (entity.name === 'heat_pipe') return true
+            if (entity.name === 'heat_exchanger' || entity.name === 'nuclear_reactor') {
+                getHeatConectionPoints(entity.entityData)
+                    .map(conn => util.rotatePointBasedOnDir(conn.position, entity.direction))
+                    .forEach(offset => {
+                        if (x === Math.floor(entity.position.x + offset.x) &&
+                            y === Math.floor(entity.position.y + offset.y)) return true
+                    })
             }
-        }
-    })
+
+            return false
+        })
 }
 
 function getBeltConnections2(bp: Blueprint, position: IPoint, dir: number) {
-    const directions = bp.entityPositionGrid.getSurroundingEntities(new Area(position), entnr => {
-        const entity = bp.entities.get(entnr)
-        if (entity.type === 'transport_belt' ||
-        entity.type === 'splitter' ||
-        (entity.type === 'underground_belt' &&
-        entity.directionType === 'output')) return entity.direction
-    }, dir)
+    let directions = bp.entityPositionGrid.getNeighbourData(position)
+        .map(({ entity }) => {
+            if (!entity) return false
+
+            if (
+                entity.type === 'transport_belt' ||
+                entity.type === 'splitter' ||
+                (entity.type === 'underground_belt' && entity.directionType === 'output')
+            ) return entity.direction
+        })
+    // Rotate directions
+    directions = [...directions, ...directions].splice(dir / 2, 4)
 
     const foundR = directions[1] !== false && (directions[1] + 2) % 8 === dir
     const foundL = directions[3] === (dir + 2) % 8
@@ -510,7 +518,7 @@ function generateGraphics(e: any) {
                     y: data.position.y,
                     width: size.x,
                     height: size.y
-                }, true), (entnr: number) => {
+                }), (entnr: number) => {
                     const ent = data.bp.entities.get(entnr)
                     if (ent && ent.name === 'gate') return true
                 }, true)
@@ -597,10 +605,9 @@ function generateGraphics(e: any) {
                     return e.pictures[type].layers[0]
                 }
                 if (data.bp) {
-                    const conn = data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: number, D: number) => {
-                        const entity = data.bp.entities.get(entnr)
-                        if (entity.name === 'stone_wall' || (entity.name === 'gate' && entity.direction === D % 4)) return true
-                    })
+                    const conn = data.bp.entityPositionGrid.getNeighbourData(data.position)
+                        .map(({ entity, relDir }) =>
+                            entity && (entity.name === 'stone_wall' || (entity.name === 'gate' && entity.direction === relDir % 4)))
 
                     if (conn[1] && conn[2] && conn[3]) return getRandomPic('t_up')
                     if (conn[1] && conn[2]) return getRandomPic('corner_right_down')
@@ -614,11 +621,10 @@ function generateGraphics(e: any) {
             }
 
             if (data.bp) {
-                let found = false
-                data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: any, D: number) => {
-                    const entity = data.bp.entities.get(entnr)
-                    if (entity.name === 'gate' && entity.direction === D % 4) found = true
-                })
+                const found = data.bp.entityPositionGrid.getNeighbourData(data.position)
+                    .find(({ entity, relDir }) =>
+                        entity && entity.name === 'gate' && entity.direction === relDir % 4)
+
                 if (found && !data.hasConnections) return [getBaseSprite(), e.wall_diode_red]
             }
             return [getBaseSprite()]
@@ -633,7 +639,7 @@ function generateGraphics(e: any) {
                         y: data.position.y,
                         width: size.x,
                         height: size.y
-                    }, true), (entnr: number) => {
+                    }), (entnr: number) => {
                         const ent = data.bp.entities.get(entnr)
                         if (ent.name === 'straight_rail') return ent
                     })
@@ -653,10 +659,10 @@ function generateGraphics(e: any) {
             }
             if (data.bp) {
                 const out = getBaseSprites()
-                const conn = data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: any, D: number) => {
-                    const entity = data.bp.entities.get(entnr)
-                    if (entity.name === 'stone_wall' && dir === D % 4) return true
-                })
+                const conn = data.bp.entityPositionGrid.getNeighbourData(data.position)
+                    .map(({ entity, relDir }) =>
+                        entity && entity.name === 'stone_wall' && dir === relDir % 4)
+
                 for (let i = 0; i < conn.length; i++) {
                     if (conn[i]) {
                         const wp = FD.entities['gate'].wall_patch[util.intToDir((i * 2 + 4) % 8)].layers[0]
@@ -673,25 +679,28 @@ function generateGraphics(e: any) {
         }
         case 'pipe': return (data: IEntityData) => {
             if (data.bp) {
-                const conn = data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: any, D: number) => {
-                    const entity = data.bp.entities.get(entnr)
-                    if (entity.name === 'pipe') return true
-                    if (entity.name === 'pipe_to_ground' && entity.direction === (D + 4) % 8) return true
-                    if ((entity.name === 'assembling_machine_2' || entity.name === 'assembling_machine_3') &&
-                        !entity.assemblerCraftsWithFluid) return false
-                    if (entity.name === 'chemical_plant' && entity.chemicalPlantDontConnectOutput &&
-                        entity.direction === D) return false
-                    const ed = entity.entityData
-                    if (ed.fluid_box || ed.output_fluid_box || ed.fluid_boxes) {
-                        const connections = getPipeConnectionPoints(ed, entity.direction, entity.assemblerPipeDirection)
-                        for (const connection of connections) {
-                            if (Math.floor(data.position.x) === Math.floor(entity.position.x + connection.x) &&
-                                Math.floor(data.position.y) === Math.floor(entity.position.y + connection.y)) {
-                                    return true
-                                }
+                const conn = data.bp.entityPositionGrid.getNeighbourData(data.position)
+                    .map(({ entity, relDir }) => {
+                        if (!entity) return false
+
+                        if (entity.name === 'pipe') return true
+                        if (entity.name === 'pipe_to_ground' && entity.direction === (relDir + 4) % 8) return true
+
+                        if ((entity.name === 'assembling_machine_2' || entity.name === 'assembling_machine_3') &&
+                            !entity.assemblerCraftsWithFluid) return false
+                        if (entity.name === 'chemical_plant' && entity.chemicalPlantDontConnectOutput &&
+                            entity.direction === relDir) return false
+
+                        if (entity.entityData.fluid_box || entity.entityData.output_fluid_box || entity.entityData.fluid_boxes) {
+                            const connections = getPipeConnectionPoints(entity.entityData, entity.direction, entity.assemblerPipeDirection)
+                            for (const connection of connections) {
+                                if (Math.floor(data.position.x) === Math.floor(entity.position.x + connection.x) &&
+                                    Math.floor(data.position.y) === Math.floor(entity.position.y + connection.y)) {
+                                        return true
+                                    }
+                            }
                         }
-                    }
-                })
+                    })
 
                 if (conn[0] && conn[1] && conn[2] && conn[3]) return [e.pictures.cross]
                 if (conn[0] && conn[1] && conn[3]) return [e.pictures.t_up]
@@ -799,15 +808,18 @@ function generateGraphics(e: any) {
         case 'transport_belt': return (data: IEntityData) => {
             const dir = data.dir
             function getBeltConnections() {
-                const directions = data.bp.entityPositionGrid.getSurroundingEntities(new Area(data.position), (entnr: number) => {
-                    const entity = data.bp.entities.get(entnr)
-                    if (entity.type === 'transport_belt' ||
-                        entity.type === 'splitter' ||
-                        (entity.type === 'underground_belt' &&
-                        entity.directionType === 'output')) {
-                            return entity.direction
-                        }
-                }, dir)
+                let directions = data.bp.entityPositionGrid.getNeighbourData(data.position)
+                    .map(({ entity }) => {
+                        if (!entity) return false
+
+                        if (
+                            entity.type === 'transport_belt' ||
+                            entity.type === 'splitter' ||
+                            (entity.type === 'underground_belt' && entity.directionType === 'output')
+                        ) return entity.direction
+                    })
+                // Rotate directions
+                directions = [...directions, ...directions].splice(dir / 2, 4)
 
                 const rightEntDir = directions[1]
                 const leftEntDir = directions[3]

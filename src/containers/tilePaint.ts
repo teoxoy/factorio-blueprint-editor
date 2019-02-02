@@ -166,7 +166,7 @@ export class TilePaintContainer extends PIXI.Container {
                 if (tileUnder) tileUnder.destroy()
 
                 G.bp.createTile(this.name, p)
-                G.BPC.tiles.addChild(new TileContainer(this.name, p))
+                const tC = new TileContainer(this.name, p)
             })
     }
 }

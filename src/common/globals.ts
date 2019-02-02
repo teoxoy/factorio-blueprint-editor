@@ -90,9 +90,8 @@ let book: Book | undefined
 
 const mouseStates = {
     NONE: 0,
-    MOVING: 1,
-    PAINTING: 2,
-    PANNING: 3
+    PAINTING: 1,
+    PANNING: 2
 }
 
 let currentMouseState = mouseStates.NONE

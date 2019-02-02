@@ -48,6 +48,8 @@ export class TileContainer extends PIXI.Container {
         sprite.position = this.position
         this.tileSprites.push(sprite)
         G.BPC.tileSprites.addChild(sprite)
+
+        G.BPC.tiles.addChild(this)
     }
 
     destroy() {

@@ -1,7 +1,7 @@
 import Blueprint from './blueprint'
 import util from '../common/util'
 import FD from 'factorio-data'
-import Immutable from 'immutable'
+import Entity from './entity'
 
 export class Area {
     y: number
@@ -9,25 +9,20 @@ export class Area {
     height: number
     width: number
 
-    constructor(data: any, posIsCenter?: boolean) {
+    constructor(data: any) {
         this.width = data.width || 1
         this.height = data.height || 1
-        if (posIsCenter) {
-            this.x = Math.round(data.x - this.width / 2)
-            this.y = Math.round(data.y - this.height / 2)
-        } else {
-            this.x = Math.floor(data.x)
-            this.y = Math.floor(data.y)
-        }
+        this.x = Math.round(data.x - this.width / 2)
+        this.y = Math.round(data.y - this.height / 2)
     }
 }
 
 export class PositionGrid {
 
     static tileDataAction(
-        grid: Immutable.Map<string, number | Immutable.List<number>>,
+        grid: Map<string, number | number[]>,
         area: Area,
-        fn: (key: string, cell: number | Immutable.List<number>) => boolean | void,
+        fn: (key: string, cell: number | number[]) => boolean | void,
         returnEmptyCells = false
     ) {
         let stop = false
@@ -43,61 +38,33 @@ export class PositionGrid {
     }
 
     bp: Blueprint
-    grid: Immutable.Map<string, number | Immutable.List<number>>
-    historyIndex: number
-    history: Array<Immutable.Map<string, number | Immutable.List<number>>>
+    grid: Map<string, number | number[]>
 
     constructor(bp: Blueprint, entity_numbers?: number[]) {
         this.bp = bp
-        this.grid = Immutable.Map()
+        this.grid = new Map()
 
         // Set Bulk
         if (entity_numbers) {
-            this.grid = this.grid.withMutations(map => {
-                for (const entity_number of entity_numbers) {
-                    const entity = this.bp.entities.get(entity_number)
-                    if (!entity.entityData.flags.includes('placeable_off_grid')) {
-                        PositionGrid.tileDataAction(map, entity.getArea(), (key, cell) => {
-                            if (cell) {
-                                if (typeof cell === 'number') {
-                                    map.set(key, Immutable.List([
-                                        cell,
-                                        entity_number
-                                    ]))
-                                } else {
-                                    map.setIn([key, cell.size], entity_number)
-                                }
+            for (const entity_number of entity_numbers) {
+                const entity = this.bp.entities.get(entity_number)
+                if (!entity.entityData.flags.includes('placeable_off_grid')) {
+                    PositionGrid.tileDataAction(this.grid, entity.getArea(), (key, cell) => {
+                        if (cell) {
+                            if (typeof cell === 'number') {
+                                this.grid.set(key, [
+                                    cell,
+                                    entity_number
+                                ])
                             } else {
-                                map.set(key, entity_number)
+                                this.grid.set(key, [...cell, entity_number])
                             }
-                        }, true)
-                    }
+                        } else {
+                            this.grid.set(key, entity_number)
+                        }
+                    }, true)
                 }
-            })
-        }
-
-        this.history = [this.grid]
-        this.historyIndex = 0
-    }
-
-    undo() {
-        if (this.historyIndex === 0) return
-        this.grid = this.history[--this.historyIndex]
-    }
-
-    redo() {
-        if (this.historyIndex === this.history.length - 1) return
-        this.grid = this.history[++this.historyIndex]
-    }
-
-    operation(fn: (grid: Immutable.Map<string, number | Immutable.List<number>>) => Immutable.Map<any, any>, pushToHistory = true) {
-        this.grid = fn(this.grid)
-        if (pushToHistory) {
-            if (this.historyIndex < this.history.length) {
-                this.history = this.history.slice(0, this.historyIndex + 1)
             }
-            this.history.push(this.grid)
-            this.historyIndex++
         }
     }
 
@@ -113,66 +80,69 @@ export class PositionGrid {
         const cell = this.grid.get(`${Math.floor(POS.x)},${Math.floor(POS.y)}`)
         if (cell) {
             if (typeof cell === 'number') return cell
-            else return cell.first()
+            else return cell[0]
         }
     }
 
-    setTileData(entity_number: number) {
-        const entity = this.bp.entities.get(entity_number)
+    setTileData(entity: Entity) {
         if (entity.entityData.flags.includes('placeable_off_grid')) return
-        this.operation(grid => grid.withMutations(map => {
-            PositionGrid.tileDataAction(map, entity.getArea(), (key, cell) => {
-                if (cell) {
-                    if (typeof cell === 'number') {
-                        map.set(key, Immutable.List([
-                            cell,
-                            entity_number
-                        ]))
-                    } else {
-                        map.setIn([key, cell.size], entity_number)
-                    }
-                } else {
-                    map.set(key, entity_number)
-                }
-            }, true)
-        }))
-    }
 
-    removeTileData(entity_number: number, pushToHistory?: boolean) {
-        this.operation(grid => grid.withMutations(map => {
-            PositionGrid.tileDataAction(map, this.bp.entities.get(entity_number).getArea(), (key, cell) => {
+        PositionGrid.tileDataAction(this.grid, entity.getArea(), (key, cell) => {
+            if (cell) {
                 if (typeof cell === 'number') {
-                    if (cell === entity_number) map.delete(key)
+                    this.grid.set(key, [
+                        cell,
+                        entity.entity_number
+                    ])
                 } else {
-                    const res = cell.findIndex(v => v === entity_number)
-                    if (res !== -1) {
-                        if (cell.count() === 1) {
-                            map.delete(key)
-                        } else if (cell.count() === 2) {
-                            map.set(key, cell.find((_, k) => k !== res))
-                        } else {
-                            map.deleteIn([key, res])
-                        }
-                    }
+                    this.grid.set(key, [...cell, entity.entity_number])
                 }
-            })
-        }), pushToHistory)
+            } else {
+                this.grid.set(key, entity.entity_number)
+            }
+        }, true)
     }
 
-    checkNoOverlap(name: string, direction: number, pos: IPoint) {
-        const fd = FD.entities[name]
-        const size = util.switchSizeBasedOnDirection(fd.size, direction)
+    removeTileData(entity: Entity) {
+        PositionGrid.tileDataAction(this.grid, this.bp.entities.get(entity.entity_number).getArea(), (key, cell) => {
+            if (typeof cell === 'number') {
+                if (cell === entity.entity_number) this.grid.delete(key)
+            } else {
+                const res = cell.findIndex(v => v === entity.entity_number)
+                if (res !== -1) {
+                    if (cell.length === 1) {
+                        this.grid.delete(key)
+                    } else if (cell.length === 2) {
+                        this.grid.set(key, cell.find((_, k) => k !== res))
+                    } else {
+                        this.grid.set(key, cell.filter((_, k) => k !== res))
+                    }
+                }
+            }
+        })
+    }
+
+    canMoveTo(entity: Entity, newPosition: IPoint) {
+        this.removeTileData(entity)
+        const spaceAvalible = this.isAreaAvalible(entity.name, newPosition, entity.direction)
+        this.setTileData(entity)
+        return spaceAvalible
+    }
+
+    isAreaAvalible(name: string, pos: IPoint, direction = 0) {
+        const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
         const area = new Area({
             x: pos.x,
             y: pos.y,
             width: size.x,
             height: size.y
-        }, true)
+        })
 
         const allStrRailEnt: number[] = []
         let gateEnt: number
         let strRailEnt: number
         let curRailEnt: number
+        let signal: number
         let otherEntities = false
 
         if (!this.foreachOverlap(area, cell => {
@@ -180,6 +150,8 @@ export class PositionGrid {
                 case 'gate': gateEnt = cell; break
                 case 'curved_rail': curRailEnt = cell; break
                 case 'straight_rail': allStrRailEnt.push(cell); strRailEnt = cell; break
+                case 'rail_signal': signal = cell; break
+                case 'rail_chain_signal': signal = cell; break
                 default: otherEntities = true
             }
         })) return true
@@ -198,7 +170,10 @@ export class PositionGrid {
             (name === 'straight_rail' && strRailEnt && !sameDirStrRails && !gateEnt) ||
             (name === 'curved_rail' && strRailEnt && !gateEnt) ||
             (name === 'straight_rail' && curRailEnt) ||
-            (name === 'curved_rail' && curRailEnt && this.bp.entities.get(curRailEnt).direction !== direction)
+            (name === 'curved_rail' && curRailEnt && this.bp.entities.get(curRailEnt).direction !== direction) ||
+            // TODO: remove this when we add better rail support
+            ((name === 'rail_signal' || name === 'rail_chain_signal') && (curRailEnt || strRailEnt)) ||
+            ((name === 'straight_rail' || name === 'curved_rail') && signal)
         ) return true
 
         return false
@@ -212,7 +187,7 @@ export class PositionGrid {
             y: pos.y,
             width: size.x,
             height: size.y
-        }, true)
+        })
 
         if (this.sharesCell(area)) return false
         const ent = this.getFirstFromArea(area, cell => {
@@ -238,7 +213,7 @@ export class PositionGrid {
             y: pos.y,
             width: size.x,
             height: size.y
-        }, true)
+        })
 
         if (this.sharesCell(area)) return false
         const ent = this.getFirstFromArea(area, cell => {
@@ -278,7 +253,7 @@ export class PositionGrid {
     sharesCell(area: Area) {
         let output = false
         PositionGrid.tileDataAction(this.grid, area, (_, cell) => {
-            if (Immutable.List.isList(cell)) {
+            if (typeof cell !== 'number') {
                 output = true
                 return true
             }
@@ -293,7 +268,7 @@ export class PositionGrid {
                 output = fn(cell)
                 if (output) return true
             } else {
-                for (const v of cell.values()) {
+                for (const v of cell) {
                     output = fn(v)
                     if (output) return true
                 }
@@ -306,13 +281,13 @@ export class PositionGrid {
         const output: boolean[] = []
         PositionGrid.tileDataAction(this.grid, area, (_, cell) => {
             let out = false
-            if (Immutable.List.isList(cell)) {
-                for (const v of cell.values()) {
+            if (typeof cell !== 'number') {
+                for (const v of cell) {
                     const o = fn(v)
                     if (o !== undefined) out = o
                 }
             } else {
-                const o = fn(cell as number)
+                const o = fn(cell)
                 if (o !== undefined) out = o
             }
             output.push(out)
@@ -320,40 +295,41 @@ export class PositionGrid {
         return output.length === 0 ? false : output
     }
 
-    getSurroundingEntities(
-        area: Area,
-        fn: (cell: number, relDir: number, x: number, y: number) => any,
-        direction?: number
-    ) {
+    getSurroundingEntities(area: Area): Entity[] {
         const coordinates = []
 
         for (let i = 0; i < area.width; i++) {
-            coordinates.push([0, area.x + i, area.y - 1])
-            coordinates.push([4, area.x + i, area.y + area.height])
+            coordinates.push([area.x + i, area.y - 1])
+            coordinates.push([area.x + i, area.y + area.height])
         }
         for (let i = 0; i < area.height; i++) {
-            coordinates.push([2, area.x + area.width, area.y + i])
-            coordinates.push([6, area.x - 1, area.y + i])
+            coordinates.push([area.x + area.width, area.y + i])
+            coordinates.push([area.x - 1, area.y + i])
         }
 
-        let output: any[] = [false, false, false, false]
-        for (const coordinate of coordinates) {
-            const cell = this.grid.get(`${coordinate[1]},${coordinate[2]}`)
-            const relDir = coordinate[0] / 2
-            if (cell) {
-                if (typeof cell === 'number') {
-                    const o = fn(cell as number, coordinate[0], coordinate[1], coordinate[2])
-                    if (o !== undefined) output[relDir] = o
-                } else {
-                    for (const v of cell.values()) {
-                        const o = fn(v, coordinate[0], coordinate[1], coordinate[2])
-                        if (o !== undefined) output[relDir] = o
-                    }
-                }
-            }
-        }
+        return util.uniqueInArray(coordinates
+            .reduce((acc, coord) => {
+                const cell = this.grid.get(`${coord[0]},${coord[1]}`)
+                if (!cell) return acc
+                if (typeof cell === 'number') acc.push(cell)
+                else acc.push(...cell)
+                return acc
+            }, []))
+            .map(entNr => this.bp.entities.get(entNr))
+    }
 
-        if (direction) output = [...output, ...output].splice(direction / 2, 4)
-        return output
+    getNeighbourData(point: IPoint) {
+        return [
+            { x: 0, y: -1 },
+            { x: 1, y: 0 },
+            { x: 0, y: 1 },
+            { x: -1, y: 0 }
+        ].map((o, i) => {
+            const x = Math.floor(point.x) + o.x
+            const y = Math.floor(point.y) + o.y
+            const cell = this.grid.get(`${x},${y}`)
+            const entity = cell ? (this.bp.entities.get(typeof cell === 'number' ? cell : cell[0])) : undefined
+            return { x, y, relDir: i * 2, entity }
+        })
     }
 }

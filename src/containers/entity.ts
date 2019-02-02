@@ -140,41 +140,61 @@ export class EntityContainer extends PIXI.Container {
 
         this.redraw(false, sort)
 
-        this.m_Entity.on('rotate', offset => {
-            if (G.currentMouseState === G.mouseStates.MOVING && offset) {
-                const pos = EntityContainer.getPositionFromData({
-                    x: this.x + offset.x * 32,
-                    y: this.y + offset.y * 32
-                }, this.m_Entity.size)
-                this.position.set(pos.x, pos.y)
-
-                G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
-            }
-
-            this.redraw(G.currentMouseState === G.mouseStates.MOVING)
-
-            if (G.currentMouseState === G.mouseStates.NONE) this.redrawSurroundingEntities()
-
-            G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
+        this.m_Entity.on('rotate', () => {
+            this.redraw()
+            this.redrawSurroundingEntities()
             this.updateUndergroundLines()
-
-            if (G.BPC.movingContainer === this) this.checkBuildable()
-
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity.entity_number)
         })
 
         this.m_Entity.on('recipe', () => {
             this.redrawEntityInfo()
-            if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.assemblerCraftsWithFluid || this.m_Entity.assemblerCraftsWithFluid) {
+            if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.assemblerCraftsWithFluid) {
                 this.redraw()
                 this.redrawSurroundingEntities()
             }
         })
 
-        this.m_Entity.on('modules', () => {
+        this.m_Entity.on('redraw', () => {
+            this.redraw()
+        })
+
+        this.m_Entity.on('destroy', () => {
+            this.destroy()
+        })
+
+        this.m_Entity.on('direction', () => {
+            this.redraw()
             this.redrawEntityInfo()
         })
+
+        this.m_Entity.on('directionType', () => {
+            this.redraw()
+            this.redrawSurroundingEntities()
+        })
+
+        this.m_Entity.on('modules', () => this.redrawEntityInfo())
+        this.m_Entity.on('filters', () => this.redrawEntityInfo())
+        this.m_Entity.on('splitterInputPriority', () => this.redrawEntityInfo())
+        this.m_Entity.on('splitterOutputPriority', () => this.redrawEntityInfo())
+
+        this.m_Entity.on('position', (newValue: IPoint, oldValue: IPoint) => {
+            console.log(newValue, oldValue)
+
+            this.position.set(
+                newValue.x * 32,
+                newValue.y * 32
+            )
+
+            this.redraw()
+            this.redrawSurroundingEntities()
+            this.updateUndergroundLines()
+            this.redrawEntityInfo()
+            G.BPC.wiresContainer.update(this.m_Entity.entity_number)
+        })
+
+        G.BPC.entities.addChild(this)
     }
 
     public get entity(): Entity {
@@ -182,12 +202,18 @@ export class EntityContainer extends PIXI.Container {
     }
 
     destroy() {
-        // TODO: Check if the following line is actually still necessary
-        // if (G.editEntityContainer.visible) G.editEntityContainer.close()
+        G.BPC.wiresContainer.remove(this.m_Entity.entity_number)
+
+        this.redrawSurroundingEntities()
+
+        G.BPC.hoverContainer = undefined
+
+        G.BPC.wiresContainer.updatePassiveWires()
+
+        G.BPC.updateOverlay()
 
         for (const s of this.entitySprites) s.destroy()
 
-        super.destroy()
         EntityContainer.mappings.delete(this.m_Entity.entity_number)
 
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
@@ -195,25 +221,8 @@ export class EntityContainer extends PIXI.Container {
         G.BPC.overlayContainer.hideUndergroundLines()
 
         if (this.entityInfo !== undefined) this.entityInfo.destroy()
-    }
 
-    checkBuildable() {
-        const position = EntityContainer.getGridPosition(this.position)
-        if (!EntityContainer.isContainerOutOfBpArea(position, this.m_Entity.size) &&
-            G.bp.entityPositionGrid.checkNoOverlap(this.m_Entity.name, this.m_Entity.direction, position)
-        ) {
-            G.BPC.movingEntityFilter.red = 0.4
-            G.BPC.movingEntityFilter.green = 1
-        } else {
-            G.BPC.movingEntityFilter.red = 1
-            G.BPC.movingEntityFilter.green = 0.4
-        }
-    }
-
-    rotate(ccw = false) {
-        const rotateOpposingEntity = G.currentMouseState === G.mouseStates.NONE && this.m_Entity.type === 'underground_belt'
-        const offset = G.gridData.calculateRotationOffset(this.position)
-        this.m_Entity.rotate(G.currentMouseState === G.mouseStates.NONE, offset, ccw, rotateOpposingEntity)
+        super.destroy()
     }
 
     updateUndergroundLines() {
@@ -243,56 +252,6 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
-    updateVisualStuff() {
-        for (const s of this.entitySprites) s.setPosition(this.position)
-
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
-
-        if (this.entityInfo !== undefined) this.entityInfo.position = this.position
-
-        G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
-        G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
-        this.updateUndergroundLines()
-
-        G.BPC.wiresContainer.update(this.m_Entity.entity_number)
-
-        this.checkBuildable()
-    }
-
-    removeContainer() {
-        G.BPC.wiresContainer.remove(this.m_Entity.entity_number)
-        G.bp.entityPositionGrid.removeTileData(this.m_Entity.entity_number, false)
-        this.redrawSurroundingEntities()
-        G.bp.removeEntity(this.m_Entity.entity_number,
-            entity_number => EntityContainer.mappings.get(entity_number).redraw()
-        )
-        G.BPC.hoverContainer = undefined
-
-        G.BPC.wiresContainer.updatePassiveWires()
-
-        G.BPC.updateOverlay()
-        this.destroy()
-    }
-
-    moveAtCursor() {
-        const position = G.gridData.position
-        if (G.BPC.movingContainer === this && G.currentMouseState === G.mouseStates.MOVING) {
-            switch (this.m_Entity.name) {
-                case 'straight_rail':
-                case 'curved_rail':
-                case 'train_stop':
-                    this.x = position.x - (position.x + G.railMoveOffset.x * 32) % 64 + 32
-                    this.y = position.y - (position.y + G.railMoveOffset.y * 32) % 64 + 32
-                    break
-                default:
-                    const pos = EntityContainer.getPositionFromData(position, this.m_Entity.size)
-                    this.position.set(pos.x, pos.y)
-            }
-
-            this.updateVisualStuff()
-        }
-    }
-
     pointerOverEventHandler() {
         if (G.currentMouseState === G.mouseStates.NONE) {
             G.BPC.hoverContainer = this
@@ -316,45 +275,6 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
-    pickUpEntityContainer() {
-        G.bp.entityPositionGrid.removeTileData(this.m_Entity.entity_number, false)
-        this.redraw(true)
-        this.redrawSurroundingEntities()
-        G.BPC.movingContainer = this
-        G.currentMouseState = G.mouseStates.MOVING
-
-        // Move container to cursor
-        const pos = EntityContainer.getPositionFromData(G.gridData.position, this.m_Entity.size)
-        if (this.position.x !== pos.x || this.position.y !== pos.y) {
-            this.position.set(pos.x, pos.y)
-            this.updateVisualStuff()
-        }
-
-        for (const s of this.entitySprites) s.moving = true
-        G.BPC.sortEntities()
-        G.BPC.underlayContainer.activateRelatedAreas(this.m_Entity.name)
-
-        G.BPC.updateOverlay()
-    }
-
-    placeDownEntityContainer() {
-        const position = EntityContainer.getGridPosition(this.position)
-        if (EntityContainer.isContainerOutOfBpArea(position, this.m_Entity.size)) return
-        if (G.currentMouseState === G.mouseStates.MOVING && this.m_Entity.move(position)) {
-            G.BPC.movingContainer = undefined
-            G.currentMouseState = G.mouseStates.NONE
-
-            for (const s of this.entitySprites) s.moving = false
-
-            this.redraw(false)
-            this.redrawSurroundingEntities()
-
-            G.BPC.underlayContainer.deactivateActiveAreas()
-
-            G.BPC.updateOverlay()
-        }
-    }
-
     redrawSurroundingEntities() {
         if (!updateGroups[this.m_Entity.name]) return
         if (this.m_Entity.name === 'straight_rail') {
@@ -363,16 +283,9 @@ export class EntityContainer extends PIXI.Container {
                 if (ent.name === 'gate') EntityContainer.mappings.get(ent.entity_number).redraw()
             })
         } else {
-            const redrawnEntities: number[] = []
-            updateGroups[this.m_Entity.name].forEach((updateGroup: string[]) => {
-                G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea(), (entnr: number) => {
-                    const ent = G.bp.entities.get(entnr)
-                    if (updateGroup.includes(ent.name) && !redrawnEntities.includes(entnr)) {
-                        EntityContainer.mappings.get(ent.entity_number).redraw()
-                        redrawnEntities.push(entnr)
-                    }
-                })
-            })
+            G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea())
+                .filter(entity => updateGroups[this.m_Entity.name].includes(entity.name))
+                .forEach(entity => EntityContainer.mappings.get(entity.entity_number).redraw())
         }
     }
 
@@ -380,7 +293,6 @@ export class EntityContainer extends PIXI.Container {
         for (const s of this.entitySprites) s.destroy()
         this.entitySprites = []
         for (const s of EntityContainer.getParts(this.m_Entity, G.hr, ignore_connections)) {
-            if (G.BPC.movingContainer === this) s.moving = true
             s.setPosition(this.position)
             this.entitySprites.push(s)
             G.BPC.entitySprites.addChild(s)

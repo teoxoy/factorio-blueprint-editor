@@ -1,11 +1,9 @@
-import G from './common/globals'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 
 export class EntitySprite extends PIXI.Sprite {
     static nextID = 0
 
     id: number
-    isMoving: boolean
     shift: IPoint
     zIndex: number
     zOrder: number
@@ -33,7 +31,6 @@ export class EntitySprite extends PIXI.Sprite {
 
         this.interactive = false
         this.id = EntitySprite.nextID++
-        this.isMoving = false
 
         this.shift = {
             x: data.shift[0] * 32,
@@ -65,18 +62,6 @@ export class EntitySprite extends PIXI.Sprite {
         }
 
         return this
-    }
-
-    set moving(moving: boolean) {
-        this.isMoving = moving
-        if (moving) {
-            if (this.filters !== null) this.filters.push(G.BPC.movingEntityFilter)
-            else this.filters = [G.BPC.movingEntityFilter]
-        } else {
-            // tslint:disable-next-line:no-null-keyword
-            if (this.filters.length === 1) this.filters = null
-            else this.filters.pop()
-        }
     }
 
     setPosition(position: PIXI.Point | PIXI.ObservablePoint) {

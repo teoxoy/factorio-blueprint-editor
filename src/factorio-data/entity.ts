@@ -11,6 +11,10 @@ import G from '../common/globals'
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
 // TODO: Optimize within connections property the way how the connections to other entities are found (Try Counter: 0)
 
+interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
+    entity_number?: number
+}
+
 /** Entity Base Class */
 export default class Entity extends EventEmitter {
 
@@ -25,10 +29,58 @@ export default class Entity extends EventEmitter {
      * @param rawEntity Raw entity object
      * @param blueprint Reference to blueprint
      */
-    constructor(rawEntity: BPS.IEntity, blueprint: Blueprint) {
+    constructor(rawEntity: IEntityData, blueprint: Blueprint) {
         super()
-        this.m_rawEntity = rawEntity
         this.m_BP = blueprint
+
+        this.m_rawEntity = {
+            ...rawEntity,
+            entity_number: rawEntity.entity_number ? rawEntity.entity_number : this.m_BP.next_entity_number
+        }
+
+        History.updateMap(this.m_BP.entities, this.entity_number, this, `Added entity: ${this.type}`)
+            .type('add')
+            .commit()
+
+        this.m_BP.entityPositionGrid.setTileData(this)
+
+        // this.emit('create')
+    }
+
+    destroy() {
+        History.startTransaction(`Deleted entity: ${this.type}`)
+
+        this.m_BP.entityPositionGrid.removeTileData(this)
+
+        History.updateMap(this.m_BP.entities, this.entity_number, undefined, undefined, true).type('del')
+
+        const entitiesToModify = this.hasConnections ? this.m_BP.connections.removeConnectionData(this.entity_number) : []
+        for (const entityToModify of entitiesToModify) {
+            const ent = this.m_BP.entities.get(entityToModify.entity_number)
+            const connections = ent.connections
+            const a = connections.size === 1
+            const b = connections[entityToModify.side].size === 1
+            const c = connections[entityToModify.side][entityToModify.color].size === 1
+            if (a && b && c) {
+                History.updateValue(ent,
+                    ['connections'], undefined, undefined, true)
+            } else if (b && c) {
+                History.updateValue(ent,
+                    ['connections', entityToModify.side], undefined, undefined, true)
+            } else if (c) {
+                History.updateValue(ent,
+                    ['connections', entityToModify.side, entityToModify.color], undefined, undefined, true)
+            } else {
+                History.updateValue(ent,
+                    ['connections', entityToModify.side, entityToModify.color, entityToModify.index.toString()], undefined, undefined, true)
+            }
+
+            ent.emit('redraw')
+        }
+
+        History.commitTransaction()
+
+        this.emit('destroy')
     }
 
     /** Return reference to blueprint */
@@ -66,12 +118,27 @@ export default class Entity extends EventEmitter {
     /** Entity position */
     get position(): IPoint { return this.m_rawEntity.position }
     set position(position: IPoint) {
-        if (this.m_rawEntity.position === position) { return }
+        if (util.areObjectsEquivalent(this.m_rawEntity.position, position)) return
+
+        if (!this.m_BP.entityPositionGrid.canMoveTo(this, position)) return
+
+        this.m_BP.entityPositionGrid.removeTileData(this)
 
         History
             .updateValue(this.m_rawEntity, ['position'], position, `Changed position to '${position}'`)
-            .emit(() => this.emit('position'))
+            .emit((newValue, oldValue) => {
+                this.emit('position', newValue, oldValue)
+            })
             .commit()
+
+        this.m_BP.entityPositionGrid.setTileData(this)
+    }
+
+    moveBy(offset: IPoint) {
+        this.position = {
+            x: this.position.x + offset.x,
+            y: this.position.y + offset.y
+        }
     }
 
     /** Entity direction */
@@ -139,11 +206,13 @@ export default class Entity extends EventEmitter {
 
         History.updateValue(this.m_rawEntity, ['recipe'], recipe).emit(r => this.emit('recipe', r))
 
-        // Some modules on the entity may not be compatible with the new selected recipe, filter those out
-        this.modules = this.modules
-            .map(k => FD.items[k])
-            .filter(item => !(item.limitation !== undefined && !item.limitation.includes(recipe)))
-            .map(item => item.name)
+        if (recipe !== undefined) {
+            // Some modules on the entity may not be compatible with the new selected recipe, filter those out
+            this.modules = this.modules
+                .map(k => FD.items[k])
+                .filter(item => !(item.limitation !== undefined && !item.limitation.includes(recipe)))
+                .map(item => item.name)
+        }
 
         History.commitTransaction()
     }
@@ -289,7 +358,7 @@ export default class Entity extends EventEmitter {
 
         History
             .updateValue(this.m_rawEntity, ['input_priority'], priority, `Changed splitter input priority to '${priority}'`)
-            .emit(() => this.emit('splitterInputPriority'))
+            .emit(() => this.emit('splitterInputPriority', this.splitterInputPriority))
             .commit()
     }
 
@@ -298,10 +367,16 @@ export default class Entity extends EventEmitter {
     set splitterOutputPriority(priority: string) {
         if (this.m_rawEntity.output_priority === priority) { return }
 
+        History.startTransaction(`Changed splitter output priority to '${priority}'`)
+
         History
-            .updateValue(this.m_rawEntity, ['output_priority'], priority, `Changed splitter output priority to '${priority}'`)
-            .emit(() => this.emit('splitterOutputPriority'))
+            .updateValue(this.m_rawEntity, ['output_priority'], priority)
+            .emit(() => this.emit('splitterOutputPriority', this.splitterOutputPriority))
             .commit()
+
+        if (priority === undefined) this.filters = undefined
+
+        History.commitTransaction()
     }
 
     /** Splitter filter */
@@ -309,11 +384,17 @@ export default class Entity extends EventEmitter {
     set splitterFilter(filter: string) {
         if (this.m_rawEntity.filter === filter) { return }
 
+        History.startTransaction(`Changed splitter filter to '${filter}'`)
+
         History
-            .updateValue(this.m_rawEntity, ['filter'], filter, `Changed splitter filter to '${filter}'`)
+            .updateValue(this.m_rawEntity, ['filter'], filter)
             .emit(() => this.emit('splitterFilter'))
             .emit(() => this.emit('filters'))
             .commit()
+
+        if (this.splitterOutputPriority === undefined) this.splitterOutputPriority = 'left'
+
+        History.commitTransaction()
     }
 
     /** Inserter filter */
@@ -437,13 +518,17 @@ export default class Entity extends EventEmitter {
         return undefined
     }
 
-    getArea(pos?: IPoint) {
+    getArea() {
         return new Area({
-            x: pos ? pos.x : this.position.x,
-            y: pos ? pos.y : this.position.y,
+            x: this.position.x,
+            y: this.position.y,
             width: this.size.x,
             height: this.size.y
-        }, true)
+        })
+    }
+
+    getOccupiedTiles() {
+        return
     }
 
     change(name: string, direction: number) {
@@ -453,24 +538,11 @@ export default class Entity extends EventEmitter {
         History.commitTransaction()
     }
 
-    move(position: IPoint) {
-        if (!this.m_BP.entityPositionGrid.checkNoOverlap(this.name, this.direction, position)) { return false }
-
-        // In this case we cannot call the actualy property position as we action type 'mov' needs to be added
-        History
-            .updateValue(this.m_rawEntity, ['position'], position, `Moved entity: ${this.type}`).type('mov')
-            .emit(() => this.emit('position'))
-            .commit()
-
-        this.m_BP.entityPositionGrid.setTileData(this.entity_number)
-        return true
-    }
-
-    rotate(notMoving: boolean, offset?: IPoint, ccw = false, rotateOpposingEntity = false) {
+    rotate(ccw = false, rotateOpposingUB = false) {
         if (!this.assemblerCraftsWithFluid &&
             (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3')) return
 
-        if (notMoving && this.m_BP.entityPositionGrid.sharesCell(this.getArea())) return
+        if (this.m_BP.entityPositionGrid.sharesCell(this.getArea())) return
 
         const PR = this.entityData.possible_rotations
         if (!PR) return
@@ -478,38 +550,33 @@ export default class Entity extends EventEmitter {
         const newDir = PR[
             (
                 PR.indexOf(this.direction) +
-                (notMoving && (this.size.x !== this.size.y || this.type === 'underground_belt') ? 2 : 1) * (ccw ? 3 : 1)
+                ((this.size.x !== this.size.y || this.type === 'underground_belt') ? 2 : 1) * (ccw ? 3 : 1)
             )
             % PR.length
         ]
 
         if (newDir === this.direction) return
 
-        const otherEntity = rotateOpposingEntity
-            ? this.m_BP.entities.get(this.m_BP.entityPositionGrid.getOpposingEntity(
-                this.name, this.direction, this.position,
-                this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
-                this.entityData.max_distance
-            ))
-            : undefined
-
         History.startTransaction(`Rotated entity: ${this.type}`)
 
         this.direction = newDir
 
-        if (notMoving && this.type === 'underground_belt') {
+        if (this.type === 'underground_belt') {
             this.directionType = this.directionType === 'input' ? 'output' : 'input'
-        }
 
-        if (!notMoving && this.size.x !== this.size.y && offset) {
-            this.position = { x: this.m_rawEntity.position.x + offset.x, y: this.m_rawEntity.position.y + offset.y }
+            if (rotateOpposingUB) {
+                const otherEntity = this.m_BP.entities.get(this.m_BP.entityPositionGrid.getOpposingEntity(
+                    this.name, this.direction, this.position,
+                    this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
+                    this.entityData.max_distance
+                ))
+                if (otherEntity) otherEntity.rotate()
+            }
         }
-
-        if (otherEntity) otherEntity.rotate(notMoving)
 
         History.commitTransaction()
 
-        this.emit('rotate', offset)
+        this.emit('rotate')
     }
 
     /** Paste relevant data from source entity */

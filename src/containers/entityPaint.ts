@@ -5,10 +5,11 @@ import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
 import { InventoryContainer } from '../panels/inventory'
+import Entity from '../factorio-data/entity'
 
 export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
-    directionType: string
+    directionType: 'input' | 'output'
     direction: number
     filter: AdjustmentFilter
     icon: PIXI.DisplayObject
@@ -84,7 +85,7 @@ export class EntityPaintContainer extends PIXI.Container {
         if (!EntityContainer.isContainerOutOfBpArea(position, size) &&
             (G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, this.direction, position) ||
             G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, this.direction, position) ||
-            G.bp.entityPositionGrid.checkNoOverlap(this.name, this.direction, position))
+            G.bp.entityPositionGrid.isAreaAvalible(this.name, position, this.direction))
         ) {
             this.filter.red = 0.4
             this.filter.green = 1
@@ -188,9 +189,9 @@ export class EntityPaintContainer extends PIXI.Container {
 
     removeContainerUnder() {
         const position = EntityContainer.getGridPosition(this.position)
-        const c = EntityContainer.mappings.get(G.bp.entityPositionGrid.getCellAtPosition(position))
-        if (c) {
-            c.removeContainer()
+        const ent = G.bp.entities.get(G.bp.entityPositionGrid.getCellAtPosition(position))
+        if (ent) {
+            ent.destroy()
             this.checkBuildable()
         }
     }
@@ -224,20 +225,18 @@ export class EntityPaintContainer extends PIXI.Container {
         }
 
         const isUB = fd.type === 'underground_belt'
-        const res = G.bp.createEntity(this.name, position,
-            isUB && this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
-            isUB ? this.directionType : undefined
-        )
-        if (res) {
-            const ec = new EntityContainer(G.bp.entities.get(res))
-            if (ec.areaVisualization) {
-                if (ec.areaVisualization instanceof PIXI.Sprite) {
-                    ec.areaVisualization.visible = true
-                } else {
-                    for (const s of ec.areaVisualization) s.visible = true
-                }
-            }
-            G.BPC.entities.addChild(ec)
+        const direction = isUB && this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction
+
+        if (G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)) {
+            const newEntity = new Entity({
+                name: this.name,
+                position,
+                direction,
+                type: isUB ? this.directionType : undefined
+            }, G.bp)
+
+            const ec = new EntityContainer(newEntity)
+            UnderlayContainer.modifyVisualizationArea(ec.areaVisualization, s => s.visible = true)
             ec.redrawSurroundingEntities()
 
             if (fd.type === 'electric_pole') G.BPC.wiresContainer.updatePassiveWires()

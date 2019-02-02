@@ -72,7 +72,7 @@ export default class Filters extends  PIXI.Container {
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 
-    /** Field to indicate whether counts can shall be shown (Used for 2 chests) */
+    /** Field to indicate whether counts shall be shown (Used for 2 chests) */
     private readonly m_Amount: boolean
 
     /** Field to hold data for module visualization */
@@ -105,13 +105,6 @@ export default class Filters extends  PIXI.Container {
         })
     }
 
-    /** Clear currently set filter */
-    public clearSlot(index: number = 0) {
-        this.m_Filters[index].name = undefined
-        this.m_Entity.filters = this.m_Filters
-        this.emit('changed', false)
-    }
-
     /** Update local filters array */
     private m_UpdateFilters() {
         const slots: number = this.m_Entity.filterSlots
@@ -125,15 +118,15 @@ export default class Filters extends  PIXI.Container {
             }
             for (let slotIndex = 0; slotIndex < slots; slotIndex++) {
                 this.m_Filters[slotIndex] =
-                    this.m_Filters[slotIndex] === undefined ?
-                    { index: slotIndex + 1, name: undefined } :
-                    this.m_Filters[slotIndex]
+                    this.m_Filters[slotIndex] === undefined
+                        ? { index: slotIndex + 1, name: undefined }
+                        : this.m_Filters[slotIndex]
             }
         }
     }
 
     /** Update slot icons */
-    private m_UpdateSlots(index?: number) {
+    private m_UpdateSlots() {
         for (const slot of this.children) {
             if (!(slot instanceof Slot)) continue
 
@@ -156,6 +149,8 @@ export default class Filters extends  PIXI.Container {
                 }
             }
         }
+
+        this.emit('changed')
     }
 
     /** Slot pointer down event handler */
@@ -164,15 +159,14 @@ export default class Filters extends  PIXI.Container {
         const slot: Slot = e.target as Slot
         const index: number = slot.data as number
         if (e.data.button === 0) {
-            const inventory: InventoryContainer = new InventoryContainer('Set the Filter', this.m_Entity.acceptedFilters, name => {
-                inventory.close()
+            new InventoryContainer('Set the Filter', this.m_Entity.acceptedFilters, name => {
                 this.m_Filters[index].name = name
                 this.m_Entity.filters = this.m_Filters
-                this.emit('changed', true)
             })
-            inventory.show()
+            .show()
         } else if (e.data.button === 2) {
-            this.clearSlot(index)
+            this.m_Filters[index].name = undefined
+            this.m_Entity.filters = this.m_Filters
         }
     }
 }

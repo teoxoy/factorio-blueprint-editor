@@ -229,7 +229,7 @@ actions.closeWindow.bind(() => {
 })
 
 actions.inventory.bind(() => {
-    if (G.currentMouseState !== G.mouseStates.MOVING && !G.renderOnly) {
+    if (!G.renderOnly) {
         // If there is a dialog open, assume user wants to close it
         if (Dialog.anyOpen()) {
             Dialog.closeLast()
@@ -243,20 +243,16 @@ actions.inventory.bind(() => {
 actions.focus.bind(() => G.BPC.centerViewport())
 
 actions.rotate.bind(() => {
-    if (G.BPC.hoverContainer &&
-        (G.currentMouseState === G.mouseStates.NONE || G.currentMouseState === G.mouseStates.MOVING)
-    ) {
-        G.BPC.hoverContainer.rotate()
+    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.entity.rotate(false, true)
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.rotate()
     }
 })
 
 actions.reverseRotate.bind(() => {
-    if (G.BPC.hoverContainer &&
-        (G.currentMouseState === G.mouseStates.NONE || G.currentMouseState === G.mouseStates.MOVING)
-    ) {
-        G.BPC.hoverContainer.rotate(true)
+    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.entity.rotate(true, true)
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.rotate(true)
     }
@@ -332,18 +328,30 @@ actions.mine.bind(() => {
     }
 })
 
-actions.moveEntity.bind(() => {
-    if (!G.BPC.movingContainer && G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
-        G.BPC.hoverContainer.pickUpEntityContainer()
-        return
+actions.moveEntityUp.bind(() => {
+    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
     }
-    if (G.BPC.movingContainer) {
-        G.BPC.movingContainer.placeDownEntityContainer()
+})
+actions.moveEntityLeft.bind(() => {
+    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
+    }
+})
+actions.moveEntityDown.bind(() => {
+    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
+    }
+})
+actions.moveEntityRight.bind(() => {
+    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
     }
 })
 
 actions.openEntityGUI.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
+        // console.log(G.BPC.hoverContainer.entity.getRawData())
         if (G.currentMouseState === G.mouseStates.NONE) {
             const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
             if (editor === undefined) return

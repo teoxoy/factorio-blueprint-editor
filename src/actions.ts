@@ -103,7 +103,10 @@ const actions = {
     redo: new Action('modifier+y'),
     info: new Action('i'),
     pan: new Action('lclick'),
-    moveEntity: new Action('mclick'),
+    moveEntityUp: new Action('up'),
+    moveEntityLeft: new Action('left'),
+    moveEntityDown: new Action('down'),
+    moveEntityRight: new Action('right'),
     generateOilOutpost: new Action('g'),
 
     moveUp: new ToggleAction('w'),
