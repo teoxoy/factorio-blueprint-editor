@@ -171,6 +171,7 @@ export class InventoryContainer extends Dialog {
                     button.position.set(itemColIndex * 38, itemRowIndex * 38)
                     button.content = InventoryContainer.createIcon(item.name, false)
                     button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+                        e.stopPropagation()
                         if (e.data.button === 0) {
                             this.close()
                             selectedCallBack(item.name)
