@@ -178,7 +178,7 @@ const styles = {
         checkbox: new PIXI.TextStyle({
             fill: colors.controls.checkbox.foreground.color,
             fontFamily: [ fontFamily ],
-            fontWeight: '100',
+            fontWeight: '300',
             fontSize: 14
         }),
         enable: {
@@ -218,7 +218,7 @@ const styles = {
         label: new PIXI.TextStyle({
             fill: colors.text.normal,
             fontFamily: [ fontFamily ],
-            fontWeight: '100',
+            fontWeight: '300',
             fontSize: 14
         })
     },
