@@ -390,7 +390,7 @@ export default class Entity extends EventEmitter {
         ) return
 
         History
-            .updateValue(this.m_rawEntity, ['filters'], filters, `Changed inserter filter${this.filterSlots === 1 ? '' : '(s)'}`)
+            .updateValue(this.m_rawEntity, ['filters'], filters, `Changed inserter filter${this.filterSlots === 1 ? '' : 's'}`)
             .emit(() => this.emit('inserterFilters'))
             .emit(() => this.emit('filters'))
             .commit()
@@ -421,7 +421,7 @@ export default class Entity extends EventEmitter {
         ) return
 
         History
-            .updateValue(this.m_rawEntity, ['request_filters'], filters, `Changed chest filter${this.filterSlots === 1 ? '' : '(s)'}`)
+            .updateValue(this.m_rawEntity, ['request_filters'], filters, `Changed chest filter${this.filterSlots === 1 ? '' : 's'}`)
             .emit(() => this.emit('logisticChestFilters'))
             .emit(() => this.emit('filters'))
             .commit()
