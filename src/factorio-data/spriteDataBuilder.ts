@@ -245,15 +245,13 @@ function getHeatConnections(position: IPoint, bp: Blueprint) {
 
             if (entity.name === 'heat_pipe') return true
             if (entity.name === 'heat_exchanger' || entity.name === 'nuclear_reactor') {
-                getHeatConectionPoints(entity.entityData)
+                return getHeatConectionPoints(entity.entityData)
                     .map(conn => util.rotatePointBasedOnDir(conn.position, entity.direction))
-                    .forEach(offset => {
-                        if (x === Math.floor(entity.position.x + offset.x) &&
-                            y === Math.floor(entity.position.y + offset.y)) return true
-                    })
+                    .filter(offset =>
+                        x === Math.floor(entity.position.x + offset.x) &&
+                        y === Math.floor(entity.position.y + offset.y))
+                    .length > 0
             }
-
-            return false
         })
 }
 
