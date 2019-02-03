@@ -105,7 +105,7 @@ export default class Entity extends EventEmitter {
         this.m_BP.entityPositionGrid.removeTileData(this)
 
         History
-            .updateValue(this.m_rawEntity, ['position'], position, `Changed position to '${position}'`)
+            .updateValue(this.m_rawEntity, ['position'], position, `Changed position to 'x: ${Math.floor(position.x)}, y: ${Math.floor(position.y)}'`)
             .emit((newValue, oldValue) => {
                 this.emit('position', newValue, oldValue)
             })
