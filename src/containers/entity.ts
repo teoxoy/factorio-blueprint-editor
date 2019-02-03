@@ -270,7 +270,7 @@ export class EntityContainer extends PIXI.Container {
     redrawSurroundingEntities(position?: IPoint) {
         if (!updateGroups[this.m_Entity.name]) return
         if (this.m_Entity.name === 'straight_rail') {
-            G.bp.entityPositionGrid.foreachOverlap(this.m_Entity.getArea(), (entnr: number) => {
+            G.bp.entityPositionGrid.foreachOverlap(this.m_Entity.getArea(position), (entnr: number) => {
                 const ent = G.bp.entities.get(entnr)
                 if (ent.name === 'gate') EntityContainer.mappings.get(ent.entity_number).redraw()
             })
