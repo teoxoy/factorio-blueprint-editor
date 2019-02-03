@@ -93,7 +93,13 @@ G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
 G.app.stage.addChild(G.quickbarContainer)
 
 Promise.all(
-    [bpSource ? bpString.findBPString(bpSource) : undefined]
+    [
+        // Get bp from source
+        bpSource ? bpString.findBPString(bpSource) : undefined,
+        // Wait for fonts to get loaded
+        document.fonts.ready
+    ]
+    // Load spritesheets
     .concat(spritesheetsLoader.getAllPromises())
 )
 .then(data => {
