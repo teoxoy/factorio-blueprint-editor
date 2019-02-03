@@ -604,7 +604,12 @@ export default class Entity extends EventEmitter {
             }
         }
 
-        // TODO: pasting filters should be handled differently for each type of filer
+        // PASTE SPLITTER SETTINGS (Has to be before filters as otherwise business logic will overwrite)
+        if (this.type === 'splitter' && sourceEntity.type === 'splitter') {
+            this.splitterInputPriority = sourceEntity.splitterInputPriority
+            this.splitterOutputPriority = sourceEntity.splitterOutputPriority
+        }
+
         // PASTE FILTERS
         const aF = this.acceptedFilters
         if (aF.length > 0) {
@@ -615,6 +620,11 @@ export default class Entity extends EventEmitter {
             } else {
                 this.filters = []
             }
+        }
+
+        // PASTE REQUESTER CHEST SETTINGS
+        if (this.type === 'logistic_chest_requester' && sourceEntity.type === 'logistic_chest_requester') {
+            this.requestFromBufferChest = sourceEntity.requestFromBufferChest
         }
 
         History.commitTransaction()
