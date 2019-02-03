@@ -84,10 +84,10 @@ export class PositionGrid {
         }
     }
 
-    setTileData(entity: Entity) {
+    setTileData(entity: Entity, position?: IPoint) {
         if (entity.entityData.flags.includes('placeable_off_grid')) return
 
-        PositionGrid.tileDataAction(this.grid, entity.getArea(), (key, cell) => {
+        PositionGrid.tileDataAction(this.grid, entity.getArea(position), (key, cell) => {
             if (cell) {
                 if (typeof cell === 'number') {
                     this.grid.set(key, [
@@ -103,8 +103,8 @@ export class PositionGrid {
         }, true)
     }
 
-    removeTileData(entity: Entity) {
-        PositionGrid.tileDataAction(this.grid, entity.getArea(), (key, cell) => {
+    removeTileData(entity: Entity, position?: IPoint) {
+        PositionGrid.tileDataAction(this.grid, entity.getArea(position), (key, cell) => {
             if (typeof cell === 'number') {
                 if (cell === entity.entity_number) this.grid.delete(key)
             } else {

@@ -102,16 +102,14 @@ export default class Entity extends EventEmitter {
 
         if (!this.m_BP.entityPositionGrid.canMoveTo(this, position)) return
 
-        this.m_BP.entityPositionGrid.removeTileData(this)
-
         History
             .updateValue(this.m_rawEntity, ['position'], position, `Changed position to 'x: ${Math.floor(position.x)}, y: ${Math.floor(position.y)}'`)
             .emit((newValue, oldValue) => {
+                this.m_BP.entityPositionGrid.removeTileData(this, oldValue)
+                this.m_BP.entityPositionGrid.setTileData(this, newValue)
                 this.emit('position', newValue, oldValue)
             })
             .commit()
-
-        this.m_BP.entityPositionGrid.setTileData(this)
     }
 
     moveBy(offset: IPoint) {
@@ -527,10 +525,10 @@ export default class Entity extends EventEmitter {
         return undefined
     }
 
-    getArea() {
+    getArea(position?: IPoint) {
         return new Area({
-            x: this.position.x,
-            y: this.position.y,
+            x: position ? position.x : this.position.x,
+            y: position ? position.y : this.position.y,
             width: this.size.x,
             height: this.size.y
         })

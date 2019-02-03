@@ -176,16 +176,13 @@ export class EntityContainer extends PIXI.Container {
         this.m_Entity.on('splitterInputPriority', () => this.redrawEntityInfo())
         this.m_Entity.on('splitterOutputPriority', () => this.redrawEntityInfo())
 
-        this.m_Entity.on('position', (newValue: IPoint, oldValue: IPoint) => {
-            console.log(newValue, oldValue)
-
-            this.position.set(
-                newValue.x * 32,
-                newValue.y * 32
-            )
+        this.m_Entity.on('position', (newPos: IPoint, oldPos: IPoint) => {
+            this.position.set(newPos.x * 32, newPos.y * 32)
 
             this.redraw()
-            this.redrawSurroundingEntities()
+            this.redrawSurroundingEntities(oldPos)
+            this.redrawSurroundingEntities(newPos)
+
             this.updateUndergroundLines()
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity.entity_number)
@@ -270,7 +267,7 @@ export class EntityContainer extends PIXI.Container {
         }
     }
 
-    redrawSurroundingEntities() {
+    redrawSurroundingEntities(position?: IPoint) {
         if (!updateGroups[this.m_Entity.name]) return
         if (this.m_Entity.name === 'straight_rail') {
             G.bp.entityPositionGrid.foreachOverlap(this.m_Entity.getArea(), (entnr: number) => {
@@ -278,7 +275,7 @@ export class EntityContainer extends PIXI.Container {
                 if (ent.name === 'gate') EntityContainer.mappings.get(ent.entity_number).redraw()
             })
         } else {
-            G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea())
+            G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea(position))
                 .filter(entity => updateGroups[this.m_Entity.name].includes(entity.name))
                 .forEach(entity => EntityContainer.mappings.get(entity.entity_number).redraw())
         }
