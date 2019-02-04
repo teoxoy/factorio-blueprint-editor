@@ -3,6 +3,15 @@ import G from '../common/globals'
 import util from '../common/util'
 import FD from 'factorio-data'
 import U from '../factorio-data/generators/util'
+import Entity from '../factorio-data/entity'
+
+const hashConn = (conn: IConnection) => {
+    const firstE = Math.min(conn.entity_number_1, conn.entity_number_2)
+    const secondE = Math.max(conn.entity_number_1, conn.entity_number_2)
+    const firstS = firstE === conn.entity_number_1 ? conn.entity_side_1 : conn.entity_side_2
+    const secondS = secondE === conn.entity_number_2 ? conn.entity_side_2 : conn.entity_side_1
+    return `${conn.color}-${firstE}-${secondE}-${firstS}-${secondS}`
+}
 
 export class WiresContainer extends PIXI.Container {
 
@@ -58,24 +67,8 @@ export class WiresContainer extends PIXI.Container {
         return s
     }
 
-    static getWireSprite(entity_number_1: number, entity_number_2: number, color: string, entity_side_1 = 0, entity_side_2 = 0) {
-        return WiresContainer.createWire(
-            getWirePos(entity_number_1, color, entity_side_1),
-            getWirePos(entity_number_2, color, entity_side_2),
-            color
-        )
-
-        function getWirePos(entity_number: number, color: string, side: number) {
-            const point = G.bp.entities.get(entity_number).getWireConnectionPoint(color, side)
-            return {
-                x: EntityContainer.mappings.get(entity_number).position.x + point[0] * 32,
-                y: EntityContainer.mappings.get(entity_number).position.y + point[1] * 32
-            }
-        }
-    }
-
-    entityWiresMapping: Map<string, PIXI.Sprite[]>
-    passiveWiresMapping: Map<string, PIXI.Sprite>
+    connectionToSprite: Map<string, PIXI.Sprite>
+    passiveConnToSprite: Map<string, PIXI.Sprite>
     entNrToConnectedEntNrs: Map<number, number[]>
 
     constructor() {
@@ -84,65 +77,99 @@ export class WiresContainer extends PIXI.Container {
         this.interactive = false
         this.interactiveChildren = false
 
-        this.entityWiresMapping = new Map()
-        this.passiveWiresMapping = new Map()
+        this.connectionToSprite = new Map()
+        this.passiveConnToSprite = new Map()
     }
 
-    remove(entity_number: number) {
-        this.entityWiresMapping.forEach((v, k) => {
-            if (k.includes(entity_number.toString())) {
-                for (const g of v) g.destroy()
-                this.entityWiresMapping.delete(k)
+    add(connections: IConnection[]) {
+        connections.forEach(conn => {
+            const hash = hashConn(conn)
+            if (!this.connectionToSprite.has(hash)) {
+                const sprite = this.getWireSprite(conn)
+                this.addChild(sprite)
+                this.connectionToSprite.set(hash, sprite)
             }
         })
     }
 
-    update(entity_number: number) {
-        if (G.bp.entities.get(entity_number).type === 'electric_pole') {
+    remove(connection: IConnection) {
+        const hash = hashConn(connection)
+        const sprite = this.connectionToSprite.get(hash)
+        if (sprite) {
+            sprite.destroy()
+            this.connectionToSprite.delete(hash)
+        }
+    }
+
+    update(entity: Entity) {
+        if (entity.type === 'electric_pole') {
             // Remove connection so that updatePassiveWires diffs correctly
-            this.passiveWiresMapping.forEach((v, k) => {
-                if (k.includes(entity_number.toString())) {
+            this.passiveConnToSprite.forEach((v, k) => {
+                if (k.includes(entity.entity_number.toString())) {
                     v.destroy()
-                    this.passiveWiresMapping.delete(k)
+                    this.passiveConnToSprite.delete(k)
                 }
             })
 
             this.updatePassiveWires()
         }
 
-        if (!G.bp.entities.get(entity_number).hasConnections) return
+        if (!entity.hasConnections) return
 
-        this.remove(entity_number)
-        G.bp.connectionsManager.connections.forEach((v, k) => {
-            const first = Number(k.split('-')[0])
-            const second = Number(k.split('-')[1])
-            if (first === entity_number || second === entity_number) {
-                if (first === entity_number) EntityContainer.mappings.get(second).redraw()
-                else if (second === entity_number) EntityContainer.mappings.get(first).redraw()
-
-                const sprites = v.map(c =>
-                    WiresContainer.getWireSprite(c.entity_number_1, c.entity_number_2, c.color, c.entity_side_1, c.entity_side_2))
-
-                sprites.forEach(s => this.addChild(s))
-                this.entityWiresMapping.set(k, sprites)
-            }
-        })
+        const connections = entity.connections
+        connections.forEach(c => this.remove(c))
+        this.add(connections)
     }
 
-    drawWires() {
-        G.bp.connectionsManager.connections.forEach((v, k) => {
-            if (this.entityWiresMapping.has(k)) {
-                for (const p of this.entityWiresMapping.get(k)) {
-                    this.removeChild(p)
-                }
+    getWireSprite(connection: IConnection) {
+        const getWirePos = (entity_number: number, color: string, side: number) => {
+            const entity = G.bp.entities.get(entity_number)
+            const direction = entity.type === 'electric_pole' ? this.getPowerPoleDirection(entity) : entity.direction
+            const point = entity.getWireConnectionPoint(color, side, direction)
+            return {
+                x: (entity.position.x + point[0]) * 32,
+                y: (entity.position.y + point[1]) * 32
             }
+        }
 
-            const sprites = v.map(c =>
-                WiresContainer.getWireSprite(c.entity_number_1, c.entity_number_2, c.color, c.entity_side_1, c.entity_side_2))
+        return WiresContainer.createWire(
+            getWirePos(connection.entity_number_1, connection.color, connection.entity_side_1),
+            getWirePos(connection.entity_number_2, connection.color, connection.entity_side_2),
+            connection.color
+        )
+    }
 
-            sprites.forEach(s => this.addChild(s))
-            this.entityWiresMapping.set(k, sprites)
-        })
+    getPowerPoleDirection(entity: Entity) {
+        if (!this.entNrToConnectedEntNrs) this.updatePassiveWires()
+        if (!this.entNrToConnectedEntNrs) return 0
+        const entNrArr = this.entNrToConnectedEntNrs.get(entity.entity_number)
+        if (!entNrArr) return 0
+        return getPowerPoleRotation(
+            entity.position,
+            entNrArr
+                .map(entNr => G.bp.entities.get(entNr))
+                .filter(e => !!e)
+                .map(ent => ent.position)
+        )
+
+        function getPowerPoleRotation(centre: IPoint, points: IPoint[]) {
+            const sectorSum = points
+                .map(p => U.getAngle(0, 0, p.x - centre.x, (p.y - centre.y) * -1 /* invert Y axis */))
+                .map(angleToSector)
+                .reduce((acc, sec) => acc + sec, 0)
+
+            return Math.floor(sectorSum / points.length) * 2
+
+            function angleToSector(angle: number) {
+                const cwAngle = 360 - angle
+                const sectorAngle = 360 / 8
+                const offset = sectorAngle * 1.5
+                let newAngle = cwAngle - offset
+                if (Math.sign(newAngle) === -1) newAngle = 360 + newAngle
+                const sector = Math.floor(newAngle / sectorAngle)
+                return (sector % 4) as 0 | 1 | 2 | 3
+            }
+        }
     }
 
     updatePassiveWires() {
@@ -151,18 +178,13 @@ export class WiresContainer extends PIXI.Container {
             name: string
         }
 
-        const poleNames = Object.keys(FD.entities)
-            .map(k => FD.entities[k])
-            .filter(e => e.type === 'electric_pole')
-            .map(e => e.name)
-
         const poles: IPole[] = G.bp.entities
-            .filter(e => poleNames.includes(e.name))
+            .filter(e => e.type === 'electric_pole')
             .map(e => ({
                 entity_number: e.entity_number,
                 name: e.name,
-                x: EntityContainer.mappings.get(e.entity_number).position.x / 32,
-                y: EntityContainer.mappings.get(e.entity_number).position.y / 32
+                x: e.position.x,
+                y: e.position.y
             }))
 
         if (poles.length < 2) return
@@ -233,8 +255,8 @@ export class WiresContainer extends PIXI.Container {
 
         const finalLinesHashes = finalLines
             .reduce((map, line) => map.set(lineHash(line), line), new Map())
-        const toAdd = Array.from(finalLinesHashes.keys()).filter(k => !this.passiveWiresMapping.get(k))
-        const toDel = Array.from(this.passiveWiresMapping.keys()).filter(k => !finalLinesHashes.get(k))
+        const toAdd = Array.from(finalLinesHashes.keys()).filter(k => !this.passiveConnToSprite.get(k))
+        const toDel = Array.from(this.passiveConnToSprite.keys()).filter(k => !finalLinesHashes.get(k))
 
         // update rotations
         const toUpdate: number[] = [...toAdd, ...toDel]
@@ -247,14 +269,20 @@ export class WiresContainer extends PIXI.Container {
             }, [])
 
         const addWire = (hash: string) => {
-            const sprite = WiresContainer.getWireSprite(Number(hash.split('-')[0]), Number(hash.split('-')[1]), 'copper')
+            const sprite = this.getWireSprite({
+                color: 'copper',
+                entity_number_1: Number(hash.split('-')[0]),
+                entity_number_2: Number(hash.split('-')[1]),
+                entity_side_1: 1,
+                entity_side_2: 1
+            })
             this.addChild(sprite)
-            this.passiveWiresMapping.set(hash, sprite)
+            this.passiveConnToSprite.set(hash, sprite)
         }
 
         const removeWire = (hash: string) => {
-            this.passiveWiresMapping.get(hash).destroy()
-            this.passiveWiresMapping.delete(hash)
+            this.passiveConnToSprite.get(hash).destroy()
+            this.passiveConnToSprite.delete(hash)
         }
 
         toUpdate.forEach(entNr => {
@@ -268,7 +296,7 @@ export class WiresContainer extends PIXI.Container {
                     this.entNrToConnectedEntNrs.get(entNr)
                         .forEach((eNr: number) => {
                             const hash = lineHash([{ entity_number: eNr }, { entity_number: entNr }])
-                            if (this.passiveWiresMapping.get(hash)) {
+                            if (this.passiveConnToSprite.get(hash)) {
                                 removeWire(hash)
                                 addWire(hash)
                             }

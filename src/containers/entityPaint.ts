@@ -5,7 +5,6 @@ import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
 import { InventoryContainer } from '../panels/inventory'
-import Entity from '../factorio-data/entity'
 
 export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
@@ -237,8 +236,6 @@ export class EntityPaintContainer extends PIXI.Container {
 
             const ec = EntityContainer.mappings.get(newEntity.entity_number)
             UnderlayContainer.modifyVisualizationArea(ec.areaVisualization, s => s.visible = true)
-
-            if (fd.type === 'electric_pole') G.BPC.wiresContainer.updatePassiveWires()
 
             if (isUB || this.name === 'pipe_to_ground') {
                 this.direction = (this.direction + 4) % 8

@@ -38,27 +38,6 @@ interface IPoint {
     y: number
 }
 
-interface IEntityData {
-    hr: boolean
-    dir: number
-
-    bp: Blueprint
-    position: IPoint
-    hasConnections: boolean
-
-    assemblerPipeDirection: string
-    dirType: string
-    operator: string
-    assemblerCraftsWithFluid: boolean
-    trainStopColor: {
-        r: number
-        g: number
-        b: number
-        a: number
-    }
-    chemicalPlantDontConnectOutput: boolean
-}
-
 interface IFilter {
     /** Slot index (1 based ... not 0 like arrays) */
     index: number
@@ -69,12 +48,59 @@ interface IFilter {
 }
 
 interface IConnection {
-    circuit_id: number
     color: string
     entity_number_1: number
     entity_number_2: number
     entity_side_1: number
     entity_side_2: number
+}
+
+interface ISpriteData {
+    filename: string
+    // filenames?: string[]
+    // stripes?: Stripes[]
+
+    width: number
+    height: number
+
+    scale?: number
+    x?: number
+    y?: number
+    // priority?: string
+    // frame_count?: number
+    // line_length?: number
+    // direction_count?: number
+    // axially_symmetrical?: boolean
+    shift?: number[]
+    // draw_as_shadow?: boolean
+    // repeat_count?: number
+    // blend_mode?: string
+    // animation_speed?: number
+    // run_mode?: string
+    // apply_runtime_tint?: boolean
+    // apply_projection?: boolean
+    // flags?: string[]
+    // counterclockwise?: boolean
+    // tint?: {
+    //     r: number;
+    //     g: number;
+    //     b: number;
+    //     a: number;
+    // }
+    // lines_per_file?: number
+
+    divW: number
+    divH: number
+    flipX: boolean
+    flipY: boolean
+    height_divider: number
+    rot: number
+    color: {
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+    }
 }
 
 /** Namespace for blueprint string interfaces */
@@ -86,7 +112,9 @@ namespace BPS {
     }
 
     interface IWireColor {
+        /** Entity number */
         entity_id: number
+        /** Entity side */
         circuit_id?: number
         wire_id?: number
     }

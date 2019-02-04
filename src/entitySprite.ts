@@ -8,7 +8,7 @@ export class EntitySprite extends PIXI.Sprite {
     zIndex: number
     zOrder: number
 
-    constructor(data: any) {
+    constructor(data: ISpriteData) {
         if (!data.shift) data.shift = [0, 0]
         if (!data.x) data.x = 0
         if (!data.y) data.y = 0

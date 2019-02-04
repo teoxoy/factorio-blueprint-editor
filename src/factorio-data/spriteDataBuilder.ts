@@ -8,22 +8,30 @@ export default {
     getBeltConnections2
 }
 
-function getSpriteData(entity: any, hr: boolean, bp: Blueprint) {
-    return entityToFunction.get(entity.name)({
-        hr,
-        dir: entity.direction,
+interface IDrawData {
+    hr: boolean
+    dir: number
 
-        bp,
-        position: entity.position,
-        hasConnections: entity.hasConnections,
+    name: string
+    bp: Blueprint
+    position: IPoint
+    hasConnections: boolean
 
-        dirType: entity.directionType,
-        operator: entity.operator,
-        assemblerCraftsWithFluid: entity.assemblerCraftsWithFluid,
-        assemblerPipeDirection: entity.assemblerPipeDirection,
-        trainStopColor: entity.trainStopColor,
-        chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput
-    })
+    assemblerPipeDirection: string
+    dirType: string
+    operator: string
+    assemblerCraftsWithFluid: boolean
+    trainStopColor: {
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+    }
+    chemicalPlantDontConnectOutput: boolean
+}
+
+function getSpriteData(data: IDrawData): ISpriteData[] {
+    return entityToFunction.get(data.name)(data)
 }
 
 const entityToFunction = new Map()
@@ -122,7 +130,7 @@ function generateConnection(e: any, data: any, out: any[]) {
     }
 }
 
-function generateCovers(e: any, data: IEntityData, out: any[]) {
+function generateCovers(e: any, data: IDrawData, out: any[]) {
     if (e.name === 'pipe' ||
         ((e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') &&
         !data.assemblerCraftsWithFluid)
@@ -290,7 +298,7 @@ function getBeltConnections2(bp: Blueprint, position: IPoint, dir: number) {
 function generateGraphics(e: any) {
 
     if (e.name.search('combinator') !== -1) {
-        return (data: IEntityData) => {
+        return (data: IDrawData) => {
             function getBaseSprite() { return e.sprites[util.intToDir(data.dir)].layers[0] }
 
             if (e.name === 'decider_combinator' || e.name === 'arithmetic_combinator') {
@@ -324,7 +332,7 @@ function generateGraphics(e: any) {
     }
 
     if (e.name.search('assembling_machine') !== -1) {
-        return (data: IEntityData) => {
+        return (data: IDrawData) => {
             if (
                 (e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') &&
                 data.assemblerCraftsWithFluid
@@ -355,15 +363,15 @@ function generateGraphics(e: any) {
         case 'beacon': return () => [e.base_picture, e.animation]
         case 'lab': return () => [e.off_animation.layers[0]]
 
-        case 'offshore_pump': return (data: IEntityData) => [e.picture[util.intToDir(data.dir)]]
-        case 'pipe_to_ground': return (data: IEntityData) => [e.pictures[util.intToDir(data.dir)]]
-        case 'burner_mining_drill': return (data: IEntityData) => [e.animations[util.intToDir(data.dir)].layers[0]]
+        case 'offshore_pump': return (data: IDrawData) => [e.picture[util.intToDir(data.dir)]]
+        case 'pipe_to_ground': return (data: IDrawData) => [e.pictures[util.intToDir(data.dir)]]
+        case 'burner_mining_drill': return (data: IDrawData) => [e.animations[util.intToDir(data.dir)].layers[0]]
 
-        case 'pumpjack': return (data: IEntityData) => [
+        case 'pumpjack': return (data: IDrawData) => [
             util.duplicateAndSetPropertyUsing(e.base_picture.sheets[0], 'x', 'width', data.dir / 2),
             e.animations.north.layers[0]
         ]
-        case 'storage_tank': return (data: IEntityData) => [
+        case 'storage_tank': return (data: IDrawData) => [
             e.pictures.window_background,
             util.set_property_using(util.duplicate(e.pictures.picture.sheets[0]), 'x', data.dir === 2 ? 'width' : undefined)
         ]
@@ -384,9 +392,9 @@ function generateGraphics(e: any) {
         ]
 
         case 'electric_mining_drill':
-        case 'pump': return (data: IEntityData) => [e.animations[util.intToDir(data.dir)]]
-        case 'boiler': return (data: IEntityData) => [e.structure[util.intToDir(data.dir)].layers[0]]
-        case 'heat_exchanger': return (data: IEntityData) => {
+        case 'pump': return (data: IDrawData) => [e.animations[util.intToDir(data.dir)]]
+        case 'boiler': return (data: IDrawData) => [e.structure[util.intToDir(data.dir)].layers[0]]
+        case 'heat_exchanger': return (data: IDrawData) => {
             let needsEnding = true
             if (data.bp) {
                 const conn = getHeatConectionPoints(e)[0]
@@ -408,19 +416,19 @@ function generateGraphics(e: any) {
             return [e.structure[util.intToDir(data.dir)].layers[0]]
         }
         case 'oil_refinery':
-        case 'chemical_plant': return (data: IEntityData) => [e.animation[util.intToDir(data.dir)].layers[0]]
+        case 'chemical_plant': return (data: IDrawData) => [e.animation[util.intToDir(data.dir)].layers[0]]
         case 'steam_engine':
-        case 'steam_turbine': return (data: IEntityData) => [
+        case 'steam_turbine': return (data: IDrawData) => [
             data.dir === 0 ? e.vertical_animation.layers[0] : e.horizontal_animation.layers[0]
         ]
         case 'gun_turret':
-        case 'laser_turret': return (data: IEntityData) => [
+        case 'laser_turret': return (data: IDrawData) => [
             ...e.base_picture.layers,
             util.duplicateAndSetPropertyUsing(e.folded_animation.layers[0], 'y', 'height', data.dir / 2),
             util.duplicateAndSetPropertyUsing(e.folded_animation.layers[e.name === 'laser_turret' ? 2 : 1], 'y', 'height', data.dir / 2)
         ]
 
-        case 'train_stop': return (data: IEntityData) => {
+        case 'train_stop': return (data: IDrawData) => {
             const dir = data.dir
             let ta = util.duplicate(e.top_animations[util.intToDir(dir)].layers[1])
             ta = util.set_property(ta, 'color', data.trainStopColor ? data.trainStopColor : e.color)
@@ -433,7 +441,7 @@ function generateGraphics(e: any) {
                 e.light2.picture[util.intToDir(dir)]
             ]
         }
-        case 'flamethrower_turret': return (data: IEntityData) => {
+        case 'flamethrower_turret': return (data: IDrawData) => {
             const dir = data.dir
             const pipe = FD.entities['pipe']
             const pipePictures = pipe.pictures as FD.PipePictures
@@ -449,7 +457,7 @@ function generateGraphics(e: any) {
                 e.folded_animation[util.intToDir(dir)].layers[1]
             ]
         }
-        case 'artillery_turret': return (data: IEntityData) => {
+        case 'artillery_turret': return (data: IDrawData) => {
             const d = data.dir * 2
             e.cannon_base_pictures.layers[0].filename = e.cannon_base_pictures.layers[0].filenames[d]
             e.cannon_base_pictures.layers[0].hr_version.filename = e.cannon_base_pictures.layers[0].hr_version.filenames[d]
@@ -470,7 +478,7 @@ function generateGraphics(e: any) {
             ]
         }
         case 'straight_rail':
-        case 'curved_rail': return (data: IEntityData) => {
+        case 'curved_rail': return (data: IDrawData) => {
             const dir = data.dir
             function getBaseSprites() {
                 function getRailSpriteForDir() {
@@ -551,7 +559,7 @@ function generateGraphics(e: any) {
             return getBaseSprites()
         }
         case 'rail_signal':
-        case 'rail_chain_signal':  return (data: IEntityData) => {
+        case 'rail_chain_signal':  return (data: IDrawData) => {
             const dir = data.dir
             let rp = util.duplicateAndSetPropertyUsing(e.rail_piece, 'x', 'width', dir)
             let a = util.duplicateAndSetPropertyUsing(e.animation, 'y', 'height', dir)
@@ -574,7 +582,7 @@ function generateGraphics(e: any) {
             }
             return [rp, a]
         }
-        case 'nuclear_reactor': return (data: IEntityData) => {
+        case 'nuclear_reactor': return (data: IDrawData) => {
             const conn = e.heat_buffer.connections
             const patches = []
             for (let i = 0; i < conn.length; i++) {
@@ -594,7 +602,7 @@ function generateGraphics(e: any) {
             }
             return [...patches, e.lower_layer_picture, e.picture.layers[0]]
         }
-        case 'stone_wall': return (data: IEntityData) => {
+        case 'stone_wall': return (data: IDrawData) => {
             function getBaseSprite() {
                 function getRandomPic(type: string) {
                     if (e.pictures[type] instanceof Array) {
@@ -627,7 +635,7 @@ function generateGraphics(e: any) {
             }
             return [getBaseSprite()]
         }
-        case 'gate': return (data: IEntityData) => {
+        case 'gate': return (data: IDrawData) => {
             const dir = data.dir
             function getBaseSprites() {
                 if (data.bp) {
@@ -675,7 +683,7 @@ function generateGraphics(e: any) {
             }
             return getBaseSprites()
         }
-        case 'pipe': return (data: IEntityData) => {
+        case 'pipe': return (data: IDrawData) => {
             if (data.bp) {
                 const conn = data.bp.entityPositionGrid.getNeighbourData(data.position)
                     .map(({ entity, relDir }) => {
@@ -724,7 +732,7 @@ function generateGraphics(e: any) {
             }
             return [e.pictures.straight_vertical_single]
         }
-        case 'heat_pipe': return (data: IEntityData) => {
+        case 'heat_pipe': return (data: IDrawData) => {
             function getRandomPic(type: string) {
                 if (e.connection_sprites[type].length === 1) return [e.connection_sprites[type][0]]
                 return [e.connection_sprites[type][util.getRandomInt(0, e.connection_sprites[type].length - 1)]]
@@ -756,10 +764,10 @@ function generateGraphics(e: any) {
         case 'container':
         case 'logistic_container': return () => [e.picture]
 
-        case 'electric_pole': return (data: IEntityData) =>
+        case 'electric_pole': return (data: IDrawData) =>
             [util.duplicateAndSetPropertyUsing(e.pictures, 'x', 'width', data.dir / 2)]
 
-        case 'splitter': return (data: IEntityData) => {
+        case 'splitter': return (data: IDrawData) => {
             const dir = data.dir
             const nP = e.name.split('_')
             const beltType = nP.length === 1 ? '' : nP[0] + '_'
@@ -777,7 +785,7 @@ function generateGraphics(e: any) {
 
             return [belt, belt2, e.structure[util.intToDir(dir)]]
         }
-        case 'underground_belt': return (data: IEntityData) => {
+        case 'underground_belt': return (data: IDrawData) => {
             const dir = data.dir
             let belt = dir === 0 || dir === 4 ? e.belt_vertical : e.belt_horizontal
 
@@ -803,7 +811,7 @@ function generateGraphics(e: any) {
                 )
             ]
         }
-        case 'transport_belt': return (data: IEntityData) => {
+        case 'transport_belt': return (data: IDrawData) => {
             const dir = data.dir
             function getBeltConnections() {
                 let directions = data.bp.entityPositionGrid.getNeighbourData(data.position)
@@ -881,7 +889,7 @@ function generateGraphics(e: any) {
             }
             return [belt]
         }
-        case 'inserter': return (data: IEntityData) => {
+        case 'inserter': return (data: IDrawData) => {
             const dir = data.dir
             let ho = util.duplicate(e.hand_open_picture)
             let hb = util.duplicate(e.hand_base_picture)

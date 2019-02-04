@@ -11,6 +11,7 @@ import { TilePaintContainer } from './tilePaint'
 import util from '../common/util'
 import FD from 'factorio-data'
 import actions from '../actions'
+import Entity from '../factorio-data/entity'
 
 export class BlueprintContainer extends PIXI.Container {
 
@@ -158,11 +159,15 @@ export class BlueprintContainer extends PIXI.Container {
 
         G.bp.tiles.forEach((v, k) => new TileContainer(v, { x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
 
-        G.bp.on('create', entity => new EntityContainer(entity))
+        G.bp.entities.forEach(e => this.wiresContainer.add(e.connections))
+
+        G.bp.on('create', (entity: Entity) => new EntityContainer(entity))
+        G.bp.on('create', (entity: Entity) => this.wiresContainer.add(entity.connections))
+        G.bp.on('create', () => this.wiresContainer.updatePassiveWires())
+        G.bp.on('destroy', () => this.wiresContainer.updatePassiveWires())
 
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()
-        this.wiresContainer.drawWires()
         this.updateOverlay()
         this.centerViewport()
 

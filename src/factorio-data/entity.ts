@@ -5,11 +5,8 @@ import Blueprint from './blueprint'
 import spriteDataBuilder from './spriteDataBuilder'
 import { Area } from './positionGrid'
 import * as History from './history'
-import U from './generators/util'
-import G from '../common/globals'
 
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
-// TODO: Optimize within connections property the way how the connections to other entities are found (Try Counter: 0)
 
 /** Entity Base Class */
 export default class Entity extends EventEmitter {
@@ -35,32 +32,6 @@ export default class Entity extends EventEmitter {
         this.emit('destroy')
 
         this.removeAllListeners()
-    }
-
-    removeConnectionsToOtherEntities() {
-        const entitiesToModify = this.hasConnections ? this.m_BP.connectionsManager.removeConnectionData(this.entity_number) : []
-        for (const entityToModify of entitiesToModify) {
-            const ent = this.m_BP.entities.get(entityToModify.entity_number)
-            const connections = ent.connections
-            const a = connections.size === 1
-            const b = connections[entityToModify.side].size === 1
-            const c = connections[entityToModify.side][entityToModify.color].size === 1
-            if (a && b && c) {
-                History.updateValue(ent,
-                    ['connections'], undefined, undefined, true)
-            } else if (b && c) {
-                History.updateValue(ent,
-                    ['connections', entityToModify.side], undefined, undefined, true)
-            } else if (c) {
-                History.updateValue(ent,
-                    ['connections', entityToModify.side, entityToModify.color], undefined, undefined, true)
-            } else {
-                History.updateValue(ent,
-                    ['connections', entityToModify.side, entityToModify.color, entityToModify.index.toString()], undefined, undefined, true)
-            }
-
-            ent.emit('redraw')
-        }
     }
 
     /** Return reference to blueprint */
@@ -121,42 +92,7 @@ export default class Entity extends EventEmitter {
 
     /** Entity direction */
     get direction(): number {
-        // TODO: find a better way of handling passive wires
-        // maybe generate the connections in blueprint.ts and
-        // store them in the entity.
-        if (this.type === 'electric_pole') {
-            if (!G.BPC.wiresContainer.entNrToConnectedEntNrs) return 0
-            const entNrArr = G.BPC.wiresContainer.entNrToConnectedEntNrs.get(this.entity_number)
-            if (!entNrArr) return 0
-            return getPowerPoleRotation(
-                this.position,
-                entNrArr
-                    .map(entNr => this.m_BP.entities.get(entNr))
-                    .filter(e => !!e)
-                    .map(ent => ent.position)
-            )
-        }
-
         return this.m_rawEntity.direction !== undefined ? this.m_rawEntity.direction : 0
-
-        function getPowerPoleRotation(centre: IPoint, points: IPoint[]) {
-            const sectorSum = points
-                .map(p => U.getAngle(0, 0, p.x - centre.x, (p.y - centre.y) * -1 /* invert Y axis */))
-                .map(angleToSector)
-                .reduce((acc, sec) => acc + sec, 0)
-
-            return Math.floor(sectorSum / points.length) * 2
-
-            function angleToSector(angle: number) {
-                const cwAngle = 360 - angle
-                const sectorAngle = 360 / 8
-                const offset = sectorAngle * 1.5
-                let newAngle = cwAngle - offset
-                if (Math.sign(newAngle) === -1) newAngle = 360 + newAngle
-                const sector = Math.floor(newAngle / sectorAngle)
-                return (sector % 4) as 0 | 1 | 2 | 3
-            }
-        }
     }
     set direction(direction: number) {
         if (this.m_rawEntity.direction === direction) { return }
@@ -449,59 +385,125 @@ export default class Entity extends EventEmitter {
     }
 
     get hasConnections() {
-        return this.connections !== undefined
+        return this.connections.length > 0
     }
 
-    get connections() {
-        const conn = this.m_rawEntity.connections !== undefined ? this.m_rawEntity.connections : {}
+    get connections(): IConnection[] {
+        const connections: IConnection[] = []
 
-        if (conn['Cu0']) {
-            if (!conn['1']) conn['1'] = {}
-            conn['1'].copper = conn['Cu0']
-            delete conn.Cu0
+        const addConnSide = (side: string) => {
+            if (this.m_rawEntity.connections[side]) {
+                Object.keys(this.m_rawEntity.connections[side])
+                    .forEach(color => {
+                        (this.m_rawEntity.connections[side] as BPS.IConnSide)[color]
+                            .forEach(data => {
+                                connections.push({
+                                    color,
+                                    entity_number_1: this.entity_number,
+                                    entity_number_2: data.entity_id,
+                                    entity_side_1: Number(side),
+                                    entity_side_2: data.circuit_id || 1
+                                })
+                            })
+                    })
+            }
         }
-        if (conn['Cu1']) {
-            if (!conn['2']) conn['2'] = {}
-            conn['2'].copper = conn['Cu1']
-            delete conn.Cu1
+
+        const addCopperConnSide = (side: string, color: string) => {
+            if (this.m_rawEntity.connections[side]) {
+                // For some reason Cu0 and Cu1 are arrays but the switch can only have 1 copper connection
+                const data = (this.m_rawEntity.connections[side] as BPS.IWireColor[])[0]
+                connections.push({
+                    color,
+                    entity_number_1: this.entity_number,
+                    entity_number_2: data.entity_id,
+                    entity_side_1: Number(side.slice(2, 3)) + 1,
+                    entity_side_2: 1
+                })
+            }
+        }
+
+        if (this.m_rawEntity.connections) {
+            addConnSide('1')
+            addConnSide('2')
+            addCopperConnSide('Cu0', 'copper')
+            addCopperConnSide('Cu1', 'copper')
         }
 
         if (this.type === 'electric_pole') {
-            const copperConn: any[] = []
-
-            this.m_BP.entities.forEach((entity, k) => {
-                if (entity.name === 'power_switch' && entity.connections) {
-                    if (entity.connections.Cu0 && entity.connections.Cu0[0].entity_id === this.entity_number) {
-                        copperConn.push({ entity_id: k })
-                    }
-                    if (entity.connections.Cu1 && entity.connections.Cu1[0].entity_id === this.entity_number) {
-                        copperConn.push({ entity_id: k })
-                    }
-                }
-            })
-
-            if (copperConn.length !== 0) {
-                if (!conn['1']) conn['1'] = {}
-                conn['1'].copper = copperConn
-            }
+            this.m_BP.entities
+                .filter(entity => entity.name === 'power_switch' && !!entity.getRawData().connections)
+                .filter(entity =>
+                    (entity.getRawData().connections.Cu0 && entity.getRawData().connections.Cu0[0].entity_id === this.entity_number) ||
+                    (entity.getRawData().connections.Cu1 && entity.getRawData().connections.Cu1[0].entity_id === this.entity_number))
+                .forEach(entity => {
+                    const c = entity.getRawData().connections
+                    connections.push({
+                        color: 'copper',
+                        entity_number_1: this.entity_number,
+                        entity_number_2: entity.entity_number,
+                        entity_side_1: 1,
+                        entity_side_2: c.Cu0 && c.Cu0[0].entity_id === this.entity_number ? 1 : 2
+                    })
+                })
         }
 
-        return Object.keys(conn).length ? conn : undefined
+        return connections.length > 0 ? connections : []
     }
 
-    get connectedEntities(): number[] {
-        const connections = this.connections
-        if (!connections) return
-
-        const entities = []
-        for (const side in connections) {
-            for (const color in connections[side]) {
-                for (const c of connections[side][color]) {
-                    entities.push(c.entity_id)
-                }
-            }
+    removeConnection(connection: IConnection) {
+        // Power poles don't have any internal connections, so we only have to fire the emit
+        if (this.type === 'electric_pole') {
+            // Hack to get emit working
+            History.updateValue(this.m_rawEntity, ['entity_number'], this.entity_number)
+                .emit(emitOnRemove.bind(this))
+            return
         }
-        return entities
+
+        if (this.name === 'power_switch' && connection.color === 'copper') {
+            if (Object.keys(this.m_rawEntity.connections).length === 1) {
+                History.updateValue(this.m_rawEntity, ['connections'], undefined, undefined, true)
+                    .emit(emitOnRemove.bind(this))
+            } else {
+                History.updateValue(this.m_rawEntity, ['connections', 'Cu' + (connection.entity_side_2 - 1).toString()], undefined, undefined, true)
+                    .emit(emitOnRemove.bind(this))
+            }
+            return
+        }
+
+        const side = connection.entity_side_2.toString()
+        const color = connection.color
+        const otherEntNr = connection.entity_number_1
+
+        const a = Object.keys(this.m_rawEntity.connections).length === 1
+        const b = Object.keys(this.m_rawEntity.connections[side]).length === 1
+        const c = (this.m_rawEntity.connections[side] as BPS.IConnSide)[color].length === 1
+
+        if (a && b && c) {
+            History.updateValue(this.m_rawEntity, ['connections'], undefined, undefined, true)
+                .emit(emitOnRemove.bind(this))
+        } else if (b && c) {
+            History.updateValue(this.m_rawEntity, ['connections', side], undefined, undefined, true)
+                .emit(emitOnRemove.bind(this))
+        } else if (c) {
+            History.updateValue(this.m_rawEntity, ['connections', side, color], undefined, undefined, true)
+                .emit(emitOnRemove.bind(this))
+        } else {
+            const i = (this.m_rawEntity.connections[side] as BPS.IConnSide)[color].findIndex(d => d.entity_id === otherEntNr)
+            History.updateValue(this.m_rawEntity, ['connections', side, color, i.toString()], undefined, undefined, true)
+                .emit(emitOnRemove.bind(this))
+        }
+
+        function emitOnRemove() {
+            this.emit('removedConnection', connection)
+        }
+    }
+
+    removeAllConnections() {
+        this.connections.forEach(conn =>
+            this.m_BP.entities.get(conn.entity_number_2).removeConnection(conn))
+
+        History.updateValue(this.m_rawEntity, ['connections'], undefined, undefined, true)
     }
 
     get chemicalPlantDontConnectOutput() {
@@ -655,14 +657,14 @@ export default class Entity extends EventEmitter {
         if (recipe.results.find(result => result.type === 'fluid')) return 'output'
     }
 
-    getWireConnectionPoint(color: string, side: number) {
+    getWireConnectionPoint(color: string, side: number, direction = this.direction) {
         const e = this.entityData
         // poles
-        if (e.connection_points) return e.connection_points[this.direction / 2].wire[color]
+        if (e.connection_points) return e.connection_points[direction / 2].wire[color]
         // combinators
         if (e.input_connection_points) {
-            if (side === 1) return e.input_connection_points[this.direction / 2].wire[color]
-            return e.output_connection_points[this.direction / 2].wire[color]
+            if (side === 1) return e.input_connection_points[direction / 2].wire[color]
+            return e.output_connection_points[direction / 2].wire[color]
         }
 
         if (this.name === 'power_switch' && color === 'copper') {
@@ -673,16 +675,16 @@ export default class Entity extends EventEmitter {
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[
-                spriteDataBuilder.getBeltConnections2(this.m_BP, this.position, this.direction) * 4
+                spriteDataBuilder.getBeltConnections2(this.m_BP, this.position, direction) * 4
             ].wire[color]
         }
         if (e.circuit_wire_connection_points.length === 8) {
-            return e.circuit_wire_connection_points[this.direction].wire[color]
+            return e.circuit_wire_connection_points[direction].wire[color]
         }
         if (this.name === 'constant_combinator') {
-            return e.circuit_wire_connection_points[this.direction / 2].wire[color]
+            return e.circuit_wire_connection_points[direction / 2].wire[color]
         }
-        return e.circuit_wire_connection_points[this.direction / 2].wire[color]
+        return e.circuit_wire_connection_points[direction / 2].wire[color]
     }
 
     getRawData() {

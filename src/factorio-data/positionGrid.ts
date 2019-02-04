@@ -91,8 +91,8 @@ export class PositionGrid {
             if (cell) {
                 if (typeof cell === 'number') {
                     this.grid.set(key, [
-                        cell,
-                        entity.entity_number
+                        entity.entity_number,
+                        cell
                     ])
                 } else {
                     this.grid.set(key, [...cell, entity.entity_number])
@@ -328,7 +328,9 @@ export class PositionGrid {
             const x = Math.floor(point.x) + o.x
             const y = Math.floor(point.y) + o.y
             const cell = this.grid.get(`${x},${y}`)
-            const entity = cell ? (this.bp.entities.get(typeof cell === 'number' ? cell : cell[0])) : undefined
+            const entity = cell
+                ? (this.bp.entities.get(typeof cell === 'number' ? cell : cell[0]))
+                : undefined
             return { x, y, relDir: i * 2, entity }
         })
     }

@@ -262,7 +262,7 @@ class HistoryEntry {
 let s_HistoryIndex = 0
 
 /** Static non-gloabl field to store historical entries */
-const s_HistoryEntries: HistoryEntry[] = []
+let s_HistoryEntries: HistoryEntry[] = []
 
 /** Count how many times a 'startTransaction' was called so we know when 'commitTransaction' actually needs to apply */
 let s_TransactionCount = 0
@@ -414,7 +414,11 @@ function s_SetValue(obj: ITargetInfo, path: string[], value: any) {
 /** Private function to delete value of an object at a specific path  */
 function s_DeleteValue(obj: ITargetInfo, path: string[]) {
     if (path.length === 1) {
-        delete obj[path[0]] /* tslint:disable-line:no-dynamic-delete */
+        if (Array.isArray(obj)) {
+            obj.splice(Number(path[0]), 1)
+        } else {
+            delete obj[path[0]] /* tslint:disable-line:no-dynamic-delete */
+        }
     } else {
         s_DeleteValue(obj[path[0]] as ITargetInfo, path.slice(1))
     }
@@ -426,6 +430,12 @@ function s_CommitTransaction(transaction: HistoryEntry) {
     while (s_HistoryEntries.length > s_HistoryIndex) { s_HistoryEntries.pop() } // Slice would need value re-assignment - hence not used on purpose
     s_HistoryEntries.push(transaction)
     s_HistoryIndex++
+}
+
+/** Resets the History (removes all history entries) */
+function reset() {
+    s_HistoryIndex = 0
+    s_HistoryEntries = []
 }
 
 export {
@@ -440,5 +450,6 @@ export {
     getRedoPreview,
     redo,
     startTransaction,
-    commitTransaction
+    commitTransaction,
+    reset
 }

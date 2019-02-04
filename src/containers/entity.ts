@@ -75,7 +75,23 @@ export class EntityContainer extends PIXI.Container {
     }
 
     static getParts(entity: Entity, hr: boolean, ignore_connections?: boolean): EntitySprite[] {
-        const anims = spriteDataBuilder.getSpriteData(entity, hr, ignore_connections ? undefined : G.bp)
+
+        const anims = spriteDataBuilder.getSpriteData({
+            hr,
+            dir: entity.type === 'electric_pole' ? G.BPC.wiresContainer.getPowerPoleDirection(entity) : entity.direction,
+
+            name: entity.name,
+            bp: ignore_connections ? undefined : G.bp,
+            position: entity.position,
+            hasConnections: entity.hasConnections,
+
+            dirType: entity.directionType,
+            operator: entity.operator,
+            assemblerCraftsWithFluid: entity.assemblerCraftsWithFluid,
+            assemblerPipeDirection: entity.assemblerPipeDirection,
+            trainStopColor: entity.trainStopColor,
+            chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput
+        })
 
         // const icon = new PIXI.Sprite(G.iconSprites['icon:' + FD.entities[entity.name].icon.split(':')[1]])
         // icon.x -= 16
@@ -149,12 +165,9 @@ export class EntityContainer extends PIXI.Container {
             }
         })
 
-        this.m_Entity.on('redraw', () => {
+        this.m_Entity.on('removedConnection', (connection: IConnection) => {
+            G.BPC.wiresContainer.remove(connection)
             this.redraw()
-        })
-
-        this.m_Entity.on('destroy', () => {
-            this.destroy()
         })
 
         this.m_Entity.on('direction', () => {
@@ -163,7 +176,7 @@ export class EntityContainer extends PIXI.Container {
 
             this.updateUndergroundLines()
             this.redrawEntityInfo()
-            G.BPC.wiresContainer.update(this.m_Entity.entity_number)
+            G.BPC.wiresContainer.update(this.m_Entity)
         })
 
         this.m_Entity.on('directionType', () => {
@@ -185,36 +198,34 @@ export class EntityContainer extends PIXI.Container {
 
             this.updateUndergroundLines()
             this.redrawEntityInfo()
-            G.BPC.wiresContainer.update(this.m_Entity.entity_number)
+            G.BPC.wiresContainer.update(this.m_Entity)
+            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
+        })
+
+        this.m_Entity.on('destroy', () => {
+            this.destroy()
+
+            this.redrawSurroundingEntities()
+
+            G.BPC.hoverContainer = undefined
+
+            G.BPC.updateOverlay()
+
+            for (const s of this.entitySprites) s.destroy()
+
+            EntityContainer.mappings.delete(this.m_Entity.entity_number)
+
+            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
+            G.BPC.overlayContainer.hideCursorBox()
+            G.BPC.overlayContainer.hideUndergroundLines()
+
+            if (this.entityInfo !== undefined) this.entityInfo.destroy()
         })
 
         G.BPC.entities.addChild(this)
     }
-
     public get entity(): Entity {
         return this.m_Entity
-    }
-
-    destroy() {
-        this.redrawSurroundingEntities()
-
-        G.BPC.hoverContainer = undefined
-
-        G.BPC.wiresContainer.updatePassiveWires()
-
-        G.BPC.updateOverlay()
-
-        for (const s of this.entitySprites) s.destroy()
-
-        EntityContainer.mappings.delete(this.m_Entity.entity_number)
-
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
-        G.BPC.overlayContainer.hideCursorBox()
-        G.BPC.overlayContainer.hideUndergroundLines()
-
-        if (this.entityInfo !== undefined) this.entityInfo.destroy()
-
-        super.destroy()
     }
 
     updateUndergroundLines() {
