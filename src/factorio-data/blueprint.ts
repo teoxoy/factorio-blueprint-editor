@@ -444,7 +444,7 @@ export default class Blueprint extends EventEmitter {
                     x: Number(k.split(',')[0]) - Math.floor(center.x) - 0.5,
                     y: Number(k.split(',')[1]) - Math.floor(center.y) - 0.5
                 },
-                name: v
+                name: v.name
             }))
         const iconData = this.icons.map((icon, i) => {
             return { signal: { type: getItemTypeForBp(icon), name: icon }, index: i + 1 }

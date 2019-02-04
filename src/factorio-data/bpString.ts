@@ -54,7 +54,7 @@ function decode(str: string): Promise<Blueprint | Book> {
     })
 }
 
-function encode(bPOrBook: any) {
+function encode(bPOrBook: Blueprint | Book) {
     return new Promise((resolve: (value: string) => void, reject) => {
         const data = encodeSync(bPOrBook)
         if (data.value) resolve(data.value)
@@ -62,7 +62,7 @@ function encode(bPOrBook: any) {
     })
 }
 
-function encodeSync(bPOrBook: any): { value?: string; error?: string } {
+function encodeSync(bPOrBook: Blueprint | Book): { value?: string; error?: string } {
     try {
         return { value: '0' + btoa(pako.deflate(
             JSON.stringify(bPOrBook.toObject())
