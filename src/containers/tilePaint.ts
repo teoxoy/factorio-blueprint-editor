@@ -145,28 +145,17 @@ export class TilePaintContainer extends PIXI.Container {
     removeContainerUnder() {
         const position = EntityContainer.getGridPosition(this.position)
 
-        TilePaintContainer.getTilePositions()
-            .map(p => ({ x: p.x + position.x, y: p.y + position.y }))
-            .forEach(p => {
-                const tileUnder = TileContainer.mappings.get(`${p.x},${p.y}`)
-                if (tileUnder) {
-                    tileUnder.destroy()
-                    G.bp.removeTile(p)
-                }
-            })
+        G.bp.removeTiles(
+            TilePaintContainer.getTilePositions().map(p => ({ x: p.x + position.x, y: p.y + position.y }))
+        )
     }
 
     placeEntityContainer() {
         const position = EntityContainer.getGridPosition(this.position)
 
-        TilePaintContainer.getTilePositions()
-            .map(p => ({ x: p.x + position.x, y: p.y + position.y }))
-            .forEach(p => {
-                const tileUnder = TileContainer.mappings.get(`${p.x},${p.y}`)
-                if (tileUnder) tileUnder.destroy()
-
-                G.bp.createTile(this.name, p)
-                const tC = new TileContainer(this.name, p)
-            })
+        G.bp.createTiles(
+            this.name,
+            TilePaintContainer.getTilePositions().map(p => ({ x: p.x + position.x, y: p.y + position.y }))
+        )
     }
 }

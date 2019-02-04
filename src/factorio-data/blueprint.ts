@@ -6,6 +6,7 @@ import generators from './generators'
 import util from '../common/util'
 import * as History from './history'
 import EventEmitter from 'eventemitter3'
+import Tile from './tile'
 
 class OurMap<K, V> extends Map<K, V> {
 
@@ -46,10 +47,10 @@ export default class Blueprint extends EventEmitter {
 
     name: string
     icons: any[]
-    tiles: Map<string, string>
     version: number
     entityPositionGrid: PositionGrid
     entities: OurMap<number, Entity>
+    tiles: OurMap<string, Tile>
 
     private m_next_entity_number = 1
 
@@ -60,7 +61,7 @@ export default class Blueprint extends EventEmitter {
         this.icons = []
         this.version = 68722819072
         this.entities = new OurMap()
-        this.tiles = new Map()
+        this.tiles = new OurMap()
         this.entityPositionGrid = new PositionGrid(this)
 
         if (data) {
@@ -74,8 +75,11 @@ export default class Blueprint extends EventEmitter {
             }
 
             if (data.tiles) {
-                this.tiles = new Map(data.tiles.map(tile =>
-                    [`${tile.position.x + offset.x + 0.5},${tile.position.y + offset.y + 0.5}`, tile.name] as [string, string]))
+                this.tiles = new OurMap(
+                    data.tiles.map(tile =>
+                        new Tile(tile.name, { x: tile.position.x + offset.x + 0.5, y: tile.position.y + offset.y + 0.5 })),
+                    t => t.hash
+                )
             }
 
             if (data.entities !== undefined) {
@@ -153,6 +157,58 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
+    createTiles(name: string, positions: IPoint[]) {
+        History.startTransaction(`Added tiles: ${name}`)
+
+        positions.forEach(p => {
+            const existingTile = this.tiles.get(`${p.x},${p.y}`)
+
+            if (existingTile && existingTile.name !== name) {
+                History
+                    .updateMap(this.tiles, existingTile.hash, undefined, undefined, true)
+                    .type('del')
+                    .emit(this.onCreateOrRemoveTile.bind(this))
+            }
+
+            if (!existingTile || (existingTile && existingTile.name !== name)) {
+                const tile = new Tile(name, p)
+
+                // TODO: fix the error here, it's because tiles don't have an entity number
+                // maybe change the History to accept a function or a variable that will be used as an identifier for logging
+                History
+                    .updateMap(this.tiles, tile.hash, tile)
+                    .type('add')
+                    .emit(this.onCreateOrRemoveTile.bind(this))
+            }
+        })
+
+        History.commitTransaction()
+    }
+
+    removeTiles(positions: IPoint[]) {
+        History.startTransaction(`Deleted tiles`)
+
+        positions.forEach(p => {
+            const tile = this.tiles.get(`${p.x},${p.y}`)
+            if (tile) {
+                History
+                    .updateMap(this.tiles, tile.hash, undefined, undefined, true)
+                    .type('del')
+                    .emit(this.onCreateOrRemoveTile.bind(this))
+            }
+        })
+
+        History.commitTransaction()
+    }
+
+    onCreateOrRemoveTile(newValue: Tile, oldValue: Tile) {
+        if (newValue === undefined) {
+            oldValue.destroy()
+        } else {
+            this.emit('create_t', newValue)
+        }
+    }
+
     get next_entity_number() {
         return this.m_next_entity_number++
     }
@@ -161,16 +217,8 @@ export default class Blueprint extends EventEmitter {
         return this.entities.find(e => e.name === 'straight_rail' /* || e.name === 'curved_rail' */)
     }
 
-    createTile(name: string, position: IPoint) {
-        this.tiles.set(`${position.x},${position.y}`, name)
-    }
-
-    removeTile(position: IPoint) {
-        this.tiles.delete(`${position.x},${position.y}`)
-    }
-
     isEmpty() {
-        return this.entities.isEmpty() && this.tiles.size === 0
+        return this.entities.isEmpty() && this.tiles.isEmpty()
     }
 
     // Get corner/center positions
@@ -413,7 +461,7 @@ export default class Blueprint extends EventEmitter {
             blueprint: {
                 icons: iconData,
                 entities: this.entities.isEmpty() ? undefined : entityInfo,
-                tiles: this.tiles.size === 0 ? undefined : tileInfo,
+                tiles: this.tiles.isEmpty() ? undefined : tileInfo,
                 item: 'blueprint',
                 version: this.version,
                 label: this.name

@@ -1,8 +1,8 @@
 import G from '../common/globals'
 import FD from 'factorio-data'
+import Tile from '../factorio-data/tile'
 
 export class TileContainer extends PIXI.Container {
-    static mappings: Map<string, TileContainer> = new Map()
 
     static generateSprite(name: string, position: IPoint) {
         // TODO: maybe optimize this with PIXI.extras.TilingSprite and masks
@@ -31,30 +31,26 @@ export class TileContainer extends PIXI.Container {
 
     tileSprites: PIXI.Sprite[]
 
-    constructor(name: string, position: IPoint) {
+    constructor(tile: Tile) {
         super()
-
-        this.name = name
 
         this.interactive = false
         this.interactiveChildren = false
 
-        this.position.set(position.x * 32, position.y * 32)
-        TileContainer.mappings.set(`${position.x},${position.y}`, this)
+        this.position.set(tile.position.x * 32, tile.position.y * 32)
 
         this.tileSprites = []
 
-        const sprite = TileContainer.generateSprite(this.name, position)
+        const sprite = TileContainer.generateSprite(tile.name, tile.position)
         sprite.position = this.position
         this.tileSprites.push(sprite)
         G.BPC.tileSprites.addChild(sprite)
 
         G.BPC.tiles.addChild(this)
-    }
 
-    destroy() {
-        TileContainer.mappings.delete(`${this.position.x / 32},${this.position.y / 32}`)
-        for (const s of this.tileSprites) s.destroy()
-        super.destroy()
+        tile.on('destroy', () => {
+            this.destroy()
+            for (const s of this.tileSprites) s.destroy()
+        })
     }
 }

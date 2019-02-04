@@ -30,7 +30,6 @@ export default class Entity extends EventEmitter {
 
     destroy() {
         this.emit('destroy')
-
         this.removeAllListeners()
     }
 
