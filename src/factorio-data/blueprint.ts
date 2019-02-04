@@ -7,11 +7,11 @@ import util from '../common/util'
 import * as History from './history'
 import EventEmitter from 'eventemitter3'
 
-class EntityCollection extends Map<number, Entity> {
+class OurMap<K, V> extends Map<K, V> {
 
-    constructor(entities?: Entity[]) {
-        if (entities) {
-            super(entities.map(e => [e.entity_number, e] as [number, Entity]))
+    constructor(values?: V[], mapFn?: (value: V) => K) {
+        if (values) {
+            super(values.map(e => [mapFn(e), e] as [K, V]))
         } else {
             super()
         }
@@ -21,23 +21,19 @@ class EntityCollection extends Map<number, Entity> {
         return this.size === 0
     }
 
-    find(predicate: (value: Entity, key: number) => boolean): Entity {
+    find(predicate: (value: V, key: K) => boolean): V {
         for (const [ k, v ] of this) {
             if (predicate(v, k)) return v
         }
         return undefined
     }
 
-    filter(predicate: (value: Entity, key: number) => boolean): Entity[] {
-        const result: Entity[] = []
+    filter(predicate: (value: V, key: K) => boolean): V[] {
+        const result: V[] = []
         this.forEach((v, k) => {
             if (predicate(v, k)) result.push(v)
         })
         return result
-    }
-
-    getRawEntities() {
-        return Array.from(this.values()).map(e => e.getRawData())
     }
 }
 
@@ -53,7 +49,7 @@ export default class Blueprint extends EventEmitter {
     tiles: Map<string, string>
     version: number
     entityPositionGrid: PositionGrid
-    entities: EntityCollection
+    entities: OurMap<number, Entity>
 
     private m_next_entity_number = 1
 
@@ -63,7 +59,7 @@ export default class Blueprint extends EventEmitter {
         this.name = 'Blueprint'
         this.icons = []
         this.version = 68722819072
-        this.entities = new EntityCollection()
+        this.entities = new OurMap()
         this.tiles = new Map()
         this.entityPositionGrid = new PositionGrid(this)
 
@@ -97,13 +93,16 @@ export default class Blueprint extends EventEmitter {
 
                 History.startTransaction()
 
-                this.entities = new EntityCollection(data.entities.map(e => this.createEntity({
-                    ...e,
-                    position: {
-                        x: e.position.x + offset.x,
-                        y: e.position.y + offset.y
-                    }
-                })))
+                this.entities = new OurMap(
+                    data.entities.map(e => this.createEntity({
+                        ...e,
+                        position: {
+                            x: e.position.x + offset.x,
+                            y: e.position.y + offset.y
+                        }
+                    })),
+                    e => e.entity_number
+                )
 
                 History.commitTransaction()
             }
@@ -357,7 +356,7 @@ export default class Blueprint extends EventEmitter {
     }
 
     getEntitiesForExport() {
-        const entityInfo = this.entities.getRawEntities()
+        const entityInfo = Array.from(this.entities.values()).map(e => e.getRawData())
         let entitiesJSON = JSON.stringify(entityInfo)
 
         // Tag changed ids with !
