@@ -5,6 +5,7 @@ import Blueprint from './blueprint'
 import spriteDataBuilder from './spriteDataBuilder'
 import { Area } from './positionGrid'
 import * as History from './history'
+import U from './generators/util'
 
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
 
@@ -72,6 +73,13 @@ export default class Entity extends EventEmitter {
 
         if (!this.m_BP.entityPositionGrid.canMoveTo(this, position)) return
 
+        // Restrict movement of connected entities
+        if (
+            !this.connections
+                .map(c => this.m_BP.entities.get(c.entity_number_2))
+                .every(e => U.pointInCircle(e.position, position, Math.min(e.maxWireDistance, this.maxWireDistance)))
+        ) return
+
         History
             .updateValue(this.m_rawEntity, ['position'], position, `Changed position to 'x: ${Math.floor(position.x)}, y: ${Math.floor(position.y)}'`)
             .emit((newValue, oldValue) => {
@@ -80,6 +88,12 @@ export default class Entity extends EventEmitter {
                 this.emit('position', newValue, oldValue)
             })
             .commit()
+    }
+
+    get maxWireDistance() {
+        return this.entityData.circuit_wire_max_distance
+            || this.entityData.wire_max_distance
+            || this.entityData.maximum_wire_distance
     }
 
     moveBy(offset: IPoint) {
