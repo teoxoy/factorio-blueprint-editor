@@ -34,6 +34,7 @@
             "members"
         ],
         "no-default-export": false,
+        "no-default-import": false,
         "cyclomatic-complexity": false,
         "binary-expression-operand-order": false,
         "one-variable-per-declaration": [true, "ignore-for-loop"],
@@ -123,6 +124,7 @@
         "no-submodule-imports": false,
         "no-reference": false,
         "no-bitwise": false,
-        "no-void-expression": [true, "ignore-arrow-function-shorthand"]
+        "no-void-expression": [true, "ignore-arrow-function-shorthand"],
+        "increment-decrement": [true, "allow-post"]
     }
 }
