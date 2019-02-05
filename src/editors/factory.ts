@@ -5,6 +5,7 @@ import MachineEditor from './machine'
 import MiningEditor from './mining'
 import SplitterEditor from './splitter'
 import ChestEditor from './chest'
+import TempEditor from './temp'
 import Entity from '../factorio-data/entity'
 
 /**
@@ -61,6 +62,16 @@ export function createEditor(entity: Entity): Editor {
             editor = new ChestEditor(entity)
             break
         }
+        // Temp
+        case 'lab':
+        case 'electric_furnace':
+        case 'pumpjack':
+        case 'oil_refinery':
+        case 'chemical_plant':
+        case 'centrifuge':
+        case 'rocket_silo':
+            editor = new TempEditor(entity)
+            break
         default: {
             return undefined
         }
