@@ -5,7 +5,7 @@ import Dialog from '../controls/dialog'
 export class InfoContainer extends Dialog {
 
     constructor() {
-        super(32 * 18, 32 * 28)
+        super(580, 900)
 
         const text = new PIXI.Text('KEYBINDS', {
             fill: G.colors.text.normal,
@@ -33,9 +33,9 @@ export class InfoContainer extends Dialog {
         this.writeColumn([
             '',
             'left click',
-            'middle click',
             'right click',
-            'R',
+            'arrow keys',
+            '(shift +) R',
             'Q',
             '',
             'left click recipe / module',
@@ -53,14 +53,16 @@ export class InfoContainer extends Dialog {
             'W / A / S / D',
             'click + drag in blueprint area',
             'mouse wheel',
-            '[ / ]'
+            '[ / ]',
+            '(shift +) 1-5',
+            'x'
         ], { x: this.width / 2 - 4, y: 40 }, 1)
 
         this.writeColumn([
             '',
             'open editor window',
-            'move',
             'remove',
+            'move',
             'rotate',
             'pippete tool / clear cursor',
             '',
@@ -79,22 +81,22 @@ export class InfoContainer extends Dialog {
             'move',
             'move',
             'zoom in / out',
-            'decrease / increase tile area'
+            'decrease / increase tile area',
+            'select quickbar item',
+            'change active quickbar row'
         ], { x: this.width / 2 + 4, y: 40 })
 
         this.writeColumn([
+            'All keybinds can be changed in the settings pannel and are saved in localStorage.',
             'You can load a blueprint from a BP string, pastebin, hastebin, gist, gitlab,',
             '    factorioprints, google docs or text webpages.',
             'Avalible url query parameters:',
             '        source=<BPSTRING_OR_URL_TO_BPSTRING>',
             '        index=<INDEX_OF_BP_IN_BOOK>',
             '        renderOnly',
-            'Keybinds can be changed in the settings pannel and are saved in localStorage.',
             'I don\'t show network or parsing errors in the app yet, you can open the console',
-            '    (F12) to check if something is wrong.',
-            'Entities with placeable-off-grid flag will not be added to the positionGrid',
-            '    (ex. landmine).'
-        ], { x: 4, y: 520 })
+            '    (F12) to check if something is wrong.'
+        ], { x: 4, y: 550 })
 
         this.writeColumn([
             'Please leave your suggestions, ideas, new features or bug reports',
