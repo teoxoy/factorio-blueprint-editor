@@ -1,6 +1,6 @@
 import G from '../../common/globals'
 import util from '../../common/util'
-import { EntityContainer } from '../../containers/entity'
+import { EntitySprite } from '../../entitySprite'
 import { OverlayContainer } from '../../containers/overlay'
 import Entity from '../../factorio-data/entity'
 
@@ -52,7 +52,7 @@ export default class Preview extends PIXI.Container {
     private generatePreview(): PIXI.Container {
         // Add all entity parts to a separate container
         const entityParts: PIXI.Container = new PIXI.Container()
-        EntityContainer.getParts(this.m_Entity, G.hr, true).forEach(s => entityParts.addChild(s))
+        EntitySprite.getParts(this.m_Entity, G.hr, true).forEach(s => entityParts.addChild(s))
         this.addChild(entityParts)
 
         const actualSpriteSize = { x: this.m_Entity.size.x, y: this.m_Entity.size.y }

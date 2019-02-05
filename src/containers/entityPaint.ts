@@ -5,6 +5,7 @@ import { EntityContainer } from './entity'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
 import { InventoryContainer } from '../panels/inventory'
+import { EntitySprite } from '../entitySprite'
 
 export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
@@ -145,7 +146,7 @@ export class EntityPaintContainer extends PIXI.Container {
 
     redraw() {
         this.removeChildren()
-        this.addChild(...EntityContainer.getParts({
+        this.addChild(...EntitySprite.getParts({
             name: this.name,
             direction: this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
             directionType: this.directionType

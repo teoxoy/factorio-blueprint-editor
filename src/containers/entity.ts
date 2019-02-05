@@ -1,6 +1,5 @@
 import G from '../common/globals'
 import FD from 'factorio-data'
-import spriteDataBuilder from '../factorio-data/spriteDataBuilder'
 import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
@@ -72,60 +71,6 @@ export class EntityContainer extends PIXI.Container {
             newPos.y - size.y / 2 < 0 ||
             newPos.x + size.x / 2 > G.bpArea.width ||
             newPos.y + size.y / 2 > G.bpArea.height
-    }
-
-    static getParts(entity: Entity, hr: boolean, ignore_connections?: boolean): EntitySprite[] {
-
-        const anims = spriteDataBuilder.getSpriteData({
-            hr,
-            dir: entity.type === 'electric_pole' ? G.BPC.wiresContainer.getPowerPoleDirection(entity) : entity.direction,
-
-            name: entity.name,
-            bp: ignore_connections ? undefined : G.bp,
-            position: entity.position,
-            hasConnections: entity.hasConnections,
-
-            dirType: entity.directionType,
-            operator: entity.operator,
-            assemblerCraftsWithFluid: entity.assemblerCraftsWithFluid,
-            assemblerPipeDirection: entity.assemblerPipeDirection,
-            trainStopColor: entity.trainStopColor,
-            chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput
-        })
-
-        // const icon = new PIXI.Sprite(G.iconSprites['icon:' + FD.entities[entity.name].icon.split(':')[1]])
-        // icon.x -= 16
-        // icon.y -= 16
-        // return [icon]
-
-        const parts: EntitySprite[] = []
-        for (let i = 0, l = anims.length; i < l; i++) {
-            const img = new EntitySprite(anims[i])
-            if (anims[i].filename.includes('circuit-connector')) {
-                img.zIndex = 1
-            } else if (entity.name === 'artillery_turret' && i > 0) {
-                img.zIndex = 2
-            } else if ((entity.name === 'rail_signal' || entity.name === 'rail_chain_signal') && i === 0) {
-                img.zIndex = -8
-            } else if (entity.name === 'straight_rail' || entity.name === 'curved_rail') {
-                if (i < 2) {
-                    img.zIndex = -10
-                } else if (i < 4) {
-                    img.zIndex = -9
-                } else {
-                    img.zIndex = -7
-                }
-            } else if (entity.type === 'transport_belt' || entity.name === 'heat_pipe') {
-                img.zIndex = i === 0 ? -6 : -5
-            } else {
-                img.zIndex = 0
-            }
-            img.zOrder = i
-
-            parts.push(img)
-        }
-
-        return parts
     }
 
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
@@ -295,7 +240,7 @@ export class EntityContainer extends PIXI.Container {
     redraw(ignore_connections?: boolean, sort = true) {
         for (const s of this.entitySprites) s.destroy()
         this.entitySprites = []
-        for (const s of EntityContainer.getParts(this.m_Entity, G.hr, ignore_connections)) {
+        for (const s of EntitySprite.getParts(this.m_Entity, G.hr, ignore_connections)) {
             s.setPosition(this.position)
             this.entitySprites.push(s)
             G.BPC.entitySprites.addChild(s)
