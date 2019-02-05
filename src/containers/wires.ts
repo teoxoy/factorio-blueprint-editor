@@ -140,7 +140,6 @@ export class WiresContainer extends PIXI.Container {
     }
 
     getPowerPoleDirection(entity: Entity) {
-        if (!this.entNrToConnectedEntNrs) this.updatePassiveWires()
         if (!this.entNrToConnectedEntNrs) return 0
         const entNrArr = this.entNrToConnectedEntNrs.get(entity.entity_number)
         if (!entNrArr) return 0
