@@ -361,14 +361,16 @@ export default class Entity extends EventEmitter {
         //     if (equal) return
         // }
 
-        if (filters !== undefined &&
+        const FILTERS = filters.filter(f => f.name)
+
+        if (FILTERS !== undefined &&
             this.m_rawEntity.request_filters !== undefined &&
-            this.m_rawEntity.request_filters.length === filters.length &&
-            this.m_rawEntity.request_filters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
+            this.m_rawEntity.request_filters.length === FILTERS.length &&
+            this.m_rawEntity.request_filters.every((filter, i) => util.areObjectsEquivalent(filter, FILTERS[i]))
         ) return
 
         History
-            .updateValue(this.m_rawEntity, ['request_filters'], filters, `Changed chest filter${this.filterSlots === 1 ? '' : 's'}`)
+            .updateValue(this.m_rawEntity, ['request_filters'], FILTERS, `Changed chest filter${this.filterSlots === 1 ? '' : 's'}`)
             .emit(() => this.emit('logisticChestFilters'))
             .emit(() => this.emit('filters'))
             .commit()
