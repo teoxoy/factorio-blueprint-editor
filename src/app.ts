@@ -6,7 +6,7 @@ if (module.hot) module.hot.dispose(() => { window.location.reload(); throw new E
 import './style.styl'
 
 import * as PIXI from 'pixi.js'
-
+console.log(PIXI)
 import { Book } from './factorio-data/book'
 import bpString from './factorio-data/bpString'
 
@@ -55,9 +55,15 @@ for (const p of params) {
 const { guiBPIndex } = initDatGui()
 initDoorbell()
 
+PIXI.settings.MIPMAP_TEXTURES = true
+PIXI.settings.ROUND_PIXELS = true
+PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
+// PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
+// PIXI.settings.GC_MODE = PIXI.GC_MODES.MANUAL
+PIXI.GRAPHICS_CURVES.adaptive = true
+
 G.app = new PIXI.Application({
-    resolution: window.devicePixelRatio,
-    roundPixels: true
+    resolution: window.devicePixelRatio
     // antialias: true
 })
 
@@ -65,7 +71,6 @@ G.app = new PIXI.Application({
 // G.app.renderer.plugins.interaction.moveWhenInside = true
 // G.app.renderer.plugins.interaction.interactionFrequency = 1
 
-G.app.renderer.autoResize = true
 G.app.renderer.resize(window.innerWidth, window.innerHeight)
 window.addEventListener('resize', () => {
     G.app.renderer.resize(window.innerWidth, window.innerHeight)
@@ -74,11 +79,6 @@ window.addEventListener('resize', () => {
     G.BPC.updateViewportCulling()
 }, false)
 document.body.appendChild(G.app.view)
-
-PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
-// PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
-// PIXI.settings.GC_MODE = PIXI.GC_MODES.MANUAL
-PIXI.Graphics.CURVES.adaptive = true
 
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)

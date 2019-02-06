@@ -129,7 +129,7 @@ export class UnderlayContainer extends PIXI.Container {
             aV.alpha = alpha
             if (position) {
                 aV.visible = false
-                aV.position.copy(position)
+                aV.position.copyFrom(position)
             }
             return aV
         }

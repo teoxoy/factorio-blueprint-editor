@@ -22,14 +22,14 @@ export class InventoryContainer extends Dialog {
         if (!item) item = FD.inventoryLayout.find(g => g.name === itemName)
 
         if (item.icon !== undefined) {
-            const icon = PIXI.Sprite.fromFrame(item.icon)
+            const icon = PIXI.Sprite.from(item.icon)
             if (setAnchor) icon.anchor.set(0.5, 0.5)
             return icon
         }
         if (item.icons !== undefined) {
             const img = new PIXI.Container()
             for (const icon of item.icons) {
-                const sprite = PIXI.Sprite.fromFrame(icon.icon)
+                const sprite = PIXI.Sprite.from(icon.icon)
                 if (icon.scale) sprite.scale.set(icon.scale, icon.scale)
                 if (icon.shift) sprite.position.set(icon.shift[0], icon.shift[1])
                 if (icon.tint) {

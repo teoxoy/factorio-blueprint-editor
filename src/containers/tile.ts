@@ -5,7 +5,7 @@ import Tile from '../factorio-data/tile'
 export class TileContainer extends PIXI.Container {
 
     static generateSprite(name: string, position: IPoint) {
-        // TODO: maybe optimize this with PIXI.extras.TilingSprite and masks
+        // TODO: maybe optimize this with PIXI.TilingSprite and masks
         const X = Math.floor(position.x) % 8
         const Y = Math.floor(position.y) % 8
         const textureKey = `${name}-${X}-${Y}`
@@ -14,7 +14,7 @@ export class TileContainer extends PIXI.Container {
             const filename = name === 'stone_path' ? 'graphics/terrain/stone-path/stone-path.png' :
                 FD.tiles[name].variants.material_background.hr_version.picture
 
-            const spriteData = PIXI.Texture.fromFrame(filename)
+            const spriteData = PIXI.Texture.from(filename)
             texture = new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
                 spriteData.frame.x + X * 64,
                 spriteData.frame.y + Y * 64,

@@ -96,7 +96,7 @@ export class EntitySprite extends PIXI.Sprite {
         const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${data.height / data.divH}`
         let texture = PIXI.utils.TextureCache[textureKey]
         if (!texture) {
-            const spriteData = PIXI.Texture.fromFrame(data.filename)
+            const spriteData = PIXI.Texture.from(data.filename)
             texture = new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
                 spriteData.frame.x + data.x,
                 spriteData.frame.y + data.y,

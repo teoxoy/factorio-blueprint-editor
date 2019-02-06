@@ -54,9 +54,9 @@ function loadSpritesheet(src: string, json: any) {
             tempCanvas.width = util.nearestPowerOf2(image.width)
             tempCanvas.height = util.nearestPowerOf2(image.height)
             tempCanvas.getContext('2d').drawImage(image, 0, 0)
-            const baseTexture = PIXI.BaseTexture.fromCanvas(tempCanvas)
-            new PIXI.Spritesheet(baseTexture, json)
-                .parse(() => G.app.renderer.plugins.prepare.upload(baseTexture, resolve))
+            const baseTexture = new PIXI.BaseTexture(tempCanvas)
+            // G.app.renderer.plugins.prepare.upload(baseTexture, () =>
+                new PIXI.Spritesheet(baseTexture, json).parse(resolve)//)
         }
         image.onerror = reject
     })

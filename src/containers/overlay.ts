@@ -292,7 +292,7 @@ export class OverlayContainer extends PIXI.Container {
 
         function createIconWithBackground(container: PIXI.Container, itemName: string, position?: IPoint) {
             const icon = InventoryContainer.createIcon(itemName)
-            const background = PIXI.Sprite.fromFrame('graphics/entity-info-dark-background.png')
+            const background = PIXI.Sprite.from('graphics/entity-info-dark-background.png')
             background.anchor.set(0.5, 0.5)
             if (position) {
                 icon.position.set(position.x , position.y)
@@ -306,7 +306,7 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         function createArrow(position: IPoint, type = 0) {
-            const arrow = PIXI.Sprite.fromFrame('graphics/arrows/' +
+            const arrow = PIXI.Sprite.from('graphics/arrows/' +
                 (type === 0 ? 'indication-arrow.png' : (type === 1 ? 'fluid-indication-arrow.png' : 'fluid-indication-arrow-both-ways.png'))
             )
             arrow.anchor.set(0.5, 0.5)
@@ -322,7 +322,7 @@ export class OverlayContainer extends PIXI.Container {
     updateCursorBoxSize(width: number, height: number) {
         this.cursorBox.removeChildren()
         if (width === 1 && height === 1) {
-            const spriteData = PIXI.Texture.fromFrame('graphics/cursor-boxes-32x32.png')
+            const spriteData = PIXI.Texture.from('graphics/cursor-boxes-32x32.png')
             const frame = spriteData.frame.clone()
             frame.width = 64
             const s = new PIXI.Sprite(new PIXI.Texture(spriteData.baseTexture, frame))
@@ -342,7 +342,7 @@ export class OverlayContainer extends PIXI.Container {
             return 0
         }
         function createCorners(spriteName: string, offset: number) {
-            const spriteData = PIXI.Texture.fromFrame(spriteName)
+            const spriteData = PIXI.Texture.from(spriteName)
             const frame = spriteData.frame.clone()
             frame.x += offset
             frame.width = 63
@@ -391,7 +391,7 @@ export class OverlayContainer extends PIXI.Container {
                     Math.abs(oE.position.x - position.x)
                 const sign = searchDirection === 0 || searchDirection === 6 ? -1 : 1
                 for (let i = 1; i < distance; i++) {
-                    const spriteData = PIXI.Texture.fromFrame('graphics/arrows/underground-lines.png')
+                    const spriteData = PIXI.Texture.from('graphics/arrows/underground-lines.png')
                     const frame = spriteData.frame.clone()
                     frame.x += name === 'pipe_to_ground' ? 0 : 64
                     frame.width = 64

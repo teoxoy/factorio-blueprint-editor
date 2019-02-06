@@ -13,10 +13,11 @@ import FD from 'factorio-data'
 import actions from '../actions'
 import Entity from '../factorio-data/entity'
 import Tile from '../factorio-data/tile'
+import { BaseTexture, RenderTexture, BaseRenderTexture } from 'pixi.js';
 
 export class BlueprintContainer extends PIXI.Container {
 
-    grid: PIXI.extras.TilingSprite
+    grid: PIXI.TilingSprite
     wiresContainer: WiresContainer
     overlayContainer: OverlayContainer
     underlayContainer: UnderlayContainer
@@ -129,8 +130,30 @@ export class BlueprintContainer extends PIXI.Container {
             : new PIXI.Graphics()
                 .beginFill(0x808080).drawRect(0, 0, 32, 32).endFill()
                 .beginFill(0xFFFFFF).drawRect(1, 1, 31, 31).endFill()
+        // const tex = PIXI.Texture.WHITE
+        // tex.width = 32
+        // tex.height = 32
+        // tex.tint
+        // console.log(gridGraphics.)
 
-        const grid = new PIXI.extras.TilingSprite(gridGraphics.generateCanvasTexture(), G.sizeBPContainer.width, G.sizeBPContainer.height)
+        const src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAABG2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIi8+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgo8P3hwYWNrZXQgZW5kPSJyIj8+Gkqr6gAAAYJpQ0NQc1JHQiBJRUM2MTk2Ni0yLjEAACiRdZG5S0NBEIe/JF5oJEIsFCyCRCsjUSFoYxHxArVIIng1ycsl5Hi8FxGxFWwDCqKNV6F/gbaCtSAoiiA2NtaKNhqe85JAgphZZufb3+4Mu7NgDaWUtF7nhXQmpwUm/a6FxSVX4ytWGnDSSXdY0dXZ4ESImvb1gMWMdx6zVu1z/1pLNKYrYGkSHlVULSc8JTyznlNN3hVuV5LhqPC5cJ8mFxS+N/VIid9MTpT4x2QtFBgDa5uwK1HFkSpWklpaWF6OO51aU8r3MV9ij2XmgxK7xbvQCTCJHxfTjDOGjwFGZPbhYZB+WVEj31vMnyMruYrMKhtorJIgSY4+UdekekxiXPSYjBQbZv//9lWPDw2Wqtv9UP9iGB890LgDhbxhfB8bRuEEbM9wlankZ49g+FP0fEVzH4JjCy6uK1pkDy63oeNJDWvhomQTt8bj8H4GrYvgvIXm5VLPyvucPkJoU77qBvYPoFfOO1Z+AUpSZ9kXwTqoAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAKklEQVRIie3NQQEAAATAQHQVUjsl+N0C7HK647N6vQMAAAAAAAAAAIDDFuLrAcPgTSXJAAAAAElFTkSuQmCC'
+
+        const texture = PIXI.RenderTexture.create({
+            width: gridGraphics.width,
+            height: gridGraphics.height
+        })
+        // texture.baseTexture.mipmap = true
+        console.log(PIXI.Texture.WHITE, texture)
+        G.app.renderer.render(gridGraphics, texture)
+        console.log(gridGraphics.geometry, gridGraphics.geometry.getAttribute('aColor'))
+        // console.log(PIXI.Texture.fromBuffer())
+
+        const grid = new PIXI.TilingSprite(
+            texture,
+            G.sizeBPContainer.width,
+            G.sizeBPContainer.height
+        )
+        grid.cacheAsBitmap = true
 
         grid.interactive = false
         G.colors.addSpriteForAutomaticTintChange(grid)

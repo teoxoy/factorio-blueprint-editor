@@ -182,7 +182,7 @@ export class EntityPaintContainer extends PIXI.Container {
         G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
         this.updateUndergroundLines()
 
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copyFrom(this.position))
 
         this.checkBuildable()
     }

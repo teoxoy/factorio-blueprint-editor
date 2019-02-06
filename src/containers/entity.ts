@@ -144,7 +144,7 @@ export class EntityContainer extends PIXI.Container {
             this.updateUndergroundLines()
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity)
-            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
+            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copyFrom(this.position))
         })
 
         this.m_Entity.on('destroy', () => {
