@@ -30,13 +30,13 @@ export default class Dialog extends Panel {
         return Dialog.s_openDialogs.length > 0
     }
 
+    /** Stores all open dialogs */
+    protected static s_openDialogs: Dialog[] = []
+
     /** Capitalize String */
     protected static capitalize(text: string): string {
         return text.split('_').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
     }
-
-    /** Stores all open dialogs */
-    private static s_openDialogs: Dialog[] = []
 
     constructor(width: number, height: number, title?: string) {
         super(width, height,

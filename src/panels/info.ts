@@ -4,6 +4,12 @@ import Dialog from '../controls/dialog'
 /** Info Dialog will be displayed to user to show important information about Factorio Blueprint Editor */
 export class InfoContainer extends Dialog {
 
+    static toggle() {
+        const wasOpen = Dialog.s_openDialogs[0] instanceof InfoContainer
+        Dialog.closeAll()
+        if (!wasOpen) new InfoContainer().show()
+    }
+
     constructor() {
         super(580, 900)
 

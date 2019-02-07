@@ -231,8 +231,7 @@ actions.showInfo.bind(() => {
 })
 
 actions.info.bind(() => {
-    Dialog.closeAll()
-    new InfoContainer().show()
+    InfoContainer.toggle()
 })
 
 actions.closeWindow.bind(() => {
