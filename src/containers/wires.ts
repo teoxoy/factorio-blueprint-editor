@@ -290,6 +290,13 @@ export class WiresContainer extends PIXI.Container {
                 // redraw to update direction
                 ec.redraw()
 
+                // redraw red and green connections if needed
+                if (ec.entity.hasConnections) {
+                    const connections = ec.entity.connections
+                    connections.forEach(c => this.remove(c))
+                    this.add(connections)
+                }
+
                 // redraw connected wires
                 if (this.entNrToConnectedEntNrs.get(entNr)) {
                     this.entNrToConnectedEntNrs.get(entNr)
