@@ -66,19 +66,6 @@ canvas
 #doorbell-submit-button
     box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5)
 
-#doorbell-button
-    z-index: 5
-    right: 0
-    bottom: 35px
-    height: 35px
-    width: 100px
-    font-family: 'Cookie', cursive
-    font-size: 22px
-    letter-spacing: 0.6px
-    line-height: 36px
-    border-radius: 5px 0 0 0
-    padding: 1px 9px
-
 #doorbell-form
     box-shadow: none !important
     border: 0
@@ -104,37 +91,50 @@ canvas
             transform: scale(1.05)
             box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5)
 
+#doorbell-button
+    bottom: 70px
+    width: 90px
+
+#github-button
+    bottom: 35px
+    width: 100px
+    background-color: #777777
+    span
+        margin-right: 5px
+    svg
+        margin-top: 3px
+        height: 22px
+
 #bmc-button
-    z-index: 5
-    position: absolute
     bottom: 0
-    right: 0
     width: 110px
-    line-height: 36px
-    height: 35px
-    text-decoration: none
-    display: inline-flex
-    color: #ffffff
     background-color: #FF813F
+    svg
+        margin-top: 3px
+
+#doorbell-button
+#bmc-button
+#github-button
+    position: absolute
+    z-index: 5
+    right: 0
+    height: 35px
+    display: flex
+    justify-content: center
+    vertical-align: middle
+    box-sizing: border-box
     border-radius: 5px 0 0 0
-    border: 1px solid transparent
-    padding: 1px 9px
+    padding: 4px 8px
+    color: #ffffff
+    font-family: 'Cookie', cursive
     font-size: 22px
     letter-spacing: 0.6px
-    margin: 0 auto
-    font-family: 'Cookie', cursive
-    box-sizing: border-box
+    line-height: 32px
+    text-decoration: none
+
+#bmc-button
+#github-button
     transition: 0.3s all linear
-
-    span
-        margin-right: 3px
-
-    img
-        width: 27px
-        margin-bottom: 1px
-        box-shadow: none
-        border: none
-        vertical-align: middle
 
     &:hover
     &:active
