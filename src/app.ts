@@ -149,6 +149,9 @@ function loadBp(bp: string, clearData = true) {
 
             if (clearData) G.BPC.clearData()
             G.BPC.initBP()
+
+            Dialog.closeAll()
+
             console.log('Loaded BP String')
         })
         .catch(error => console.error(error))
