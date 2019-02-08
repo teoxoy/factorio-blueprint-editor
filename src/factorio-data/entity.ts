@@ -456,8 +456,8 @@ export default class Entity extends EventEmitter {
     }
 
     removeConnection(connection: IConnection) {
-        // Power poles don't have any internal connections, so we only have to fire the emit
-        if (this.type === 'electric_pole') {
+        // If power pole doesn't have connections, we only have to fire the emit
+        if (this.type === 'electric_pole' && !this.m_rawEntity.connections) {
             // Hack to get emit working
             History.updateValue(this.m_rawEntity, ['entity_number'], this.entity_number)
                 .emit(emitOnRemove.bind(this))
@@ -504,6 +504,7 @@ export default class Entity extends EventEmitter {
     }
 
     removeAllConnections() {
+        console.log(this.m_rawEntity.connections[1])
         this.connections.forEach(conn =>
             this.m_BP.entities.get(conn.entity_number_2).removeConnection(conn))
 
