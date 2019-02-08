@@ -504,7 +504,6 @@ export default class Entity extends EventEmitter {
     }
 
     removeAllConnections() {
-        console.log(this.m_rawEntity.connections[1])
         this.connections.forEach(conn =>
             this.m_BP.entities.get(conn.entity_number_2).removeConnection(conn))
 
