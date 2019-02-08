@@ -383,7 +383,7 @@ export default class Blueprint extends EventEmitter {
         if (!this.entities.isEmpty()) {
             const iconNames = Array.from(Array.from(this.entities)
                 .reduce((map, [_, entity]) => {
-                    // minable result is the icon namee
+                    // minable result is the icon name
                     const itemName = FD.entities[entity.name].minable.result
                     return map.set(itemName, map.has(itemName) ? (map.get(itemName) + 1) : 0)
                 }, new Map()))
@@ -395,7 +395,7 @@ export default class Blueprint extends EventEmitter {
         } else {
             this.icons[0] = Array.from(Array.from(this.tiles)
                 .reduce((map, [_, tile]) => {
-                    // minable result is the icon namee
+                    // minable result is the icon name
                     const itemName = FD.tiles[tile.name].minable.result
                     return map.set(itemName, map.has(itemName) ? (map.get(itemName) + 1) : 0)
                 }, new Map()))
