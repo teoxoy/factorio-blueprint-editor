@@ -381,25 +381,25 @@ export default class Blueprint extends EventEmitter {
     generateIcons() {
         // TODO: make this behave more like in Factorio
         if (!this.entities.isEmpty()) {
-            const entities: Map<string, number> = new Map()
+            const iconNames = Array.from(Array.from(this.entities)
+                .reduce((map, [_, entity]) => {
+                    // minable result is the icon namee
+                    const itemName = FD.entities[entity.name].minable.result
+                    return map.set(itemName, map.has(itemName) ? (map.get(itemName) + 1) : 0)
+                }, new Map()))
+                .sort((a, b) => b[1] - a[1])
+                .map(kv => kv[0])
 
-            for (const i of [...this.entities.keys()]) {
-                const name = this.entities.get(i).name
-
-                const value = entities.get(name)
-                entities.set(name, value ? (value + 1) : 0)
-            }
-
-            const sortedEntities = [...entities.entries()].sort((a, b) => a[1] - b[1])
-
-            this.icons[0] = sortedEntities[0][0]
-            if (sortedEntities.length > 1) this.icons[1] = sortedEntities[1][0]
+            this.icons[0] = iconNames[0]
+            if (iconNames.length > 1) this.icons[1] = iconNames[1]
         } else {
-            const tileName = Array.from(Array.from(this.tiles)
-                .reduce((map, [_, tile]) => map.set(tile, map.has(tile) ? (map.get(tile) + 1) : 0), new Map()))
+            this.icons[0] = Array.from(Array.from(this.tiles)
+                .reduce((map, [_, tile]) => {
+                    // minable result is the icon namee
+                    const itemName = FD.tiles[tile.name].minable.result
+                    return map.set(itemName, map.has(itemName) ? (map.get(itemName) + 1) : 0)
+                }, new Map()))
                 .sort((a, b) => b[1] - a[1])[0][0]
-
-            this.icons[0] = FD.tiles[tileName].minable.result
         }
     }
 
