@@ -121,7 +121,7 @@ const actions = {
     pasteEntitySettings: new ToggleAction('shift+lclick'),
     openEntityGUI: new Action('lclick'),
     showInfo: new Action('alt'),
-    pippete: new Action('q'),
+    pipette: new Action('q'),
     rotate: new Action('r'),
     reverseRotate: new Action('shift+r'),
     closeWindow: new Action('esc'),

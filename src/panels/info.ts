@@ -70,7 +70,7 @@ export class InfoContainer extends Dialog {
             'remove',
             'move',
             'rotate',
-            'pippete tool / clear cursor',
+            'pipette tool / clear cursor',
             '',
             'choose',
             'remove',
