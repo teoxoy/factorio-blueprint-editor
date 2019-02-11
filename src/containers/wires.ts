@@ -186,7 +186,13 @@ export class WiresContainer extends PIXI.Container {
                 y: e.position.y
             }))
 
-        if (poles.length < 2) return
+        if (poles.length < 2) {
+            this.passiveConnToSprite.forEach((_, hash) => {
+                this.passiveConnToSprite.get(hash).destroy()
+                this.passiveConnToSprite.delete(hash)
+            })
+            return
+        }
 
         const lineHash = (line: Array<{ entity_number: number }>) =>
             `${Math.min(line[0].entity_number, line[1].entity_number)}-${Math.max(line[0].entity_number, line[1].entity_number)}`
