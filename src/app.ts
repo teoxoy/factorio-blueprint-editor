@@ -323,6 +323,14 @@ actions.pan.bind(() => {
     }
 })
 
+actions.zoomIn.bind(() => {
+    G.BPC.zoom(true)
+})
+
+actions.zoomOut.bind(() => {
+    G.BPC.zoom(false)
+})
+
 actions.build.bind(() => {
     if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.placeEntityContainer()

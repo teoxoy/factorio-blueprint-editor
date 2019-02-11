@@ -103,6 +103,8 @@ const actions = {
     redo: new Action('modifier+y'),
     info: new Action('i'),
     pan: new Action('lclick'),
+    zoomIn: new Action('wheelNeg'),
+    zoomOut: new Action('wheelPos'),
     moveEntityUp: new Action('up'),
     moveEntityLeft: new Action('left'),
     moveEntityDown: new Action('down'),
@@ -182,16 +184,30 @@ const actions = {
 
     // Hack for plugging the mouse into keyboardJS
     attachEventsToContainer(stage: PIXI.Container) {
-        stage.on('pointerdown', e => keyboardJS.pressKey(e.data.button + 300, e))
-        stage.on('pointerup', e => keyboardJS.releaseKey(e.data.button + 300, e))
-        stage.on('pointerupoutside', e => keyboardJS.releaseKey(e.data.button + 300, e))
+        stage.on('pointerdown', (e: PIXI.interaction.InteractionEvent) =>
+            keyboardJS.pressKey(e.data.button + 300, e))
+
+        stage.on('pointerup', (e: PIXI.interaction.InteractionEvent) =>
+            keyboardJS.releaseKey(e.data.button + 300, e))
+
+        stage.on('pointerupoutside', (e: PIXI.interaction.InteractionEvent) =>
+            keyboardJS.releaseKey(e.data.button + 300, e))
     }
 }
+
+document.addEventListener('wheel', e => {
+    if (keyboardJS._paused) return
+    e.preventDefault()
+    keyboardJS.pressKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
+    keyboardJS.releaseKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
+}, false)
 
 // Hack for plugging the mouse into keyboardJS
 keyboardJS._locale.bindKeyCode(300, ['lclick'])
 keyboardJS._locale.bindKeyCode(301, ['mclick'])
 keyboardJS._locale.bindKeyCode(302, ['rclick'])
+keyboardJS._locale.bindKeyCode(303, ['wheelNeg'])
+keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
 
 G.gridData.onUpdate(() => {
     if (actions.build.pressed) actions.build.call()

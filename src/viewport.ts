@@ -147,10 +147,10 @@ export class Viewport {
         return this.positionY
     }
 
-    zoomBy(deltaX: number, deltaY: number) {
+    zoomBy(deltaX: number, deltaY?: number) {
         if (Math.sign(deltaX) === 1 && this.origTransform.a > this.maxZoom) return
         this.scaleX += deltaX
-        this.scaleY += deltaY
+        this.scaleY += deltaY === undefined ? deltaX : deltaY
         this.dirty = true
     }
 
