@@ -85,6 +85,7 @@ export default function initDatGui() {
         .name('Debug')
     oilOutpostFolder
         .add(G.oilOutpostSettings, 'PUMPJACK_MODULE', [
+            'none',
             'speed_module_3', 'speed_module_2', 'speed_module',
             'productivity_module_3', 'productivity_module_2', 'productivity_module',
             'effectivity_module_3', 'effectivity_module_2', 'effectivity_module'

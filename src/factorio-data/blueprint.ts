@@ -338,7 +338,7 @@ export default class Blueprint extends EventEmitter {
         GP.pumpjacksToRotate.forEach(p => {
             const entity = this.entities.get(p.entity_number)
             entity.direction = p.direction
-            if (PUMPJACK_MODULE) entity.modules = [PUMPJACK_MODULE, PUMPJACK_MODULE]
+            if (PUMPJACK_MODULE !== 'none') entity.modules = [PUMPJACK_MODULE, PUMPJACK_MODULE]
         })
 
         History.commitTransaction()
