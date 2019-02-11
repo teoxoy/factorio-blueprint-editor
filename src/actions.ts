@@ -91,6 +91,11 @@ class ToggleAction extends Action {
     }
 }
 
+const canvasEl = document.getElementById('editor') as HTMLCanvasElement
+
+// Bind the events on the canvas
+keyboardJS.watch(canvasEl)
+
 // Set the general application keyboard context
 // Needed to have seperate context's for input controls (i.e. Textbox)
 keyboardJS.setContext('app')
@@ -146,7 +151,7 @@ const actions = {
     copyBPString: {
         bind: (pressHandler?: (e: ClipboardEvent) => void) => {
             document.addEventListener('copy', (e: ClipboardEvent) => {
-                if (keyboardJS._paused) return
+                if (document.activeElement !== canvasEl) return
                 e.preventDefault()
                 pressHandler(e)
             })
@@ -156,7 +161,7 @@ const actions = {
     pasteBPString: {
         bind: (pressHandler?: (e: ClipboardEvent) => void) => {
             document.addEventListener('paste', (e: ClipboardEvent) => {
-                if (keyboardJS._paused) return
+                if (document.activeElement !== canvasEl) return
                 e.preventDefault()
                 pressHandler(e)
             })
@@ -177,11 +182,6 @@ const actions = {
         }
     },
 
-    disableOnElementFocus(element: HTMLElement) {
-        element.addEventListener('focus', keyboardJS.pause.bind(keyboardJS))
-        element.addEventListener('blur', keyboardJS.resume.bind(keyboardJS))
-    },
-
     // Hack for plugging the mouse into keyboardJS
     attachEventsToContainer(stage: PIXI.Container) {
         stage.on('pointerdown', (e: PIXI.interaction.InteractionEvent) =>
@@ -195,12 +195,11 @@ const actions = {
     }
 }
 
-document.addEventListener('wheel', e => {
-    if (keyboardJS._paused) return
+canvasEl.addEventListener('wheel', e => {
     e.preventDefault()
     keyboardJS.pressKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
     keyboardJS.releaseKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
-}, false)
+})
 
 // Hack for plugging the mouse into keyboardJS
 keyboardJS._locale.bindKeyCode(300, ['lclick'])
@@ -228,7 +227,7 @@ function loadKeybinds() {
 loadKeybinds()
 
 function saveKeybinds() {
-    const changedKeybinds = {}
+    const changedKeybinds: { [key: string]: string } = {}
     actions.forEachAction((action, actionName) => {
         if (!action.usesDefaultKeyCombo) {
             changedKeybinds[actionName] = action.keyCombo

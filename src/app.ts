@@ -56,6 +56,7 @@ const { guiBPIndex } = initDatGui()
 initDoorbell()
 
 G.app = new PIXI.Application({
+    view: document.getElementById('editor') as HTMLCanvasElement,
     resolution: window.devicePixelRatio,
     roundPixels: true
     // antialias: true
@@ -73,7 +74,6 @@ window.addEventListener('resize', () => {
     G.BPC.viewport.updateTransform()
     G.BPC.updateViewportCulling()
 }, false)
-document.body.appendChild(G.app.view)
 
 PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 // PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST

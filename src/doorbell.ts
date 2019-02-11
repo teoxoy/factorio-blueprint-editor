@@ -1,5 +1,3 @@
-import actions from './actions'
-
 export default function initDoorbell() {
     window.doorbellOptions = {
         id: '9657',
@@ -36,10 +34,6 @@ export default function initDoorbell() {
 
             const fieldset = document.getElementById('doorbell-form').firstElementChild
             fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
-
-            // Disables the controls inside inputs
-            actions.disableOnElementFocus(document.getElementById('doorbell-feedback'))
-            actions.disableOnElementFocus(document.getElementById('doorbell-email'))
         }
     }
 
