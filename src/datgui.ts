@@ -139,10 +139,10 @@ export default function initDatGui() {
         }, 'resetDefaults')
         .name('Reset Defaults')
 
-    // Disables the controls inside inputs
-    for (const el of gui.domElement.getElementsByTagName('input')) {
-        actions.disableOnElementFocus(el)
-    }
+    gui.domElement.style.overflowX = 'hidden'
+    gui.domElement.style.overflowY = 'auto'
+    gui.domElement.style.maxHeight = window.innerHeight + 'px'
+    window.addEventListener('resize', () => gui.domElement.style.maxHeight = window.innerHeight + 'px')
 
     return {
         guiBPIndex
