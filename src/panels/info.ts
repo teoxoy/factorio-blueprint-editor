@@ -30,8 +30,6 @@ export class InfoContainer extends Dialog {
             '',
             '',
             '',
-            'In editor window',
-            '',
             '',
             'Others'
         ], { x: this.width / 2, y: 40 }, 0.5, true)
@@ -44,8 +42,6 @@ export class InfoContainer extends Dialog {
             '(shift +) R',
             'Q',
             '',
-            'left click recipe / module',
-            'right click recipe / module',
             '',
             'ctrl / cmd + Z / Y',
             ['ctrl / cmd + C / V', G.colors.text.accent],
@@ -72,8 +68,6 @@ export class InfoContainer extends Dialog {
             'rotate',
             'pipette tool / clear cursor',
             '',
-            'choose',
-            'remove',
             '',
             'undo / redo changes',
             ['copy / paste BP string', G.colors.text.accent],
