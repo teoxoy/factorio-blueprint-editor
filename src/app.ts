@@ -66,6 +66,24 @@ PIXI.GRAPHICS_CURVES.adaptive = true
 // PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
 // PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 
+function getMonitorRefreshRate(iterations = 10) {
+    return new Promise(resolve => {
+        const results: number[] = []
+        let lastTimestamp = 0
+        let i = 0
+
+        const fn = (timestamp: number) => {
+            results.push(1000 / (timestamp - lastTimestamp))
+            lastTimestamp = timestamp
+            i++
+            if (i < iterations) requestAnimationFrame(fn)
+            else resolve(Math.ceil(Math.max(...results)))
+        }
+        requestAnimationFrame(fn)
+    })
+}
+getMonitorRefreshRate().then((fps: number) => PIXI.settings.TARGET_FPMS = fps / 1000)
+
 G.app = new PIXI.Application({ view: document.getElementById('editor') as HTMLCanvasElement })
 
 // https://github.com/pixijs/pixi.js/issues/3928
@@ -166,7 +184,7 @@ window.addEventListener('unload', () => {
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
-    if (G.currentMouseState === G.mouseStates.PANNING && !actions.movingViaKeyboard) {
+    if (G.currentMouseState === G.mouseStates.PANNING) {
         G.BPC.viewport.translateBy(e.movementX, e.movementY)
         G.BPC.viewport.updateTransform()
         G.BPC.updateViewportCulling()
