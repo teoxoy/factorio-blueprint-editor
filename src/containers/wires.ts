@@ -1,12 +1,9 @@
 import { EntityContainer } from './entity'
 import G from '../common/globals'
-import util from '../common/util'
 import FD from 'factorio-data'
 import U from '../factorio-data/generators/util'
 import Entity from '../factorio-data/entity'
-import { CanvasRenderer } from '@pixi/canvas-renderer'
 import * as PIXI from 'pixi.js'
-console.log(CanvasRenderer)
 
 const hashConn = (conn: IConnection) => {
     const firstE = Math.min(conn.entity_number_1, conn.entity_number_2)
@@ -18,10 +15,11 @@ const hashConn = (conn: IConnection) => {
 
 export class WiresContainer extends PIXI.Container {
 
-    static canvasRenderer = new CanvasRenderer()
-
     static createWire(p1: IPoint, p2: IPoint, color: string) {
         const wire = new PIXI.Graphics()
+
+        const minX = Math.min(p1.x, p2.x)
+        const minY = Math.min(p1.y, p2.y)
 
         const colorMap: { [key: string]: number } = {
             copper: 0xCF7C00,
@@ -30,14 +28,9 @@ export class WiresContainer extends PIXI.Container {
         }
 
         wire.lineStyle(1.5, colorMap[color])
-
-        const minX = Math.min(p1.x, p2.x)
-        const minY = Math.min(p1.y, p2.y)
+        wire.moveTo(p1.x - minX, p1.y - minY)
 
         if (p1.x === p2.x) {
-            wire.lineStyle(3)
-
-            wire.moveTo(p1.x - minX, p1.y - minY)
             wire.lineTo(p2.x - minX, p2.y - minY)
         } else {
             const force = 0.2
@@ -47,33 +40,15 @@ export class WiresContainer extends PIXI.Container {
             const Y = (dY / dX) * X + force * dX
 
             // TODO: make wires smoother, use 2 points instead of 1
-            wire.moveTo(p1.x - minX, p1.y - minY)
             wire.bezierCurveTo(X, Y, X, Y, p2.x - minX, p2.y - minY)
         }
 
-        const s = new PIXI.Sprite(generateCanvasTexture(wire, 2))
-        s.position.set(minX, minY)
-        return s
-
-        // Modified version of generateCanvasTexture, makes the texture a power of 2 so that it generates mipmaps
-        // https://github.com/pixijs/pixi.js/blob/c2bff5c07b5178ff4ca2b3b8ddcfa3e002cf598f/src/core/graphics/Graphics.js#L1268
-        function generateCanvasTexture(graphic: PIXI.Graphics, resolution = 1) {
-            graphic.render()
-            const bounds = graphic.getLocalBounds()
-            const canvasBuffer = PIXI.RenderTexture.create({
-                width: util.nearestPowerOf2(bounds.width),
-                height: util.nearestPowerOf2(bounds.height),
-                resolution
-            })
-            WiresContainer.canvasRenderer.render(graphic, canvasBuffer, true)
-            const baseTexture = new PIXI.BaseTexture(canvasBuffer.baseTexture._canvasRenderTarget.canvas)
-            baseTexture.setResolution(resolution)
-            return new PIXI.Texture(baseTexture)
-        }
+        wire.position.set(minX, minY)
+        return wire
     }
 
-    connectionToSprite: Map<string, PIXI.Sprite>
-    passiveConnToSprite: Map<string, PIXI.Sprite>
+    connectionToSprite: Map<string, PIXI.Graphics>
+    passiveConnToSprite: Map<string, PIXI.Graphics>
     entNrToConnectedEntNrs: Map<number, number[]>
 
     constructor() {

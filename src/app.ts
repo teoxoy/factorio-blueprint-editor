@@ -6,7 +6,7 @@ if (module.hot) module.hot.dispose(() => { window.location.reload(); throw new E
 import './style.styl'
 
 import * as PIXI from 'pixi.js'
-console.log(PIXI)
+
 import { Book } from './factorio-data/book'
 import bpString from './factorio-data/bpString'
 
@@ -55,17 +55,18 @@ for (const p of params) {
 const { guiBPIndex } = initDatGui()
 initDoorbell()
 
-PIXI.settings.MIPMAP_TEXTURES = true
+PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
 PIXI.settings.ROUND_PIXELS = true
-PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
-// PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
-// PIXI.settings.GC_MODE = PIXI.GC_MODES.MANUAL
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
+PIXI.settings.WRAP_MODE = PIXI.WRAP_MODES.REPEAT
+PIXI.settings.RENDER_OPTIONS.antialias = true // for wires
+PIXI.settings.RENDER_OPTIONS.resolution = window.devicePixelRatio
 PIXI.GRAPHICS_CURVES.adaptive = true
+// PIXI.settings.PREFER_ENV = 1
+// PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
+// PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 
-G.app = new PIXI.Application({
-    resolution: window.devicePixelRatio
-    // antialias: true
-})
+G.app = new PIXI.Application()
 
 // https://github.com/pixijs/pixi.js/issues/3928
 // G.app.renderer.plugins.interaction.moveWhenInside = true
@@ -154,7 +155,11 @@ function loadBp(bp: string, clearData = true) {
         .catch(error => console.error(error))
 }
 
-window.addEventListener('unload', () => G.app.destroy(true, true))
+window.addEventListener('unload', () => {
+    G.app.stop()
+    G.app.renderer.textureGC.unload(G.app.stage)
+    G.app.destroy()
+})
 
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
@@ -210,17 +215,18 @@ actions.takePicture.bind(() => {
 
     G.BPC.enableRenderableOnChildren()
     if (G.renderOnly) G.BPC.cacheAsBitmap = false
-    const texture = G.app.renderer.generateTexture(G.BPC)
-    if (G.renderOnly) G.BPC.cacheAsBitmap = true
-    G.BPC.updateViewportCulling()
 
+    const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1)
     texture.frame = G.BPC.getBlueprintBounds()
-    texture._updateUvs()
+    texture.updateUvs()
 
     G.app.renderer.plugins.extract.canvas(new PIXI.Sprite(texture)).toBlob((blob: Blob) => {
         FileSaver.saveAs(blob, G.bp.name + '.png')
         console.log('Saved BP Image')
     })
+
+    if (G.renderOnly) G.BPC.cacheAsBitmap = true
+    G.BPC.updateViewportCulling()
 })
 
 actions.showInfo.bind(() => {

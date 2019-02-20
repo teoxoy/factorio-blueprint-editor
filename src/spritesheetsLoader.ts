@@ -8,6 +8,7 @@ import utilitySpritesheetPNG from 'factorio-data/data/graphics/utilitySpriteshee
 import utilitySpritesheetJSON from 'factorio-data/data/graphics/utilitySpritesheet.json'
 import tilesSpritesheetPNG from 'factorio-data/data/graphics/tileSpritesheet.png'
 import tilesSpritesheetJSON from 'factorio-data/data/graphics/tileSpritesheet.json'
+import * as PIXI from 'pixi.js'
 
 import G from './common/globals'
 import util from './common/util'
@@ -50,13 +51,19 @@ function loadSpritesheet(src: string, json: any) {
         const image = new Image()
         image.src = src
         image.onload = () => {
-            const tempCanvas = document.createElement('canvas')
-            tempCanvas.width = util.nearestPowerOf2(image.width)
-            tempCanvas.height = util.nearestPowerOf2(image.height)
-            tempCanvas.getContext('2d').drawImage(image, 0, 0)
-            const baseTexture = new PIXI.BaseTexture(tempCanvas)
-            // G.app.renderer.plugins.prepare.upload(baseTexture, () =>
-                new PIXI.Spritesheet(baseTexture, json).parse(resolve)//)
+            const getPow2Canvas = () => {
+                const c = document.createElement('canvas')
+                c.width = util.nearestPowerOf2(image.width)
+                c.height = util.nearestPowerOf2(image.height)
+                c.getContext('2d').drawImage(image, 0, 0)
+                return c
+            }
+            // if WebGL1, make the spritesheet a power of 2 so that it generates mipmaps
+            // WebGL2 generates mipmaps even with non pow 2 textures
+            const baseTexture = new PIXI.BaseTexture(G.app.renderer.context.webGLVersion === 1 ? getPow2Canvas() : image)
+            // bind the baseTexture, this will also upload it to the GPU
+            G.app.renderer.texture.bind(baseTexture)
+            new PIXI.Spritesheet(baseTexture, json).parse(resolve)
         }
         image.onerror = reject
     })
