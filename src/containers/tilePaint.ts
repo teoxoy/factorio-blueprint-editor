@@ -4,6 +4,7 @@ import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { TileContainer } from './tile'
 import FD from 'factorio-data'
 import { InventoryContainer } from '../panels/inventory'
+import * as PIXI from 'pixi.js'
 
 export class TilePaintContainer extends PIXI.Container {
 

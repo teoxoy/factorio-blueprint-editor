@@ -3,6 +3,7 @@ import { ToolbarContainer } from '../panels/toolbar'
 import { QuickbarContainer } from '../panels/quickbar'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
+import * as PIXI from 'pixi.js'
 
 // tslint:disable:prefer-const
 

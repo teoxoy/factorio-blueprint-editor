@@ -1,6 +1,7 @@
 import Slot from '../../controls/slot'
 import { InventoryContainer } from '../../panels/inventory'
 import Entity from '../../factorio-data/entity'
+import * as PIXI from 'pixi.js'
 
 /** Module Slots for Entity */
 export default class Modules extends  PIXI.Container {

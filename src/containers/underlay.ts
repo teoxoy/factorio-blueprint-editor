@@ -1,5 +1,6 @@
 import FD from 'factorio-data'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
+import * as PIXI from 'pixi.js'
 
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
 

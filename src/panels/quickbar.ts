@@ -2,6 +2,7 @@ import G from '../common/globals'
 import { InventoryContainer } from './inventory'
 import Panel from '../controls/panel'
 import Slot from '../controls/slot'
+import * as PIXI from 'pixi.js'
 
 export class QuickbarSlot extends Slot {
 

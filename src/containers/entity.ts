@@ -4,6 +4,7 @@ import { EntitySprite } from '../entitySprite'
 import { UnderlayContainer } from './underlay'
 import util from '../common/util'
 import Entity from '../factorio-data/entity'
+import * as PIXI from 'pixi.js'
 
 const updateGroups = [
     {

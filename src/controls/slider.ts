@@ -1,5 +1,6 @@
 import G from '../common/globals'
 import F from '../controls/functions'
+import * as PIXI from 'pixi.js'
 
 /** Slider Control */
 export default class Slider extends PIXI.Container {

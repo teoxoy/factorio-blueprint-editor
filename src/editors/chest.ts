@@ -5,6 +5,7 @@ import Slider from '../controls/slider'
 import Entity from '../factorio-data/entity'
 import Textbox from '../controls/textbox'
 import Checkbox from '../controls/checkbox'
+import * as PIXI from 'pixi.js'
 
 /** Assembly Machines Editor */
 export default class ChestEditor extends Editor {

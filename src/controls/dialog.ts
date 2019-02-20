@@ -1,6 +1,7 @@
 import G from '../common/globals'
 import F from './functions'
 import Panel from './panel'
+import * as PIXI from 'pixi.js'
 
 /**
  * Base Dialog for usage whenever a dialog shall be shown to the user

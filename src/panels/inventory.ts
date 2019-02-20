@@ -4,6 +4,7 @@ import G from '../common/globals'
 import F from '../controls/functions'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'
+import * as PIXI from 'pixi.js'
 
 // TODO: Optimize showing recipe when hovering with mouse over button
 // TODO: Move methods createIcon() and createIconWithAmount() to common functions class

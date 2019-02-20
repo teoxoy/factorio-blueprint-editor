@@ -6,6 +6,7 @@ import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
 import { InventoryContainer } from '../panels/inventory'
 import { EntitySprite } from '../entitySprite'
+import * as PIXI from 'pixi.js'
 
 export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined

@@ -2,6 +2,7 @@ import FD from 'factorio-data'
 import { InventoryContainer } from '../panels/inventory'
 import G from '../common/globals'
 import util from '../common/util'
+import * as PIXI from 'pixi.js'
 
 export class OverlayContainer extends PIXI.Container {
 

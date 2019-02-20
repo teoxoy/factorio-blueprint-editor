@@ -2,6 +2,7 @@ import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import spriteDataBuilder from './factorio-data/spriteDataBuilder'
 import Entity from './factorio-data/entity'
 import G from './common/globals'
+import * as PIXI from 'pixi.js'
 
 interface IEntityData {
     name: string

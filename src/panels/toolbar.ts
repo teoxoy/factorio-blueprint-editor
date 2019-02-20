@@ -1,4 +1,5 @@
 import G from '../common/globals'
+import * as PIXI from 'pixi.js'
 
 export class ToolbarContainer extends PIXI.Container {
 

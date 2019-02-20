@@ -1,6 +1,7 @@
 import G from '../common/globals'
 import F from './functions'
 import keyboardjs from 'keyboardjs'
+import * as PIXI from 'pixi.js'
 
 // TODO: Evaluate enhancement: Posibility to set caret with mouse (prototype commented ou with 'PT')
 // TODO: Evaluate enhancement: Text marking / copy / paste

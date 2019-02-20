@@ -1,4 +1,5 @@
 import G from '../common/globals'
+import * as PIXI from 'pixi.js'
 
 /** Base Checkbox */
 export default class Enable extends PIXI.Container {

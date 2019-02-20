@@ -1,6 +1,7 @@
 import G from '../common/globals'
 import FD from 'factorio-data'
 import Tile from '../factorio-data/tile'
+import * as PIXI from 'pixi.js'
 
 export class TileContainer extends PIXI.Container {
 

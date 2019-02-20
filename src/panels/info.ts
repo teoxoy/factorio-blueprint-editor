@@ -1,5 +1,6 @@
 import G from '../common/globals'
 import Dialog from '../controls/dialog'
+import * as PIXI from 'pixi.js'
 
 /** Info Dialog will be displayed to user to show important information about Factorio Blueprint Editor */
 export class InfoContainer extends Dialog {
