@@ -175,6 +175,12 @@ function loadBp(bp: string, clearData = true) {
         .catch(error => console.error(error))
 }
 
+// If the tab is not active then stop the app
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') G.app.start()
+    else G.app.stop()
+})
+
 window.addEventListener('unload', () => {
     G.app.stop()
     G.app.renderer.textureGC.unload(G.app.stage)
