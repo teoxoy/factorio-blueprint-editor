@@ -74,16 +74,6 @@ export class BlueprintContainer extends PIXI.Container {
         this.overlayContainer = new OverlayContainer()
         this.addChild(this.overlayContainer)
 
-        document.addEventListener('wheel', e => {
-            e.preventDefault()
-            this.viewport.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
-            const z = Math.sign(-e.deltaY) * 0.1
-            this.viewport.zoomBy(z, z)
-            this.viewport.updateTransform()
-            G.gridData.recalculate(this)
-            this.updateViewportCulling()
-        }, false)
-
         G.app.ticker.add(() => {
             if (actions.movingViaKeyboard) {
                 const WSXOR = actions.moveUp.pressed !== actions.moveDown.pressed
@@ -113,6 +103,15 @@ export class BlueprintContainer extends PIXI.Container {
             // Instead of decreasing the global interactionFrequency, call the over and out entity events here
             this.updateHoverContainer()
         })
+    }
+
+    zoom(zoomIn = true) {
+        const zoomFactor = 0.1
+        this.viewport.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
+        this.viewport.zoomBy(zoomFactor * (zoomIn ? 1 : -1))
+        this.viewport.updateTransform()
+        G.gridData.recalculate(this)
+        this.updateViewportCulling()
     }
 
     updateHoverContainer() {

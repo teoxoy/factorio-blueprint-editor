@@ -248,34 +248,23 @@ export default class Entity extends EventEmitter {
         }
     }
     set filters(list: IFilter[]) {
+        const FILTERS = (list === undefined || list.length === 0) ? undefined : list.filter(f => !!f.name)
         switch (this.name) {
             case 'splitter':
             case 'fast_splitter':
             case 'express_splitter': {
-                this.splitterFilter = (list === undefined || list.length !== 1 || list[0].name === undefined) ? undefined : list[0].name
+                this.splitterFilter = FILTERS === undefined ? undefined : FILTERS[0].name
                 return
             }
             case 'filter_inserter':
             case 'stack_filter_inserter': {
-                let filters: Array<{ index: number; name: string }>
-                if (list === undefined || list.length === 0) {
-                    filters = undefined
-                } else {
-                    filters = []
-                    for (const item of list) {
-                        if (item.name === undefined) {
-                            continue
-                        }
-                        filters.push({ index: item.index, name: item.name })
-                    }
-                }
-                this.inserterFilters = filters
+                this.inserterFilters = FILTERS
                 return
             }
             case 'logistic_chest_storage':
             case 'logistic_chest_requester':
             case 'logistic_chest_buffer': {
-                this.logisticChestFilters = (list === undefined || list.length === 0) ? undefined : list
+                this.logisticChestFilters = FILTERS
                 return
             }
         }
@@ -330,6 +319,7 @@ export default class Entity extends EventEmitter {
     /** Inserter filter */
     get inserterFilters(): IFilter[] { return this.m_rawEntity.filters }
     set inserterFilters(filters: IFilter[]) {
+        if (filters === undefined && this.m_rawEntity.filters === undefined) return
         if (filters !== undefined &&
             this.m_rawEntity.filters !== undefined &&
             this.m_rawEntity.filters.length === filters.length &&
@@ -361,6 +351,7 @@ export default class Entity extends EventEmitter {
         //     if (equal) return
         // }
 
+        if (filters === undefined && this.m_rawEntity.request_filters === undefined) return
         if (filters !== undefined &&
             this.m_rawEntity.request_filters !== undefined &&
             this.m_rawEntity.request_filters.length === filters.length &&
@@ -465,8 +456,8 @@ export default class Entity extends EventEmitter {
     }
 
     removeConnection(connection: IConnection) {
-        // Power poles don't have any internal connections, so we only have to fire the emit
-        if (this.type === 'electric_pole') {
+        // If power pole doesn't have connections, we only have to fire the emit
+        if (this.type === 'electric_pole' && !this.m_rawEntity.connections) {
             // Hack to get emit working
             History.updateValue(this.m_rawEntity, ['entity_number'], this.entity_number)
                 .emit(emitOnRemove.bind(this))
@@ -597,18 +588,20 @@ export default class Entity extends EventEmitter {
 
     /** Paste relevant data from source entity */
     pasteSettings(sourceEntity: Entity) {
+        if (sourceEntity.type !== this.type) return
+
         History.startTransaction(`Pasted settings to entity: ${this.type}`)
 
         // PASTE RECIPE
         const aR = this.acceptedRecipes
-        if (aR.length > 0) {
+        if (aR.length > 0 && sourceEntity.acceptedRecipes) {
             this.recipe = sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
         }
 
         // PASTE MODULES
         const aM = this.acceptedModules
-        if (aM.length > 0) {
-            if (sourceEntity.modules.length > 0) {
+        if (aM.length > 0 && sourceEntity.acceptedModules) {
+            if (sourceEntity.modules && sourceEntity.modules.length > 0) {
                 this.modules = sourceEntity.modules
                     .filter(m => aM.includes(m))
                     .slice(0, this.moduleSlots)
@@ -625,8 +618,8 @@ export default class Entity extends EventEmitter {
 
         // PASTE FILTERS
         const aF = this.acceptedFilters
-        if (aF.length > 0) {
-            if (sourceEntity.filters.length > 0) {
+        if (aF.length > 0 && sourceEntity.acceptedFilters) {
+            if (sourceEntity.filters && sourceEntity.filters.length > 0) {
                 this.filters = sourceEntity.filters
                     .filter(f => aF.includes(f.name))
                     .slice(0, this.filterSlots)

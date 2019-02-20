@@ -5,6 +5,12 @@ import * as PIXI from 'pixi.js'
 /** Info Dialog will be displayed to user to show important information about Factorio Blueprint Editor */
 export class InfoContainer extends Dialog {
 
+    static toggle() {
+        const wasOpen = Dialog.s_openDialogs[0] instanceof InfoContainer
+        Dialog.closeAll()
+        if (!wasOpen) new InfoContainer().show()
+    }
+
     constructor() {
         super(580, 900)
 
@@ -25,8 +31,6 @@ export class InfoContainer extends Dialog {
             '',
             '',
             '',
-            'In editor window',
-            '',
             '',
             'Others'
         ], { x: this.width / 2, y: 40 }, 0.5, true)
@@ -39,8 +43,6 @@ export class InfoContainer extends Dialog {
             '(shift +) R',
             'Q',
             '',
-            'left click recipe / module',
-            'right click recipe / module',
             '',
             'ctrl / cmd + Z / Y',
             ['ctrl / cmd + C / V', G.colors.text.accent],
@@ -65,10 +67,8 @@ export class InfoContainer extends Dialog {
             'remove',
             'move',
             'rotate',
-            'pippete tool / clear cursor',
+            'pipette tool / clear cursor',
             '',
-            'choose',
-            'remove',
             '',
             'undo / redo changes',
             ['copy / paste BP string', G.colors.text.accent],

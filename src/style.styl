@@ -1,10 +1,21 @@
 
+// Normalize
+body
+    margin: 0
+
+button
+input
+select
+textarea
+  font-family: inherit
+  font-size: 100%
+  line-height: 1.15
+  margin: 0
+
+
 html
     font-family: 'Roboto', sans-serif
     user-select: none
-
-body
-    margin: 0
 
 #loadingScreen
     position: fixed
@@ -43,11 +54,17 @@ canvas
 #doorbell-submit-button
     background-color: #1E88E5
     border: 0
+    transition: 0.3s all linear
     &:hover
-        background-color: #1976D2
+    &:active
+    &:focus
+        text-decoration: none
+        background: #1E88E5
+        opacity: 0.85
+        color: #ffffff
 
-#doorbell-button
-    z-index: 5
+#doorbell-submit-button
+    box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5)
 
 #doorbell-form
     box-shadow: none !important
@@ -67,9 +84,87 @@ canvas
         cursor: pointer
         border-radius: 4px
         padding: 4px
-        border: 2px solid white
         color: white
+        transition: 0.1s all linear
         &:hover
-            opacity: 0.8
         &.active
-            border: 2px solid black
+            transform: scale(1.05)
+            box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5)
+
+#doorbell-button
+#bmc-button
+#github-button
+#discord-button
+    position: absolute
+    z-index: 5
+    right: 0
+    height: 35px
+    display: flex
+    justify-content: center
+    vertical-align: middle
+    box-sizing: border-box
+    border-radius: 5px 0 0 0
+    padding: 4px 8px
+    color: #ffffff
+    font-family: 'Cookie', cursive
+    font-size: 22px
+    letter-spacing: 0.6px
+    line-height: 32px
+    text-decoration: none
+
+    svg
+        width: 100%
+        height: 100%
+
+#doorbell-button
+    bottom: 105px
+    width: 90px
+
+#github-button
+    bottom: 70px
+    width: 100px
+    background-color: #777777
+    span
+        margin-right: 11px
+    svg
+        margin-top: 3px
+        height: 22px
+
+#bmc-button
+    bottom: 35px
+    width: 110px
+    background-color: #FF813F
+    span
+        margin-right: 6px
+    svg
+        margin-top: 3px
+
+#discord-button
+    bottom: 0
+    width: 120px
+    background-color: #7289DA
+    span
+        margin-right: 2px
+    svg
+        margin-top: 2px
+
+#bmc-button
+#github-button
+#discord-button
+#doorbell-button
+    transition: 0.3s all linear
+
+    &:hover
+    &:active
+    &:focus
+        transform: translateX(-5px)
+        opacity: 0.9
+
+#button-background
+    z-index: 4
+    position: absolute
+    bottom: 0
+    right: 0
+    width: 5px
+    height: 140px
+    background-color: #FFFFFF

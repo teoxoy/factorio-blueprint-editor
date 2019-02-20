@@ -166,7 +166,13 @@ export class WiresContainer extends PIXI.Container {
                 y: e.position.y
             }))
 
-        if (poles.length < 2) return
+        if (poles.length < 2) {
+            this.passiveConnToSprite.forEach((_, hash) => {
+                this.passiveConnToSprite.get(hash).destroy()
+                this.passiveConnToSprite.delete(hash)
+            })
+            return
+        }
 
         const lineHash = (line: Array<{ entity_number: number }>) =>
             `${Math.min(line[0].entity_number, line[1].entity_number)}-${Math.max(line[0].entity_number, line[1].entity_number)}`
@@ -270,12 +276,19 @@ export class WiresContainer extends PIXI.Container {
                 // redraw to update direction
                 ec.redraw()
 
+                // redraw red and green connections if needed
+                if (ec.entity.hasConnections) {
+                    const connections = ec.entity.connections
+                    connections.forEach(c => this.remove(c))
+                    this.add(connections)
+                }
+
                 // redraw connected wires
-                if (this.entNrToConnectedEntNrs.get(entNr)) {
+                if (this.entNrToConnectedEntNrs.has(entNr)) {
                     this.entNrToConnectedEntNrs.get(entNr)
                         .forEach((eNr: number) => {
                             const hash = lineHash([{ entity_number: eNr }, { entity_number: entNr }])
-                            if (this.passiveConnToSprite.get(hash)) {
+                            if (this.passiveConnToSprite.has(hash)) {
                                 removeWire(hash)
                                 addWire(hash)
                             }

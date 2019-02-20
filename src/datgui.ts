@@ -13,6 +13,11 @@ export default function initDatGui() {
         width: 300
     })
 
+    gui.domElement.style.overflowX = 'hidden'
+    gui.domElement.style.overflowY = 'auto'
+    gui.domElement.style.maxHeight = window.innerHeight + 'px'
+    window.addEventListener('resize', () => gui.domElement.style.maxHeight = window.innerHeight + 'px')
+
     window.addEventListener('unload', () => localStorage.setItem('dat.gui.closed', String(gui.closed)))
 
     document.body.appendChild(gui.domElement)
@@ -79,12 +84,16 @@ export default function initDatGui() {
             localStorage.setItem('pattern', val)
         })
 
+    if (localStorage.getItem('oilOutpostSettings')) G.oilOutpostSettings = JSON.parse(localStorage.getItem('oilOutpostSettings'))
+    window.addEventListener('unload', () => localStorage.setItem('oilOutpostSettings', JSON.stringify(G.oilOutpostSettings)))
+
     const oilOutpostFolder = gui.addFolder('Oil Outpost Generator Settings')
     oilOutpostFolder
         .add(G.oilOutpostSettings, 'DEBUG')
         .name('Debug')
     oilOutpostFolder
         .add(G.oilOutpostSettings, 'PUMPJACK_MODULE', [
+            'none',
             'speed_module_3', 'speed_module_2', 'speed_module',
             'productivity_module_3', 'productivity_module_2', 'productivity_module',
             'effectivity_module_3', 'effectivity_module_2', 'effectivity_module'
@@ -137,11 +146,6 @@ export default function initDatGui() {
             resetDefaults: () => actions.forEachAction(action => action.resetKeyCombo())
         }, 'resetDefaults')
         .name('Reset Defaults')
-
-    // Disables the controls inside inputs
-    for (const el of gui.domElement.getElementsByTagName('input')) {
-        actions.disableOnElementFocus(el)
-    }
 
     return {
         guiBPIndex
