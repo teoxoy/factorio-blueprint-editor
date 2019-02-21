@@ -65,7 +65,7 @@ export default class Dialog extends Panel {
     /** Show Dialog */
     public show(): void {
         Dialog.s_openDialogs.push(this)
-        G.app.stage.addChild(this)
+        G.dialogsContainer.addChild(this)
         this.visible = true
     }
 

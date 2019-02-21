@@ -110,6 +110,9 @@ G.app.stage.addChild(G.toolbarContainer)
 G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
 G.app.stage.addChild(G.quickbarContainer)
 
+G.dialogsContainer = new PIXI.Container()
+G.app.stage.addChild(G.dialogsContainer)
+
 Promise.all(
     [
         // Get bp from source
