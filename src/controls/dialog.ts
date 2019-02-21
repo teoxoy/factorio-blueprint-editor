@@ -74,6 +74,7 @@ export default class Dialog extends Panel {
         Dialog.s_openDialogs = Dialog.s_openDialogs
             .filter(d => d !== this)
 
+        this.emit('close')
         this.destroy()
     }
 

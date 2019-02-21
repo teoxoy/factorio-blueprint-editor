@@ -46,7 +46,7 @@ export class EntityPaintContainer extends PIXI.Container {
         this.redraw()
     }
 
-    changeIconPos(e: MouseEvent) {
+    changeIconPos(e: IPoint) {
         this.icon.position.set(e.x + 16, e.y + 16)
     }
 
