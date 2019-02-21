@@ -108,7 +108,6 @@ export class EntitySprite extends PIXI.Sprite {
         }
         super(texture)
 
-        this.interactive = false
         this.id = EntitySprite.nextID++
 
         this.shift = {

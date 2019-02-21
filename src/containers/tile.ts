@@ -35,9 +35,6 @@ export class TileContainer extends PIXI.Container {
     constructor(tile: Tile) {
         super()
 
-        this.interactive = false
-        this.interactiveChildren = false
-
         this.position.set(tile.position.x * 32, tile.position.y * 32)
 
         this.tileSprites = []

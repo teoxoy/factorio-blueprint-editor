@@ -46,16 +46,12 @@ export class BlueprintContainer extends PIXI.Container {
         // this.addChild(this.pgOverlay)
 
         this.tileSprites = new PIXI.Container()
-        this.tileSprites.interactive = false
-        this.tileSprites.interactiveChildren = false
         this.addChild(this.tileSprites)
 
         this.underlayContainer = new UnderlayContainer()
         this.addChild(this.underlayContainer)
 
         this.entitySprites = new PIXI.Container()
-        this.entitySprites.interactive = false
-        this.entitySprites.interactiveChildren = false
         this.addChild(this.entitySprites)
 
         this.tiles = new PIXI.Container()
@@ -144,7 +140,6 @@ export class BlueprintContainer extends PIXI.Container {
             G.sizeBPContainer.height
         )
 
-        grid.interactive = false
         G.colors.addSpriteForAutomaticTintChange(grid)
 
         if (this.grid) {
@@ -206,14 +201,10 @@ export class BlueprintContainer extends PIXI.Container {
         this.paintContainer = undefined
 
         this.tileSprites = new PIXI.Container()
-        this.tileSprites.interactive = false
-        this.tileSprites.interactiveChildren = false
 
         this.underlayContainer = new UnderlayContainer()
 
         this.entitySprites = new PIXI.Container()
-        this.entitySprites.interactive = false
-        this.entitySprites.interactiveChildren = false
 
         this.tiles = new PIXI.Container()
         this.tiles.interactive = false

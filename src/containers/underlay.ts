@@ -60,9 +60,6 @@ export class UnderlayContainer extends PIXI.Container {
     constructor() {
         super()
 
-        this.interactive = false
-        this.interactiveChildren = false
-
         this.active = []
         this.logistics0 = new PIXI.Container()
         this.logistics1 = new PIXI.Container()

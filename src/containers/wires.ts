@@ -54,9 +54,6 @@ export class WiresContainer extends PIXI.Container {
     constructor() {
         super()
 
-        this.interactive = false
-        this.interactiveChildren = false
-
         this.connectionToSprite = new Map()
         this.passiveConnToSprite = new Map()
     }

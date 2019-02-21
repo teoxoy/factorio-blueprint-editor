@@ -13,9 +13,6 @@ export class OverlayContainer extends PIXI.Container {
     constructor() {
         super()
 
-        this.interactive = false
-        this.interactiveChildren = false
-
         this.overlay = new PIXI.Container()
 
         this.cursorBox = new PIXI.Container()
