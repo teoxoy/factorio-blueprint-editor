@@ -98,7 +98,7 @@ export class UnderlayContainer extends PIXI.Container {
         this.active = []
     }
 
-    createNewArea(entityName: string, position?: PIXI.Point | PIXI.ObservablePoint) {
+    createNewArea(entityName: string, position?: IPoint) {
         const aVData = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (aVData) {
             const ed = FD.entities[entityName]
@@ -117,7 +117,7 @@ export class UnderlayContainer extends PIXI.Container {
             }
         }
 
-        function createVisualizationArea(radius: number, color: number, position?: PIXI.Point | PIXI.ObservablePoint, alpha = 0.25) {
+        function createVisualizationArea(radius: number, color: number, position?: IPoint, alpha = 0.25) {
             const aV = new PIXI.Sprite(PIXI.Texture.WHITE)
             const S = radius * 64
             aV.width = S
@@ -127,7 +127,7 @@ export class UnderlayContainer extends PIXI.Container {
             aV.alpha = alpha
             if (position) {
                 aV.visible = false
-                aV.position.copyFrom(position)
+                aV.position.set(position.x, position.y)
             }
             return aV
         }

@@ -15,24 +15,56 @@ import Entity from '../factorio-data/entity'
 import Tile from '../factorio-data/tile'
 import * as PIXI from 'pixi.js'
 
+// This container improves rendering time by around 10-40% and has baked in viewport culling
+class OptimizedContainer extends PIXI.Container {
+    children: EntitySprite[]
+
+    updateTransform() {
+        this._boundsID++
+
+        this.transform.updateTransform(this.parent.transform)
+
+        this.worldAlpha = this.alpha * this.parent.worldAlpha
+
+        for (const c of this.children) {
+            if (c.visible) c.updateTransform()
+        }
+    }
+    render(renderer: PIXI.Renderer) {
+        for (const c of this.children) {
+            // faster than using c.getBounds()
+            const shouldRender = !(
+                (c.cachedBounds[0] * this.worldTransform.a + c.worldTransform.tx) > G.app.screen.width ||
+                (c.cachedBounds[1] * this.worldTransform.d + c.worldTransform.ty) > G.app.screen.height ||
+                (c.cachedBounds[2] * this.worldTransform.a + c.worldTransform.tx) < G.positionBPContainer.x ||
+                (c.cachedBounds[3] * this.worldTransform.d + c.worldTransform.ty) < G.positionBPContainer.y
+            )
+
+            if (shouldRender) c.render(renderer)
+        }
+    }
+}
+
 export class BlueprintContainer extends PIXI.Container {
 
     grid: PIXI.TilingSprite
     wiresContainer: WiresContainer
     overlayContainer: OverlayContainer
     underlayContainer: UnderlayContainer
-    tiles: PIXI.Container
-    entities: PIXI.Container
-    tileSprites: PIXI.Container
-    entitySprites: PIXI.Container
+    tilePaintSlot: PIXI.Container
+    entityPaintSlot: PIXI.Container
+    tileSprites: OptimizedContainer
+    entitySprites: OptimizedContainer
     viewport: Viewport
-    pgOverlay: PIXI.Graphics
     hoverContainer: undefined | EntityContainer
     paintContainer: undefined | EntityPaintContainer | TilePaintContainer
 
     constructor() {
         super()
+
         this.interactive = true
+        this.interactiveChildren = false
+        this.hitArea = new PIXI.Rectangle(0, 0, G.sizeBPContainer.width, G.sizeBPContainer.height)
 
         this.viewport = new Viewport(this, G.sizeBPContainer, G.positionBPContainer, {
             width: G.app.screen.width,
@@ -41,34 +73,18 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.generateGrid(G.colors.pattern)
 
-        this.pgOverlay = new PIXI.Graphics()
-        this.pgOverlay.alpha = 0.2
-        // this.addChild(this.pgOverlay)
-
-        this.tileSprites = new PIXI.Container()
-        this.addChild(this.tileSprites)
-
+        this.tileSprites = new OptimizedContainer()
+        this.tilePaintSlot = new PIXI.Container()
         this.underlayContainer = new UnderlayContainer()
-        this.addChild(this.underlayContainer)
-
-        this.entitySprites = new PIXI.Container()
-        this.addChild(this.entitySprites)
-
-        this.tiles = new PIXI.Container()
-        this.tiles.interactive = false
-        this.tiles.interactiveChildren = true
-        this.addChild(this.tiles)
-
-        this.entities = new PIXI.Container()
-        this.entities.interactive = false
-        this.entities.interactiveChildren = true
-        this.addChild(this.entities)
-
+        this.entitySprites = new OptimizedContainer()
+        this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer()
-        this.addChild(this.wiresContainer)
-
         this.overlayContainer = new OverlayContainer()
-        this.addChild(this.overlayContainer)
+
+        this.addChild(
+            this.tileSprites, this.tilePaintSlot, this.underlayContainer,
+            this.entitySprites, this.entityPaintSlot, this.wiresContainer, this.overlayContainer
+        )
 
         G.app.ticker.add(() => {
             if (actions.movingViaKeyboard) {
@@ -83,8 +99,6 @@ export class BlueprintContainer extends PIXI.Container {
                     this.viewport.updateTransform()
 
                     G.gridData.recalculate(this)
-
-                    this.updateViewportCulling()
                 }
             }
         })
@@ -107,14 +121,32 @@ export class BlueprintContainer extends PIXI.Container {
         this.viewport.zoomBy(zoomFactor * (zoomIn ? 1 : -1))
         this.viewport.updateTransform()
         G.gridData.recalculate(this)
-        this.updateViewportCulling()
     }
 
     updateHoverContainer() {
-        const e = G.app.renderer.plugins.interaction.hitTest(G.gridData._lastMousePos, this.entities)
+        const removeHoverContainer = () => {
+            this.hoverContainer.pointerOutEventHandler()
+            this.hoverContainer = undefined
+            this.cursor = 'inherit'
+        }
+
+        if (this.paintContainer && this.hoverContainer) {
+            removeHoverContainer()
+            return
+        }
+
+        if (!G.bp) return
+        const e = EntityContainer.mappings.get(G.bp.entityPositionGrid.getCellAtPosition(G.gridData))
+
         if (e && this.hoverContainer === e) return
-        if (this.hoverContainer) this.hoverContainer.pointerOutEventHandler()
-        if (e) e.pointerOverEventHandler()
+
+        if (this.hoverContainer) removeHoverContainer()
+
+        if (e && G.currentMouseState === G.mouseStates.NONE) {
+            this.hoverContainer = e
+            this.cursor = 'pointer'
+            e.pointerOverEventHandler()
+        }
     }
 
     generateGrid(pattern: 'checker' | 'grid' = 'checker') {
@@ -174,9 +206,11 @@ export class BlueprintContainer extends PIXI.Container {
 
         G.bp.on('create_t', (tile: Tile) => new TileContainer(tile))
 
+        G.bp.on('create', () => this.updateHoverContainer())
+        G.bp.on('destroy', () => this.updateHoverContainer())
+
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()
-        this.updateOverlay()
         this.centerViewport()
 
         if (G.renderOnly) {
@@ -187,77 +221,57 @@ export class BlueprintContainer extends PIXI.Container {
 
     clearData() {
         const opt = { children: true }
-        this.tiles.destroy(opt)
-        this.entities.destroy(opt)
         this.tileSprites.destroy(opt)
-        this.entitySprites.destroy(opt)
+        this.tilePaintSlot.destroy(opt)
         this.underlayContainer.destroy(opt)
-        this.overlayContainer.destroy(opt)
+        this.entitySprites.destroy(opt)
+        this.entityPaintSlot.destroy(opt)
         this.wiresContainer.destroy(opt)
+        this.overlayContainer.destroy(opt)
 
         this.removeChildren()
+
+        this.cursor = 'inherit'
 
         this.hoverContainer = undefined
         this.paintContainer = undefined
 
-        this.tileSprites = new PIXI.Container()
-
+        this.tileSprites = new OptimizedContainer()
+        this.tilePaintSlot = new PIXI.Container()
         this.underlayContainer = new UnderlayContainer()
-
-        this.entitySprites = new PIXI.Container()
-
-        this.tiles = new PIXI.Container()
-        this.tiles.interactive = false
-        this.tiles.interactiveChildren = true
-
-        this.entities = new PIXI.Container()
-        this.entities.interactive = false
-        this.entities.interactiveChildren = true
-
+        this.entitySprites = new OptimizedContainer()
+        this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer()
-
         this.overlayContainer = new OverlayContainer()
 
         this.addChild(
-            this.grid, this.tileSprites, this.underlayContainer, this.entitySprites,
-            this.tiles, this.entities, this.wiresContainer, this.overlayContainer
+            this.grid, this.tileSprites, this.tilePaintSlot, this.underlayContainer,
+            this.entitySprites, this.entityPaintSlot, this.wiresContainer, this.overlayContainer
         )
 
         G.currentMouseState = G.mouseStates.NONE
     }
 
     sortEntities() {
-        (this.entities.children as EntityContainer[]).sort((a, b) =>
-            ((b.hitArea as PIXI.Rectangle).height - (a.hitArea as PIXI.Rectangle).height)
-        );
-
-        (this.entitySprites.children as EntitySprite[]).sort((a, b) => {
+        this.entitySprites.children.sort((a, b) => {
             const dZ = a.zIndex - b.zIndex
             if (dZ !== 0) return dZ
+
             const dY = (a.y - a.shift.y) - (b.y - b.shift.y)
             if (dY !== 0) return dY
+
             const dO = a.zOrder - b.zOrder
             if (dO !== 0) return dO
+
             const dX = (a.x - a.shift.x) - (b.x - b.shift.x)
             if (dX !== 0) return dX
+
             return a.id - b.id
         })
     }
 
     transparentEntities(bool = true) {
-        this.entities.interactiveChildren = !bool
         this.entitySprites.alpha = bool ? 0.5 : 1
-    }
-
-    // For testing
-    updateOverlay() {
-        // const TEMP = G.bp.entityPositionGrid.getAllPositions()
-        // this.pgOverlay.clear()
-        // for (const t of TEMP) {
-        //     this.pgOverlay.beginFill(0x0080FF)
-        //     this.pgOverlay.drawRect(t.x * 32, t.y * 32, G.cellSize, G.cellSize)
-        //     this.pgOverlay.endFill()
-        // }
     }
 
     centerViewport() {
@@ -275,13 +289,12 @@ export class BlueprintContainer extends PIXI.Container {
             x: (G.sizeBPContainer.width - bounds.width) / 2 - bounds.x,
             y: (G.sizeBPContainer.height - bounds.height) / 2 - bounds.y
         })
-        this.updateViewportCulling()
     }
 
     getBlueprintBounds() {
         const bounds = new PIXI.Bounds()
-        const sprites = this.entitySprites.children.concat(this.tileSprites.children) as PIXI.Sprite[]
-        for (const sprite of sprites) {
+
+        const addBounds = (sprite: EntitySprite) => {
             const sB = new PIXI.Bounds()
             const W = sprite.width * sprite.anchor.x
             const H = sprite.height * sprite.anchor.y
@@ -291,6 +304,10 @@ export class BlueprintContainer extends PIXI.Container {
             sB.maxY = sprite.y + H
             bounds.addBounds(sB)
         }
+
+        this.entitySprites.children.forEach(addBounds)
+        this.tileSprites.children.forEach(addBounds)
+
         const rect = bounds.getRectangle()
 
         const X = Math.floor(rect.x / 32) * 32
@@ -300,35 +317,11 @@ export class BlueprintContainer extends PIXI.Container {
         return new PIXI.Rectangle(X, Y, W, H)
     }
 
-    enableRenderableOnChildren() {
-        this.tileSprites.children.forEach(c => c.renderable = true)
-        this.entitySprites.children.forEach(c => c.renderable = true)
-        this.overlayContainer.overlay.children.forEach(c => c.renderable = true)
-    }
-
-    updateViewportCulling() {
-        cullChildren(this.tileSprites.children)
-        cullChildren(this.entitySprites.children)
-        cullChildren(this.overlayContainer.overlay.children)
-
-        function cullChildren(children: PIXI.DisplayObject[]) {
-            for (const c of children) {
-                const b = c.getBounds()
-                c.renderable =
-                    b.x + b.width > G.positionBPContainer.x &&
-                    b.y + b.height > G.positionBPContainer.y &&
-                    b.x < G.app.screen.width &&
-                    b.y < G.app.screen.height
-            }
-        }
-    }
-
-    spawnEntityAtMouse(itemName: string) {
+    spawnPaintContainer(itemName: string, direction = 0) {
         const itemData = FD.items[itemName]
         const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
         const placeResult = itemData.place_result || tileResult
 
-        G.currentMouseState = G.mouseStates.PAINTING
         if (this.paintContainer) this.paintContainer.destroy()
 
         if (tileResult) {
@@ -339,19 +332,26 @@ export class BlueprintContainer extends PIXI.Container {
                     { x: TilePaintContainer.size, y: TilePaintContainer.size }
                 )
             )
-            this.tiles.addChild(this.paintContainer)
+            this.tilePaintSlot.addChild(this.paintContainer)
         } else {
             this.paintContainer = new EntityPaintContainer(
                 placeResult,
-                0,
+                direction,
                 EntityContainer.getPositionFromData(
                     G.gridData.position,
                     util.switchSizeBasedOnDirection(FD.entities[placeResult].size, 0)
                 )
             )
-            this.addChild(this.paintContainer)
+            this.entityPaintSlot.addChild(this.paintContainer)
         }
 
-        if (this.hoverContainer) this.hoverContainer.pointerOutEventHandler()
+        this.paintContainer.on('destroy', () => {
+            this.paintContainer = undefined
+            G.currentMouseState = G.mouseStates.NONE
+            this.updateHoverContainer()
+        })
+
+        G.currentMouseState = G.mouseStates.PAINTING
+        this.updateHoverContainer()
     }
 }

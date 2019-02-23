@@ -12,7 +12,6 @@ import * as PIXI from 'pixi.js'
 
 import G from './common/globals'
 import util from './common/util'
-import { EntityContainer } from './containers/entity'
 
 function getAllPromises() {
     return [
@@ -27,10 +26,7 @@ function getAllPromises() {
 function changeQuality(hr: boolean) {
     G.loadingScreen.show()
 
-    G.BPC.entities.children.forEach((eC: EntityContainer) => {
-        eC.entitySprites.forEach(eS => eS.destroy())
-        eC.entitySprites = []
-    })
+    G.BPC.clearData()
 
     Object.keys(PIXI.utils.TextureCache)
         .filter(texture => texture.includes('graphics/entity/'))
@@ -40,8 +36,7 @@ function changeQuality(hr: boolean) {
         hr ? HRentitySpritesheetPNG : LRentitySpritesheetPNG,
         hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
     ).then(() => {
-        G.BPC.entities.children.forEach((eC: EntityContainer) => eC.redraw(false, false))
-        G.BPC.sortEntities()
+        G.BPC.initBP()
         G.loadingScreen.hide()
     })
 }

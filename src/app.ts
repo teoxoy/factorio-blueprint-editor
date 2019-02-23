@@ -12,7 +12,6 @@ import bpString from './factorio-data/bpString'
 
 import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
-import { EntityPaintContainer } from './containers/entityPaint'
 import { TilePaintContainer } from './containers/tilePaint'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './panels/toolbar'
@@ -95,7 +94,6 @@ window.addEventListener('resize', () => {
     G.app.renderer.resize(window.innerWidth, window.innerHeight)
     G.BPC.viewport.setSize(G.app.screen.width, G.app.screen.height)
     G.BPC.viewport.updateTransform()
-    G.BPC.updateViewportCulling()
 }, false)
 
 G.BPC = new BlueprintContainer()
@@ -112,6 +110,9 @@ G.app.stage.addChild(G.quickbarContainer)
 
 G.dialogsContainer = new PIXI.Container()
 G.app.stage.addChild(G.dialogsContainer)
+
+G.paintIconContainer = new PIXI.Container()
+G.app.stage.addChild(G.paintIconContainer)
 
 Promise.all(
     [
@@ -196,7 +197,6 @@ document.addEventListener('mousemove', e => {
     if (G.currentMouseState === G.mouseStates.PANNING) {
         G.BPC.viewport.translateBy(e.movementX, e.movementY)
         G.BPC.viewport.updateTransform()
-        G.BPC.updateViewportCulling()
     }
 })
 
@@ -242,7 +242,6 @@ actions.clear.bind(() => {
 actions.takePicture.bind(() => {
     if (G.bp.isEmpty()) return
 
-    G.BPC.enableRenderableOnChildren()
     if (G.renderOnly) G.BPC.cacheAsBitmap = false
 
     const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1)
@@ -255,7 +254,6 @@ actions.takePicture.bind(() => {
     })
 
     if (G.renderOnly) G.BPC.cacheAsBitmap = true
-    G.BPC.updateViewportCulling()
 })
 
 actions.showInfo.bind(() => {
@@ -276,7 +274,7 @@ actions.inventory.bind(() => {
         if (Dialog.anyOpen()) {
             Dialog.closeLast()
         } else {
-            new InventoryContainer('Inventory', undefined, G.BPC.spawnEntityAtMouse.bind(G.BPC))
+            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
                 .show()
         }
     }
@@ -302,22 +300,14 @@ actions.reverseRotate.bind(() => {
 
 actions.pipette.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
-        G.currentMouseState = G.mouseStates.PAINTING
 
-        const hoverContainer = G.BPC.hoverContainer
-        G.BPC.hoverContainer.pointerOutEventHandler()
+        const entity = G.BPC.hoverContainer.entity
+        const itemName = entity.entityData.minable.result
+        const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
+        G.BPC.spawnPaintContainer(itemName, direction)
 
-        const entity = hoverContainer.entity
-        G.BPC.paintContainer = new EntityPaintContainer(entity.name,
-            entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction,
-            hoverContainer.position)
-
-        G.BPC.paintContainer.moveAtCursor()
-        G.BPC.addChild(G.BPC.paintContainer)
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.destroy()
-        G.currentMouseState = G.mouseStates.NONE
-        G.BPC.updateHoverContainer()
     }
 })
 

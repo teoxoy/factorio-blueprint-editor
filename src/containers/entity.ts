@@ -40,7 +40,7 @@ const updateGroups = [
     return pV
 }, {} as any)
 
-export class EntityContainer extends PIXI.Container {
+export class EntityContainer {
     static mappings: Map<number, EntityContainer> = new Map()
 
     static getGridPosition(containerPosition: IPoint) {
@@ -81,19 +81,9 @@ export class EntityContainer extends PIXI.Container {
     private readonly m_Entity: Entity
 
     constructor(entity: Entity, sort = true) {
-        super()
         this.m_Entity = entity
 
         EntityContainer.mappings.set(this.m_Entity.entity_number, this)
-
-        this.position.set(
-            this.m_Entity.position.x * 32,
-            this.m_Entity.position.y * 32
-        )
-
-        this.interactive = true
-        this.interactiveChildren = false
-        this.buttonMode = true
 
         this.entitySprites = []
 
@@ -136,8 +126,6 @@ export class EntityContainer extends PIXI.Container {
         this.m_Entity.on('splitterOutputPriority', () => this.redrawEntityInfo())
 
         this.m_Entity.on('position', (newPos: IPoint, oldPos: IPoint) => {
-            this.position.set(newPos.x * 32, newPos.y * 32)
-
             this.redraw()
             this.redrawSurroundingEntities(oldPos)
             this.redrawSurroundingEntities(newPos)
@@ -145,39 +133,37 @@ export class EntityContainer extends PIXI.Container {
             this.updateUndergroundLines()
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity)
-            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copyFrom(this.position))
+            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.set(this.position.x, this.position.y))
         })
 
         this.m_Entity.on('destroy', () => {
-            this.destroy()
-
             this.redrawSurroundingEntities()
-
-            G.BPC.hoverContainer = undefined
-
-            G.BPC.updateOverlay()
 
             for (const s of this.entitySprites) s.destroy()
 
             EntityContainer.mappings.delete(this.m_Entity.entity_number)
 
             UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
-            G.BPC.overlayContainer.hideCursorBox()
-            G.BPC.overlayContainer.hideUndergroundLines()
 
             if (this.entityInfo !== undefined) this.entityInfo.destroy()
         })
-
-        G.BPC.entities.addChild(this)
     }
+
     public get entity(): Entity {
         return this.m_Entity
+    }
+
+    get position(): IPoint {
+        return {
+            x: this.m_Entity.position.x * 32,
+            y: this.m_Entity.position.y * 32
+        }
     }
 
     updateUndergroundLines() {
         G.BPC.overlayContainer.updateUndergroundLines(
             this.m_Entity.name,
-            { x: this.position.x / 32, y: this.position.y / 32 },
+            this.m_Entity.position,
             this.m_Entity.direction,
             this.m_Entity.directionType === 'output' || this.m_Entity.name === 'pipe_to_ground' ?
                 (this.m_Entity.direction + 4) % 8 :
@@ -202,26 +188,19 @@ export class EntityContainer extends PIXI.Container {
     }
 
     pointerOverEventHandler() {
-        if (G.currentMouseState === G.mouseStates.NONE) {
-            G.BPC.hoverContainer = this
+        G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
+        G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
+        G.BPC.overlayContainer.showCursorBox()
+        G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
+        this.updateUndergroundLines()
 
-            G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
-            G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
-            G.BPC.overlayContainer.showCursorBox()
-            G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
-            this.updateUndergroundLines()
-
-            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.visible = true)
-        }
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.visible = true)
     }
 
     pointerOutEventHandler() {
-        if (G.currentMouseState === G.mouseStates.NONE && G.BPC.hoverContainer === this) {
-            G.BPC.hoverContainer = undefined
-            G.BPC.overlayContainer.hideCursorBox()
-            G.BPC.overlayContainer.hideUndergroundLines()
-            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.visible = false)
-        }
+        G.BPC.overlayContainer.hideCursorBox()
+        G.BPC.overlayContainer.hideUndergroundLines()
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.visible = false)
     }
 
     redrawSurroundingEntities(position?: IPoint) {
@@ -247,12 +226,5 @@ export class EntityContainer extends PIXI.Container {
             G.BPC.entitySprites.addChild(s)
         }
         if (sort) G.BPC.sortEntities()
-
-        this.hitArea = new PIXI.Rectangle(
-            -this.m_Entity.size.x * 16,
-            -this.m_Entity.size.y * 16,
-            this.m_Entity.size.x * 32,
-            this.m_Entity.size.y * 32
-        )
     }
 }

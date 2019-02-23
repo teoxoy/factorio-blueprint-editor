@@ -14,6 +14,7 @@ let app: PIXI.Application
 let toolbarContainer: ToolbarContainer
 let quickbarContainer: QuickbarContainer
 let dialogsContainer: PIXI.Container
+let paintIconContainer: PIXI.Container
 let BPC: BlueprintContainer
 
 const loadingScreen = {
@@ -253,6 +254,7 @@ export default {
     toolbarContainer,
     quickbarContainer,
     dialogsContainer,
+    paintIconContainer,
     bpArea,
     positionBPContainer,
     sizeBPContainer,

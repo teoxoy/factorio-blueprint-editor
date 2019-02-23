@@ -794,20 +794,17 @@ function generateGraphics(e: any) {
             if (dir === 4) belt = util.set_property(belt, 'flipY', true)
             belt = util.set_property(belt, dir === 2 || dir === 6 ? 'divW' : 'divH', 2)
 
-            const dirType = data.dirType === 'output' ? -1 : 1
-            belt = util.add_to_shift([
-                (dir === 2 ? -1 : (dir === 6 ? 1 : 0)) * dirType * (dirType === 1 ? 0.35 : 0.2),
-                // * ((data.hr ? belt.hr_version.width : belt.width) / 8 * dirType) / 32,
-                (dir === 4 ? -1 : (dir === 0 ? 1 : 0)) * dirType * (dirType === 1 ? 0.2 : 0.35)
-                // * ((data.hr ? belt.hr_version.height : belt.height) / 8 * dirType) / 32
-            ], belt)
+            const isInput = data.dirType === 'input'
+            if (dir === 2 || dir === 6) belt = util.set_property(belt, 'anchorX', isInput ? 1 : 0.2)
+            if (dir === 0 || dir === 4) belt = util.set_property(belt, 'anchorY', !isInput ? 1 : 0.2)
+
             return [
                 belt,
                 util.duplicateAndSetPropertyUsing(
-                    dirType === 1 ? e.structure.direction_in.sheet : e.structure.direction_out.sheet,
+                    isInput ? e.structure.direction_in.sheet : e.structure.direction_out.sheet,
                     'x',
                     'width',
-                    (dirType === 1 ? dir : ((dir + 4) % 8)) / 2
+                    (isInput ? dir : ((dir + 4) % 8)) / 2
                 )
             ]
         }
@@ -855,7 +852,7 @@ function generateGraphics(e: any) {
                 const res = getBeltConnections()
                 if (res !== false) {
                     const temp = res === 0 || res === 4
-                    belt = util.set_property(belt, 'rot', (res + (temp ? 0 : 2)) / 2)
+                    belt = util.set_property(belt, 'rotAngle', (res + (temp ? 0 : 2)) * 45)
                     belt = util.set_property_using(belt, 'y', 'height',
                         (temp ? 11 : 8) * (data.hr && e.name !== 'transport_belt' ? 2 : 1))
                     if (res === (dir + 2) % 8) {
@@ -890,104 +887,117 @@ function generateGraphics(e: any) {
             return [belt]
         }
         case 'inserter': return (data: IDrawData) => {
-            const dir = data.dir
             let ho = util.duplicate(e.hand_open_picture)
             let hb = util.duplicate(e.hand_base_picture)
-            const hoMod = {
-                rot: 0,
-                height_divider: 1,
+
+            const handData = {
+                anchorX: 0.5,
+                anchorY: 1,
+                rotAngle: 0,
+                squishY: 1,
                 x: 0,
                 y: 0
             }
-            const hbMod = { ...hoMod }
-            const am = 0.5
-            if (e.name === 'long_handed_inserter') {
-                switch (dir) {
-                    case 0:
-                        hoMod.rot = 2
-                        hoMod.height_divider = 3
-                        hoMod.y = -am * 1.5
+            const armData = { ...handData }
 
-                        hbMod.y = -am
+            const armAngle = 45
+            const armAngleLHI = 25
+
+            if (e.name === 'long_handed_inserter') {
+                switch (data.dir) {
+                    case 6:
+                        handData.rotAngle = armAngleLHI - 180
+                        handData.squishY = 1.5
+                        handData.x = -0.275
+                        handData.y = -0.7
+
+                        armData.rotAngle = -armAngleLHI
+                        armData.squishY = 1.25
+                        armData.x = 0.03
+                        armData.y = 0.03
                         break
                     case 2:
-                        hoMod.rot = 1.7
-                        hoMod.height_divider = 1.5
-                        hoMod.x = am
-                        hoMod.y = -am / 1.25
+                        handData.rotAngle = -armAngleLHI + 180
+                        handData.squishY = 1.5
+                        handData.x = 0.275
+                        handData.y = -0.7
 
-                        hbMod.rot = 0.3
-                        hbMod.x = am / 3
-                        hbMod.y = -am / 1.5
+                        armData.rotAngle = armAngleLHI
+                        armData.squishY = 1.25
+                        armData.x = -0.03
+                        armData.y = 0.03
                         break
                     case 4:
-                        hoMod.rot = 2
-                        hoMod.height_divider = 1.25
-                        hoMod.y = am / 1.75
+                        handData.rotAngle = 180
+                        handData.squishY = 1.25
+                        handData.y = -0.3
 
-                        hbMod.rot = 0
-                        hbMod.height_divider = 1.75
-                        hbMod.y = -am / 1.75
+                        armData.squishY = 2.5
+                        armData.y = 0.03
                         break
-                    case 6:
-                        hoMod.rot = 2.3
-                        hoMod.height_divider = 1.5
-                        hoMod.x = -am
-                        hoMod.y = -am / 1.25
+                    case 0:
+                        handData.rotAngle = 180
+                        handData.squishY = 3.5
+                        handData.y = -0.95
 
-                        hbMod.rot = 3.7
-                        hbMod.x = -am / 3
-                        hbMod.y = -am / 1.5
+                        armData.y = 0.05
                 }
             } else {
-                switch (dir) {
+                switch (data.dir) {
                     case 6:
-                        hoMod.rot = 2.5
-                        hoMod.height_divider = 2
-                        hoMod.x = -am
-                        hoMod.y = -am * 0.5
+                        handData.rotAngle = -armAngle - 90
+                        handData.squishY = 2.5
+                        handData.x = -0.325
+                        handData.y = -0.325
 
-                        hbMod.rot = 3.5
-                        hbMod.height_divider = 1.5
-                        hbMod.x = -am / 3
-                        hbMod.y = -am / 2
+                        armData.rotAngle = -armAngle
+                        armData.squishY = 1.9
+                        armData.x = 0.03
+                        armData.y = 0.03
                         break
                     case 2:
-                        hoMod.rot = 1.5
-                        hoMod.height_divider = 2
-                        hoMod.x = am
-                        hoMod.y = -am * 0.5
+                        handData.rotAngle = armAngle + 90
+                        handData.squishY = 2.5
+                        handData.x = 0.325
+                        handData.y = -0.325
 
-                        hbMod.rot = 0.5
-                        hbMod.height_divider = 1.5
-                        hbMod.x = am / 3
-                        hbMod.y = -am / 2
+                        armData.rotAngle = armAngle
+                        armData.squishY = 1.9
+                        armData.x = -0.03
+                        armData.y = 0.03
                         break
                     case 4:
-                        hoMod.rot = 2
-                        hoMod.height_divider = 1.75
-                        hoMod.y = am / 1.5
+                        handData.rotAngle = 180
+                        handData.squishY = 1.75
+                        handData.y = 0.03
 
-                        hbMod.rot = 2
-                        hbMod.height_divider = 5
+                        armData.rotAngle = 180
+                        armData.squishY = 7
+                        armData.y = -0.03
                         break
                     case 0:
-                        hoMod.height_divider = 3
-                        hoMod.y = -am * 1.5
+                        handData.squishY = 3
+                        handData.y = -0.5
 
-                        hbMod.height_divider = 1.25
-                        hbMod.y = -am / 1.5
+                        armData.squishY = 1.4
+                        armData.y = 0.05
                 }
             }
-            ho = util.set_property(ho, 'rot', hoMod.rot)
-            ho = util.set_property(ho, 'height_divider', hoMod.height_divider)
-            ho = util.add_to_shift(hoMod, ho)
 
-            hb = util.set_property(hb, 'rot', hbMod.rot)
-            hb = util.set_property(hb, 'height_divider', hbMod.height_divider)
-            hb = util.add_to_shift(hbMod, hb)
+            ho = util.set_property(ho, 'anchorX', handData.anchorX)
+            ho = util.set_property(ho, 'anchorY', handData.anchorY)
+            ho = util.set_property(ho, 'rotAngle', handData.rotAngle)
+            ho = util.set_property(ho, 'squishY', handData.squishY)
+            ho = util.add_to_shift(handData, ho)
+
+            hb = util.set_property(hb, 'anchorX', armData.anchorX)
+            hb = util.set_property(hb, 'anchorY', armData.anchorY)
+            hb = util.set_property(hb, 'rotAngle', armData.rotAngle)
+            hb = util.set_property(hb, 'squishY', armData.squishY)
+            hb = util.add_to_shift(armData, hb)
+
             return [
-                util.duplicateAndSetPropertyUsing(e.platform_picture.sheet, 'x', 'width', ((dir + 4) % 8) / 2),
+                util.duplicateAndSetPropertyUsing(e.platform_picture.sheet, 'x', 'width', ((data.dir + 4) % 8) / 2),
                 ho,
                 hb
             ]

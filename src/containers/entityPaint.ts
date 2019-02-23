@@ -31,7 +31,7 @@ export class EntityPaintContainer extends PIXI.Container {
 
         this.icon = InventoryContainer.createIcon(this.getItemName())
         this.icon.visible = false
-        G.app.stage.addChild(this.icon)
+        G.paintIconContainer.addChild(this.icon)
         this.changeIconPos = this.changeIconPos.bind(this)
         window.addEventListener('mousemove', this.changeIconPos)
         this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
@@ -66,11 +66,12 @@ export class EntityPaintContainer extends PIXI.Container {
     }
 
     destroy() {
+        this.emit('destroy')
+
         super.destroy()
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
         G.BPC.overlayContainer.hideUndergroundLines()
-        G.BPC.paintContainer = undefined
 
         window.removeEventListener('mousemove', this.changeIconPos)
         this.icon.destroy()
@@ -244,8 +245,6 @@ export class EntityPaintContainer extends PIXI.Container {
                 this.redraw()
                 G.BPC.overlayContainer.hideUndergroundLines()
             }
-
-            G.BPC.updateOverlay()
         }
 
         this.checkBuildable()

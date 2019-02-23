@@ -43,7 +43,7 @@ export class TilePaintContainer extends PIXI.Container {
 
         this.icon = InventoryContainer.createIcon(this.getItemName())
         this.icon.visible = false
-        G.app.stage.addChild(this.icon)
+        G.paintIconContainer.addChild(this.icon)
         this.changeIconPos = this.changeIconPos.bind(this)
         window.addEventListener('mousemove', this.changeIconPos)
         this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
@@ -73,9 +73,10 @@ export class TilePaintContainer extends PIXI.Container {
     }
 
     destroy() {
+        this.emit('destroy')
+
         G.BPC.transparentEntities(false)
         super.destroy()
-        G.BPC.paintContainer = undefined
 
         window.removeEventListener('mousemove', this.changeIconPos)
         this.icon.destroy()
@@ -109,9 +110,9 @@ export class TilePaintContainer extends PIXI.Container {
 
     rotate() {
         if (this.name.includes('hazard')) {
-            this.name = this.name.includes('left') ?
-                this.name.replace('left', 'right') :
-                this.name.replace('right', 'left')
+            this.name = this.name.includes('left')
+                ? this.name.replace('left', 'right')
+                : this.name.replace('right', 'left')
             this.redraw()
         }
     }

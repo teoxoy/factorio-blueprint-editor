@@ -2,53 +2,35 @@ import G from '../common/globals'
 import FD from 'factorio-data'
 import Tile from '../factorio-data/tile'
 import * as PIXI from 'pixi.js'
+import { EntitySprite } from '../entitySprite'
 
-export class TileContainer extends PIXI.Container {
+export class TileContainer {
 
     static generateSprite(name: string, position: IPoint) {
         // TODO: maybe optimize this with PIXI.TilingSprite and masks
-        const X = Math.floor(position.x) % 8
-        const Y = Math.floor(position.y) % 8
-        const textureKey = `${name}-${X}-${Y}`
-        let texture = PIXI.utils.TextureCache[textureKey]
-        if (!texture) {
-            const filename = name === 'stone_path' ? 'graphics/terrain/stone-path/stone-path.png' :
-                FD.tiles[name].variants.material_background.hr_version.picture
-
-            const spriteData = PIXI.Texture.from(filename)
-            texture = new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
-                spriteData.frame.x + X * 64,
-                spriteData.frame.y + Y * 64,
-                64,
-                64
-            ))
-            PIXI.Texture.addToCache(texture, textureKey)
-        }
-        const s = new PIXI.Sprite(texture)
-        s.scale.set(0.5)
-        s.anchor.set(0.5)
-        return s
+        // https://github.com/pixijs/pixi.js/wiki/v4-Gotchas#graphics--tilingsprite
+        return new EntitySprite({
+            filename: name === 'stone_path'
+                ? 'graphics/terrain/stone-path/stone-path.png'
+                : FD.tiles[name].variants.material_background.hr_version.picture,
+            x: Math.floor(position.x) % 8 * 64,
+            y: Math.floor(position.y) % 8 * 64,
+            width: 64,
+            height: 64,
+            scale: 0.5
+        })
     }
 
     tileSprites: PIXI.Sprite[]
 
     constructor(tile: Tile) {
-        super()
-
-        this.position.set(tile.position.x * 32, tile.position.y * 32)
-
         this.tileSprites = []
 
         const sprite = TileContainer.generateSprite(tile.name, tile.position)
-        sprite.position = this.position
+        sprite.position.set(tile.position.x * 32, tile.position.y * 32)
         this.tileSprites.push(sprite)
         G.BPC.tileSprites.addChild(sprite)
 
-        G.BPC.tiles.addChild(this)
-
-        tile.on('destroy', () => {
-            this.destroy()
-            for (const s of this.tileSprites) s.destroy()
-        })
+        tile.on('destroy', () => this.tileSprites.forEach(s => s.destroy()))
     }
 }
