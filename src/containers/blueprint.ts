@@ -272,7 +272,10 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     transparentEntities(bool = true) {
-        this.entitySprites.alpha = bool ? 0.5 : 1
+        const alpha = bool ? 0.5 : 1
+        this.entitySprites.alpha = alpha
+        this.wiresContainer.alpha = alpha
+        this.overlayContainer.alpha = alpha
     }
 
     centerViewport() {
