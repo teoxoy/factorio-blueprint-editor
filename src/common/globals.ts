@@ -3,6 +3,7 @@ import { ToolbarContainer } from '../panels/toolbar'
 import { QuickbarContainer } from '../panels/quickbar'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
+import * as PIXI from 'pixi.js'
 
 // tslint:disable:prefer-const
 
@@ -12,6 +13,8 @@ let app: PIXI.Application
 
 let toolbarContainer: ToolbarContainer
 let quickbarContainer: QuickbarContainer
+let dialogsContainer: PIXI.Container
+let paintIconContainer: PIXI.Container
 let BPC: BlueprintContainer
 
 const loadingScreen = {
@@ -250,6 +253,8 @@ export default {
     app,
     toolbarContainer,
     quickbarContainer,
+    dialogsContainer,
+    paintIconContainer,
     bpArea,
     positionBPContainer,
     sizeBPContainer,

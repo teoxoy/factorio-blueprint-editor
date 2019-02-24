@@ -6,6 +6,7 @@ import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
 import { InventoryContainer } from '../panels/inventory'
 import { EntitySprite } from '../entitySprite'
+import * as PIXI from 'pixi.js'
 
 export class EntityPaintContainer extends PIXI.Container {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
@@ -30,7 +31,7 @@ export class EntityPaintContainer extends PIXI.Container {
 
         this.icon = InventoryContainer.createIcon(this.getItemName())
         this.icon.visible = false
-        G.app.stage.addChild(this.icon)
+        G.paintIconContainer.addChild(this.icon)
         this.changeIconPos = this.changeIconPos.bind(this)
         window.addEventListener('mousemove', this.changeIconPos)
         this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
@@ -45,7 +46,7 @@ export class EntityPaintContainer extends PIXI.Container {
         this.redraw()
     }
 
-    changeIconPos(e: MouseEvent) {
+    changeIconPos(e: IPoint) {
         this.icon.position.set(e.x + 16, e.y + 16)
     }
 
@@ -65,11 +66,12 @@ export class EntityPaintContainer extends PIXI.Container {
     }
 
     destroy() {
+        this.emit('destroy')
+
         super.destroy()
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
         G.BPC.overlayContainer.hideUndergroundLines()
-        G.BPC.paintContainer = undefined
 
         window.removeEventListener('mousemove', this.changeIconPos)
         this.icon.destroy()
@@ -182,7 +184,7 @@ export class EntityPaintContainer extends PIXI.Container {
         G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
         this.updateUndergroundLines()
 
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copy(this.position))
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copyFrom(this.position))
 
         this.checkBuildable()
     }
@@ -243,8 +245,6 @@ export class EntityPaintContainer extends PIXI.Container {
                 this.redraw()
                 G.BPC.overlayContainer.hideUndergroundLines()
             }
-
-            G.BPC.updateOverlay()
         }
 
         this.checkBuildable()

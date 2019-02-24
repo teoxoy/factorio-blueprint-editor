@@ -89,13 +89,15 @@ interface ISpriteData {
     // }
     // lines_per_file?: number
 
-    divW: number
-    divH: number
-    flipX: boolean
-    flipY: boolean
-    height_divider: number
-    rot: number
-    color: {
+    anchorX?: number
+    anchorY?: number
+    divW?: number
+    divH?: number
+    flipX?: boolean
+    flipY?: boolean
+    squishY?: number
+    rotAngle?: number
+    color?: {
         r: number;
         g: number;
         b: number;

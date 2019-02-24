@@ -2,6 +2,7 @@ import G from '../common/globals'
 import { InventoryContainer } from './inventory'
 import Panel from '../controls/panel'
 import Slot from '../controls/slot'
+import * as PIXI from 'pixi.js'
 
 export class QuickbarSlot extends Slot {
 
@@ -102,12 +103,12 @@ export class QuickbarContainer extends Panel {
                                 quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
                             // >> Slot == Item (UC2)
                             } else {
-                                G.BPC.spawnEntityAtMouse(quickbarSlot.itemName)
+                                G.BPC.spawnPaintContainer(quickbarSlot.itemName)
                                 G.BPC.paintContainer.hide()
                             }
                         // >> Slot == Item (UC4)
                         } else if (quickbarSlot.itemName) {
-                            G.BPC.spawnEntityAtMouse(quickbarSlot.itemName)
+                            G.BPC.spawnPaintContainer(quickbarSlot.itemName)
                             G.BPC.paintContainer.hide()
                         }
 
@@ -129,11 +130,10 @@ export class QuickbarContainer extends Panel {
 
         if (G.currentMouseState === G.mouseStates.PAINTING && G.BPC.paintContainer.getItemName() === itemName) {
             G.BPC.paintContainer.destroy()
-            G.currentMouseState = G.mouseStates.NONE
             return
         }
 
-        G.BPC.spawnEntityAtMouse(itemName)
+        G.BPC.spawnPaintContainer(itemName)
     }
 
     public changeActiveQuickbar() {

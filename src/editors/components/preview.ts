@@ -3,6 +3,7 @@ import util from '../../common/util'
 import { EntitySprite } from '../../entitySprite'
 import { OverlayContainer } from '../../containers/overlay'
 import Entity from '../../factorio-data/entity'
+import * as PIXI from 'pixi.js'
 
 /** Preview of Entity */
 export default class Preview extends PIXI.Container {

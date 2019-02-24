@@ -2,6 +2,7 @@ import FD from 'factorio-data'
 import Slot from '../../controls/slot'
 import Entity from '../../factorio-data/entity'
 import { InventoryContainer } from '../../panels/inventory'
+import * as PIXI from 'pixi.js'
 
 /** Module Slots for Entity */
 export default class Filters extends PIXI.Container {

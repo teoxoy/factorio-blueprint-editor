@@ -2,6 +2,7 @@ import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import spriteDataBuilder from './factorio-data/spriteDataBuilder'
 import Entity from './factorio-data/entity'
 import G from './common/globals'
+import * as PIXI from 'pixi.js'
 
 interface IEntityData {
     name: string
@@ -85,6 +86,7 @@ export class EntitySprite extends PIXI.Sprite {
     shift: IPoint
     zIndex: number
     zOrder: number
+    cachedBounds: number[]
 
     constructor(data: ISpriteData) {
         if (!data.shift) data.shift = [0, 0]
@@ -96,7 +98,7 @@ export class EntitySprite extends PIXI.Sprite {
         const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${data.height / data.divH}`
         let texture = PIXI.utils.TextureCache[textureKey]
         if (!texture) {
-            const spriteData = PIXI.Texture.fromFrame(data.filename)
+            const spriteData = PIXI.Texture.from(data.filename)
             texture = new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
                 spriteData.frame.x + data.x,
                 spriteData.frame.y + data.y,
@@ -107,7 +109,6 @@ export class EntitySprite extends PIXI.Sprite {
         }
         super(texture)
 
-        this.interactive = false
         this.id = EntitySprite.nextID++
 
         this.shift = {
@@ -118,14 +119,16 @@ export class EntitySprite extends PIXI.Sprite {
         this.position.set(this.shift.x, this.shift.y)
 
         if (data.scale) this.scale.set(data.scale, data.scale)
-        this.anchor.set(0.5, 0.5)
+
+        this.anchor.x = data.anchorX === undefined ? 0.5 : data.anchorX
+        this.anchor.y = data.anchorY === undefined ? 0.5 : data.anchorY
 
         if (data.flipX) this.scale.x *= -1
         if (data.flipY) this.scale.y *= -1
 
-        if (data.height_divider) this.height /= data.height_divider
+        if (data.squishY) this.height /= data.squishY
 
-        if (data.rot) this.rotation = data.rot * Math.PI * 0.5
+        if (data.rotAngle) this.angle = data.rotAngle
 
         if (data.color) {
             this.filters = [new AdjustmentFilter({
@@ -139,10 +142,41 @@ export class EntitySprite extends PIXI.Sprite {
             })]
         }
 
+        // CACHE LOCAL BOUNDS
+        let minX = this.texture.orig.width * -this.anchor.x * data.scale
+        let minY = this.texture.orig.height * -this.anchor.y * data.scale
+        let maxX = this.texture.orig.width * (1 - this.anchor.x) * data.scale
+        let maxY = this.texture.orig.height * (1 - this.anchor.y) * data.scale
+
+        if (this.rotation !== 0) {
+            const sin = Math.sin(this.rotation)
+            const cos = Math.cos(this.rotation)
+            // 01
+            // 23
+            const x0 = minX * cos - minY * sin
+            const y0 = minX * sin + minY * cos
+
+            const x1 = maxX * cos - minY * sin
+            const y1 = maxX * sin + minY * cos
+
+            const x2 = minX * cos - maxY * sin
+            const y2 = minX * sin + maxY * cos
+
+            const x3 = maxX * cos - maxY * sin
+            const y3 = maxX * sin + maxY * cos
+
+            minX = Math.min(x0, x1, x2, x3)
+            minY = Math.min(y0, y1, y2, y3)
+            maxX = Math.max(x0, x1, x2, x3)
+            maxY = Math.max(y0, y1, y2, y3)
+        }
+
+        this.cachedBounds = [minX, minY, maxX, maxY]
+
         return this
     }
 
-    setPosition(position: PIXI.Point | PIXI.ObservablePoint) {
+    setPosition(position: IPoint) {
         this.position.set(
             position.x + this.shift.x,
             position.y + this.shift.y

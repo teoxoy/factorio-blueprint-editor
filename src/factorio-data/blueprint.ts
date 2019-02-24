@@ -7,6 +7,7 @@ import util from '../common/util'
 import * as History from './history'
 import EventEmitter from 'eventemitter3'
 import Tile from './tile'
+import * as PIXI from 'pixi.js'
 
 class OurMap<K, V> extends Map<K, V> {
 

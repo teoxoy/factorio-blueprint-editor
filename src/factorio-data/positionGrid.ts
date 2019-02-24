@@ -80,7 +80,7 @@ export class PositionGrid {
         const cell = this.grid.get(`${Math.floor(POS.x)},${Math.floor(POS.y)}`)
         if (cell) {
             if (typeof cell === 'number') return cell
-            else return cell[0]
+            else return cell[cell.length - 1]
         }
     }
 
@@ -89,14 +89,13 @@ export class PositionGrid {
 
         PositionGrid.tileDataAction(this.grid, entity.getArea(position), (key, cell) => {
             if (cell) {
-                if (typeof cell === 'number') {
-                    this.grid.set(key, [
-                        entity.entity_number,
-                        cell
-                    ])
-                } else {
-                    this.grid.set(key, [...cell, entity.entity_number])
-                }
+                const arr = typeof cell === 'number' ? [cell] : cell
+
+                const isRail = entity.name === 'straight_rail' || entity.name === 'curved_rail'
+                if (isRail) arr.unshift(entity.entity_number)
+                else arr.push(entity.entity_number)
+
+                this.grid.set(key, arr)
             } else {
                 this.grid.set(key, entity.entity_number)
             }

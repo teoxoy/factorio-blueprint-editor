@@ -12,7 +12,6 @@ import bpString from './factorio-data/bpString'
 
 import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
-import { EntityPaintContainer } from './containers/entityPaint'
 import { TilePaintContainer } from './containers/tilePaint'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './panels/toolbar'
@@ -55,30 +54,47 @@ for (const p of params) {
 const { guiBPIndex } = initDatGui()
 initDoorbell()
 
-G.app = new PIXI.Application({
-    view: document.getElementById('editor') as HTMLCanvasElement,
-    resolution: window.devicePixelRatio,
-    roundPixels: true
-    // antialias: true
-})
+PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
+PIXI.settings.ROUND_PIXELS = true
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
+PIXI.settings.WRAP_MODE = PIXI.WRAP_MODES.REPEAT
+PIXI.settings.RENDER_OPTIONS.antialias = true // for wires
+PIXI.settings.RENDER_OPTIONS.resolution = window.devicePixelRatio
+PIXI.GRAPHICS_CURVES.adaptive = true
+// PIXI.settings.PREFER_ENV = 1
+// PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
+// PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
+
+function getMonitorRefreshRate(iterations = 10) {
+    return new Promise(resolve => {
+        const results: number[] = []
+        let lastTimestamp = 0
+        let i = 0
+
+        const fn = (timestamp: number) => {
+            results.push(1000 / (timestamp - lastTimestamp))
+            lastTimestamp = timestamp
+            i++
+            if (i < iterations) requestAnimationFrame(fn)
+            else resolve(Math.ceil(Math.max(...results)))
+        }
+        requestAnimationFrame(fn)
+    })
+}
+getMonitorRefreshRate().then((fps: number) => PIXI.settings.TARGET_FPMS = fps / 1000)
+
+G.app = new PIXI.Application({ view: document.getElementById('editor') as HTMLCanvasElement })
 
 // https://github.com/pixijs/pixi.js/issues/3928
 // G.app.renderer.plugins.interaction.moveWhenInside = true
 // G.app.renderer.plugins.interaction.interactionFrequency = 1
 
-G.app.renderer.autoResize = true
 G.app.renderer.resize(window.innerWidth, window.innerHeight)
 window.addEventListener('resize', () => {
     G.app.renderer.resize(window.innerWidth, window.innerHeight)
     G.BPC.viewport.setSize(G.app.screen.width, G.app.screen.height)
     G.BPC.viewport.updateTransform()
-    G.BPC.updateViewportCulling()
 }, false)
-
-PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
-// PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
-// PIXI.settings.GC_MODE = PIXI.GC_MODES.MANUAL
-PIXI.Graphics.CURVES.adaptive = true
 
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)
@@ -91,6 +107,12 @@ G.app.stage.addChild(G.toolbarContainer)
 
 G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
 G.app.stage.addChild(G.quickbarContainer)
+
+G.dialogsContainer = new PIXI.Container()
+G.app.stage.addChild(G.dialogsContainer)
+
+G.paintIconContainer = new PIXI.Container()
+G.app.stage.addChild(G.paintIconContainer)
 
 Promise.all(
     [
@@ -157,15 +179,24 @@ function loadBp(bp: string, clearData = true) {
         .catch(error => console.error(error))
 }
 
-window.addEventListener('unload', () => G.app.destroy(true, true))
+// If the tab is not active then stop the app
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') G.app.start()
+    else G.app.stop()
+})
+
+window.addEventListener('unload', () => {
+    G.app.stop()
+    G.app.renderer.textureGC.unload(G.app.stage)
+    G.app.destroy()
+})
 
 document.addEventListener('mousemove', e => {
     G.gridData.update(e.clientX, e.clientY, G.BPC)
 
-    if (G.currentMouseState === G.mouseStates.PANNING && !actions.movingViaKeyboard) {
+    if (G.currentMouseState === G.mouseStates.PANNING) {
         G.BPC.viewport.translateBy(e.movementX, e.movementY)
         G.BPC.viewport.updateTransform()
-        G.BPC.updateViewportCulling()
     }
 })
 
@@ -211,19 +242,18 @@ actions.clear.bind(() => {
 actions.takePicture.bind(() => {
     if (G.bp.isEmpty()) return
 
-    G.BPC.enableRenderableOnChildren()
     if (G.renderOnly) G.BPC.cacheAsBitmap = false
-    const texture = G.app.renderer.generateTexture(G.BPC)
-    if (G.renderOnly) G.BPC.cacheAsBitmap = true
-    G.BPC.updateViewportCulling()
 
+    const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1)
     texture.frame = G.BPC.getBlueprintBounds()
-    texture._updateUvs()
+    texture.updateUvs()
 
     G.app.renderer.plugins.extract.canvas(new PIXI.Sprite(texture)).toBlob((blob: Blob) => {
         FileSaver.saveAs(blob, G.bp.name + '.png')
         console.log('Saved BP Image')
     })
+
+    if (G.renderOnly) G.BPC.cacheAsBitmap = true
 })
 
 actions.showInfo.bind(() => {
@@ -244,7 +274,7 @@ actions.inventory.bind(() => {
         if (Dialog.anyOpen()) {
             Dialog.closeLast()
         } else {
-            new InventoryContainer('Inventory', undefined, G.BPC.spawnEntityAtMouse.bind(G.BPC))
+            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
                 .show()
         }
     }
@@ -270,22 +300,14 @@ actions.reverseRotate.bind(() => {
 
 actions.pipette.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
-        G.currentMouseState = G.mouseStates.PAINTING
 
-        const hoverContainer = G.BPC.hoverContainer
-        G.BPC.hoverContainer.pointerOutEventHandler()
+        const entity = G.BPC.hoverContainer.entity
+        const itemName = entity.entityData.minable.result
+        const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
+        G.BPC.spawnPaintContainer(itemName, direction)
 
-        const entity = hoverContainer.entity
-        G.BPC.paintContainer = new EntityPaintContainer(entity.name,
-            entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction,
-            hoverContainer.position)
-
-        G.BPC.paintContainer.moveAtCursor()
-        G.BPC.addChild(G.BPC.paintContainer)
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.destroy()
-        G.currentMouseState = G.mouseStates.NONE
-        G.BPC.updateHoverContainer()
     }
 })
 

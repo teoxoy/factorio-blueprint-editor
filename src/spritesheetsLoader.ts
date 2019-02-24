@@ -8,10 +8,10 @@ import utilitySpritesheetPNG from 'factorio-data/data/graphics/utilitySpriteshee
 import utilitySpritesheetJSON from 'factorio-data/data/graphics/utilitySpritesheet.json'
 import tilesSpritesheetPNG from 'factorio-data/data/graphics/tileSpritesheet.png'
 import tilesSpritesheetJSON from 'factorio-data/data/graphics/tileSpritesheet.json'
+import * as PIXI from 'pixi.js'
 
 import G from './common/globals'
 import util from './common/util'
-import { EntityContainer } from './containers/entity'
 
 function getAllPromises() {
     return [
@@ -26,10 +26,7 @@ function getAllPromises() {
 function changeQuality(hr: boolean) {
     G.loadingScreen.show()
 
-    G.BPC.entities.children.forEach((eC: EntityContainer) => {
-        eC.entitySprites.forEach(eS => eS.destroy())
-        eC.entitySprites = []
-    })
+    G.BPC.clearData()
 
     Object.keys(PIXI.utils.TextureCache)
         .filter(texture => texture.includes('graphics/entity/'))
@@ -39,27 +36,43 @@ function changeQuality(hr: boolean) {
         hr ? HRentitySpritesheetPNG : LRentitySpritesheetPNG,
         hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
     ).then(() => {
-        G.BPC.entities.children.forEach((eC: EntityContainer) => eC.redraw(false, false))
-        G.BPC.sortEntities()
+        G.BPC.initBP()
         G.loadingScreen.hide()
     })
 }
 
 function loadSpritesheet(src: string, json: any) {
-    return new Promise((resolve, reject) => {
-        const image = new Image()
-        image.src = src
-        image.onload = () => {
-            const tempCanvas = document.createElement('canvas')
-            tempCanvas.width = util.nearestPowerOf2(image.width)
-            tempCanvas.height = util.nearestPowerOf2(image.height)
-            tempCanvas.getContext('2d').drawImage(image, 0, 0)
-            const baseTexture = PIXI.BaseTexture.fromCanvas(tempCanvas)
-            new PIXI.Spritesheet(baseTexture, json)
-                .parse(() => G.app.renderer.plugins.prepare.upload(baseTexture, resolve))
-        }
-        image.onerror = reject
-    })
+    return fetch(src)
+        .then(response => response.blob())
+        .then(blob => {
+            if (!!window.createImageBitmap) return createImageBitmap(blob)
+
+            // Polyfill
+            return new Promise(resolve => {
+                const img = new Image()
+                img.onload = () => resolve(img)
+                img.src = URL.createObjectURL(blob)
+            })
+        })
+        .then((imageData: ImageBitmap | HTMLImageElement) => {
+            const getPow2Canvas = () => {
+                const c = document.createElement('canvas')
+                c.width = util.nearestPowerOf2(imageData.width)
+                c.height = util.nearestPowerOf2(imageData.height)
+                c.getContext('2d').drawImage(imageData, 0, 0)
+                return c
+            }
+            // if WebGL1, make the spritesheet a power of 2 so that it generates mipmaps
+            // WebGL2 generates mipmaps even with non pow 2 textures
+            const resource = G.app.renderer.context.webGLVersion === 1
+                ? new PIXI.resources.CanvasResource(getPow2Canvas())
+                : new PIXI.resources.BaseImageResource(imageData)
+
+            const baseTexture = new PIXI.BaseTexture(resource)
+            // bind the baseTexture, this will also upload it to the GPU
+            G.app.renderer.texture.bind(baseTexture)
+            return new Promise(resolve => new PIXI.Spritesheet(baseTexture, json).parse(resolve))
+        })
 }
 
 export default {

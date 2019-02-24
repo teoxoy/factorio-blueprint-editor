@@ -1,5 +1,6 @@
 import FD from 'factorio-data'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
+import * as PIXI from 'pixi.js'
 
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
 
@@ -59,9 +60,6 @@ export class UnderlayContainer extends PIXI.Container {
     constructor() {
         super()
 
-        this.interactive = false
-        this.interactiveChildren = false
-
         this.active = []
         this.logistics0 = new PIXI.Container()
         this.logistics1 = new PIXI.Container()
@@ -100,7 +98,7 @@ export class UnderlayContainer extends PIXI.Container {
         this.active = []
     }
 
-    createNewArea(entityName: string, position?: PIXI.Point | PIXI.ObservablePoint) {
+    createNewArea(entityName: string, position?: IPoint) {
         const aVData = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (aVData) {
             const ed = FD.entities[entityName]
@@ -119,7 +117,7 @@ export class UnderlayContainer extends PIXI.Container {
             }
         }
 
-        function createVisualizationArea(radius: number, color: number, position?: PIXI.Point | PIXI.ObservablePoint, alpha = 0.25) {
+        function createVisualizationArea(radius: number, color: number, position?: IPoint, alpha = 0.25) {
             const aV = new PIXI.Sprite(PIXI.Texture.WHITE)
             const S = radius * 64
             aV.width = S
@@ -129,7 +127,7 @@ export class UnderlayContainer extends PIXI.Container {
             aV.alpha = alpha
             if (position) {
                 aV.visible = false
-                aV.position.copy(position)
+                aV.position.set(position.x, position.y)
             }
             return aV
         }

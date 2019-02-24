@@ -1,6 +1,7 @@
 import G from '../common/globals'
 import F from './functions'
 import Panel from './panel'
+import * as PIXI from 'pixi.js'
 
 /**
  * Base Dialog for usage whenever a dialog shall be shown to the user
@@ -64,7 +65,7 @@ export default class Dialog extends Panel {
     /** Show Dialog */
     public show(): void {
         Dialog.s_openDialogs.push(this)
-        G.app.stage.addChild(this)
+        G.dialogsContainer.addChild(this)
         this.visible = true
     }
 
@@ -73,6 +74,7 @@ export default class Dialog extends Panel {
         Dialog.s_openDialogs = Dialog.s_openDialogs
             .filter(d => d !== this)
 
+        this.emit('close')
         this.destroy()
     }
 

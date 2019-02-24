@@ -1,4 +1,5 @@
 import G from '../common/globals'
+import * as PIXI from 'pixi.js'
 
 export class ToolbarContainer extends PIXI.Container {
 
@@ -9,9 +10,6 @@ export class ToolbarContainer extends PIXI.Container {
 
     constructor() {
         super()
-
-        this.interactive = false
-        this.interactiveChildren = false
 
         const background = new PIXI.Sprite(PIXI.Texture.WHITE)
         background.width = G.app.screen.width
