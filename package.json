@@ -8,6 +8,8 @@
     "type": "git",
     "url": "git://github.com/Teoxoy/factorio-blueprint-editor.git"
   },
+  "bugs": "https://github.com/Teoxoy/factorio-blueprint-editor/issues",
+  "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
   "scripts": {
     "start": "parcel src/index.html --port 8080",
     "prebuild": "rimraf dist/*",
