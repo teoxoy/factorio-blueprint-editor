@@ -64,9 +64,6 @@ export class QuickbarContainer extends Panel {
         this.iHeight = 24 + rows * 38
         this.slots = new Array<QuickbarSlot>(rows * 10)
 
-        this.on('pointerover', () => { if (G.BPC.paintContainer) G.BPC.paintContainer.hide() })
-        this.on('pointerout',  () => { if (G.BPC.paintContainer) G.BPC.paintContainer.show() })
-
         this.slotsContainer = new PIXI.Container()
         this.slotsContainer.position.set(12, 12)
         this.addChild(this.slotsContainer)

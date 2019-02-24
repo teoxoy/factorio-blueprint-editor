@@ -115,10 +115,6 @@ export class InventoryContainer extends Dialog {
     constructor(title: string = 'Inventory', itemsFilter?: string[], selectedCallBack?: (selectedItem: string) => void) {
         super(404, 442, Dialog.capitalize(title))
 
-        this.on('pointerover', () => { if (G.BPC.paintContainer !== undefined) G.BPC.paintContainer.hide() })
-        this.on('pointerout',  () => { if (G.BPC.paintContainer !== undefined) G.BPC.paintContainer.show() })
-        this.on('close', () => { if (G.BPC.paintContainer !== undefined) G.BPC.paintContainer.show() })
-
         this.m_InventoryGroups = new PIXI.Container()
         this.m_InventoryGroups.position.set(12, 46)
         this.addChild(this.m_InventoryGroups)

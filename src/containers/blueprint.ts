@@ -112,7 +112,7 @@ export class BlueprintContainer extends PIXI.Container {
         }
 
         G.gridData.onUpdate(() => {
-            if (this.paintContainer) this.paintContainer.moveAtCursor()
+            if (G.currentMouseState === G.mouseStates.PAINTING) this.paintContainer.moveAtCursor()
 
             // Instead of decreasing the global interactionFrequency, call the over and out entity events here
             this.updateHoverContainer()
@@ -134,8 +134,8 @@ export class BlueprintContainer extends PIXI.Container {
             this.cursor = 'inherit'
         }
 
-        if (this.paintContainer && this.hoverContainer) {
-            removeHoverContainer()
+        if (G.currentMouseState === G.mouseStates.PAINTING) {
+            if (this.hoverContainer) removeHoverContainer()
             return
         }
 
@@ -329,7 +329,11 @@ export class BlueprintContainer extends PIXI.Container {
         const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
         const placeResult = itemData.place_result || tileResult
 
-        if (this.paintContainer) this.paintContainer.destroy()
+        if (G.currentMouseState === G.mouseStates.PAINTING) this.paintContainer.destroy()
+
+        G.currentMouseState = G.mouseStates.PAINTING
+        this.updateHoverContainer()
+        this.cursor = 'pointer'
 
         if (tileResult) {
             this.paintContainer = new TilePaintContainer(
@@ -358,9 +362,5 @@ export class BlueprintContainer extends PIXI.Container {
             this.updateHoverContainer()
             this.cursor = 'inherit'
         })
-
-        G.currentMouseState = G.mouseStates.PAINTING
-        this.updateHoverContainer()
-        this.cursor = 'pointer'
     }
 }

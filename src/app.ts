@@ -358,7 +358,7 @@ actions.zoomOut.bind(() => {
 })
 
 actions.build.bind(() => {
-    if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
+    if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.placeEntityContainer()
     }
 })
@@ -367,7 +367,7 @@ actions.mine.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.bp.removeEntity(G.BPC.hoverContainer.entity)
     }
-    if (G.BPC.paintContainer && G.currentMouseState === G.mouseStates.PAINTING) {
+    if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.removeContainerUnder()
     }
 })
