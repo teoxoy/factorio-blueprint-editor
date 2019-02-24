@@ -243,6 +243,7 @@ actions.takePicture.bind(() => {
     if (G.bp.isEmpty()) return
 
     if (G.renderOnly) G.BPC.cacheAsBitmap = false
+    G.BPC.viewportCulling = false
 
     const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1)
     texture.frame = G.BPC.getBlueprintBounds()
@@ -254,6 +255,7 @@ actions.takePicture.bind(() => {
     })
 
     if (G.renderOnly) G.BPC.cacheAsBitmap = true
+    G.BPC.viewportCulling = true
 })
 
 actions.showInfo.bind(() => {

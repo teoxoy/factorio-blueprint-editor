@@ -33,15 +33,17 @@ class OptimizedContainer extends PIXI.Container {
     }
     render(renderer: PIXI.Renderer) {
         for (const c of this.children) {
-            // faster than using c.getBounds()
-            const shouldRender = !(
-                (c.cachedBounds[0] * this.worldTransform.a + c.worldTransform.tx) > G.app.screen.width ||
-                (c.cachedBounds[1] * this.worldTransform.d + c.worldTransform.ty) > G.app.screen.height ||
-                (c.cachedBounds[2] * this.worldTransform.a + c.worldTransform.tx) < G.positionBPContainer.x ||
-                (c.cachedBounds[3] * this.worldTransform.d + c.worldTransform.ty) < G.positionBPContainer.y
-            )
 
-            if (shouldRender) c.render(renderer)
+            if (G.BPC.viewportCulling) {
+                // faster than using c.getBounds()
+                if ((c.cachedBounds[0] * this.worldTransform.a + c.worldTransform.tx) > G.app.screen.width ||
+                    (c.cachedBounds[1] * this.worldTransform.d + c.worldTransform.ty) > G.app.screen.height ||
+                    (c.cachedBounds[2] * this.worldTransform.a + c.worldTransform.tx) < G.positionBPContainer.x ||
+                    (c.cachedBounds[3] * this.worldTransform.d + c.worldTransform.ty) < G.positionBPContainer.y
+                ) continue
+            }
+
+            c.render(renderer)
         }
     }
 }
@@ -59,6 +61,7 @@ export class BlueprintContainer extends PIXI.Container {
     viewport: Viewport
     hoverContainer: EntityContainer
     paintContainer: PaintContainer
+    viewportCulling = true
 
     constructor() {
         super()
