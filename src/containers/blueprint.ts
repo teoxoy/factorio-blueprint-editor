@@ -1,4 +1,9 @@
 import G from '../common/globals'
+import FD from 'factorio-data'
+import util from '../common/util'
+import actions from '../actions'
+import Entity from '../factorio-data/entity'
+import Tile from '../factorio-data/tile'
 import { Viewport } from '../viewport'
 import { WiresContainer } from './wires'
 import { UnderlayContainer } from './underlay'
@@ -8,11 +13,7 @@ import { OverlayContainer } from './overlay'
 import { EntityPaintContainer } from './paintEntity'
 import { TileContainer } from './tile'
 import { TilePaintContainer } from './paintTile'
-import util from '../common/util'
-import FD from 'factorio-data'
-import actions from '../actions'
-import Entity from '../factorio-data/entity'
-import Tile from '../factorio-data/tile'
+import { PaintContainer } from './paint'
 import * as PIXI from 'pixi.js'
 
 // This container improves rendering time by around 10-40% and has baked in viewport culling
@@ -56,8 +57,8 @@ export class BlueprintContainer extends PIXI.Container {
     tileSprites: OptimizedContainer
     entitySprites: OptimizedContainer
     viewport: Viewport
-    hoverContainer: undefined | EntityContainer
-    paintContainer: undefined | EntityPaintContainer | TilePaintContainer
+    hoverContainer: EntityContainer
+    paintContainer: PaintContainer
 
     constructor() {
         super()
@@ -83,7 +84,7 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.addChild(
             this.tileSprites, this.tilePaintSlot, this.underlayContainer,
-            this.entitySprites, this.entityPaintSlot, this.wiresContainer, this.overlayContainer
+            this.entitySprites, this.wiresContainer, this.overlayContainer, this.entityPaintSlot
         )
 
         G.app.ticker.add(() => {
@@ -246,7 +247,7 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.addChild(
             this.grid, this.tileSprites, this.tilePaintSlot, this.underlayContainer,
-            this.entitySprites, this.entityPaintSlot, this.wiresContainer, this.overlayContainer
+            this.entitySprites, this.wiresContainer, this.overlayContainer, this.entityPaintSlot
         )
 
         G.currentMouseState = G.mouseStates.NONE
