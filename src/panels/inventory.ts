@@ -113,7 +113,7 @@ export class InventoryContainer extends Dialog {
      * Height : 10 + 16 + 10 + 36 + 8 = 78
      */
     constructor(title: string = 'Inventory', itemsFilter?: string[], selectedCallBack?: (selectedItem: string) => void) {
-        super(404, 442, Dialog.capitalize(title))
+        super(404, 442, title)
 
         this.m_InventoryGroups = new PIXI.Container()
         this.m_InventoryGroups.position.set(12, 46)
@@ -256,7 +256,7 @@ export class InventoryContainer extends Dialog {
     private updateRecipeVisualization(recipeName?: string) {
 
         // Update Recipe Label
-        this.m_RecipeLabel.text = recipeName === undefined ? undefined : Dialog.capitalize(recipeName)
+        this.m_RecipeLabel.text = recipeName === undefined ? undefined : FD.recipes[recipeName].ui_name
 
         // Update Recipe Container
         this.m_RecipeContainer.removeChildren()

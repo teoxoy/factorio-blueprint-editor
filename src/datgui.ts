@@ -3,6 +3,7 @@ import G from './common/globals'
 import * as dat from 'dat.gui'
 import { QuickbarContainer } from './panels/quickbar'
 import spritesheetsLoader from './spritesheetsLoader'
+import FD from 'factorio-data'
 
 export default function initDatGui() {
     const gui = new dat.GUI({
@@ -92,12 +93,7 @@ export default function initDatGui() {
         .add(G.oilOutpostSettings, 'DEBUG')
         .name('Debug')
     oilOutpostFolder
-        .add(G.oilOutpostSettings, 'PUMPJACK_MODULE', [
-            'none',
-            'speed_module_3', 'speed_module_2', 'speed_module',
-            'productivity_module_3', 'productivity_module_2', 'productivity_module',
-            'effectivity_module_3', 'effectivity_module_2', 'effectivity_module'
-        ])
+        .add(G.oilOutpostSettings, 'PUMPJACK_MODULE', getModulesObjFor('pumpjack'))
         .name('Pumpjack Modules')
     oilOutpostFolder
         .add(G.oilOutpostSettings, 'MIN_GAP_BETWEEN_UNDERGROUNDS', 1, 9, 1)
@@ -109,14 +105,26 @@ export default function initDatGui() {
         .add(G.oilOutpostSettings, 'MIN_AFFECTED_ENTITIES', 1, 12, 1)
         .name('Min Affect. Pumpjacks')
     oilOutpostFolder
-        .add(G.oilOutpostSettings, 'BEACON_MODULE', [
-            'speed_module_3', 'speed_module_2', 'speed_module',
-            'effectivity_module_3', 'effectivity_module_2', 'effectivity_module'
-        ])
+        .add(G.oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon'))
         .name('Beacon Modules')
     oilOutpostFolder
         .add(actions.generateOilOutpost, 'call')
         .name('Generate (g)')
+
+    function getModulesObjFor(entityName: string) {
+        return Object.keys(FD.items)
+            .map(k => FD.items[k])
+            .filter(item => item.type === 'module')
+            // filter modules based on entity allowed_effects (ex: beacons don't accept productivity effect)
+            .filter(item =>
+                !FD.entities[entityName].allowed_effects ||
+                Object.keys(item.effect).every(effect => FD.entities[entityName].allowed_effects.includes(effect))
+            )
+            .reduce((obj, item) => {
+                obj[item.ui_name] = item.name
+                return obj
+            }, { None: 'none' })
+    }
 
     // Keybinds folder
     const keybindsFolder = gui.addFolder('Keybinds')

@@ -49,7 +49,7 @@ export abstract class PaintContainer extends PIXI.Container {
     }
 
     // override
-    rotate() {
+    rotate(ccw?: boolean) {
         return
     }
 

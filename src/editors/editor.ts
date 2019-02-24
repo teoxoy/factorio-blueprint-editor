@@ -22,7 +22,7 @@ export default abstract class Editor extends Dialog {
      * @param entity - Reference to Entity Data
      */
     constructor(width: number, height: number, entity: Entity) {
-        super(width, height, Dialog.capitalize(entity.name))
+        super(width, height, entity.entityData.ui_name)
 
         // Store reference to entity for later use
         this.m_Entity = entity
