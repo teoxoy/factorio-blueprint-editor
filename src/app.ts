@@ -338,10 +338,12 @@ actions.generateOilOutpost.bind(() => {
 actions.pan.bind(() => {
     if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         G.currentMouseState = G.mouseStates.PANNING
+        G.BPC.cursor = 'move'
     }
 }, () => {
     if (G.currentMouseState === G.mouseStates.PANNING) {
         G.currentMouseState = G.mouseStates.NONE
+        G.BPC.cursor = 'inherit'
     }
 })
 
