@@ -12,7 +12,7 @@ import bpString from './factorio-data/bpString'
 
 import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
-import { TilePaintContainer } from './containers/tilePaint'
+import { TilePaintContainer } from './containers/paintTile'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './panels/toolbar'
 import { QuickbarContainer } from './panels/quickbar'

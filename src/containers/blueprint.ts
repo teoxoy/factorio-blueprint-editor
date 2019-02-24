@@ -5,9 +5,9 @@ import { UnderlayContainer } from './underlay'
 import { EntitySprite } from '../entitySprite'
 import { EntityContainer } from './entity'
 import { OverlayContainer } from './overlay'
-import { EntityPaintContainer } from './entityPaint'
+import { EntityPaintContainer } from './paintEntity'
 import { TileContainer } from './tile'
-import { TilePaintContainer } from './tilePaint'
+import { TilePaintContainer } from './paintTile'
 import util from '../common/util'
 import FD from 'factorio-data'
 import actions from '../actions'
@@ -336,11 +336,11 @@ export class BlueprintContainer extends PIXI.Container {
         } else {
             this.paintContainer = new EntityPaintContainer(
                 placeResult,
-                direction,
                 EntityContainer.getPositionFromData(
                     G.gridData.position,
                     util.switchSizeBasedOnDirection(FD.entities[placeResult].size, 0)
-                )
+                ),
+                direction
             )
             this.entityPaintSlot.addChild(this.paintContainer)
         }
@@ -349,9 +349,11 @@ export class BlueprintContainer extends PIXI.Container {
             this.paintContainer = undefined
             G.currentMouseState = G.mouseStates.NONE
             this.updateHoverContainer()
+            this.cursor = 'inherit'
         })
 
         G.currentMouseState = G.mouseStates.PAINTING
         this.updateHoverContainer()
+        this.cursor = 'pointer'
     }
 }

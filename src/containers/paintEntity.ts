@@ -1,40 +1,25 @@
 import G from '../common/globals'
-import util from '../common/util'
 import FD from 'factorio-data'
+import util from '../common/util'
 import { EntityContainer } from './entity'
-import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import { UnderlayContainer } from './underlay'
-import { InventoryContainer } from '../panels/inventory'
 import { EntitySprite } from '../entitySprite'
+import { PaintContainer } from './paint'
 import * as PIXI from 'pixi.js'
 
-export class EntityPaintContainer extends PIXI.Container {
+export class EntityPaintContainer extends PaintContainer {
+
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
     directionType: 'input' | 'output'
     direction: number
-    filter: AdjustmentFilter
-    icon: PIXI.DisplayObject
 
-    constructor(name: string, direction: number, position: IPoint) {
-        super()
-        this.name = name
+    constructor(name: string, position: IPoint, direction: number) {
+        super(name, position)
+
         this.direction = direction
         this.directionType = 'input'
-        this.position.set(position.x, position.y)
-        this.filter = new AdjustmentFilter({ blue: 0.4 })
-        this.filters = [this.filter]
+
         this.checkBuildable()
-
-        this.interactive = true
-        this.interactiveChildren = false
-        this.buttonMode = true
-
-        this.icon = InventoryContainer.createIcon(this.getItemName())
-        this.icon.visible = false
-        G.paintIconContainer.addChild(this.icon)
-        this.changeIconPos = this.changeIconPos.bind(this)
-        window.addEventListener('mousemove', this.changeIconPos)
-        this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
 
         this.areaVisualization = G.BPC.underlayContainer.createNewArea(this.name)
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
@@ -46,35 +31,21 @@ export class EntityPaintContainer extends PIXI.Container {
         this.redraw()
     }
 
-    changeIconPos(e: IPoint) {
-        this.icon.position.set(e.x + 16, e.y + 16)
-    }
-
     hide() {
-        this.visible = false
         G.BPC.underlayContainer.deactivateActiveAreas()
-
-        this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
-        this.icon.visible = true
+        super.hide()
     }
 
     show() {
-        this.visible = true
         G.BPC.underlayContainer.activateRelatedAreas(this.name)
-
-        this.icon.visible = false
+        super.show()
     }
 
     destroy() {
-        this.emit('destroy')
-
-        super.destroy()
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
         G.BPC.overlayContainer.hideUndergroundLines()
-
-        window.removeEventListener('mousemove', this.changeIconPos)
-        this.icon.destroy()
+        super.destroy()
     }
 
     getItemName() {
@@ -153,13 +124,6 @@ export class EntityPaintContainer extends PIXI.Container {
             direction: this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
             directionType: this.directionType
         }, G.hr, true))
-        const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
-        this.hitArea = new PIXI.Rectangle(
-            -size.x * 16,
-            -size.y * 16,
-            size.x * 32,
-            size.y * 32
-        )
     }
 
     moveAtCursor() {

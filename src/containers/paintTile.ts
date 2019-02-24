@@ -1,12 +1,10 @@
 import G from '../common/globals'
-import { EntityContainer } from './entity'
-import { AdjustmentFilter } from '@pixi/filter-adjustment'
-import { TileContainer } from './tile'
 import FD from 'factorio-data'
-import { InventoryContainer } from '../panels/inventory'
-import * as PIXI from 'pixi.js'
+import { EntityContainer } from './entity'
+import { TileContainer } from './tile'
+import { PaintContainer } from './paint'
 
-export class TilePaintContainer extends PIXI.Container {
+export class TilePaintContainer extends PaintContainer {
 
     static size = 2
 
@@ -20,66 +18,27 @@ export class TilePaintContainer extends PIXI.Container {
         })
     }
 
-    areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
-    directionType: string
-    direction: string
-    filter: AdjustmentFilter
-    icon: PIXI.DisplayObject
-
     constructor(name: string, position: IPoint) {
-        super()
-
-        this.name = name
-        this.direction = 'left'
-
-        this.position.set(position.x, position.y)
-
-        this.filter = new AdjustmentFilter({ red: 0.4, green: 1, blue: 0.4 })
-        this.filters = [this.filter]
-
-        this.interactive = true
-        this.interactiveChildren = false
-        this.buttonMode = true
-
-        this.icon = InventoryContainer.createIcon(this.getItemName())
-        this.icon.visible = false
-        G.paintIconContainer.addChild(this.icon)
-        this.changeIconPos = this.changeIconPos.bind(this)
-        window.addEventListener('mousemove', this.changeIconPos)
-        this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
+        super(name, position)
 
         G.BPC.transparentEntities()
 
         this.redraw()
     }
 
-    changeIconPos(e: IPoint) {
-        this.icon.position.set(e.x + 16, e.y + 16)
-    }
-
     hide() {
-        this.visible = false
         G.BPC.transparentEntities(false)
-
-        this.changeIconPos(G.app.renderer.plugins.interaction.mouse.global)
-        this.icon.visible = true
+        super.hide()
     }
 
     show() {
-        this.visible = true
         G.BPC.transparentEntities()
-
-        this.icon.visible = false
+        super.show()
     }
 
     destroy() {
-        this.emit('destroy')
-
         G.BPC.transparentEntities(false)
         super.destroy()
-
-        window.removeEventListener('mousemove', this.changeIconPos)
-        this.icon.destroy()
     }
 
     getItemName() {
@@ -126,13 +85,6 @@ export class TilePaintContainer extends PIXI.Container {
             s.alpha = 0.5
             return s
         }))
-
-        this.hitArea = new PIXI.Rectangle(
-            -TilePaintContainer.size * 16,
-            -TilePaintContainer.size * 16,
-            TilePaintContainer.size * 32,
-            TilePaintContainer.size * 32
-        )
     }
 
     moveAtCursor() {
