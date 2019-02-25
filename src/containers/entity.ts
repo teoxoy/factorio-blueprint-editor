@@ -220,7 +220,7 @@ export class EntityContainer {
     redraw(ignore_connections?: boolean, sort = true) {
         for (const s of this.entitySprites) s.destroy()
         this.entitySprites = []
-        for (const s of EntitySprite.getParts(this.m_Entity, G.hr, ignore_connections)) {
+        for (const s of EntitySprite.getParts(this.m_Entity, G.quality.hr, ignore_connections)) {
             s.setPosition(this.position)
             this.entitySprites.push(s)
             G.BPC.entitySprites.addChild(s)

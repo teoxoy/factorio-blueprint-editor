@@ -123,7 +123,7 @@ export class EntityPaintContainer extends PaintContainer {
             name: this.name,
             direction: this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
             directionType: this.directionType
-        }, G.hr, true))
+        }, G.quality.hr, true))
     }
 
     moveAtCursor() {

@@ -7,7 +7,10 @@ import * as PIXI from 'pixi.js'
 
 // tslint:disable:prefer-const
 
-let hr = false
+const quality = {
+    hr: true,
+    compressed: true
+}
 
 let app: PIXI.Application
 
@@ -247,7 +250,7 @@ let oilOutpostSettings = {
 }
 
 export default {
-    hr,
+    quality,
     renderOnly,
     BPC,
     app,
