@@ -1,6 +1,5 @@
 import G from '../common/globals'
 import FD from 'factorio-data'
-import { EntityContainer } from './entity'
 import { TileContainer } from './tile'
 import { PaintContainer } from './paint'
 
@@ -18,11 +17,12 @@ export class TilePaintContainer extends PaintContainer {
         })
     }
 
-    constructor(name: string, position: IPoint) {
-        super(name, position)
+    constructor(name: string) {
+        super(name)
 
         G.BPC.transparentEntities()
 
+        this.moveAtCursor()
         this.redraw()
     }
 
@@ -48,23 +48,15 @@ export class TilePaintContainer extends PaintContainer {
     increaseSize() {
         if (TilePaintContainer.size === 20) return
         TilePaintContainer.size++
-        this.reposition()
+        this.moveAtCursor()
         this.redraw()
     }
 
     decreaseSize() {
         if (TilePaintContainer.size === 1) return
         TilePaintContainer.size--
-        this.reposition()
+        this.moveAtCursor()
         this.redraw()
-    }
-
-    reposition() {
-        const pos = EntityContainer.getPositionFromData(
-            G.gridData.position,
-            { x: TilePaintContainer.size, y: TilePaintContainer.size }
-        )
-        this.position.set(pos.x, pos.y)
     }
 
     rotate() {
@@ -88,28 +80,28 @@ export class TilePaintContainer extends PaintContainer {
     }
 
     moveAtCursor() {
-        const position = G.gridData.position
-        const pos = EntityContainer.getPositionFromData(
-            position,
-            { x: TilePaintContainer.size, y: TilePaintContainer.size }
-        )
-        this.position.set(pos.x, pos.y)
+        this.setNewPosition({
+            x: TilePaintContainer.size,
+            y: TilePaintContainer.size
+        })
     }
 
     removeContainerUnder() {
-        const position = EntityContainer.getGridPosition(this.position)
+        const position = this.getGridPosition()
 
         G.bp.removeTiles(
-            TilePaintContainer.getTilePositions().map(p => ({ x: p.x + position.x, y: p.y + position.y }))
+            TilePaintContainer.getTilePositions()
+                .map(p => ({ x: p.x + position.x, y: p.y + position.y }))
         )
     }
 
     placeEntityContainer() {
-        const position = EntityContainer.getGridPosition(this.position)
+        const position = this.getGridPosition()
 
         G.bp.createTiles(
             this.name,
-            TilePaintContainer.getTilePositions().map(p => ({ x: p.x + position.x, y: p.y + position.y }))
+            TilePaintContainer.getTilePositions()
+                .map(p => ({ x: p.x + position.x, y: p.y + position.y }))
         )
     }
 }

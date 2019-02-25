@@ -31,7 +31,7 @@ function getAllPromises() {
     ].map(data => loadSpritesheet(data[0], data[1]))
 }
 
-function changeQuality(hr: boolean) {
+function changeQuality(hr: boolean, compressed: boolean) {
     G.loadingScreen.show()
 
     G.BPC.clearData()
@@ -42,8 +42,8 @@ function changeQuality(hr: boolean) {
 
     loadSpritesheet(
         hr
-            ? (G.quality.compressed ? HRentitySpritesheetCompressedPNG : HRentitySpritesheetPNG)
-            : (G.quality.compressed ? LRentitySpritesheetCompressedPNG : LRentitySpritesheetPNG),
+            ? (compressed ? HRentitySpritesheetCompressedPNG : HRentitySpritesheetPNG)
+            : (compressed ? LRentitySpritesheetCompressedPNG : LRentitySpritesheetPNG),
         hr
             ? HRentitySpritesheetJSON
             : LRentitySpritesheetJSON

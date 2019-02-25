@@ -99,9 +99,6 @@ window.addEventListener('resize', () => {
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)
 
-// Hack for plugging the mouse into keyboardJS
-actions.attachEventsToContainer(G.BPC)
-
 G.toolbarContainer = new ToolbarContainer()
 G.app.stage.addChild(G.toolbarContainer)
 
@@ -141,9 +138,6 @@ Promise.all(
 
     function finishSetup() {
         G.BPC.centerViewport()
-
-        G.gridData.update(window.innerWidth / 2, window.innerHeight / 2, G.BPC)
-
         G.loadingScreen.hide()
     }
 })
@@ -192,8 +186,6 @@ window.addEventListener('unload', () => {
 })
 
 document.addEventListener('mousemove', e => {
-    G.gridData.update(e.clientX, e.clientY, G.BPC)
-
     if (G.currentMouseState === G.mouseStates.PANNING) {
         G.BPC.viewport.translateBy(e.movementX, e.movementY)
         G.BPC.viewport.updateTransform()
