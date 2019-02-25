@@ -95,6 +95,11 @@ const canvasEl = document.getElementById('editor') as HTMLCanvasElement
 // Bind the events on the canvas
 keyboardJS.watch(canvasEl)
 
+// keyboardJS.watch will bind keydown and keyup events on the canvas but
+// keydown and keyup will only fire if the canvas is focused
+canvasEl.addEventListener('mouseover', () => canvasEl.focus())
+canvasEl.addEventListener('blur', () => { keyboardJS.releaseAllKeys() })
+
 // Set the general application keyboard context
 // Needed to have seperate context's for input controls (i.e. Textbox)
 keyboardJS.setContext('app')
