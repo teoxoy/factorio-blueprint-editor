@@ -87,6 +87,9 @@ export class InventoryContainer extends Dialog {
     /** Container for Recipe Tooltip */
     private readonly m_RecipeContainer: PIXI.Container
 
+    /** Hovered item for item pointerout check */
+    private m_hoveredItem: string
+
     /**
      *
      * Cols
@@ -175,8 +178,17 @@ export class InventoryContainer extends Dialog {
                             selectedCallBack(item.name)
                         }
                     })
-                    button.on('pointerover', () => this.updateRecipeVisualization(item.name))
-                    button.on('pointerout', () => this.updateRecipeVisualization(undefined))
+                    button.on('pointerover', () => {
+                        this.m_hoveredItem = item.name
+                        this.updateRecipeVisualization(item.name)
+                    })
+                    button.on('pointerout', () => {
+                        // we have to check this because pointerout can fire after pointerover
+                        if (this.m_hoveredItem === item.name) {
+                            this.m_hoveredItem = undefined
+                            this.updateRecipeVisualization(undefined)
+                        }
+                    })
 
                     inventoryGroupItems.addChild(button)
 
