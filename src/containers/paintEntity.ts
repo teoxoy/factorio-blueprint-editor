@@ -9,17 +9,24 @@ import * as PIXI from 'pixi.js'
 
 export class EntityPaintContainer extends PaintContainer {
 
+    static isContainerOutOfBpArea(newPos: IPoint, size: IPoint) {
+        return (
+            newPos.x - size.x / 2 < 0 ||
+            newPos.y - size.y / 2 < 0 ||
+            newPos.x + size.x / 2 > G.bpArea.width ||
+            newPos.y + size.y / 2 > G.bpArea.height
+        )
+    }
+
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
     directionType: 'input' | 'output'
     direction: number
 
-    constructor(name: string, position: IPoint, direction: number) {
-        super(name, position)
+    constructor(name: string, direction: number) {
+        super(name)
 
         this.direction = direction
         this.directionType = 'input'
-
-        this.checkBuildable()
 
         this.areaVisualization = G.BPC.underlayContainer.createNewArea(this.name)
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
@@ -28,6 +35,7 @@ export class EntityPaintContainer extends PaintContainer {
         })
         G.BPC.underlayContainer.activateRelatedAreas(this.name)
 
+        this.moveAtCursor()
         this.redraw()
     }
 
@@ -53,9 +61,9 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     checkBuildable() {
-        const position = EntityContainer.getGridPosition(this.position)
+        const position = this.getGridPosition()
         const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
-        if (!EntityContainer.isContainerOutOfBpArea(position, size) &&
+        if (!EntityPaintContainer.isContainerOutOfBpArea(position, size) &&
             (G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, this.direction, position) ||
             G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, this.direction, position) ||
             G.bp.entityPositionGrid.isAreaAvalible(this.name, position, this.direction))
@@ -102,16 +110,11 @@ export class EntityPaintContainer extends PaintContainer {
         const pr = FD.entities[this.name].possible_rotations
         if (!pr) return
         this.direction = pr[ (pr.indexOf(this.direction) + (ccw ? 3 : 1)) % pr.length ]
-        this.redraw()
-        const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
-        if (size.x !== size.y) {
-            const offset = G.gridData.calculateRotationOffset(this.position)
-            this.x += offset.x * 32
-            this.y += offset.y * 32
 
-            const pos = EntityContainer.getPositionFromData(this.position, size)
-            this.position.set(pos.x, pos.y)
-        }
+        const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
+        this.setNewPosition(size)
+
+        this.redraw()
         this.checkBuildable()
         this.updateUndergroundBeltRotation()
         this.updateUndergroundLines()
@@ -123,11 +126,11 @@ export class EntityPaintContainer extends PaintContainer {
             name: this.name,
             direction: this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
             directionType: this.directionType
-        }, G.hr, true))
+        }, G.quality.hr, true))
     }
 
     moveAtCursor() {
-        const position = G.gridData.position
+        const position = G.BPC.gridData.mousePositionInBPC
 
         switch (this.name) {
             case 'straight_rail':
@@ -140,8 +143,7 @@ export class EntityPaintContainer extends PaintContainer {
                 break
             default:
                 const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
-                const pos = EntityContainer.getPositionFromData(position, size)
-                this.position.set(pos.x, pos.y)
+                this.setNewPosition(size)
         }
 
         this.updateUndergroundBeltRotation()
@@ -154,8 +156,7 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     removeContainerUnder() {
-        const position = EntityContainer.getGridPosition(this.position)
-        const entity = G.bp.entities.get(G.bp.entityPositionGrid.getCellAtPosition(position))
+        const entity = G.bp.entities.get(G.bp.entityPositionGrid.getCellAtPosition(G.BPC.gridData))
         if (entity) {
             G.bp.removeEntity(entity)
             this.checkBuildable()
@@ -164,9 +165,9 @@ export class EntityPaintContainer extends PaintContainer {
 
     placeEntityContainer() {
         const fd = FD.entities[this.name]
-        const position = EntityContainer.getGridPosition(this.position)
+        const position = this.getGridPosition()
         const size = util.switchSizeBasedOnDirection(fd.size, this.direction)
-        if (EntityContainer.isContainerOutOfBpArea(position, size)) return
+        if (EntityPaintContainer.isContainerOutOfBpArea(position, size)) return
 
         const frgEntNr = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, this.direction, position)
         if (frgEntNr) {

@@ -1,5 +1,4 @@
 import keyboardJS from 'keyboardjs'
-import G from './common/globals'
 
 class Action {
 
@@ -96,6 +95,11 @@ const canvasEl = document.getElementById('editor') as HTMLCanvasElement
 // Bind the events on the canvas
 keyboardJS.watch(canvasEl)
 
+// keyboardJS.watch will bind keydown and keyup events on the canvas but
+// keydown and keyup will only fire if the canvas is focused
+canvasEl.addEventListener('mouseover', () => canvasEl.focus())
+canvasEl.addEventListener('blur', () => { keyboardJS.releaseAllKeys() })
+
 // Set the general application keyboard context
 // Needed to have seperate context's for input controls (i.e. Textbox)
 keyboardJS.setContext('app')
@@ -168,12 +172,6 @@ const actions = {
         }
     },
 
-    get movingViaKeyboard() {
-        return (this.moveUp.pressed !== this.moveDown.pressed ||
-            this.moveLeft.pressed !== this.moveRight.pressed) &&
-            G.currentMouseState !== G.mouseStates.PANNING
-    },
-
     forEachAction(cb: (action: Action, actionName: string) => void) {
         for (const actionName in this) {
             if (this[actionName] instanceof Action) {
@@ -207,12 +205,6 @@ keyboardJS._locale.bindKeyCode(301, ['mclick'])
 keyboardJS._locale.bindKeyCode(302, ['rclick'])
 keyboardJS._locale.bindKeyCode(303, ['wheelNeg'])
 keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
-
-G.gridData.onUpdate(() => {
-    if (actions.build.pressed) actions.build.call()
-    if (actions.mine.pressed) actions.mine.call()
-    if (actions.pasteEntitySettings.pressed) actions.pasteEntitySettings.call()
-})
 
 function loadKeybinds() {
     const changedKeybinds = JSON.parse(localStorage.getItem('keybinds'))

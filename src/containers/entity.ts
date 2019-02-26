@@ -43,37 +43,6 @@ const updateGroups = [
 export class EntityContainer {
     static mappings: Map<number, EntityContainer> = new Map()
 
-    static getGridPosition(containerPosition: IPoint) {
-        return {
-            x: Math.round(containerPosition.x / 32 * 10) / 10,
-            y: Math.round(containerPosition.y / 32 * 10) / 10
-        }
-    }
-
-    static getPositionFromData(currentPos: IPoint, size: IPoint) {
-        const res = { x: 0, y: 0 }
-        if (size.x % 2 === 0) {
-            const npx = currentPos.x - currentPos.x % 16
-            res.x = npx + (npx % 32 === 0 ? 0 : 16)
-        } else {
-            res.x = currentPos.x - currentPos.x % 32 + 16
-        }
-        if (size.y % 2 === 0) {
-            const npy = currentPos.y - currentPos.y % 16
-            res.y = npy + (npy % 32 === 0 ? 0 : 16)
-        } else {
-            res.y = currentPos.y - currentPos.y % 32 + 16
-        }
-        return res
-    }
-
-    static isContainerOutOfBpArea(newPos: IPoint, size: IPoint) {
-        return newPos.x - size.x / 2 < 0 ||
-            newPos.y - size.y / 2 < 0 ||
-            newPos.x + size.x / 2 > G.bpArea.width ||
-            newPos.y + size.y / 2 > G.bpArea.height
-    }
-
     areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
     entityInfo: PIXI.Container
     entitySprites: EntitySprite[]
@@ -220,7 +189,7 @@ export class EntityContainer {
     redraw(ignore_connections?: boolean, sort = true) {
         for (const s of this.entitySprites) s.destroy()
         this.entitySprites = []
-        for (const s of EntitySprite.getParts(this.m_Entity, G.hr, ignore_connections)) {
+        for (const s of EntitySprite.getParts(this.m_Entity, G.quality.hr, ignore_connections)) {
             s.setPosition(this.position)
             this.entitySprites.push(s)
             G.BPC.entitySprites.addChild(s)

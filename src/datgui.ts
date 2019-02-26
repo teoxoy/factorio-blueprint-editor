@@ -3,6 +3,7 @@ import G from './common/globals'
 import * as dat from 'dat.gui'
 import { QuickbarContainer } from './panels/quickbar'
 import spritesheetsLoader from './spritesheetsLoader'
+import FD from 'factorio-data'
 
 export default function initDatGui() {
     const gui = new dat.GUI({
@@ -10,7 +11,7 @@ export default function initDatGui() {
         hideable: false,
         closeOnTop: true,
         closed: localStorage.getItem('dat.gui.closed') === 'true',
-        width: 300
+        width: 320
     })
 
     gui.domElement.style.overflowX = 'hidden'
@@ -31,15 +32,6 @@ export default function initDatGui() {
                 G.BPC.clearData()
                 G.BPC.initBP()
             }
-        })
-
-    if (localStorage.getItem('hr')) G.hr = localStorage.getItem('hr') === 'true'
-    gui
-        .add(G, 'hr')
-        .name('HR Entities')
-        .onChange((val: boolean) => {
-            localStorage.setItem('hr', val.toString())
-            spritesheetsLoader.changeQuality(G.hr)
         })
 
     if (localStorage.getItem('moveSpeed')) G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
@@ -65,6 +57,29 @@ export default function initDatGui() {
     window.addEventListener('unload', () => {
         localStorage.setItem('quickbarItemNames', JSON.stringify(G.quickbarContainer.getAllItemNames()))
     })
+
+    const entitiesQuality = {
+        'Low. Res PNG 8 (1.50 MB)': 0,
+        'High Res PNG 8 (4.88 MB)': 1,
+        'Low. Res PNG 32 (5.56 MB)': 2,
+        'High Res PNG 32 (15.80 MB)': 3
+    }
+    const setQuality = (quality: number) => {
+        G.quality.hr = quality % 2 === 1
+        G.quality.compressed = quality < 2
+    }
+
+    let quality = (G.quality.hr ? 1 : 0) + (G.quality.compressed ? 0 : 2)
+    setQuality(quality)
+    if (localStorage.getItem('quality')) quality = JSON.parse(localStorage.getItem('quality'))
+    gui
+        .add({ quality }, 'quality', entitiesQuality)
+        .name('Entities Quality')
+        .onChange((quality: number) => {
+            localStorage.setItem('quality', quality.toString())
+            setQuality(quality)
+            spritesheetsLoader.changeQuality(G.quality.hr, G.quality.compressed)
+        })
 
     // Theme folder
     const themeFolder = gui.addFolder('Theme')
@@ -92,12 +107,7 @@ export default function initDatGui() {
         .add(G.oilOutpostSettings, 'DEBUG')
         .name('Debug')
     oilOutpostFolder
-        .add(G.oilOutpostSettings, 'PUMPJACK_MODULE', [
-            'none',
-            'speed_module_3', 'speed_module_2', 'speed_module',
-            'productivity_module_3', 'productivity_module_2', 'productivity_module',
-            'effectivity_module_3', 'effectivity_module_2', 'effectivity_module'
-        ])
+        .add(G.oilOutpostSettings, 'PUMPJACK_MODULE', getModulesObjFor('pumpjack'))
         .name('Pumpjack Modules')
     oilOutpostFolder
         .add(G.oilOutpostSettings, 'MIN_GAP_BETWEEN_UNDERGROUNDS', 1, 9, 1)
@@ -109,14 +119,26 @@ export default function initDatGui() {
         .add(G.oilOutpostSettings, 'MIN_AFFECTED_ENTITIES', 1, 12, 1)
         .name('Min Affect. Pumpjacks')
     oilOutpostFolder
-        .add(G.oilOutpostSettings, 'BEACON_MODULE', [
-            'speed_module_3', 'speed_module_2', 'speed_module',
-            'effectivity_module_3', 'effectivity_module_2', 'effectivity_module'
-        ])
+        .add(G.oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon'))
         .name('Beacon Modules')
     oilOutpostFolder
         .add(actions.generateOilOutpost, 'call')
         .name('Generate (g)')
+
+    function getModulesObjFor(entityName: string) {
+        return Object.keys(FD.items)
+            .map(k => FD.items[k])
+            .filter(item => item.type === 'module')
+            // filter modules based on entity allowed_effects (ex: beacons don't accept productivity effect)
+            .filter(item =>
+                !FD.entities[entityName].allowed_effects ||
+                Object.keys(item.effect).every(effect => FD.entities[entityName].allowed_effects.includes(effect))
+            )
+            .reduce((obj, item) => {
+                obj[item.ui_name] = item.name
+                return obj
+            }, { None: 'none' })
+    }
 
     // Keybinds folder
     const keybindsFolder = gui.addFolder('Keybinds')

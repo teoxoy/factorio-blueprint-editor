@@ -1,6 +1,8 @@
 import LRentitySpritesheetPNG from 'factorio-data/data/graphics/LREntitySpritesheet.png'
+import LRentitySpritesheetCompressedPNG from 'factorio-data/data/graphics/LREntitySpritesheetCompressed.png'
 import LRentitySpritesheetJSON from 'factorio-data/data/graphics/LREntitySpritesheet.json'
 import HRentitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
+import HRentitySpritesheetCompressedPNG from 'factorio-data/data/graphics/HREntitySpritesheetCompressed.png'
 import HRentitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
 import iconSpritesheetPNG from 'factorio-data/data/graphics/iconSpritesheet.png'
 import iconSpritesheetJSON from 'factorio-data/data/graphics/iconSpritesheet.json'
@@ -15,15 +17,21 @@ import util from './common/util'
 
 function getAllPromises() {
     return [
-        G.hr ? [ HRentitySpritesheetPNG, HRentitySpritesheetJSON ] :
-        [ LRentitySpritesheetPNG, LRentitySpritesheetJSON ],
+        [
+            G.quality.hr
+                ? (G.quality.compressed ? HRentitySpritesheetCompressedPNG : HRentitySpritesheetPNG)
+                : (G.quality.compressed ? LRentitySpritesheetCompressedPNG : LRentitySpritesheetPNG),
+            G.quality.hr
+                ? HRentitySpritesheetJSON
+                : LRentitySpritesheetJSON
+        ],
         [ iconSpritesheetPNG, iconSpritesheetJSON ],
         [ utilitySpritesheetPNG, utilitySpritesheetJSON ],
         [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
     ].map(data => loadSpritesheet(data[0], data[1]))
 }
 
-function changeQuality(hr: boolean) {
+function changeQuality(hr: boolean, compressed: boolean) {
     G.loadingScreen.show()
 
     G.BPC.clearData()
@@ -33,8 +41,12 @@ function changeQuality(hr: boolean) {
         .forEach(k => PIXI.utils.TextureCache[k].destroy(true))
 
     loadSpritesheet(
-        hr ? HRentitySpritesheetPNG : LRentitySpritesheetPNG,
-        hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
+        hr
+            ? (compressed ? HRentitySpritesheetCompressedPNG : HRentitySpritesheetPNG)
+            : (compressed ? LRentitySpritesheetCompressedPNG : LRentitySpritesheetPNG),
+        hr
+            ? HRentitySpritesheetJSON
+            : LRentitySpritesheetJSON
     ).then(() => {
         G.BPC.initBP()
         G.loadingScreen.hide()

@@ -188,7 +188,7 @@ export default class Filters extends PIXI.Container {
         const index: number = slot.data as number
         if (e.data.button === 0) {
             if (!this.m_Amount || this.m_Filters[index].name === undefined) {
-                new InventoryContainer('Set the Filter', this.m_Entity.acceptedFilters, name => {
+                new InventoryContainer('Select Filter', this.m_Entity.acceptedFilters, name => {
                     this.m_Filters[index].name = name
                     if (this.m_Amount) this.m_Filters[index].count = FD.items[name].stack_size
                     this.m_Entity.filters = this.m_Filters

@@ -58,6 +58,6 @@ export class ToolbarContainer extends PIXI.Container {
 
         G.app.ticker.add(() => this.fpsGUIText.text = String(Math.round(G.app.ticker.FPS)) + ' FPS')
 
-        G.gridData.onUpdate(() => this.gridposGUIText.text = `X ${G.gridData.x} Y ${G.gridData.y}`)
+        G.BPC.gridData.on('update', (pos: IPoint) => this.gridposGUIText.text = `X ${pos.x} Y ${pos.y}`)
     }
 }

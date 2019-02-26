@@ -87,6 +87,9 @@ export class InventoryContainer extends Dialog {
     /** Container for Recipe Tooltip */
     private readonly m_RecipeContainer: PIXI.Container
 
+    /** Hovered item for item pointerout check */
+    private m_hoveredItem: string
+
     /**
      *
      * Cols
@@ -113,7 +116,7 @@ export class InventoryContainer extends Dialog {
      * Height : 10 + 16 + 10 + 36 + 8 = 78
      */
     constructor(title: string = 'Inventory', itemsFilter?: string[], selectedCallBack?: (selectedItem: string) => void) {
-        super(404, 442, Dialog.capitalize(title))
+        super(404, 442, title)
 
         this.m_InventoryGroups = new PIXI.Container()
         this.m_InventoryGroups.position.set(12, 46)
@@ -175,8 +178,17 @@ export class InventoryContainer extends Dialog {
                             selectedCallBack(item.name)
                         }
                     })
-                    button.on('pointerover', () => this.updateRecipeVisualization(item.name))
-                    button.on('pointerout', () => this.updateRecipeVisualization(undefined))
+                    button.on('pointerover', () => {
+                        this.m_hoveredItem = item.name
+                        this.updateRecipeVisualization(item.name)
+                    })
+                    button.on('pointerout', () => {
+                        // we have to check this because pointerout can fire after pointerover
+                        if (this.m_hoveredItem === item.name) {
+                            this.m_hoveredItem = undefined
+                            this.updateRecipeVisualization(undefined)
+                        }
+                    })
 
                     inventoryGroupItems.addChild(button)
 
@@ -256,7 +268,7 @@ export class InventoryContainer extends Dialog {
     private updateRecipeVisualization(recipeName?: string) {
 
         // Update Recipe Label
-        this.m_RecipeLabel.text = recipeName === undefined ? undefined : Dialog.capitalize(recipeName)
+        this.m_RecipeLabel.text = recipeName === undefined ? undefined : FD.recipes[recipeName].ui_name
 
         // Update Recipe Container
         this.m_RecipeContainer.removeChildren()

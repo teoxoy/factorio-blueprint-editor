@@ -8,11 +8,10 @@ export abstract class PaintContainer extends PIXI.Container {
     filter: AdjustmentFilter
     icon: PIXI.DisplayObject
 
-    constructor(name: string, position: IPoint) {
+    constructor(name: string) {
         super()
 
         this.name = name
-        this.position.set(position.x, position.y)
 
         this.filter = new AdjustmentFilter({ red: 0.4, green: 1, blue: 0.4 })
         this.filters = [this.filter]
@@ -49,7 +48,7 @@ export abstract class PaintContainer extends PIXI.Container {
     }
 
     // override
-    rotate() {
+    rotate(ccw?: boolean) {
         return
     }
 
@@ -71,6 +70,31 @@ export abstract class PaintContainer extends PIXI.Container {
     // override
     placeEntityContainer() {
         return
+    }
+
+    getGridPosition() {
+        return {
+            x: Math.round(this.x / 32 * 10) / 10,
+            y: Math.round(this.y / 32 * 10) / 10
+        }
+    }
+
+    setNewPosition(size: IPoint) {
+        const mousePos = G.BPC.gridData.mousePositionInBPC
+
+        if (size.x % 2 === 0) {
+            const npx = mousePos.x - mousePos.x % 16
+            this.x = npx + (npx % 32 === 0 ? 0 : 16)
+        } else {
+            this.x = mousePos.x - mousePos.x % 32 + 16
+        }
+
+        if (size.y % 2 === 0) {
+            const npy = mousePos.y - mousePos.y % 16
+            this.y = npy + (npy % 32 === 0 ? 0 : 16)
+        } else {
+            this.y = mousePos.y - mousePos.y % 32 + 16
+        }
     }
 
     private updateIconPos() {

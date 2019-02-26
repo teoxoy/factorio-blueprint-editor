@@ -1,6 +1,5 @@
 import G from '../common/globals'
 import FD from 'factorio-data'
-import util from '../common/util'
 import actions from '../actions'
 import Entity from '../factorio-data/entity'
 import Tile from '../factorio-data/tile'
@@ -14,7 +13,70 @@ import { EntityPaintContainer } from './paintEntity'
 import { TileContainer } from './tile'
 import { TilePaintContainer } from './paintTile'
 import { PaintContainer } from './paint'
+import { EventEmitter } from 'eventemitter3'
 import * as PIXI from 'pixi.js'
+
+class GridData extends EventEmitter {
+
+    /** mouse x in 32 pixel size grid */
+    x = 0
+    /** mouse y in 32 pixel size grid */
+    y = 0
+
+    /** mouse x in 16 pixel size grid */
+    private x16 = 0
+    /** mouse y in 16 pixel size grid */
+    private y16 = 0
+
+    private lastMousePosX = 0
+    private lastMousePosY = 0
+
+    constructor() {
+        super()
+        document.addEventListener('mousemove', e => this.update(e.clientX, e.clientY))
+    }
+
+    get mousePositionInBPC() {
+        return { x: this.x16 * 16, y: this.y16 * 16 }
+    }
+
+    public recalculate() {
+        this.update(this.lastMousePosX, this.lastMousePosY)
+    }
+
+    private update(x: number, y: number) {
+        this.lastMousePosX = x
+        this.lastMousePosY = y
+
+        const mousePositionInBP = {
+            x: Math.abs(G.BPC.position.x - x) / G.BPC.viewport.getCurrentScale(),
+            y: Math.abs(G.BPC.position.y - y) / G.BPC.viewport.getCurrentScale()
+        }
+        const gridCoordsOfCursor16 = {
+            x: (mousePositionInBP.x - mousePositionInBP.x % 16) / 16,
+            y: (mousePositionInBP.y - mousePositionInBP.y % 16) / 16
+        }
+
+        if (gridCoordsOfCursor16.x !== this.x16 || gridCoordsOfCursor16.y !== this.y16) {
+            const X = Math.floor(gridCoordsOfCursor16.x / 2)
+            const Y = Math.floor(gridCoordsOfCursor16.y / 2)
+            this.x16 = gridCoordsOfCursor16.x
+            this.y16 = gridCoordsOfCursor16.y
+
+            // don't emit updates if panning
+            const notPanning = G.currentMouseState !== G.mouseStates.PANNING
+            // emit update16 when mouse changes tile whithin the 16 pixel size grid
+            if (notPanning) this.emit('update16', this)
+
+            if (X !== this.x || Y !== this.y) {
+                this.x = X
+                this.y = Y
+                // emit update when mouse changes tile whithin the 32 pixel size grid
+                if (notPanning) this.emit('update', this)
+            }
+        }
+    }
+}
 
 // This container improves rendering time by around 10-40% and has baked in viewport culling
 class OptimizedContainer extends PIXI.Container {
@@ -62,6 +124,7 @@ export class BlueprintContainer extends PIXI.Container {
     hoverContainer: EntityContainer
     paintContainer: PaintContainer
     viewportCulling = true
+    gridData: GridData
 
     constructor() {
         super()
@@ -90,8 +153,10 @@ export class BlueprintContainer extends PIXI.Container {
             this.entitySprites, this.wiresContainer, this.overlayContainer, this.entityPaintSlot
         )
 
+        this.gridData = new GridData()
+
         G.app.ticker.add(() => {
-            if (actions.movingViaKeyboard) {
+            if (G.currentMouseState !== G.mouseStates.PANNING) {
                 const WSXOR = actions.moveUp.pressed !== actions.moveDown.pressed
                 const ADXOR = actions.moveLeft.pressed !== actions.moveRight.pressed
                 if (WSXOR || ADXOR) {
@@ -102,7 +167,7 @@ export class BlueprintContainer extends PIXI.Container {
                     )
                     this.viewport.updateTransform()
 
-                    G.gridData.recalculate(this)
+                    this.gridData.recalculate()
                 }
             }
         })
@@ -111,20 +176,29 @@ export class BlueprintContainer extends PIXI.Container {
             this.interactiveChildren = false
         }
 
-        G.gridData.onUpdate(() => {
-            if (G.currentMouseState === G.mouseStates.PAINTING) this.paintContainer.moveAtCursor()
+        // Hack for plugging the mouse into keyboardJS
+        actions.attachEventsToContainer(this)
 
+        this.gridData.on('update16', () => {
+            if (G.currentMouseState === G.mouseStates.PAINTING) this.paintContainer.moveAtCursor()
+        })
+
+        this.gridData.on('update', () => {
             // Instead of decreasing the global interactionFrequency, call the over and out entity events here
             this.updateHoverContainer()
+
+            if (actions.build.pressed) actions.build.call()
+            if (actions.mine.pressed) actions.mine.call()
+            if (actions.pasteEntitySettings.pressed) actions.pasteEntitySettings.call()
         })
     }
 
     zoom(zoomIn = true) {
         const zoomFactor = 0.1
-        this.viewport.setScaleCenter(G.gridData.position.x, G.gridData.position.y)
+        this.viewport.setScaleCenter(this.gridData.mousePositionInBPC.x, this.gridData.mousePositionInBPC.y)
         this.viewport.zoomBy(zoomFactor * (zoomIn ? 1 : -1))
         this.viewport.updateTransform()
-        G.gridData.recalculate(this)
+        this.gridData.recalculate()
     }
 
     updateHoverContainer() {
@@ -140,7 +214,7 @@ export class BlueprintContainer extends PIXI.Container {
         }
 
         if (!G.bp) return
-        const e = EntityContainer.mappings.get(G.bp.entityPositionGrid.getCellAtPosition(G.gridData))
+        const e = EntityContainer.mappings.get(G.bp.entityPositionGrid.getCellAtPosition(this.gridData))
 
         if (e && this.hoverContainer === e) return
 
@@ -336,23 +410,10 @@ export class BlueprintContainer extends PIXI.Container {
         this.cursor = 'pointer'
 
         if (tileResult) {
-            this.paintContainer = new TilePaintContainer(
-                placeResult,
-                EntityContainer.getPositionFromData(
-                    G.gridData.position,
-                    { x: TilePaintContainer.size, y: TilePaintContainer.size }
-                )
-            )
+            this.paintContainer = new TilePaintContainer(placeResult)
             this.tilePaintSlot.addChild(this.paintContainer)
         } else {
-            this.paintContainer = new EntityPaintContainer(
-                placeResult,
-                EntityContainer.getPositionFromData(
-                    G.gridData.position,
-                    util.switchSizeBasedOnDirection(FD.entities[placeResult].size, 0)
-                ),
-                direction
-            )
+            this.paintContainer = new EntityPaintContainer(placeResult, direction)
             this.entityPaintSlot.addChild(this.paintContainer)
         }
 

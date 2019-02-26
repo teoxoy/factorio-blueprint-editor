@@ -266,9 +266,9 @@ export default class Blueprint extends EventEmitter {
         const DEBUG = G.oilOutpostSettings.DEBUG
         const PUMPJACK_MODULE = G.oilOutpostSettings.PUMPJACK_MODULE
         const MIN_GAP_BETWEEN_UNDERGROUNDS = G.oilOutpostSettings.MIN_GAP_BETWEEN_UNDERGROUNDS
-        const BEACONS = G.oilOutpostSettings.BEACONS
         const MIN_AFFECTED_ENTITIES = G.oilOutpostSettings.MIN_AFFECTED_ENTITIES
         const BEACON_MODULE = G.oilOutpostSettings.BEACON_MODULE
+        const BEACONS = G.oilOutpostSettings.BEACONS && BEACON_MODULE !== 'none'
 
         const pumpjacks = this.entities.filter(v => v.name === 'pumpjack')
             .map(p => ({ entity_number: p.entity_number, name: p.name, position: p.position }))

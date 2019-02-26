@@ -7,7 +7,10 @@ import * as PIXI from 'pixi.js'
 
 // tslint:disable:prefer-const
 
-let hr = false
+const quality = {
+    hr: true,
+    compressed: true
+}
 
 let app: PIXI.Application
 
@@ -21,50 +24,6 @@ const loadingScreen = {
     el: document.getElementById('loadingScreen'),
     show() { this.el.classList.add('active') },
     hide() { this.el.classList.remove('active') }
-}
-
-const gridData = {
-    x: 0,
-    y: 0,
-    x16: 0,
-    y16: 0,
-    _callbacks: [] as Array<() => void>,
-    _lastMousePos: { x: 0, y: 0 },
-
-    onUpdate(cb: () => void) {
-        this._callbacks.push(cb)
-    },
-    get position() {
-        return { x: this.x16 * 16, y: this.y16 * 16 }
-    },
-    calculateRotationOffset(position: IPoint) {
-        return {
-            x: (position.x / 16 - this.x16) === 0 ? 0.5 : -0.5,
-            y: (position.y / 16 - this.y16) === 0 ? 0.5 : -0.5
-        }
-    },
-
-    recalculate(BPC: BlueprintContainer) {
-        this.update(this._lastMousePos.x, this._lastMousePos.y, BPC)
-    },
-    update(x: number, y: number, BPC: BlueprintContainer) {
-        this._lastMousePos = { x, y }
-        const mousePositionInBP = {
-            x: Math.abs(BPC.position.x - x) / BPC.viewport.getCurrentScale(),
-            y: Math.abs(BPC.position.y - y) / BPC.viewport.getCurrentScale()
-        }
-        const gridCoordsOfCursor16 = {
-            x: (mousePositionInBP.x - mousePositionInBP.x % 16) / 16,
-            y: (mousePositionInBP.y - mousePositionInBP.y % 16) / 16
-        }
-        if (gridCoordsOfCursor16.x !== this.x16 || gridCoordsOfCursor16.y !== this.y16) {
-            this.x = Math.floor(gridCoordsOfCursor16.x / 2)
-            this.y = Math.floor(gridCoordsOfCursor16.y / 2)
-            this.x16 = gridCoordsOfCursor16.x
-            this.y16 = gridCoordsOfCursor16.y
-            this._callbacks.forEach((cb: any) => cb())
-        }
-    }
 }
 
 let railMoveOffset: IPoint = { x: 0, y: 0 }
@@ -247,7 +206,7 @@ let oilOutpostSettings = {
 }
 
 export default {
-    hr,
+    quality,
     renderOnly,
     BPC,
     app,
@@ -258,7 +217,6 @@ export default {
     bpArea,
     positionBPContainer,
     sizeBPContainer,
-    gridData,
     railMoveOffset,
     bp,
     book,
