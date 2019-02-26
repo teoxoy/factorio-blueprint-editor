@@ -23,7 +23,7 @@ export class InfoEntityPanel extends Panel {
     constructor() {
         super(270, 460, G.colors.controls.panel.background.color, G.colors.controls.panel.background.alpha, G.colors.controls.panel.background.border)
 
-        this.interactive = true//or false ?
+        this.interactive = false
         this.visible = false
 
         this.InfoProdTitle = new PIXI.Text('Information', G.styles.dialog.title)
