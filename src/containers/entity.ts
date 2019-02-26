@@ -164,12 +164,14 @@ export class EntityContainer {
         this.updateUndergroundLines()
 
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.visible = true)
+        G.infoEntityPanel.updateVisualization(this.m_Entity)
     }
 
     pointerOutEventHandler() {
         G.BPC.overlayContainer.hideCursorBox()
         G.BPC.overlayContainer.hideUndergroundLines()
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.visible = false)
+        G.infoEntityPanel.updateVisualization(undefined)
     }
 
     redrawSurroundingEntities(position?: IPoint) {

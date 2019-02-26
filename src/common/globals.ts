@@ -1,6 +1,7 @@
 import Blueprint from '../factorio-data/blueprint'
 import { ToolbarContainer } from '../panels/toolbar'
 import { QuickbarContainer } from '../panels/quickbar'
+import { InfoEntityPanel } from '../panels/InfoEntityPanel';
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
 import * as PIXI from 'pixi.js'
@@ -16,6 +17,7 @@ let app: PIXI.Application
 
 let toolbarContainer: ToolbarContainer
 let quickbarContainer: QuickbarContainer
+let infoEntityPanel: InfoEntityPanel
 let dialogsContainer: PIXI.Container
 let paintIconContainer: PIXI.Container
 let BPC: BlueprintContainer
@@ -212,6 +214,7 @@ export default {
     app,
     toolbarContainer,
     quickbarContainer,
+    infoEntityPanel,
     dialogsContainer,
     paintIconContainer,
     bpArea,
