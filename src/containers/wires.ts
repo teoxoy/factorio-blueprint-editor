@@ -1,20 +1,19 @@
-import { EntityContainer } from './entity'
-import G from '../common/globals'
 import FD from 'factorio-data'
+import * as PIXI from 'pixi.js'
+import G from '../common/globals'
 import U from '../factorio-data/generators/util'
 import Entity from '../factorio-data/entity'
-import * as PIXI from 'pixi.js'
+import { EntityContainer } from './entity'
 
 const hashConn = (conn: IConnection) => {
-    const firstE = Math.min(conn.entity_number_1, conn.entity_number_2)
-    const secondE = Math.max(conn.entity_number_1, conn.entity_number_2)
-    const firstS = firstE === conn.entity_number_1 ? conn.entity_side_1 : conn.entity_side_2
-    const secondS = secondE === conn.entity_number_2 ? conn.entity_side_2 : conn.entity_side_1
+    const firstE = Math.min(conn.entityNumber1, conn.entityNumber2)
+    const secondE = Math.max(conn.entityNumber1, conn.entityNumber2)
+    const firstS = firstE === conn.entityNumber1 ? conn.entitySide1 : conn.entitySide2
+    const secondS = secondE === conn.entityNumber2 ? conn.entitySide2 : conn.entitySide1
     return `${conn.color}-${firstE}-${secondE}-${firstS}-${secondS}`
 }
 
 export class WiresContainer extends PIXI.Container {
-
     static createWire(p1: IPoint, p2: IPoint, color: string) {
         const wire = new PIXI.Graphics()
 
@@ -22,9 +21,9 @@ export class WiresContainer extends PIXI.Container {
         const minY = Math.min(p1.y, p2.y)
 
         const colorMap: { [key: string]: number } = {
-            copper: 0xCF7C00,
-            red: 0xC83718,
-            green: 0x588C38
+            copper: 0xcf7c00,
+            red: 0xc83718,
+            green: 0x588c38
         }
 
         wire.lineStyle(1.5, colorMap[color])
@@ -82,7 +81,7 @@ export class WiresContainer extends PIXI.Container {
         if (entity.type === 'electric_pole') {
             // Remove connection so that updatePassiveWires diffs correctly
             this.passiveConnToSprite.forEach((v, k) => {
-                if (k.includes(entity.entity_number.toString())) {
+                if (k.includes(entity.entityNumber.toString())) {
                     v.destroy()
                     this.passiveConnToSprite.delete(k)
                 }
@@ -91,7 +90,9 @@ export class WiresContainer extends PIXI.Container {
             this.updatePassiveWires()
         }
 
-        if (!entity.hasConnections) return
+        if (!entity.hasConnections) {
+            return
+        }
 
         const connections = entity.connections
         connections.forEach(c => this.remove(c))
@@ -99,8 +100,8 @@ export class WiresContainer extends PIXI.Container {
     }
 
     getWireSprite(connection: IConnection) {
-        const getWirePos = (entity_number: number, color: string, side: number) => {
-            const entity = G.bp.entities.get(entity_number)
+        const getWirePos = (entityNumber: number, color: string, side: number) => {
+            const entity = G.bp.entities.get(entityNumber)
             const direction = entity.type === 'electric_pole' ? this.getPowerPoleDirection(entity) : entity.direction
             const point = entity.getWireConnectionPoint(color, side, direction)
             return {
@@ -110,16 +111,20 @@ export class WiresContainer extends PIXI.Container {
         }
 
         return WiresContainer.createWire(
-            getWirePos(connection.entity_number_1, connection.color, connection.entity_side_1),
-            getWirePos(connection.entity_number_2, connection.color, connection.entity_side_2),
+            getWirePos(connection.entityNumber1, connection.color, connection.entitySide1),
+            getWirePos(connection.entityNumber2, connection.color, connection.entitySide2),
             connection.color
         )
     }
 
     getPowerPoleDirection(entity: Entity) {
-        if (!this.entNrToConnectedEntNrs) return 0
-        const entNrArr = this.entNrToConnectedEntNrs.get(entity.entity_number)
-        if (!entNrArr) return 0
+        if (!this.entNrToConnectedEntNrs) {
+            return 0
+        }
+        const entNrArr = this.entNrToConnectedEntNrs.get(entity.entityNumber)
+        if (!entNrArr) {
+            return 0
+        }
         return getPowerPoleRotation(
             entity.position,
             entNrArr
@@ -141,7 +146,9 @@ export class WiresContainer extends PIXI.Container {
                 const sectorAngle = 360 / 8
                 const offset = sectorAngle * 1.5
                 let newAngle = cwAngle - offset
-                if (Math.sign(newAngle) === -1) newAngle = 360 + newAngle
+                if (Math.sign(newAngle) === -1) {
+                    newAngle = 360 + newAngle
+                }
                 const sector = Math.floor(newAngle / sectorAngle)
                 return (sector % 4) as 0 | 1 | 2 | 3
             }
@@ -150,14 +157,14 @@ export class WiresContainer extends PIXI.Container {
 
     updatePassiveWires() {
         interface IPole extends IPoint {
-            entity_number: number
+            entityNumber: number
             name: string
         }
 
         const poles: IPole[] = G.bp.entities
             .filter(e => e.type === 'electric_pole')
             .map(e => ({
-                entity_number: e.entity_number,
+                entityNumber: e.entityNumber,
                 name: e.name,
                 x: e.position.x,
                 y: e.position.y
@@ -171,34 +178,44 @@ export class WiresContainer extends PIXI.Container {
             return
         }
 
-        const lineHash = (line: Array<{ entity_number: number }>) =>
-            `${Math.min(line[0].entity_number, line[1].entity_number)}-${Math.max(line[0].entity_number, line[1].entity_number)}`
+        const lineHash = (line: { entityNumber: number }[]) => {
+            const min = Math.min(line[0].entityNumber, line[1].entityNumber)
+            const max = Math.max(line[0].entityNumber, line[1].entityNumber)
+            return `${min}-${max}`
+        }
 
-        const setsOfLines = U.pointsToTriangles(poles)
-            .map(tri => tri
-                .reduce((acc, _, i, arr) => {
-                    if (i === arr.length - 1) return acc.concat([[arr[0], arr[i]]])
-                    return acc.concat([[arr[i], arr[i + 1]]])
-                }, [] as IPole[][])
-                .filter(line =>
-                    U.pointInCircle(line[0], line[1], Math.min(
-                        FD.entities[line[0].name].maximum_wire_distance,
-                        FD.entities[line[1].name].maximum_wire_distance
-                    ))
+        const setsOfLines = U.pointsToTriangles(poles).map(tri =>
+            tri
+                .reduce(
+                    (acc, _, i, arr) => {
+                        if (i === arr.length - 1) {
+                            return acc.concat([[arr[0], arr[i]]])
+                        }
+                        return acc.concat([[arr[i], arr[i + 1]]])
+                    },
+                    [] as IPole[][]
                 )
-            )
+                .filter(line =>
+                    U.pointInCircle(
+                        line[0],
+                        line[1],
+                        Math.min(
+                            FD.entities[line[0].name].maximum_wire_distance,
+                            FD.entities[line[1].name].maximum_wire_distance
+                        )
+                    )
+                )
+        )
 
         const lines = setsOfLines
             .reduce((acc, val) => acc.concat(val), [])
-            .sort((a, b) =>
-                (Math.min(a[0].x, a[1].x) + Math.min(a[0].y, a[1].y)) -
-                (Math.min(b[0].x, b[1].x) + Math.min(b[0].y, b[1].y))
-            )
+            .sort((a, b) => {
+                const minPos = (l: IPole[]) => Math.min(l[0].x, l[1].x) + Math.min(l[0].y, l[1].y)
+                return minPos(a) - minPos(b)
+            })
             .sort((a, b) => U.manhattenDistance(a[0], a[1]) - U.manhattenDistance(b[0], b[1]))
 
-        const triangles = setsOfLines
-            .filter(lines => lines.length === 3)
-            .map(lines => lines.map(lineHash))
+        const triangles = setsOfLines.filter(lines => lines.length === 3).map(lines => lines.map(lineHash))
 
         const finalLines: IPole[][] = []
         const addedMap: Map<string, boolean> = new Map()
@@ -219,44 +236,53 @@ export class WiresContainer extends PIXI.Container {
             }
         }
 
-        this.entNrToConnectedEntNrs = finalLines
-            .reduce((map: Map<number, number[]>, line) => {
-                const eNr0 = line[0].entity_number
-                const eNr1 = line[1].entity_number
+        this.entNrToConnectedEntNrs = finalLines.reduce((map: Map<number, number[]>, line) => {
+            const eNr0 = line[0].entityNumber
+            const eNr1 = line[1].entityNumber
 
-                const arr0 = map.get(eNr0)
-                if (arr0 && !arr0.includes(eNr1)) arr0.push(eNr1)
-                if (!arr0) map.set(eNr0, [eNr1])
+            const arr0 = map.get(eNr0)
+            if (arr0 && !arr0.includes(eNr1)) {
+                arr0.push(eNr1)
+            }
+            if (!arr0) {
+                map.set(eNr0, [eNr1])
+            }
 
-                const arr1 = map.get(eNr1)
-                if (arr1 && !arr1.includes(eNr0)) arr1.push(eNr0)
-                if (!arr1) map.set(eNr1, [eNr0])
+            const arr1 = map.get(eNr1)
+            if (arr1 && !arr1.includes(eNr0)) {
+                arr1.push(eNr0)
+            }
+            if (!arr1) {
+                map.set(eNr1, [eNr0])
+            }
 
-                return map
-            }, new Map<number, number[]>())
+            return map
+        }, new Map<number, number[]>())
 
-        const finalLinesHashes = finalLines
-            .reduce((map, line) => map.set(lineHash(line), line), new Map())
+        const finalLinesHashes = finalLines.reduce((map, line) => map.set(lineHash(line), line), new Map())
         const toAdd = Array.from(finalLinesHashes.keys()).filter(k => !this.passiveConnToSprite.get(k))
         const toDel = Array.from(this.passiveConnToSprite.keys()).filter(k => !finalLinesHashes.get(k))
 
         // update rotations
-        const toUpdate: number[] = [...toAdd, ...toDel]
-            .reduce((arr, hash) => {
-                const entNr0 = Number(hash.split('-')[0])
-                const entNr1 = Number(hash.split('-')[1])
-                if (!arr.includes(entNr0)) arr.push(entNr0)
-                if (!arr.includes(entNr1)) arr.push(entNr1)
-                return arr
-            }, [])
+        const toUpdate: number[] = [...toAdd, ...toDel].reduce((arr, hash) => {
+            const entNr0 = Number(hash.split('-')[0])
+            const entNr1 = Number(hash.split('-')[1])
+            if (!arr.includes(entNr0)) {
+                arr.push(entNr0)
+            }
+            if (!arr.includes(entNr1)) {
+                arr.push(entNr1)
+            }
+            return arr
+        }, [])
 
         const addWire = (hash: string) => {
             const sprite = this.getWireSprite({
                 color: 'copper',
-                entity_number_1: Number(hash.split('-')[0]),
-                entity_number_2: Number(hash.split('-')[1]),
-                entity_side_1: 1,
-                entity_side_2: 1
+                entityNumber1: Number(hash.split('-')[0]),
+                entityNumber2: Number(hash.split('-')[1]),
+                entitySide1: 1,
+                entitySide2: 1
             })
             this.addChild(sprite)
             this.passiveConnToSprite.set(hash, sprite)
@@ -282,14 +308,13 @@ export class WiresContainer extends PIXI.Container {
 
                 // redraw connected wires
                 if (this.entNrToConnectedEntNrs.has(entNr)) {
-                    this.entNrToConnectedEntNrs.get(entNr)
-                        .forEach((eNr: number) => {
-                            const hash = lineHash([{ entity_number: eNr }, { entity_number: entNr }])
-                            if (this.passiveConnToSprite.has(hash)) {
-                                removeWire(hash)
-                                addWire(hash)
-                            }
-                        })
+                    this.entNrToConnectedEntNrs.get(entNr).forEach((eNr: number) => {
+                        const hash = lineHash([{ entityNumber: eNr }, { entityNumber: entNr }])
+                        if (this.passiveConnToSprite.has(hash)) {
+                            removeWire(hash)
+                            addWire(hash)
+                        }
+                    })
                 }
             }
         })

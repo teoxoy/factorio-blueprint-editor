@@ -1,3 +1,4 @@
+import Entity from '../factorio-data/entity'
 import Editor from './editor'
 import BeaconEditor from './beacon'
 import InserterEditor from './inserter'
@@ -6,7 +7,6 @@ import MiningEditor from './mining'
 import SplitterEditor from './splitter'
 import ChestEditor from './chest'
 import TempEditor from './temp'
-import Entity from '../factorio-data/entity'
 
 /**
  * Factory Function for creating Editor based on Entity Number

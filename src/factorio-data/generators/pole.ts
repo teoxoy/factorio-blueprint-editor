@@ -12,7 +12,7 @@ interface IPole extends IPoint {
 }
 
 interface IGroup extends IPoint {
-    poles: Array<IPole | IPoint>
+    poles: (IPole | IPoint)[]
     lines: IPole[][]
 }
 
@@ -45,21 +45,19 @@ interface IGroup extends IPoint {
 
     DT = using delaunay triangulation to form lines between x (for optimization)
 */
-export default function generatePoles(
-    entities: Array<{ position: IPoint; size: number; power: boolean }>
-) {
-    const visualizations: Array<{ path: IPoint[]; size: number; alpha: number; color?: number }> = []
+export default function generatePoles(entities: { position: IPoint; size: number; power: boolean }[]) {
+    const visualizations: { path: IPoint[]; size: number; alpha: number; color?: number }[] = []
     function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number) {
         visualizations.push({ path: path.map(p => ({ x: p.x + 0.5, y: p.y + 0.5 })), size, alpha, color })
     }
 
-    const entityAreas = entities
-        .map(e => U.range(0, e.size * e.size)
-            .map(i => ({
-                x: Math.floor(e.position.x) + (i % e.size - Math.floor(e.size / 2)),
-                y: Math.floor(e.position.y) + (Math.floor(i / e.size) - Math.floor(e.size / 2)),
-                power: e.power
-            })))
+    const entityAreas = entities.map(e =>
+        U.range(0, e.size * e.size).map(i => ({
+            x: Math.floor(e.position.x) + ((i % e.size) - Math.floor(e.size / 2)),
+            y: Math.floor(e.position.y) + (Math.floor(i / e.size) - Math.floor(e.size / 2)),
+            power: e.power
+        }))
+    )
 
     const occupiedPositions = entityAreas
         .reduce((acc, val) => acc.concat(val), [])
@@ -69,18 +67,18 @@ export default function generatePoles(
     // addVisualization(entityAreas.reduce((acc, val) => acc.concat(val), []))
 
     // GENERATE VALID POLE POSITIONS
-    const validPolePositions = U.uniqPoints(entities
-        .filter(e => e.power)
-        .map(e => {
-            const searchSize = e.size + POLE_SIZE * 2 + (POLE_EFFECT_RADIUS - 1) * 2
-            return U.range(0, searchSize * searchSize)
-                .map(i => ({
-                    x: Math.floor(e.position.x) + (i % searchSize - Math.floor(searchSize / 2)),
+    const validPolePositions = U.uniqPoints(
+        entities
+            .filter(e => e.power)
+            .map(e => {
+                const searchSize = e.size + POLE_SIZE * 2 + (POLE_EFFECT_RADIUS - 1) * 2
+                return U.range(0, searchSize * searchSize).map(i => ({
+                    x: Math.floor(e.position.x) + ((i % searchSize) - Math.floor(searchSize / 2)),
                     y: Math.floor(e.position.y) + (Math.floor(i / searchSize) - Math.floor(searchSize / 2))
                 }))
-        })
-        .reduce((acc, val) => acc.concat(val), []))
-        .filter(p => occupiedPositions.get(U.hashPoint(p)) !== true)
+            })
+            .reduce((acc, val) => acc.concat(val), [])
+    ).filter(p => occupiedPositions.get(U.hashPoint(p)) !== true)
 
     // addVisualization(validPolePositions)
 
@@ -92,52 +90,56 @@ export default function generatePoles(
         }, new Map())
 
     // GENERATE POSSIBLE POLES
-    let possiblePoles: IPole[] = validPolePositions
-        .map(mid => {
-            const D = POLE_SIZE + POLE_EFFECT_RADIUS * 2
-            const powerArea = U.range(0, D * D)
-                .map(i => ({
-                    x: mid.x + (i % D - Math.floor(D / 2)),
-                    y: mid.y + (Math.floor(i / D) - Math.floor(D / 2))
-                }))
+    let possiblePoles: IPole[] = validPolePositions.map(mid => {
+        const D = POLE_SIZE + POLE_EFFECT_RADIUS * 2
+        const powerArea = U.range(0, D * D).map(i => ({
+            x: mid.x + ((i % D) - Math.floor(D / 2)),
+            y: mid.y + (Math.floor(i / D) - Math.floor(D / 2))
+        }))
 
-            const powerGiven = powerArea
-                .reduce((acc, p) => {
-                    const area = pointToEntityArea.get(U.hashPoint(p))
-                    if (!area || acc.includes(area)) return acc
-                    return acc.concat([area])
-                }, [])
+        const powerGiven = powerArea.reduce((acc, p) => {
+            const area = pointToEntityArea.get(U.hashPoint(p))
+            if (!area || acc.includes(area)) {
+                return acc
+            }
+            return acc.concat([area])
+        }, [])
 
-            const midOfConsumers = powerGiven
-                .map(p => p[4])
-                .reduce((m, p) => {
+        const midOfConsumers = powerGiven
+            .map(p => p[4])
+            .reduce(
+                (m, p) => {
                     m.x += p.x
                     m.y += p.y
                     return m
-                }, { x: 0, y: 0 })
+                },
+                { x: 0, y: 0 }
+            )
 
-            const distFromMidOfConsumers =
-                Math.abs(midOfConsumers.x / powerGiven.length - mid.x) +
-                Math.abs(midOfConsumers.y / powerGiven.length - mid.y)
+        const distFromMidOfConsumers =
+            Math.abs(midOfConsumers.x / powerGiven.length - mid.x) +
+            Math.abs(midOfConsumers.y / powerGiven.length - mid.y)
 
-            return {
-                ...mid,
-                powerArea,
-                poweredEntityAreas: powerGiven,
-                powerGiven: powerGiven.length,
-                distFromMidOfConsumers
+        return {
+            ...mid,
+            powerArea,
+            poweredEntityAreas: powerGiven,
+            powerGiven: powerGiven.length,
+            distFromMidOfConsumers
+        }
+    })
+
+    const entAreaToPoles = possiblePoles.reduce((map, p) => {
+        p.poweredEntityAreas.forEach(area => {
+            const exists = map.get(area)
+            if (exists) {
+                exists.push(p)
+            } else {
+                map.set(area, [p])
             }
         })
-
-    const entAreaToPoles = possiblePoles
-        .reduce((map, p) => {
-            p.poweredEntityAreas.forEach(area => {
-                const exists = map.get(area)
-                if (exists) exists.push(p)
-                else map.set(area, [p])
-            })
-            return map
-        }, new Map())
+        return map
+    }, new Map())
 
     // GENERATE POLES
     const poles: IPole[] = []
@@ -149,29 +151,27 @@ export default function generatePoles(
         const pole = possiblePoles.shift()
         poles.push(pole)
 
-        const toRemove = pole.poweredEntityAreas
-            .reduce((acc, area) => {
-                const poles: IPole[] = entAreaToPoles.get(area)
-                if (!poles) return acc
+        const toRemove = pole.poweredEntityAreas.reduce((acc, area) => {
+            const poles: IPole[] = entAreaToPoles.get(area)
+            if (!poles) {
+                return acc
+            }
 
-                poles.forEach(p => {
-                    p.poweredEntityAreas = p.poweredEntityAreas
-                        .filter(a => a !== area)
-                    p.powerGiven -= 1
-                })
+            poles.forEach(p => {
+                p.poweredEntityAreas = p.poweredEntityAreas.filter(a => a !== area)
+                p.powerGiven -= 1
+            })
 
-                return acc.concat(poles.filter(p => p.poweredEntityAreas.length === 0))
-            }, [])
+            return acc.concat(poles.filter(p => p.poweredEntityAreas.length === 0))
+        }, [])
 
-        possiblePoles = possiblePoles
-            .filter(p => !toRemove.includes(p))
+        possiblePoles = possiblePoles.filter(p => !toRemove.includes(p))
     }
 
-    addVisualization(poles, 16, 1, 0x00BFFF)
+    addVisualization(poles, 16, 1, 0x00bfff)
 
     // GENERATE LINES
-    const lines = U.pointsToLines(poles)
-        .filter(l => U.pointInCircle(l[0], l[1], POLE_TO_POLE_RADIUS))
+    const lines = U.pointsToLines(poles).filter(l => U.pointInCircle(l[0], l[1], POLE_TO_POLE_RADIUS))
 
     // GENERATE GROUPS
     let groups: IGroup[] = []
@@ -207,10 +207,7 @@ export default function generatePoles(
     }
 
     // ADD LEFTOVER POLES
-    groups = groups.concat(
-        poles
-            .filter(p => !addedPoles.includes(p))
-            .map(p => ({ poles: [p], lines: [], x: 0, y: 0 })))
+    groups = groups.concat(poles.filter(p => !addedPoles.includes(p)).map(p => ({ poles: [p], lines: [], x: 0, y: 0 })))
 
     poles.forEach(p => occupiedPositions.set(U.hashPoint(p), true))
 
@@ -221,7 +218,7 @@ export default function generatePoles(
     const r2 = POLE_TO_POLE_RADIUS * 2 + 1
     const circleOffsets = U.range(0, r2 * r2)
         .map(i => ({
-            x: i % r2 - Math.floor(r2 / 2),
+            x: (i % r2) - Math.floor(r2 / 2),
             y: Math.floor(i / r2) - Math.floor(r2 / 2)
         }))
         .filter(o => U.pointInCircle(o, { x: 0, y: 0 }, POLE_TO_POLE_RADIUS))
@@ -234,8 +231,7 @@ export default function generatePoles(
             g.x = g.poles.reduce((acc, e) => acc + e.x, 0) / g.poles.length
             g.y = g.poles.reduce((acc, e) => acc + e.y, 0) / g.poles.length
         })
-        groups = groups
-            .sort((a, b) => a.poles.length - b.poles.length)
+        groups = groups.sort((a, b) => a.poles.length - b.poles.length)
 
         const groupsCopy = [...groups]
         const group = groups.shift()
@@ -248,19 +244,20 @@ export default function generatePoles(
             .filter(l => l.includes(group))
             .map(l => l.find(g => g !== group))
             .map(otherGroup => {
-
                 const shortestLine = U.pointsToLines([...group.poles, ...otherGroup.poles])
                     // filter out lines that are in the same group
-                    .filter(l => !(
-                        group.poles.includes(l[0]) && group.poles.includes(l[1]) ||
-                        otherGroup.poles.includes(l[0]) && otherGroup.poles.includes(l[1])
-                    ))
+                    .filter(
+                        l =>
+                            !(
+                                (group.poles.includes(l[0]) && group.poles.includes(l[1])) ||
+                                (otherGroup.poles.includes(l[0]) && otherGroup.poles.includes(l[1]))
+                            )
+                    )
                     .map(l => ({
                         poles: l,
                         dist: U.euclideanDistance(l[0], l[1])
                     }))
-                    .sort((a, b) => a.dist - b.dist)
-                    [0]
+                    .sort((a, b) => a.dist - b.dist)[0]
 
                 const g1pole = shortestLine.poles.find(p => group.poles.includes(p))
                 const g2pole = shortestLine.poles.find(p => otherGroup.poles.includes(p))
@@ -278,8 +275,7 @@ export default function generatePoles(
                     betweenG1AndG2Poles
                 }
             })
-            .sort((a, b) => a.dist - b.dist)
-            [0]
+            .sort((a, b) => a.dist - b.dist)[0]
 
         const newPolePos = circleOffsets
             .map(o => ({
@@ -290,8 +286,7 @@ export default function generatePoles(
             .sort((a, b) => {
                 const point = DATA.dist > POLE_TO_POLE_RADIUS + 2 ? DATA.g2pole : DATA.betweenG1AndG2Poles
                 return U.manhattenDistance(a, point) - U.manhattenDistance(b, point)
-            })
-            [0]
+            })[0]
 
         connectionPoles.push(newPolePos)
 
@@ -303,7 +298,7 @@ export default function generatePoles(
         }
     }
 
-    addVisualization(connectionPoles, 16, 1, 0x8A2BE2)
+    addVisualization(connectionPoles, 16, 1, 0x8a2be2)
 
     const info = {
         totalPoles: finalGroup.poles.length

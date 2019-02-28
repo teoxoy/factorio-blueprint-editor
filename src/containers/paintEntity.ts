@@ -1,14 +1,13 @@
-import G from '../common/globals'
 import FD from 'factorio-data'
+import * as PIXI from 'pixi.js'
+import G from '../common/globals'
 import util from '../common/util'
+import { EntitySprite } from '../entitySprite'
 import { EntityContainer } from './entity'
 import { UnderlayContainer } from './underlay'
-import { EntitySprite } from '../entitySprite'
 import { PaintContainer } from './paint'
-import * as PIXI from 'pixi.js'
 
 export class EntityPaintContainer extends PaintContainer {
-
     static isContainerOutOfBpArea(newPos: IPoint, size: IPoint) {
         return (
             newPos.x - size.x / 2 < 0 ||
@@ -18,7 +17,7 @@ export class EntityPaintContainer extends PaintContainer {
         )
     }
 
-    areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
+    areaVisualization: PIXI.Sprite | PIXI.Sprite[]
     directionType: 'input' | 'output'
     direction: number
 
@@ -63,10 +62,11 @@ export class EntityPaintContainer extends PaintContainer {
     checkBuildable() {
         const position = this.getGridPosition()
         const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
-        if (!EntityPaintContainer.isContainerOutOfBpArea(position, size) &&
+        if (
+            !EntityPaintContainer.isContainerOutOfBpArea(position, size) &&
             (G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, this.direction, position) ||
-            G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, this.direction, position) ||
-            G.bp.entityPositionGrid.isAreaAvalible(this.name, position, this.direction))
+                G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, this.direction, position) ||
+                G.bp.entityPositionGrid.isAreaAvalible(this.name, position, this.direction))
         ) {
             this.filter.red = 0.4
             this.filter.green = 1
@@ -80,7 +80,9 @@ export class EntityPaintContainer extends PaintContainer {
         const fd = FD.entities[this.name]
         if (fd.type === 'underground_belt') {
             const otherEntity = G.bp.entityPositionGrid.getOpposingEntity(
-                this.name, (this.direction + 4) % 8, {
+                this.name,
+                (this.direction + 4) % 8,
+                {
                     x: this.x / 32,
                     y: this.y / 32
                 },
@@ -91,7 +93,9 @@ export class EntityPaintContainer extends PaintContainer {
                 const oe = G.bp.entities.get(otherEntity)
                 this.directionType = oe.directionType === 'input' ? 'output' : 'input'
             } else {
-                if (this.directionType === 'output') this.directionType = 'input'
+                if (this.directionType === 'output') {
+                    this.directionType = 'input'
+                }
             }
             this.redraw()
         }
@@ -108,8 +112,10 @@ export class EntityPaintContainer extends PaintContainer {
 
     rotate(ccw = false) {
         const pr = FD.entities[this.name].possible_rotations
-        if (!pr) return
-        this.direction = pr[ (pr.indexOf(this.direction) + (ccw ? 3 : 1)) % pr.length ]
+        if (!pr) {
+            return
+        }
+        this.direction = pr[(pr.indexOf(this.direction) + (ccw ? 3 : 1)) % pr.length]
 
         const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
         this.setNewPosition(size)
@@ -122,11 +128,17 @@ export class EntityPaintContainer extends PaintContainer {
 
     redraw() {
         this.removeChildren()
-        this.addChild(...EntitySprite.getParts({
-            name: this.name,
-            direction: this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
-            directionType: this.directionType
-        }, G.quality.hr, true))
+        this.addChild(
+            ...EntitySprite.getParts(
+                {
+                    name: this.name,
+                    direction: this.directionType === 'output' ? (this.direction + 4) % 8 : this.direction,
+                    directionType: this.directionType
+                },
+                G.quality.hr,
+                true
+            )
+        )
     }
 
     moveAtCursor() {
@@ -137,13 +149,12 @@ export class EntityPaintContainer extends PaintContainer {
             case 'curved_rail':
             case 'train_stop':
                 this.position.set(
-                    position.x - (position.x + G.railMoveOffset.x * 32) % 64 + 32,
-                    position.y - (position.y + G.railMoveOffset.y * 32) % 64 + 32
+                    position.x - ((position.x + G.railMoveOffset.x * 32) % 64) + 32,
+                    position.y - ((position.y + G.railMoveOffset.y * 32) % 64) + 32
                 )
                 break
             default:
-                const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
-                this.setNewPosition(size)
+                this.setNewPosition(util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction))
         }
 
         this.updateUndergroundBeltRotation()
@@ -167,7 +178,9 @@ export class EntityPaintContainer extends PaintContainer {
         const fd = FD.entities[this.name]
         const position = this.getGridPosition()
         const size = util.switchSizeBasedOnDirection(fd.size, this.direction)
-        if (EntityPaintContainer.isContainerOutOfBpArea(position, size)) return
+        if (EntityPaintContainer.isContainerOutOfBpArea(position, size)) {
+            return
+        }
 
         const frgEntNr = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, this.direction, position)
         if (frgEntNr) {
@@ -180,7 +193,9 @@ export class EntityPaintContainer extends PaintContainer {
             return
         }
         const snEntNr = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
-            this.name, this.direction, position
+            this.name,
+            this.direction,
+            position
         )
         if (snEntNr) {
             G.bp.entities.get(snEntNr).direction = this.direction
@@ -202,8 +217,10 @@ export class EntityPaintContainer extends PaintContainer {
                 type: isUB ? this.directionType : undefined
             })
 
-            const ec = EntityContainer.mappings.get(newEntity.entity_number)
-            UnderlayContainer.modifyVisualizationArea(ec.areaVisualization, s => s.visible = true)
+            const ec = EntityContainer.mappings.get(newEntity.entityNumber)
+            UnderlayContainer.modifyVisualizationArea(ec.areaVisualization, s => {
+                s.visible = true
+            })
 
             if (isUB || this.name === 'pipe_to_ground') {
                 this.direction = (this.direction + 4) % 8

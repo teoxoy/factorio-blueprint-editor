@@ -1,12 +1,11 @@
 import FD from 'factorio-data'
+import * as PIXI from 'pixi.js'
 import Slot from '../../controls/slot'
 import Entity from '../../factorio-data/entity'
 import { InventoryContainer } from '../../panels/inventory'
-import * as PIXI from 'pixi.js'
 
 /** Module Slots for Entity */
 export default class Filters extends PIXI.Container {
-
     /* Blueprint Splitters
     ########################
     entity_number: 1
@@ -113,7 +112,9 @@ export default class Filters extends PIXI.Container {
      * @param count - New count
      */
     public updateFilter(index: number, count: number) {
-        if (this.m_Filters[index].count === count) return
+        if (this.m_Filters[index].count === count) {
+            return
+        }
         this.m_Filters[index].count = count
         this.m_Entity.filters = this.m_Filters
         this.m_UpdateSlots()
@@ -150,7 +151,9 @@ export default class Filters extends PIXI.Container {
     /** Update slot icons */
     private m_UpdateSlots() {
         for (const slot of this.children) {
-            if (!(slot instanceof Slot)) continue
+            if (!(slot instanceof Slot)) {
+                continue
+            }
 
             const slotIndex: number = slot.data as number
             const slotFilter: IFilter = this.m_Filters[slotIndex]
@@ -169,7 +172,13 @@ export default class Filters extends PIXI.Container {
                             }
                         }
                         slot.content = new PIXI.Container()
-                        InventoryContainer.createIconWithAmount(slot.content as PIXI.Container, -16, -16, slotFilter.name, slotFilter.count)
+                        InventoryContainer.createIconWithAmount(
+                            slot.content as PIXI.Container,
+                            -16,
+                            -16,
+                            slotFilter.name,
+                            slotFilter.count
+                        )
                     } else {
                         slot.content = InventoryContainer.createIcon(slotFilter.name, false)
                     }
@@ -190,19 +199,26 @@ export default class Filters extends PIXI.Container {
             if (!this.m_Amount || this.m_Filters[index].name === undefined) {
                 new InventoryContainer('Select Filter', this.m_Entity.acceptedFilters, name => {
                     this.m_Filters[index].name = name
-                    if (this.m_Amount) this.m_Filters[index].count = FD.items[name].stack_size
+                    if (this.m_Amount) {
+                        this.m_Filters[index].count = FD.items[name].stack_size
+                    }
                     this.m_Entity.filters = this.m_Filters
 
-                    if (this.m_Amount) this.emit('selected', index, this.m_Filters[index].count)
-                })
-                .show()
+                    if (this.m_Amount) {
+                        this.emit('selected', index, this.m_Filters[index].count)
+                    }
+                }).show()
             } else {
-                if (this.m_Amount) this.emit('selected', index, this.m_Filters[index].count)
+                if (this.m_Amount) {
+                    this.emit('selected', index, this.m_Filters[index].count)
+                }
             }
         } else if (e.data.button === 2) {
             this.m_Filters[index].name = undefined
             this.m_Entity.filters = this.m_Filters
-            if (this.m_Amount) this.emit('selected', -1, 0)
+            if (this.m_Amount) {
+                this.emit('selected', -1, 0)
+            }
         }
     }
 }

@@ -1,12 +1,6 @@
 {
     "compilerOptions": {
-        "lib": [
-            "dom",
-            "es6",
-            "dom.iterable",
-            "es2016.array.include",
-            "es2017.object"
-        ],
+        "lib": ["dom", "es6", "dom.iterable", "es2016.array.include", "es2017.object"],
         "target": "es6",
         "module": "es6",
         "moduleResolution": "node",

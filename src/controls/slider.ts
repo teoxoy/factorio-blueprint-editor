@@ -1,10 +1,9 @@
+import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import F from '../controls/functions'
-import * as PIXI from 'pixi.js'
 
 /** Slider Control */
 export default class Slider extends PIXI.Container {
-
     /** Static width of slider */
     private static readonly SLIDER_WIDTH = 148 // Actual Width is 164 ... this is a necessary constant to improve calculation
     /** Static height of slider */
@@ -38,12 +37,17 @@ export default class Slider extends PIXI.Container {
         const factor = 2
 
         // Draw slide bar
-        const slidebar = F.DrawControlFace(Slider.SLIDER_WIDTH + Slider.SLIDER_HEIGHT, Slider.SLIDER_HEIGHT, factor,
-            G.colors.controls.slider.slidebar.color, 1,
+        const slidebar = F.DrawControlFace(
+            Slider.SLIDER_WIDTH + Slider.SLIDER_HEIGHT,
+            Slider.SLIDER_HEIGHT,
+            factor,
+            G.colors.controls.slider.slidebar.color,
+            1,
             G.colors.controls.slider.slidebar.p0,
             G.colors.controls.slider.slidebar.p1,
             G.colors.controls.slider.slidebar.p2,
-            G.colors.controls.slider.slidebar.p3)
+            G.colors.controls.slider.slidebar.p3
+        )
         slidebar.position.set(0, 0)
         this.addChild(slidebar)
 
@@ -53,20 +57,30 @@ export default class Slider extends PIXI.Container {
         this.addChild(this.m_SliderValue)
 
         // Draw slide button
-        const buttonFace = F.DrawControlFace(Slider.SLIDER_HEIGHT, Slider.SLIDER_HEIGHT, factor,
-            G.colors.controls.slider.button.color, 1,
+        const buttonFace = F.DrawControlFace(
+            Slider.SLIDER_HEIGHT,
+            Slider.SLIDER_HEIGHT,
+            factor,
+            G.colors.controls.slider.button.color,
+            1,
             G.colors.controls.slider.button.p0,
             G.colors.controls.slider.button.p1,
             G.colors.controls.slider.button.p2,
-            G.colors.controls.slider.button.p3)
+            G.colors.controls.slider.button.p3
+        )
         buttonFace.position.set(0, 0)
 
-        const buttonHover = F.DrawControlFace(Slider.SLIDER_HEIGHT, Slider.SLIDER_HEIGHT, factor,
-            G.colors.controls.slider.hover.color, 1,
+        const buttonHover = F.DrawControlFace(
+            Slider.SLIDER_HEIGHT,
+            Slider.SLIDER_HEIGHT,
+            factor,
+            G.colors.controls.slider.hover.color,
+            1,
             G.colors.controls.slider.hover.p0,
             G.colors.controls.slider.hover.p1,
             G.colors.controls.slider.hover.p2,
-            G.colors.controls.slider.hover.p3)
+            G.colors.controls.slider.hover.p3
+        )
         buttonHover.position.set(0, 0)
         buttonHover.visible = false
 
@@ -75,8 +89,14 @@ export default class Slider extends PIXI.Container {
         this.m_SliderButton.interactive = true
         this.m_SliderButton.addChild(buttonFace)
         this.m_SliderButton.addChild(buttonHover)
-        this.m_SliderButton.on('pointerover', () => { buttonHover.visible = true })
-        this.m_SliderButton.on('pointerout', () => { if (!this.m_Dragging) buttonHover.visible = false })
+        this.m_SliderButton.on('pointerover', () => {
+            buttonHover.visible = true
+        })
+        this.m_SliderButton.on('pointerout', () => {
+            if (!this.m_Dragging) {
+                buttonHover.visible = false
+            }
+        })
         this.m_SliderButton.on('pointerdown', this.onButtonDragStart)
         this.m_SliderButton.on('pointermove', this.onButtonDragMove)
         this.m_SliderButton.on('pointerup', this.onButtonDragEnd)
@@ -93,7 +113,9 @@ export default class Slider extends PIXI.Container {
         if (this.p_Value !== value) {
             this.p_Value = value
             this.emit('changed')
-            if (!this.m_Dragging) this.updateButtonPosition()
+            if (!this.m_Dragging) {
+                this.updateButtonPosition()
+            }
         }
     }
 
@@ -127,12 +149,19 @@ export default class Slider extends PIXI.Container {
     private updateSliderValue() {
         this.m_SliderValue.removeChildren()
         if (this.m_SliderButton.x > 0) {
-            this.m_SliderValue.addChild(F.DrawControlFace(this.m_SliderButton.x + 2, Slider.SLIDER_HEIGHT, 2,
-                G.colors.controls.slider.value.color, 1,
-                G.colors.controls.slider.value.p0,
-                G.colors.controls.slider.value.p1,
-                G.colors.controls.slider.value.p2,
-                G.colors.controls.slider.value.p3))
+            this.m_SliderValue.addChild(
+                F.DrawControlFace(
+                    this.m_SliderButton.x + 2,
+                    Slider.SLIDER_HEIGHT,
+                    2,
+                    G.colors.controls.slider.value.color,
+                    1,
+                    G.colors.controls.slider.value.p0,
+                    G.colors.controls.slider.value.p1,
+                    G.colors.controls.slider.value.p2,
+                    G.colors.controls.slider.value.p3
+                )
+            )
         }
     }
 

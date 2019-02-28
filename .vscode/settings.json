@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": true,
+    "[typescript]": {
+        "editor.formatOnSave": false
+    },
+    "eslint.validate": [{ "language": "typescript", "autoFix": true }],
+    "eslint.autoFixOnSave": true,
+    "eslint.alwaysShowStatus": true,
+    "prettier.disableLanguages": ["ts"]
+}

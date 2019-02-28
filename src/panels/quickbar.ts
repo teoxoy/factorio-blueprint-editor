@@ -1,15 +1,10 @@
+import * as PIXI from 'pixi.js'
 import G from '../common/globals'
-import { InventoryContainer } from './inventory'
 import Panel from '../controls/panel'
 import Slot from '../controls/slot'
-import * as PIXI from 'pixi.js'
+import { InventoryContainer } from './inventory'
 
-export class QuickbarSlot extends Slot {
-
-    constructor() {
-        super()
-    }
-
+class QuickbarSlot extends Slot {
     get itemName() {
         return this.data
     }
@@ -26,7 +21,6 @@ export class QuickbarSlot extends Slot {
 }
 
 export class QuickbarContainer extends Panel {
-
     static createTriangleButton(width: number, height: number) {
         const button = new PIXI.Graphics()
 
@@ -40,8 +34,12 @@ export class QuickbarContainer extends Panel {
 
         button.interactive = true
 
-        button.on('pointerover', () => button.alpha = 0.8)
-        button.on('pointerout', () => button.alpha = 1)
+        button.on('pointerover', () => {
+            button.alpha = 0.8
+        })
+        button.on('pointerout', () => {
+            button.alpha = 1
+        })
 
         return button
     }
@@ -54,11 +52,13 @@ export class QuickbarContainer extends Panel {
     private slotsContainer: PIXI.Container
 
     constructor(rows = 1, itemNames?: string[]) {
-        super(442,
-              24 + rows * 38,
-              G.colors.quickbar.background.color,
-              G.colors.quickbar.background.alpha,
-              G.colors.quickbar.background.border)
+        super(
+            442,
+            24 + rows * 38,
+            G.colors.quickbar.background.color,
+            G.colors.quickbar.background.alpha,
+            G.colors.quickbar.background.border
+        )
 
         this.rows = rows
         this.iHeight = 24 + rows * 38
@@ -80,9 +80,11 @@ export class QuickbarContainer extends Panel {
         for (let r = 0; r < this.rows; r++) {
             for (let i = 0; i < 10; i++) {
                 const quickbarSlot = new QuickbarSlot()
-                quickbarSlot.position.set(((36 + 2) * i) + (i > 4 ? 38 : 0), 38 * r)
+                quickbarSlot.position.set((36 + 2) * i + (i > 4 ? 38 : 0), 38 * r)
 
-                if (itemNames && itemNames[(r * 10) + i]) quickbarSlot.assignItem(itemNames[(r * 10) + i])
+                if (itemNames && itemNames[r * 10 + i]) {
+                    quickbarSlot.assignItem(itemNames[r * 10 + i])
+                }
 
                 quickbarSlot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     // Use Case 1: Left Click  & Slot=Empty & Mouse=Painting >> Assign Mouse Item to Slot
@@ -95,27 +97,27 @@ export class QuickbarContainer extends Panel {
                     if (e.data.button === 0) {
                         // >> Mouse == Painting (UC1,UC2)
                         if (G.currentMouseState === G.mouseStates.PAINTING) {
-                            // >> Slot == Empty (UC1)
-                            if (!quickbarSlot.itemName) {
-                                quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
-                            // >> Slot == Item (UC2)
-                            } else {
+                            if (quickbarSlot.itemName) {
+                                // >> Slot == Item (UC2)
                                 G.BPC.spawnPaintContainer(quickbarSlot.itemName)
                                 G.BPC.paintContainer.hide()
+                            } else {
+                                // >> Slot == Empty (UC1)
+                                quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
                             }
-                        // >> Slot == Item (UC4)
+                            // >> Slot == Item (UC4)
                         } else if (quickbarSlot.itemName) {
                             G.BPC.spawnPaintContainer(quickbarSlot.itemName)
                             G.BPC.paintContainer.hide()
                         }
 
-                    // >> Right Click (UC5)
+                        // >> Right Click (UC5)
                     } else if (e.data.button === 2) {
                         quickbarSlot.unassignItem()
                     }
                 })
 
-                this.slots[(r * 10) + i] = quickbarSlot
+                this.slots[r * 10 + i] = quickbarSlot
                 this.slotsContainer.addChild(quickbarSlot)
             }
         }
@@ -123,7 +125,9 @@ export class QuickbarContainer extends Panel {
 
     public bindKeyToSlot(slot: number) {
         const itemName = this.slots[slot].itemName
-        if (!itemName) return
+        if (!itemName) {
+            return
+        }
 
         if (G.currentMouseState === G.mouseStates.PAINTING && G.BPC.paintContainer.getItemName() === itemName) {
             G.BPC.paintContainer.destroy()
@@ -147,9 +151,6 @@ export class QuickbarContainer extends Panel {
     }
 
     setPosition() {
-        this.position.set(
-            G.app.screen.width / 2 - this.width / 2,
-            G.app.screen.height - this.height
-        )
+        this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height - this.height)
     }
 }

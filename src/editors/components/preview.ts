@@ -1,13 +1,12 @@
+import * as PIXI from 'pixi.js'
 import G from '../../common/globals'
 import util from '../../common/util'
 import { EntitySprite } from '../../entitySprite'
 import { OverlayContainer } from '../../containers/overlay'
 import Entity from '../../factorio-data/entity'
-import * as PIXI from 'pixi.js'
 
 /** Preview of Entity */
 export default class Preview extends PIXI.Container {
-
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 
@@ -32,7 +31,7 @@ export default class Preview extends PIXI.Container {
 
         // Mask for the entity parts
         const mask = new PIXI.Graphics()
-            .beginFill(0xFFFFFF)
+            .beginFill(0xffffff)
             .drawRect(0, 0, size, size)
             .endFill()
         this.addChild(mask)
@@ -61,7 +60,7 @@ export default class Preview extends PIXI.Container {
 
         if (this.m_Entity.entityData !== undefined) {
             /** Adjust sprite size and offset based on drawing box */
-            function assignDataFromDrawingBox(db: number[][]) {
+            const assignDataFromDrawingBox = (db: number[][]) => {
                 actualSpriteSize.x = Math.abs(db[0][0]) + db[1][0]
                 actualSpriteSize.y = Math.abs(db[0][1]) + db[1][1]
                 offset.x = actualSpriteSize.x / 2 - db[1][0]
@@ -77,12 +76,12 @@ export default class Preview extends PIXI.Container {
             }
         }
 
-        const SCALE = (this.m_Size / (Math.max(actualSpriteSize.x, actualSpriteSize.y, 3) * 32 + 32))
+        const SCALE = this.m_Size / (Math.max(actualSpriteSize.x, actualSpriteSize.y, 3) * 32 + 32)
         entityParts.scale.set(SCALE)
         entityParts.position.set(this.m_Size / 2 + offset.x * 32 * SCALE, this.m_Size / 2 + offset.y * 32 * SCALE)
 
         const oc: OverlayContainer = new OverlayContainer()
-        const o: PIXI.Container = oc.createEntityInfo(this.m_Entity.entity_number, { x: 0, y: 0 })
+        const o: PIXI.Container = oc.createEntityInfo(this.m_Entity.entityNumber, { x: 0, y: 0 })
         if (o !== undefined) {
             entityParts.addChild(o)
         }

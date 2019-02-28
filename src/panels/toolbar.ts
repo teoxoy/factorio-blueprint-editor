@@ -1,8 +1,7 @@
-import G from '../common/globals'
 import * as PIXI from 'pixi.js'
+import G from '../common/globals'
 
 export class ToolbarContainer extends PIXI.Container {
-
     info: PIXI.Text
     logo: PIXI.Text
     fpsGUIText: PIXI.Text
@@ -13,12 +12,16 @@ export class ToolbarContainer extends PIXI.Container {
 
         const background = new PIXI.Sprite(PIXI.Texture.WHITE)
         background.width = G.app.screen.width
-        window.addEventListener('resize', () => {
-            background.width = G.app.screen.width
-            this.fpsGUIText.position.set(G.app.screen.width, background.height / 2)
-            this.logo.position.set(G.app.screen.width / 2, background.height / 2)
-            this.info.position.set(G.app.screen.width - 100, background.height)
-        }, false)
+        window.addEventListener(
+            'resize',
+            () => {
+                background.width = G.app.screen.width
+                this.fpsGUIText.position.set(G.app.screen.width, background.height / 2)
+                this.logo.position.set(G.app.screen.width / 2, background.height / 2)
+                this.info.position.set(G.app.screen.width - 100, background.height)
+            },
+            false
+        )
         background.height = 32
         G.colors.addSpriteForAutomaticTintChange(background)
         this.addChild(background)
@@ -56,8 +59,12 @@ export class ToolbarContainer extends PIXI.Container {
         this.info.position.set(G.app.screen.width - 100, background.height)
         this.addChild(this.info)
 
-        G.app.ticker.add(() => this.fpsGUIText.text = String(Math.round(G.app.ticker.FPS)) + ' FPS')
+        G.app.ticker.add(() => {
+            this.fpsGUIText.text = `${String(Math.round(G.app.ticker.FPS))} FPS`
+        })
 
-        G.BPC.gridData.on('update', (pos: IPoint) => this.gridposGUIText.text = `X ${pos.x} Y ${pos.y}`)
+        G.BPC.gridData.on('update', (pos: IPoint) => {
+            this.gridposGUIText.text = `X ${pos.x} Y ${pos.y}`
+        })
     }
 }

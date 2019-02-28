@@ -1,7 +1,7 @@
+import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import F from './functions'
 import Panel from './panel'
-import * as PIXI from 'pixi.js'
 
 /**
  * Base Dialog for usage whenever a dialog shall be shown to the user
@@ -13,7 +13,6 @@ import * as PIXI from 'pixi.js'
  *  + automatically executes 'setDialogPosition()' on Browser Resizing
  */
 export default class Dialog extends Panel {
-
     /** Closes last open dialog */
     static closeLast() {
         if (Dialog.anyOpen()) {
@@ -36,14 +35,20 @@ export default class Dialog extends Panel {
 
     /** Capitalize String */
     protected static capitalize(text: string): string {
-        return text.split('_').map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+        return text
+            .split('_')
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(' ')
     }
 
     constructor(width: number, height: number, title?: string) {
-        super(width, height,
+        super(
+            width,
+            height,
             G.colors.dialog.background.color,
             G.colors.dialog.background.alpha,
-            G.colors.dialog.background.border)
+            G.colors.dialog.background.border
+        )
 
         this.visible = false
         this.interactive = true
@@ -56,10 +61,7 @@ export default class Dialog extends Panel {
 
     /** Automatically sets position of dialog to center screen */
     setPosition() {
-        this.position.set(
-            G.app.screen.width / 2 - this.width / 2,
-            G.app.screen.height / 2 - this.height / 2
-        )
+        this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height / 2 - this.height / 2)
     }
 
     /** Show Dialog */
@@ -71,8 +73,7 @@ export default class Dialog extends Panel {
 
     /** Close Dialog */
     public close(): void {
-        Dialog.s_openDialogs = Dialog.s_openDialogs
-            .filter(d => d !== this)
+        Dialog.s_openDialogs = Dialog.s_openDialogs.filter(d => d !== this)
 
         this.emit('close')
         this.destroy()
@@ -87,7 +88,12 @@ export default class Dialog extends Panel {
      * @param style - Style of label
      * @returns Reference to PIXI.Text for further usage
      */
-    protected addLabel(x: number = 140, y: number = 56, text: string = 'Recipe:', style: PIXI.TextStyle = G.styles.dialog.label): PIXI.Text {
+    protected addLabel(
+        x: number = 140,
+        y: number = 56,
+        text: string = 'Recipe:',
+        style: PIXI.TextStyle = G.styles.dialog.label
+    ): PIXI.Text {
         const label: PIXI.Text = new PIXI.Text(text, style)
         label.position.set(x, y)
         this.addChild(label)
@@ -105,14 +111,21 @@ export default class Dialog extends Panel {
      * @param style - Height from top to bottom of line
      * @returns Reference to PIXI.Graphics for further usage
      */
-    protected addLine(x: number, y: number, width: number, height: number, border: number = G.colors.dialog.line.background.border): PIXI.Graphics {
+    protected addLine(
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        border: number = G.colors.dialog.line.background.border
+    ): PIXI.Graphics {
         const line: PIXI.Graphics = F.DrawRectangle(
             width,
             height,
             G.colors.dialog.line.background.color,
             G.colors.dialog.line.background.alpha,
             border,
-            true)
+            true
+        )
         line.position.set(x, y)
         this.addChild(line)
 

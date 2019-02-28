@@ -1,9 +1,8 @@
-import G from '../common/globals'
 import * as PIXI from 'pixi.js'
+import G from '../common/globals'
 
 /** Base Checkbox */
 export default class Enable extends PIXI.Container {
-
     /** Reference to regular text */
     private readonly m_TextText: PIXI.Text
 
@@ -51,7 +50,9 @@ export default class Enable extends PIXI.Container {
             }
         })
         this.on('pointerover', () => {
-            if (!this.active) this.m_HoverText.visible = true
+            if (!this.active) {
+                this.m_HoverText.visible = true
+            }
         })
         this.on('pointerout', () => {
             this.m_HoverText.visible = false

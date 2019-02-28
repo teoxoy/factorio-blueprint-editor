@@ -64,9 +64,9 @@ interface IEntityNumber {
 
 /** Interface for providing additional data for action */
 interface IHistoryData {
-    readonly entity_number: number
+    readonly entityNumber: number
     readonly type: 'init' | 'add' | 'del' | 'mov' | 'upd'
-    readonly other_entity?: number
+    readonly otherEntity?: number
 }
 
 /** Interface for further enhancing actions */
@@ -75,7 +75,7 @@ interface IHistoryOptions {
     type(type: 'init' | 'add' | 'del' | 'mov' | 'upd'): IHistoryOptions
 
     /** Privde other/related entity number */
-    other_entity(other_entity: number): IHistoryOptions
+    otherEntity(otherEntity: number): IHistoryOptions
 
     /** Emit function after executing action */
     emit(f: (value: any, oldValue: any) => void): IHistoryOptions
@@ -86,24 +86,22 @@ interface IHistoryOptions {
 
 /** Implementation for IHistoryData interface */
 class HistoryData implements IHistoryData {
-
     /** Entity number */
-    public entity_number: number
+    public entityNumber: number
 
     /** Action type */
     public type: 'init' | 'add' | 'del' | 'mov' | 'upd' = 'upd'
 
     /** Other entity */
-    public other_entity?: number
+    public otherEntity?: number
 
-    constructor(entity_number: number) {
-        this.entity_number = entity_number
+    constructor(entityNumber: number) {
+        this.entityNumber = entityNumber
     }
 }
 
 /** Private class for historical actions */
 class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
-
     /** Field to store old value (=overwritten value) */
     private readonly m_OldValue: IValueInfo<V>
 
@@ -117,12 +115,18 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
     private readonly m_Apply: (value: IValueInfo<V>) => void
 
     /** Field to store functions to emit after execution of action */
-    private readonly m_Emits: Array<((value: any, oldValue: any) => void)>
+    private readonly m_Emits: ((value: any, oldValue: any) => void)[]
 
     /** Field to store description */
     private readonly m_Text: string
 
-    constructor(oldValue: IValueInfo<V>, newValue: IValueInfo<V>, data: HistoryData, apply: (value: IValueInfo<V>) => void, text?: string) {
+    constructor(
+        oldValue: IValueInfo<V>,
+        newValue: IValueInfo<V>,
+        data: HistoryData,
+        apply: (value: IValueInfo<V>) => void,
+        text?: string
+    ) {
         this.m_OldValue = oldValue
         this.m_NewValue = newValue
         this.m_Data = data
@@ -153,7 +157,6 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
      * @param value Whether to apply the new or the old value (Default: New)
      */
     public apply(value: HistoryValue = HistoryValue.New): number {
-
         const valueInfo = value === HistoryValue.New ? this.m_NewValue : this.m_OldValue
         const oldValueInfo = value === HistoryValue.New ? this.m_OldValue : this.m_NewValue
 
@@ -165,7 +168,7 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
             }
         }
 
-        return this.m_Data.entity_number
+        return this.m_Data.entityNumber
     }
 
     /** Historical action associated data */
@@ -180,8 +183,8 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
     }
 
     /** Privde other/related entity number */
-    public other_entity(other_entity: number): IHistoryOptions {
-        this.m_Data.other_entity = other_entity
+    public otherEntity(otherEntity: number): IHistoryOptions {
+        this.m_Data.otherEntity = otherEntity
         return this
     }
 
@@ -194,7 +197,6 @@ class HistoryAction<V> implements IHistoryAction, IHistoryOptions {
 
 /** Historical entries */
 class HistoryEntry {
-
     /** Field to store description */
     private readonly m_Text: string
 
@@ -212,7 +214,9 @@ class HistoryEntry {
      * @returns False if there were no actions to be executed
      */
     public apply(value: HistoryValue = HistoryValue.New): boolean {
-        if (this.m_Actions.length === 0) return false
+        if (this.m_Actions.length === 0) {
+            return false
+        }
 
         const entityNumbers: number[] = []
         for (const action of this.m_Actions) {
@@ -229,7 +233,9 @@ class HistoryEntry {
         for (const action of this.m_Actions) {
             entityNumbers.push(action.apply(HistoryValue.Old))
         }
-        if (this.m_Text !== undefined) console.log(`[${entityNumbers.join(',')}]: UNDO ${this.m_Text}`)
+        if (this.m_Text !== undefined) {
+            console.log(`[${entityNumbers.join(',')}]: UNDO ${this.m_Text}`)
+        }
     }
 
     /** Undo all actions from this entry */
@@ -238,13 +244,17 @@ class HistoryEntry {
         for (const action of this.m_Actions) {
             entityNumbers.push(action.apply(HistoryValue.New))
         }
-        if (this.m_Text !== undefined) console.log(`[${entityNumbers.join(',')}]: REDO ${this.m_Text}`)
+        if (this.m_Text !== undefined) {
+            console.log(`[${entityNumbers.join(',')}]: REDO ${this.m_Text}`)
+        }
     }
 
     /** Log all actions (used during transaction commit as apply is not executed there) */
     public log() {
-        const entityNumbers: number[] = this.m_Actions.map(a => a.data.entity_number)
-        if (this.m_Text !== undefined) console.log(`[${entityNumbers.join(',')}]: ${this.m_Text}`)
+        const entityNumbers: number[] = this.m_Actions.map(a => a.data.entityNumber)
+        if (this.m_Text !== undefined) {
+            console.log(`[${entityNumbers.join(',')}]: ${this.m_Text}`)
+        }
     }
 
     /** Add action to this entry */
@@ -272,51 +282,75 @@ let s_Transaction: HistoryEntry
 
 /** Perform update value action on object and store in history  */
 function updateValue<T extends IEntityNumber, V>(
-    target: T, path: string[], value: V, text?: string, remove: boolean = false): IHistoryOptions {
-
+    target: T,
+    path: string[],
+    value: V,
+    text?: string,
+    remove: boolean = false
+): IHistoryOptions {
     const oldValue: IValueInfo<V> = s_GetValue<V>(target, path)
     const newValue: IValueInfo<V> = { value, exists: !remove }
     const data: HistoryData = new HistoryData(target.entity_number)
 
-    const historyAction: HistoryAction<V> = new HistoryAction(oldValue, newValue, data, (v: IValueInfo<V>) => {
-        if (!v.exists) {
-            const current = s_GetValue(target, path)
-            if (current.exists) {
-                s_DeleteValue(target, path)
+    const historyAction: HistoryAction<V> = new HistoryAction(
+        oldValue,
+        newValue,
+        data,
+        (v: IValueInfo<V>) => {
+            if (v.exists) {
+                s_SetValue(target, path, v)
+            } else {
+                const current = s_GetValue(target, path)
+                if (current.exists) {
+                    s_DeleteValue(target, path)
+                }
             }
-        } else {
-            s_SetValue(target, path, v)
-        }
-    }, text)
+        },
+        text
+    )
 
     // If transaction is active, add the new historyAction to it
-    if (s_Transaction) s_Transaction.push(historyAction)
+    if (s_Transaction) {
+        s_Transaction.push(historyAction)
+    }
 
     return historyAction
 }
 
 /** Perform change to map and store in history */
 function updateMap<K extends number, V extends IEntityNumber>(
-    target: Map<K, V>, key: K, value: V, text?: string, remove: boolean = false): IHistoryOptions {
-
-    const oldValue: IValueInfo<V> = target.has(key) ?
-        { value: target.get(key), exists: true } :
-        { value: undefined, exists: false }
+    target: Map<K, V>,
+    key: K,
+    value: V,
+    text?: string,
+    remove: boolean = false
+): IHistoryOptions {
+    const oldValue: IValueInfo<V> = target.has(key)
+        ? { value: target.get(key), exists: true }
+        : { value: undefined, exists: false }
     const newValue: IValueInfo<V> = { value, exists: !remove }
     const data: IHistoryData = new HistoryData(key)
 
-    const historyAction: HistoryAction<V> = new HistoryAction(oldValue, newValue, data, (v: IValueInfo<V>) => {
-        if (!v.exists) {
-            if (target.has(key)) {
-                target.delete(key)
+    const historyAction: HistoryAction<V> = new HistoryAction(
+        oldValue,
+        newValue,
+        data,
+        (v: IValueInfo<V>) => {
+            if (v.exists) {
+                target.set(key, v.value)
+            } else {
+                if (target.has(key)) {
+                    target.delete(key)
+                }
             }
-        } else {
-            target.set(key, v.value)
-        }
-    }, text)
+        },
+        text
+    )
 
     // If transaction is active, add the new historyAction to it
-    if (s_Transaction) s_Transaction.push(historyAction)
+    if (s_Transaction) {
+        s_Transaction.push(historyAction)
+    }
 
     return historyAction
 }
@@ -335,7 +369,7 @@ function getUndoPreview(): IHistoryData {
 function undo() {
     const historyEntry: HistoryEntry = s_HistoryEntries[s_HistoryIndex - 1]
     historyEntry.undo()
-    s_HistoryIndex--
+    s_HistoryIndex -= 1
 }
 
 /** Return true if there are any actions left for redo */
@@ -352,7 +386,7 @@ function getRedoPreview(): IHistoryData {
 function redo() {
     const historyEntry: HistoryEntry = s_HistoryEntries[s_HistoryIndex]
     historyEntry.redo()
-    s_HistoryIndex++
+    s_HistoryIndex += 1
 }
 
 /**
@@ -361,9 +395,11 @@ function redo() {
  * @returns True if new transaction was started | False if there is an existing transaction in progress
  */
 function startTransaction(text?: string): boolean {
-    s_TransactionCount++
+    s_TransactionCount += 1
 
-    if (s_Transaction !== undefined) return false
+    if (s_Transaction !== undefined) {
+        return false
+    }
 
     s_Transaction = new HistoryEntry(text)
     return true
@@ -374,11 +410,15 @@ function startTransaction(text?: string): boolean {
  * @returns True if transaction was committed | False if there was not transaction in progress
  */
 function commitTransaction(force = false) {
-    s_TransactionCount--
+    s_TransactionCount -= 1
 
-    if (s_TransactionCount !== 0 && !force) return false
+    if (s_TransactionCount !== 0 && !force) {
+        return false
+    }
 
-    if (s_Transaction === undefined) return false
+    if (s_Transaction === undefined) {
+        return false
+    }
 
     if (s_Transaction.apply()) {
         s_CommitTransaction(s_Transaction)
@@ -392,7 +432,7 @@ function commitTransaction(force = false) {
 function s_GetValue<V>(obj: ITargetInfo, path: string[]): IValueInfo<V> {
     if (path.length === 1) {
         if (obj.hasOwnProperty(path[0])) {
-            return { value: obj[path[0]], exists: true } /* tslint:disable-line:no-unsafe-any */
+            return { value: obj[path[0]], exists: true }
         } else {
             return { value: undefined, exists: false }
         }
@@ -404,7 +444,6 @@ function s_GetValue<V>(obj: ITargetInfo, path: string[]): IValueInfo<V> {
 /** Private function to set value of an object on a sepcific path */
 function s_SetValue(obj: ITargetInfo, path: string[], value: any) {
     if (path.length === 1) {
-        /* tslint:disable-next-line:no-unsafe-any */
         obj[path[0]] = value.value
     } else {
         s_SetValue(obj[path[0]] as ITargetInfo, path.slice(1), value)
@@ -417,7 +456,7 @@ function s_DeleteValue(obj: ITargetInfo, path: string[]) {
         if (Array.isArray(obj)) {
             obj.splice(Number(path[0]), 1)
         } else {
-            delete obj[path[0]] /* tslint:disable-line:no-dynamic-delete */
+            delete obj[path[0]]
         }
     } else {
         s_DeleteValue(obj[path[0]] as ITargetInfo, path.slice(1))
@@ -427,9 +466,11 @@ function s_DeleteValue(obj: ITargetInfo, path: string[]) {
 /** Private central function to commit a transaction */
 function s_CommitTransaction(transaction: HistoryEntry) {
     transaction.log()
-    while (s_HistoryEntries.length > s_HistoryIndex) { s_HistoryEntries.pop() } // Slice would need value re-assignment - hence not used on purpose
+    while (s_HistoryEntries.length > s_HistoryIndex) {
+        s_HistoryEntries.pop()
+    } // Slice would need value re-assignment - hence not used on purpose
     s_HistoryEntries.push(transaction)
-    s_HistoryIndex++
+    s_HistoryIndex += 1
 }
 
 /** Resets the History (removes all history entries) */

@@ -1,15 +1,14 @@
 import keyboardJS from 'keyboardjs'
 
 class Action {
-
     readonly defaultKeyCombo: string
 
     private m_active = true
     private m_keyCombo: string
-    private handlers: Array<{
-        press(e?: keyboardJS.KeyEvent): void;
-        release(e?: keyboardJS.KeyEvent): void;
-    }> = []
+    private handlers: {
+        press(e?: keyboardJS.KeyEvent): void
+        release(e?: keyboardJS.KeyEvent): void
+    }[] = []
 
     constructor(defaultKeyCombo: string) {
         this.defaultKeyCombo = defaultKeyCombo
@@ -61,10 +60,17 @@ class Action {
     bind(pressHandler?: (e: keyboardJS.KeyEvent) => void, releaseHandler?: (e: keyboardJS.KeyEvent) => void) {
         // Wrap pressHandler to preventDefault
         const PRESSED = pressHandler
-            ? (e: keyboardJS.KeyEvent) => { if (e && e.preventDefault) { e.preventDefault() } pressHandler(e) }
+            ? (e: keyboardJS.KeyEvent) => {
+                  if (e && e.preventDefault) {
+                      e.preventDefault()
+                  }
+                  pressHandler(e)
+              }
             : undefined
 
-        if (this.active) keyboardJS.bind(this.keyCombo, PRESSED, releaseHandler)
+        if (this.active) {
+            keyboardJS.bind(this.keyCombo, PRESSED, releaseHandler)
+        }
         this.handlers.push({
             press: PRESSED,
             release: releaseHandler
@@ -86,7 +92,14 @@ class ToggleAction extends Action {
 
     constructor(defaultKeyCombo: string) {
         super(defaultKeyCombo)
-        this.bind(() => this.pressed = true, () => this.pressed = false)
+        this.bind(
+            () => {
+                this.pressed = true
+            },
+            () => {
+                this.pressed = false
+            }
+        )
     }
 }
 
@@ -98,7 +111,9 @@ keyboardJS.watch(canvasEl)
 // keyboardJS.watch will bind keydown and keyup events on the canvas but
 // keydown and keyup will only fire if the canvas is focused
 canvasEl.addEventListener('mouseover', () => canvasEl.focus())
-canvasEl.addEventListener('blur', () => { keyboardJS.releaseAllKeys() })
+canvasEl.addEventListener('blur', () => {
+    keyboardJS.releaseAllKeys()
+})
 
 // Set the general application keyboard context
 // Needed to have seperate context's for input controls (i.e. Textbox)
@@ -155,7 +170,9 @@ const actions = {
     copyBPString: {
         bind: (pressHandler?: (e: ClipboardEvent) => void) => {
             document.addEventListener('copy', (e: ClipboardEvent) => {
-                if (document.activeElement !== canvasEl) return
+                if (document.activeElement !== canvasEl) {
+                    return
+                }
                 e.preventDefault()
                 pressHandler(e)
             })
@@ -165,7 +182,9 @@ const actions = {
     pasteBPString: {
         bind: (pressHandler?: (e: ClipboardEvent) => void) => {
             document.addEventListener('paste', (e: ClipboardEvent) => {
-                if (document.activeElement !== canvasEl) return
+                if (document.activeElement !== canvasEl) {
+                    return
+                }
                 e.preventDefault()
                 pressHandler(e)
             })
@@ -182,14 +201,13 @@ const actions = {
 
     // Hack for plugging the mouse into keyboardJS
     attachEventsToContainer(stage: PIXI.Container) {
-        stage.on('pointerdown', (e: PIXI.interaction.InteractionEvent) =>
-            keyboardJS.pressKey(e.data.button + 300, e))
+        stage.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => keyboardJS.pressKey(e.data.button + 300, e))
 
-        stage.on('pointerup', (e: PIXI.interaction.InteractionEvent) =>
-            keyboardJS.releaseKey(e.data.button + 300, e))
+        stage.on('pointerup', (e: PIXI.interaction.InteractionEvent) => keyboardJS.releaseKey(e.data.button + 300, e))
 
         stage.on('pointerupoutside', (e: PIXI.interaction.InteractionEvent) =>
-            keyboardJS.releaseKey(e.data.button + 300, e))
+            keyboardJS.releaseKey(e.data.button + 300, e)
+        )
     }
 }
 
@@ -208,7 +226,9 @@ keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
 
 function loadKeybinds() {
     const changedKeybinds = JSON.parse(localStorage.getItem('keybinds'))
-    if (!changedKeybinds) return
+    if (!changedKeybinds) {
+        return
+    }
     actions.forEachAction((action, actionName) => {
         if (changedKeybinds[actionName] !== undefined) {
             action.keyCombo = changedKeybinds[actionName]

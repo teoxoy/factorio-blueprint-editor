@@ -1,52 +1,58 @@
 {
-  "name": "factorio-blueprint-editor",
-  "version": "0.1.0",
-  "description": "A Factorio blueprint editor and renderer webapp",
-  "author": "Teoxoy",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/Teoxoy/factorio-blueprint-editor.git"
-  },
-  "bugs": "https://github.com/Teoxoy/factorio-blueprint-editor/issues",
-  "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
-  "scripts": {
-    "start": "parcel src/index.html --port 8080",
-    "prebuild": "rimraf dist/*",
-    "build": "parcel build src/index.html --public-url ./",
-    "setupDist": "git worktree add dist gh-pages",
-    "deploy": "cd dist && git add --all && git reset -- stats && git commit -m \"new version\" && git push origin gh-pages"
-  },
-  "browserslist": [
-    "last 2 Chrome versions",
-    "last 2 Firefox versions",
-    "last 2 Safari versions",
-    "last 2 Edge versions"
-  ],
-  "dependencies": {
-    "@pixi/filter-adjustment": "^2.7.0",
-    "ajv": "^6.9.2",
-    "dat.gui": "^0.7.5",
-    "delaunator": "^3.0.2",
-    "eventemitter3": "^3.1.0",
-    "factorio-data": "3.2.0",
-    "file-saver": "^2.0.1",
-    "keyboardjs": "^2.5.1",
-    "pako": "^1.0.8",
-    "pathfinding": "^0.4.18",
-    "pixi.js": "^5.0.0-rc.2"
-  },
-  "devDependencies": {
-    "@types/dat.gui": "^0.7.2",
-    "@types/delaunator": "^2.0.0",
-    "@types/file-saver": "^2.0.0",
-    "@types/keyboardjs": "^2.4.1",
-    "@types/pako": "^1.0.0",
-    "@types/pathfinding": "0.0.2",
-    "parcel-bundler": "^1.11.0",
-    "rimraf": "^2.6.3",
-    "stylus": "^0.54.5",
-    "tslint": "^5.13.0",
-    "typescript": "^3.3.3333"
-  }
+    "name": "factorio-blueprint-editor",
+    "version": "0.1.0",
+    "description": "A Factorio blueprint editor and renderer webapp",
+    "author": "Teoxoy",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Teoxoy/factorio-blueprint-editor.git"
+    },
+    "bugs": "https://github.com/Teoxoy/factorio-blueprint-editor/issues",
+    "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
+    "scripts": {
+        "start": "parcel src/index.html --port 8080",
+        "prebuild": "rimraf dist/*",
+        "build": "parcel build src/index.html --public-url ./",
+        "setupDist": "git worktree add dist gh-pages",
+        "deploy": "cd dist && git add --all && git reset -- stats && git commit -m \"new version\" && git push origin gh-pages"
+    },
+    "browserslist": [
+        "last 2 Chrome versions",
+        "last 2 Firefox versions",
+        "last 2 Safari versions",
+        "last 2 Edge versions"
+    ],
+    "dependencies": {
+        "@pixi/filter-adjustment": "^2.7.0",
+        "ajv": "^6.9.2",
+        "dat.gui": "^0.7.5",
+        "delaunator": "^3.0.2",
+        "eventemitter3": "^3.1.0",
+        "factorio-data": "3.2.0",
+        "file-saver": "^2.0.1",
+        "keyboardjs": "^2.5.1",
+        "pako": "^1.0.8",
+        "pathfinding": "^0.4.18",
+        "pixi.js": "^5.0.0-rc.2"
+    },
+    "devDependencies": {
+        "@types/dat.gui": "^0.7.2",
+        "@types/delaunator": "^2.0.0",
+        "@types/file-saver": "^2.0.0",
+        "@types/keyboardjs": "^2.4.1",
+        "@types/pako": "^1.0.0",
+        "@types/pathfinding": "0.0.2",
+        "@typescript-eslint/eslint-plugin": "^1.4.2",
+        "@typescript-eslint/parser": "^1.4.2",
+        "eslint": "^5.14.1",
+        "eslint-config-prettier": "^4.1.0",
+        "eslint-plugin-import": "^2.16.0",
+        "eslint-plugin-prettier": "^3.0.1",
+        "parcel-bundler": "^1.11.0",
+        "prettier": "1.16.4",
+        "rimraf": "^2.6.3",
+        "stylus": "^0.54.5",
+        "typescript": "^3.3.3333"
+    }
 }

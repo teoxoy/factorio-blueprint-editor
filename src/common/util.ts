@@ -1,47 +1,5 @@
-function duplicate(obj: any) {
+function duplicate<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj))
-}
-
-function set_shift(shift: any, tab: any) {
-    tab.shift = shift
-    if (tab.hr_version) {
-        tab.hr_version.shift = shift
-    }
-    return tab
-}
-
-function add_to_shift(shift: any, tab: any) {
-    const SHIFT = shift.constructor === Object ? [shift.x, shift.y] : shift
-
-    tab.shift = tab.shift ? [SHIFT[0] + tab.shift[0], SHIFT[1] + tab.shift[1]] : SHIFT
-    if (tab.hr_version) {
-        tab.hr_version.shift = tab.hr_version.shift ?
-            [SHIFT[0] + tab.hr_version.shift[0], SHIFT[1] + tab.hr_version.shift[1]] :
-            SHIFT
-    }
-    return tab
-}
-
-function set_property(img: any, key: string, val: any) {
-    img[key] = val
-    if (img.hr_version) {
-        img.hr_version[key] = val
-    }
-    return img
-}
-
-function set_property_using(img: any, key: any, key2: any, mult = 1) {
-    if (key2) {
-        img[key] = img[key2] * mult
-        if (img.hr_version) {
-            img.hr_version[key] = img.hr_version[key2] * mult
-        }
-    }
-    return img
-}
-
-function duplicateAndSetPropertyUsing(img: any, key: any, key2: any, mult: number) {
-    return set_property_using(this.duplicate(img), key, key2, mult)
 }
 
 function getRandomInt(min: number, max: number) {
@@ -50,8 +8,12 @@ function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (MAX - MIN)) + MIN
 }
 
+function getRandomItem<T>(array: T[]): T {
+    return array[getRandomInt(0, array.length - 1)]
+}
+
 function rotatePointBasedOnDir(p: IPoint | number[], dir: number) {
-    const point: IPoint = {x: 0, y: 0}
+    const point: IPoint = { x: 0, y: 0 }
     const nP = p instanceof Array ? { x: p[0], y: p[1] } : { ...p }
     switch (dir) {
         case 0:
@@ -79,15 +41,33 @@ function rotatePointBasedOnDir(p: IPoint | number[], dir: number) {
     return point
 }
 
+/** returns the direction of the point in relation to the origin at (0, 0) */
+function getRelativeDirection(position: IPoint) {
+    /* eslint-disable no-nested-ternary */
+    return Math.abs(position.x) > Math.abs(position.y)
+        ? Math.sign(position.x) === 1
+            ? 2
+            : 6
+        : Math.sign(position.y) === 1
+        ? 4
+        : 0
+    /* eslint-enable no-nested-ternary */
+}
+
 function transformConnectionPosition(position: IPoint, direction: number) {
-    const dir = Math.abs(position.x) > Math.abs(position.y) ?
-        (Math.sign(position.x) === 1 ? 2 : 6) :
-        (Math.sign(position.y) === 1 ? 4 : 0)
+    const dir = getRelativeDirection(position)
     switch (dir) {
-        case 0: position.y += 1; break
-        case 2: position.x -= 1; break
-        case 4: position.y -= 1; break
-        case 6: position.x += 1
+        case 0:
+            position.y += 1
+            break
+        case 2:
+            position.x -= 1
+            break
+        case 4:
+            position.y -= 1
+            break
+        case 6:
+            position.x += 1
     }
     return rotatePointBasedOnDir(position, direction)
 }
@@ -101,10 +81,14 @@ function switchSizeBasedOnDirection(defaultSize: { width: number; height: number
 
 function intToDir(i: number) {
     switch (i) {
-        case 0: return 'north'
-        case 2: return 'east'
-        case 4: return 'south'
-        case 6: return 'west'
+        case 0:
+            return 'north'
+        case 2:
+            return 'east'
+        case 4:
+            return 'south'
+        case 6:
+            return 'west'
     }
 }
 
@@ -112,22 +96,32 @@ function nearestPowerOf2(n: number) {
     return Math.pow(2, Math.ceil(Math.log2(n)))
 }
 
-function uniqueInArray(array: any[]) {
+function uniqueInArray<T>(array: T[]) {
     return [...new Set(array)]
 }
 
-function equalArrays(array1: any[], array2: any[]) {
-    return array1 && array2 && array1.length === array2.length &&
+function equalArrays<T>(array1: T[], array2: T[]) {
+    return (
+        array1 &&
+        array2 &&
+        array1.length === array2.length &&
         array1.sort().every((value, index) => value === array2.sort()[index])
+    )
 }
 
-function areObjectsEquivalent(a: { [key: string]: any }, b: { [key: string]: any }) {
+function areObjectsEquivalent(a: { [key: string]: unknown }, b: { [key: string]: unknown }) {
     const aProps = Object.getOwnPropertyNames(a)
     const bProps = Object.getOwnPropertyNames(b)
 
-    if (aProps.length !== bProps.length) return false
+    if (aProps.length !== bProps.length) {
+        return false
+    }
 
-    for (const propName of aProps) if (a[propName] !== b[propName]) return false
+    for (const propName of aProps) {
+        if (a[propName] !== b[propName]) {
+            return false
+        }
+    }
 
     return true
 }
@@ -145,12 +139,9 @@ function timer(name: string) {
 
 export default {
     duplicate,
-    set_shift,
-    set_property,
-    set_property_using,
-    add_to_shift,
     getRandomInt,
-    duplicateAndSetPropertyUsing,
+    getRandomItem,
+    getRelativeDirection,
     rotatePointBasedOnDir,
     transformConnectionPosition,
     switchSizeBasedOnDirection,

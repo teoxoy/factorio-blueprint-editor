@@ -1,6 +1,6 @@
+import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import F from './functions'
-import * as PIXI from 'pixi.js'
 
 /** Panel */
 /**
@@ -14,7 +14,6 @@ import * as PIXI from 'pixi.js'
  *  + does not automatically set its position (hint: override onBrowserResize())
  */
 export default class Panel extends PIXI.Container {
-
     /** Event string of browser resize */
     private static readonly WINDOW_RESIZE_EVENT_STRING = 'browserResized'
 
@@ -30,11 +29,13 @@ export default class Panel extends PIXI.Container {
      * @param alpha - Background Alpha of the Control (1...no transparency)
      * @param border - Border Width of the Control (0...no border)
      */
-    constructor(width: number,
-                height: number,
-                background: number = G.colors.controls.panel.background.color,
-                alpha: number = G.colors.controls.panel.background.alpha,
-                border: number = G.colors.controls.panel.background.border) {
+    constructor(
+        width: number,
+        height: number,
+        background: number = G.colors.controls.panel.background.color,
+        alpha: number = G.colors.controls.panel.background.alpha,
+        border: number = G.colors.controls.panel.background.border
+    ) {
         super()
 
         // Subscribe to browser window resized to amit a panel contained event
@@ -50,9 +51,21 @@ export default class Panel extends PIXI.Container {
 
         this.setPosition()
 
-        this.on('pointerover', () => { if (G.currentMouseState === G.mouseStates.PAINTING) G.BPC.paintContainer.hide() })
-        this.on('pointerout',  () => { if (G.currentMouseState === G.mouseStates.PAINTING) G.BPC.paintContainer.show() })
-        this.on('close', () => { if (G.currentMouseState === G.mouseStates.PAINTING) G.BPC.paintContainer.show() })
+        this.on('pointerover', () => {
+            if (G.currentMouseState === G.mouseStates.PAINTING) {
+                G.BPC.paintContainer.hide()
+            }
+        })
+        this.on('pointerout', () => {
+            if (G.currentMouseState === G.mouseStates.PAINTING) {
+                G.BPC.paintContainer.show()
+            }
+        })
+        this.on('close', () => {
+            if (G.currentMouseState === G.mouseStates.PAINTING) {
+                G.BPC.paintContainer.show()
+            }
+        })
     }
 
     /** Width of the Control */
@@ -66,7 +79,5 @@ export default class Panel extends PIXI.Container {
     }
 
     /** Called by when the browser is resized */
-    protected setPosition() {
-        return
-    }
+    protected setPosition() {}
 }

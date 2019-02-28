@@ -49,10 +49,10 @@ interface IFilter {
 
 interface IConnection {
     color: string
-    entity_number_1: number
-    entity_number_2: number
-    entity_side_1: number
-    entity_side_2: number
+    entityNumber1: number
+    entityNumber2: number
+    entitySide1: number
+    entitySide2: number
 }
 
 interface ISpriteData {
@@ -98,15 +98,14 @@ interface ISpriteData {
     squishY?: number
     rotAngle?: number
     color?: {
-        r: number;
-        g: number;
-        b: number;
-        a: number;
+        r: number
+        g: number
+        b: number
+        a: number
     }
 }
 
 /** Namespace for blueprint string interfaces */
-// tslint:disable-next-line:no-namespace
 namespace BPS {
     interface ISignal {
         name: string
@@ -168,16 +167,16 @@ namespace BPS {
         /** only present if entity is logistic-chest-requester */
         request_from_buffers?: boolean
         /** only present if entity is filter-inserter or stack-filter-inserter */
-        filters?: Array<{
+        filters?: {
             index: number
             name: string
-        }>
+        }[]
         /** only present if entity is logistic-chest-storage, logistic-chest-buffer or logistic-chest-requester */
-        request_filters?: Array<{
+        request_filters?: {
             index: number
             name: string
             count: number
-        }>
+        }[]
 
         /** only present if entity is programmable-speaker */
         alert_parameters?: {
@@ -206,11 +205,11 @@ namespace BPS {
             /** only present if entity is constant-combinator */
             is_on?: boolean
             /** only present if entity is constant-combinator */
-            filters?: Array<{
+            filters?: {
                 index: number
                 count: number
                 signal: ISignal
-            }>
+            }[]
 
             /** only present if entity is small-lamp */
             use_colors?: boolean
@@ -331,10 +330,10 @@ namespace BPS {
     export interface IBlueprint {
         version: number
         item: 'blueprint'
-        icons: Array<{
+        icons: {
             index: 1 | 2 | 3 | 4
             signal: ISignal
-        }>
+        }[]
 
         label?: string
         entities?: IEntity[]
@@ -345,7 +344,10 @@ namespace BPS {
         version: number
         item: 'blueprint_book'
         active_index: number
-        blueprints: IBlueprint[]
+        blueprints: {
+            blueprint: IBlueprint
+            index: number
+        }[]
 
         label?: string
     }

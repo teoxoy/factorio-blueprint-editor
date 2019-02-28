@@ -18,16 +18,20 @@ import util from './common/util'
 function getAllPromises() {
     return [
         [
+            /* eslint-disable no-nested-ternary */
             G.quality.hr
-                ? (G.quality.compressed ? HRentitySpritesheetCompressedPNG : HRentitySpritesheetPNG)
-                : (G.quality.compressed ? LRentitySpritesheetCompressedPNG : LRentitySpritesheetPNG),
-            G.quality.hr
-                ? HRentitySpritesheetJSON
-                : LRentitySpritesheetJSON
+                ? G.quality.compressed
+                    ? HRentitySpritesheetCompressedPNG
+                    : HRentitySpritesheetPNG
+                : G.quality.compressed
+                ? LRentitySpritesheetCompressedPNG
+                : LRentitySpritesheetPNG,
+            /* eslint-enable no-nested-ternary */
+            G.quality.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
         ],
-        [ iconSpritesheetPNG, iconSpritesheetJSON ],
-        [ utilitySpritesheetPNG, utilitySpritesheetJSON ],
-        [ tilesSpritesheetPNG, tilesSpritesheetJSON ]
+        [iconSpritesheetPNG, iconSpritesheetJSON],
+        [utilitySpritesheetPNG, utilitySpritesheetJSON],
+        [tilesSpritesheetPNG, tilesSpritesheetJSON]
     ].map(data => loadSpritesheet(data[0], data[1]))
 }
 
@@ -41,12 +45,16 @@ function changeQuality(hr: boolean, compressed: boolean) {
         .forEach(k => PIXI.utils.TextureCache[k].destroy(true))
 
     loadSpritesheet(
+        /* eslint-disable no-nested-ternary */
         hr
-            ? (compressed ? HRentitySpritesheetCompressedPNG : HRentitySpritesheetPNG)
-            : (compressed ? LRentitySpritesheetCompressedPNG : LRentitySpritesheetPNG),
-        hr
-            ? HRentitySpritesheetJSON
-            : LRentitySpritesheetJSON
+            ? compressed
+                ? HRentitySpritesheetCompressedPNG
+                : HRentitySpritesheetPNG
+            : compressed
+            ? LRentitySpritesheetCompressedPNG
+            : LRentitySpritesheetPNG,
+        /* eslint-enable no-nested-ternary */
+        hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
     ).then(() => {
         G.BPC.initBP()
         G.loadingScreen.hide()
@@ -57,7 +65,9 @@ function loadSpritesheet(src: string, json: any) {
     return fetch(src)
         .then(response => response.blob())
         .then(blob => {
-            if (!!window.createImageBitmap) return createImageBitmap(blob)
+            if (window.createImageBitmap) {
+                return createImageBitmap(blob)
+            }
 
             // Polyfill
             return new Promise(resolve => {
@@ -76,9 +86,10 @@ function loadSpritesheet(src: string, json: any) {
             }
             // if WebGL1, make the spritesheet a power of 2 so that it generates mipmaps
             // WebGL2 generates mipmaps even with non pow 2 textures
-            const resource = G.app.renderer.context.webGLVersion === 1
-                ? new PIXI.resources.CanvasResource(getPow2Canvas())
-                : new PIXI.resources.BaseImageResource(imageData)
+            const resource =
+                G.app.renderer.context.webGLVersion === 1
+                    ? new PIXI.resources.CanvasResource(getPow2Canvas())
+                    : new PIXI.resources.BaseImageResource(imageData)
 
             const baseTexture = new PIXI.BaseTexture(resource)
             // bind the baseTexture, this will also upload it to the GPU
