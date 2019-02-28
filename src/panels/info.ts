@@ -13,7 +13,7 @@ export class InfoContainer extends Dialog {
     }
 
     constructor() {
-        super(580, 900)
+        super(580, 860)
 
         const text = new PIXI.Text('KEYBINDS', {
             fill: G.colors.text.normal,
@@ -108,34 +108,22 @@ export class InfoContainer extends Dialog {
 
         this.writeColumn(
             [
-                'Please leave your suggestions, ideas, new features or bug reports',
-                'inside the app via the Feedback button or on Github.'
+                ['Please leave your suggestions, ideas, new features or bug reports', G.colors.text.accent],
+                ['inside the app via the Feedback button or on Github.', G.colors.text.accent]
             ],
             { x: this.width / 2, y: 750 },
-            0.5,
-            true
+            0.5
         )
-
-        const link = new PIXI.Text('Github Source')
-        link.interactive = true
-        link.buttonMode = true
-        link.on('click', () => window.open('https://github.com/Teoxoy/factorio-blueprint-editor', '_blank'))
-        link.position.set(this.width / 2, 790)
-        link.style.fontSize = 16
-        link.style.fill = G.colors.text.link
-        link.anchor.set(0.5, 0)
-        this.addChild(link)
 
         this.writeColumn(
             [
-                'Copyright © 2018 Tanasoaia Teodor Andrei',
                 'All art assets, spritesheets and other Factorio game data used in this project',
                 'belong to Wube Software Ltd and are not for redistribution.'
             ],
-            { x: this.width / 2, y: 830 },
+            { x: this.width / 2, y: 810 },
             0.5,
-            true,
-            14
+            false,
+            12
         )
     }
 
