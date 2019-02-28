@@ -1,12 +1,8 @@
-
-// https://github.com/parcel-bundler/parcel/issues/289#issuecomment-393106708
-if (module.hot) module.hot.dispose(() => { window.location.reload(); throw new Error('Reloading') })
-
-// tslint:disable:no-import-side-effect
 import './style.styl'
 
 import * as PIXI from 'pixi.js'
 
+import FileSaver from 'file-saver'
 import { Book } from './factorio-data/book'
 import bpString from './factorio-data/bpString'
 
@@ -18,7 +14,6 @@ import { ToolbarContainer } from './panels/toolbar'
 import { QuickbarContainer } from './panels/quickbar'
 import { InfoContainer } from './panels/info'
 import Blueprint from './factorio-data/blueprint'
-import FileSaver from 'file-saver'
 import initDoorbell from './doorbell'
 import actions from './actions'
 import initDatGui from './datgui'
@@ -28,13 +23,26 @@ import Entity from './factorio-data/entity'
 import Dialog from './controls/dialog'
 import * as History from './factorio-data/history'
 
+// https://github.com/parcel-bundler/parcel/issues/289#issuecomment-393106708
+/* eslint-disable */
+if (module.hot) {
+    module.hot.dispose(() => {
+        window.location.reload()
+        throw new Error('Reloading')
+    })
+}
+/* eslint-enable */
+
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
     document.getElementById('loadingMsg').innerHTML = text
     throw new Error(text)
 }
 
-console.log('\n%cLooking for the source?\nhttps://github.com/Teoxoy/factorio-blueprint-editor\n', 'color: #1f79aa; font-weight: bold')
+console.log(
+    '\n%cLooking for the source?\nhttps://github.com/Teoxoy/factorio-blueprint-editor\n',
+    'color: #1f79aa; font-weight: bold'
+)
 
 const params = window.location.search.slice(1).split('&')
 
@@ -74,14 +82,19 @@ function getMonitorRefreshRate(iterations = 10) {
         const fn = (timestamp: number) => {
             results.push(1000 / (timestamp - lastTimestamp))
             lastTimestamp = timestamp
-            i++
-            if (i < iterations) requestAnimationFrame(fn)
-            else resolve(Math.ceil(Math.max(...results)))
+            i += 1
+            if (i < iterations) {
+                requestAnimationFrame(fn)
+            } else {
+                resolve(Math.ceil(Math.max(...results)))
+            }
         }
         requestAnimationFrame(fn)
     })
 }
-getMonitorRefreshRate().then((fps: number) => PIXI.settings.TARGET_FPMS = fps / 1000)
+getMonitorRefreshRate().then((fps: number) => {
+    PIXI.settings.TARGET_FPMS = fps / 1000
+})
 
 G.app = new PIXI.Application({ view: document.getElementById('editor') as HTMLCanvasElement })
 
@@ -90,11 +103,15 @@ G.app = new PIXI.Application({ view: document.getElementById('editor') as HTMLCa
 // G.app.renderer.plugins.interaction.interactionFrequency = 1
 
 G.app.renderer.resize(window.innerWidth, window.innerHeight)
-window.addEventListener('resize', () => {
-    G.app.renderer.resize(window.innerWidth, window.innerHeight)
-    G.BPC.viewport.setSize(G.app.screen.width, G.app.screen.height)
-    G.BPC.viewport.updateTransform()
-}, false)
+window.addEventListener(
+    'resize',
+    () => {
+        G.app.renderer.resize(window.innerWidth, window.innerHeight)
+        G.BPC.viewport.setSize(G.app.screen.width, G.app.screen.height)
+        G.BPC.viewport.updateTransform()
+    },
+    false
+)
 
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)
@@ -111,59 +128,55 @@ G.app.stage.addChild(G.dialogsContainer)
 G.paintIconContainer = new PIXI.Container()
 G.app.stage.addChild(G.paintIconContainer)
 
-Promise.all(
-    [
-        // Get bp from source
-        bpSource ? bpString.findBPString(bpSource) : undefined,
-        // Wait for fonts to get loaded
-        document.fonts.ready
-    ]
+Promise.all([
+    // Get bp from source
+    bpString.findBPString(bpSource),
+    // Wait for fonts to get loaded
+    document.fonts.ready,
     // Load spritesheets
-    .concat(spritesheetsLoader.getAllPromises())
-)
-.then(data => {
-    // Load quickbarItemNames from localStorage
-    if (localStorage.getItem('quickbarItemNames')) {
-        const quickbarItemNames = JSON.parse(localStorage.getItem('quickbarItemNames'))
-        G.quickbarContainer.generateSlots(quickbarItemNames)
-    }
+    ...spritesheetsLoader.getAllPromises()
+])
+    .then(data => {
+        // Load quickbarItemNames from localStorage
+        if (localStorage.getItem('quickbarItemNames')) {
+            const quickbarItemNames = JSON.parse(localStorage.getItem('quickbarItemNames'))
+            G.quickbarContainer.generateSlots(quickbarItemNames)
+        }
 
-    if (!bpSource) {
-        G.bp = new Blueprint()
-        G.BPC.initBP()
-        finishSetup()
-    } else {
-        loadBp(data[0], false).then(finishSetup)
-    }
+        if (data[0]) {
+            loadBp(data[0], false).then(finishSetup)
+        } else {
+            G.bp = new Blueprint()
+            G.BPC.initBP()
+            finishSetup()
+        }
 
-    function finishSetup() {
-        G.BPC.centerViewport()
-        G.loadingScreen.hide()
-    }
-})
-.catch(error => console.error(error))
+        function finishSetup() {
+            G.BPC.centerViewport()
+            G.loadingScreen.hide()
+        }
+    })
+    .catch(error => console.error(error))
 
 function loadBp(bp: string, clearData = true) {
-    return bpString.decode(bp)
+    return bpString
+        .decode(bp)
         .then(data => {
-
             if (data instanceof Book) {
                 G.book = data
                 G.bp = G.book.getBlueprint(bpIndex)
 
-                guiBPIndex
-                    .max(G.book.blueprints.length - 1)
-                    .setValue(bpIndex)
+                guiBPIndex.max(G.book.blueprints.length - 1).setValue(bpIndex)
             } else {
                 G.book = undefined
                 G.bp = data
 
-                guiBPIndex
-                    .setValue(0)
-                    .max(0)
+                guiBPIndex.setValue(0).max(0)
             }
 
-            if (clearData) G.BPC.clearData()
+            if (clearData) {
+                G.BPC.clearData()
+            }
             G.BPC.initBP()
 
             Dialog.closeAll()
@@ -175,8 +188,11 @@ function loadBp(bp: string, clearData = true) {
 
 // If the tab is not active then stop the app
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') G.app.start()
-    else G.app.stop()
+    if (document.visibilityState === 'visible') {
+        G.app.start()
+    } else {
+        G.app.stop()
+    }
 })
 
 window.addEventListener('unload', () => {
@@ -193,10 +209,13 @@ document.addEventListener('mousemove', e => {
 })
 
 actions.copyBPString.bind(e => {
-    if (G.bp.isEmpty()) return
+    if (G.bp.isEmpty()) {
+        return
+    }
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        bpString.encode(G.bp)
+        bpString
+            .encode(G.bp)
             .then(s => navigator.clipboard.writeText(s))
             .then(() => console.log('Copied BP String'))
             .catch(error => console.error(error))
@@ -214,9 +233,10 @@ actions.copyBPString.bind(e => {
 actions.pasteBPString.bind(e => {
     G.loadingScreen.show()
 
-    const promise = navigator.clipboard && navigator.clipboard.readText ?
-        navigator.clipboard.readText() :
-        Promise.resolve(e.clipboardData.getData('text'))
+    const promise =
+        navigator.clipboard && navigator.clipboard.readText
+            ? navigator.clipboard.readText()
+            : Promise.resolve(e.clipboardData.getData('text'))
 
     promise
         .then(bpString.findBPString)
@@ -232,9 +252,13 @@ actions.clear.bind(() => {
 })
 
 actions.takePicture.bind(() => {
-    if (G.bp.isEmpty()) return
+    if (G.bp.isEmpty()) {
+        return
+    }
 
-    if (G.renderOnly) G.BPC.cacheAsBitmap = false
+    if (G.renderOnly) {
+        G.BPC.cacheAsBitmap = false
+    }
     G.BPC.viewportCulling = false
 
     const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1)
@@ -242,11 +266,13 @@ actions.takePicture.bind(() => {
     texture.updateUvs()
 
     G.app.renderer.plugins.extract.canvas(new PIXI.Sprite(texture)).toBlob((blob: Blob) => {
-        FileSaver.saveAs(blob, G.bp.name + '.png')
+        FileSaver.saveAs(blob, `${G.bp.name}.png`)
         console.log('Saved BP Image')
     })
 
-    if (G.renderOnly) G.BPC.cacheAsBitmap = true
+    if (G.renderOnly) {
+        G.BPC.cacheAsBitmap = true
+    }
     G.BPC.viewportCulling = true
 })
 
@@ -268,8 +294,7 @@ actions.inventory.bind(() => {
         if (Dialog.anyOpen()) {
             Dialog.closeLast()
         } else {
-            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
-                .show()
+            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC)).show()
         }
     }
 })
@@ -294,12 +319,10 @@ actions.reverseRotate.bind(() => {
 
 actions.pipette.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
-
         const entity = G.BPC.hoverContainer.entity
         const itemName = entity.entityData.minable.result
         const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
         G.BPC.spawnPaintContainer(itemName, direction)
-
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {
         G.BPC.paintContainer.destroy()
     }
@@ -318,28 +341,35 @@ actions.decreaseTileBuildingArea.bind(() => {
 })
 
 actions.undo.bind(() => {
-    if (History.canUndo()) History.undo()
+    if (History.canUndo()) {
+        History.undo()
+    }
 })
 
 actions.redo.bind(() => {
-    if (History.canRedo()) History.redo()
+    if (History.canRedo()) {
+        History.redo()
+    }
 })
 
 actions.generateOilOutpost.bind(() => {
     G.bp.generatePipes()
 })
 
-actions.pan.bind(() => {
-    if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
-        G.currentMouseState = G.mouseStates.PANNING
-        G.BPC.cursor = 'move'
+actions.pan.bind(
+    () => {
+        if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+            G.currentMouseState = G.mouseStates.PANNING
+            G.BPC.cursor = 'move'
+        }
+    },
+    () => {
+        if (G.currentMouseState === G.mouseStates.PANNING) {
+            G.currentMouseState = G.mouseStates.NONE
+            G.BPC.cursor = 'inherit'
+        }
     }
-}, () => {
-    if (G.currentMouseState === G.mouseStates.PANNING) {
-        G.currentMouseState = G.mouseStates.NONE
-        G.BPC.cursor = 'inherit'
-    }
-})
+)
 
 actions.zoomIn.bind(() => {
     G.BPC.zoom(true)
@@ -390,7 +420,9 @@ actions.openEntityGUI.bind(() => {
         // console.log(G.BPC.hoverContainer.entity.getRawData())
         if (G.currentMouseState === G.mouseStates.NONE) {
             const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
-            if (editor === undefined) return
+            if (editor === undefined) {
+                return
+            }
             Dialog.closeAll()
             editor.show()
         }

@@ -1,30 +1,32 @@
 import Blueprint from './blueprint'
 
 export class Book {
+    activeIndex: number
+    blueprints: {
+        blueprint: BPS.IBlueprint
+        loaded?: Blueprint
+    }[]
 
-    active_index: number
-    blueprints: any[]
-
-    constructor(data: any) {
+    constructor(data: BPS.IBlueprintBook) {
         if (data) {
-            this.active_index = data.blueprint_book.active_index
-            this.blueprints = data.blueprint_book.blueprints
+            this.activeIndex = data.active_index
+            this.blueprints = data.blueprints
         } else {
-            this.active_index = 0
+            this.activeIndex = 0
             this.blueprints = []
         }
     }
 
-    addBlueprint(blueprint: Blueprint) {
-        this.blueprints.push(blueprint)
-    }
-
     getBlueprint(index?: number) {
-        let INDEX = this.active_index
-        if (index !== undefined) INDEX = (index < 0 || index > this.blueprints.length - 1) ? 0 : index
-        this.active_index = INDEX
+        let INDEX = this.activeIndex
+        if (index !== undefined) {
+            INDEX = index < 0 || index > this.blueprints.length - 1 ? 0 : index
+        }
+        this.activeIndex = INDEX
 
-        if (this.blueprints[INDEX].loaded) return this.blueprints[INDEX].loaded
+        if (this.blueprints[INDEX].loaded) {
+            return this.blueprints[INDEX].loaded
+        }
 
         const bp = new Blueprint(this.blueprints[INDEX].blueprint)
         this.blueprints[INDEX].loaded = bp
@@ -37,16 +39,16 @@ export class Book {
             blueprints.push({
                 index: i,
                 // TODO: modified instead of loaded
-                blueprint: this.blueprints[i].loaded ?
-                    this.blueprints[i].loaded.toObject() :
-                    this.blueprints[i].blueprint
+                blueprint: this.blueprints[i].loaded
+                    ? this.blueprints[i].loaded.toObject()
+                    : this.blueprints[i].blueprint
             })
         }
         return {
             blueprint_book: {
                 blueprints,
                 item: 'blueprint_book',
-                active_index: this.active_index,
+                active_index: this.activeIndex,
                 version: 0
             }
         }

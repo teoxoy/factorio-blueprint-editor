@@ -5,9 +5,8 @@ import * as PIXI from 'pixi.js'
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
 
 export class UnderlayContainer extends PIXI.Container {
-
     static getDataForVisualizationArea(name: string) {
-        const type = FD.entities[name].type
+        const ed = FD.entities[name]
         function undoBlendModeColorShift(color0: number, color1: number, alpha: number) {
             // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendFunc
             // array[BLEND_MODES.NORMAL] = [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
@@ -16,37 +15,42 @@ export class UnderlayContainer extends PIXI.Container {
         if (name === 'roboport') {
             return {
                 type: ['logistics0', 'logistics1'] as Type[],
-                rKey: ['construction_radius', 'logistics_radius'],
-                color: [0x83D937, undoBlendModeColorShift(0xFF8800, 0x83D937, 0.25)]
+                radius: [ed.construction_radius, ed.logistics_radius],
+                color: [0x83d937, undoBlendModeColorShift(0xff8800, 0x83d937, 0.25)]
             }
         }
-        if (type === 'electric_pole') {
+        if (ed.type === 'electric_pole') {
             return {
                 type: 'poles' as Type,
-                rKey: 'supply_area_distance',
-                color: 0x33755D9
+                radius: ed.supply_area_distance,
+                color: 0x33755d9
             }
         }
         if (name === 'beacon') {
             return {
                 type: 'beacons' as Type,
-                rKey: 'supply_area_distance',
-                color: 0xD9C037
+                radius: ed.supply_area_distance,
+                color: 0xd9c037
             }
         }
         if (name === 'electric_mining_drill') {
             return {
                 type: 'drills' as Type,
-                rKey: 'resource_searching_radius',
-                color: 0x4EAD9F
+                radius: ed.resource_searching_radius,
+                color: 0x4ead9f
             }
         }
     }
 
-    static modifyVisualizationArea(area: PIXI.Sprite | PIXI.Sprite[] | undefined, fn: (s: PIXI.Sprite) => void) {
+    static modifyVisualizationArea(area: PIXI.Sprite | PIXI.Sprite[], fn: (s: PIXI.Sprite) => void) {
         if (area) {
-            if (area instanceof PIXI.Sprite) fn(area)
-            else for (const s of area) fn(s)
+            if (area instanceof PIXI.Sprite) {
+                fn(area)
+            } else {
+                for (const s of area) {
+                    fn(s)
+                }
+            }
         }
     }
 
@@ -77,10 +81,22 @@ export class UnderlayContainer extends PIXI.Container {
     activateRelatedAreas(entityName: string) {
         const ed = FD.entities[entityName]
         const data = UnderlayContainer.getDataForVisualizationArea(entityName)
-        if (data) if (data.type instanceof Array) this.active.push(...data.type); else this.active.push(data.type)
-        if (ed.type === 'logistic_container') this.active.push('logistics0', 'logistics1')
-        if (ed.energy_source && ed.energy_source.type === 'electric') this.active.push('poles')
-        if (ed.module_specification) this.active.push('beacons')
+        if (data) {
+            if (data.type instanceof Array) {
+                this.active.push(...data.type)
+            } else {
+                this.active.push(data.type)
+            }
+        }
+        if (ed.type === 'logistic_container') {
+            this.active.push('logistics0', 'logistics1')
+        }
+        if (ed.energy_source && ed.energy_source.type === 'electric') {
+            this.active.push('poles')
+        }
+        if (ed.module_specification) {
+            this.active.push('beacons')
+        }
 
         for (const type of this.active) {
             for (const s of this[type].children) {
@@ -101,17 +117,25 @@ export class UnderlayContainer extends PIXI.Container {
     createNewArea(entityName: string, position?: IPoint) {
         const aVData = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (aVData) {
-            const ed = FD.entities[entityName]
             if (aVData.type instanceof Array) {
                 const aVs = []
                 for (let i = 0; i < aVData.type.length; i++) {
-                    const areaVisualization = createVisualizationArea(ed[aVData.rKey[i]], (aVData.color as number[])[i], position, 1)
+                    const areaVisualization = createVisualizationArea(
+                        (aVData.radius as number[])[i],
+                        (aVData.color as number[])[i],
+                        position,
+                        1
+                    )
                     this[aVData.type[i]].addChild(areaVisualization)
                     aVs.push(areaVisualization)
                 }
                 return aVs
             } else {
-                const areaVisualization = createVisualizationArea(ed[aVData.rKey as string], aVData.color as number, position)
+                const areaVisualization = createVisualizationArea(
+                    aVData.radius as number,
+                    aVData.color as number,
+                    position
+                )
                 this[aVData.type].addChild(areaVisualization)
                 return areaVisualization
             }

@@ -1,14 +1,13 @@
 import G from '../common/globals'
-import Editor from './editor'
 import Entity from '../factorio-data/entity'
-import Filters from './components/filters'
 import Checkbox from '../controls/checkbox'
 import Enable from '../controls/enable'
 import Switch from '../controls/switch'
+import Filters from './components/filters'
+import Editor from './editor'
 
 /** Splitter Editor */
 export default class SplitterEditor extends Editor {
-
     constructor(entity: Entity) {
         super(504, 176, entity)
 
@@ -55,30 +54,38 @@ export default class SplitterEditor extends Editor {
         filter.position.set(456, 76)
 
         // Attach input events
-        inputCheckbox.on('changed', () =>
-            this.m_Entity.splitterInputPriority = inputCheckbox.checked ? 'left' : undefined)
+        inputCheckbox.on('changed', () => {
+            this.m_Entity.splitterInputPriority = inputCheckbox.checked ? 'left' : undefined
+        })
 
-        inputLeft.on('changed', () =>
-            this.m_Entity.splitterInputPriority = inputLeft.active ? 'left' : 'right')
+        inputLeft.on('changed', () => {
+            this.m_Entity.splitterInputPriority = inputLeft.active ? 'left' : 'right'
+        })
 
-        inputSwitch.on('changed', () =>
-            this.m_Entity.splitterInputPriority = inputSwitch.value)
+        inputSwitch.on('changed', () => {
+            this.m_Entity.splitterInputPriority = inputSwitch.value
+        })
 
-        inputRight.on('changed', () =>
-            this.m_Entity.splitterInputPriority = inputRight.active ? 'right' : 'left')
+        inputRight.on('changed', () => {
+            this.m_Entity.splitterInputPriority = inputRight.active ? 'right' : 'left'
+        })
 
         // Attach output events
-        outputCheckbox.on('changed', () =>
-            this.m_Entity.splitterOutputPriority = outputCheckbox.checked ? 'left' : undefined)
+        outputCheckbox.on('changed', () => {
+            this.m_Entity.splitterOutputPriority = outputCheckbox.checked ? 'left' : undefined
+        })
 
-        outputLeft.on('changed', () =>
-            this.m_Entity.splitterOutputPriority = outputLeft.active ? 'left' : 'right')
+        outputLeft.on('changed', () => {
+            this.m_Entity.splitterOutputPriority = outputLeft.active ? 'left' : 'right'
+        })
 
-        outputSwitch.on('changed', () =>
-            this.m_Entity.splitterOutputPriority = outputSwitch.value)
+        outputSwitch.on('changed', () => {
+            this.m_Entity.splitterOutputPriority = outputSwitch.value
+        })
 
-        outputRight.on('changed', () =>
-            this.m_Entity.splitterOutputPriority = outputRight.active ? 'right' : 'left')
+        outputRight.on('changed', () => {
+            this.m_Entity.splitterOutputPriority = outputRight.active ? 'right' : 'left'
+        })
 
         this.m_Entity.on('splitterInputPriority', priority => {
             inputCheckbox.checked = priority !== undefined

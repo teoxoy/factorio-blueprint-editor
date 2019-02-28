@@ -1,14 +1,13 @@
-import G from '../common/globals'
-import F from './functions'
 import keyboardjs from 'keyboardjs'
 import * as PIXI from 'pixi.js'
+import G from '../common/globals'
+import F from './functions'
 
 // TODO: Evaluate enhancement: Posibility to set caret with mouse (prototype commented ou with 'PT')
 // TODO: Evaluate enhancement: Text marking / copy / paste
 
 /** Class representing single character in textbox */
 class TextChar extends PIXI.Text {
-
     /** Text metrics for character */
     private readonly m_Metrics: PIXI.TextMetrics
 
@@ -32,7 +31,6 @@ class TextChar extends PIXI.Text {
 
 /** Class representing all text in textbox */
 class TextContainer extends PIXI.Container {
-
     /**
      * Construct text container
      * @param text Initial text
@@ -71,7 +69,9 @@ class TextContainer extends PIXI.Container {
 
     /** Get char from a specific position (position is base 1 indexed) */
     public getChar(position: number): TextChar {
-        if (position < 1 || position > this.children.length) throw new RangeError('Argument position out of range')
+        if (position < 1 || position > this.children.length) {
+            throw new RangeError('Argument position out of range')
+        }
         return super.getChildAt(position - 1) as TextChar
     }
 
@@ -96,7 +96,9 @@ class TextContainer extends PIXI.Container {
 
     /** Remove char from specific position (position is base 1 indexed) */
     public removeChar(position: number) {
-        if (position < 1 || position > this.children.length) throw new RangeError('Argument position out of range')
+        if (position < 1 || position > this.children.length) {
+            throw new RangeError('Argument position out of range')
+        }
         // (PT) this.getChar(position).removeAllListeners()
         super.removeChildAt(position - 1)
         this.alignTextChars()
@@ -122,7 +124,6 @@ class TextContainer extends PIXI.Container {
 
 /** Base Textbox Control */
 export default class Textbox extends PIXI.Container {
-
     /** Textbox regular background graphic */
     private readonly m_Background: PIXI.Graphics
 
@@ -165,16 +166,24 @@ export default class Textbox extends PIXI.Container {
         // 1 (Border) + 2 (Space) + Text Height + 2 (Space) + 1 Border = Text Height + 6
         const height: number = PIXI.TextMetrics.measureText(text, G.styles.controls.textbox).height
 
-        this.m_Background = F.DrawRectangle(width, height + 6,
+        this.m_Background = F.DrawRectangle(
+            width,
+            height + 6,
             G.colors.controls.textbox.background.color,
             G.colors.controls.textbox.background.alpha,
-            1, true)
+            1,
+            true
+        )
         this.addChild(this.m_Background)
 
-        this.m_Active = F.DrawRectangle(width, height + 6,
+        this.m_Active = F.DrawRectangle(
+            width,
+            height + 6,
             G.colors.controls.textbox.active.color,
             G.colors.controls.textbox.active.alpha,
-            1, true)
+            1,
+            true
+        )
         this.m_Active.visible = false
         this.addChild(this.m_Active)
 
@@ -184,7 +193,10 @@ export default class Textbox extends PIXI.Container {
         this.addChild(this.m_Text)
 
         this.m_CaretGraphic = new PIXI.Graphics()
-        this.m_CaretGraphic.lineStyle(1, G.colors.controls.textbox.foreground.color).moveTo(0, 0).lineTo(0, height)
+        this.m_CaretGraphic
+            .lineStyle(1, G.colors.controls.textbox.foreground.color)
+            .moveTo(0, 0)
+            .lineTo(0, height)
         this.m_CaretGraphic.y = 3
         this.m_CaretGraphic.visible = false
         this.addChild(this.m_CaretGraphic)
@@ -192,8 +204,12 @@ export default class Textbox extends PIXI.Container {
         this.caretPosition = text.length
 
         this.interactive = true
-        this.on('pointerover', () => { this.m_MouseInside = true })
-        this.on('pointerout', () => { this.m_MouseInside = false })
+        this.on('pointerover', () => {
+            this.m_MouseInside = true
+        })
+        this.on('pointerout', () => {
+            this.m_MouseInside = false
+        })
         this.on('pointerup', this.onPointerUp)
     }
 
@@ -214,7 +230,9 @@ export default class Textbox extends PIXI.Container {
         return this.p_CaretPosition
     }
     private set caretPosition(position: number) {
-        if (position < 0 || position > this.m_Text.children.length) return
+        if (position < 0 || position > this.m_Text.children.length) {
+            return
+        }
         this.p_CaretPosition = position
         if (this.p_CaretPosition === 0) {
             this.m_CaretGraphic.x = 3
@@ -229,12 +247,18 @@ export default class Textbox extends PIXI.Container {
      * @param char - Character to insert at current caret position
      */
     private instertCharacter(char: string) {
-        if (char === undefined || char.length !== 1) return
-        if (this.m_Text.children.length >= this.m_Length) return
-        if (this.m_Filter !== '' && this.m_Filter.indexOf(char) < 0) return
+        if (char === undefined || char.length !== 1) {
+            return
+        }
+        if (this.m_Text.children.length >= this.m_Length) {
+            return
+        }
+        if (this.m_Filter !== '' && this.m_Filter.indexOf(char) < 0) {
+            return
+        }
 
         this.m_Text.insertChar(new TextChar(char), this.caretPosition)
-        this.caretPosition++
+        this.caretPosition += 1
         this.emit('changed')
     }
 
@@ -244,11 +268,15 @@ export default class Textbox extends PIXI.Container {
      */
     private removeCharacter(direction: number) {
         if (direction === -1) {
-            if (this.caretPosition < 1) return
+            if (this.caretPosition < 1) {
+                return
+            }
             this.m_Text.removeChar(this.caretPosition)
-            this.caretPosition--
+            this.caretPosition -= 1
         } else if (direction === 1) {
-            if (this.caretPosition >= this.m_Text.children.length) return
+            if (this.caretPosition >= this.m_Text.children.length) {
+                return
+            }
             this.m_Text.removeChar(this.caretPosition + 1)
         }
         this.emit('changed')
@@ -288,11 +316,11 @@ export default class Textbox extends PIXI.Container {
                 break
             }
             case 'ArrowRight': {
-                this.caretPosition++
+                this.caretPosition += 1
                 break
             }
             case 'ArrowLeft': {
-                this.caretPosition--
+                this.caretPosition -= 1
                 break
             }
             case 'Backspace': {

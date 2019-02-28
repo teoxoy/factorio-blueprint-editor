@@ -1,48 +1,60 @@
 import FD from 'factorio-data'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
+import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import F from '../controls/functions'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'
-import * as PIXI from 'pixi.js'
 
 // TODO: Optimize showing recipe when hovering with mouse over button
 // TODO: Move methods createIcon() and createIconWithAmount() to common functions class
 
 /** Inventory Dialog - Displayed to the user if there is a need to select an item */
 export class InventoryContainer extends Dialog {
-
     /**
      * Create Icon from Sprite Item information
      * @param item - Item to create Sprite from
      * @param setAnchor - Temporar parameter to disable anchoring (this parameter may be removed again in the future)
      */
     public static createIcon(itemName: string, setAnchor: boolean = true): PIXI.DisplayObject {
-        let item = FD.items[itemName]
-        // only needed for inventory group icon
-        if (!item) item = FD.inventoryLayout.find(g => g.name === itemName)
+        // inventory group icon is not present in FD.items
+        const iconName = FD.items[itemName]
+            ? FD.items[itemName].icon
+            : FD.inventoryLayout.find(g => g.name === itemName).icon
 
-        if (item.icon !== undefined) {
-            const icon = PIXI.Sprite.from(item.icon)
-            if (setAnchor) icon.anchor.set(0.5, 0.5)
+        if (iconName !== undefined) {
+            const icon = PIXI.Sprite.from(iconName)
+            if (setAnchor) {
+                icon.anchor.set(0.5, 0.5)
+            }
             return icon
         }
-        if (item.icons !== undefined) {
+
+        const icons = FD.items[itemName].icons
+        if (icons !== undefined) {
             const img = new PIXI.Container()
-            for (const icon of item.icons) {
+            for (const icon of icons) {
                 const sprite = PIXI.Sprite.from(icon.icon)
-                if (icon.scale) sprite.scale.set(icon.scale, icon.scale)
-                if (icon.shift) sprite.position.set(icon.shift[0], icon.shift[1])
+                if (icon.scale) {
+                    sprite.scale.set(icon.scale, icon.scale)
+                }
+                if (icon.shift) {
+                    sprite.position.set(icon.shift[0], icon.shift[1])
+                }
                 if (icon.tint) {
                     const t = icon.tint
-                    sprite.filters = [new AdjustmentFilter({
-                        red: t.r,
-                        green: t.g,
-                        blue: t.b,
-                        alpha: t.a
-                    })]
+                    sprite.filters = [
+                        new AdjustmentFilter({
+                            red: t.r,
+                            green: t.g,
+                            blue: t.b,
+                            alpha: t.a
+                        })
+                    ]
                 }
-                if (setAnchor) sprite.anchor.set(0.5, 0.5)
+                if (setAnchor) {
+                    sprite.anchor.set(0.5, 0.5)
+                }
 
                 if (!setAnchor && icon.shift) {
                     sprite.position.x += sprite.width / 2
@@ -115,7 +127,11 @@ export class InventoryContainer extends Dialog {
      * Space   @ 8   +8                 ->78
      * Height : 10 + 16 + 10 + 36 + 8 = 78
      */
-    constructor(title: string = 'Inventory', itemsFilter?: string[], selectedCallBack?: (selectedItem: string) => void) {
+    constructor(
+        title: string = 'Inventory',
+        itemsFilter?: string[],
+        selectedCallBack?: (selectedItem: string) => void
+    ) {
         super(404, 442, title)
 
         this.m_InventoryGroups = new PIXI.Container()
@@ -128,24 +144,26 @@ export class InventoryContainer extends Dialog {
 
         let groupIndex = 0
         for (const group of FD.inventoryLayout) {
-
             const inventoryGroupItems = new PIXI.Container()
             let itemColIndex = 0
             let itemRowIndex = 0
 
             for (const subgroup of group.subgroups) {
-
                 let subgroupHasItems = false
 
                 for (const item of subgroup.items) {
-
                     const itemData = FD.items[item.name]
                     if (itemsFilter === undefined) {
                         const resultPlaceable = itemData.place_result !== undefined
-                        const entityFindable = resultPlaceable ? FD.entities[itemData.place_result] !== undefined : false
+                        const entityFindable = resultPlaceable
+                            ? FD.entities[itemData.place_result] !== undefined
+                            : false
                         if (!entityFindable) {
-                            const tilePlaceable = itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
-                            const tileFindable = (tilePlaceable) ? FD.tiles[itemData.place_as_tile.result] !== undefined : false
+                            const tilePlaceable =
+                                itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
+                            const tileFindable = tilePlaceable
+                                ? FD.tiles[itemData.place_as_tile.result] !== undefined
+                                : false
                             if (!tileFindable) {
                                 continue
                             }
@@ -165,7 +183,7 @@ export class InventoryContainer extends Dialog {
 
                     if (itemColIndex === 10) {
                         itemColIndex = 0
-                        itemRowIndex++
+                        itemRowIndex += 1
                     }
 
                     const button: Button = new Button(36, 36)
@@ -192,19 +210,18 @@ export class InventoryContainer extends Dialog {
 
                     inventoryGroupItems.addChild(button)
 
-                    itemColIndex++
+                    itemColIndex += 1
                     subgroupHasItems = true
                     // }
                 }
 
                 if (subgroupHasItems) {
-                    itemRowIndex++
+                    itemRowIndex += 1
                     itemColIndex = 0
                 }
             }
 
             if (inventoryGroupItems.children.length > 0) {
-
                 inventoryGroupItems.visible = groupIndex === 0
                 this.m_InventoryItems.addChild(inventoryGroupItems)
 
@@ -216,13 +233,13 @@ export class InventoryContainer extends Dialog {
                 button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     if (e.data.button === 0) {
                         if (!button.active) {
-                            for (const inventoryGroup of this.m_InventoryGroups.children) {
-                                (inventoryGroup as Button).active = inventoryGroup === button
+                            for (const inventoryGroup of this.m_InventoryGroups.children as Button[]) {
+                                inventoryGroup.active = inventoryGroup === button
                             }
                         }
                         const buttonData: PIXI.Container = button.data as PIXI.Container
                         if (!buttonData.visible) {
-                            for (const inventoryGroupItems of this.m_InventoryItems.children) {
+                            for (const inventoryGroupItems of this.m_InventoryItems.children as PIXI.Container[]) {
                                 inventoryGroupItems.visible = inventoryGroupItems === buttonData
                                 inventoryGroupItems.interactiveChildren = inventoryGroupItems === buttonData
                             }
@@ -232,7 +249,7 @@ export class InventoryContainer extends Dialog {
 
                 this.m_InventoryGroups.addChild(button)
 
-                groupIndex++
+                groupIndex += 1
             }
         }
 
@@ -240,10 +257,13 @@ export class InventoryContainer extends Dialog {
         recipePanel.position.set(0, 442)
         this.addChild(recipePanel)
 
-        const recipeBackground: PIXI.Graphics = F.DrawRectangle(404, 78,
+        const recipeBackground: PIXI.Graphics = F.DrawRectangle(
+            404,
+            78,
             G.colors.dialog.background.color,
             G.colors.dialog.background.alpha,
-            G.colors.dialog.background.border)
+            G.colors.dialog.background.border
+        )
         recipeBackground.position.set(0, 0)
         recipePanel.addChild(recipeBackground)
 
@@ -258,15 +278,11 @@ export class InventoryContainer extends Dialog {
 
     /** Override automatically set position of dialog due to additional area for recipe */
     setPosition() {
-        this.position.set(
-            G.app.screen.width / 2 - this.width / 2,
-            G.app.screen.height / 2 - 520 / 2
-        )
+        this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height / 2 - 520 / 2)
     }
 
     /** Update recipe visulaization */
     private updateRecipeVisualization(recipeName?: string) {
-
         // Update Recipe Label
         this.m_RecipeLabel.text = recipeName === undefined ? undefined : FD.recipes[recipeName].ui_name
 
@@ -274,11 +290,19 @@ export class InventoryContainer extends Dialog {
         this.m_RecipeContainer.removeChildren()
 
         const recipe = FD.recipes[recipeName]
-        if (recipe === undefined) return
+        if (recipe === undefined) {
+            return
+        }
 
         let nextX = 0
         for (const ingredient of recipe.ingredients) {
-            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, ingredient.name, ingredient.amount)
+            InventoryContainer.createIconWithAmount(
+                this.m_RecipeContainer,
+                nextX,
+                0,
+                ingredient.name,
+                ingredient.amount
+            )
             nextX += 36
         }
 

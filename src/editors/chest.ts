@@ -1,15 +1,14 @@
+import * as PIXI from 'pixi.js'
 import G from '../common/globals'
-import Editor from './editor'
-import Filters from './components/filters'
 import Slider from '../controls/slider'
 import Entity from '../factorio-data/entity'
 import Textbox from '../controls/textbox'
 import Checkbox from '../controls/checkbox'
-import * as PIXI from 'pixi.js'
+import Filters from './components/filters'
+import Editor from './editor'
 
 /** Assembly Machines Editor */
 export default class ChestEditor extends Editor {
-
     // logistic_chest_buffer
     // >> 12 Slots / Counts
 
@@ -32,11 +31,13 @@ export default class ChestEditor extends Editor {
         this.m_Filter = -1
 
         // Add Filters
-        this.addLabel(140, 56, `Filter${(this.m_Entity.filterSlots === 1 ? '' : 's')}:`)
+        this.addLabel(140, 56, `Filter${this.m_Entity.filterSlots === 1 ? '' : 's'}:`)
         const filters: Filters = this.addFilters(208, 45, this.m_Amount)
 
         /** Remaining controls are not needed if amount shall not be shown */
-        if (!this.m_Amount) return
+        if (!this.m_Amount) {
+            return
+        }
 
         // Add Label
         const label: PIXI.Text = new PIXI.Text('Count:', G.styles.dialog.label)
@@ -73,7 +74,9 @@ export default class ChestEditor extends Editor {
         })
         slider.on('changed', () => {
             if (slider.value !== 0) {
-                if (slider.value !== undefined) textbox.text = slider.value.toString()
+                if (slider.value !== undefined) {
+                    textbox.text = slider.value.toString()
+                }
                 filters.updateFilter(this.m_Filter, slider.value)
             }
         })
@@ -97,8 +100,12 @@ export default class ChestEditor extends Editor {
         if (entity.name === 'logistic_chest_requester') {
             const checkbox: Checkbox = new Checkbox(this.m_Entity.requestFromBufferChest, 'Request from buffer chests')
             checkbox.position.set(208, 128)
-            checkbox.on('changed', () => { this.m_Entity.requestFromBufferChest = checkbox.checked })
-            this.m_Entity.on('requestFromBufferChest', () => { checkbox.checked = this.m_Entity.requestFromBufferChest })
+            checkbox.on('changed', () => {
+                this.m_Entity.requestFromBufferChest = checkbox.checked
+            })
+            this.m_Entity.on('requestFromBufferChest', () => {
+                checkbox.checked = this.m_Entity.requestFromBufferChest
+            })
             this.addChild(checkbox)
         }
     }

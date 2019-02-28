@@ -1,8 +1,8 @@
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
+import * as PIXI from 'pixi.js'
 import spriteDataBuilder from './factorio-data/spriteDataBuilder'
 import Entity from './factorio-data/entity'
 import G from './common/globals'
-import * as PIXI from 'pixi.js'
 
 interface IEntityData {
     name: string
@@ -15,27 +15,31 @@ interface IEntityData {
     assemblerCraftsWithFluid?: boolean
     assemblerPipeDirection?: string
     trainStopColor?: {
-        r: number;
-        g: number;
-        b: number;
-        a: number;
+        r: number
+        g: number
+        b: number
+        a: number
     }
     chemicalPlantDontConnectOutput?: boolean
 }
 
 export class EntitySprite extends PIXI.Sprite {
     static nextID = 0
+    static getNextID() {
+        this.nextID += 1
+        return this.nextID
+    }
 
-    static getParts(entity: IEntityData | Entity, hr: boolean, ignore_connections?: boolean): EntitySprite[] {
-
+    static getParts(entity: IEntityData | Entity, hr: boolean, ignoreConnections?: boolean): EntitySprite[] {
         const anims = spriteDataBuilder.getSpriteData({
             hr,
-            dir: !ignore_connections && entity.type === 'electric_pole' && entity instanceof Entity
-                ? G.BPC.wiresContainer.getPowerPoleDirection(entity)
-                : entity.direction,
+            dir:
+                !ignoreConnections && entity.type === 'electric_pole' && entity instanceof Entity
+                    ? G.BPC.wiresContainer.getPowerPoleDirection(entity)
+                    : entity.direction,
 
             name: entity.name,
-            bp: ignore_connections ? undefined : G.bp,
+            bp: ignoreConnections ? undefined : G.bp,
             position: entity.position,
             hasConnections: entity.hasConnections,
 
@@ -89,27 +93,40 @@ export class EntitySprite extends PIXI.Sprite {
     cachedBounds: number[]
 
     constructor(data: ISpriteData) {
-        if (!data.shift) data.shift = [0, 0]
-        if (!data.x) data.x = 0
-        if (!data.y) data.y = 0
-        if (!data.divW) data.divW = 1
-        if (!data.divH) data.divH = 1
+        if (!data.shift) {
+            data.shift = [0, 0]
+        }
+        if (!data.x) {
+            data.x = 0
+        }
+        if (!data.y) {
+            data.y = 0
+        }
+        if (!data.divW) {
+            data.divW = 1
+        }
+        if (!data.divH) {
+            data.divH = 1
+        }
 
         const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${data.height / data.divH}`
         let texture = PIXI.utils.TextureCache[textureKey]
         if (!texture) {
             const spriteData = PIXI.Texture.from(data.filename)
-            texture = new PIXI.Texture(spriteData.baseTexture, new PIXI.Rectangle(
-                spriteData.frame.x + data.x,
-                spriteData.frame.y + data.y,
-                data.width / data.divW,
-                data.height / data.divH
-            ))
+            texture = new PIXI.Texture(
+                spriteData.baseTexture,
+                new PIXI.Rectangle(
+                    spriteData.frame.x + data.x,
+                    spriteData.frame.y + data.y,
+                    data.width / data.divW,
+                    data.height / data.divH
+                )
+            )
             PIXI.Texture.addToCache(texture, textureKey)
         }
         super(texture)
 
-        this.id = EntitySprite.nextID++
+        this.id = EntitySprite.getNextID()
 
         this.shift = {
             x: data.shift[0] * 32,
@@ -118,28 +135,40 @@ export class EntitySprite extends PIXI.Sprite {
 
         this.position.set(this.shift.x, this.shift.y)
 
-        if (data.scale) this.scale.set(data.scale, data.scale)
+        if (data.scale) {
+            this.scale.set(data.scale, data.scale)
+        }
 
         this.anchor.x = data.anchorX === undefined ? 0.5 : data.anchorX
         this.anchor.y = data.anchorY === undefined ? 0.5 : data.anchorY
 
-        if (data.flipX) this.scale.x *= -1
-        if (data.flipY) this.scale.y *= -1
+        if (data.flipX) {
+            this.scale.x *= -1
+        }
+        if (data.flipY) {
+            this.scale.y *= -1
+        }
 
-        if (data.squishY) this.height /= data.squishY
+        if (data.squishY) {
+            this.height /= data.squishY
+        }
 
-        if (data.rotAngle) this.angle = data.rotAngle
+        if (data.rotAngle) {
+            this.angle = data.rotAngle
+        }
 
         if (data.color) {
-            this.filters = [new AdjustmentFilter({
-                gamma: 1.4,
-                contrast: 1.4,
-                brightness: 1.2,
-                red: data.color.r,
-                green: data.color.g,
-                blue: data.color.b,
-                alpha: data.color.a
-            })]
+            this.filters = [
+                new AdjustmentFilter({
+                    gamma: 1.4,
+                    contrast: 1.4,
+                    brightness: 1.2,
+                    red: data.color.r,
+                    green: data.color.g,
+                    blue: data.color.b,
+                    alpha: data.color.a
+                })
+            ]
         }
 
         // CACHE LOCAL BOUNDS
@@ -177,9 +206,6 @@ export class EntitySprite extends PIXI.Sprite {
     }
 
     setPosition(position: IPoint) {
-        this.position.set(
-            position.x + this.shift.x,
-            position.y + this.shift.y
-        )
+        this.position.set(position.x + this.shift.x, position.y + this.shift.y)
     }
 }

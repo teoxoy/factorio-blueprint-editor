@@ -1,53 +1,58 @@
 import pako from 'pako'
 import Ajv from 'ajv'
-import blueprintSchema from '../blueprintSchema.json'
 import FD from 'factorio-data'
+import blueprintSchema from '../blueprintSchema.json'
 import Blueprint from './blueprint'
 import { Book } from './book'
 
 const validate = new Ajv()
-.addKeyword('entityName', {
-    validate: (data: string) => !!FD.entities[data],
-    errors: false,
-    schema: false
-})
-.addKeyword('itemName', {
-    validate: (data: string) => !!FD.items[data],
-    errors: false,
-    schema: false
-})
-.addKeyword('objectWithItemNames', {
-    validate: (data: object) => {
-        for (const k in data) {
-            if (!FD.items[k]) return false
-        }
-        return true
-    },
-    errors: false,
-    schema: false
-})
-.addKeyword('recipeName', {
-    validate: (data: string) => !!FD.recipes[data],
-    errors: false,
-    schema: false
-})
-.addKeyword('tileName', {
-    validate: (data: string) => !!FD.tiles[data],
-    errors: false,
-    schema: false
-})
-.compile(blueprintSchema)
+    .addKeyword('entityName', {
+        validate: (data: string) => !!FD.entities[data],
+        errors: false,
+        schema: false
+    })
+    .addKeyword('itemName', {
+        validate: (data: string) => !!FD.items[data],
+        errors: false,
+        schema: false
+    })
+    .addKeyword('objectWithItemNames', {
+        validate: (data: object) => {
+            for (const k in data) {
+                if (!FD.items[k]) {
+                    return false
+                }
+            }
+            return true
+        },
+        errors: false,
+        schema: false
+    })
+    .addKeyword('recipeName', {
+        validate: (data: string) => !!FD.recipes[data],
+        errors: false,
+        schema: false
+    })
+    .addKeyword('tileName', {
+        validate: (data: string) => !!FD.tiles[data],
+        errors: false,
+        schema: false
+    })
+    .compile(blueprintSchema)
 
 function decode(str: string): Promise<Blueprint | Book> {
     return new Promise((resolve, reject) => {
         try {
             const data = JSON.parse(
-                pako.inflate(atob(str.slice(1)), { to: 'string' })
-                .replace(/("[^,]{3,}?")/g, (_: string, capture: string) => capture.replace(/-/g, '_'))
+                pako
+                    .inflate(atob(str.slice(1)), { to: 'string' })
+                    .replace(/("[^,]{3,}?")/g, (_: string, capture: string) => capture.replace(/-/g, '_'))
             )
             console.log(data)
-            if (!validate(data)) reject(validate.errors)
-            resolve(data.blueprint_book === undefined ? new Blueprint(data.blueprint) : new Book(data))
+            if (!validate(data)) {
+                reject(validate.errors)
+            }
+            resolve(data.blueprint_book === undefined ? new Blueprint(data.blueprint) : new Book(data.blueprint_book))
         } catch (e) {
             reject(e)
         }
@@ -57,17 +62,26 @@ function decode(str: string): Promise<Blueprint | Book> {
 function encode(bPOrBook: Blueprint | Book) {
     return new Promise((resolve: (value: string) => void, reject) => {
         const data = encodeSync(bPOrBook)
-        if (data.value) resolve(data.value)
-        else reject(data.error)
+        if (data.value) {
+            resolve(data.value)
+        } else {
+            reject(data.error)
+        }
     })
 }
 
 function encodeSync(bPOrBook: Blueprint | Book): { value?: string; error?: string } {
     try {
-        return { value: '0' + btoa(pako.deflate(
-            JSON.stringify(bPOrBook.toObject())
-                .replace(/(:".+?"|"[a-z]+?_module(|_[0-9])")/g, (_: string, capture: string) => capture.replace(/_/g, '-'))
-            , { to: 'string' }))
+        return {
+            value: `0${btoa(
+                pako.deflate(
+                    JSON.stringify(bPOrBook.toObject()).replace(
+                        /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
+                        (_: string, capture: string) => capture.replace(/_/g, '-')
+                    ),
+                    { to: 'string' }
+                )
+            )}`
         }
     } catch (e) {
         return { error: e }
@@ -75,9 +89,14 @@ function encodeSync(bPOrBook: Blueprint | Book): { value?: string; error?: strin
 }
 
 function findBPString(data: string) {
+    if (data === undefined) {
+        return
+    }
     const DATA = data.replace(/\s/g, '')
 
-    if (DATA[0] === '0') return new Promise(resolve => resolve(DATA))
+    if (DATA[0] === '0') {
+        return new Promise(resolve => resolve(DATA))
+    }
 
     // function isUrl(url: string) {
     //     try { return Boolean(new URL(url)) }
@@ -110,7 +129,9 @@ function findBPString(data: string) {
                     r.json().then(data => data.blueprintString)
                 )
             case 'docs':
-                return fetchData(`https://docs.google.com/document/d/${pathParts[2]}/export?format=txt`).then(r => r.text())
+                return fetchData(`https://docs.google.com/document/d/${pathParts[2]}/export?format=txt`).then(r =>
+                    r.text()
+                )
             default:
                 return fetchData(url.toString()).then(r => r.text())
         }
@@ -118,7 +139,9 @@ function findBPString(data: string) {
 
     function fetchData(url: string) {
         return fetch(url).then(response => {
-            if (response.ok) return response
+            if (response.ok) {
+                return response
+            }
             throw new Error('Network response was not ok.')
         })
     }

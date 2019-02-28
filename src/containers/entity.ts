@@ -1,49 +1,63 @@
-import G from '../common/globals'
 import FD from 'factorio-data'
+import * as PIXI from 'pixi.js'
+import G from '../common/globals'
 import { EntitySprite } from '../entitySprite'
-import { UnderlayContainer } from './underlay'
 import util from '../common/util'
 import Entity from '../factorio-data/entity'
-import * as PIXI from 'pixi.js'
+import { UnderlayContainer } from './underlay'
 
 const updateGroups = [
     {
         is: [
-            'transport_belt', 'fast_transport_belt', 'express_transport_belt', 'splitter', 'fast_splitter',
-            'express_splitter', 'underground_belt', 'fast_underground_belt', 'express_underground_belt'
+            'transport_belt',
+            'fast_transport_belt',
+            'express_transport_belt',
+            'splitter',
+            'fast_splitter',
+            'express_splitter',
+            'underground_belt',
+            'fast_underground_belt',
+            'express_underground_belt'
         ],
-        updates: [ 'transport_belt', 'fast_transport_belt', 'express_transport_belt' ]
+        updates: ['transport_belt', 'fast_transport_belt', 'express_transport_belt']
     },
     {
-        is: [ 'heat_pipe', 'nuclear_reactor', 'heat_exchanger' ],
-        updates: [ 'heat_pipe', 'nuclear_reactor', 'heat_exchanger' ]
+        is: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger'],
+        updates: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger']
     },
     {
-        has: [ 'fluid_box', 'output_fluid_box', 'fluid_boxes' ],
-        updates: [ 'fluid_box', 'output_fluid_box', 'fluid_boxes' ]
+        has: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
+        updates: ['fluid_box', 'output_fluid_box', 'fluid_boxes']
     },
     {
-        is: [ 'stone_wall', 'gate', 'straight_rail' ],
-        updates: [ 'stone_wall', 'gate', 'straight_rail' ]
+        is: ['stone_wall', 'gate', 'straight_rail'],
+        updates: ['stone_wall', 'gate', 'straight_rail']
     }
 ]
-.map(uG => {
-    if (!uG.has) return uG
-    const entities = Object.values(FD.entities)
-    return {
-        is: entities.filter(e => Object.keys(e).find(k => uG.has.includes(k))).map(e => e.name),
-        updates: entities.filter(e => Object.keys(e).find(k => uG.updates.includes(k))).map(e => e.name)
-    }
-})
-.reduce((pV, cV) => {
-    cV.is.forEach(k => pV[k] = pV[k] ? util.uniqueInArray(pV[k].concat(cV.updates)) : cV.updates)
-    return pV
-}, {} as any)
+    .map(uG => {
+        if (!uG.has) {
+            return uG
+        }
+        const entities = Object.values(FD.entities)
+        return {
+            is: entities.filter(e => Object.keys(e).find(k => uG.has.includes(k))).map(e => e.name),
+            updates: entities.filter(e => Object.keys(e).find(k => uG.updates.includes(k))).map(e => e.name)
+        }
+    })
+    .reduce(
+        (pV: { [key: string]: string[] }, cV) => {
+            cV.is.forEach(k => {
+                pV[k] = pV[k] ? util.uniqueInArray(pV[k].concat(cV.updates)) : cV.updates
+            })
+            return pV
+        },
+        {} as { [key: string]: string[] }
+    )
 
 export class EntityContainer {
     static mappings: Map<number, EntityContainer> = new Map()
 
-    areaVisualization: PIXI.Sprite | PIXI.Sprite[] | undefined
+    areaVisualization: PIXI.Sprite | PIXI.Sprite[]
     entityInfo: PIXI.Container
     entitySprites: EntitySprite[]
 
@@ -52,15 +66,17 @@ export class EntityContainer {
     constructor(entity: Entity, sort = true) {
         this.m_Entity = entity
 
-        EntityContainer.mappings.set(this.m_Entity.entity_number, this)
+        EntityContainer.mappings.set(this.m_Entity.entityNumber, this)
 
         this.entitySprites = []
 
         this.areaVisualization = G.BPC.underlayContainer.createNewArea(this.m_Entity.name, this.position)
-        this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entity_number, this.position)
+        this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entityNumber, this.position)
 
         this.redraw(false, sort)
-        if (sort) this.redrawSurroundingEntities()
+        if (sort) {
+            this.redrawSurroundingEntities()
+        }
 
         this.m_Entity.on('recipe', () => {
             this.redrawEntityInfo()
@@ -102,19 +118,25 @@ export class EntityContainer {
             this.updateUndergroundLines()
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity)
-            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.set(this.position.x, this.position.y))
+            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s =>
+                s.position.set(this.position.x, this.position.y)
+            )
         })
 
         this.m_Entity.on('destroy', () => {
             this.redrawSurroundingEntities()
 
-            for (const s of this.entitySprites) s.destroy()
+            for (const s of this.entitySprites) {
+                s.destroy()
+            }
 
-            EntityContainer.mappings.delete(this.m_Entity.entity_number)
+            EntityContainer.mappings.delete(this.m_Entity.entityNumber)
 
             UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
 
-            if (this.entityInfo !== undefined) this.entityInfo.destroy()
+            if (this.entityInfo !== undefined) {
+                this.entityInfo.destroy()
+            }
         })
     }
 
@@ -134,25 +156,33 @@ export class EntityContainer {
             this.m_Entity.name,
             this.m_Entity.position,
             this.m_Entity.direction,
-            this.m_Entity.directionType === 'output' || this.m_Entity.name === 'pipe_to_ground' ?
-                (this.m_Entity.direction + 4) % 8 :
-                this.m_Entity.direction
+            this.m_Entity.directionType === 'output' || this.m_Entity.name === 'pipe_to_ground'
+                ? (this.m_Entity.direction + 4) % 8
+                : this.m_Entity.direction
         )
     }
 
     redrawEntityInfo() {
-        if (this.m_Entity.moduleSlots !== 0 || this.m_Entity.type === 'splitter' ||
-            this.m_Entity.entityData.crafting_categories !== undefined || this.m_Entity.type === 'mining_drill' ||
-            this.m_Entity.type === 'boiler' || this.m_Entity.type === 'generator' ||
-            this.m_Entity.name === 'pump' || this.m_Entity.name === 'offshore_pump' ||
-            this.m_Entity.name === 'arithmetic_combinator' || this.m_Entity.name === 'decider_combinator' ||
-            this.m_Entity.name === 'filter_inserter' || this.m_Entity.name === 'stack_filter_inserter' ||
-            this.m_Entity.type === 'splitter' || this.m_Entity.type === 'logistic_container'
+        if (
+            this.m_Entity.moduleSlots !== 0 ||
+            this.m_Entity.type === 'splitter' ||
+            this.m_Entity.entityData.crafting_categories !== undefined ||
+            this.m_Entity.type === 'mining_drill' ||
+            this.m_Entity.type === 'boiler' ||
+            this.m_Entity.type === 'generator' ||
+            this.m_Entity.name === 'pump' ||
+            this.m_Entity.name === 'offshore_pump' ||
+            this.m_Entity.name === 'arithmetic_combinator' ||
+            this.m_Entity.name === 'decider_combinator' ||
+            this.m_Entity.name === 'filter_inserter' ||
+            this.m_Entity.name === 'stack_filter_inserter' ||
+            this.m_Entity.type === 'splitter' ||
+            this.m_Entity.type === 'logistic_container'
         ) {
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()
             }
-            this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entity_number, this.position)
+            this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entityNumber, this.position)
         }
     }
 
@@ -163,37 +193,50 @@ export class EntityContainer {
         G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
         this.updateUndergroundLines()
 
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.visible = true)
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
+            s.visible = true
+        })
     }
 
     pointerOutEventHandler() {
         G.BPC.overlayContainer.hideCursorBox()
         G.BPC.overlayContainer.hideUndergroundLines()
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.visible = false)
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
+            s.visible = false
+        })
     }
 
     redrawSurroundingEntities(position?: IPoint) {
-        if (!updateGroups[this.m_Entity.name]) return
+        if (!updateGroups[this.m_Entity.name]) {
+            return
+        }
         if (this.m_Entity.name === 'straight_rail') {
             G.bp.entityPositionGrid.foreachOverlap(this.m_Entity.getArea(position), (entnr: number) => {
                 const ent = G.bp.entities.get(entnr)
-                if (ent.name === 'gate') EntityContainer.mappings.get(ent.entity_number).redraw()
+                if (ent.name === 'gate') {
+                    EntityContainer.mappings.get(ent.entityNumber).redraw()
+                }
             })
         } else {
-            G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea(position))
+            G.bp.entityPositionGrid
+                .getSurroundingEntities(this.m_Entity.getArea(position))
                 .filter(entity => updateGroups[this.m_Entity.name].includes(entity.name))
-                .forEach(entity => EntityContainer.mappings.get(entity.entity_number).redraw())
+                .forEach(entity => EntityContainer.mappings.get(entity.entityNumber).redraw())
         }
     }
 
-    redraw(ignore_connections?: boolean, sort = true) {
-        for (const s of this.entitySprites) s.destroy()
+    redraw(ignoreConnections?: boolean, sort = true) {
+        for (const s of this.entitySprites) {
+            s.destroy()
+        }
         this.entitySprites = []
-        for (const s of EntitySprite.getParts(this.m_Entity, G.quality.hr, ignore_connections)) {
+        for (const s of EntitySprite.getParts(this.m_Entity, G.quality.hr, ignoreConnections)) {
             s.setPosition(this.position)
             this.entitySprites.push(s)
             G.BPC.entitySprites.addChild(s)
         }
-        if (sort) G.BPC.sortEntities()
+        if (sort) {
+            G.BPC.sortEntities()
+        }
     }
 }

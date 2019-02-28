@@ -1,10 +1,9 @@
-import G from '../common/globals'
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
-import { InventoryContainer } from '../panels/inventory'
 import * as PIXI from 'pixi.js'
+import G from '../common/globals'
+import { InventoryContainer } from '../panels/inventory'
 
 export abstract class PaintContainer extends PIXI.Container {
-
     filter: AdjustmentFilter
     icon: PIXI.DisplayObject
 
@@ -43,39 +42,27 @@ export abstract class PaintContainer extends PIXI.Container {
     }
 
     // override
-    getItemName(): string {
-        return
-    }
+    abstract getItemName(): string
 
     // override
-    rotate(ccw?: boolean) {
-        return
-    }
+    abstract rotate(ccw?: boolean): void
 
     // override
-    redraw() {
-        return
-    }
+    redraw() {}
 
     // override
-    moveAtCursor() {
-        return
-    }
+    moveAtCursor() {}
 
     // override
-    removeContainerUnder() {
-        return
-    }
+    removeContainerUnder() {}
 
     // override
-    placeEntityContainer() {
-        return
-    }
+    placeEntityContainer() {}
 
     getGridPosition() {
         return {
-            x: Math.round(this.x / 32 * 10) / 10,
-            y: Math.round(this.y / 32 * 10) / 10
+            x: Math.round((this.x / 32) * 10) / 10,
+            y: Math.round((this.y / 32) * 10) / 10
         }
     }
 
@@ -83,17 +70,17 @@ export abstract class PaintContainer extends PIXI.Container {
         const mousePos = G.BPC.gridData.mousePositionInBPC
 
         if (size.x % 2 === 0) {
-            const npx = mousePos.x - mousePos.x % 16
+            const npx = mousePos.x - (mousePos.x % 16)
             this.x = npx + (npx % 32 === 0 ? 0 : 16)
         } else {
-            this.x = mousePos.x - mousePos.x % 32 + 16
+            this.x = mousePos.x - (mousePos.x % 32) + 16
         }
 
         if (size.y % 2 === 0) {
-            const npy = mousePos.y - mousePos.y % 16
+            const npy = mousePos.y - (mousePos.y % 16)
             this.y = npy + (npy % 32 === 0 ? 0 : 16)
         } else {
-            this.y = mousePos.y - mousePos.y % 32 + 16
+            this.y = mousePos.y - (mousePos.y % 32) + 16
         }
     }
 
