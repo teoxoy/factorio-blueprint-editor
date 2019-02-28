@@ -18,6 +18,10 @@ Sample blueprint: https://teoxoy.github.io/factorio-blueprint-editor/?source=htt
 
 Example link that uses url query parameters: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/Xp9u7NaA&index=1&renderOnly
 
+# Contributing
+
+Check out [this readme](./CONTRIBUTING.md) if you are interested in contributing.
+
 # Credits
 
 Thanks to all contributors!
