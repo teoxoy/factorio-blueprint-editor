@@ -12,7 +12,7 @@ import { TilePaintContainer } from './containers/paintTile'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './panels/toolbar'
 import { QuickbarContainer } from './panels/quickbar'
-import { InfoEntityPanel } from './panels/InfoEntityPanel';
+import { InfoEntityPanel } from './panels/infoEntityPanel'
 import { InfoContainer } from './panels/info'
 import Blueprint from './factorio-data/blueprint'
 import initDoorbell from './doorbell'
@@ -124,8 +124,6 @@ G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
 G.app.stage.addChild(G.quickbarContainer)
 
 G.infoEntityPanel = new InfoEntityPanel()
-//G.infoEntityPanel.on("Mouse over an entity", (entity: Entity|undefined)=>{G.infoEntityPanel.updateVisualization(entity)})
-//G.infoEntityPanel.on("Mouse not over an entity", ()=>{G.infoEntityPanel.updateVisualization(undefined)})
 G.app.stage.addChild(G.infoEntityPanel)
 
 G.dialogsContainer = new PIXI.Container()

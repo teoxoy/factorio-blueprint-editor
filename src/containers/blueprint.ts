@@ -234,7 +234,6 @@ export class BlueprintContainer extends PIXI.Container {
             this.hoverContainer.pointerOutEventHandler()
             this.hoverContainer = undefined
             this.cursor = 'inherit'
-            //this.emit("Mouse not over an entity")
         }
 
         if (G.currentMouseState === G.mouseStates.PAINTING) {
@@ -261,7 +260,6 @@ export class BlueprintContainer extends PIXI.Container {
             this.hoverContainer = e
             this.cursor = 'pointer'
             e.pointerOverEventHandler()
-            //this.emit("Mouse over an entity", this.hoverContainer.entity)
         }
     }
 
