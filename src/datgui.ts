@@ -73,6 +73,13 @@ export default function initDatGui() {
         G.quality.compressed = quality < 2
     }
 
+    const gl = document.createElement('canvas').getContext('webgl')
+    if (gl.getParameter(gl.MAX_TEXTURE_SIZE) < 8192) {
+        delete entitiesQuality['High Res PNG 8 (4.88 MB)']
+        delete entitiesQuality['High Res PNG 32 (15.80 MB)']
+        G.quality.hr = false
+    }
+
     const quality = localStorage.getItem('quality')
         ? Number(localStorage.getItem('quality'))
         : (G.quality.hr ? 1 : 0) + (G.quality.compressed ? 0 : 2)
