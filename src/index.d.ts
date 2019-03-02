@@ -127,7 +127,7 @@ namespace BPS {
         [key: string]: IWireColor[]
     }
 
-    export interface IEntity {
+    interface IEntity {
         entity_number: number
         name: string
         position: IPoint
@@ -322,12 +322,12 @@ namespace BPS {
         }
     }
 
-    export interface ITile {
+    interface ITile {
         name: string
         position: IPoint
     }
 
-    export interface IBlueprint {
+    interface IBlueprint {
         version: number
         item: 'blueprint'
         icons: {
@@ -340,7 +340,7 @@ namespace BPS {
         tiles?: ITile[]
     }
 
-    export interface IBlueprintBook {
+    interface IBlueprintBook {
         version: number
         item: 'blueprint_book'
         active_index: number
