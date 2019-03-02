@@ -114,7 +114,7 @@ function findBPString(data: string) {
         const pathParts = url.pathname.slice(1).split('/')
         switch (url.hostname.split('.')[0]) {
             case 'pastebin':
-                return fetchData(`${corsProxy}https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
+                return fetchData(`https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
             case 'hastebin':
                 return fetchData(`${corsProxy}https://hastebin.com/raw/${pathParts[0]}`).then(r => r.text())
             case 'gist':
