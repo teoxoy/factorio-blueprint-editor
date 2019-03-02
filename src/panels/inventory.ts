@@ -87,6 +87,35 @@ export class InventoryContainer extends Dialog {
         host.addChild(text)
     }
 
+    public static createRecipe(
+        host: PIXI.Container,
+        x: number,
+        y: number,
+        ingredients: FD.IngredientOrResult[],
+        results: FD.IngredientOrResult[],
+        time: number
+    ) {
+        let nextX = x
+
+        for (const i of ingredients) {
+            InventoryContainer.createIconWithAmount(host, nextX, y, i.name, i.amount)
+            nextX += 36
+        }
+
+        nextX += 2
+        const timeText = `=${time}s>`
+        const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, G.styles.dialog.label)
+        const timeObject: PIXI.Text = new PIXI.Text(timeText, G.styles.dialog.label)
+        timeObject.position.set(nextX, 6 + y)
+        host.addChild(timeObject)
+        nextX += timeSize.width + 6
+
+        for (const r of results) {
+            InventoryContainer.createIconWithAmount(host, nextX, y, r.name, r.amount)
+            nextX += 36
+        }
+    }
+
     /** Container for Inventory Group Buttons */
     private readonly m_InventoryGroups: PIXI.Container
 
@@ -294,29 +323,6 @@ export class InventoryContainer extends Dialog {
             return
         }
 
-        let nextX = 0
-        for (const ingredient of recipe.ingredients) {
-            InventoryContainer.createIconWithAmount(
-                this.m_RecipeContainer,
-                nextX,
-                0,
-                ingredient.name,
-                ingredient.amount
-            )
-            nextX += 36
-        }
-
-        nextX += 2
-        const timeText = `=${recipe.time}s>`
-        const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, G.styles.dialog.label)
-        const timeObject: PIXI.Text = new PIXI.Text(timeText, G.styles.dialog.label)
-        timeObject.position.set(nextX, 6)
-        this.m_RecipeContainer.addChild(timeObject)
-        nextX += timeSize.width + 6
-
-        for (const result of recipe.results) {
-            InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, result.name, result.amount)
-            nextX += 36
-        }
+        InventoryContainer.createRecipe(this.m_RecipeContainer, 0, 0, recipe.ingredients, recipe.results, recipe.time)
     }
 }

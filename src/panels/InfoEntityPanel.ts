@@ -3,7 +3,47 @@ import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import Panel from '../controls/panel'
 import Entity from '../factorio-data/entity'
+import util from '../common/util'
 import { InventoryContainer } from './inventory'
+
+function template(strings: TemplateStringsArray, ...keys: (number | string)[]) {
+    return (...values: (unknown | { [key: string]: unknown })[]) => {
+        const result = [strings[0].replace('\n', '')]
+        keys.forEach((key, i) => {
+            result.push(
+                typeof key === 'number' ? (values as string[])[key] : (values[0] as { [key: string]: string })[key],
+                strings[i + 1]
+            )
+        })
+        return result.join('')
+    }
+}
+
+const entityInfoTemplate = template`
+Crafting speed: ${'craftingSpeed'} ${'speedMultiplier'}
+Power consumption: ${'energyUsage'} kW ${'energyMultiplier'}`
+
+const SIZE_OF_ITEM_ON_BELT = 0.28125
+
+const getBeltSpeed = (beltSpeed: number) => beltSpeed * 60 * (1 / SIZE_OF_ITEM_ON_BELT) * 2
+
+const containerToContainer = (rotationSpeed: number, n: number) => rotationSpeed * 60 * n
+
+/**
+    nr of items to ignore the time it takes to place them on a belt
+
+    because: first item is being placed instantly and also in front so
+    this also reduces the time it takes to put down the second item by about 75%
+*/
+const NR_OF_ITEMS_TO_IGNORE = 1.75
+const containerToBelt = (rotationSpeed: number, beltSpeed: number, n: number) => {
+    const armTime = 1 / (rotationSpeed * 60)
+    const itemTime = (1 / (beltSpeed * 60)) * SIZE_OF_ITEM_ON_BELT
+    return n / (armTime + itemTime * Math.max(n - NR_OF_ITEMS_TO_IGNORE, 0))
+}
+// TODO: add beltToContainer
+
+const roundToTwo = (n: number) => Math.round(n * 100) / 100
 
 /**
  * This class creates a panel to show detailed informations about each entity (as the original game and maybe more).
@@ -13,121 +53,96 @@ import { InventoryContainer } from './inventory'
  * @see instanciation in /app.ts - event in /containers/entity.ts
  */
 export class InfoEntityPanel extends Panel {
-    InfoProdTitle: PIXI.Text
+    title: PIXI.Text
     m_EntityName: PIXI.Text
     m_entityInfo: PIXI.Text
-    m_RecipeRawContainer: PIXI.Container
     m_RecipeContainer: PIXI.Container
+    m_RecipeIOContainer: PIXI.Container
 
     constructor() {
-        super(
-            270,
-            460,
-            G.colors.controls.panel.background.color,
-            G.colors.controls.panel.background.alpha,
-            G.colors.controls.panel.background.border
-        )
+        super(270, 270)
 
         this.interactive = false
         this.visible = false
 
-        this.InfoProdTitle = new PIXI.Text('Information', G.styles.dialog.title)
-        this.InfoProdTitle.anchor.set(0.5, 0)
-        this.InfoProdTitle.position.set(super.width / 2, 2)
-        this.addChild(this.InfoProdTitle)
+        this.title = new PIXI.Text('Information', G.styles.dialog.title)
+        this.title.anchor.set(0.5, 0)
+        this.title.position.set(super.width / 2, 2)
+        this.addChild(this.title)
 
         this.m_EntityName = new PIXI.Text('', G.styles.dialog.label)
-        this.addChild(this.m_EntityName)
-
         this.m_entityInfo = new PIXI.Text('', G.styles.dialog.label)
-        this.addChild(this.m_entityInfo)
-
-        this.m_RecipeRawContainer = new PIXI.Container()
-        this.addChild(this.m_RecipeRawContainer)
-
         this.m_RecipeContainer = new PIXI.Container()
-        this.addChild(this.m_RecipeContainer)
+        this.m_RecipeIOContainer = new PIXI.Container()
+
+        this.addChild(this.m_EntityName, this.m_entityInfo, this.m_RecipeContainer, this.m_RecipeIOContainer)
     }
+
     updateVisualization(entity?: Entity) {
         if (!entity) {
             this.visible = false
             this.m_EntityName.text = ''
             this.m_entityInfo.text = ''
-            this.m_RecipeRawContainer.removeChildren()
             this.m_RecipeContainer.removeChildren()
+            this.m_RecipeIOContainer.removeChildren()
             return
         }
         this.visible = true
+        let nextY = this.title.position.y + this.title.height + 10
 
         // TODO (for all entities): icon, recipe to create itself, total raw to create itself, energy consumption,...
-        this.m_EntityName.text = `Type : ${entity.name.charAt(0).toUpperCase()}${entity.name.slice(1)}\nRaw recipe :`
-        this.m_EntityName.position.set(10, this.InfoProdTitle.position.y + this.InfoProdTitle.height + 10)
+        this.m_EntityName.text = `Name: ${FD.entities[entity.name].ui_name}`
+        this.m_EntityName.position.set(10, nextY)
+        nextY = this.m_EntityName.position.y + this.m_EntityName.height + 10
 
-        // Raw recipe
-        let nextX = 0
-        for (const ingredient of FD.recipes[entity.name].ingredients) {
-            InventoryContainer.createIconWithAmount(
-                this.m_RecipeRawContainer,
-                nextX,
-                0,
-                ingredient.name,
-                ingredient.amount
-            )
-            nextX += 36
-        }
-        nextX += 2
-        let timeText = `=${FD.recipes[entity.name].time}s>`
-        let timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, G.styles.dialog.label)
-        let timeObject: PIXI.Text = new PIXI.Text(timeText, G.styles.dialog.label)
-        timeObject.position.set(nextX, 6)
-        this.m_RecipeRawContainer.addChild(timeObject)
-        nextX += timeSize.width + 6
-        for (const result of FD.recipes[entity.name].results) {
-            InventoryContainer.createIconWithAmount(this.m_RecipeRawContainer, nextX, 0, result.name, result.amount)
-            nextX += 36
-        }
-        this.m_RecipeRawContainer.position.set(10, this.m_EntityName.position.y + this.m_EntityName.height + 10)
-        this.m_RecipeRawContainer.scale.set(0.85, 0.85)
-
+        // TODO: add beacon effect to calculation
         if (entity.entityData.type === 'assembling_machine') {
             // Details for assembling machines with or without recipe
-            let k_productivity = 0
-            let k_consumption = 0
-            let k_pollution = 0
-            let k_speed = 0
+            let productivity = 0
+            let consumption = 0
+            // let pollution = 0
+            let speed = 0
+
             if (entity.modules.length > 0) {
                 for (const module of entity.modules) {
                     if (FD.items[module].effect.productivity) {
-                        k_productivity += FD.items[module].effect.productivity.bonus
+                        productivity += FD.items[module].effect.productivity.bonus
                     }
                     if (FD.items[module].effect.consumption) {
-                        k_consumption += FD.items[module].effect.consumption.bonus
+                        consumption += FD.items[module].effect.consumption.bonus
                     }
-                    if (FD.items[module].effect.pollution) {
-                        k_pollution += FD.items[module].effect.pollution.bonus
-                    }
+                    // if (FD.items[module].effect.pollution) {
+                    //     pollution += FD.items[module].effect.pollution.bonus
+                    // }
                     if (FD.items[module].effect.speed) {
-                        k_speed += FD.items[module].effect.speed.bonus
+                        speed += FD.items[module].effect.speed.bonus
                     }
                 }
             }
-            k_productivity = Math.round(k_productivity * 100) / 100
-            k_consumption = Math.round(k_consumption * 100) / 100
-            k_pollution = Math.round(k_pollution * 100) / 100
-            k_speed = Math.round(k_speed * 100) / 100
-            let new_crafting_speed = entity.entityData.crafting_speed * (1 + k_speed)
-            let new_energy_usage = parseInt(entity.entityData.energy_usage.slice(0, -2))
-            new_energy_usage = Math.max(new_energy_usage * 0.2, new_energy_usage * (1 + k_consumption))
+
+            consumption = consumption < -0.8 ? -0.8 : consumption
+            const newCraftingSpeed = entity.entityData.crafting_speed * (1 + speed)
+            const newEnergyUsage = parseInt(entity.entityData.energy_usage.slice(0, -2)) * (1 + consumption)
+
             // Show modules effect and some others informations
-            this.m_entityInfo.text = `Modules effect :\n- Production : ${k_productivity}\n- Consumption : ${k_consumption}\n- Pollution : ${k_pollution}\n- Speed : ${k_speed}\nCrafting speed : ${new_crafting_speed}\nConsumption : ${new_energy_usage} kW`
-            this.m_entityInfo.position.set(
-                10,
-                this.m_RecipeRawContainer.position.y + this.m_RecipeRawContainer.height + 20
-            )
+            this.m_entityInfo.text = entityInfoTemplate({
+                craftingSpeed: roundToTwo(newCraftingSpeed),
+                speedMultiplier: speed
+                    ? `(${Math.sign(speed) === 1 ? '+' : '-'}${String(roundToTwo(Math.abs(speed)) * 100)}%)`
+                    : '',
+                energyUsage: roundToTwo(newEnergyUsage),
+                energyMultiplier: consumption
+                    ? `(${Math.sign(consumption) === 1 ? '+' : '-'}${String(roundToTwo(Math.abs(consumption)) * 100)}%)`
+                    : ''
+            })
+
+            this.m_entityInfo.position.set(10, nextY)
+            nextY = this.m_entityInfo.position.y + this.m_entityInfo.height + 10
 
             if (!entity.recipe) {
                 return
             }
+
             // Details for assembling machines with recipe
             this.m_RecipeContainer.removeChildren()
             const recipe = FD.recipes[entity.recipe]
@@ -136,76 +151,79 @@ export class InfoEntityPanel extends Panel {
             }
 
             // Show the original recipe
-            let nextX = 0
-            for (const ingredient of recipe.ingredients) {
-                InventoryContainer.createIconWithAmount(
-                    this.m_RecipeContainer,
-                    nextX,
-                    0,
-                    ingredient.name,
-                    ingredient.amount
-                )
-                nextX += 36
-            }
-            nextX += 2
-            const timeText = `=${recipe.time}s>`
-            const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, G.styles.dialog.label)
-            const timeObject: PIXI.Text = new PIXI.Text(timeText, G.styles.dialog.label)
-            timeObject.position.set(nextX, 6)
-            this.m_RecipeContainer.addChild(timeObject)
-            nextX += timeSize.width + 6
-            for (const result of recipe.results) {
-                InventoryContainer.createIconWithAmount(this.m_RecipeContainer, nextX, 0, result.name, result.amount)
-                nextX += 36
-            }
+            this.m_RecipeContainer.addChild(new PIXI.Text('Recipe:', G.styles.dialog.label))
+            InventoryContainer.createRecipe(
+                this.m_RecipeContainer,
+                0,
+                20,
+                recipe.ingredients,
+                recipe.results,
+                recipe.time
+            )
+            this.m_RecipeContainer.position.set(10, nextY)
+            nextY = this.m_RecipeContainer.position.y + this.m_RecipeContainer.height + 20
 
-            // Calculation of input and output of recipe
-            const txt_ingredient: PIXI.Text = new PIXI.Text('', G.styles.dialog.label)
-            txt_ingredient.position.set(0, txt_ingredient.y + 50)
-            txt_ingredient.text = 'Input :\n'
-            for (const ingredient of recipe.ingredients) {
-                txt_ingredient.text += `${Math.round(((ingredient.amount * new_crafting_speed) / recipe.time) * 100) /
-                    100} /s x ${ingredient.name}\n`
-            }
-            txt_ingredient.text += '\nOutput :\n'
-            for (const result of recipe.results) {
-                txt_ingredient.text += `${Math.round(
-                    ((result.amount * new_crafting_speed) / recipe.time) * (1 + k_productivity) * 100
-                ) / 100} /s x ${result.name}\n`
-            }
-            this.m_RecipeContainer.addChild(txt_ingredient)
-            this.m_RecipeContainer.position.set(10, this.m_entityInfo.position.y + this.m_entityInfo.height + 20)
+            // Show recipe that takes entity effects into account
+            this.m_RecipeIOContainer.addChild(
+                new PIXI.Text('Recipe (takes entity effects into account):', G.styles.dialog.label)
+            )
+            InventoryContainer.createRecipe(
+                this.m_RecipeIOContainer,
+                0,
+                20,
+                recipe.ingredients.map(i => ({
+                    name: i.name,
+                    amount: roundToTwo((i.amount * newCraftingSpeed) / recipe.time)
+                })),
+                recipe.results.map(r => ({
+                    name: r.name,
+                    amount: roundToTwo(((r.amount * newCraftingSpeed) / recipe.time) * (1 + productivity))
+                })),
+                1
+            )
+            this.m_RecipeIOContainer.position.set(10, nextY)
+            nextY = this.m_RecipeIOContainer.position.y + this.m_RecipeIOContainer.height + 20
         }
+
+        const isBelt = (e: Entity) =>
+            e.entityData.type === 'transport_belt' ||
+            e.entityData.type === 'underground_belt' ||
+            e.entityData.type === 'splitter'
+
         if (entity.entityData.type === 'inserter') {
             // Details for inserters
-            let speed = [0.59, 0.83, 1.15, 2.31, 2.31, 2.31, 2.31]
-            let type = [
-                'burner_inserter',
-                'inserter',
-                'long_handed_inserter',
-                'fast_inserter',
-                'stack_inserter',
-                'stack_filter_inserter',
-                'filter_inserter'
-            ]
-            this.m_entityInfo.text = `Speed : ${speed[type.indexOf(entity.entityData.name)]} items/s`
-            // +"\nConsumption : "+new_energy_usage+" kW"// Not very easy to get data, it needs special calcultations
-            this.m_entityInfo.position.set(
-                10,
-                this.m_RecipeRawContainer.position.y + this.m_RecipeRawContainer.height + 20
+            let speed = containerToContainer(entity.entityData.rotation_speed, entity.inserterStackSize)
+            const tiles = entity.name === 'long_handed_inserter' ? 2 : 1
+            // const fromP = util.rotatePointBasedOnDir([0, -tiles], entity.direction)
+            const toP = util.rotatePointBasedOnDir([0, tiles], entity.direction)
+            // const from = G.bp.entities.get(
+            //     G.bp.entityPositionGrid.getCellAtPosition({
+            //         x: entity.position.x + fromP.x,
+            //         y: entity.position.y + fromP.y
+            //     })
+            // )
+            const to = G.bp.entities.get(
+                G.bp.entityPositionGrid.getCellAtPosition({
+                    x: entity.position.x + toP.x,
+                    y: entity.position.y + toP.y
+                })
             )
+            if (to && isBelt(to)) {
+                speed = containerToBelt(entity.entityData.rotation_speed, to.entityData.speed, entity.inserterStackSize)
+            }
+            this.m_entityInfo.text = `Speed: ${roundToTwo(speed)} items/s\n> changes if inserter unloads to a belt`
+            this.m_entityInfo.position.set(10, nextY)
+            nextY = this.m_entityInfo.position.y + this.m_entityInfo.height + 20
         }
-        if (entity.entityData.type === 'transport_belt') {
+
+        if (isBelt(entity)) {
             // Details for belts
-            let speed = [13.33, 26.66, 40]
-            let type = ['transport_belt', 'fast_transport_belt', 'express_transport_belt']
-            this.m_entityInfo.text = `Speed : ${speed[type.indexOf(entity.entityData.name)]} items/s`
-            this.m_entityInfo.position.set(
-                10,
-                this.m_RecipeRawContainer.position.y + this.m_RecipeRawContainer.height + 20
-            )
+            this.m_entityInfo.text = `Speed: ${roundToTwo(getBeltSpeed(entity.entityData.speed))} items/s`
+            this.m_entityInfo.position.set(10, nextY)
+            nextY = this.m_entityInfo.position.y + this.m_entityInfo.height + 20
         }
     }
+
     setPosition() {
         this.position.set(G.app.screen.width - this.width, 35)
     }

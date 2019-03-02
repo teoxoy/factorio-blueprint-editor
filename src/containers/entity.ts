@@ -184,6 +184,8 @@ export class EntityContainer {
             }
             this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entityNumber, this.position)
         }
+
+        G.infoEntityPanel.updateVisualization(this.m_Entity)
     }
 
     pointerOverEventHandler() {
