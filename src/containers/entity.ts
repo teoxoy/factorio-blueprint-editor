@@ -184,6 +184,8 @@ export class EntityContainer {
             }
             this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entityNumber, this.position)
         }
+
+        G.infoEntityPanel.updateVisualization(this.m_Entity)
     }
 
     pointerOverEventHandler() {
@@ -193,6 +195,7 @@ export class EntityContainer {
         G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
         this.updateUndergroundLines()
 
+        G.infoEntityPanel.updateVisualization(this.m_Entity)
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
             s.visible = true
         })
@@ -201,6 +204,8 @@ export class EntityContainer {
     pointerOutEventHandler() {
         G.BPC.overlayContainer.hideCursorBox()
         G.BPC.overlayContainer.hideUndergroundLines()
+
+        G.infoEntityPanel.updateVisualization(undefined)
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
             s.visible = false
         })

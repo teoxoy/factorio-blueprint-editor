@@ -483,6 +483,16 @@ export default class Entity extends EventEmitter {
             .commit()
     }
 
+    get inserterStackSize() {
+        if (this.m_rawEntity.override_stack_size) {
+            return this.m_rawEntity.override_stack_size
+        }
+        if (this.name.includes('stack')) {
+            return 12
+        }
+        return 3
+    }
+
     get constantCombinatorFilters() {
         return this.m_rawEntity.control_behavior === undefined ? undefined : this.m_rawEntity.control_behavior.filters
     }

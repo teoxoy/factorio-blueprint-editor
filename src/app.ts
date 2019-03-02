@@ -12,6 +12,7 @@ import { TilePaintContainer } from './containers/paintTile'
 import { BlueprintContainer } from './containers/blueprint'
 import { ToolbarContainer } from './panels/toolbar'
 import { QuickbarContainer } from './panels/quickbar'
+import { InfoEntityPanel } from './panels/infoEntityPanel'
 import { InfoContainer } from './panels/info'
 import Blueprint from './factorio-data/blueprint'
 import initDoorbell from './doorbell'
@@ -121,6 +122,9 @@ G.app.stage.addChild(G.toolbarContainer)
 
 G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
 G.app.stage.addChild(G.quickbarContainer)
+
+G.infoEntityPanel = new InfoEntityPanel()
+G.app.stage.addChild(G.infoEntityPanel)
 
 G.dialogsContainer = new PIXI.Container()
 G.app.stage.addChild(G.dialogsContainer)
