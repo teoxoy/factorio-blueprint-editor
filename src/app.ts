@@ -69,6 +69,7 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
 PIXI.settings.WRAP_MODE = PIXI.WRAP_MODES.REPEAT
 PIXI.settings.RENDER_OPTIONS.antialias = true // for wires
 PIXI.settings.RENDER_OPTIONS.resolution = window.devicePixelRatio
+PIXI.settings.RENDER_OPTIONS.autoResize = true
 PIXI.GRAPHICS_CURVES.adaptive = true
 // PIXI.settings.PREFER_ENV = 1
 // PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
