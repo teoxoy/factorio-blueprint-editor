@@ -73,11 +73,11 @@ export default function initDatGui() {
         G.quality.compressed = quality < 2
     }
 
-    let quality = (G.quality.hr ? 1 : 0) + (G.quality.compressed ? 0 : 2)
+    const quality = localStorage.getItem('quality')
+        ? Number(localStorage.getItem('quality'))
+        : (G.quality.hr ? 1 : 0) + (G.quality.compressed ? 0 : 2)
     setQuality(quality)
-    if (localStorage.getItem('quality')) {
-        quality = JSON.parse(localStorage.getItem('quality'))
-    }
+
     gui.add({ quality }, 'quality', entitiesQuality)
         .name('Entities Quality')
         .onChange((quality: number) => {
