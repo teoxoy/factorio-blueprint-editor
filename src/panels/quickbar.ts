@@ -5,8 +5,8 @@ import Slot from '../controls/slot'
 import { InventoryContainer } from './inventory'
 
 class QuickbarSlot extends Slot {
-    get itemName() {
-        return this.data
+    get itemName(): string {
+        return this.data as string
     }
 
     public assignItem(itemName: string) {
