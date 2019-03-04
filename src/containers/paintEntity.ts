@@ -102,7 +102,7 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     updateUndergroundLines() {
-        G.BPC.overlayContainer.updateUndergroundLines(
+        G.BPC.overlayContainer.showUndergroundLines(
             this.name,
             { x: this.position.x / 32, y: this.position.y / 32 },
             this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
@@ -158,7 +158,6 @@ export class EntityPaintContainer extends PaintContainer {
         }
 
         this.updateUndergroundBeltRotation()
-        G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
         this.updateUndergroundLines()
 
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copyFrom(this.position))

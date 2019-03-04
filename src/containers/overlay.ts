@@ -16,7 +16,6 @@ export class OverlayContainer extends PIXI.Container {
 
         this.cursorBox = new PIXI.Container()
         this.cursorBox.scale.set(0.5, 0.5)
-        this.cursorBox.visible = false
 
         this.undergroundLines = new PIXI.Container()
 
@@ -384,13 +383,11 @@ export class OverlayContainer extends PIXI.Container {
         }
     }
 
-    showCursorBox() {
-        this.cursorBox.visible = true
-    }
-
-    updateCursorBoxSize(width: number, height: number) {
+    // Cursor box
+    showCursorBox(position: IPoint, size: IPoint) {
         this.cursorBox.removeChildren()
-        if (width === 1 && height === 1) {
+
+        if (size.x === 1 && size.y === 1) {
             const spriteData = PIXI.Texture.from('graphics/cursor-boxes-32x32.png')
             const frame = spriteData.frame.clone()
             frame.width = 64
@@ -399,9 +396,12 @@ export class OverlayContainer extends PIXI.Container {
             this.cursorBox.addChild(s)
         } else {
             this.cursorBox.addChild(
-                ...createCorners('graphics/cursor-boxes.png', mapMinLengthToSpriteIndex(Math.min(width, height)))
+                ...createCorners('graphics/cursor-boxes.png', mapMinLengthToSpriteIndex(Math.min(size.x, size.y)))
             )
         }
+
+        this.cursorBox.position.set(position.x, position.y)
+
         function mapMinLengthToSpriteIndex(minLength: number) {
             if (minLength < 0.4) {
                 return 256
@@ -417,6 +417,7 @@ export class OverlayContainer extends PIXI.Container {
             }
             return 0
         }
+
         function createCorners(spriteName: string, offset: number) {
             const spriteData = PIXI.Texture.from(spriteName)
             const frame = spriteData.frame.clone()
@@ -428,10 +429,10 @@ export class OverlayContainer extends PIXI.Container {
             const c1 = new PIXI.Sprite(texture)
             const c2 = new PIXI.Sprite(texture)
             const c3 = new PIXI.Sprite(texture)
-            c0.position.set(-width * 32, -height * 32)
-            c1.position.set(width * 32, -height * 32)
-            c2.position.set(-width * 32, height * 32)
-            c3.position.set(width * 32, height * 32)
+            c0.position.set(-size.x * 32, -size.y * 32)
+            c1.position.set(size.x * 32, -size.y * 32)
+            c2.position.set(-size.x * 32, size.y * 32)
+            c3.position.set(size.x * 32, size.y * 32)
             c1.rotation = Math.PI * 0.5
             c2.rotation = Math.PI * 1.5
             c3.rotation = Math.PI
@@ -439,39 +440,44 @@ export class OverlayContainer extends PIXI.Container {
         }
     }
 
-    updateCursorBoxPosition(position: IPoint) {
-        this.cursorBox.position.set(position.x, position.y)
-    }
-
     hideCursorBox() {
-        this.cursorBox.visible = false
+        this.cursorBox.removeChildren()
     }
 
-    updateUndergroundLines(name: string, position: IPoint, direction: number, searchDirection: number) {
+    // Underground Lines
+    showUndergroundLines(name: string, position: IPoint, direction: number, searchDirection: number) {
         const fd = FD.entities[name]
         if (fd.type === 'underground_belt' || name === 'pipe_to_ground') {
             this.undergroundLines.removeChildren()
-            const otherEntity = G.bp.entityPositionGrid.getOpposingEntity(
-                name,
-                name === 'pipe_to_ground' ? searchDirection : direction,
-                position,
-                searchDirection,
-                fd.max_distance || 10
+
+            const otherEntity = G.bp.entities.get(
+                G.bp.entityPositionGrid.getOpposingEntity(
+                    name,
+                    name === 'pipe_to_ground' ? searchDirection : direction,
+                    position,
+                    searchDirection,
+                    fd.max_distance || 10
+                )
             )
+
             if (otherEntity) {
-                const oE = G.bp.entities.get(otherEntity)
                 // Return if directionTypes are the same
                 if (
                     fd.type === 'underground_belt' &&
-                    (oE.directionType === 'input' ? oE.direction : oE.direction + (4 % 8)) === searchDirection
+                    (otherEntity.directionType === 'input'
+                        ? otherEntity.direction
+                        : otherEntity.direction + (4 % 8)) === searchDirection
                 ) {
                     return
                 }
+
                 const distance =
                     searchDirection % 4 === 0
-                        ? Math.abs(oE.position.y - position.y)
-                        : Math.abs(oE.position.x - position.x)
+                        ? Math.abs(otherEntity.position.y - position.y)
+                        : Math.abs(otherEntity.position.x - position.x)
+
                 const sign = searchDirection === 0 || searchDirection === 6 ? -1 : 1
+
                 for (let i = 1; i < distance; i++) {
                     const spriteData = PIXI.Texture.from('graphics/arrows/underground-lines.png')
                     const frame = spriteData.frame.clone()
@@ -490,10 +496,7 @@ export class OverlayContainer extends PIXI.Container {
                 }
             }
         }
-    }
-
-    updateUndergroundLinesPosition(position: IPoint) {
-        this.undergroundLines.position.set(position.x, position.y)
+        this.undergroundLines.position.set(position.x * 32, position.y * 32)
     }
 
     hideUndergroundLines() {

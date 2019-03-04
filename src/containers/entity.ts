@@ -103,6 +103,8 @@ export class EntityContainer {
         this.m_Entity.on('directionType', () => {
             this.redraw()
             this.redrawSurroundingEntities()
+
+            this.updateUndergroundLines()
         })
 
         this.m_Entity.on('modules', () => this.redrawEntityInfo())
@@ -152,7 +154,7 @@ export class EntityContainer {
     }
 
     updateUndergroundLines() {
-        G.BPC.overlayContainer.updateUndergroundLines(
+        G.BPC.overlayContainer.showUndergroundLines(
             this.m_Entity.name,
             this.m_Entity.position,
             this.m_Entity.direction,
@@ -189,10 +191,7 @@ export class EntityContainer {
     }
 
     pointerOverEventHandler() {
-        G.BPC.overlayContainer.updateCursorBoxSize(this.m_Entity.size.x, this.m_Entity.size.y)
-        G.BPC.overlayContainer.updateCursorBoxPosition(this.position)
-        G.BPC.overlayContainer.showCursorBox()
-        G.BPC.overlayContainer.updateUndergroundLinesPosition(this.position)
+        G.BPC.overlayContainer.showCursorBox(this.position, this.m_Entity.size)
         this.updateUndergroundLines()
 
         G.infoEntityPanel.updateVisualization(this.m_Entity)
