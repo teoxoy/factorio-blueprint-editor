@@ -41,12 +41,12 @@ const validate = new Ajv()
     .compile(blueprintSchema)
 
 const nameMigrations: { [key: string]: string } = {
-    'raw-wood': 'wood',
-    wall: 'stone-wall',
-    'science-pack-1': 'automation-science-pack',
-    'science-pack-2': 'logistic-science-pack',
-    'science-pack-3': 'chemical-science-pack',
-    'high-tech-science-pack': 'utility-science-pack'
+    '"raw-wood"': '"wood"',
+    '"wall"': '"stone-wall"',
+    '"science-pack-1"': '"automation-science-pack"',
+    '"science-pack-2"': '"logistic-science-pack"',
+    '"science-pack-3"': '"chemical-science-pack"',
+    '"high-tech-science-pack"': '"utility-science-pack"'
     // ',"recipe":"steel-axe"': '',
     // ',"recipe":"iron-axe"': ''
 }
