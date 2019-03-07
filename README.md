@@ -18,7 +18,7 @@
 
 _All badges are clickable!_
 
-A [Factorio](https://www.factorio.com) blueprint editor and renderer webapp
+A feature-rich [Factorio](https://www.factorio.com) Blueprint Editor. You can now edit your blueprints in the browser!
 
 ![Preview](./.github/preview.png)
 
