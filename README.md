@@ -1,4 +1,4 @@
-<img src="./logo.svg" width="128" align="right">
+<img src="./.github/logo.svg" width="128" align="right">
 
 <br/>
 <br/>
@@ -20,7 +20,7 @@ _All badges are clickable!_
 
 A [Factorio](https://www.factorio.com) blueprint editor and renderer webapp
 
-![Preview](./preview.png)
+![Preview](./.github/preview.png)
 
 Sample blueprint: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/uc4n81GP
 

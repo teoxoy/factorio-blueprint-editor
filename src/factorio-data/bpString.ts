@@ -40,12 +40,25 @@ const validate = new Ajv()
     })
     .compile(blueprintSchema)
 
+const nameMigrations: { [key: string]: string } = {
+    'raw-wood': 'wood',
+    wall: 'stone-wall',
+    'science-pack-1': 'automation-science-pack',
+    'science-pack-2': 'logistic-science-pack',
+    'science-pack-3': 'chemical-science-pack',
+    'high-tech-science-pack': 'utility-science-pack'
+    // ',"recipe":"steel-axe"': '',
+    // ',"recipe":"iron-axe"': ''
+}
+const nameMigrationsRegex = new RegExp(Object.keys(nameMigrations).join('|'), 'g')
+
 function decode(str: string): Promise<Blueprint | Book> {
     return new Promise((resolve, reject) => {
         try {
             const data = JSON.parse(
                 pako
                     .inflate(atob(str.slice(1)), { to: 'string' })
+                    .replace(nameMigrationsRegex, match => nameMigrations[match])
                     .replace(/("[^,]{3,}?")/g, (_: string, capture: string) => capture.replace(/-/g, '_'))
             )
             console.log(data)

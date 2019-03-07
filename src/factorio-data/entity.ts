@@ -191,18 +191,10 @@ export default class Entity extends EventEmitter {
             return []
         }
 
-        return (
-            Object.keys(FD.recipes)
-                .map(k => FD.recipes[k])
-                .filter(recipe => this.entityData.crafting_categories.includes(recipe.category))
-                // filter recipes based on entity ingredient_count
-                .filter(
-                    recipe =>
-                        !this.entityData.ingredient_count ||
-                        this.entityData.ingredient_count >= recipe.ingredients.length
-                )
-                .map(recipe => recipe.name)
-        )
+        return Object.keys(FD.recipes)
+            .map(k => FD.recipes[k])
+            .filter(recipe => this.entityData.crafting_categories.includes(recipe.category))
+            .map(recipe => recipe.name)
     }
 
     /** Count of module slots */
@@ -302,6 +294,10 @@ export default class Entity extends EventEmitter {
             case 'logistic_chest_requester':
             case 'logistic_chest_buffer':
                 return this.logisticChestFilters
+            case 'infinity_chest':
+                return this.infinityChestFilters
+            case 'infinity_pipe':
+                return this.infinityPipeFilters
             default: {
                 return undefined
             }
@@ -462,6 +458,14 @@ export default class Entity extends EventEmitter {
             .emit(() => this.emit('logisticChestFilters'))
             .emit(() => this.emit('filters'))
             .commit()
+    }
+
+    get infinityChestFilters(): IFilter[] {
+        return this.m_rawEntity.infinity_settings.filters
+    }
+
+    get infinityPipeFilters(): IFilter[] {
+        return [{ name: this.m_rawEntity.infinity_settings.name, index: 1 }]
     }
 
     /** Requester chest - request from buffer chest */
@@ -722,7 +726,7 @@ export default class Entity extends EventEmitter {
 
         this.direction = newDir
 
-        if (this.type === 'underground_belt') {
+        if (this.type === 'underground_belt' || this.type === 'loader') {
             this.directionType = this.directionType === 'input' ? 'output' : 'input'
 
             if (rotateOpposingUB) {
@@ -853,7 +857,7 @@ export default class Entity extends EventEmitter {
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[
-                spriteDataBuilder.getBeltConnections2(this.m_BP, this.position, direction) * 4
+                spriteDataBuilder.getBeltWireConnectionIndex(this.m_BP, this.position, direction) * 4
             ].wire[color]
         }
         if (e.circuit_wire_connection_points.length === 8) {

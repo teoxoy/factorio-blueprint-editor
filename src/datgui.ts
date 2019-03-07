@@ -63,10 +63,10 @@ export default function initDatGui() {
     })
 
     const entitiesQuality = {
-        'Low. Res PNG 8 (1.50 MB)': 0,
-        'High Res PNG 8 (4.88 MB)': 1,
-        'Low. Res PNG 32 (5.56 MB)': 2,
-        'High Res PNG 32 (15.80 MB)': 3
+        'Low. Res PNG 8 (1.52 MB)': 0,
+        'High Res PNG 8 (5.52 MB)': 1,
+        'Low. Res PNG 32 (5.55 MB)': 2,
+        'High Res PNG 32 (18.20 MB)': 3
     }
     const setQuality = (quality: number) => {
         G.quality.hr = quality % 2 === 1
@@ -75,8 +75,8 @@ export default function initDatGui() {
 
     const gl = document.createElement('canvas').getContext('webgl')
     if (gl.getParameter(gl.MAX_TEXTURE_SIZE) < 8192) {
-        delete entitiesQuality['High Res PNG 8 (4.88 MB)']
-        delete entitiesQuality['High Res PNG 32 (15.80 MB)']
+        delete entitiesQuality['High Res PNG 8 (5.52 MB)']
+        delete entitiesQuality['High Res PNG 32 (18.20 MB)']
         G.quality.hr = false
     }
 

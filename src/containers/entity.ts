@@ -4,6 +4,7 @@ import G from '../common/globals'
 import { EntitySprite } from '../entitySprite'
 import util from '../common/util'
 import Entity from '../factorio-data/entity'
+import { Area } from '../factorio-data/positionGrid'
 import { UnderlayContainer } from './underlay'
 
 const updateGroups = [
@@ -17,13 +18,29 @@ const updateGroups = [
             'express_splitter',
             'underground_belt',
             'fast_underground_belt',
-            'express_underground_belt'
+            'express_underground_belt',
+            'loader',
+            'fast_loader',
+            'express_loader'
         ],
-        updates: ['transport_belt', 'fast_transport_belt', 'express_transport_belt']
+        updates: [
+            'transport_belt',
+            'fast_transport_belt',
+            'express_transport_belt',
+            'splitter',
+            'fast_splitter',
+            'express_splitter',
+            'underground_belt',
+            'fast_underground_belt',
+            'express_underground_belt',
+            'loader',
+            'fast_loader',
+            'express_loader'
+        ]
     },
     {
-        is: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger'],
-        updates: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger']
+        is: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
+        updates: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface']
     },
     {
         has: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
@@ -222,10 +239,32 @@ export class EntityContainer {
                 }
             })
         } else {
-            G.bp.entityPositionGrid
-                .getSurroundingEntities(this.m_Entity.getArea(position))
+            const entities = G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea(position))
+
+            // We need to update a larger area because belt endings might change
+            if (
+                this.m_Entity.type === 'transport_belt' ||
+                this.m_Entity.type === 'splitter' ||
+                this.m_Entity.type === 'underground_belt' ||
+                this.m_Entity.type === 'loader'
+            ) {
+                const area = new Area({
+                    x: position ? position.x : this.m_Entity.position.x,
+                    y: position ? position.y : this.m_Entity.position.y,
+                    width: this.m_Entity.size.x + 2,
+                    height: this.m_Entity.size.y + 2
+                })
+                entities.push(...G.bp.entityPositionGrid.getSurroundingEntities(area))
+            }
+
+            entities
                 .filter(entity => updateGroups[this.m_Entity.name].includes(entity.name))
-                .forEach(entity => EntityContainer.mappings.get(entity.entityNumber).redraw())
+                .forEach(entity => {
+                    EntityContainer.mappings.get(entity.entityNumber).redraw()
+                    if (entity.type === 'transport_belt') {
+                        G.BPC.wiresContainer.update(entity)
+                    }
+                })
         }
     }
 

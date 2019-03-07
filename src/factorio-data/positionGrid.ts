@@ -4,11 +4,12 @@ import Blueprint from './blueprint'
 import Entity from './entity'
 
 class Area {
-    y: number
     x: number
-    height: number
+    y: number
     width: number
+    height: number
 
+    // Pivot (x and y) is the upper left corner
     constructor(data: { x: number; y: number; width?: number; height?: number }) {
         this.width = data.width || 1
         this.height = data.height || 1
@@ -391,6 +392,12 @@ class PositionGrid {
             coordinates.push([area.x + area.width, area.y + i])
             coordinates.push([area.x - 1, area.y + i])
         }
+
+        // Corners
+        coordinates.push([area.x - 1, area.y - 1])
+        coordinates.push([area.x - 1, area.y + area.height])
+        coordinates.push([area.x + area.width, area.y - 1])
+        coordinates.push([area.x + area.width, area.y + area.height])
 
         return util
             .uniqueInArray(

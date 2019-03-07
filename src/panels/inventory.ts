@@ -48,7 +48,7 @@ export class InventoryContainer extends Dialog {
                             red: t.r,
                             green: t.g,
                             blue: t.b,
-                            alpha: t.a
+                            alpha: t.a || 1
                         })
                     ]
                 }
@@ -173,6 +173,11 @@ export class InventoryContainer extends Dialog {
 
         let groupIndex = 0
         for (const group of FD.inventoryLayout) {
+            // Make creative entities avalible only in the main inventory
+            if (group.name === 'creative' && itemsFilter !== undefined) {
+                continue
+            }
+
             const inventoryGroupItems = new PIXI.Container()
             let itemColIndex = 0
             let itemRowIndex = 0
@@ -313,15 +318,21 @@ export class InventoryContainer extends Dialog {
     /** Update recipe visulaization */
     private updateRecipeVisualization(recipeName?: string) {
         // Update Recipe Label
-        this.m_RecipeLabel.text = recipeName === undefined ? undefined : FD.recipes[recipeName].ui_name
+        this.m_RecipeLabel.text = undefined
 
         // Update Recipe Container
         this.m_RecipeContainer.removeChildren()
 
         const recipe = FD.recipes[recipeName]
         if (recipe === undefined) {
+            // Creative entities don't have a recipe so we have to do it this way
+            if (recipeName) {
+                this.m_RecipeLabel.text = `[CREATIVE] - ${FD.items[recipeName].ui_name}`
+            }
             return
         }
+
+        this.m_RecipeLabel.text = recipe.ui_name
 
         InventoryContainer.createRecipe(this.m_RecipeContainer, 0, 0, recipe.ingredients, recipe.results, recipe.time)
     }

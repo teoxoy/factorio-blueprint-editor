@@ -258,6 +258,35 @@
                                 }
                             },
 
+                            "infinity_settings": {
+                                "type": "object",
+                                "$comment": "only present if entity is infinity_chest or infinity_pipe",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "name": { "type": "string", "itemName": true },
+                                    "mode": { "type": "string", "enum": ["at_least", "at_most", "exactly"] },
+                                    "percentage": { "type": "number" },
+                                    "temperature": { "type": "number" },
+                                    "filters": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "name": { "type": "string", "itemName": true },
+                                                "mode": {
+                                                    "type": "string",
+                                                    "enum": ["at_least", "at_most", "exactly"]
+                                                },
+                                                "index": { "type": "number" },
+                                                "count": { "type": "number" }
+                                            }
+                                        }
+                                    },
+                                    "remove_unfiltered_items": { "type": "boolean" }
+                                }
+                            },
+
                             "connections": {
                                 "type": "object",
                                 "$comment": "wire connections",

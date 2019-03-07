@@ -51,13 +51,11 @@ export class EntitySprite extends PIXI.Sprite {
             chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput
         })
 
-        // const icon = new PIXI.Sprite(G.iconSprites['icon:' + FD.entities[entity.name].icon.split(':')[1]])
-        // icon.x -= 16
-        // icon.y -= 16
-        // return [icon]
-
+        // TODO: maybe move the zIndex logic to spriteDataBuilder
         const parts: EntitySprite[] = []
-        for (let i = 0, l = anims.length; i < l; i++) {
+
+        let foundMainBelt = false
+        for (let i = 0; i < anims.length; i++) {
             const img = new EntitySprite(anims[i])
             if (anims[i].filename.includes('circuit-connector')) {
                 img.zIndex = 1
@@ -75,6 +73,15 @@ export class EntitySprite extends PIXI.Sprite {
                 }
             } else if (entity.type === 'transport_belt' || entity.name === 'heat_pipe') {
                 img.zIndex = i === 0 ? -6 : -5
+
+                if (anims[i].filename.includes('connector') && !anims[i].filename.includes('back-patch')) {
+                    img.zIndex = 0
+                }
+            } else if (entity.type === 'splitter' || entity.type === 'underground_belt' || entity.type === 'loader') {
+                if (!foundMainBelt && anims[i].filename.includes('transport-belt')) {
+                    foundMainBelt = true
+                    img.zIndex = -6
+                }
             } else {
                 img.zIndex = 0
             }
@@ -142,13 +149,6 @@ export class EntitySprite extends PIXI.Sprite {
         this.anchor.x = data.anchorX === undefined ? 0.5 : data.anchorX
         this.anchor.y = data.anchorY === undefined ? 0.5 : data.anchorY
 
-        if (data.flipX) {
-            this.scale.x *= -1
-        }
-        if (data.flipY) {
-            this.scale.y *= -1
-        }
-
         if (data.squishY) {
             this.height /= data.squishY
         }
@@ -157,16 +157,16 @@ export class EntitySprite extends PIXI.Sprite {
             this.angle = data.rotAngle
         }
 
-        if (data.color) {
+        if (data.tint) {
             this.filters = [
                 new AdjustmentFilter({
                     gamma: 1.4,
                     contrast: 1.4,
                     brightness: 1.2,
-                    red: data.color.r,
-                    green: data.color.g,
-                    blue: data.color.b,
-                    alpha: data.color.a
+                    red: data.tint.r || 1,
+                    green: data.tint.g || 1,
+                    blue: data.tint.b || 1,
+                    alpha: data.tint.a || 1
                 })
             ]
         }

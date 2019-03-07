@@ -8,11 +8,20 @@ export class TileContainer {
     static generateSprite(name: string, position: IPoint) {
         // TODO: maybe optimize this with PIXI.TilingSprite and masks
         // https://github.com/pixijs/pixi.js/wiki/v4-Gotchas#graphics--tilingsprite
+
+        const filename = (() => {
+            switch (name) {
+                case 'stone_path':
+                    return 'graphics/terrain/stone-path/stone-path.png'
+                case 'grass_1':
+                    return 'graphics/terrain/grass-1/grass-1.png'
+                default:
+                    return FD.tiles[name].variants.material_background.hr_version.picture
+            }
+        })()
+
         return new EntitySprite({
-            filename:
-                name === 'stone_path'
-                    ? 'graphics/terrain/stone-path/stone-path.png'
-                    : FD.tiles[name].variants.material_background.hr_version.picture,
+            filename,
             x: (Math.floor(position.x) % 8) * 64,
             y: (Math.floor(position.y) % 8) * 64,
             width: 64,

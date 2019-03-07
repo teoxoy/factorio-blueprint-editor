@@ -65,6 +65,7 @@ let renderOnly = false
 
 const colors = {
     text: {
+        title: 0xffe6c0,
         normal: 0xfafafa,
         link: 0x03a9f4,
         accent: 0xff8a65
@@ -88,7 +89,7 @@ const colors = {
             active: { color: 0xff9e44 }
         },
         panel: {
-            background: { color: 0x3a3a3a, alpha: 0.7, border: 2 }
+            background: { color: 0x303030, border: 2 }
         },
         slider: {
             slidebar: { color: 0xe2e2e2, p0: -95, p1: -80, p2: -10, p3: 0 },
@@ -111,14 +112,14 @@ const colors = {
         }
     },
     dialog: {
-        background: { color: 0x3a3a3a, alpha: 0.7, border: 2 },
+        background: { color: 0x303030, border: 2 },
         line: { background: { color: 0x646464, alpha: 0.7, border: 1 } }
     },
     editor: {
         sprite: { background: { color: 0x646464, alpha: 0.7 } }
     },
     quickbar: {
-        background: { color: 0x3a3a3a, alpha: 0.7, border: 2 }
+        background: { color: 0x303030, border: 2 }
     },
 
     _darkTheme: true,
@@ -178,7 +179,7 @@ const styles = {
     },
     dialog: {
         title: new PIXI.TextStyle({
-            fill: colors.text.normal,
+            fill: colors.text.title,
             fontFamily: [fontFamily],
             fontWeight: '500',
             fontSize: 20

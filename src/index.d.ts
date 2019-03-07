@@ -81,28 +81,20 @@ interface ISpriteData {
     // apply_projection?: boolean
     // flags?: string[]
     // counterclockwise?: boolean
-    // tint?: {
-    //     r: number;
-    //     g: number;
-    //     b: number;
-    //     a: number;
-    // }
+    tint?: {
+        r: number
+        g: number
+        b: number
+        a: number
+    }
     // lines_per_file?: number
 
     anchorX?: number
     anchorY?: number
     divW?: number
     divH?: number
-    flipX?: boolean
-    flipY?: boolean
     squishY?: number
     rotAngle?: number
-    color?: {
-        r: number
-        g: number
-        b: number
-        a: number
-    }
 }
 
 /** Namespace for blueprint string interfaces */
@@ -166,7 +158,7 @@ namespace BPS {
         override_stack_size?: number
         /** only present if entity is logistic-chest-requester */
         request_from_buffers?: boolean
-        /** only present if entity is filter-inserter or stack-filter-inserter */
+        /** only present if entity is filter-inserter, stack-filter-inserter or of type loader */
         filters?: {
             index: number
             name: string
@@ -190,6 +182,28 @@ namespace BPS {
             playback_volume?: number
             playback_globally?: boolean
             allow_polyphony?: boolean
+        }
+
+        /** only present if entity is infinity_chest or infinity_pipe */
+        infinity_settings?: {
+            /** only present if entity is infinity_pipe */
+            name?: string
+            /** only present if entity is infinity_pipe */
+            mode?: 'at_least' | 'at_most' | 'exactly'
+            /** only present if entity is infinity_pipe */
+            percentage?: number
+            /** only present if entity is infinity_pipe */
+            temperature?: number
+
+            /** only present if entity is infinity_chest */
+            filters?: {
+                name: string
+                mode: 'at_least' | 'at_most' | 'exactly'
+                index: number
+                count: number
+            }[]
+            /** only present if entity is infinity_chest */
+            remove_unfiltered_items?: boolean
         }
 
         /** wire connections */

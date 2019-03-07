@@ -188,7 +188,8 @@ export class InfoEntityPanel extends Panel {
         const isBelt = (e: Entity) =>
             e.entityData.type === 'transport_belt' ||
             e.entityData.type === 'underground_belt' ||
-            e.entityData.type === 'splitter'
+            e.entityData.type === 'splitter' ||
+            e.entityData.type === 'loader'
 
         if (entity.entityData.type === 'inserter') {
             // Details for inserters
@@ -225,6 +226,6 @@ export class InfoEntityPanel extends Panel {
     }
 
     setPosition() {
-        this.position.set(G.app.screen.width - this.width, 35)
+        this.position.set(G.app.screen.width - this.width + 1, 32)
     }
 }

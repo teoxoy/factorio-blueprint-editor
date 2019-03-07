@@ -41,6 +41,9 @@ export class TilePaintContainer extends PaintContainer {
     }
 
     getItemName() {
+        if (this.name === 'grass_1') {
+            return 'landfill'
+        }
         return FD.tiles[this.name].minable.result
     }
 

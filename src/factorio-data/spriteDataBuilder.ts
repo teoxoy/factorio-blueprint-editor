@@ -2,6 +2,7 @@ import FD from 'factorio-data'
 import util from '../common/util'
 import { Area } from './positionGrid'
 import Blueprint from './blueprint'
+import Entity from './entity'
 
 interface IDrawData {
     hr: boolean
@@ -43,8 +44,8 @@ for (const e in FD.entities) {
             ]
             for (let i = 0; i < spriteData.length; i++) {
                 spriteData[i] = data.hr && spriteData[i].hr_version ? spriteData[i].hr_version : spriteData[i]
-                if (spriteData[i].apply_runtime_tint && !spriteData[i].color) {
-                    spriteData[i].color = {
+                if (spriteData[i].apply_runtime_tint && !spriteData[i].tint) {
+                    spriteData[i].tint = {
                         r: 0.73,
                         g: 0.59,
                         b: 0.44,
@@ -142,16 +143,14 @@ function duplicateAndSetPropertyUsing(img: FD.SpriteData, key: string, key2: str
 }
 
 function generateCovers(e: FD.Entity, data: IDrawData) {
-    function hasPipeCoverFeature(e: FD.Entity) {
-        if (e.fluid_box || e.fluid_boxes || e.output_fluid_box) {
-            return true
-        }
-    }
-    if (!hasPipeCoverFeature(e)) {
+    // entity doesn't have PipeCoverFeature
+    if (!(e.fluid_box || e.fluid_boxes || e.output_fluid_box)) {
         return []
     }
+
     if (
         e.name === 'pipe' ||
+        e.name === 'infinity_pipe' ||
         ((e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') && !data.assemblerCraftsWithFluid)
     ) {
         return []
@@ -183,6 +182,7 @@ function generateCovers(e: FD.Entity, data: IDrawData) {
 
                 if (
                     ent.name === 'pipe' ||
+                    ent.name === 'infinity_pipe' ||
                     ent.name === 'pipe_to_ground' ||
                     ent.entityData.fluid_box ||
                     ent.entityData.output_fluid_box ||
@@ -294,7 +294,7 @@ function getHeatConnections(position: IPoint, bp: Blueprint) {
             return false
         }
 
-        if (entity.name === 'heat_pipe') {
+        if (entity.name === 'heat_pipe' || entity.name === 'heat_interface') {
             return true
         }
         if (entity.name === 'heat_exchanger' || entity.name === 'nuclear_reactor') {
@@ -311,60 +311,289 @@ function getHeatConnections(position: IPoint, bp: Blueprint) {
     })
 }
 
-function getBeltConnections2(bp: Blueprint, position: IPoint, dir: number) {
-    let directions = bp.entityPositionGrid.getNeighbourData(position).map(({ entity }) => {
-        if (!entity) {
-            return false
-        }
-
+function getBeltWireConnectionIndex(bp: Blueprint, position: IPoint, dir: number) {
+    let C = bp.entityPositionGrid.getNeighbourData(position).map(d => {
         if (
-            entity.type === 'transport_belt' ||
-            entity.type === 'splitter' ||
-            (entity.type === 'underground_belt' && entity.directionType === 'output')
+            d.entity &&
+            (d.entity.type === 'transport_belt' ||
+                d.entity.type === 'splitter' ||
+                ((d.entity.type === 'underground_belt' || d.entity.type === 'loader') &&
+                    d.entity.directionType === 'output')) &&
+            d.entity.direction === (d.relDir + 4) % 8
         ) {
-            return entity.direction
+            return d
         }
     })
     // Rotate directions
-    directions = [...directions, ...directions].splice(dir / 2, 4) as (number | false)[]
+    C = [...C, ...C].splice(dir / 2, 4)
 
-    const foundR = directions[1] !== false && ((directions[1] as number) + 2) % 8 === dir
-    const foundL = directions[3] === (dir + 2) % 8
-
-    if ((dir === directions[2] && (foundR || foundL)) || (foundR && foundL)) {
-        return 0
-    }
-    if (!foundR && !foundL) {
+    if (!C[1] && C[2] && !C[3]) {
         if (dir === 0 || dir === 4) {
             return 2
         }
         return 1
     }
-    switch (dir) {
-        case 0:
-            if (foundR) {
+    if (C[1] && !C[2] && !C[3]) {
+        switch (dir) {
+            case 0:
                 return 5
-            } else {
-                return 6
-            }
-        case 2:
-            if (foundR) {
+            case 2:
                 return 3
-            } else {
+            case 4:
+                return 4
+            case 6:
+                return 6
+        }
+    }
+    if (!C[1] && !C[2] && C[3]) {
+        switch (dir) {
+            case 0:
+                return 6
+            case 2:
                 return 5
-            }
-        case 4:
-            if (foundR) {
-                return 4
-            } else {
+            case 4:
                 return 3
-            }
-        case 6:
-            if (foundR) {
-                return 6
-            } else {
+            case 6:
                 return 4
+        }
+    }
+    return 0
+}
+
+function getBeltSprites(
+    bas: FD.BeltAnimationSet,
+    position: IPoint,
+    direction: number,
+    blueprint?: Blueprint,
+    stratingEnding = true,
+    endingEnding = true,
+    forceStraight = false
+) {
+    const parts = []
+
+    if (blueprint) {
+        const conn = getConnForPos(blueprint, position, direction, forceStraight)
+
+        parts.push(getBeltSpriteFromData(bas, direction, conn.curve))
+
+        if (stratingEnding) {
+            let spawn = true
+
+            if (conn.from) {
+                const C = getConnForPos(blueprint, conn.from, conn.from.entity.direction)
+
+                if (
+                    (C.from && C.from.x === Math.floor(position.x) && C.from.y === Math.floor(position.y)) ||
+                    (C.to && C.to.x === Math.floor(position.x) && C.to.y === Math.floor(position.y))
+                ) {
+                    spawn = false
+                }
             }
+
+            if (spawn) {
+                parts.push(
+                    addToShift(
+                        util.rotatePointBasedOnDir([0, 1], direction),
+                        getBeltSpriteFromData(bas, direction, 'stratingEnding')
+                    )
+                )
+            }
+        }
+
+        if (endingEnding) {
+            let spawn = true
+
+            if (conn.to) {
+                const C = getConnForPos(blueprint, conn.to, conn.to.entity.direction)
+                if (
+                    (C.from && C.from.x === Math.floor(position.x) && C.from.y === Math.floor(position.y)) ||
+                    (C.to && C.to.x === Math.floor(position.x) && C.to.y === Math.floor(position.y))
+                ) {
+                    spawn = false
+                }
+            }
+
+            if (spawn) {
+                parts.push(
+                    addToShift(
+                        util.rotatePointBasedOnDir([0, -1], direction),
+                        getBeltSpriteFromData(bas, direction, 'endingEnding')
+                    )
+                )
+            }
+        }
+    } else {
+        parts.push(getBeltSpriteFromData(bas, direction, 'straight'))
+
+        if (stratingEnding) {
+            parts.push(
+                addToShift(
+                    util.rotatePointBasedOnDir([0, 1], direction),
+                    getBeltSpriteFromData(bas, direction, 'stratingEnding')
+                )
+            )
+        }
+
+        if (endingEnding) {
+            parts.push(
+                addToShift(
+                    util.rotatePointBasedOnDir([0, -1], direction),
+                    getBeltSpriteFromData(bas, direction, 'endingEnding')
+                )
+            )
+        }
+    }
+
+    return parts
+
+    interface IConnection {
+        from: {
+            x: number
+            y: number
+            entity: Entity
+        }
+        to: {
+            x: number
+            y: number
+            entity: Entity
+        }
+        curve: 'straight' | 'rightCurve' | 'leftCurve'
+    }
+
+    function getConnForPos(blueprint: Blueprint, pos: IPoint, direction: number, forceStraight = false): IConnection {
+        let C = blueprint.entityPositionGrid.getNeighbourData(pos).map(d => {
+            if (
+                d.entity &&
+                (d.entity.type === 'transport_belt' ||
+                    d.entity.type === 'splitter' ||
+                    d.entity.type === 'underground_belt' ||
+                    d.entity.type === 'loader')
+            ) {
+                return d
+            }
+        })
+        // Rotate based on belt direction
+        C = [...C, ...C].splice(direction / 2, 4)
+
+        // Belt facing this belt
+        const C2 = C.map(d => {
+            if (
+                !d ||
+                ((d.entity.type === 'underground_belt' || d.entity.type === 'loader') &&
+                    d.entity.directionType === 'input')
+            ) {
+                return
+            }
+            if (d.entity.direction === (d.relDir + 4) % 8) {
+                return d
+            }
+        })
+
+        const entAtPos = blueprint.entities.get(blueprint.entityPositionGrid.getCellAtPosition(pos))
+        if (
+            forceStraight ||
+            entAtPos.type === 'splitter' ||
+            entAtPos.type === 'underground_belt' ||
+            entAtPos.type === 'loader'
+        ) {
+            return {
+                from: C[2],
+                to: C[0],
+                curve: 'straight'
+            }
+        }
+
+        if (C2[1] && !C2[3] && !C2[2]) {
+            return {
+                from: C[1],
+                to: C[0],
+                curve: 'rightCurve'
+            }
+        }
+        if (C2[3] && !C2[1] && !C2[2]) {
+            return {
+                from: C[3],
+                to: C[0],
+                curve: 'leftCurve'
+            }
+        }
+        return {
+            from: C[2],
+            to: C[0],
+            curve: 'straight'
+        }
+    }
+
+    function getBeltSpriteFromData(
+        bas: FD.BeltAnimationSet,
+        dir: number,
+        type: 'straight' | 'rightCurve' | 'leftCurve' | 'stratingEnding' | 'endingEnding'
+    ) {
+        return duplicateAndSetPropertyUsing(bas.animation_set, 'y', 'height', getIndex() - 1)
+
+        function getIndex() {
+            switch (type) {
+                case 'straight':
+                    switch (dir) {
+                        case 0:
+                            return bas.north_index
+                        case 2:
+                            return bas.east_index
+                        case 4:
+                            return bas.south_index
+                        case 6:
+                            return bas.west_index
+                    }
+                    break
+                case 'rightCurve':
+                    switch (dir) {
+                        case 0:
+                            return bas.east_to_north_index
+                        case 2:
+                            return bas.south_to_east_index
+                        case 4:
+                            return bas.west_to_south_index
+                        case 6:
+                            return bas.north_to_west_index
+                    }
+                    break
+                case 'leftCurve':
+                    switch (dir) {
+                        case 0:
+                            return bas.west_to_north_index
+                        case 2:
+                            return bas.north_to_east_index
+                        case 4:
+                            return bas.east_to_south_index
+                        case 6:
+                            return bas.south_to_west_index
+                    }
+                    break
+                case 'stratingEnding':
+                    switch (dir) {
+                        case 0:
+                            return bas.starting_south_index
+                        case 2:
+                            return bas.starting_west_index
+                        case 4:
+                            return bas.starting_north_index
+                        case 6:
+                            return bas.starting_east_index
+                    }
+                    break
+                case 'endingEnding':
+                    switch (dir) {
+                        case 0:
+                            return bas.ending_north_index
+                        case 2:
+                            return bas.ending_east_index
+                        case 4:
+                            return bas.ending_south_index
+                        case 6:
+                            return bas.ending_west_index
+                    }
+            }
+        }
     }
 }
 
@@ -447,7 +676,8 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
     switch (e.name) {
         case 'accumulator':
-            return () => [e.picture as FD.SpriteData]
+        case 'electric_energy_interface':
+            return () => [(e.picture as FD.SpriteLayers).layers[0]]
         case 'solar_panel':
             return () => [(e.picture as FD.SpriteLayers).layers[0]]
         case 'radar':
@@ -464,6 +694,9 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             return () => [e.base_picture as FD.SpriteData, e.animation as FD.SpriteData]
         case 'lab':
             return () => [e.off_animation.layers[0]]
+        case 'infinity_chest':
+        case 'heat_interface':
+            return () => [e.picture as FD.SpriteData]
 
         case 'offshore_pump':
             return (data: IDrawData) => [(e.picture as FD.DirectionalSpriteData)[util.intToDir(data.dir)]]
@@ -575,23 +808,12 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 ]
             }
         case 'flamethrower_turret':
-            return (data: IDrawData) => {
-                const dir = data.dir
-                const pipe = FD.entities.pipe
-                const pipePictures = pipe.pictures as FD.PipePictures
-                const pipePicture =
-                    dir === 0 || dir === 4 ? pipePictures.straight_horizontal : pipePictures.straight_vertical
-                const p1 = addToShift(util.rotatePointBasedOnDir([0.5, 1], dir), util.duplicate(pipePicture))
-                const p2 = addToShift(util.rotatePointBasedOnDir([-0.5, 1], dir), util.duplicate(pipePicture))
-                return [
-                    p1,
-                    p2,
-                    (e.base_picture as FD.DirectionalSpriteLayers)[util.intToDir(dir)].layers[0],
-                    (e.base_picture as FD.DirectionalSpriteLayers)[util.intToDir(dir)].layers[1],
-                    (e.folded_animation as FD.DirectionalSpriteLayers)[util.intToDir(dir)].layers[0],
-                    (e.folded_animation as FD.DirectionalSpriteLayers)[util.intToDir(dir)].layers[1]
-                ]
-            }
+            return (data: IDrawData) => [
+                (e.base_picture as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
+                (e.base_picture as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[1],
+                (e.folded_animation as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
+                (e.folded_animation as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[1]
+            ]
         case 'artillery_turret':
             return (data: IDrawData) => {
                 const d = data.dir * 2
@@ -690,21 +912,17 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         if (dir === 0) {
                             if (gates[0] || gates[2]) {
                                 assignShiftAndPushPicture([0, -0.5], FD.entities.gate.horizontal_rail_base)
-                                assignShiftAndPushPicture([0, -0.5], FD.entities.gate.horizontal_rail_base_mask)
                             }
                             if (gates[1] || gates[3]) {
                                 assignShiftAndPushPicture([0, 0.5], FD.entities.gate.horizontal_rail_base)
-                                assignShiftAndPushPicture([0, 0.5], FD.entities.gate.horizontal_rail_base_mask)
                             }
                         }
                         if (dir === 2) {
                             if (gates[0] || gates[1]) {
                                 assignShiftAndPushPicture([-0.5, 0], FD.entities.gate.vertical_rail_base)
-                                assignShiftAndPushPicture([-0.5, 0], FD.entities.gate.vertical_rail_base_mask)
                             }
                             if (gates[2] || gates[3]) {
                                 assignShiftAndPushPicture([0.5, 0], FD.entities.gate.vertical_rail_base)
-                                assignShiftAndPushPicture([0.5, 0], FD.entities.gate.vertical_rail_base_mask)
                             }
                         }
                         return [...getBaseSprites(), ...railBases]
@@ -771,62 +989,104 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             }
         case 'stone_wall':
             return (data: IDrawData) => {
-                function getBaseSprite() {
-                    const pictures = e.pictures as FD.WallPictures
-                    if (data.bp) {
-                        const conn = data.bp.entityPositionGrid
-                            .getNeighbourData(data.position)
-                            .map(
-                                ({ entity, relDir }) =>
-                                    entity &&
-                                    (entity.name === 'stone_wall' ||
-                                        (entity.name === 'gate' && entity.direction === relDir % 4))
-                            )
-
-                        if (conn[1] && conn[2] && conn[3]) {
-                            return pictures.t_up.layers[0]
-                        }
-                        if (conn[1] && conn[2]) {
-                            return pictures.corner_right_down.layers[0]
-                        }
-                        if (conn[2] && conn[3]) {
-                            return pictures.corner_left_down.layers[0]
-                        }
-                        if (conn[1] && conn[3]) {
-                            return util.getRandomItem(pictures.straight_horizontal).layers[0]
-                        }
-                        if (conn[1]) {
-                            return pictures.ending_right.layers[0]
-                        }
-                        if (conn[2]) {
-                            return util.getRandomItem(pictures.straight_vertical).layers[0]
-                        }
-                        if (conn[3]) {
-                            return pictures.ending_left.layers[0]
-                        }
-                    }
-                    return pictures.single.layers[0]
-                }
+                const pictures = e.pictures as FD.WallPictures
 
                 if (data.bp) {
-                    const found = data.bp.entityPositionGrid
+                    const sprites = []
+
+                    const conn = data.bp.entityPositionGrid
                         .getNeighbourData(data.position)
-                        .find(
-                            ({ entity, relDir }) => entity && entity.name === 'gate' && entity.direction === relDir % 4
+                        .map(
+                            ({ entity, relDir }) =>
+                                entity &&
+                                (entity.name === 'stone_wall' ||
+                                    (entity.name === 'gate' && entity.direction === relDir % 4))
                         )
 
-                    if (found && !data.hasConnections) {
-                        return [getBaseSprite(), e.wall_diode_red]
+                    const wall = (() => {
+                        if (conn[1] && conn[2] && conn[3]) {
+                            return pictures.t_up.layers[0]
+                        } else if (conn[1] && conn[2]) {
+                            return pictures.corner_right_down.layers[0]
+                        } else if (conn[2] && conn[3]) {
+                            return pictures.corner_left_down.layers[0]
+                        } else if (conn[1] && conn[3]) {
+                            return pictures.straight_horizontal.layers[0]
+                        } else if (conn[1]) {
+                            return pictures.ending_right.layers[0]
+                        } else if (conn[2]) {
+                            return pictures.straight_vertical.layers[0]
+                        } else if (conn[3]) {
+                            return pictures.ending_left.layers[0]
+                        } else {
+                            return pictures.single.layers[0]
+                        }
+                    })()
+
+                    sprites.push(
+                        duplicateAndSetPropertyUsing(wall, 'x', 'width', util.getRandomInt(0, wall.line_length))
+                    )
+
+                    const neighbourDirections = data.bp.entityPositionGrid
+                        .getNeighbourData(data.position)
+                        .filter(
+                            ({ entity, relDir }) => entity && entity.name === 'gate' && entity.direction === relDir % 4
+                        )
+                        .map(({ relDir }) => relDir)
+
+                    neighbourDirections.forEach(relDir => {
+                        const patch = duplicateAndSetPropertyUsing(
+                            pictures.gate_connection_patch.sheets[0],
+                            'x',
+                            'width',
+                            relDir / 2
+                        )
+                        if (relDir === 0) {
+                            sprites.unshift(patch)
+                        } else {
+                            sprites.push(patch)
+                        }
+                    })
+
+                    const spawnFilling = [[-1, 0], [-1, 1], [0, 1]]
+                        .map(o => {
+                            const ent = data.bp.entities.get(
+                                data.bp.entityPositionGrid.getCellAtPosition([
+                                    data.position.x + o[0],
+                                    data.position.y + o[1]
+                                ])
+                            )
+                            return !!ent && ent.name === 'stone_wall'
+                        })
+                        .every(e => e)
+
+                    if (spawnFilling) {
+                        let filling = duplicateAndSetPropertyUsing(
+                            pictures.filling,
+                            'x',
+                            'width',
+                            util.getRandomInt(0, pictures.filling.line_length)
+                        )
+                        filling = setProperty(filling, 'anchorX', 1.17)
+                        sprites.push(filling)
                     }
+
+                    sprites.push(
+                        ...neighbourDirections.map(relDir =>
+                            duplicateAndSetPropertyUsing(e.wall_diode_red.sheet, 'x', 'width', relDir / 2)
+                        )
+                    )
+
+                    return sprites
                 }
-                return [getBaseSprite()]
+
+                return [pictures.single.layers[0]]
             }
         case 'gate':
             return (data: IDrawData) => {
-                const dir = data.dir
                 function getBaseSprites() {
                     if (data.bp) {
-                        const size = util.switchSizeBasedOnDirection(e.size, dir)
+                        const size = util.switchSizeBasedOnDirection(e.size, data.dir)
                         const rail = data.bp.entityPositionGrid.getFirstFromArea(
                             new Area({
                                 x: data.position.x,
@@ -842,7 +1102,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                             }
                         )
                         if (rail) {
-                            if (dir === 0) {
+                            if (data.dir === 0) {
                                 if (rail.position.y > data.position.y) {
                                     return [e.vertical_rail_animation_left.layers[0]]
                                 }
@@ -856,32 +1116,25 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         }
                     }
 
-                    if (dir === 0) {
-                        return [...e.vertical_base.layers, e.vertical_animation.layers[0]]
+                    if (data.dir === 0) {
+                        return [e.vertical_animation.layers[0]]
                     }
-                    return [...e.horizontal_base.layers, e.horizontal_animation.layers[0]]
+                    return [e.horizontal_animation.layers[0]]
                 }
-                if (data.bp) {
-                    const out = getBaseSprites()
-                    const conn = data.bp.entityPositionGrid
-                        .getNeighbourData(data.position)
-                        .map(({ entity, relDir }) => entity && entity.name === 'stone_wall' && dir === relDir % 4)
 
-                    for (let i = 0; i < conn.length; i++) {
-                        if (conn[i]) {
-                            const wp = FD.entities.gate.wall_patch[util.intToDir((i * 2 + 4) % 8)].layers[0]
-                            if (i === 0) {
-                                out.unshift(wp)
-                            } else {
-                                out.push(wp)
-                            }
-                        }
+                if (data.dir === 0 && data.bp) {
+                    const wall = data.bp.entities.get(
+                        data.bp.entityPositionGrid.getCellAtPosition([data.position.x, data.position.y + 1])
+                    )
+                    if (wall && wall.name === 'stone_wall') {
+                        return [...getBaseSprites(), e.wall_patch.layers[0]]
                     }
-                    return out
                 }
+
                 return getBaseSprites()
             }
         case 'pipe':
+        case 'infinity_pipe':
             return (data: IDrawData) => {
                 const pictures = e.pictures as FD.PipePictures
                 if (data.bp) {
@@ -892,7 +1145,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                                 return false
                             }
 
-                            if (entity.name === 'pipe') {
+                            if (entity.name === 'pipe' || entity.name === 'infinity_pipe') {
                                 return true
                             }
                             if (entity.name === 'pipe_to_ground' && entity.direction === (relDir + 4) % 8) {
@@ -1042,162 +1295,182 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
     switch (e.type) {
         case 'furnace':
+        case 'logistic_container':
             return () => [(e.animation as FD.SpriteLayers).layers[0]]
         case 'container':
-        case 'logistic_container':
-            return () => [e.picture as FD.SpriteData]
+            return () => [(e.picture as FD.SpriteLayers).layers[0]]
 
         case 'electric_pole':
             return (data: IDrawData) => [
-                duplicateAndSetPropertyUsing(e.pictures as FD.SpriteData, 'x', 'width', data.dir / 2)
+                duplicateAndSetPropertyUsing((e.pictures as FD.SpriteLayers).layers[0], 'x', 'width', data.dir / 2)
             ]
 
         case 'splitter':
             return (data: IDrawData) => {
-                const dir = data.dir
-                const nP = e.name.split('_')
-                const beltType = nP.length === 1 ? '' : `${nP[0]}_`
+                const b0Offset = util.rotatePointBasedOnDir([-0.5, 0], data.dir)
+                const b1Offset = util.rotatePointBasedOnDir([0.5, 0], data.dir)
 
-                const belt = FD.entities[`${beltType}transport_belt`]
-                let beltSprite = dir === 0 || dir === 4 ? belt.belt_vertical : belt.belt_horizontal
+                const belt0Parts = getBeltSprites(
+                    e.belt_animation_set,
+                    data.bp
+                        ? {
+                              x: data.position.x + b0Offset.x,
+                              y: data.position.y + b0Offset.y
+                          }
+                        : b0Offset,
+                    data.dir,
+                    data.bp,
+                    true,
+                    true,
+                    true
+                ).map(sd => addToShift(b0Offset, sd))
 
-                beltSprite = util.duplicate(beltSprite)
-                if (dir === 4) {
-                    beltSprite = setProperty(beltSprite, 'flipY', true)
-                }
-                if (dir === 6) {
-                    beltSprite = setProperty(beltSprite, 'flipX', true)
-                }
+                const belt1Parts = getBeltSprites(
+                    e.belt_animation_set,
+                    data.bp
+                        ? {
+                              x: data.position.x + b1Offset.x,
+                              y: data.position.y + b1Offset.y
+                          }
+                        : b1Offset,
+                    data.dir,
+                    data.bp,
+                    true,
+                    true,
+                    true
+                ).map(sd => addToShift(b1Offset, sd))
 
-                let belt2 = util.duplicate(beltSprite)
-                beltSprite = addToShift(util.rotatePointBasedOnDir([-0.5, 0], dir), beltSprite)
-                belt2 = addToShift(util.rotatePointBasedOnDir([0.5, 0], dir), belt2)
-
-                return [beltSprite, belt2, (e.structure as FD.DirectionalSpriteData)[util.intToDir(dir)]]
+                return [
+                    ...belt0Parts,
+                    ...belt1Parts,
+                    (e.structure as FD.DirectionalSpriteData)[util.intToDir(data.dir)]
+                ]
             }
         case 'underground_belt':
             return (data: IDrawData) => {
-                const dir = data.dir
-                let belt = dir === 0 || dir === 4 ? e.belt_vertical : e.belt_horizontal
+                const isInput = data.dirType === 'input'
+                const dir = isInput ? data.dir : (data.dir + 4) % 8
 
-                belt = util.duplicate(belt)
+                const beltParts = getBeltSprites(
+                    e.belt_animation_set,
+                    data.position,
+                    data.dir,
+                    data.bp,
+                    isInput,
+                    !isInput,
+                    true
+                )
+
+                let mainBelt = beltParts[0]
+                mainBelt = setProperty(mainBelt, dir === 2 || dir === 6 ? 'divW' : 'divH', 2)
+
+                if (dir === 2) {
+                    mainBelt = setProperty(mainBelt, 'anchorX', 1)
+                }
                 if (dir === 6) {
-                    belt = setProperty(belt, 'flipX', true)
+                    mainBelt = setProperty(mainBelt, 'anchorX', 0.5)
                 }
                 if (dir === 4) {
-                    belt = setProperty(belt, 'flipY', true)
+                    mainBelt = setProperty(mainBelt, 'anchorY', 1)
                 }
-                belt = setProperty(belt, dir === 2 || dir === 6 ? 'divW' : 'divH', 2)
-
-                const isInput = data.dirType === 'input'
-                if (dir === 2 || dir === 6) {
-                    belt = setProperty(belt, 'anchorX', isInput ? 1 : 0.2)
-                }
-                if (dir === 0 || dir === 4) {
-                    belt = setProperty(belt, 'anchorY', isInput ? 0.2 : 1)
+                if (dir === 0) {
+                    mainBelt = setProperty(mainBelt, 'anchorY', 0.5)
                 }
 
-                return [
-                    belt,
+                let sideloadingBack = false
+                let sideloadingFront = false
+
+                if (data.bp && (dir === 2 || dir === 6)) {
+                    let C = data.bp.entityPositionGrid.getNeighbourData(data.position).map(d => {
+                        if (
+                            d.entity &&
+                            (d.entity.type === 'transport_belt' ||
+                                d.entity.type === 'splitter' ||
+                                ((d.entity.type === 'underground_belt' || d.entity.type === 'loader') &&
+                                    d.entity.directionType === 'output'))
+                        ) {
+                            return d
+                        }
+                    })
+
+                    // Belt facing this belt
+                    C = C.map(d => {
+                        if (d && d.entity.direction === (d.relDir + 4) % 8) {
+                            return d
+                        }
+                    })
+
+                    sideloadingBack = C[0] !== undefined
+                    sideloadingFront = C[2] !== undefined
+                }
+
+                const structure = e.structure as FD.UndergroundBeltStructure
+                const sprites = []
+
+                if (!sideloadingBack) {
+                    sprites.push(duplicateAndSetPropertyUsing(structure.back_patch.sheet, 'x', 'width', dir / 2))
+                }
+
+                sprites.push(mainBelt)
+
+                /* eslint-disable no-nested-ternary */
+                sprites.push(
                     duplicateAndSetPropertyUsing(
-                        isInput
-                            ? (e.structure as FD.UndergroundBeltStructure).direction_in.sheet
-                            : (e.structure as FD.UndergroundBeltStructure).direction_out.sheet,
+                        sideloadingFront
+                            ? isInput
+                                ? structure.direction_in_side_loading.sheet
+                                : structure.direction_out_side_loading.sheet
+                            : isInput
+                            ? structure.direction_in.sheet
+                            : structure.direction_out.sheet,
                         'x',
                         'width',
-                        (isInput ? dir : (dir + 4) % 8) / 2
+                        dir / 2
                     )
-                ]
+                )
+                /* eslint-enable no-nested-ternary */
+
+                if (!sideloadingFront) {
+                    sprites.push(duplicateAndSetPropertyUsing(structure.front_patch.sheet, 'x', 'width', dir / 2))
+                }
+
+                if (beltParts[1]) {
+                    sprites.push(beltParts[1])
+                }
+
+                return sprites
             }
         case 'transport_belt':
             return (data: IDrawData) => {
-                const dir = data.dir
-                function getBeltConnections() {
-                    let directions = data.bp.entityPositionGrid.getNeighbourData(data.position).map(({ entity }) => {
-                        if (!entity) {
-                            return false
+                if (data.hasConnections && data.bp) {
+                    const connIndex = getBeltWireConnectionIndex(data.bp, data.position, data.dir)
+                    const patchIndex = (() => {
+                        switch (connIndex) {
+                            case 1:
+                                return 0
+                            case 3:
+                                return 1
+                            case 4:
+                                return 2
                         }
+                    })()
 
-                        if (
-                            entity.type === 'transport_belt' ||
-                            entity.type === 'splitter' ||
-                            (entity.type === 'underground_belt' && entity.directionType === 'output')
-                        ) {
-                            return entity.direction
-                        }
-                    })
-                    // Rotate directions
-                    directions = [...directions, ...directions].splice(dir / 2, 4) as (number | false)[]
+                    const sprites = []
 
-                    const rightEntDir = directions[1]
-                    const leftEntDir = directions[3]
+                    if (patchIndex !== undefined) {
+                        let patch = e.connector_frame_sprites.frame_back_patch.sheet
+                        sprites.push(duplicateAndSetPropertyUsing(patch, 'x', 'width', patchIndex))
+                    }
 
-                    if (dir === directions[2]) {
-                        return false
-                    }
-                    let found = false
-                    if (rightEntDir !== false && (rightEntDir + 2) % 8 === dir) {
-                        found = true
-                    }
-                    if (leftEntDir === (dir + 2) % 8) {
-                        if (found) {
-                            return false
-                        } else {
-                            return leftEntDir
-                        }
-                    }
-                    if (found) {
-                        return rightEntDir
-                    }
-                    return false
-                }
+                    sprites.push(...getBeltSprites(e.belt_animation_set, data.position, data.dir, data.bp))
 
-                let belt = dir === 0 || dir === 4 ? e.belt_vertical : e.belt_horizontal
-
-                if (data.bp) {
-                    belt = util.duplicate(belt)
-                    const res = getBeltConnections()
-                    if (res === false) {
-                        if (dir === 6) {
-                            belt = setProperty(belt, 'flipX', true)
-                        }
-                        if (dir === 4) {
-                            belt = setProperty(belt, 'flipY', true)
-                        }
-                    } else {
-                        const temp = res === 0 || res === 4
-                        belt = setProperty(belt, 'rotAngle', (res + (temp ? 0 : 2)) * 45)
-                        belt = setPropertyUsing(
-                            belt,
-                            'y',
-                            'height',
-                            (temp ? 11 : 8) * (data.hr && e.name !== 'transport_belt' ? 2 : 1)
-                        )
-                        if (res === (dir + 2) % 8) {
-                            belt = setProperty(belt, temp ? 'flipX' : 'flipY', true)
-                        }
-                    }
-                } else {
-                    if (dir === 6) {
-                        belt = setProperty(util.duplicate(belt), 'flipX', true)
-                    }
-                    if (dir === 4) {
-                        belt = setProperty(util.duplicate(belt), 'flipY', true)
-                    }
-                }
-
-                if (data.hasConnections) {
                     let frame = e.connector_frame_sprites.frame_main.sheet
-                    frame = util.duplicate(frame)
-                    frame = setPropertyUsing(frame, 'x', 'width')
-                    if (data.bp) {
-                        frame = setPropertyUsing(frame, 'y', 'height', getBeltConnections2(data.bp, data.position, dir))
-                    } else {
-                        frame = setPropertyUsing(frame, 'y', 'height', dir === 0 || dir === 4 ? 2 : 1)
-                    }
-                    return [belt, frame]
+                    frame = duplicateAndSetPropertyUsing(frame, 'x', 'width', 1)
+                    sprites.push(setPropertyUsing(frame, 'y', 'height', connIndex))
+
+                    return sprites
                 }
-                return [belt]
+                return [...getBeltSprites(e.belt_animation_set, data.position, data.dir, data.bp)]
             }
         case 'inserter':
             return (data: IDrawData) => {
@@ -1316,10 +1589,62 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     hb
                 ]
             }
+        case 'loader': {
+            return (data: IDrawData) => {
+                const isInput = data.dirType === 'input'
+                const dir = isInput ? data.dir : (data.dir + 4) % 8
+
+                const beltParts = getBeltSprites(
+                    e.belt_animation_set,
+                    data.position,
+                    data.dir,
+                    data.bp,
+                    isInput,
+                    !isInput,
+                    true
+                ).map(sprite => addToShift(util.rotatePointBasedOnDir([0, 0.5], dir), sprite))
+
+                let mainBelt = beltParts[0]
+                mainBelt = setProperty(mainBelt, dir === 2 || dir === 6 ? 'divW' : 'divH', 2)
+
+                if (dir === 2) {
+                    mainBelt = setProperty(mainBelt, 'anchorX', 1)
+                }
+                if (dir === 6) {
+                    mainBelt = setProperty(mainBelt, 'anchorX', 0.5)
+                }
+                if (dir === 4) {
+                    mainBelt = setProperty(mainBelt, 'anchorY', 1)
+                }
+                if (dir === 0) {
+                    mainBelt = setProperty(mainBelt, 'anchorY', 0.5)
+                }
+
+                const structure = e.structure as FD.UndergroundBeltStructure
+                const sprites = []
+
+                sprites.push(mainBelt)
+
+                sprites.push(
+                    duplicateAndSetPropertyUsing(
+                        isInput ? structure.direction_in.sheet : structure.direction_out.sheet,
+                        'x',
+                        'width',
+                        dir / 2
+                    )
+                )
+
+                if (beltParts[1]) {
+                    sprites.push(beltParts[1])
+                }
+
+                return sprites
+            }
+        }
     }
 }
 
 export default {
     getSpriteData,
-    getBeltConnections2
+    getBeltWireConnectionIndex
 }

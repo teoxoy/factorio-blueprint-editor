@@ -26,7 +26,7 @@ export class OverlayContainer extends PIXI.Container {
         const entity = G.bp.entities.get(entityNumber)
         const entityInfo = new PIXI.Container()
 
-        if (entity.recipe && entity.recipe !== 'rocket_part') {
+        if (entity.recipe && entity.entityData.show_recipe_icon !== false) {
             const recipeInfo = new PIXI.Container()
             createIconWithBackground(recipeInfo, entity.recipe)
             const S = entity.name === 'oil_refinery' ? 1.5 : 0.9
@@ -105,7 +105,13 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         const filters = entity.filters === undefined ? undefined : entity.filters.filter(v => v.name !== undefined)
-        if (filters !== undefined && (entity.type === 'inserter' || entity.type === 'logistic_container')) {
+        if (
+            filters !== undefined &&
+            (entity.type === 'inserter' ||
+                entity.type === 'logistic_container' ||
+                entity.name === 'infinity_chest' ||
+                entity.name === 'infinity_pipe')
+        ) {
             const filterInfo = new PIXI.Container()
             for (let i = 0; i < filters.length; i++) {
                 if (i === 4) {

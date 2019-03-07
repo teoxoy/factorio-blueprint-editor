@@ -151,6 +151,6 @@ export class QuickbarContainer extends Panel {
     }
 
     setPosition() {
-        this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height - this.height)
+        this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height - this.height + 1)
     }
 }
