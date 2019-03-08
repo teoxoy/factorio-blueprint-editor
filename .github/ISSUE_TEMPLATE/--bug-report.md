@@ -35,6 +35,6 @@ If applicable, add screenshots to help explain your problem.
 **Additional context**
 Add any other context about the problem here.
 
-<details><summary><b>Blueprint String</b></summary>
+<details><summary><strong>Blueprint String</strong></summary>
 If applicable, add a blueprint string here.
 </details>
