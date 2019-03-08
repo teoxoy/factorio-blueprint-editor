@@ -1,11 +1,14 @@
 ---
 name: "\U0001F680Feature request"
 about: Suggest an idea for this project
-title: "[FEAT]"
+title: '[FEAT]'
 labels: enhancement
 assignees: ''
-
 ---
+
+<!---
+Delete a specific section if you can't come up with anything to write in it.
+--->
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
