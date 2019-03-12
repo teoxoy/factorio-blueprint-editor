@@ -196,7 +196,8 @@ export class InventoryContainer extends Dialog {
                             const tilePlaceable =
                                 itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
                             const tileFindable = tilePlaceable
-                                ? FD.tiles[itemData.place_as_tile.result] !== undefined
+                                ? FD.tiles[itemData.place_as_tile.result] !== undefined ||
+                                  itemData.place_as_tile.result === 'landfill'
                                 : false
                             if (!tileFindable) {
                                 continue
