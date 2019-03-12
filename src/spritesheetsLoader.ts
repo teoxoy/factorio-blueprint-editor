@@ -61,35 +61,42 @@ function changeQuality(hr: boolean, compressed: boolean) {
     })
 }
 
+function blobToImageBitmap(blob: Blob): Promise<ImageBitmap | HTMLImageElement> {
+    if (window.createImageBitmap) {
+        return createImageBitmap(blob)
+    }
+
+    // Polyfill
+    return new Promise(resolve => {
+        const img = new Image()
+        img.onload = () => resolve(img)
+        img.src = URL.createObjectURL(blob)
+    })
+}
+
 function loadSpritesheet(src: string, json: any) {
     return fetch(src)
         .then(response => response.blob())
-        .then(blob => {
-            if (window.createImageBitmap) {
-                return createImageBitmap(blob)
-            }
-
-            // Polyfill
-            return new Promise(resolve => {
-                const img = new Image()
-                img.onload = () => resolve(img)
-                img.src = URL.createObjectURL(blob)
-            })
-        })
-        .then((imageData: ImageBitmap | HTMLImageElement) => {
-            const getPow2Canvas = () => {
-                const c = document.createElement('canvas')
-                c.width = util.nearestPowerOf2(imageData.width)
-                c.height = util.nearestPowerOf2(imageData.height)
-                c.getContext('2d').drawImage(imageData, 0, 0)
-                return c
-            }
+        .then(blobToImageBitmap)
+        .then(
+            imageData =>
+                new Promise(resolve => {
+                    if (G.app.renderer.context.webGLVersion === 1) {
+                        const canvas = document.createElement('canvas')
+                        const ctx = canvas.getContext('2d')
+                        canvas.width = util.nearestPowerOf2(imageData.width)
+                        canvas.height = util.nearestPowerOf2(imageData.height)
+                        ctx.drawImage(imageData, 0, 0)
+                        canvas.toBlob(blob => resolve(blobToImageBitmap(blob)))
+                    } else {
+                        return resolve(imageData)
+                    }
+                })
+        )
+        .then(imageData => {
             // if WebGL1, make the spritesheet a power of 2 so that it generates mipmaps
             // WebGL2 generates mipmaps even with non pow 2 textures
-            const resource =
-                G.app.renderer.context.webGLVersion === 1
-                    ? new PIXI.resources.CanvasResource(getPow2Canvas())
-                    : new PIXI.resources.BaseImageResource(imageData)
+            const resource = new PIXI.resources.BaseImageResource(imageData)
 
             const baseTexture = new PIXI.BaseTexture(resource)
             // bind the baseTexture, this will also upload it to the GPU
