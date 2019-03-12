@@ -776,9 +776,9 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 data.dir === 0 ? e.vertical_animation.layers[0] : e.horizontal_animation.layers[0]
             ]
         case 'gun_turret':
-        case 'laser_turret':
             return (data: IDrawData) => [
-                ...(e.base_picture as FD.SpriteLayers).layers,
+                (e.base_picture as FD.SpriteLayers).layers[0],
+                (e.base_picture as FD.SpriteLayers).layers[1],
                 duplicateAndSetPropertyUsing(
                     (e.folded_animation as FD.SpriteLayers).layers[0],
                     'y',
@@ -786,7 +786,23 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     data.dir / 2
                 ),
                 duplicateAndSetPropertyUsing(
-                    (e.folded_animation as FD.SpriteLayers).layers[e.name === 'laser_turret' ? 2 : 1],
+                    (e.folded_animation as FD.SpriteLayers).layers[1],
+                    'y',
+                    'height',
+                    data.dir / 2
+                )
+            ]
+        case 'laser_turret':
+            return (data: IDrawData) => [
+                (e.base_picture as FD.SpriteLayers).layers[0],
+                duplicateAndSetPropertyUsing(
+                    (e.folded_animation as FD.SpriteLayers).layers[0],
+                    'y',
+                    'height',
+                    data.dir / 2
+                ),
+                duplicateAndSetPropertyUsing(
+                    (e.folded_animation as FD.SpriteLayers).layers[2],
                     'y',
                     'height',
                     data.dir / 2
