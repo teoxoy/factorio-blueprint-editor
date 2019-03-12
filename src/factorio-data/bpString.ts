@@ -34,7 +34,7 @@ const validate = new Ajv()
         schema: false
     })
     .addKeyword('tileName', {
-        validate: (data: string) => !!FD.tiles[data],
+        validate: (data: string) => !!FD.tiles[data] || data === 'landfill',
         errors: false,
         schema: false
     })
@@ -46,7 +46,8 @@ const nameMigrations: { [key: string]: string } = {
     '"science-pack-1"': '"automation-science-pack"',
     '"science-pack-2"': '"logistic-science-pack"',
     '"science-pack-3"': '"chemical-science-pack"',
-    '"high-tech-science-pack"': '"utility-science-pack"'
+    '"high-tech-science-pack"': '"utility-science-pack"',
+    '"grass-1"': '"landfill"'
     // ',"recipe":"steel-axe"': '',
     // ',"recipe":"iron-axe"': ''
 }

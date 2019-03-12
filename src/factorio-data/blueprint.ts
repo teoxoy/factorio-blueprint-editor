@@ -62,7 +62,7 @@ export default class Blueprint extends EventEmitter {
 
         this.name = 'Blueprint'
         this.icons = []
-        this.version = 73014837249
+        this.version = 73015164928
         this.entities = new OurMap()
         this.tiles = new OurMap()
         this.entityPositionGrid = new PositionGrid(this)

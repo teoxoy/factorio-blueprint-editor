@@ -13,7 +13,7 @@ export class TileContainer {
             switch (name) {
                 case 'stone_path':
                     return 'graphics/terrain/stone-path/stone-path.png'
-                case 'grass_1':
+                case 'landfill':
                     return 'graphics/terrain/grass-1/grass-1.png'
                 default:
                     return FD.tiles[name].variants.material_background.hr_version.picture
