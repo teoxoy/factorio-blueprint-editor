@@ -73,9 +73,9 @@ function decode(str: string): Promise<Blueprint | Book> {
     })
 }
 
-function encode(bPOrBook: Blueprint | Book) {
+function encode(bpOrBook: Blueprint | Book) {
     return new Promise((resolve: (value: string) => void, reject) => {
-        const data = encodeSync(bPOrBook)
+        const data = encodeSync(bpOrBook)
         if (data.value) {
             resolve(data.value)
         } else {
@@ -84,12 +84,12 @@ function encode(bPOrBook: Blueprint | Book) {
     })
 }
 
-function encodeSync(bPOrBook: Blueprint | Book): { value?: string; error?: string } {
+function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: string } {
     try {
         return {
             value: `0${btoa(
                 pako.deflate(
-                    JSON.stringify(bPOrBook.toObject()).replace(
+                    JSON.stringify(bpOrBook.toObject()).replace(
                         /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
                         (_: string, capture: string) => capture.replace(/_/g, '-')
                     ),

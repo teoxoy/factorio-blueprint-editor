@@ -169,9 +169,9 @@ function loadBp(bp: string, clearData = true) {
         .then(data => {
             if (data instanceof Book) {
                 G.book = data
-                G.bp = G.book.getBlueprint(bpIndex)
+                G.bp = G.book.getBlueprint(bpIndex ? bpIndex : undefined)
 
-                guiBPIndex.max(G.book.blueprints.length - 1).setValue(bpIndex)
+                guiBPIndex.max(G.book.blueprints.length - 1).setValue(G.book.activeIndex)
             } else {
                 G.book = undefined
                 G.bp = data
@@ -218,14 +218,16 @@ actions.copyBPString.bind(e => {
         return
     }
 
+    const bpOrBook = G.book ? G.book : G.bp
+    console.log(bpOrBook)
     if (navigator.clipboard && navigator.clipboard.writeText) {
         bpString
-            .encode(G.bp)
+            .encode(bpOrBook)
             .then(s => navigator.clipboard.writeText(s))
             .then(() => console.log('Copied BP String'))
             .catch(error => console.error(error))
     } else {
-        const data = bpString.encodeSync(G.bp)
+        const data = bpString.encodeSync(bpOrBook)
         if (data.value) {
             e.clipboardData.setData('text/plain', data.value)
             console.log('Copied BP String')

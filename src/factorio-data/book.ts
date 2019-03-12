@@ -18,18 +18,17 @@ export class Book {
     }
 
     getBlueprint(index?: number) {
-        let INDEX = this.activeIndex
         if (index !== undefined) {
-            INDEX = index < 0 || index > this.blueprints.length - 1 ? 0 : index
-        }
-        this.activeIndex = INDEX
-
-        if (this.blueprints[INDEX].loaded) {
-            return this.blueprints[INDEX].loaded
+            this.activeIndex = index < 0 || index > this.blueprints.length - 1 ? 0 : index
         }
 
-        const bp = new Blueprint(this.blueprints[INDEX].blueprint)
-        this.blueprints[INDEX].loaded = bp
+        const blueprint = this.blueprints[this.activeIndex]
+        if (blueprint.loaded) {
+            return blueprint.loaded
+        }
+
+        const bp = new Blueprint(blueprint.blueprint)
+        blueprint.loaded = bp
         return bp
     }
 
@@ -40,7 +39,7 @@ export class Book {
                 index: i,
                 // TODO: modified instead of loaded
                 blueprint: this.blueprints[i].loaded
-                    ? this.blueprints[i].loaded.toObject()
+                    ? this.blueprints[i].loaded.toObject().blueprint
                     : this.blueprints[i].blueprint
             })
         }
