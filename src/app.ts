@@ -24,16 +24,6 @@ import Entity from './factorio-data/entity'
 import Dialog from './controls/dialog'
 import * as History from './factorio-data/history'
 
-// https://github.com/parcel-bundler/parcel/issues/289#issuecomment-393106708
-/* eslint-disable */
-if (module.hot) {
-    module.hot.dispose(() => {
-        window.location.reload()
-        throw new Error('Reloading')
-    })
-}
-/* eslint-enable */
-
 if (PIXI.utils.isMobile.any) {
     const text = 'This application is not compatible with mobile devices.'
     document.getElementById('loadingMsg').innerHTML = text
