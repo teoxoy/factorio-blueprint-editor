@@ -102,20 +102,15 @@ function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: strin
     }
 }
 
-function findBPString(data: string) {
-    if (data === undefined) {
-        return
+function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book> {
+    if (source === undefined) {
+        return Promise.resolve(new Blueprint())
     }
-    const DATA = data.replace(/\s/g, '')
+    const DATA = source.replace(/\s/g, '')
 
     if (DATA[0] === '0') {
-        return new Promise(resolve => resolve(DATA))
+        return decode(DATA)
     }
-
-    // function isUrl(url: string) {
-    //     try { return Boolean(new URL(url)) }
-    //     catch (e) { return false }
-    // }
 
     // Other CORS Proxies:
     // https://crossorigin.me/
@@ -123,33 +118,43 @@ function findBPString(data: string) {
     const corsProxy = 'https://api.allorigins.win/raw?url='
 
     // TODO: maybe add dropbox support https://www.dropbox.com/s/ID?raw=1
-    return new Promise(resolve => resolve(new URL(DATA))).then((url: URL) => {
-        console.log(`Loading data from: ${url}`)
-        const pathParts = url.pathname.slice(1).split('/')
-        switch (url.hostname.split('.')[0]) {
-            case 'pastebin':
-                return fetchData(`${corsProxy}https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
-            case 'hastebin':
-                return fetchData(`${corsProxy}https://hastebin.com/raw/${pathParts[0]}`).then(r => r.text())
-            case 'gist':
-                return fetchData(`https://api.github.com/gists/${pathParts[1]}`).then(r =>
-                    r.json().then(data => data.files[Object.keys(data.files)[0]].content)
-                )
-            case 'gitlab':
-                // https://gitlab.com/gitlab-org/gitlab-ce/issues/24596
-                return fetchData(`${corsProxy}https://gitlab.com/snippets/${pathParts[1]}/raw`).then(r => r.text())
-            case 'factorioprints':
-                return fetchData(`https://facorio-blueprints.firebaseio.com/blueprints/${pathParts[1]}.json`).then(r =>
-                    r.json().then(data => data.blueprintString)
-                )
-            case 'docs':
-                return fetchData(`https://docs.google.com/document/d/${pathParts[2]}/export?format=txt`).then(r =>
-                    r.text()
-                )
-            default:
-                return fetchData(url.toString()).then(r => r.text())
+    return new Promise((resolve, reject) => {
+        const url = `https://${DATA.replace(/https?:\/\//g, '')}`
+        try {
+            resolve(new URL(url))
+        } catch (e) {
+            reject(e)
         }
     })
+        .then((url: URL) => {
+            console.log(`Loading data from: ${url}`)
+            const pathParts = url.pathname.slice(1).split('/')
+            switch (url.hostname.split('.')[0]) {
+                case 'pastebin':
+                    return fetchData(`${corsProxy}https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
+                case 'hastebin':
+                    return fetchData(`${corsProxy}https://hastebin.com/raw/${pathParts[0]}`).then(r => r.text())
+                case 'gist':
+                    return fetchData(`https://api.github.com/gists/${pathParts[1]}`).then(r =>
+                        r.json().then(data => data.files[Object.keys(data.files)[0]].content)
+                    )
+                case 'gitlab':
+                    // https://gitlab.com/gitlab-org/gitlab-ce/issues/24596
+                    return fetchData(`${corsProxy}https://gitlab.com/snippets/${pathParts[1]}/raw`).then(r => r.text())
+                case 'factorioprints':
+                    return fetchData(`https://facorio-blueprints.firebaseio.com/blueprints/${pathParts[1]}.json`).then(
+                        r => r.json().then(data => data.blueprintString)
+                    )
+                case 'docs':
+                    return fetchData(`https://docs.google.com/document/d/${pathParts[2]}/export?format=txt`).then(r =>
+                        r.text()
+                    )
+                default:
+                    return fetchData(url.href).then(r => r.text())
+            }
+        })
+        .then(decode)
+        .catch(() => new Blueprint())
 
     function fetchData(url: string) {
         return fetch(url).then(response => {
@@ -162,8 +167,7 @@ function findBPString(data: string) {
 }
 
 export default {
-    decode,
     encode,
     encodeSync,
-    findBPString
+    getBlueprintOrBookFromSource
 }

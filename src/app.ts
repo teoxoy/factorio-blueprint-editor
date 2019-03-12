@@ -135,7 +135,7 @@ G.app.stage.addChild(G.paintIconContainer)
 
 Promise.all([
     // Get bp from source
-    bpString.findBPString(bpSource),
+    bpString.getBlueprintOrBookFromSource(bpSource),
     // Wait for fonts to get loaded
     document.fonts.ready,
     // Load spritesheets
@@ -148,47 +148,32 @@ Promise.all([
             G.quickbarContainer.generateSlots(quickbarItemNames)
         }
 
-        if (data[0]) {
-            loadBp(data[0], false).then(finishSetup)
-        } else {
-            G.bp = new Blueprint()
-            G.BPC.initBP()
-            finishSetup()
-        }
-
-        function finishSetup() {
-            G.BPC.centerViewport()
-            G.loadingScreen.hide()
-        }
+        loadBp(data[0], false)
     })
     .catch(error => console.error(error))
 
-function loadBp(bp: string, clearData = true) {
-    return bpString
-        .decode(bp)
-        .then(data => {
-            if (data instanceof Book) {
-                G.book = data
-                G.bp = G.book.getBlueprint(bpIndex ? bpIndex : undefined)
+function loadBp(bpOrBook: Blueprint | Book, clearData = true) {
+    if (bpOrBook instanceof Book) {
+        G.book = bpOrBook
+        G.bp = G.book.getBlueprint(bpIndex ? bpIndex : undefined)
 
-                guiBPIndex.max(G.book.blueprints.length - 1).setValue(G.book.activeIndex)
-            } else {
-                G.book = undefined
-                G.bp = data
+        guiBPIndex.max(G.book.blueprints.length - 1).setValue(G.book.activeIndex)
+    } else {
+        G.book = undefined
+        G.bp = bpOrBook
 
-                guiBPIndex.setValue(0).max(0)
-            }
+        guiBPIndex.setValue(0).max(0)
+    }
 
-            if (clearData) {
-                G.BPC.clearData()
-            }
-            G.BPC.initBP()
+    if (clearData) {
+        G.BPC.clearData()
+    }
+    G.BPC.initBP()
+    G.loadingScreen.hide()
 
-            Dialog.closeAll()
+    Dialog.closeAll()
 
-            console.log('Loaded BP String')
-        })
-        .catch(error => console.error(error))
+    console.log('Loaded BP String')
 }
 
 // If the tab is not active then stop the app
@@ -219,7 +204,6 @@ actions.copyBPString.bind(e => {
     }
 
     const bpOrBook = G.book ? G.book : G.bp
-    console.log(bpOrBook)
     if (navigator.clipboard && navigator.clipboard.writeText) {
         bpString
             .encode(bpOrBook)
@@ -245,11 +229,13 @@ actions.pasteBPString.bind(e => {
             ? navigator.clipboard.readText()
             : Promise.resolve(e.clipboardData.getData('text'))
 
-    promise
-        .then(bpString.findBPString)
-        .then(loadBp)
-        .then(() => G.loadingScreen.hide())
-        .catch(error => console.error(error))
+    promise.then(bpString.getBlueprintOrBookFromSource).then(bpOrBook => {
+        if (bpOrBook instanceof Blueprint && bpOrBook.isEmpty()) {
+            G.loadingScreen.hide()
+        } else {
+            loadBp(bpOrBook)
+        }
+    })
 })
 
 actions.clear.bind(() => {
