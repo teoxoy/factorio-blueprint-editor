@@ -28,6 +28,20 @@ html
     cursor: wait
     &.active
         z-index: 10
+        svg
+            animation: rotating 2s linear infinite
+    svg
+        width: 60px
+        height: 60px
+        position: fixed
+        right: 16px
+        bottom: 16px
+
+@keyframes rotating
+  from
+    transform: rotate(0deg)
+  to
+    transform: rotate(360deg)
 
 #logo
     position: fixed
@@ -35,22 +49,6 @@ html
     top: 50%
     transform: translate(-50%, -50%)
     width: 50%
-
-#loadingWheel
-    width: 60px
-    height: 60px
-    position: fixed
-    right: 16px
-    bottom: 16px
-
-.active #loadingWheel
-    animation: rotating 2s linear infinite
-
-@keyframes rotating
-  from
-    transform: rotate(0deg);
-  to
-    transform: rotate(360deg)
 
 .dg
     font: 12px 'Roboto', sans-serif !important
