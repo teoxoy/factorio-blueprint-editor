@@ -1,8 +1,4 @@
-<img src="./.github/logo.svg" width="128" align="right">
-
-<br/>
-<br/>
-<br/>
+<img src="./.github/logo.svg" width="100%" align="right">
 
 # factorio-blueprint-editor
 
