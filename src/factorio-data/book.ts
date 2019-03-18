@@ -1,3 +1,4 @@
+import G from '../common/globals'
 import Blueprint from './blueprint'
 
 export class Book {
@@ -48,7 +49,7 @@ export class Book {
                 blueprints,
                 item: 'blueprint_book',
                 active_index: this.activeIndex,
-                version: 0
+                version: G.getFactorioVersion()
             }
         }
     }

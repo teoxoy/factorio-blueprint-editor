@@ -54,7 +54,6 @@ interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
 export default class Blueprint extends EventEmitter {
     name: string
     icons: string[]
-    version: number
     entityPositionGrid: PositionGrid
     entities: OurMap<number, Entity>
     tiles: OurMap<string, Tile>
@@ -66,14 +65,12 @@ export default class Blueprint extends EventEmitter {
 
         this.name = 'Blueprint'
         this.icons = []
-        this.version = 73015164928
         this.entities = new OurMap()
         this.tiles = new OurMap()
         this.entityPositionGrid = new PositionGrid(this)
 
         if (data) {
             this.name = data.label
-            this.version = data.version
             if (data.icons) {
                 data.icons.forEach(icon => {
                     this.icons[icon.index - 1] = icon.signal.name
@@ -504,7 +501,7 @@ export default class Blueprint extends EventEmitter {
                 entities: this.entities.isEmpty() ? undefined : entityInfo,
                 tiles: this.tiles.isEmpty() ? undefined : tileInfo,
                 item: 'blueprint',
-                version: this.version,
+                version: G.getFactorioVersion(),
                 label: this.name
             }
         }
