@@ -260,8 +260,8 @@ export class WiresContainer extends PIXI.Container {
         }, new Map<number, number[]>())
 
         const finalLinesHashes = finalLines.reduce((map, line) => map.set(lineHash(line), line), new Map())
-        const toAdd = Array.from(finalLinesHashes.keys()).filter(k => !this.passiveConnToSprite.get(k))
-        const toDel = Array.from(this.passiveConnToSprite.keys()).filter(k => !finalLinesHashes.get(k))
+        const toAdd = [...finalLinesHashes.keys()].filter(k => !this.passiveConnToSprite.get(k))
+        const toDel = [...this.passiveConnToSprite.keys()].filter(k => !finalLinesHashes.get(k))
 
         // update rotations
         const toUpdate: number[] = [...toAdd, ...toDel].reduce((arr, hash) => {
