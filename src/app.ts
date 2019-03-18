@@ -162,8 +162,6 @@ function loadBp(bpOrBook: Blueprint | Book, clearData = true) {
     G.loadingScreen.hide()
 
     Dialog.closeAll()
-
-    console.log('Loaded BP String')
 }
 
 // If the tab is not active then stop the app
@@ -229,9 +227,7 @@ actions.pasteBPString.bind(e => {
 })
 
 actions.clear.bind(() => {
-    G.BPC.clearData()
-    G.bp = new Blueprint()
-    G.BPC.initBP()
+    loadBp(new Blueprint())
 })
 
 actions.takePicture.bind(() => {
