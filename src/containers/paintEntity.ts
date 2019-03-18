@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import util from '../common/util'
 import { EntitySprite } from '../entitySprite'
+import Entity from '../factorio-data/entity'
 import { EntityContainer } from './entity'
 import { UnderlayContainer } from './underlay'
 import { PaintContainer } from './paint'
@@ -56,7 +57,7 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     getItemName() {
-        return FD.entities[this.name].minable.result
+        return Entity.getItemName(this.name)
     }
 
     checkBuildable() {

@@ -1,5 +1,5 @@
-import FD from 'factorio-data'
 import G from '../common/globals'
+import Tile from '../factorio-data/tile'
 import { TileContainer } from './tile'
 import { PaintContainer } from './paint'
 
@@ -41,10 +41,7 @@ export class TilePaintContainer extends PaintContainer {
     }
 
     getItemName() {
-        if (this.name === 'landfill') {
-            return 'landfill'
-        }
-        return FD.tiles[this.name].minable.result
+        return Tile.getItemName(this.name)
     }
 
     increaseSize() {

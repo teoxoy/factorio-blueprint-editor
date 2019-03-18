@@ -299,7 +299,7 @@ actions.reverseRotate.bind(() => {
 actions.pipette.bind(() => {
     if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
         const entity = G.BPC.hoverContainer.entity
-        const itemName = entity.entityData.minable.result
+        const itemName = Entity.getItemName(entity.name)
         const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
         G.BPC.spawnPaintContainer(itemName, direction)
     } else if (G.currentMouseState === G.mouseStates.PAINTING) {

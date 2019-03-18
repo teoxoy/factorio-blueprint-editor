@@ -11,6 +11,10 @@ import U from './generators/util'
 
 /** Entity Base Class */
 export default class Entity extends EventEmitter {
+    static getItemName(name: string) {
+        return FD.entities[name].minable.result
+    }
+
     /** Field to hold raw entity */
     private readonly m_rawEntity: BPS.IEntity
 

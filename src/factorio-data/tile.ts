@@ -1,6 +1,14 @@
 import EventEmitter from 'eventemitter3'
+import FD from 'factorio-data'
 
 export default class Tile extends EventEmitter {
+    static getItemName(name: string) {
+        if (name === 'landfill') {
+            return 'landfill'
+        }
+        return FD.tiles[name].minable.result
+    }
+
     name: string
     position: IPoint
 

@@ -22,6 +22,10 @@ class OurMap<K, V> extends Map<K, V> {
         return this.size === 0
     }
 
+    valuesArray() {
+        return [...this.values()]
+    }
+
     find(predicate: (value: V, key: K) => boolean): V {
         for (const [k, v] of this) {
             if (predicate(v, k)) {
@@ -403,36 +407,43 @@ export default class Blueprint extends EventEmitter {
             })
     }
 
+    /** behaves like in Factorio 0.17.14 */
     generateIcons() {
-        // TODO: make this behave more like in Factorio
-        if (this.entities.isEmpty()) {
-            this.icons[0] = Array.from(
-                Array.from(this.tiles).reduce((map, [_, tile]) => {
-                    // minable result is the icon name
-                    const itemName = FD.tiles[tile.name].minable.result
+        /** returns [iconName, count][] */
+        function getIconPairs(tilesOrEntities: (Tile | Entity)[], getItemName: (name: string) => string) {
+            return [
+                ...tilesOrEntities.reduce((map, tileOrEntity) => {
+                    const itemName = getItemName(tileOrEntity.name)
                     return map.set(itemName, map.has(itemName) ? map.get(itemName) + 1 : 0)
                 }, new Map<string, number>())
-            ).sort((a, b) => b[1] - a[1])[0][0]
-        } else {
-            const iconNames = Array.from(
-                Array.from(this.entities).reduce((map, [_, entity]) => {
-                    // minable result is the icon name
-                    const itemName = FD.entities[entity.name].minable.result
-                    return map.set(itemName, map.has(itemName) ? map.get(itemName) + 1 : 0)
-                }, new Map<string, number>())
-            )
-                .sort((a, b) => b[1] - a[1])
-                .map(kv => kv[0])
+            ]
+        }
 
-            this.icons[0] = iconNames[0]
-            if (iconNames.length > 1) {
-                this.icons[1] = iconNames[1]
+        if (!this.entities.isEmpty()) {
+            const getSize = (name: string) => FD.entities[name].size.width * FD.entities[name].size.height
+            const getItemScore = (item: [string, number]) => getSize(item[0]) * item[1]
+
+            const iconPairs = getIconPairs(this.entities.valuesArray(), Entity.getItemName).sort(
+                (a, b) => getItemScore(b) - getItemScore(a)
+            )
+
+            this.icons[0] = iconPairs[0][0]
+            if (
+                iconPairs[1] &&
+                getSize(iconPairs[1][0]) > 1 &&
+                getItemScore(iconPairs[1]) * 2.5 > getItemScore(iconPairs[0])
+            ) {
+                this.icons[1] = iconPairs[1][0]
             }
+        } else if (!this.tiles.isEmpty()) {
+            const iconPairs = getIconPairs(this.tiles.valuesArray(), Tile.getItemName).sort((a, b) => b[1] - a[1])
+
+            this.icons[0] = iconPairs[0][0]
         }
     }
 
     getEntitiesForExport() {
-        const entityInfo = Array.from(this.entities.values()).map(e => e.getRawData())
+        const entityInfo = this.entities.valuesArray().map(e => e.getRawData())
         let entitiesJSON = JSON.stringify(entityInfo)
 
         // Tag changed ids with !
