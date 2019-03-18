@@ -41,15 +41,17 @@ const validate = new Ajv()
     .compile(blueprintSchema)
 
 const nameMigrations: { [key: string]: string } = {
+    // if (blueprintVersion < getFactorioVersion(0, 17, 0))
     '"raw-wood"': '"wood"',
-    '"wall"': '"stone-wall"',
     '"science-pack-1"': '"automation-science-pack"',
     '"science-pack-2"': '"logistic-science-pack"',
     '"science-pack-3"': '"chemical-science-pack"',
     '"high-tech-science-pack"': '"utility-science-pack"',
-    '"grass-1"': '"landfill"'
-    // ',"recipe":"steel-axe"': '',
+    // ',"recipe":"steel-axe"': ''
     // ',"recipe":"iron-axe"': ''
+
+    // if (blueprintVersion < getFactorioVersion(0, 17, 10))
+    '"grass-1"': '"landfill"'
 }
 const nameMigrationsRegex = new RegExp(Object.keys(nameMigrations).join('|'), 'g')
 
