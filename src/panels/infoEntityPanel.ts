@@ -23,7 +23,7 @@ const entityInfoTemplate = template`
 Crafting speed: ${'craftingSpeed'} ${'speedMultiplier'}
 Power consumption: ${'energyUsage'} kW ${'energyMultiplier'}`
 
-const SIZE_OF_ITEM_ON_BELT = 0.28125
+const SIZE_OF_ITEM_ON_BELT = 0.25
 
 const getBeltSpeed = (beltSpeed: number) => beltSpeed * 60 * (1 / SIZE_OF_ITEM_ON_BELT) * 2
 
