@@ -106,29 +106,40 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
     if (source === undefined) {
         return Promise.resolve(new Blueprint())
     }
+
+    // trim whitespace
     const DATA = source.replace(/\s/g, '')
 
+    let bpString
     if (DATA[0] === '0') {
-        return decode(DATA)
-    }
+        bpString = Promise.resolve(DATA)
+    } else {
+        bpString = new Promise((resolve, reject) => {
+            const url = `https://${DATA.replace(/https?:\/\//g, '')}`
+            try {
+                resolve(new URL(url))
+            } catch (e) {
+                reject(e)
+            }
+        }).then((url: URL) => {
+            // Other CORS Proxies:
+            // https://crossorigin.me/
+            // https://cors-anywhere.herokuapp.com/
+            const corsProxy = 'https://api.allorigins.win/raw?url='
 
-    // Other CORS Proxies:
-    // https://crossorigin.me/
-    // https://cors-anywhere.herokuapp.com/
-    const corsProxy = 'https://api.allorigins.win/raw?url='
-
-    // TODO: maybe add dropbox support https://www.dropbox.com/s/ID?raw=1
-    return new Promise((resolve, reject) => {
-        const url = `https://${DATA.replace(/https?:\/\//g, '')}`
-        try {
-            resolve(new URL(url))
-        } catch (e) {
-            reject(e)
-        }
-    })
-        .then((url: URL) => {
             console.log(`Loading data from: ${url}`)
             const pathParts = url.pathname.slice(1).split('/')
+
+            function fetchData(url: string) {
+                return fetch(url).then(response => {
+                    if (response.ok) {
+                        return response
+                    }
+                    throw new Error('Network response was not ok.')
+                })
+            }
+
+            // TODO: add dropbox support https://www.dropbox.com/s/ID?raw=1
             switch (url.hostname.split('.')[0]) {
                 case 'pastebin':
                     return fetchData(`${corsProxy}https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
@@ -153,17 +164,12 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                     return fetchData(url.href).then(r => r.text())
             }
         })
-        .then(decode)
-        .catch(() => new Blueprint())
-
-    function fetchData(url: string) {
-        return fetch(url).then(response => {
-            if (response.ok) {
-                return response
-            }
-            throw new Error('Network response was not ok.')
-        })
     }
+
+    return bpString.then(decode).catch(err => {
+        console.error(err)
+        return new Blueprint()
+    })
 }
 
 export default {
