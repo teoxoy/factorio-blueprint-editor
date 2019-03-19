@@ -9,7 +9,7 @@ interface IEntityData {
     type?: string
     direction?: number
     position?: IPoint
-    hasConnections?: boolean
+    generateConnector?: boolean
     directionType?: string
     operator?: string
     assemblerCraftsWithFluid?: boolean
@@ -41,7 +41,7 @@ export class EntitySprite extends PIXI.Sprite {
             name: entity.name,
             bp: ignoreConnections ? undefined : G.bp,
             position: entity.position,
-            hasConnections: entity.hasConnections,
+            generateConnector: entity.generateConnector,
 
             dirType: entity.directionType,
             operator: entity.operator,

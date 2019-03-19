@@ -11,7 +11,7 @@ interface IDrawData {
     name: string
     bp: Blueprint
     position: IPoint
-    hasConnections: boolean
+    generateConnector: boolean
 
     assemblerPipeDirection: string
     dirType: string
@@ -96,7 +96,7 @@ function generateConnection(e: FD.Entity, data: IDrawData) {
     if (!hasWireConnectionFeature(e)) {
         return []
     }
-    if (data.hasConnections) {
+    if (data.generateConnector) {
         if (e.circuit_connector_sprites) {
             const ccs =
                 e.circuit_connector_sprites instanceof Array
@@ -1458,7 +1458,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             }
         case 'transport_belt':
             return (data: IDrawData) => {
-                if (data.hasConnections && data.bp) {
+                if (data.generateConnector && data.bp) {
                     const connIndex = getBeltWireConnectionIndex(data.bp, data.position, data.dir)
                     const patchIndex = (() => {
                         switch (connIndex) {

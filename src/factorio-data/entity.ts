@@ -517,6 +517,14 @@ export default class Entity extends EventEmitter {
             : this.m_rawEntity.control_behavior.arithmetic_conditions
     }
 
+    get generateConnector() {
+        return this.hasConnections || this.connectToLogisticNetwork
+    }
+
+    get connectToLogisticNetwork() {
+        return this.m_rawEntity.control_behavior && this.m_rawEntity.control_behavior.connect_to_logistic_network
+    }
+
     get hasConnections() {
         return this.connections.length > 0
     }
