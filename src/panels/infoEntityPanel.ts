@@ -4,7 +4,7 @@ import G from '../common/globals'
 import Panel from '../controls/panel'
 import Entity from '../factorio-data/entity'
 import util from '../common/util'
-import { InventoryContainer } from './inventory'
+import F from '../controls/functions'
 
 function template(strings: TemplateStringsArray, ...keys: (number | string)[]) {
     return (...values: (unknown | { [key: string]: unknown })[]) => {
@@ -154,14 +154,7 @@ export class InfoEntityPanel extends Panel {
 
             // Show the original recipe
             this.m_RecipeContainer.addChild(new PIXI.Text('Recipe:', G.styles.dialog.label))
-            InventoryContainer.createRecipe(
-                this.m_RecipeContainer,
-                0,
-                20,
-                recipe.ingredients,
-                recipe.results,
-                recipe.time
-            )
+            F.CreateRecipe(this.m_RecipeContainer, 0, 20, recipe.ingredients, recipe.results, recipe.time)
             this.m_RecipeContainer.position.set(10, nextY)
             nextY = this.m_RecipeContainer.position.y + this.m_RecipeContainer.height + 20
 
@@ -169,7 +162,7 @@ export class InfoEntityPanel extends Panel {
             this.m_RecipeIOContainer.addChild(
                 new PIXI.Text('Recipe (takes entity effects into account):', G.styles.dialog.label)
             )
-            InventoryContainer.createRecipe(
+            F.CreateRecipe(
                 this.m_RecipeIOContainer,
                 0,
                 20,

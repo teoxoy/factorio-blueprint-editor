@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js'
 import Slot from '../../controls/slot'
 import { InventoryContainer } from '../../panels/inventory'
 import Entity from '../../factorio-data/entity'
+import F from '../../controls/functions'
 
 /** Module Slots for Entity */
 export default class Modules extends PIXI.Container {
@@ -34,7 +35,7 @@ export default class Modules extends PIXI.Container {
             slot.data = slotIndex
             slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => this.onSlotPointerDown(e))
             if (this.m_Modules[slotIndex] !== undefined) {
-                slot.content = InventoryContainer.createIcon(this.m_Modules[slotIndex], false)
+                slot.content = F.CreateIcon(this.m_Modules[slotIndex], false)
             }
             this.addChild(slot)
         }
@@ -56,7 +57,7 @@ export default class Modules extends PIXI.Container {
                 slot.content = undefined
             }
         } else {
-            slot.content = InventoryContainer.createIcon(module, false)
+            slot.content = F.CreateIcon(module, false)
         }
         this.emit('changed')
     }

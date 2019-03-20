@@ -1,6 +1,7 @@
 import Slot from '../../controls/slot'
 import { InventoryContainer } from '../../panels/inventory'
 import Entity from '../../factorio-data/entity'
+import F from '../../controls/functions'
 
 /** Module Slots for Entity */
 export default class Recipe extends Slot {
@@ -24,7 +25,7 @@ export default class Recipe extends Slot {
                 this.content = undefined
             }
         } else {
-            this.content = InventoryContainer.createIcon(recipe, false)
+            this.content = F.CreateIcon(recipe, false)
         }
         this.emit('changed')
     }

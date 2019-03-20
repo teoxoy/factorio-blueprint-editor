@@ -1,7 +1,7 @@
 import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
-import { InventoryContainer } from '../panels/inventory'
+import F from '../controls/functions'
 
 export abstract class PaintContainer extends PIXI.Container {
     filter: AdjustmentFilter
@@ -15,7 +15,7 @@ export abstract class PaintContainer extends PIXI.Container {
         this.filter = new AdjustmentFilter({ red: 0.4, green: 1, blue: 0.4 })
         this.filters = [this.filter]
 
-        this.icon = InventoryContainer.createIcon(this.getItemName())
+        this.icon = F.CreateIcon(this.getItemName())
         this.icon.visible = false
         G.paintIconContainer.addChild(this.icon)
         this.updateIconPos = this.updateIconPos.bind(this)

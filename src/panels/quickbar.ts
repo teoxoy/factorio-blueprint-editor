@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import Panel from '../controls/panel'
 import Slot from '../controls/slot'
-import { InventoryContainer } from './inventory'
+import F from '../controls/functions'
 
 class QuickbarSlot extends Slot {
     get itemName(): string {
@@ -11,7 +11,7 @@ class QuickbarSlot extends Slot {
 
     public assignItem(itemName: string) {
         this.data = itemName
-        this.content = InventoryContainer.createIcon(itemName, false)
+        this.content = F.CreateIcon(itemName, false)
     }
 
     public unassignItem() {

@@ -1,120 +1,12 @@
 import FD from 'factorio-data'
-import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import F from '../controls/functions'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'
 
-// TODO: Move methods createIcon() and createIconWithAmount() to common functions class
-
 /** Inventory Dialog - Displayed to the user if there is a need to select an item */
 export class InventoryContainer extends Dialog {
-    /**
-     * Create Icon from Sprite Item information
-     * @param item - Item to create Sprite from
-     * @param setAnchor - Temporar parameter to disable anchoring (this parameter may be removed again in the future)
-     */
-    public static createIcon(itemName: string, setAnchor: boolean = true): PIXI.DisplayObject {
-        // inventory group icon is not present in FD.items
-        const iconName = FD.items[itemName]
-            ? FD.items[itemName].icon
-            : FD.inventoryLayout.find(g => g.name === itemName).icon
-
-        if (iconName !== undefined) {
-            const icon = PIXI.Sprite.from(iconName)
-            if (setAnchor) {
-                icon.anchor.set(0.5, 0.5)
-            }
-            return icon
-        }
-
-        const icons = FD.items[itemName].icons
-        if (icons !== undefined) {
-            const img = new PIXI.Container()
-            for (const icon of icons) {
-                const sprite = PIXI.Sprite.from(icon.icon)
-                if (icon.scale) {
-                    sprite.scale.set(icon.scale, icon.scale)
-                }
-                if (icon.shift) {
-                    sprite.position.set(icon.shift[0], icon.shift[1])
-                }
-                if (icon.tint) {
-                    const t = icon.tint
-                    sprite.filters = [
-                        new AdjustmentFilter({
-                            red: t.r,
-                            green: t.g,
-                            blue: t.b,
-                            alpha: t.a || 1
-                        })
-                    ]
-                }
-                if (setAnchor) {
-                    sprite.anchor.set(0.5, 0.5)
-                }
-
-                if (!setAnchor && icon.shift) {
-                    sprite.position.x += sprite.width / 2
-                    sprite.position.y += sprite.height / 2
-                }
-
-                img.addChild(sprite)
-            }
-            return img
-        }
-    }
-
-    /**
-     * Creates an icon with amount on host at coordinates
-     * @param host - PIXI.Container on top of which the icon shall be created
-     * @param x - Horizontal position of icon from top left corner
-     * @param y - Vertical position of icon from top left corner
-     * @param name - Name if item
-     * @param amount - Amount to show
-     */
-    public static createIconWithAmount(host: PIXI.Container, x: number, y: number, name: string, amount: number) {
-        const icon: PIXI.DisplayObject = InventoryContainer.createIcon(name, false)
-        icon.position.set(x, y)
-        host.addChild(icon)
-
-        const amountString: string = amount < 1000 ? amount.toString() : `${Math.floor(amount / 1000)}k`
-        const size: PIXI.TextMetrics = PIXI.TextMetrics.measureText(amountString, G.styles.icon.amount)
-        const text = new PIXI.Text(amountString, G.styles.icon.amount)
-        text.position.set(x + 33 - size.width, y + 33 - size.height)
-        host.addChild(text)
-    }
-
-    public static createRecipe(
-        host: PIXI.Container,
-        x: number,
-        y: number,
-        ingredients: FD.IngredientOrResult[],
-        results: FD.IngredientOrResult[],
-        time: number
-    ) {
-        let nextX = x
-
-        for (const i of ingredients) {
-            InventoryContainer.createIconWithAmount(host, nextX, y, i.name, i.amount)
-            nextX += 36
-        }
-
-        nextX += 2
-        const timeText = `=${time}s>`
-        const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, G.styles.dialog.label)
-        const timeObject: PIXI.Text = new PIXI.Text(timeText, G.styles.dialog.label)
-        timeObject.position.set(nextX, 6 + y)
-        host.addChild(timeObject)
-        nextX += timeSize.width + 6
-
-        for (const r of results) {
-            InventoryContainer.createIconWithAmount(host, nextX, y, r.name, r.amount)
-            nextX += 36
-        }
-    }
-
     /** Container for Inventory Group Buttons */
     private readonly m_InventoryGroups: PIXI.Container
 
@@ -222,7 +114,7 @@ export class InventoryContainer extends Dialog {
 
                     const button: Button = new Button(36, 36)
                     button.position.set(itemColIndex * 38, itemRowIndex * 38)
-                    button.content = InventoryContainer.createIcon(item.name, false)
+                    button.content = F.CreateIcon(item.name, false)
                     button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                         e.stopPropagation()
                         if (e.data.button === 0) {
@@ -262,7 +154,7 @@ export class InventoryContainer extends Dialog {
                 const button = new Button(68, 68, 3)
                 button.active = groupIndex === 0
                 button.position.set(groupIndex * 70, 0)
-                button.content = InventoryContainer.createIcon(group.name, false)
+                button.content = F.CreateIcon(group.name, false)
                 button.data = inventoryGroupItems
                 button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     if (e.data.button === 0) {
@@ -334,6 +226,6 @@ export class InventoryContainer extends Dialog {
 
         this.m_RecipeLabel.text = recipe.ui_name
 
-        InventoryContainer.createRecipe(this.m_RecipeContainer, 0, 0, recipe.ingredients, recipe.results, recipe.time)
+        F.CreateRecipe(this.m_RecipeContainer, 0, 0, recipe.ingredients, recipe.results, recipe.time)
     }
 }

@@ -1,6 +1,6 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import { InventoryContainer } from '../panels/inventory'
+import F from '../controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
 
@@ -357,7 +357,7 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         function createIconWithBackground(container: PIXI.Container, itemName: string, position?: IPoint) {
-            const icon = InventoryContainer.createIcon(itemName)
+            const icon = F.CreateIcon(itemName)
             const background = PIXI.Sprite.from('graphics/entity-info-dark-background.png')
             background.anchor.set(0.5, 0.5)
             if (position) {

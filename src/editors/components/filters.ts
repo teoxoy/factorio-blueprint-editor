@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js'
 import Slot from '../../controls/slot'
 import Entity from '../../factorio-data/entity'
 import { InventoryContainer } from '../../panels/inventory'
+import F from '../../controls/functions'
 
 /** Module Slots for Entity */
 export default class Filters extends PIXI.Container {
@@ -172,7 +173,7 @@ export default class Filters extends PIXI.Container {
                             }
                         }
                         slot.content = new PIXI.Container()
-                        InventoryContainer.createIconWithAmount(
+                        F.CreateIconWithAmount(
                             slot.content as PIXI.Container,
                             -16,
                             -16,
@@ -180,7 +181,7 @@ export default class Filters extends PIXI.Container {
                             slotFilter.count
                         )
                     } else {
-                        slot.content = InventoryContainer.createIcon(slotFilter.name, false)
+                        slot.content = F.CreateIcon(slotFilter.name, false)
                     }
                     slot.name = slotFilter.name
                 }
