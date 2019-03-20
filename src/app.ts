@@ -25,9 +25,8 @@ import Dialog from './controls/dialog'
 import * as History from './factorio-data/history'
 
 if (PIXI.utils.isMobile.any) {
-    const text = 'This application is not compatible with mobile devices.'
-    document.getElementById('loadingMsg').innerHTML = text
-    throw new Error(text)
+    document.getElementById('loadingScreen').classList.add('mobileError')
+    throw new Error('MOBILE DEVICE DETECTED')
 }
 
 console.log(
