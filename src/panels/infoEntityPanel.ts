@@ -79,14 +79,16 @@ export class InfoEntityPanel extends Panel {
     }
 
     updateVisualization(entity?: Entity) {
+        this.m_RecipeContainer.removeChildren()
+        this.m_RecipeIOContainer.removeChildren()
+
         if (!entity) {
             this.visible = false
             this.m_EntityName.text = ''
             this.m_entityInfo.text = ''
-            this.m_RecipeContainer.removeChildren()
-            this.m_RecipeIOContainer.removeChildren()
             return
         }
+
         this.visible = true
         let nextY = this.title.position.y + this.title.height + 10
 
