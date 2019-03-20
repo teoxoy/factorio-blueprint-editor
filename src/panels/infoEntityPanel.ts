@@ -92,7 +92,6 @@ export class InfoEntityPanel extends Panel {
         this.visible = true
         let nextY = this.title.position.y + this.title.height + 10
 
-        // TODO (for all entities): icon, recipe to create itself, total raw to create itself, energy consumption,...
         this.m_EntityName.text = `Name: ${FD.entities[entity.name].ui_name}`
         this.m_EntityName.position.set(10, nextY)
         nextY = this.m_EntityName.position.y + this.m_EntityName.height + 10
