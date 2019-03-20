@@ -171,5 +171,5 @@ export default {
     range,
     getAngle,
     getReflectedPoint,
-    point: findSide
+    findSide
 }
