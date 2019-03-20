@@ -706,28 +706,30 @@ export default class Entity extends EventEmitter {
         History.commitTransaction()
     }
 
-    rotate(ccw = false, rotateOpposingUB = false) {
+    get canBeRotated() {
         if (
-            !this.assemblerCraftsWithFluid &&
-            (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3')
+            ((this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3') &&
+                !this.assemblerCraftsWithFluid) ||
+            this.m_BP.entityPositionGrid.sharesCell(this.getArea()) ||
+            !this.entityData.possible_rotations
         ) {
+            return false
+        }
+
+        return true
+    }
+
+    rotate(ccw = false, rotateOpposingUB = false) {
+        if (!this.canBeRotated) {
             return
         }
 
-        if (this.m_BP.entityPositionGrid.sharesCell(this.getArea())) {
-            return
-        }
-
-        const PR = this.entityData.possible_rotations
-        if (!PR) {
-            return
-        }
-
+        const pr = this.entityData.possible_rotations
         const newDir =
-            PR[
-                (PR.indexOf(this.direction) +
+            pr[
+                (pr.indexOf(this.direction) +
                     (this.size.x !== this.size.y || this.type === 'underground_belt' ? 2 : 1) * (ccw ? 3 : 1)) %
-                    PR.length
+                    pr.length
             ]
 
         if (newDir === this.direction) {
@@ -769,10 +771,22 @@ export default class Entity extends EventEmitter {
         History.startTransaction(`Pasted settings to entity: ${this.type}`)
 
         // PASTE RECIPE
+        let tRecipe = this.recipe
         const aR = this.acceptedRecipes
         if (aR.length > 0 && sourceEntity.acceptedRecipes) {
-            this.recipe =
+            tRecipe =
                 sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
+            this.recipe = tRecipe
+        }
+
+        // PASTE DIRECTION (only for type assembling_machine)
+        if (
+            this.type === 'assembling_machine' &&
+            this.name !== 'assembling_machine' &&
+            tRecipe &&
+            FD.recipes[tRecipe].category === 'crafting_with_fluid'
+        ) {
+            this.direction = sourceEntity.direction
         }
 
         // PASTE MODULES
@@ -807,6 +821,60 @@ export default class Entity extends EventEmitter {
         }
 
         History.commitTransaction()
+
+        /*
+            TODO:
+
+            assembling machines -> filter inserters:
+                filters
+
+            assembling machines -> requester chest:
+                filters
+                request amount formula: Math.min(ingredientAmount, Math.ceil((ingredientAmount * newCraftingSpeed) / recipe.time))
+
+            Locomotive:
+                Schedule
+                Color
+
+            TrainStop:
+                Color
+                Name
+
+            TrainStop<->Locomotive:
+                Color
+
+            ProgrammableSpeaker:
+                Parameters
+                AlertParameters
+
+            RocketSilo:
+                LaunchWhenRocketHasItems
+
+            CargoWagon:
+            ContainerEntity:
+                Bar
+                Filters
+
+            CREATIVE ENTITIES:
+                ElectricEnergyInterface:
+                    ElectricBufferSize
+                    PowerProduction
+                    PowerUsage
+
+                HeatInterface:
+                    temperature
+                    mode
+
+                InfinityContainer:
+                    Filters
+                    RemoveUnfilteredItems
+
+                InfinityPipe:
+                    Filter
+
+                Loader:
+                    Filters
+        */
     }
 
     topLeft() {
