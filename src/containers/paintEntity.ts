@@ -187,21 +187,12 @@ export class EntityPaintContainer extends PaintContainer {
 
         const frgEntNr = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position)
         if (frgEntNr) {
-            const frgEnt = G.bp.entities.get(frgEntNr)
-            frgEnt.change(this.name, direction)
-            const c = EntityContainer.mappings.get(frgEntNr)
-            c.redraw()
-            c.redrawSurroundingEntities()
-            c.redrawEntityInfo()
+            G.bp.fastReplaceEntity(G.bp.entities.get(frgEntNr), this.name, direction)
             return
         }
         const snEntNr = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position)
         if (snEntNr) {
             G.bp.entities.get(snEntNr).direction = direction
-            const c = EntityContainer.mappings.get(snEntNr)
-            c.redraw()
-            c.redrawSurroundingEntities()
-            c.redrawEntityInfo()
             return
         }
 

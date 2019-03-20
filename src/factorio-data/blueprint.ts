@@ -161,6 +161,21 @@ export default class Blueprint extends EventEmitter {
         History.commitTransaction()
     }
 
+    fastReplaceEntity(entity: Entity, name: string, direction: number) {
+        History.startTransaction(`Fast replaced entity: ${entity.name}`)
+
+        this.removeEntity(entity)
+
+        // TODO: keep wire connections
+        this.createEntity({
+            name,
+            direction,
+            position: entity.position
+        }).pasteSettings(entity)
+
+        History.commitTransaction()
+    }
+
     onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity) {
         if (newValue === undefined) {
             this.entityPositionGrid.removeTileData(oldValue)

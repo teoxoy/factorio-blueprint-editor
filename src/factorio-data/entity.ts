@@ -51,15 +51,6 @@ export default class Entity extends EventEmitter {
     get name(): string {
         return this.m_rawEntity.name
     }
-    set name(name: string) {
-        if (this.m_rawEntity.name === name) {
-            return
-        }
-
-        History.updateValue(this.m_rawEntity, ['name'], name, `Changed name to '${name}'`)
-            .emit(() => this.emit('name'))
-            .commit()
-    }
 
     /** Entity Type */
     get type(): string {
@@ -697,13 +688,6 @@ export default class Entity extends EventEmitter {
             width: this.size.x,
             height: this.size.y
         })
-    }
-
-    change(name: string, direction: number) {
-        History.startTransaction(`Changed Entity: ${this.type}`)
-        this.name = name
-        this.direction = direction
-        History.commitTransaction()
     }
 
     get canBeRotated() {
