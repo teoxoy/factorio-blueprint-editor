@@ -19,6 +19,10 @@ export class WiresContainer extends PIXI.Container {
 
         const minX = Math.min(p1.x, p2.x)
         const minY = Math.min(p1.y, p2.y)
+        const maxX = Math.max(p1.x, p2.x)
+        const maxY = Math.max(p1.y, p2.y)
+        const dX = maxX - minX
+        const dY = maxY - minY
 
         const colorMap: { [key: string]: number } = {
             copper: 0xcf7c00,
@@ -27,22 +31,39 @@ export class WiresContainer extends PIXI.Container {
         }
 
         wire.lineStyle(1.5, colorMap[color])
-        wire.moveTo(p1.x - minX, p1.y - minY)
+        wire.moveTo(0, 0)
 
         if (p1.x === p2.x) {
-            wire.lineTo(p2.x - minX, p2.y - minY)
+            wire.lineTo(dX, dY)
         } else {
-            const force = 0.2
-            const dX = Math.max(p1.x, p2.x) - minX
-            const dY = Math.max(p1.y, p2.y) - minY
-            const X = dX / 2
-            const Y = (dY / dX) * X + force * dX
+            const d = Math.sqrt(dX * dX + dY * dY)
+            const a = Math.atan2(dX, -dY)
+            const height = Math.sin(a) * Math.min(1, d / 32 / 3) * 30
 
-            // TODO: make wires smoother, use 2 points instead of 1
-            wire.bezierCurveTo(X, Y, X, Y, p2.x - minX, p2.y - minY)
+            const slope = dY / dX
+            const uX = -dY / d
+            const uY = dX / d
+
+            const oX = dX / 5
+            const oY = slope * oX
+            const oX2 = (dX / 5) * 4
+            const oY2 = slope * oX2
+
+            const X = oX + height * uX
+            const Y = oY + height * uY
+            const X2 = oX2 + height * uX
+            const Y2 = oY2 + height * uY
+
+            wire.bezierCurveTo(X, Y, X2, Y2, dX, dY)
         }
 
-        wire.position.set(minX, minY)
+        wire.position.set(minX + dX / 2, minY + dY / 2)
+        wire.pivot.set(dX / 2, dY / 2)
+
+        if (!((p1.x < p2.x && p1.y < p2.y) || (p2.x < p1.x && p2.y < p1.y))) {
+            wire.scale.x = -1
+        }
+
         return wire
     }
 
