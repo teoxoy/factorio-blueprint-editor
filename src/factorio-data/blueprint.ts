@@ -6,7 +6,7 @@ import util from '../common/util'
 import Entity from './entity'
 import { PositionGrid } from './positionGrid'
 import generators from './generators'
-import * as History from './history'
+import History from './history'
 import Tile from './tile'
 
 class OurMap<K, V> extends Map<K, V> {
@@ -57,6 +57,7 @@ export default class Blueprint extends EventEmitter {
     entityPositionGrid: PositionGrid
     entities: OurMap<number, Entity>
     tiles: OurMap<string, Tile>
+    history: History
 
     private m_nextEntityNumber = 1
 
@@ -68,6 +69,7 @@ export default class Blueprint extends EventEmitter {
         this.entities = new OurMap()
         this.tiles = new OurMap()
         this.entityPositionGrid = new PositionGrid(this)
+        this.history = new History()
 
         if (data) {
             this.name = data.label
@@ -107,7 +109,7 @@ export default class Blueprint extends EventEmitter {
                 offset.x += firstEntityTopLeft.x % 1 === 0 ? 0 : 0.5
                 offset.y += firstEntityTopLeft.y % 1 === 0 ? 0 : 0.5
 
-                History.startTransaction()
+                this.history.startTransaction()
 
                 this.entities = new OurMap(
                     data.entities.map(e =>
@@ -122,12 +124,13 @@ export default class Blueprint extends EventEmitter {
                     e => e.entityNumber
                 )
 
-                History.commitTransaction()
+                this.history.commitTransaction()
             }
         }
 
         // makes initial entities non undoable and resets the history if the user cleared the editor
-        History.reset()
+        this.history.reset()
+        this.history.logging = true
 
         return this
     }
@@ -141,28 +144,28 @@ export default class Blueprint extends EventEmitter {
             this
         )
 
-        History.updateMap(this.entities, rawEntity.entityNumber, rawEntity, `Added entity: ${rawEntity.name}`)
-            .type('add')
-            .emit(this.onCreateOrRemoveEntity.bind(this))
+        this.history
+            .updateMap(this.entities, rawEntity.entityNumber, rawEntity, 'Create entity')
+            .onDone(this.onCreateOrRemoveEntity.bind(this))
             .commit()
 
         return rawEntity
     }
 
     removeEntity(entity: Entity) {
-        History.startTransaction(`Deleted entity: ${entity.name}`)
+        this.history.startTransaction('Remove entity')
 
         entity.removeAllConnections()
 
-        History.updateMap(this.entities, entity.entityNumber, undefined, undefined, true)
-            .type('del')
-            .emit(this.onCreateOrRemoveEntity.bind(this))
+        this.history
+            .updateMap(this.entities, entity.entityNumber, undefined, 'Remove entity')
+            .onDone(this.onCreateOrRemoveEntity.bind(this))
 
-        History.commitTransaction()
+        this.history.commitTransaction()
     }
 
     fastReplaceEntity(entity: Entity, name: string, direction: number) {
-        History.startTransaction(`Fast replaced entity: ${entity.name}`)
+        this.history.startTransaction('Fast replace entity')
 
         this.removeEntity(entity)
 
@@ -173,65 +176,54 @@ export default class Blueprint extends EventEmitter {
             position: entity.position
         }).pasteSettings(entity)
 
-        History.commitTransaction()
+        this.history.commitTransaction()
     }
 
     onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity) {
-        if (newValue === undefined) {
+        if (newValue) {
+            this.entityPositionGrid.setTileData(newValue)
+            this.emit('create', newValue)
+        } else if (oldValue) {
             this.entityPositionGrid.removeTileData(oldValue)
             oldValue.destroy()
             this.emit('destroy')
-        } else {
-            this.entityPositionGrid.setTileData(newValue)
-            this.emit('create', newValue)
         }
     }
 
     createTiles(name: string, positions: IPoint[]) {
-        History.startTransaction(`Added tiles: ${name}`)
+        this.history.startTransaction('Create tiles')
 
         positions.forEach(p => {
-            const existingTile = this.tiles.get(`${p.x},${p.y}`)
-
-            if (existingTile && existingTile.name !== name) {
-                History.updateMap(this.tiles, existingTile.hash, undefined, undefined, true)
-                    .type('del')
-                    .emit(this.onCreateOrRemoveTile.bind(this))
-            }
-
-            if (!existingTile || (existingTile && existingTile.name !== name)) {
-                const tile = new Tile(name, p)
-
-                // TODO: fix the error here, it's because tiles don't have an entity number
-                // maybe change the History to accept a function or a variable that will be used as an identifier for logging
-                History.updateMap(this.tiles, tile.hash, tile)
-                    .type('add')
-                    .emit(this.onCreateOrRemoveTile.bind(this))
-            }
+            const tile = new Tile(name, p)
+            this.history
+                .updateMap(this.tiles, tile.hash, tile, 'Create tile')
+                .onDone(this.onCreateOrRemoveTile.bind(this))
         })
 
-        History.commitTransaction()
+        this.history.commitTransaction()
     }
 
     removeTiles(positions: IPoint[]) {
-        History.startTransaction(`Deleted tiles`)
+        this.history.startTransaction('Remove tiles')
 
-        positions.forEach(p => {
-            const tile = this.tiles.get(`${p.x},${p.y}`)
-            if (tile) {
-                History.updateMap(this.tiles, tile.hash, undefined, undefined, true)
-                    .type('del')
-                    .emit(this.onCreateOrRemoveTile.bind(this))
-            }
-        })
+        positions
+            .map(p => this.tiles.get(`${p.x},${p.y}`))
+            .filter(tile => !!tile)
+            .forEach(tile => {
+                this.history
+                    .updateMap(this.tiles, tile.hash, undefined, 'Remove tile')
+                    .onDone(this.onCreateOrRemoveTile.bind(this))
+            })
 
-        History.commitTransaction()
+        this.history.commitTransaction()
     }
 
     onCreateOrRemoveTile(newValue: Tile, oldValue: Tile) {
-        if (newValue === undefined) {
+        if (oldValue) {
             oldValue.destroy()
-        } else {
+        }
+
+        if (newValue) {
             this.emit('create_t', newValue)
         }
     }
@@ -370,7 +362,8 @@ export default class Blueprint extends EventEmitter {
 
         T.stop()
 
-        History.startTransaction('Generated Oil Outpost!')
+        this.history.logging = false
+        this.history.startTransaction('Generate Oil Outpost')
 
         GP.pipes.forEach(pipe => this.createEntity(pipe))
         if (BEACONS) {
@@ -386,7 +379,8 @@ export default class Blueprint extends EventEmitter {
             }
         })
 
-        History.commitTransaction()
+        this.history.commitTransaction()
+        this.history.logging = true
 
         if (!DEBUG) {
             return

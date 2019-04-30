@@ -4,7 +4,6 @@ import util from '../common/util'
 import Blueprint from './blueprint'
 import spriteDataBuilder from './spriteDataBuilder'
 import { Area } from './positionGrid'
-import * as History from './history'
 import U from './generators/util'
 
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
@@ -99,13 +98,9 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.updateValue(
-            this.m_rawEntity,
-            ['position'],
-            position,
-            `Changed position to 'x: ${Math.floor(position.x)}, y: ${Math.floor(position.y)}'`
-        )
-            .emit((newValue, oldValue) => {
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['position'], position, 'Change position')
+            .onDone((newValue, oldValue) => {
                 this.m_BP.entityPositionGrid.removeTileData(this, oldValue)
                 this.m_BP.entityPositionGrid.setTileData(this, newValue)
                 this.emit('position', newValue, oldValue)
@@ -137,8 +132,9 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.updateValue(this.m_rawEntity, ['direction'], direction, `Changed direction to '${direction}'`)
-            .emit(() => this.emit('direction'))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['direction'], direction, 'Change direction')
+            .onDone(() => this.emit('direction'))
             .commit()
     }
 
@@ -151,8 +147,9 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.updateValue(this.m_rawEntity, ['type'], type, `Changed direction type to '${type}'`)
-            .emit(() => this.emit('directionType'))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['type'], type, 'Change direction type')
+            .onDone(() => this.emit('directionType'))
             .commit()
     }
 
@@ -165,9 +162,11 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.startTransaction(`Changed recipe to '${recipe}'`)
+        this.m_BP.history.startTransaction()
 
-        History.updateValue(this.m_rawEntity, ['recipe'], recipe).emit(r => this.emit('recipe', r))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['recipe'], recipe, 'Change recipe')
+            .onDone(r => this.emit('recipe', r))
 
         if (recipe !== undefined) {
             // Some modules on the entity may not be compatible with the new selected recipe, filter those out
@@ -177,7 +176,7 @@ export default class Entity extends EventEmitter {
                 .map(item => item.name)
         }
 
-        History.commitTransaction()
+        this.m_BP.history.commitTransaction()
     }
 
     /** Recipes this entity can accept */
@@ -254,8 +253,9 @@ export default class Entity extends EventEmitter {
             }
         }
 
-        History.updateValue(this.m_rawEntity, ['items'], ms, `Changed modules to '${modules}'`)
-            .emit(() => this.emit('modules', this.modules))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['items'], ms, 'Change modules')
+            .onDone(() => this.emit('modules', this.modules))
             .commit()
     }
 
@@ -329,13 +329,9 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.updateValue(
-            this.m_rawEntity,
-            ['input_priority'],
-            priority,
-            `Changed splitter input priority to '${priority}'`
-        )
-            .emit(() => this.emit('splitterInputPriority', this.splitterInputPriority))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['input_priority'], priority, 'Change splitter input priority')
+            .onDone(() => this.emit('splitterInputPriority', this.splitterInputPriority))
             .commit()
     }
 
@@ -348,17 +344,18 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.startTransaction(`Changed splitter output priority to '${priority}'`)
+        this.m_BP.history.startTransaction()
 
-        History.updateValue(this.m_rawEntity, ['output_priority'], priority)
-            .emit(() => this.emit('splitterOutputPriority', this.splitterOutputPriority))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['output_priority'], priority, 'Change splitter output priority')
+            .onDone(() => this.emit('splitterOutputPriority', this.splitterOutputPriority))
             .commit()
 
         if (priority === undefined) {
             this.filters = undefined
         }
 
-        History.commitTransaction()
+        this.m_BP.history.commitTransaction()
     }
 
     /** Splitter filter */
@@ -370,18 +367,19 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.startTransaction(`Changed splitter filter to '${filter}'`)
+        this.m_BP.history.startTransaction()
 
-        History.updateValue(this.m_rawEntity, ['filter'], filter)
-            .emit(() => this.emit('splitterFilter'))
-            .emit(() => this.emit('filters'))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['filter'], filter, 'Change splitter filter')
+            .onDone(() => this.emit('splitterFilter'))
+            .onDone(() => this.emit('filters'))
             .commit()
 
         if (this.splitterOutputPriority === undefined) {
             this.splitterOutputPriority = 'left'
         }
 
-        History.commitTransaction()
+        this.m_BP.history.commitTransaction()
     }
 
     /** Inserter filter */
@@ -401,14 +399,10 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.updateValue(
-            this.m_rawEntity,
-            ['filters'],
-            filters,
-            `Changed inserter filter${this.filterSlots === 1 ? '' : 's'}`
-        )
-            .emit(() => this.emit('inserterFilters'))
-            .emit(() => this.emit('filters'))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['filters'], filters, 'Change inserter filter')
+            .onDone(() => this.emit('inserterFilters'))
+            .onDone(() => this.emit('filters'))
             .commit()
     }
 
@@ -444,14 +438,10 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.updateValue(
-            this.m_rawEntity,
-            ['request_filters'],
-            filters,
-            `Changed chest filter${this.filterSlots === 1 ? '' : 's'}`
-        )
-            .emit(() => this.emit('logisticChestFilters'))
-            .emit(() => this.emit('filters'))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['request_filters'], filters, 'Change chest filter')
+            .onDone(() => this.emit('logisticChestFilters'))
+            .onDone(() => this.emit('filters'))
             .commit()
     }
 
@@ -472,13 +462,9 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.updateValue(
-            this.m_rawEntity,
-            ['request_from_buffers'],
-            request,
-            `Changed request from buffer chest to '${request}'`
-        )
-            .emit(() => this.emit('requestFromBufferChest'))
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['request_from_buffers'], request, 'Change request from buffer chest')
+            .onDone(() => this.emit('requestFromBufferChest'))
             .commit()
     }
 
@@ -589,23 +575,23 @@ export default class Entity extends EventEmitter {
         // If power pole doesn't have connections, we only have to fire the emit
         if (this.type === 'electric_pole' && !this.m_rawEntity.connections) {
             // Hack to get emit working
-            History.updateValue(this.m_rawEntity, ['entity_number'], this.entityNumber).emit(emitOnRemove.bind(this))
+            this.m_BP.history
+                .updateValue(this.m_rawEntity, ['entity_number'], this.entityNumber, '')
+                .onDone(() => this.emit('removedConnection', connection))
             return
+        }
+
+        const removeValueAtKey = (key: string[]) => {
+            this.m_BP.history
+                .updateValue(this.m_rawEntity, key, undefined, 'Remove connection')
+                .onDone(() => this.emit('removedConnection', connection))
         }
 
         if (this.name === 'power_switch' && connection.color === 'copper') {
             if (Object.keys(this.m_rawEntity.connections).length === 1) {
-                History.updateValue(this.m_rawEntity, ['connections'], undefined, undefined, true).emit(
-                    emitOnRemove.bind(this)
-                )
+                removeValueAtKey(['connections'])
             } else {
-                History.updateValue(
-                    this.m_rawEntity,
-                    ['connections', `Cu${(connection.entitySide2 - 1).toString()}`],
-                    undefined,
-                    undefined,
-                    true
-                ).emit(emitOnRemove.bind(this))
+                removeValueAtKey(['connections', `Cu${(connection.entitySide2 - 1).toString()}`])
             }
             return
         }
@@ -619,39 +605,29 @@ export default class Entity extends EventEmitter {
         const c = (this.m_rawEntity.connections[side] as BPS.IConnSide)[color].length === 1
 
         if (a && b && c) {
-            History.updateValue(this.m_rawEntity, ['connections'], undefined, undefined, true).emit(
-                emitOnRemove.bind(this)
-            )
+            removeValueAtKey(['connections'])
         } else if (b && c) {
-            History.updateValue(this.m_rawEntity, ['connections', side], undefined, undefined, true).emit(
-                emitOnRemove.bind(this)
-            )
+            removeValueAtKey(['connections', side])
         } else if (c) {
-            History.updateValue(this.m_rawEntity, ['connections', side, color], undefined, undefined, true).emit(
-                emitOnRemove.bind(this)
-            )
+            removeValueAtKey(['connections', side, color])
         } else {
             const i = (this.m_rawEntity.connections[side] as BPS.IConnSide)[color].findIndex(
                 d => d.entity_id === otherEntNr
             )
-            History.updateValue(
-                this.m_rawEntity,
-                ['connections', side, color, i.toString()],
-                undefined,
-                undefined,
-                true
-            ).emit(emitOnRemove.bind(this))
-        }
-
-        function emitOnRemove() {
-            this.emit('removedConnection', connection)
+            removeValueAtKey(['connections', side, color, i.toString()])
         }
     }
 
     removeAllConnections() {
-        this.connections.forEach(conn => this.m_BP.entities.get(conn.entityNumber2).removeConnection(conn))
+        const C = this.connections
+        if (C.length !== 0) {
+            C.forEach(conn => this.m_BP.entities.get(conn.entityNumber2).removeConnection(conn))
+        }
 
-        History.updateValue(this.m_rawEntity, ['connections'], undefined, undefined, true)
+        // Needed because it's different than this.connections
+        if (this.m_rawEntity.connections) {
+            this.m_BP.history.updateValue(this.m_rawEntity, ['connections'], undefined, 'Remove connection')
+        }
     }
 
     get chemicalPlantDontConnectOutput() {
@@ -720,7 +696,7 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.startTransaction(`Rotated entity: ${this.type}`)
+        this.m_BP.history.startTransaction('Rotate entity')
 
         this.direction = newDir
 
@@ -743,7 +719,7 @@ export default class Entity extends EventEmitter {
             }
         }
 
-        History.commitTransaction()
+        this.m_BP.history.commitTransaction()
     }
 
     /** Paste relevant data from source entity */
@@ -752,7 +728,7 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        History.startTransaction(`Pasted settings to entity: ${this.type}`)
+        this.m_BP.history.startTransaction('Paste settings to entity')
 
         // PASTE RECIPE
         let tRecipe = this.recipe
@@ -804,7 +780,7 @@ export default class Entity extends EventEmitter {
             this.requestFromBufferChest = sourceEntity.requestFromBufferChest
         }
 
-        History.commitTransaction()
+        this.m_BP.history.commitTransaction()
 
         /*
             TODO:

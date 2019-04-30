@@ -20,7 +20,6 @@ import spritesheetsLoader from './spritesheetsLoader'
 import * as Editors from './editors/factory'
 import Entity from './factorio-data/entity'
 import Dialog from './controls/dialog'
-import * as History from './factorio-data/history'
 
 if (PIXI.utils.isMobile.any) {
     document.getElementById('loadingScreen').classList.add('mobileError')
@@ -317,15 +316,11 @@ actions.decreaseTileBuildingArea.bind(() => {
 })
 
 actions.undo.bind(() => {
-    if (History.canUndo()) {
-        History.undo()
-    }
+    G.bp.history.undo()
 })
 
 actions.redo.bind(() => {
-    if (History.canRedo()) {
-        History.redo()
-    }
+    G.bp.history.redo()
 })
 
 actions.generateOilOutpost.bind(() => {
