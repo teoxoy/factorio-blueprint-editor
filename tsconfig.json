@@ -12,8 +12,6 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "skipLibCheck": true,
-        "declaration": true,
-        "alwaysStrict": true,
-        "allowJs": true
+        "alwaysStrict": true
     }
 }
