@@ -320,15 +320,15 @@ export class BlueprintContainer extends PIXI.Container {
         G.bp.entities.forEach(e => this.wiresContainer.add(e.connections))
         G.bp.tiles.forEach(t => new TileContainer(t))
 
-        G.bp.on('create', (entity: Entity) => new EntityContainer(entity))
-        G.bp.on('create', (entity: Entity) => this.wiresContainer.add(entity.connections))
-        G.bp.on('create', () => this.wiresContainer.updatePassiveWires())
-        G.bp.on('destroy', () => this.wiresContainer.updatePassiveWires())
+        G.bp.on('create-entity', (entity: Entity) => new EntityContainer(entity))
+        G.bp.on('create-entity', (entity: Entity) => this.wiresContainer.add(entity.connections))
+        G.bp.on('create-entity', () => this.wiresContainer.updatePassiveWires())
+        G.bp.on('remove-entity', () => this.wiresContainer.updatePassiveWires())
 
-        G.bp.on('create_t', (tile: Tile) => new TileContainer(tile))
+        G.bp.on('create-tile', (tile: Tile) => new TileContainer(tile))
 
-        G.bp.on('create', () => this.updateHoverContainer())
-        G.bp.on('destroy', () => this.updateHoverContainer())
+        G.bp.on('create-entity', () => this.updateHoverContainer())
+        G.bp.on('remove-entity', () => this.updateHoverContainer())
 
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()

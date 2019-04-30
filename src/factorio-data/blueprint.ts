@@ -183,11 +183,11 @@ export default class Blueprint extends EventEmitter {
     onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity) {
         if (newValue) {
             this.entityPositionGrid.setTileData(newValue)
-            this.emit('create', newValue)
+            this.emit('create-entity', newValue)
         } else if (oldValue) {
             this.entityPositionGrid.removeTileData(oldValue)
             oldValue.destroy()
-            this.emit('destroy')
+            this.emit('remove-entity')
         }
     }
 
@@ -227,7 +227,7 @@ export default class Blueprint extends EventEmitter {
         }
 
         if (newValue) {
-            this.emit('create_t', newValue)
+            this.emit('create-tile', newValue)
         }
     }
 
