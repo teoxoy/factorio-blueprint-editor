@@ -82,6 +82,7 @@ function loadSpritesheet(src: string, json: any) {
             imageData =>
                 new Promise(resolve => {
                     if (G.app.renderer.context.webGLVersion === 1) {
+                        // WebGL1 --> make the spritesheet a power of 2 so that it generates mipmaps
                         const canvas = document.createElement('canvas')
                         const ctx = canvas.getContext('2d')
                         canvas.width = util.nearestPowerOf2(imageData.width)
@@ -89,15 +90,13 @@ function loadSpritesheet(src: string, json: any) {
                         ctx.drawImage(imageData, 0, 0)
                         canvas.toBlob(blob => resolve(blobToImageBitmap(blob)))
                     } else {
+                        // WebGL2 --> generates mipmaps even with non pow 2 textures
                         return resolve(imageData)
                     }
                 })
         )
         .then(imageData => {
-            // if WebGL1, make the spritesheet a power of 2 so that it generates mipmaps
-            // WebGL2 generates mipmaps even with non pow 2 textures
             const resource = new PIXI.resources.BaseImageResource(imageData)
-
             const baseTexture = new PIXI.BaseTexture(resource)
             // bind the baseTexture, this will also upload it to the GPU
             G.app.renderer.texture.bind(baseTexture)
