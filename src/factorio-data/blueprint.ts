@@ -160,6 +160,7 @@ export default class Blueprint extends EventEmitter {
         this.history
             .updateMap(this.entities, entity.entityNumber, undefined, 'Remove entity')
             .onDone(this.onCreateOrRemoveEntity.bind(this))
+            .commit()
 
         this.history.commitTransaction()
     }
@@ -198,6 +199,7 @@ export default class Blueprint extends EventEmitter {
             this.history
                 .updateMap(this.tiles, tile.hash, tile, 'Create tile')
                 .onDone(this.onCreateOrRemoveTile.bind(this))
+                .commit()
         })
 
         this.history.commitTransaction()
@@ -213,6 +215,7 @@ export default class Blueprint extends EventEmitter {
                 this.history
                     .updateMap(this.tiles, tile.hash, undefined, 'Remove tile')
                     .onDone(this.onCreateOrRemoveTile.bind(this))
+                    .commit()
             })
 
         this.history.commitTransaction()

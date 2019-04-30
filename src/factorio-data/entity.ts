@@ -167,6 +167,7 @@ export default class Entity extends EventEmitter {
         this.m_BP.history
             .updateValue(this.m_rawEntity, ['recipe'], recipe, 'Change recipe')
             .onDone(r => this.emit('recipe', r))
+            .commit()
 
         if (recipe !== undefined) {
             // Some modules on the entity may not be compatible with the new selected recipe, filter those out
@@ -578,6 +579,7 @@ export default class Entity extends EventEmitter {
             this.m_BP.history
                 .updateValue(this.m_rawEntity, ['entity_number'], this.entityNumber, '')
                 .onDone(() => this.emit('removedConnection', connection))
+                .commit()
             return
         }
 
@@ -585,6 +587,7 @@ export default class Entity extends EventEmitter {
             this.m_BP.history
                 .updateValue(this.m_rawEntity, key, undefined, 'Remove connection')
                 .onDone(() => this.emit('removedConnection', connection))
+                .commit()
         }
 
         if (this.name === 'power_switch' && connection.color === 'copper') {
@@ -626,7 +629,7 @@ export default class Entity extends EventEmitter {
 
         // Needed because it's different than this.connections
         if (this.m_rawEntity.connections) {
-            this.m_BP.history.updateValue(this.m_rawEntity, ['connections'], undefined, 'Remove connection')
+            this.m_BP.history.updateValue(this.m_rawEntity, ['connections'], undefined, 'Remove connection').commit()
         }
     }
 
