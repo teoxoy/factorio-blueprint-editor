@@ -1,5 +1,3 @@
-import './style.styl'
-
 import * as PIXI from 'pixi.js'
 
 import FileSaver from 'file-saver'
