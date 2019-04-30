@@ -297,6 +297,9 @@ export default class History {
             this.activeTransaction.apply()
             this.transactionHistory.push(this.activeTransaction)
             if (this.logging) {
+                if (this.historyIndex !== 0 && this.historyIndex % 20 === 0) {
+                    console.clear()
+                }
                 this.activeTransaction.log()
             }
             this.activeTransaction = undefined
