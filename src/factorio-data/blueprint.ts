@@ -393,7 +393,7 @@ export default class Blueprint extends EventEmitter {
         }
 
         // TODO: make a container special for debugging purposes
-        G.BPC.wiresContainer.children = []
+        G.BPC.wiresContainer.removeChildren()
 
         const timePerVis = 1000
         ;[GP.visualizations, BEACONS ? GB.visualizations : [], GPO.visualizations]

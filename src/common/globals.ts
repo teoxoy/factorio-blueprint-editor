@@ -99,7 +99,7 @@ const colors = {
             active: { color: 0xff9e44 }
         },
         panel: {
-            background: { color: 0x303030, border: 2 }
+            background: { color: 0x303030, alpha: 1, border: 2 }
         },
         slider: {
             slidebar: { color: 0xe2e2e2, p0: -95, p1: -80, p2: -10, p3: 0 },
@@ -122,14 +122,14 @@ const colors = {
         }
     },
     dialog: {
-        background: { color: 0x303030, border: 2 },
+        background: { color: 0x303030, alpha: 1, border: 2 },
         line: { background: { color: 0x646464, alpha: 0.7, border: 1 } }
     },
     editor: {
         sprite: { background: { color: 0x646464, alpha: 0.7 } }
     },
     quickbar: {
-        background: { color: 0x303030, border: 2 }
+        background: { color: 0x303030, alpha: 1, border: 2 }
     },
 
     _darkTheme: true,

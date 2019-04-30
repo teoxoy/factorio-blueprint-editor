@@ -8,23 +8,12 @@ module.exports = {
         project: './tsconfig.json'
     },
     plugins: ['@typescript-eslint'],
-    settings: {
-        'import/extensions': ['.ts'],
-        'import/parsers': {
-            '@typescript-eslint/parser': ['.ts']
-        },
-        'import/resolver': { node: { extensions: ['.ts'] } }
-    },
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:import/errors',
         'plugin:import/warnings',
-        /*
-            TODO: add 'plugin:import/typescript', and remove the settings object
-            when a new version of eslint-plugin-import gets released
-            https://github.com/benmosher/eslint-plugin-import/pull/1277
-        */
+        'plugin:import/typescript',
         // Turns off all rules that are unnecessary or might conflict with Prettier
         'plugin:prettier/recommended',
         'prettier/@typescript-eslint'
