@@ -50,7 +50,7 @@ const roundToTwo = (n: number) => Math.round(n * 100) / 100
  * @function updateVisualization (Update informations and show/hide panel)
  * @function setPosition (top right corner of the screen)
  * @extends /controls/panel (extends PIXI.Container)
- * @see instanciation in /app.ts - event in /containers/entity.ts
+ * @see instantiation in /index.ts - event in /containers/entity.ts
  */
 export class InfoEntityPanel extends Panel {
     title: PIXI.Text
