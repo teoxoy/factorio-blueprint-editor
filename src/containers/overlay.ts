@@ -256,11 +256,15 @@ export class OverlayContainer extends PIXI.Container {
             entity.type === 'generator' ||
             entity.name === 'oil_refinery' ||
             entity.name === 'chemical_plant' ||
-            entity.assemblerCraftsWithFluid
+            entity.assemblerCraftsWithFluid ||
+            entity.name === 'flamethrower_turret'
         ) {
             const createFluidArrow = (position: IPoint, type = 1) => {
                 const offset = 0.5
                 if (entity.name === 'offshore_pump') {
+                    position.y -= 2
+                }
+                if (entity.name === 'flamethrower_turret') {
                     position.y -= 2
                 }
                 const dir = util.getRelativeDirection(position)
@@ -289,6 +293,9 @@ export class OverlayContainer extends PIXI.Container {
                 }
                 if (entity.name === 'pumpjack') {
                     arrow.rotation = entity.direction * Math.PI * 0.25
+                }
+                if (entity.name === 'flamethrower_turret') {
+                    arrow.rotation = 0.5 * Math.PI
                 }
                 arrows.addChild(arrow)
             }

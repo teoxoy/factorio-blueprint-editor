@@ -677,6 +677,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
     switch (e.name) {
         case 'accumulator':
         case 'electric_energy_interface':
+        case 'infinity_chest':
             return () => [(e.picture as FD.SpriteLayers).layers[0]]
         case 'solar_panel':
             return () => [(e.picture as FD.SpriteLayers).layers[0]]
@@ -694,7 +695,6 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             return () => [e.base_picture as FD.SpriteData, e.animation as FD.SpriteData]
         case 'lab':
             return () => [e.off_animation.layers[0]]
-        case 'infinity_chest':
         case 'heat_interface':
             return () => [e.picture as FD.SpriteData]
 
