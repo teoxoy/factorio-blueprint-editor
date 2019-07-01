@@ -447,6 +447,9 @@ export default class Entity extends EventEmitter {
     }
 
     get infinityChestFilters(): IFilter[] {
+        if (!this.m_rawEntity.infinity_settings) {
+            return []
+        }
         return this.m_rawEntity.infinity_settings.filters
     }
 
