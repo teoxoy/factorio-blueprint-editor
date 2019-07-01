@@ -202,6 +202,11 @@
                                 "type": "boolean",
                                 "$comment": "only present if entity is logistic-chest-requester"
                             },
+                            "filter_mode": {
+                                "type": "string",
+                                "enum": ["blacklist"],
+                                "$comment": "only present if entity is filter-inserter or stack-filter-inserter"
+                            },
                             "filters": {
                                 "type": "array",
                                 "$comment": "only present if entity is filter-inserter or stack-filter-inserter",

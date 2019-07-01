@@ -383,6 +383,19 @@ export default class Entity extends EventEmitter {
         this.m_BP.history.commitTransaction()
     }
 
+    get filterMode() {
+        return this.m_rawEntity.filter_mode === 'blacklist' ? 'blacklist' : 'whitelist'
+    }
+
+    set filterMode(filterMode: 'whitelist' | 'blacklist') {
+        const mode = filterMode === 'blacklist' ? 'blacklist' : undefined
+
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['filter_mode'], mode, 'Change filter mode')
+            .onDone(() => this.emit('filterMode', this.filterMode))
+            .commit()
+    }
+
     /** Inserter filter */
     get inserterFilters(): IFilter[] {
         return this.m_rawEntity.filters

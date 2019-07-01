@@ -154,6 +154,8 @@ namespace BPS {
         override_stack_size?: number
         /** only present if entity is logistic-chest-requester */
         request_from_buffers?: boolean
+        /** only present if entity is filter-inserter or stack-filter-inserter */
+        filter_mode?: 'blacklist'
         /** only present if entity is filter-inserter, stack-filter-inserter or of type loader */
         filters?: {
             index: number
