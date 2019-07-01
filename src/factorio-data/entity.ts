@@ -451,6 +451,9 @@ export default class Entity extends EventEmitter {
     }
 
     get infinityPipeFilters(): IFilter[] {
+        if (!this.m_rawEntity.infinity_settings) {
+            return []
+        }
         return [{ name: this.m_rawEntity.infinity_settings.name, index: 1 }]
     }
 
