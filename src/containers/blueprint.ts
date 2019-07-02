@@ -81,42 +81,51 @@ class GridData extends EventEmitter {
     }
 }
 
-// This container improves rendering time by around 10-40% and has baked in viewport culling
-class OptimizedContainer extends PIXI.Container {
+class OptimizedContainer extends PIXI.ParticleContainer {
     children: EntitySprite[]
 
-    updateTransform() {
-        this._boundsID += 1
-
-        this.transform.updateTransform(this.parent.transform)
-
-        this.worldAlpha = this.alpha * this.parent.worldAlpha
-
-        for (const c of this.children) {
-            if (c.visible) {
-                c.updateTransform()
-            }
-        }
-    }
-
-    render(renderer: PIXI.Renderer) {
-        for (const c of this.children) {
-            if (G.BPC.viewportCulling) {
-                // faster than using c.getBounds()
-                if (
-                    c.cachedBounds[0] * this.worldTransform.a + c.worldTransform.tx > G.app.screen.width ||
-                    c.cachedBounds[1] * this.worldTransform.d + c.worldTransform.ty > G.app.screen.height ||
-                    c.cachedBounds[2] * this.worldTransform.a + c.worldTransform.tx < G.positionBPContainer.x ||
-                    c.cachedBounds[3] * this.worldTransform.d + c.worldTransform.ty < G.positionBPContainer.y
-                ) {
-                    continue
-                }
-            }
-
-            c.render(renderer)
-        }
+    constructor() {
+        super(undefined, undefined, undefined, true)
     }
 }
+
+// Old OptimizedContainer implementation - maybe remove this in the future
+// // This container improves rendering time by around 10-40% and has baked in viewport culling
+// class OptimizedContainer extends PIXI.Container {
+//     children: EntitySprite[]
+
+//     updateTransform() {
+//         this._boundsID += 1
+
+//         this.transform.updateTransform(this.parent.transform)
+
+//         this.worldAlpha = this.alpha * this.parent.worldAlpha
+
+//         for (const c of this.children) {
+//             if (c.visible) {
+//                 c.updateTransform()
+//             }
+//         }
+//     }
+
+//     render(renderer: PIXI.Renderer) {
+//         for (const c of this.children) {
+//             if (G.BPC.viewportCulling) {
+//                 // faster than using c.getBounds()
+//                 if (
+//                     c.cachedBounds[0] * this.worldTransform.a + c.worldTransform.tx > G.app.screen.width ||
+//                     c.cachedBounds[1] * this.worldTransform.d + c.worldTransform.ty > G.app.screen.height ||
+//                     c.cachedBounds[2] * this.worldTransform.a + c.worldTransform.tx < G.positionBPContainer.x ||
+//                     c.cachedBounds[3] * this.worldTransform.d + c.worldTransform.ty < G.positionBPContainer.y
+//                 ) {
+//                     continue
+//                 }
+//             }
+
+//             c.render(renderer)
+//         }
+//     }
+// }
 
 export class BlueprintContainer extends PIXI.Container {
     grid: PIXI.TilingSprite
@@ -130,7 +139,6 @@ export class BlueprintContainer extends PIXI.Container {
     viewport: Viewport
     hoverContainer: EntityContainer
     paintContainer: PaintContainer
-    viewportCulling = true
     gridData: GridData
 
     constructor() {

@@ -234,21 +234,25 @@ actions.takePicture.bind(() => {
     if (G.renderOnly) {
         G.BPC.cacheAsBitmap = false
     }
-    G.BPC.viewportCulling = false
 
-    const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1)
-    texture.frame = G.BPC.getBlueprintBounds()
-    texture.updateUvs()
+    // getLocalBounds is needed because it seems that it has sideeffects
+    // without it generateTexture returns an empty texture
+    G.BPC.getLocalBounds()
+    const region = G.BPC.getBlueprintBounds()
+    const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1, region)
+    const canvas = G.app.renderer.plugins.extract.canvas(texture as PIXI.RenderTexture)
 
-    G.app.renderer.plugins.extract.canvas(new PIXI.Sprite(texture)).toBlob((blob: Blob) => {
+    canvas.toBlob(blob => {
         FileSaver.saveAs(blob, `${G.bp.name}.png`)
         console.log('Saved BP Image')
+
+        // Clear
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
     })
 
     if (G.renderOnly) {
         G.BPC.cacheAsBitmap = true
     }
-    G.BPC.viewportCulling = true
 })
 
 actions.showInfo.bind(() => {

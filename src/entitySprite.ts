@@ -97,7 +97,6 @@ export class EntitySprite extends PIXI.Sprite {
     shift: IPoint
     zIndex: number
     zOrder: number
-    cachedBounds: number[]
 
     constructor(data: ISpriteData) {
         if (!data.shift) {
@@ -161,11 +160,16 @@ export class EntitySprite extends PIXI.Sprite {
             F.applyTint(this, data.tint)
         }
 
+        return this
+    }
+
+    /** Was needed for viewport culling but now with ParticleContainer we can't use viewport culling anymore */
+    cacheLocalBounds() {
         // CACHE LOCAL BOUNDS
-        let minX = this.texture.orig.width * -this.anchor.x * data.scale
-        let minY = this.texture.orig.height * -this.anchor.y * data.scale
-        let maxX = this.texture.orig.width * (1 - this.anchor.x) * data.scale
-        let maxY = this.texture.orig.height * (1 - this.anchor.y) * data.scale
+        let minX = this.texture.orig.width * -this.anchor.x * this.scale.x
+        let minY = this.texture.orig.height * -this.anchor.y * this.scale.y
+        let maxX = this.texture.orig.width * (1 - this.anchor.x) * this.scale.x
+        let maxY = this.texture.orig.height * (1 - this.anchor.y) * this.scale.y
 
         if (this.rotation !== 0) {
             const sin = Math.sin(this.rotation)
@@ -190,9 +194,7 @@ export class EntitySprite extends PIXI.Sprite {
             maxY = Math.max(y0, y1, y2, y3)
         }
 
-        this.cachedBounds = [minX, minY, maxX, maxY]
-
-        return this
+        // this.cachedBounds = [minX, minY, maxX, maxY]
     }
 
     setPosition(position: IPoint) {
