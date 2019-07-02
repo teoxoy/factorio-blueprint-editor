@@ -70,11 +70,9 @@ export class EntityPaintContainer extends PaintContainer {
                 G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position) ||
                 G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction))
         ) {
-            this.filter.red = 0.4
-            this.filter.green = 1
+            this.blocked = false
         } else {
-            this.filter.red = 1
-            this.filter.green = 0.4
+            this.blocked = true
         }
     }
 

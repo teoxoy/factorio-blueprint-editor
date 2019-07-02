@@ -1,8 +1,8 @@
-import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import * as PIXI from 'pixi.js'
 import spriteDataBuilder from './factorio-data/spriteDataBuilder'
 import Entity from './factorio-data/entity'
 import G from './common/globals'
+import F from './controls/functions'
 
 interface IEntityData {
     name: string
@@ -158,17 +158,7 @@ export class EntitySprite extends PIXI.Sprite {
         }
 
         if (data.tint) {
-            this.filters = [
-                new AdjustmentFilter({
-                    gamma: 1.4,
-                    contrast: 1.4,
-                    brightness: 1.2,
-                    red: data.tint.r || 1,
-                    green: data.tint.g || 1,
-                    blue: data.tint.b || 1,
-                    alpha: data.tint.a || 1
-                })
-            ]
+            F.applyTint(this, data.tint)
         }
 
         // CACHE LOCAL BOUNDS

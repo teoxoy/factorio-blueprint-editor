@@ -46,10 +46,10 @@ for (const e in FD.entities) {
                 spriteData[i] = data.hr && spriteData[i].hr_version ? spriteData[i].hr_version : spriteData[i]
                 if (spriteData[i].apply_runtime_tint && !spriteData[i].tint) {
                     spriteData[i].tint = {
-                        r: 0.73,
-                        g: 0.59,
-                        b: 0.44,
-                        a: 0.75
+                        r: 233 / 255,
+                        g: 195 / 255,
+                        b: 153 / 255,
+                        a: 0.8
                     }
                 }
             }

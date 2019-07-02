@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js'
 import FD from 'factorio-data'
-import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import G from '../common/globals'
 
 /**
@@ -173,15 +172,7 @@ function CreateIcon(itemName: string, setAnchor: boolean = true): PIXI.DisplayOb
                 sprite.position.set(icon.shift[0], icon.shift[1])
             }
             if (icon.tint) {
-                const t = icon.tint
-                sprite.filters = [
-                    new AdjustmentFilter({
-                        red: t.r,
-                        green: t.g,
-                        blue: t.b,
-                        alpha: t.a || 1
-                    })
-                ]
+                applyTint(sprite, icon.tint)
             }
             if (setAnchor) {
                 sprite.anchor.set(0.5, 0.5)
@@ -247,11 +238,17 @@ function CreateRecipe(
     }
 }
 
+function applyTint(s: PIXI.Sprite, tint: FD.ColorWithAlpha) {
+    s.tint = PIXI.utils.rgb2hex([tint.r || 0, tint.g || 0, tint.b || 0])
+    s.alpha = tint.a || 1
+}
+
 export default {
     ShadeColor,
     DrawRectangle,
     DrawControlFace,
     CreateIcon,
     CreateIconWithAmount,
-    CreateRecipe
+    CreateRecipe,
+    applyTint
 }

@@ -1,19 +1,17 @@
-import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import F from '../controls/functions'
 
 export abstract class PaintContainer extends PIXI.Container {
-    filter: AdjustmentFilter
     icon: PIXI.DisplayObject
+    private _blocked: boolean = false
 
     constructor(name: string) {
         super()
 
         this.name = name
 
-        this.filter = new AdjustmentFilter({ red: 0.4, green: 1, blue: 0.4 })
-        this.filters = [this.filter]
+        this.on('added', this.applyTint.bind(this))
 
         this.icon = F.CreateIcon(this.getItemName())
         this.icon.visible = false
@@ -21,6 +19,25 @@ export abstract class PaintContainer extends PIXI.Container {
         this.updateIconPos = this.updateIconPos.bind(this)
         window.addEventListener('mousemove', this.updateIconPos)
         this.updateIconPos()
+    }
+
+    get blocked() {
+        return this._blocked
+    }
+
+    set blocked(value: boolean) {
+        this._blocked = value
+        this.applyTint()
+    }
+
+    private applyTint() {
+        const t = {
+            r: this.blocked ? 1 : 0.4,
+            g: this.blocked ? 0.4 : 1,
+            b: 0.4,
+            a: 1
+        }
+        this.children.forEach((s: PIXI.Sprite) => F.applyTint(s, t))
     }
 
     hide() {

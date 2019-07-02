@@ -1,5 +1,4 @@
 import FD from 'factorio-data'
-import { AdjustmentFilter } from '@pixi/filter-adjustment'
 import * as PIXI from 'pixi.js'
 
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
@@ -71,7 +70,7 @@ export class UnderlayContainer extends PIXI.Container {
         this.beacons = new PIXI.Container()
         this.drills = new PIXI.Container()
 
-        const filter = new AdjustmentFilter({ alpha: 0.25 })
+        const filter = new PIXI.filters.AlphaFilter(0.25)
         this.logistics0.filters = [filter]
         this.logistics1.filters = [filter]
 
