@@ -130,7 +130,7 @@ export default class Blueprint extends EventEmitter {
 
         // makes initial entities non undoable and resets the history if the user cleared the editor
         this.history.reset()
-        this.history.logging = true
+        this.history.logging = G.debug
 
         return this
     }

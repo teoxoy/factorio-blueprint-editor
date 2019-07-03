@@ -93,6 +93,19 @@ export default function initDatGui() {
             spritesheetsLoader.changeQuality(G.quality.hr, G.quality.compressed)
         })
 
+    G.debug = Boolean(localStorage.getItem('debug'))
+    gui.add(G, 'debug')
+        .name('Debug')
+        .onChange((debug: boolean) => {
+            if (debug) {
+                localStorage.setItem('debug', 'true')
+            } else {
+                localStorage.removeItem('debug')
+            }
+            // TODO: find a nice way to do this
+            G.bp.history.logging = debug
+        })
+
     // Theme folder
     const themeFolder = gui.addFolder('Theme')
 

@@ -6,6 +6,8 @@ import { InfoEntityPanel } from '../panels/infoEntityPanel'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
 
+let debug = false
+
 const quality = {
     hr: true,
     compressed: true
@@ -223,6 +225,7 @@ let oilOutpostSettings = {
 }
 
 export default {
+    debug,
     quality,
     getFactorioVersion,
     interactive,

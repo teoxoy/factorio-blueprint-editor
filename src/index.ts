@@ -386,7 +386,9 @@ actions.moveEntityRight.bind(() => {
 
 actions.openEntityGUI.bind(() => {
     if (G.BPC.hoverContainer !== undefined) {
-        // console.log(G.BPC.hoverContainer.entity.getRawData())
+        if (G.debug) {
+            console.log(G.BPC.hoverContainer.entity.getRawData())
+        }
         if (G.currentMouseState === G.mouseStates.NONE) {
             const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
             if (editor === undefined) {
