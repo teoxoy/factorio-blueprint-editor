@@ -8,7 +8,7 @@ import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
 import { TilePaintContainer } from './containers/paintTile'
 import { BlueprintContainer } from './containers/blueprint'
-import { ToolbarContainer } from './panels/toolbar'
+import { DebugContainer } from './panels/debug'
 import { QuickbarContainer } from './panels/quickbar'
 import { InfoEntityPanel } from './panels/infoEntityPanel'
 import { InfoContainer } from './panels/info'
@@ -106,8 +106,10 @@ window.addEventListener(
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)
 
-G.toolbarContainer = new ToolbarContainer()
-G.app.stage.addChild(G.toolbarContainer)
+G.debugContainer = new DebugContainer()
+if (G.debug) {
+    G.app.stage.addChild(G.debugContainer)
+}
 
 G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
 G.app.stage.addChild(G.quickbarContainer)

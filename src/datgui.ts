@@ -107,6 +107,11 @@ export default function initDatGui() {
             }
             // TODO: find a nice way to do this
             G.bp.history.logging = debug
+            if (debug) {
+                G.app.stage.addChild(G.debugContainer)
+            } else {
+                G.app.stage.removeChild(G.debugContainer)
+            }
         })
 
     // Theme folder

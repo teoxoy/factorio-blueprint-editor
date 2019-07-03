@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import Blueprint from '../factorio-data/blueprint'
-import { ToolbarContainer } from '../panels/toolbar'
+import { DebugContainer } from '../panels/debug'
 import { QuickbarContainer } from '../panels/quickbar'
 import { InfoEntityPanel } from '../panels/infoEntityPanel'
 import { BlueprintContainer } from '../containers/blueprint'
@@ -25,7 +25,7 @@ function getFactorioVersion(main?: 0, major?: 17, minor?: 14) {
 
 let app: PIXI.Application
 
-let toolbarContainer: ToolbarContainer
+let debugContainer: DebugContainer
 let quickbarContainer: QuickbarContainer
 let infoEntityPanel: InfoEntityPanel
 let dialogsContainer: PIXI.Container
@@ -49,7 +49,7 @@ let quickbarRows = 2
 
 const positionBPContainer = {
     x: 0,
-    y: 32
+    y: 0
 }
 
 const bpArea = {
@@ -231,7 +231,7 @@ export default {
     interactive,
     BPC,
     app,
-    toolbarContainer,
+    debugContainer,
     quickbarContainer,
     infoEntityPanel,
     dialogsContainer,
