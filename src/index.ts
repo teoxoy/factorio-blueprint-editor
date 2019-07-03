@@ -33,7 +33,9 @@ console.log(
 
 const params = window.location.search.slice(1).split('&')
 
-G.renderOnly = params.includes('renderOnly')
+if (params.includes('interactive=false')) {
+    G.interactive = false
+}
 
 let bpSource: string
 let bpIndex = 0
@@ -231,10 +233,6 @@ actions.takePicture.bind(() => {
         return
     }
 
-    if (G.renderOnly) {
-        G.BPC.cacheAsBitmap = false
-    }
-
     // getLocalBounds is needed because it seems that it has sideeffects
     // without it generateTexture returns an empty texture
     G.BPC.getLocalBounds()
@@ -249,10 +247,6 @@ actions.takePicture.bind(() => {
         // Clear
         canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
     })
-
-    if (G.renderOnly) {
-        G.BPC.cacheAsBitmap = true
-    }
 })
 
 actions.showInfo.bind(() => {
@@ -268,7 +262,7 @@ actions.closeWindow.bind(() => {
 })
 
 actions.inventory.bind(() => {
-    if (!G.renderOnly) {
+    if (G.interactive) {
         // If there is a dialog open, assume user wants to close it
         if (Dialog.anyOpen()) {
             Dialog.closeLast()

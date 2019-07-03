@@ -71,7 +71,7 @@ const mouseStates = {
 
 let currentMouseState = mouseStates.NONE
 
-let renderOnly = false
+let interactive = true
 
 const colors = {
     text: {
@@ -225,7 +225,7 @@ let oilOutpostSettings = {
 export default {
     quality,
     getFactorioVersion,
-    renderOnly,
+    interactive,
     BPC,
     app,
     toolbarContainer,

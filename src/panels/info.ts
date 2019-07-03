@@ -99,7 +99,7 @@ export class InfoContainer extends Dialog {
                 'Avalible url query parameters:',
                 '        source=<BPSTRING_OR_URL_TO_BPSTRING>',
                 '        index=<INDEX_OF_BP_IN_BOOK>',
-                '        renderOnly',
+                '        interactive=false',
                 "I don't show network or parsing errors in the app yet, you can open the console",
                 '    (F12) to check if something is wrong.'
             ],

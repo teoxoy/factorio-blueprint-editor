@@ -200,10 +200,6 @@ export class BlueprintContainer extends PIXI.Container {
             }
         })
 
-        if (G.renderOnly) {
-            this.interactiveChildren = false
-        }
-
         // Hack for plugging the mouse into keyboardJS
         actions.attachEventsToContainer(this)
 
@@ -341,11 +337,6 @@ export class BlueprintContainer extends PIXI.Container {
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()
         this.centerViewport()
-
-        if (G.renderOnly) {
-            this.cacheAsBitmap = false
-            this.cacheAsBitmap = true
-        }
     }
 
     clearData() {
