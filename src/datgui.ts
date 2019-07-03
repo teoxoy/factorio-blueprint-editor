@@ -1,12 +1,15 @@
-import * as dat from 'dat.gui'
+import { GUI } from 'dat.gui'
 import FD from 'factorio-data'
 import actions from './actions'
 import G from './common/globals'
 import { QuickbarContainer } from './panels/quickbar'
 import spritesheetsLoader from './spritesheetsLoader'
 
+GUI.TEXT_CLOSED = 'Close Settings'
+GUI.TEXT_OPEN = 'Open Settings'
+
 export default function initDatGui() {
-    const gui = new dat.GUI({
+    const gui = new GUI({
         autoPlace: false,
         hideable: false,
         closeOnTop: true,
