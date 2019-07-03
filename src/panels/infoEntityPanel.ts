@@ -220,6 +220,6 @@ export class InfoEntityPanel extends Panel {
     }
 
     setPosition() {
-        this.position.set(G.app.screen.width - this.width + 1, 32)
+        this.position.set(G.app.screen.width - this.width + 1, 0)
     }
 }
