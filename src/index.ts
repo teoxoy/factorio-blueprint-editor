@@ -392,11 +392,11 @@ actions.openEntityGUI.bind(() => {
             console.log(G.BPC.hoverContainer.entity.getRawData())
         }
         if (G.currentMouseState === G.mouseStates.NONE) {
+            Dialog.closeAll()
             const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
             if (editor === undefined) {
                 return
             }
-            Dialog.closeAll()
             editor.show()
         }
     }
