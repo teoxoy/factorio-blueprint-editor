@@ -57,8 +57,9 @@ function createErrorMessage(text: string, error: unknown) {
     console.error(error)
     createToast({
         text:
-            `${text} Please check out the console (F12) for an error message and ` +
-            `report this bug on github or using the feedback button.`,
+            `${text}<br>` +
+            'Please check out the console (F12) for an error message and ' +
+            'report this bug on github or using the feedback button.',
         type: 'error',
         timeout: 10000
     })
@@ -78,21 +79,20 @@ function createWelcomeMessage() {
     if (notFirstRun) {
         return
     }
+    localStorage.setItem('firstRun', 'false')
 
     // Wait a bit just to capture the users attention
     // This way they will see the toast animation
     setTimeout(() => {
         createToast({
             text:
-                'To start building press E to access the inventory. ' +
-                'To import/export a blueprint string use ctrl/cmd + C/V. ' +
-                'For more info press I. ' +
-                'Also check out the settings area.',
+                '> To start building press E to access the inventory<br>' +
+                '> To import/export a blueprint string use ctrl/cmd + C/V<br>' +
+                '> For more info press I<br>' +
+                '> Also check out the settings area',
             timeout: 30000
         })
     }, 1000)
-
-    localStorage.setItem('firstRun', 'false')
 }
 
 PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
