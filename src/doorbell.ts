@@ -33,6 +33,13 @@ export default function initDoorbell() {
 
             const fieldset = document.getElementById('doorbell-form').firstElementChild
             fieldset.insertBefore(tagsDiv, fieldset.lastElementChild)
+
+            const button = document.getElementById('doorbell-button')
+            // needed so that the doorbell.io css doesn't get applied
+            button.attributes.removeNamedItem('id')
+            button.attributes.removeNamedItem('style')
+            button.className = 'doorbell-button'
+            document.getElementById('buttons').appendChild(button)
         }
     }
 
