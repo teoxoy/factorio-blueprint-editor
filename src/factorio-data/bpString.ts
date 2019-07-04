@@ -5,6 +5,15 @@ import blueprintSchema from '../blueprintSchema.json'
 import Blueprint from './blueprint'
 import { Book } from './book'
 
+class ModdedBlueprintError {
+    errors: Ajv.ErrorObject[]
+    constructor(errors: Ajv.ErrorObject[]) {
+        this.errors = errors
+    }
+}
+
+const customKeywords = ['entityName', 'itemName', 'objectWithItemNames', 'recipeName', 'tileName']
+
 const validate = new Ajv()
     .addKeyword('entityName', {
         validate: (data: string) => !!FD.entities[data],
@@ -66,7 +75,12 @@ function decode(str: string): Promise<Blueprint | Book> {
             )
             console.log(data)
             if (!validate(data)) {
-                reject(validate.errors)
+                const moddedBlueprint = !!validate.errors.find(e => customKeywords.includes(e.keyword))
+                if (moddedBlueprint) {
+                    reject(new ModdedBlueprintError(validate.errors))
+                } else {
+                    reject(validate.errors)
+                }
             }
             resolve(data.blueprint_book === undefined ? new Blueprint(data.blueprint) : new Book(data.blueprint_book))
         } catch (e) {
@@ -86,7 +100,7 @@ function encode(bpOrBook: Blueprint | Book) {
     })
 }
 
-function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: string } {
+function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: Error } {
     try {
         return {
             value: `0${btoa(
@@ -168,12 +182,10 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
         })
     }
 
-    return bpString.then(decode).catch(err => {
-        console.error(err)
-        return new Blueprint()
-    })
+    return bpString.then(decode)
 }
 
+export { ModdedBlueprintError }
 export default {
     encode,
     encodeSync,

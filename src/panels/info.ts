@@ -13,7 +13,7 @@ export class InfoContainer extends Dialog {
     }
 
     constructor() {
-        super(580, 860)
+        super(580, 810)
 
         const text = new PIXI.Text('KEYBINDS', {
             fill: G.colors.text.normal,
@@ -99,9 +99,7 @@ export class InfoContainer extends Dialog {
                 'Avalible url query parameters:',
                 '        source=<BPSTRING_OR_URL_TO_BPSTRING>',
                 '        index=<INDEX_OF_BP_IN_BOOK>',
-                '        interactive=false',
-                "I don't show network or parsing errors in the app yet, you can open the console",
-                '    (F12) to check if something is wrong.'
+                '        interactive=false'
             ],
             { x: 4, y: 550 }
         )
@@ -111,7 +109,7 @@ export class InfoContainer extends Dialog {
                 ['Please leave your suggestions, ideas, new features or bug reports', G.colors.text.accent],
                 ['inside the app via the Feedback button or on Github.', G.colors.text.accent]
             ],
-            { x: this.width / 2, y: 750 },
+            { x: this.width / 2, y: 700 },
             0.5
         )
 
@@ -120,7 +118,7 @@ export class InfoContainer extends Dialog {
                 'All art assets, spritesheets and other Factorio game data used in this project',
                 'belong to Wube Software Ltd and are not for redistribution.'
             ],
-            { x: this.width / 2, y: 810 },
+            { x: this.width / 2, y: 760 },
             0.5,
             false,
             12

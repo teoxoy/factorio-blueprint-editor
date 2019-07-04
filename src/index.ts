@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 
 import FileSaver from 'file-saver'
 import { Book } from './factorio-data/book'
-import bpString from './factorio-data/bpString'
+import bpString, { ModdedBlueprintError } from './factorio-data/bpString'
 
 import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
@@ -16,6 +16,7 @@ import Blueprint from './factorio-data/blueprint'
 import initDoorbell from './doorbell'
 import actions from './actions'
 import initDatGui from './datgui'
+import initToasts from './toasts'
 import spritesheetsLoader from './spritesheetsLoader'
 import * as Editors from './editors/factory'
 import Entity from './factorio-data/entity'
@@ -50,6 +51,28 @@ for (const p of params) {
 
 const { guiBPIndex } = initDatGui()
 initDoorbell()
+
+const createToast = initToasts()
+function createErrorMessage(text: string, error: unknown) {
+    console.error(error)
+    createToast({
+        text:
+            `${text} Please check out the console (F12) for an error message and ` +
+            `report this bug on github or using the feedback button.`,
+        type: 'error',
+        timeout: 10000
+    })
+}
+function createBPImportError(error: Error | ModdedBlueprintError) {
+    if (error instanceof ModdedBlueprintError) {
+        createErrorMessage(
+            'Blueprint with modded items not supported yet. If you think this is a mistake:',
+            error.errors
+        )
+    } else {
+        createErrorMessage('Blueprint string could not be loaded.', error)
+    }
+}
 
 PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
 PIXI.settings.ROUND_PIXELS = true
@@ -125,7 +148,11 @@ G.app.stage.addChild(G.paintIconContainer)
 
 Promise.all([
     // Get bp from source
-    bpString.getBlueprintOrBookFromSource(bpSource),
+    // catch the error here so that Promise.all can resolve
+    bpString.getBlueprintOrBookFromSource(bpSource).catch(error => {
+        createBPImportError(error)
+        return new Blueprint()
+    }),
     // Wait for fonts to get loaded
     document.fonts.ready,
     // Load spritesheets
@@ -140,7 +167,7 @@ Promise.all([
 
         loadBp(data[0], false)
     })
-    .catch(error => console.error(error))
+    .catch(error => createErrorMessage('Something went wrong.', error))
 
 function loadBp(bpOrBook: Blueprint | Book, clearData = true) {
     if (bpOrBook instanceof Book) {
@@ -160,6 +187,10 @@ function loadBp(bpOrBook: Blueprint | Book, clearData = true) {
     }
     G.BPC.initBP()
     G.loadingScreen.hide()
+
+    if (!(bpOrBook instanceof Blueprint && bpOrBook.isEmpty())) {
+        createToast({ text: 'Blueprint string loaded successfully', type: 'success' })
+    }
 
     Dialog.closeAll()
 }
@@ -191,20 +222,28 @@ actions.copyBPString.bind(e => {
         return
     }
 
+    const onSuccess = () => {
+        createToast({ text: 'Blueprint string copied to clipboard', type: 'success' })
+    }
+
+    const onError = (error: Error) => {
+        createErrorMessage('Blueprint string could not be generated.', error)
+    }
+
     const bpOrBook = G.book ? G.book : G.bp
     if (navigator.clipboard && navigator.clipboard.writeText) {
         bpString
             .encode(bpOrBook)
             .then(s => navigator.clipboard.writeText(s))
-            .then(() => console.log('Copied BP String'))
-            .catch(error => console.error(error))
+            .then(onSuccess)
+            .catch(onError)
     } else {
         const data = bpString.encodeSync(bpOrBook)
         if (data.value) {
             e.clipboardData.setData('text/plain', data.value)
-            console.log('Copied BP String')
+            onSuccess()
         } else {
-            console.error(data.error)
+            onError(data.error)
         }
     }
 })
@@ -217,13 +256,13 @@ actions.pasteBPString.bind(e => {
             ? navigator.clipboard.readText()
             : Promise.resolve(e.clipboardData.getData('text'))
 
-    promise.then(bpString.getBlueprintOrBookFromSource).then(bpOrBook => {
-        if (bpOrBook instanceof Blueprint && bpOrBook.isEmpty()) {
+    promise
+        .then(bpString.getBlueprintOrBookFromSource)
+        .then(loadBp)
+        .catch(error => {
             G.loadingScreen.hide()
-        } else {
-            loadBp(bpOrBook)
-        }
-    })
+            createBPImportError(error)
+        })
 })
 
 actions.clear.bind(() => {
@@ -244,7 +283,7 @@ actions.takePicture.bind(() => {
 
     canvas.toBlob(blob => {
         FileSaver.saveAs(blob, `${G.bp.name}.png`)
-        console.log('Saved BP Image')
+        createToast({ text: 'Blueprint image successfully generated', type: 'success' })
 
         // Clear
         canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
@@ -324,7 +363,10 @@ actions.redo.bind(() => {
 })
 
 actions.generateOilOutpost.bind(() => {
-    G.bp.generatePipes()
+    const errorMessage = G.bp.generatePipes()
+    if (errorMessage) {
+        createToast({ text: errorMessage, type: 'warning' })
+    }
 })
 
 actions.pan.bind(

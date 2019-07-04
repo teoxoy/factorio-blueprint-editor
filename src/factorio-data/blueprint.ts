@@ -309,13 +309,11 @@ export default class Blueprint extends EventEmitter {
             .map(p => ({ entity_number: p.entityNumber, name: p.name, position: p.position }))
 
         if (pumpjacks.length < 2 || pumpjacks.length > 200) {
-            console.error('There should be between 2 and 200 pumpjacks in the BP Area!')
-            return
+            return 'There should be between 2 and 200 pumpjacks in the blueprint area!'
         }
 
         if (pumpjacks.length !== this.entities.size) {
-            console.error('BP Area should only contain pumpjacks!')
-            return
+            return 'Blueprint area should only contain pumpjacks!'
         }
 
         console.log('Generating pipes...')

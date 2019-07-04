@@ -1,4 +1,3 @@
-
 // Normalize
 body
     margin: 0
@@ -206,3 +205,68 @@ canvas
         border: none
         outline: none
         cursor: pointer
+
+/* TOASTS */
+.toasts
+    &-container
+        position: fixed
+        bottom: 0
+        right: 0
+        width: 320px
+
+    &-toast
+        position: relative
+        padding: 12px 16px
+        margin: 8px 0 5px 0
+        background: #303030
+        cursor: pointer
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1)
+
+        border-radius: 5px 0 0 0
+        border-style: solid
+        border-width: 1px 0 2px 1px
+        border-color: #888
+
+        animation-name: toastsFadeIn
+        animation-duration: .3s
+        animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1) // easeOutQuint
+
+        transition-delay: .3s
+        transition-duration: .2s
+        transition-timing-function: cubic-bezier(0.47, 0, 0.745, 0.715) // easeInSine
+        transition-property: max-height margin border padding
+        &-fadeOut
+            animation-name: toastsFadeOut
+            animation-fill-mode: forwards
+
+            max-height: 0 !important
+            margin: 0
+            border: 0
+            padding: 0
+
+
+    &-text
+        font-size: 14px
+        color: white
+
+    // toast types
+    &-success
+        border-bottom-color: #51C625
+    &-warning
+        border-bottom-color: #DB9215
+    &-error
+        border-bottom-color: #DB2B1D
+    &-info
+        border-bottom-color: #27ABDB
+
+@keyframes toastsFadeIn
+    from
+        transform: translateX(100%)
+    to
+        transform: translateX(0)
+
+@keyframes toastsFadeOut
+    from
+        transform: translateX(0)
+    to
+        transform: translateX(100%)
