@@ -2,8 +2,8 @@ import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 
 export class DebugContainer extends PIXI.Container {
-    x = 5
-    y = 100
+    x = 145
+    y = 5
 
     constructor() {
         super()
