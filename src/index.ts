@@ -73,6 +73,27 @@ function createBPImportError(error: Error | ModdedBlueprintError) {
         createErrorMessage('Blueprint string could not be loaded.', error)
     }
 }
+function createWelcomeMessage() {
+    const notFirstRun = localStorage.getItem('firstRun') === 'false'
+    if (notFirstRun) {
+        return
+    }
+
+    // Wait a bit just to capture the users attention
+    // This way they will see the toast animation
+    setTimeout(() => {
+        createToast({
+            text:
+                'To start building press E to access the inventory. ' +
+                'To import/export a blueprint string use ctrl/cmd + C/V. ' +
+                'For more info press I. ' +
+                'Also check out the settings area.',
+            timeout: 30000
+        })
+    }, 1000)
+
+    localStorage.setItem('firstRun', 'false')
+}
 
 PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
 PIXI.settings.ROUND_PIXELS = true
@@ -166,6 +187,8 @@ Promise.all([
         }
 
         loadBp(data[0], false)
+
+        createWelcomeMessage()
     })
     .catch(error => createErrorMessage('Something went wrong.', error))
 
