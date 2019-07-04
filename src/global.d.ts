@@ -100,6 +100,18 @@ namespace BPS {
         type: 'item' | 'virtual' | 'fluid'
     }
 
+    interface ICondition {
+        comparator?: '<' | '>' | '≤' | '≥' | '=' | '≠'
+        constant?: number
+        first_signal?: ISignal
+        second_signal?: ISignal
+    }
+
+    interface IFilter {
+        index: number
+        name: string
+    }
+
     interface IWireColor {
         /** Entity number */
         entity_id: number
@@ -128,7 +140,10 @@ namespace BPS {
         recipe?: string
         /** inventory size limitation, only present if entity has inventory_size */
         bar?: number
-        /** object, keys are module names and value nr of modules, only present if entity has module_specification */
+        /**
+         * keys are item names and value nr of items, only present if entity is locomotive or has module_specification
+         * for the locomotive it represents fuel and for an eintity with module_specification it represents modules
+         */
         items?: { [key: string]: number }
 
         /** splitter input priority, only present if entity is of type splitter */
@@ -140,12 +155,18 @@ namespace BPS {
 
         /** train stop station name, only present if entity is train-stop */
         station?: string
-        /** train stop color, only present if entity is train-stop */
+        /** only present if entity is locomotive or train-stop */
         color?: {
             r: number
             g: number
             b: number
             a: number
+        }
+        /** only present if entity is locomotive, cargo_wagon or fluid_wagon */
+        orientation?: number
+        /** only present if entity is cargo_wagon */
+        inventory?: {
+            filters: IFilter[]
         }
 
         /** auto launch, only present if entity is rocket-silo */
@@ -157,10 +178,7 @@ namespace BPS {
         /** only present if entity is filter-inserter or stack-filter-inserter */
         filter_mode?: 'blacklist'
         /** only present if entity is filter-inserter, stack-filter-inserter or of type loader */
-        filters?: {
-            index: number
-            name: string
-        }[]
+        filters?: IFilter[]
         /** only present if entity is logistic-chest-storage, logistic-chest-buffer or logistic-chest-requester */
         request_filters?: {
             index: number
@@ -308,7 +326,7 @@ namespace BPS {
 
             /** only present if entity is arithmetic-combinator */
             arithmetic_conditions?: {
-                operation?: string
+                operation?: '+' | '-' | '*' | '/' | '%' | '^' | '<<' | '>>' | 'AND' | 'OR' | 'XOR'
                 constant?: number
                 first_constant?: number
                 second_constant?: number
@@ -321,12 +339,7 @@ namespace BPS {
              *  only present if entity is pump, offshore-pump, rail-signal, train-stop, small-lamp,
              *  power-switch, stone-wall, programmable-speaker or of type: inserter, transport-belt or mining-drill
              */
-            circuit_condition?: {
-                comparator?: string
-                constant?: number
-                first_signal?: ISignal
-                second_signal?: ISignal
-            }
+            circuit_condition?: ICondition
 
             /**
              * only present if entity is pump, offshore-pump, train-stop, small-lamp, power-switch
@@ -337,18 +350,35 @@ namespace BPS {
              * only present if entity is pump, offshore-pump, train-stop, small-lamp, power-switch
              * or of type: inserter, transport-belt or mining-drill
              */
-            logistic_condition?: {
-                comparator?: string
-                constant?: number
-                first_signal?: ISignal
-                second_signal?: ISignal
-            }
+            logistic_condition?: ICondition
         }
     }
 
     interface ITile {
         name: string
         position: IPoint
+    }
+
+    interface ISchedule {
+        locomotives: number[]
+        schedule: {
+            station: string
+            wait_conditions: {
+                compare_type: 'and' | 'or'
+                type:
+                    | 'time'
+                    | 'inactivity'
+                    | 'full'
+                    | 'empty'
+                    | 'item_count'
+                    | 'fluid_count'
+                    | 'circuit'
+                    | 'passenger_present'
+                    | 'passenger_not_present'
+                ticks?: number
+                condition?: ICondition
+            }[]
+        }[]
     }
 
     interface IBlueprint {
@@ -362,6 +392,7 @@ namespace BPS {
         label?: string
         entities?: IEntity[]
         tiles?: ITile[]
+        schedules?: ISchedule[]
     }
 
     interface IBlueprintBook {

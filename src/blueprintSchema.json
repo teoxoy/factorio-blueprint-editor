@@ -91,6 +91,31 @@
                 "green": { "$ref": "blueprintSchema.json#/definitions/wireColor" }
             }
         },
+        "condition": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "comparator": {
+                    "type": "string",
+                    "enum": ["<", ">", "≤", "≥", "=", "≠"]
+                },
+                "constant": { "type": "integer" },
+                "first_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
+                "second_signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
+            }
+        },
+        "filter": {
+            "type": "object",
+            "required": ["index", "name"],
+            "additionalProperties": false,
+            "properties": {
+                "index": { "type": "integer" },
+                "name": {
+                    "type": "string",
+                    "itemName": true
+                }
+            }
+        },
         "blueprint": {
             "type": "object",
             "required": ["version", "item", "icons"],
@@ -116,6 +141,63 @@
                                 "enum": [1, 2, 3, 4]
                             },
                             "signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
+                        }
+                    }
+                },
+                "schedules": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["locomotives", "schedule"],
+                        "additionalProperties": false,
+                        "properties": {
+                            "locomotives": {
+                                "type": "array",
+                                "items": { "type": "integer" }
+                            },
+                            "schedule": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": ["station", "wait_conditions"],
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "station": { "type": "string" },
+                                        "wait_conditions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "required": ["compare_type", "type"],
+                                                "additionalProperties": false,
+                                                "properties": {
+                                                    "compare_type": {
+                                                        "type": "string",
+                                                        "enum": ["and", "or"]
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "time",
+                                                            "inactivity",
+                                                            "full",
+                                                            "empty",
+                                                            "item_count",
+                                                            "fluid_count",
+                                                            "circuit",
+                                                            "passenger_present",
+                                                            "passenger_not_present"
+                                                        ]
+                                                    },
+                                                    "ticks": { "type": "integer" },
+                                                    "condition": {
+                                                        "$ref": "blueprintSchema.json#/definitions/condition"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -154,7 +236,7 @@
                             "items": {
                                 "type": "object",
                                 "objectWithItemNames": true,
-                                "$comment": "object, keys are module names and value nr of modules, only present if entity has module_specification"
+                                "$comment": "object, keys are item names and value nr of items, only present if entity is locomotive or has module_specification, for the locomotive it represents fuel and for an eintity with module_specification it represents modules"
                             },
 
                             "input_priority": {
@@ -181,12 +263,26 @@
                                 "type": "object",
                                 "required": ["r", "g", "b", "a"],
                                 "additionalProperties": false,
-                                "$comment": "train stop color, only present if entity is train-stop",
+                                "$comment": "only present if entity is locomotive or train-stop",
                                 "properties": {
                                     "r": { "type": "number" },
                                     "g": { "type": "number" },
                                     "b": { "type": "number" },
                                     "a": { "type": "number" }
+                                }
+                            },
+                            "orientation": {
+                                "type": "number",
+                                "$comment": "only present if entity is locomotive, cargo_wagon or fluid_wagon"
+                            },
+                            "inventory": {
+                                "type": "object",
+                                "$comment": "only present if entity is cargo_wagon",
+                                "properties": {
+                                    "filters": {
+                                        "type": "array",
+                                        "items": { "$ref": "blueprintSchema.json#/definitions/filter" }
+                                    }
                                 }
                             },
 
@@ -210,18 +306,7 @@
                             "filters": {
                                 "type": "array",
                                 "$comment": "only present if entity is filter-inserter or stack-filter-inserter",
-                                "items": {
-                                    "type": "object",
-                                    "required": ["index", "name"],
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "index": { "type": "integer" },
-                                        "name": {
-                                            "type": "string",
-                                            "itemName": true
-                                        }
-                                    }
-                                }
+                                "items": { "$ref": "blueprintSchema.json#/definitions/filter" }
                             },
                             "request_filters": {
                                 "type": "array",
@@ -480,7 +565,10 @@
                                         "$comment": "only present if entity is arithmetic-combinator",
                                         "additionalProperties": false,
                                         "properties": {
-                                            "operation": { "type": "string" },
+                                            "operation": {
+                                                "type": "string",
+                                                "enum": ["+", "-", "*", "/", "%", "^", "<<", ">>", "AND", "OR", "XOR"]
+                                            },
                                             "constant": { "type": "integer" },
                                             "first_constant": { "type": "integer" },
                                             "second_constant": { "type": "integer" },
@@ -489,33 +577,13 @@
                                             "output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
                                         }
                                     },
-                                    "circuit_condition": {
-                                        "type": "object",
-                                        "$comment": "only present if entity is pump, offshore-pump, rail-signal, train-stop, small-lamp, power-switch, stone-wall, programmable-speaker or of type: inserter, transport-belt or mining-drill",
-                                        "additionalProperties": false,
-                                        "properties": {
-                                            "comparator": { "type": "string" },
-                                            "constant": { "type": "integer" },
-                                            "first_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                            "second_signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
-                                        }
-                                    },
+                                    "circuit_condition": { "$ref": "blueprintSchema.json#/definitions/condition" },
                                     "connect_to_logistic_network": {
                                         "type": "boolean",
                                         "enum": [true],
                                         "$comment": "only present if entity is pump, offshore-pump, train-stop, small-lamp, power-switch or of type: inserter, transport-belt or mining-drill"
                                     },
-                                    "logistic_condition": {
-                                        "type": "object",
-                                        "$comment": "only present if entity is pump, offshore-pump, train-stop, small-lamp, power-switch or of type: inserter, transport-belt or mining-drill",
-                                        "additionalProperties": false,
-                                        "properties": {
-                                            "comparator": { "type": "string" },
-                                            "constant": { "type": "integer" },
-                                            "first_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                            "second_signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
-                                        }
-                                    }
+                                    "logistic_condition": { "$ref": "blueprintSchema.json#/definitions/condition" }
                                 }
                             }
                         }

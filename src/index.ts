@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 
 import FileSaver from 'file-saver'
 import { Book } from './factorio-data/book'
-import bpString, { ModdedBlueprintError } from './factorio-data/bpString'
+import bpString, { ModdedBlueprintError, TrainBlueprintError } from './factorio-data/bpString'
 
 import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
@@ -65,14 +65,23 @@ function createErrorMessage(text: string, error: unknown) {
     })
 }
 function createBPImportError(error: Error | ModdedBlueprintError) {
+    if (error instanceof TrainBlueprintError) {
+        createErrorMessage(
+            'Blueprint with train entities not supported yet. If you think this is a mistake:',
+            error.errors
+        )
+        return
+    }
+
     if (error instanceof ModdedBlueprintError) {
         createErrorMessage(
             'Blueprint with modded items not supported yet. If you think this is a mistake:',
             error.errors
         )
-    } else {
-        createErrorMessage('Blueprint string could not be loaded.', error)
+        return
     }
+
+    createErrorMessage('Blueprint string could not be loaded.', error)
 }
 function createWelcomeMessage() {
     const notFirstRun = localStorage.getItem('firstRun') === 'false'
