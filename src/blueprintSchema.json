@@ -263,6 +263,29 @@
                                 }
                             },
 
+                            "buffer_size": {
+                                "type": "number",
+                                "$comment": "only present if entity is electric_energy_interface"
+                            },
+                            "power_production": {
+                                "type": "number",
+                                "$comment": "only present if entity is electric_energy_interface"
+                            },
+                            "power_usage": {
+                                "type": "number",
+                                "$comment": "only present if entity is electric_energy_interface"
+                            },
+
+                            "mode": {
+                                "type": "string",
+                                "enum": ["at_least", "at_most", "exactly"],
+                                "$comment": "only present if entity is heat_interface"
+                            },
+                            "temperature": {
+                                "type": "number",
+                                "$comment": "only present if entity is heat_interface"
+                            },
+
                             "infinity_settings": {
                                 "type": "object",
                                 "$comment": "only present if entity is infinity_chest or infinity_pipe",

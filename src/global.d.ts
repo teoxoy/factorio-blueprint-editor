@@ -182,6 +182,18 @@ namespace BPS {
             allow_polyphony?: boolean
         }
 
+        /** only present if entity is electric_energy_interface */
+        buffer_size?: number
+        /** only present if entity is electric_energy_interface */
+        power_production?: number
+        /** only present if entity is electric_energy_interface */
+        power_usage?: number
+
+        /** only present if entity is heat_interface */
+        mode?: 'at_least' | 'at_most' | 'exactly'
+        /** only present if entity is heat_interface */
+        temperature?: number
+
         /** only present if entity is infinity_chest or infinity_pipe */
         infinity_settings?: {
             /** only present if entity is infinity_pipe */
