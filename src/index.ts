@@ -95,7 +95,7 @@ function createWelcomeMessage() {
     setTimeout(() => {
         createToast({
             text:
-                '> To start building press E to access the inventory<br>' +
+                '> To access the inventory and start building press E<br>' +
                 '> To import/export a blueprint string use ctrl/cmd + C/V<br>' +
                 '> For more info press I<br>' +
                 '> Also check out the settings area',
