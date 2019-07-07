@@ -22,6 +22,15 @@ Sample blueprint: https://teoxoy.github.io/factorio-blueprint-editor/?source=htt
 
 Example link that uses url query parameters: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/Xp9u7NaA&index=1&interactive=false
 
+# Features
+- rendering and editing blueprints
+- history (undo/redo)
+- import blueprints and books from multiple sources (direct bp string, pastebin, hastebin, gist, gitlab, factorioprints, google docs)
+- generating blueprint images
+- oil outpost generator
+- customizable keybinds
+- "creative" entities
+
 # Contributing
 
 Check out [this readme](./CONTRIBUTING.md) if you are interested in contributing.
