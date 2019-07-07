@@ -17,9 +17,14 @@ import { TilePaintContainer } from './paintTile'
 import { PaintContainer } from './paint'
 
 enum EditorMode {
+    /** Default */
+    NONE,
+    /** Active when an entity is being hovered */
     EDIT,
-    PAN,
-    PAINT
+    /** Active when "painting" */
+    PAINT,
+    /** Active when panning */
+    PAN
 }
 
 class GridData extends EventEmitter {
@@ -146,7 +151,7 @@ class BlueprintContainer extends PIXI.Container {
     hoverContainer: EntityContainer
     paintContainer: PaintContainer
     gridData: GridData
-    mode: EditorMode = EditorMode.EDIT
+    mode: EditorMode = EditorMode.NONE
 
     constructor() {
         super()
@@ -230,16 +235,37 @@ class BlueprintContainer extends PIXI.Container {
 
         this.addListener('pointerover', () => {
             if (this.mode === EditorMode.PAINT) {
-                G.BPC.paintContainer.show()
+                this.paintContainer.show()
             }
             this.updateHoverContainer()
         })
         this.addListener('pointerout', () => {
             if (this.mode === EditorMode.PAINT) {
-                G.BPC.paintContainer.hide()
+                this.paintContainer.hide()
             }
             this.updateHoverContainer()
         })
+
+        document.addEventListener('mousemove', e => {
+            if (this.mode === EditorMode.PAN) {
+                this.viewport.translateBy(e.movementX, e.movementY)
+                this.viewport.updateTransform()
+            }
+        })
+    }
+
+    enterPanMode() {
+        if (this.mode === EditorMode.NONE && this.isPointerInside) {
+            this.mode = EditorMode.PAN
+            this.cursor = 'move'
+        }
+    }
+
+    exitPanMode() {
+        if (this.mode === EditorMode.PAN) {
+            this.mode = EditorMode.NONE
+            this.cursor = 'inherit'
+        }
     }
 
     zoom(zoomIn = true) {
@@ -258,14 +284,15 @@ class BlueprintContainer extends PIXI.Container {
         return container === this
     }
 
-    updateHoverContainer() {
+    updateHoverContainer(forceRemove = false) {
         const removeHoverContainer = () => {
             this.hoverContainer.pointerOutEventHandler()
             this.hoverContainer = undefined
+            this.mode = EditorMode.NONE
             this.cursor = 'inherit'
         }
 
-        if (this.mode === EditorMode.PAINT || !this.isPointerInside) {
+        if (forceRemove || !this.isPointerInside) {
             if (this.hoverContainer) {
                 removeHoverContainer()
             }
@@ -281,12 +308,13 @@ class BlueprintContainer extends PIXI.Container {
             return
         }
 
-        if (this.hoverContainer) {
+        if (this.mode === EditorMode.EDIT) {
             removeHoverContainer()
         }
 
-        if (e && this.mode === EditorMode.EDIT) {
+        if (e && this.mode === EditorMode.NONE) {
             this.hoverContainer = e
+            this.mode = EditorMode.EDIT
             this.cursor = 'pointer'
             e.pointerOverEventHandler()
         }
@@ -400,7 +428,7 @@ class BlueprintContainer extends PIXI.Container {
             this.entityPaintSlot
         )
 
-        this.mode = EditorMode.EDIT
+        this.mode = EditorMode.NONE
     }
 
     sortEntities() {
@@ -491,8 +519,8 @@ class BlueprintContainer extends PIXI.Container {
             this.paintContainer.destroy()
         }
 
+        this.updateHoverContainer(true)
         this.mode = EditorMode.PAINT
-        this.updateHoverContainer()
         this.cursor = 'pointer'
 
         if (tileResult) {
@@ -504,12 +532,12 @@ class BlueprintContainer extends PIXI.Container {
         }
 
         if (!this.isPointerInside) {
-            G.BPC.paintContainer.hide()
+            this.paintContainer.hide()
         }
 
         this.paintContainer.on('destroy', () => {
             this.paintContainer = undefined
-            this.mode = EditorMode.EDIT
+            this.mode = EditorMode.NONE
             this.updateHoverContainer()
             this.cursor = 'inherit'
         })

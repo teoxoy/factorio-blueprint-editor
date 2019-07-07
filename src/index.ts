@@ -354,7 +354,7 @@ actions.inventory.bind(() => {
 actions.focus.bind(() => G.BPC.centerViewport())
 
 actions.rotate.bind(() => {
-    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.rotate(false, true)
     } else if (G.BPC.mode === EditorMode.PAINT) {
         G.BPC.paintContainer.rotate()
@@ -362,7 +362,7 @@ actions.rotate.bind(() => {
 })
 
 actions.reverseRotate.bind(() => {
-    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.rotate(true, true)
     } else if (G.BPC.mode === EditorMode.PAINT) {
         G.BPC.paintContainer.rotate(true)
@@ -370,7 +370,7 @@ actions.reverseRotate.bind(() => {
 })
 
 actions.pipette.bind(() => {
-    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         const entity = G.BPC.hoverContainer.entity
         const itemName = Entity.getItemName(entity.name)
         const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
@@ -407,27 +407,7 @@ actions.generateOilOutpost.bind(() => {
     }
 })
 
-actions.pan.bind(
-    () => {
-        if (!G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT && G.BPC.isPointerInside) {
-            G.BPC.mode = EditorMode.PAN
-            G.BPC.cursor = 'move'
-        }
-    },
-    () => {
-        if (G.BPC.mode === EditorMode.PAN) {
-            G.BPC.mode = EditorMode.EDIT
-            G.BPC.cursor = 'inherit'
-        }
-    }
-)
-
-document.addEventListener('mousemove', e => {
-    if (G.BPC.mode === EditorMode.PAN) {
-        G.BPC.viewport.translateBy(e.movementX, e.movementY)
-        G.BPC.viewport.updateTransform()
-    }
-})
+actions.pan.bind(G.BPC.enterPanMode.bind(G.BPC), G.BPC.exitPanMode.bind(G.BPC))
 
 actions.zoomIn.bind(() => {
     G.BPC.zoom(true)
@@ -444,7 +424,7 @@ actions.build.bind(() => {
 })
 
 actions.mine.bind(() => {
-    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         G.bp.removeEntity(G.BPC.hoverContainer.entity)
     }
     if (G.BPC.mode === EditorMode.PAINT) {
@@ -453,51 +433,50 @@ actions.mine.bind(() => {
 })
 
 actions.moveEntityUp.bind(() => {
-    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
     }
 })
 actions.moveEntityLeft.bind(() => {
-    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
     }
 })
 actions.moveEntityDown.bind(() => {
-    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
     }
 })
 actions.moveEntityRight.bind(() => {
-    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
     }
 })
 
 actions.openEntityGUI.bind(() => {
-    if (G.BPC.hoverContainer !== undefined) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         if (G.debug) {
             console.log(G.BPC.hoverContainer.entity.getRawData())
         }
-        if (G.BPC.mode === EditorMode.EDIT) {
-            Dialog.closeAll()
-            const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
-            if (editor === undefined) {
-                return
-            }
-            editor.show()
+
+        Dialog.closeAll()
+        const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
+        if (editor === undefined) {
+            return
         }
+        editor.show()
     }
 })
 
 let entityForCopyData: Entity
 actions.copyEntitySettings.bind(() => {
-    if (G.BPC.hoverContainer !== undefined) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         // Store reference to source entity
         entityForCopyData = G.BPC.hoverContainer.entity
     }
 })
 actions.pasteEntitySettings.bind(() => {
-    if (G.BPC.hoverContainer !== undefined) {
+    if (G.BPC.mode === EditorMode.EDIT) {
         // Hand over reference of source entity to target entity for pasting data
         G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
     }
