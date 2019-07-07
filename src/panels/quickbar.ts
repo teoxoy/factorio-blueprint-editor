@@ -109,7 +109,7 @@ export class QuickbarContainer extends Panel {
                             G.BPC.spawnPaintContainer(quickbarSlot.itemName)
                         } else {
                             // UC3
-                            new InventoryContainer('Inventory', undefined, item => quickbarSlot.assignItem(item)).show()
+                            new InventoryContainer('Inventory', undefined, item => quickbarSlot.assignItem(item))
                         }
                     } else if (e.data.button === 2) {
                         // UC5

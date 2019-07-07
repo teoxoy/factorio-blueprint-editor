@@ -346,7 +346,7 @@ actions.inventory.bind(() => {
         if (Dialog.anyOpen()) {
             Dialog.closeLast()
         } else {
-            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC)).show()
+            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
         }
     }
 })

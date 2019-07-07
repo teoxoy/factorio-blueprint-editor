@@ -208,7 +208,7 @@ export default class Filters extends PIXI.Container {
                     if (this.m_Amount) {
                         this.emit('selected', index, this.m_Filters[index].count)
                     }
-                }).show()
+                })
             } else {
                 if (this.m_Amount) {
                     this.emit('selected', index, this.m_Filters[index].count)

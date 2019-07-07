@@ -36,7 +36,7 @@ export default class Recipe extends Slot {
         if (e.data.button === 0) {
             new InventoryContainer('Select Recipe', this.m_Entity.acceptedRecipes, name => {
                 this.m_Entity.recipe = name
-            }).show()
+            })
         } else if (e.data.button === 2) {
             this.m_Entity.recipe = undefined
         }
