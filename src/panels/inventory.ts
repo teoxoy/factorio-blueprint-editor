@@ -5,6 +5,31 @@ import F from '../controls/functions'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'
 
+/*
+    Cols
+    Space   @ 0     +12              ->12
+    Items   @ 12    +(10*(36+2))     ->392
+    Space   @ 392   +12              ->404
+    Width : 12 + (10 * (36 + 2)) + 12 = 404
+
+    Rows
+    Space   @ 0   +10                ->10
+    Title   @ 10  +24                ->34
+    Space   @ 34  +12                ->46
+    Groups  @ 46  +68                ->114
+    Space   @ 114 +12                ->126
+    Items   @ 126 +(8*(36+2))        ->430
+    Space   @ 430 +12                ->442
+    Height : 10 + 24 + 12 + 68 + 12 + (8*(36+2)) + 12 = 442
+
+    Space   @ 0   +10                ->10
+    R.Label @ 10  +16                ->26
+    Space   @ 26  +10                ->36
+    R.Data  @ 36  +36                ->72
+    Space   @ 8   +8                 ->78
+    Height : 10 + 16 + 10 + 36 + 8 = 78
+*/
+
 /** Inventory Dialog - Displayed to the user if there is a need to select an item */
 export class InventoryContainer extends Dialog {
     /** Container for Inventory Group Buttons */
@@ -22,31 +47,6 @@ export class InventoryContainer extends Dialog {
     /** Hovered item for item pointerout check */
     private m_hoveredItem: string
 
-    /**
-     *
-     * Cols
-     * Space   @ 0     +12              ->12
-     * Items   @ 12    +(10*(36+2))     ->392
-     * Space   @ 392   +12              ->404
-     * Width : 12 + (10 * (36 + 2)) + 12 = 404
-     *
-     * Rows
-     * Space   @ 0   +10                ->10
-     * Title   @ 10  +24                ->34
-     * Space   @ 34  +12                ->46
-     * Groups  @ 46  +68                ->114
-     * Space   @ 114 +12                ->126
-     * Items   @ 126 +(8*(36+2))        ->430
-     * Space   @ 430 +12                ->442
-     * Height : 10 + 24 + 12 + 68 + 12 + (8*(36+2)) + 12 = 442
-     *
-     * Space   @ 0   +10                ->10
-     * R.Label @ 10  +16                ->26
-     * Space   @ 26  +10                ->36
-     * R.Data  @ 36  +36                ->72
-     * Space   @ 8   +8                 ->78
-     * Height : 10 + 16 + 10 + 36 + 8 = 78
-     */
     constructor(
         title: string = 'Inventory',
         itemsFilter?: string[],
@@ -200,6 +200,8 @@ export class InventoryContainer extends Dialog {
         this.m_RecipeContainer = new PIXI.Container()
         this.m_RecipeContainer.position.set(12, 36)
         recipePanel.addChild(this.m_RecipeContainer)
+
+        this.show()
     }
 
     /** Override automatically set position of dialog due to additional area for recipe */
