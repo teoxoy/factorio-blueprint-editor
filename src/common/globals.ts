@@ -65,14 +65,6 @@ const sizeBPContainer = {
 let bp: Blueprint
 let book: Book
 
-const mouseStates = {
-    NONE: 0,
-    PAINTING: 1,
-    PANNING: 2
-}
-
-let currentMouseState = mouseStates.NONE
-
 let interactive = true
 
 const colors = {
@@ -242,8 +234,6 @@ export default {
     railMoveOffset,
     bp,
     book,
-    mouseStates,
-    currentMouseState,
     moveSpeed,
     quickbarRows,
     loadingScreen,

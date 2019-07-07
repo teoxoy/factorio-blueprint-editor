@@ -16,6 +16,12 @@ import { TileContainer } from './tile'
 import { TilePaintContainer } from './paintTile'
 import { PaintContainer } from './paint'
 
+enum EditorMode {
+    EDIT,
+    PAN,
+    PAINT
+}
+
 class GridData extends EventEmitter {
     /** mouse x in 32 pixel size grid */
     x = 0
@@ -63,7 +69,7 @@ class GridData extends EventEmitter {
             this.y16 = gridCoordsOfCursor16.y
 
             // don't emit updates if panning
-            const notPanning = G.currentMouseState !== G.mouseStates.PANNING
+            const notPanning = G.BPC.mode !== EditorMode.PAN
             // emit update16 when mouse changes tile whithin the 16 pixel size grid
             if (notPanning) {
                 this.emit('update16', this)
@@ -127,7 +133,7 @@ class OptimizedContainer extends PIXI.ParticleContainer {
 //     }
 // }
 
-export class BlueprintContainer extends PIXI.Container {
+class BlueprintContainer extends PIXI.Container {
     grid: PIXI.TilingSprite
     wiresContainer: WiresContainer
     overlayContainer: OverlayContainer
@@ -140,6 +146,7 @@ export class BlueprintContainer extends PIXI.Container {
     hoverContainer: EntityContainer
     paintContainer: PaintContainer
     gridData: GridData
+    mode: EditorMode = EditorMode.EDIT
 
     constructor() {
         super()
@@ -182,7 +189,7 @@ export class BlueprintContainer extends PIXI.Container {
         this.gridData = new GridData()
 
         G.app.ticker.add(() => {
-            if (G.currentMouseState !== G.mouseStates.PANNING) {
+            if (this.mode !== EditorMode.PAN) {
                 const WSXOR = actions.moveUp.pressed !== actions.moveDown.pressed
                 const ADXOR = actions.moveLeft.pressed !== actions.moveRight.pressed
                 if (WSXOR || ADXOR) {
@@ -201,7 +208,7 @@ export class BlueprintContainer extends PIXI.Container {
         })
 
         this.gridData.on('update16', () => {
-            if (G.currentMouseState === G.mouseStates.PAINTING) {
+            if (this.mode === EditorMode.PAINT) {
                 this.paintContainer.moveAtCursor()
             }
         })
@@ -222,13 +229,13 @@ export class BlueprintContainer extends PIXI.Container {
         })
 
         this.addListener('pointerover', () => {
-            if (G.currentMouseState === G.mouseStates.PAINTING) {
+            if (this.mode === EditorMode.PAINT) {
                 G.BPC.paintContainer.show()
             }
             this.updateHoverContainer()
         })
         this.addListener('pointerout', () => {
-            if (G.currentMouseState === G.mouseStates.PAINTING) {
+            if (this.mode === EditorMode.PAINT) {
                 G.BPC.paintContainer.hide()
             }
             this.updateHoverContainer()
@@ -258,7 +265,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.cursor = 'inherit'
         }
 
-        if (G.currentMouseState === G.mouseStates.PAINTING || !this.isPointerInside) {
+        if (this.mode === EditorMode.PAINT || !this.isPointerInside) {
             if (this.hoverContainer) {
                 removeHoverContainer()
             }
@@ -278,7 +285,7 @@ export class BlueprintContainer extends PIXI.Container {
             removeHoverContainer()
         }
 
-        if (e && G.currentMouseState === G.mouseStates.NONE) {
+        if (e && this.mode === EditorMode.EDIT) {
             this.hoverContainer = e
             this.cursor = 'pointer'
             e.pointerOverEventHandler()
@@ -393,7 +400,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.entityPaintSlot
         )
 
-        G.currentMouseState = G.mouseStates.NONE
+        this.mode = EditorMode.EDIT
     }
 
     sortEntities() {
@@ -480,11 +487,11 @@ export class BlueprintContainer extends PIXI.Container {
         const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
         const placeResult = itemData.place_result || tileResult
 
-        if (G.currentMouseState === G.mouseStates.PAINTING) {
+        if (this.mode === EditorMode.PAINT) {
             this.paintContainer.destroy()
         }
 
-        G.currentMouseState = G.mouseStates.PAINTING
+        this.mode = EditorMode.PAINT
         this.updateHoverContainer()
         this.cursor = 'pointer'
 
@@ -502,9 +509,11 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.paintContainer.on('destroy', () => {
             this.paintContainer = undefined
-            G.currentMouseState = G.mouseStates.NONE
+            this.mode = EditorMode.EDIT
             this.updateHoverContainer()
             this.cursor = 'inherit'
         })
     }
 }
+
+export { EditorMode, BlueprintContainer }

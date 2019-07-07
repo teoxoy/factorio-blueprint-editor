@@ -3,6 +3,7 @@ import G from '../common/globals'
 import Panel from '../controls/panel'
 import Slot from '../controls/slot'
 import F from '../controls/functions'
+import { EditorMode } from '../containers/blueprint'
 
 class QuickbarSlot extends Slot {
     get itemName(): string {
@@ -96,7 +97,7 @@ export class QuickbarContainer extends Panel {
                     // >> Left Click (UC1-UC4)
                     if (e.data.button === 0) {
                         // >> Mouse == Painting (UC1,UC2)
-                        if (G.currentMouseState === G.mouseStates.PAINTING) {
+                        if (G.BPC.mode === EditorMode.PAINT) {
                             if (quickbarSlot.itemName) {
                                 // >> Slot == Item (UC2)
                                 G.BPC.spawnPaintContainer(quickbarSlot.itemName)
@@ -127,7 +128,7 @@ export class QuickbarContainer extends Panel {
             return
         }
 
-        if (G.currentMouseState === G.mouseStates.PAINTING && G.BPC.paintContainer.getItemName() === itemName) {
+        if (G.BPC.mode === EditorMode.PAINT && G.BPC.paintContainer.getItemName() === itemName) {
             G.BPC.paintContainer.destroy()
             return
         }

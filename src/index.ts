@@ -7,7 +7,7 @@ import bpString, { ModdedBlueprintError, TrainBlueprintError } from './factorio-
 import G from './common/globals'
 import { InventoryContainer } from './panels/inventory'
 import { TilePaintContainer } from './containers/paintTile'
-import { BlueprintContainer } from './containers/blueprint'
+import { BlueprintContainer, EditorMode } from './containers/blueprint'
 import { DebugContainer } from './panels/debug'
 import { QuickbarContainer } from './panels/quickbar'
 import { InfoEntityPanel } from './panels/infoEntityPanel'
@@ -354,28 +354,28 @@ actions.inventory.bind(() => {
 actions.focus.bind(() => G.BPC.centerViewport())
 
 actions.rotate.bind(() => {
-    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.rotate(false, true)
-    } else if (G.currentMouseState === G.mouseStates.PAINTING) {
+    } else if (G.BPC.mode === EditorMode.PAINT) {
         G.BPC.paintContainer.rotate()
     }
 })
 
 actions.reverseRotate.bind(() => {
-    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.rotate(true, true)
-    } else if (G.currentMouseState === G.mouseStates.PAINTING) {
+    } else if (G.BPC.mode === EditorMode.PAINT) {
         G.BPC.paintContainer.rotate(true)
     }
 })
 
 actions.pipette.bind(() => {
-    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
         const entity = G.BPC.hoverContainer.entity
         const itemName = Entity.getItemName(entity.name)
         const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
         G.BPC.spawnPaintContainer(itemName, direction)
-    } else if (G.currentMouseState === G.mouseStates.PAINTING) {
+    } else if (G.BPC.mode === EditorMode.PAINT) {
         G.BPC.paintContainer.destroy()
     }
 })
@@ -409,21 +409,21 @@ actions.generateOilOutpost.bind(() => {
 
 actions.pan.bind(
     () => {
-        if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE && G.BPC.isPointerInside) {
-            G.currentMouseState = G.mouseStates.PANNING
+        if (!G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT && G.BPC.isPointerInside) {
+            G.BPC.mode = EditorMode.PAN
             G.BPC.cursor = 'move'
         }
     },
     () => {
-        if (G.currentMouseState === G.mouseStates.PANNING) {
-            G.currentMouseState = G.mouseStates.NONE
+        if (G.BPC.mode === EditorMode.PAN) {
+            G.BPC.mode = EditorMode.EDIT
             G.BPC.cursor = 'inherit'
         }
     }
 )
 
 document.addEventListener('mousemove', e => {
-    if (G.currentMouseState === G.mouseStates.PANNING) {
+    if (G.BPC.mode === EditorMode.PAN) {
         G.BPC.viewport.translateBy(e.movementX, e.movementY)
         G.BPC.viewport.updateTransform()
     }
@@ -438,37 +438,37 @@ actions.zoomOut.bind(() => {
 })
 
 actions.build.bind(() => {
-    if (G.currentMouseState === G.mouseStates.PAINTING) {
+    if (G.BPC.mode === EditorMode.PAINT) {
         G.BPC.paintContainer.placeEntityContainer()
     }
 })
 
 actions.mine.bind(() => {
-    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
         G.bp.removeEntity(G.BPC.hoverContainer.entity)
     }
-    if (G.currentMouseState === G.mouseStates.PAINTING) {
+    if (G.BPC.mode === EditorMode.PAINT) {
         G.BPC.paintContainer.removeContainerUnder()
     }
 })
 
 actions.moveEntityUp.bind(() => {
-    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
     }
 })
 actions.moveEntityLeft.bind(() => {
-    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
     }
 })
 actions.moveEntityDown.bind(() => {
-    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
     }
 })
 actions.moveEntityRight.bind(() => {
-    if (G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+    if (G.BPC.hoverContainer && G.BPC.mode === EditorMode.EDIT) {
         G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
     }
 })
@@ -478,7 +478,7 @@ actions.openEntityGUI.bind(() => {
         if (G.debug) {
             console.log(G.BPC.hoverContainer.entity.getRawData())
         }
-        if (G.currentMouseState === G.mouseStates.NONE) {
+        if (G.BPC.mode === EditorMode.EDIT) {
             Dialog.closeAll()
             const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
             if (editor === undefined) {
