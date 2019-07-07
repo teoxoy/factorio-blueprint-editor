@@ -86,6 +86,10 @@ class Transaction {
         this.actions = []
     }
 
+    public empty() {
+        return this.actions.length === 0
+    }
+
     /**
      * Execute all actions and therfore apply all values of this transaction
      * @param value Whether to apply the new or the old values (Default: New)
@@ -284,12 +288,16 @@ export default class History {
 
     /**
      * Commits the active transaction and pushes it into the history
-     * @returns `false` if `transactionCount` is not 0
+     * @returns `false` if `transactionCount` is not 0 or transaction is empty
      */
     commitTransaction() {
         this.transactionCount -= 1
 
         if (this.transactionCount === 0) {
+            if (this.activeTransaction.empty()) {
+                return false
+            }
+
             while (this.transactionHistory.length > this.historyIndex) {
                 this.transactionHistory.pop()
             }
