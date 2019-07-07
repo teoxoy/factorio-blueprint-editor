@@ -4,6 +4,7 @@ import Panel from '../controls/panel'
 import Slot from '../controls/slot'
 import F from '../controls/functions'
 import { EditorMode } from '../containers/blueprint'
+import { InventoryContainer } from './inventory'
 
 class QuickbarSlot extends Slot {
     get itemName(): string {
@@ -90,28 +91,28 @@ export class QuickbarContainer extends Panel {
                 quickbarSlot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     // Use Case 1: Left Click  & Slot=Empty & Mouse=Painting >> Assign Mouse Item to Slot
                     // Use Case 2: Left Click  & Slot=Item  & Mouse=Painting >> Assign Slot Item to Mouse
-                    // Use Case 3: Left Click  & Slot=Empty & Mouse=Empty    >> Do Nothing
+                    // Use Case 3: Left Click  & Slot=Empty & Mouse=Empty    >> Assign Slot Item to Selected Inv item
                     // Use Case 4: Left Click  & Slot=Item  & Mouse=Empty    >> Assign Slot Item to Mouse
                     // Use Case 5: Right Click & Slot=*     & Mouse=*        >> Unassign Slot
 
-                    // >> Left Click (UC1-UC4)
                     if (e.data.button === 0) {
-                        // >> Mouse == Painting (UC1,UC2)
                         if (G.BPC.mode === EditorMode.PAINT) {
                             if (quickbarSlot.itemName) {
-                                // >> Slot == Item (UC2)
+                                // UC2
                                 G.BPC.spawnPaintContainer(quickbarSlot.itemName)
                             } else {
-                                // >> Slot == Empty (UC1)
+                                // UC1
                                 quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
                             }
-                            // >> Slot == Item (UC4)
                         } else if (quickbarSlot.itemName) {
+                            // UC4
                             G.BPC.spawnPaintContainer(quickbarSlot.itemName)
+                        } else {
+                            // UC3
+                            new InventoryContainer('Inventory', undefined, item => quickbarSlot.assignItem(item)).show()
                         }
-
-                        // >> Right Click (UC5)
                     } else if (e.data.button === 2) {
+                        // UC5
                         quickbarSlot.unassignItem()
                     }
                 })
