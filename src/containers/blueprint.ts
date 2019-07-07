@@ -200,9 +200,6 @@ export class BlueprintContainer extends PIXI.Container {
             }
         })
 
-        // Hack for plugging the mouse into keyboardJS
-        actions.attachEventsToContainer(this)
-
         this.gridData.on('update16', () => {
             if (G.currentMouseState === G.mouseStates.PAINTING) {
                 this.paintContainer.moveAtCursor()
@@ -223,6 +220,19 @@ export class BlueprintContainer extends PIXI.Container {
                 actions.pasteEntitySettings.call()
             }
         })
+
+        this.addListener('pointerover', () => {
+            if (G.currentMouseState === G.mouseStates.PAINTING) {
+                G.BPC.paintContainer.show()
+            }
+            this.updateHoverContainer()
+        })
+        this.addListener('pointerout', () => {
+            if (G.currentMouseState === G.mouseStates.PAINTING) {
+                G.BPC.paintContainer.hide()
+            }
+            this.updateHoverContainer()
+        })
     }
 
     zoom(zoomIn = true) {
@@ -233,6 +243,14 @@ export class BlueprintContainer extends PIXI.Container {
         this.gridData.recalculate()
     }
 
+    get isPointerInside() {
+        const container = G.app.renderer.plugins.interaction.hitTest(
+            G.app.renderer.plugins.interaction.mouse.global,
+            G.app.stage
+        )
+        return container === this
+    }
+
     updateHoverContainer() {
         const removeHoverContainer = () => {
             this.hoverContainer.pointerOutEventHandler()
@@ -240,7 +258,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.cursor = 'inherit'
         }
 
-        if (G.currentMouseState === G.mouseStates.PAINTING) {
+        if (G.currentMouseState === G.mouseStates.PAINTING || !this.isPointerInside) {
             if (this.hoverContainer) {
                 removeHoverContainer()
             }
@@ -476,6 +494,10 @@ export class BlueprintContainer extends PIXI.Container {
         } else {
             this.paintContainer = new EntityPaintContainer(placeResult, direction)
             this.entityPaintSlot.addChild(this.paintContainer)
+        }
+
+        if (!this.isPointerInside) {
+            G.BPC.paintContainer.hide()
         }
 
         this.paintContainer.on('destroy', () => {

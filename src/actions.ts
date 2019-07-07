@@ -1,5 +1,53 @@
 import keyboardJS from 'keyboardjs'
 
+// Set the general application keyboard context
+// Needed to have seperate context's for input controls (i.e. Textbox)
+keyboardJS.setContext('editor')
+
+const canvasEl = document.getElementById('editor') as HTMLCanvasElement
+
+// Bind the events on the canvas
+keyboardJS.watch(canvasEl)
+
+// keyboardJS.watch will bind keydown and keyup events on the canvas but
+// keydown and keyup will only fire if the canvas is focused
+canvasEl.addEventListener('mouseover', () => canvasEl.focus())
+canvasEl.addEventListener('blur', () => {
+    keyboardJS.releaseAllKeys()
+})
+
+// Hack for plugging the mouse into keyboardJS
+keyboardJS._locale.bindKeyCode(300, ['lclick'])
+keyboardJS._locale.bindKeyCode(301, ['mclick'])
+keyboardJS._locale.bindKeyCode(302, ['rclick'])
+keyboardJS._locale.bindKeyCode(303, ['wheelNeg'])
+keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
+canvasEl.addEventListener('mousedown', e => keyboardJS.pressKey(e.button + 300, e))
+// attach mouseup to window so that releaseKey will be called even when mouseup is fired from outside the window
+window.addEventListener('mouseup', e => keyboardJS.releaseKey(e.button + 300, e))
+
+canvasEl.addEventListener('wheel', e => {
+    e.preventDefault()
+    keyboardJS.pressKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
+    keyboardJS.releaseKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
+})
+
+/**
+ * Passes trough all events to the callback
+ * @param cb Callback - return true if you want to stop the passtrough
+ */
+function passtroughAllEvents(cb: (e: keyboardJS.KeyEvent) => boolean) {
+    keyboardJS.setContext('passtrough')
+    const callback = (e: keyboardJS.KeyEvent) => {
+        const stop = cb(e)
+        if (stop) {
+            keyboardJS.unbind(undefined, callback)
+            keyboardJS.setContext('editor')
+        }
+    }
+    keyboardJS.bind(undefined, callback)
+}
+
 class Action {
     readonly defaultKeyCombo: string
 
@@ -103,22 +151,6 @@ class ToggleAction extends Action {
     }
 }
 
-const canvasEl = document.getElementById('editor') as HTMLCanvasElement
-
-// Bind the events on the canvas
-keyboardJS.watch(canvasEl)
-
-// keyboardJS.watch will bind keydown and keyup events on the canvas but
-// keydown and keyup will only fire if the canvas is focused
-canvasEl.addEventListener('mouseover', () => canvasEl.focus())
-canvasEl.addEventListener('blur', () => {
-    keyboardJS.releaseAllKeys()
-})
-
-// Set the general application keyboard context
-// Needed to have seperate context's for input controls (i.e. Textbox)
-keyboardJS.setContext('app')
-
 const actions = {
     clear: new Action('shift+n'),
     focus: new Action('f'),
@@ -199,59 +231,27 @@ const actions = {
         }
     },
 
-    // Hack for plugging the mouse into keyboardJS
-    attachEventsToContainer(stage: PIXI.Container) {
-        stage.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => keyboardJS.pressKey(e.data.button + 300, e))
-
-        stage.on('pointerup', (e: PIXI.interaction.InteractionEvent) => keyboardJS.releaseKey(e.data.button + 300, e))
-
-        stage.on('pointerupoutside', (e: PIXI.interaction.InteractionEvent) =>
-            keyboardJS.releaseKey(e.data.button + 300, e)
-        )
-    }
-}
-
-canvasEl.addEventListener('wheel', e => {
-    e.preventDefault()
-    keyboardJS.pressKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
-    keyboardJS.releaseKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
-})
-
-// Hack for plugging the mouse into keyboardJS
-keyboardJS._locale.bindKeyCode(300, ['lclick'])
-keyboardJS._locale.bindKeyCode(301, ['mclick'])
-keyboardJS._locale.bindKeyCode(302, ['rclick'])
-keyboardJS._locale.bindKeyCode(303, ['wheelNeg'])
-keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
-
-function loadKeybinds() {
-    const changedKeybinds = JSON.parse(localStorage.getItem('keybinds'))
-    if (!changedKeybinds) {
-        return
-    }
-    actions.forEachAction((action, actionName) => {
-        if (changedKeybinds[actionName] !== undefined) {
-            action.keyCombo = changedKeybinds[actionName]
+    importKeybinds(keybinds: Record<string, string>) {
+        if (!keybinds) {
+            return
         }
-    })
-}
+        actions.forEachAction((action, actionName) => {
+            if (keybinds[actionName] !== undefined) {
+                action.keyCombo = keybinds[actionName]
+            }
+        })
+    },
 
-loadKeybinds()
-
-function saveKeybinds() {
-    const changedKeybinds: { [key: string]: string } = {}
-    actions.forEachAction((action, actionName) => {
-        if (!action.usesDefaultKeyCombo) {
-            changedKeybinds[actionName] = action.keyCombo
-        }
-    })
-    if (Object.keys(changedKeybinds).length) {
-        localStorage.setItem('keybinds', JSON.stringify(changedKeybinds))
-    } else {
-        localStorage.removeItem('keybinds')
+    exportKeybinds(changedOnly = true) {
+        const changedKeybinds: Record<string, string> = {}
+        actions.forEachAction((action, actionName) => {
+            if (!changedOnly || !action.usesDefaultKeyCombo) {
+                changedKeybinds[actionName] = action.keyCombo
+            }
+        })
+        return changedKeybinds
     }
 }
 
-window.addEventListener('unload', saveKeybinds)
-
+export { passtroughAllEvents }
 export default actions

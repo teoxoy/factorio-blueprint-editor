@@ -50,22 +50,6 @@ export default class Panel extends PIXI.Container {
         this.addChild(this.m_Background)
 
         this.setPosition()
-
-        this.on('pointerover', () => {
-            if (G.currentMouseState === G.mouseStates.PAINTING) {
-                G.BPC.paintContainer.hide()
-            }
-        })
-        this.on('pointerout', () => {
-            if (G.currentMouseState === G.mouseStates.PAINTING) {
-                G.BPC.paintContainer.show()
-            }
-        })
-        this.on('close', () => {
-            if (G.currentMouseState === G.mouseStates.PAINTING) {
-                G.BPC.paintContainer.show()
-            }
-        })
     }
 
     /** Width of the Control */

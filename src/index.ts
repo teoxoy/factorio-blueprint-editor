@@ -242,10 +242,16 @@ window.addEventListener('unload', () => {
     G.app.destroy()
 })
 
-document.addEventListener('mousemove', e => {
-    if (G.currentMouseState === G.mouseStates.PANNING) {
-        G.BPC.viewport.translateBy(e.movementX, e.movementY)
-        G.BPC.viewport.updateTransform()
+// ACTIONS //
+
+actions.importKeybinds(JSON.parse(localStorage.getItem('keybinds')))
+
+window.addEventListener('unload', () => {
+    const keybinds = actions.exportKeybinds()
+    if (Object.keys(keybinds).length) {
+        localStorage.setItem('keybinds', JSON.stringify(keybinds))
+    } else {
+        localStorage.removeItem('keybinds')
     }
 })
 
@@ -403,7 +409,7 @@ actions.generateOilOutpost.bind(() => {
 
 actions.pan.bind(
     () => {
-        if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE) {
+        if (!G.BPC.hoverContainer && G.currentMouseState === G.mouseStates.NONE && G.BPC.isPointerInside) {
             G.currentMouseState = G.mouseStates.PANNING
             G.BPC.cursor = 'move'
         }
@@ -415,6 +421,13 @@ actions.pan.bind(
         }
     }
 )
+
+document.addEventListener('mousemove', e => {
+    if (G.currentMouseState === G.mouseStates.PANNING) {
+        G.BPC.viewport.translateBy(e.movementX, e.movementY)
+        G.BPC.viewport.updateTransform()
+    }
+})
 
 actions.zoomIn.bind(() => {
     G.BPC.zoom(true)

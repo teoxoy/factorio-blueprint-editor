@@ -100,7 +100,6 @@ export class QuickbarContainer extends Panel {
                             if (quickbarSlot.itemName) {
                                 // >> Slot == Item (UC2)
                                 G.BPC.spawnPaintContainer(quickbarSlot.itemName)
-                                G.BPC.paintContainer.hide()
                             } else {
                                 // >> Slot == Empty (UC1)
                                 quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
@@ -108,7 +107,6 @@ export class QuickbarContainer extends Panel {
                             // >> Slot == Item (UC4)
                         } else if (quickbarSlot.itemName) {
                             G.BPC.spawnPaintContainer(quickbarSlot.itemName)
-                            G.BPC.paintContainer.hide()
                         }
 
                         // >> Right Click (UC5)

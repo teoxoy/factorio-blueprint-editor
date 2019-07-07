@@ -174,6 +174,10 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     placeEntityContainer() {
+        if (!this.visible) {
+            return
+        }
+
         const fd = FD.entities[this.name]
         const position = this.getGridPosition()
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8

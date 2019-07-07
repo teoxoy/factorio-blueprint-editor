@@ -101,6 +101,10 @@ export class TilePaintContainer extends PaintContainer {
     }
 
     placeEntityContainer() {
+        if (!this.visible) {
+            return
+        }
+
         const position = this.getGridPosition()
 
         G.bp.createTiles(

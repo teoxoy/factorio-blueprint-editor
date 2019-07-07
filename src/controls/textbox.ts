@@ -1,5 +1,5 @@
-import keyboardjs from 'keyboardjs'
 import * as PIXI from 'pixi.js'
+import { passtroughAllEvents } from '../actions'
 import G from '../common/globals'
 import F from './functions'
 
@@ -285,35 +285,32 @@ export default class Textbox extends PIXI.Container {
     /** Pointer up event callback */
     private readonly onPointerUp = () => {
         if (!this.m_Active.visible) {
-            keyboardjs.setContext('textbox')
-            keyboardjs.bind(undefined, this.keyPressedCallback)
-            window.addEventListener('mousedown', this.releaseKeybindings)
+            passtroughAllEvents(this.keyPressedCallback.bind(this))
             this.m_CaretGraphic.visible = true
             // (PT) this.m_Text.activate()
             this.m_Active.visible = true
         }
     }
 
-    /** Window wouse up event callback */
-    private readonly releaseKeybindings: EventListener = () => {
-        if (!this.m_MouseInside) {
-            window.removeEventListener('mousedown', this.releaseKeybindings)
-            keyboardjs.unbind(undefined, this.keyPressedCallback)
-            keyboardjs.setContext('app')
+    /** KeyboardJS key pressed event callback */
+    private readonly keyPressedCallback = (e: keyboardJS.KeyEvent) => {
+        const disable = () => {
             this.m_CaretGraphic.visible = false
             // (PT) this.m_Text.deactivate()
             this.m_Active.visible = false
         }
-    }
 
-    /** KeyboardJS key released event callback */
-    private readonly keyPressedCallback: EventListener = (e: keyboardjs.KeyEvent) => {
+        if (e.pressedKeys.includes('lclick') && !this.m_MouseInside) {
+            disable()
+            return true
+        }
+
         switch (e.key) {
             case 'Enter':
             case 'Escape':
             case 'Tab': {
-                this.releaseKeybindings(undefined)
-                break
+                disable()
+                return true
             }
             case 'ArrowRight': {
                 this.caretPosition += 1
@@ -336,5 +333,7 @@ export default class Textbox extends PIXI.Container {
                 this.instertCharacter(e.key)
             }
         }
+
+        return false
     }
 }

@@ -118,8 +118,8 @@ export class InventoryContainer extends Dialog {
                     button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                         e.stopPropagation()
                         if (e.data.button === 0) {
-                            this.close()
                             selectedCallBack(item.name)
+                            this.close()
                         }
                     })
                     button.on('pointerover', () => {
