@@ -11,7 +11,6 @@ import { BlueprintContainer, EditorMode } from './containers/blueprint'
 import { DebugContainer } from './panels/debug'
 import { QuickbarContainer } from './panels/quickbar'
 import { InfoEntityPanel } from './panels/infoEntityPanel'
-import { InfoContainer } from './panels/info'
 import Blueprint from './factorio-data/blueprint'
 import initDoorbell from './doorbell'
 import actions from './actions'
@@ -333,7 +332,12 @@ actions.showInfo.bind(() => {
 })
 
 actions.info.bind(() => {
-    InfoContainer.toggle()
+    const infoPanel = document.getElementById('info-panel')
+    if (infoPanel.classList.contains('active')) {
+        infoPanel.classList.remove('active')
+    } else {
+        infoPanel.classList.add('active')
+    }
 })
 
 actions.closeWindow.bind(() => {

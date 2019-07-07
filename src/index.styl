@@ -206,6 +206,56 @@ canvas
         outline: none
         cursor: pointer
 
+#info-panel
+    display: none
+    position: fixed
+    top: 50vh
+    left: 50vw
+    transform: translate(-50%, -50%)
+    width: 40vw
+    max-width: 640px
+    z-index: 100
+    color: white
+    background-color: #303030
+    border-radius: 10px
+    padding: 4px 16px
+    border: 1px solid #888
+    &.active
+        display: block
+    ul
+        position: relative
+        list-style: none
+        padding-left: 1em
+        margin-left: 0.5em
+        li:before
+            color: #ffe6c0
+            content: "-"
+            position: absolute
+            left: 0
+    h1
+        color: #ffe6c0
+        text-align: center
+        font-size: 1.8em
+        font-weight: 500
+    h2
+        font-size: 1.6em
+        font-weight: 500
+    h3
+        font-size: 1.2em
+        font-weight: 500
+    .info-list
+        font-size: 1.1em
+        li
+            mark
+                background-color: transparent
+                color: #ffe6c0
+            &:before
+                content: ">"
+    .copyright-notice
+        font-size: 0.9em
+        text-align: center
+
+
 /* TOASTS */
 .toasts
     &-container
