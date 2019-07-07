@@ -151,7 +151,7 @@ class BlueprintContainer extends PIXI.Container {
     hoverContainer: EntityContainer
     paintContainer: PaintContainer
     gridData: GridData
-    mode: EditorMode = EditorMode.NONE
+    private _mode: EditorMode = EditorMode.NONE
 
     constructor() {
         super()
@@ -252,6 +252,15 @@ class BlueprintContainer extends PIXI.Container {
                 this.viewport.updateTransform()
             }
         })
+    }
+
+    get mode() {
+        return this._mode
+    }
+
+    set mode(mode: EditorMode) {
+        this._mode = mode
+        this.emit('mode', mode)
     }
 
     enterPanMode() {

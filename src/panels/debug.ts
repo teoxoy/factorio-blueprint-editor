@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
+import { EditorMode } from '../containers/blueprint'
 
 export class DebugContainer extends PIXI.Container {
     x = 145
@@ -27,6 +28,17 @@ export class DebugContainer extends PIXI.Container {
 
         G.BPC.gridData.on('update', (pos: IPoint) => {
             gridposGUIText.text = `X ${pos.x} Y ${pos.y}`
+        })
+
+        const modeText = new PIXI.Text('', {
+            fill: G.colors.text.normal,
+            fontFamily: G.fontFamily
+        })
+        modeText.position.set(0, 64)
+        this.addChild(modeText)
+
+        G.BPC.on('mode', (mode: EditorMode) => {
+            modeText.text = EditorMode[mode]
         })
     }
 }
