@@ -84,7 +84,7 @@ export abstract class PaintContainer extends PIXI.Container {
     }
 
     setNewPosition(size: IPoint) {
-        const mousePos = G.BPC.gridData.mousePositionInBPC
+        const mousePos = G.BPC.gridData
 
         if (size.x % 2 === 0) {
             const npx = mousePos.x - (mousePos.x % 16)

@@ -142,7 +142,7 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     moveAtCursor() {
-        const position = G.BPC.gridData.mousePositionInBPC
+        const position = G.BPC.gridData
 
         switch (this.name) {
             case 'straight_rail':
@@ -166,7 +166,9 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     removeContainerUnder() {
-        const entity = G.bp.entities.get(G.bp.entityPositionGrid.getCellAtPosition(G.BPC.gridData))
+        const entity = G.bp.entities.get(
+            G.bp.entityPositionGrid.getCellAtPosition({ x: G.BPC.gridData.x32, y: G.BPC.gridData.y32 })
+        )
         if (entity) {
             G.bp.removeEntity(entity)
             this.checkBuildable()

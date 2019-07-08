@@ -26,7 +26,7 @@ export class DebugContainer extends PIXI.Container {
         gridposGUIText.position.set(0, 32)
         this.addChild(gridposGUIText)
 
-        G.BPC.gridData.on('update', (pos: IPoint) => {
+        G.BPC.gridData.on('update32', (pos: IPoint) => {
             gridposGUIText.text = `X ${pos.x} Y ${pos.y}`
         })
 

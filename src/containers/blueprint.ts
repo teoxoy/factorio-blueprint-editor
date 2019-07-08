@@ -28,9 +28,9 @@ enum EditorMode {
 }
 
 class GridData extends EventEmitter {
-    /** mouse x in 32 pixel size grid */
+    /** mouse x */
     x = 0
-    /** mouse y in 32 pixel size grid */
+    /** mouse y */
     y = 0
 
     /** mouse x in 16 pixel size grid */
@@ -38,16 +38,17 @@ class GridData extends EventEmitter {
     /** mouse y in 16 pixel size grid */
     private y16 = 0
 
+    /** mouse x in 32 pixel size grid */
+    x32 = 0
+    /** mouse y in 32 pixel size grid */
+    y32 = 0
+
     private lastMousePosX = 0
     private lastMousePosY = 0
 
     constructor() {
         super()
         document.addEventListener('mousemove', e => this.update(e.clientX, e.clientY))
-    }
-
-    get mousePositionInBPC() {
-        return { x: this.x16 * 16, y: this.y16 * 16 }
     }
 
     public recalculate() {
@@ -58,13 +59,18 @@ class GridData extends EventEmitter {
         this.lastMousePosX = x
         this.lastMousePosY = y
 
-        const mousePositionInBP = {
-            x: Math.abs(G.BPC.position.x - x) / G.BPC.viewport.getCurrentScale(),
-            y: Math.abs(G.BPC.position.y - y) / G.BPC.viewport.getCurrentScale()
+        this.x = Math.abs(G.BPC.position.x - x) / G.BPC.viewport.getCurrentScale()
+        this.y = Math.abs(G.BPC.position.y - y) / G.BPC.viewport.getCurrentScale()
+
+        // don't emit updates if panning
+        const notPanning = G.BPC.mode !== EditorMode.PAN
+        if (notPanning) {
+            this.emit('update', { x: this.x, y: this.y })
         }
+
         const gridCoordsOfCursor16 = {
-            x: (mousePositionInBP.x - (mousePositionInBP.x % 16)) / 16,
-            y: (mousePositionInBP.y - (mousePositionInBP.y % 16)) / 16
+            x: (this.x - (this.x % 16)) / 16,
+            y: (this.y - (this.y % 16)) / 16
         }
 
         if (gridCoordsOfCursor16.x !== this.x16 || gridCoordsOfCursor16.y !== this.y16) {
@@ -73,19 +79,17 @@ class GridData extends EventEmitter {
             this.x16 = gridCoordsOfCursor16.x
             this.y16 = gridCoordsOfCursor16.y
 
-            // don't emit updates if panning
-            const notPanning = G.BPC.mode !== EditorMode.PAN
             // emit update16 when mouse changes tile whithin the 16 pixel size grid
             if (notPanning) {
-                this.emit('update16', this)
+                this.emit('update16', { x: this.x16, y: this.y16 })
             }
 
-            if (X !== this.x || Y !== this.y) {
-                this.x = X
-                this.y = Y
-                // emit update when mouse changes tile whithin the 32 pixel size grid
+            if (X !== this.x32 || Y !== this.y32) {
+                this.x32 = X
+                this.y32 = Y
+                // emit update32 when mouse changes tile whithin the 32 pixel size grid
                 if (notPanning) {
-                    this.emit('update', this)
+                    this.emit('update32', { x: this.x32, y: this.y32 })
                 }
             }
         }
@@ -206,8 +210,6 @@ class BlueprintContainer extends PIXI.Container {
                     )
                     /* eslint-enable no-nested-ternary */
                     this.viewport.updateTransform()
-
-                    this.gridData.recalculate()
                 }
             }
         })
@@ -218,7 +220,7 @@ class BlueprintContainer extends PIXI.Container {
             }
         })
 
-        this.gridData.on('update', () => {
+        this.gridData.on('update32', () => {
             // Instead of decreasing the global interactionFrequency, call the over and out entity events here
             this.updateHoverContainer()
 
@@ -254,6 +256,11 @@ class BlueprintContainer extends PIXI.Container {
         })
     }
 
+    updateTransform() {
+        super.updateTransform()
+        this.gridData.recalculate()
+    }
+
     get mode() {
         return this._mode
     }
@@ -279,10 +286,9 @@ class BlueprintContainer extends PIXI.Container {
 
     zoom(zoomIn = true) {
         const zoomFactor = 0.1
-        this.viewport.setScaleCenter(this.gridData.mousePositionInBPC.x, this.gridData.mousePositionInBPC.y)
+        this.viewport.setScaleCenter(this.gridData.x, this.gridData.y)
         this.viewport.zoomBy(zoomFactor * (zoomIn ? 1 : -1))
         this.viewport.updateTransform()
-        this.gridData.recalculate()
     }
 
     get isPointerInside() {
@@ -311,7 +317,9 @@ class BlueprintContainer extends PIXI.Container {
         if (!G.bp) {
             return
         }
-        const e = EntityContainer.mappings.get(G.bp.entityPositionGrid.getCellAtPosition(this.gridData))
+        const e = EntityContainer.mappings.get(
+            G.bp.entityPositionGrid.getCellAtPosition({ x: this.gridData.x32, y: this.gridData.y32 })
+        )
 
         if (e && this.hoverContainer === e) {
             return
@@ -475,7 +483,11 @@ class BlueprintContainer extends PIXI.Container {
 
     centerViewport() {
         if (G.bp.isEmpty()) {
-            this.viewport.setPosition(-G.sizeBPContainer.width / 2, -G.sizeBPContainer.height / 2)
+            this.viewport.setCurrentScale(1)
+            this.viewport.setPosition(
+                -G.sizeBPContainer.width / 2 + G.app.screen.width / 2,
+                -G.sizeBPContainer.height / 2 + G.app.screen.width / 2
+            )
             this.viewport.updateTransform()
             return
         }
