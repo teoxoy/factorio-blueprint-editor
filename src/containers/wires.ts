@@ -146,13 +146,18 @@ export class WiresContainer extends PIXI.Container {
         if (!entNrArr) {
             return 0
         }
-        return getPowerPoleRotation(
-            entity.position,
-            entNrArr
-                .map(entNr => G.bp.entities.get(entNr))
-                .filter(e => !!e)
-                .map(ent => ent.position)
-        )
+
+        const points = entNrArr
+            .map(entNr => G.bp.entities.get(entNr))
+            .filter(e => !!e)
+            .map(ent => ent.position)
+
+        // TODO: this should not happen - find out why it does
+        if (points.length === 0) {
+            return 0
+        }
+
+        return getPowerPoleRotation(entity.position, points)
 
         function getPowerPoleRotation(centre: IPoint, points: IPoint[]) {
             const sectorSum = points
