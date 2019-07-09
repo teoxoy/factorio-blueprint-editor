@@ -4,6 +4,26 @@ import F from '../controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
 
+type CursorBoxType = 'regular' | 'not_allowed' | 'logistics' | 'electricity' | 'pair' | 'copy' | 'train_visualization'
+const cursorBoxTypeToOffset = (type: CursorBoxType) => {
+    switch (type) {
+        case 'regular':
+            return 0
+        case 'not_allowed':
+            return 64
+        case 'logistics':
+            return 128
+        case 'electricity':
+            return 128
+        case 'pair':
+            return 192
+        case 'copy':
+            return 192
+        case 'train_visualization':
+            return 256
+    }
+}
+
 export class OverlayContainer extends PIXI.Container {
     entityInfos: PIXI.Container
     cursorBoxes: PIXI.Container
@@ -393,7 +413,7 @@ export class OverlayContainer extends PIXI.Container {
         }
     }
 
-    createCursorBox(position: IPoint, size: IPoint) {
+    createCursorBox(position: IPoint, size: IPoint, type: CursorBoxType = 'regular') {
         const cursorBox = new PIXI.Container()
         cursorBox.scale.set(0.5, 0.5)
         cursorBox.position.set(position.x, position.y)
@@ -402,6 +422,7 @@ export class OverlayContainer extends PIXI.Container {
         if (size.x === 1 && size.y === 1) {
             const spriteData = PIXI.Texture.from('graphics/cursor-boxes-32x32.png')
             const frame = spriteData.frame.clone()
+            frame.x += cursorBoxTypeToOffset(type)
             frame.width = 64
             const s = new PIXI.Sprite(new PIXI.Texture(spriteData.baseTexture, frame))
             s.anchor.set(0.5, 0.5)
@@ -434,6 +455,7 @@ export class OverlayContainer extends PIXI.Container {
             const spriteData = PIXI.Texture.from(spriteName)
             const frame = spriteData.frame.clone()
             frame.x += offset
+            frame.y += cursorBoxTypeToOffset(type)
             frame.width = 63
             frame.height = 63
             const texture = new PIXI.Texture(spriteData.baseTexture, frame)
@@ -476,10 +498,10 @@ export class OverlayContainer extends PIXI.Container {
                     return
                 }
 
-                const distance =
-                    searchDirection % 4 === 0
-                        ? Math.abs(otherEntity.position.y - position.y)
-                        : Math.abs(otherEntity.position.x - position.x)
+                const searchingAlongY = searchDirection % 4 === 0
+                const distance = searchingAlongY
+                    ? Math.abs(otherEntity.position.y - position.y)
+                    : Math.abs(otherEntity.position.x - position.x)
 
                 const sign = searchDirection === 0 || searchDirection === 6 ? -1 : 1
 
@@ -497,13 +519,20 @@ export class OverlayContainer extends PIXI.Container {
                     s.rotation = direction * Math.PI * 0.25
                     s.scale.set(0.5, 0.5)
                     s.anchor.set(0.5, 0.5)
-                    if (searchDirection % 4 === 0) {
-                        s.y += sign * i * 32
-                    } else {
-                        s.x += sign * i * 32
-                    }
+                    s.x = searchingAlongY ? 0 : sign * i * 32
+                    s.y = searchingAlongY ? sign * i * 32 : 0
                     lineParts.addChild(s)
                 }
+
+                const otherEntityCursorBox = G.BPC.overlayContainer.createCursorBox(
+                    {
+                        x: searchingAlongY ? 0 : sign * distance * 32,
+                        y: searchingAlongY ? sign * distance * 32 : 0
+                    },
+                    otherEntity.size,
+                    'pair'
+                )
+                lineParts.addChild(otherEntityCursorBox)
 
                 return lineParts
             }
