@@ -5,21 +5,18 @@ import G from '../common/globals'
 import util from '../common/util'
 
 export class OverlayContainer extends PIXI.Container {
+    entityInfos: PIXI.Container
+    cursorBoxes: PIXI.Container
     undergroundLines: PIXI.Container
-    cursorBox: PIXI.Container
-    overlay: PIXI.Container
 
     constructor() {
         super()
 
-        this.overlay = new PIXI.Container()
-
-        this.cursorBox = new PIXI.Container()
-        this.cursorBox.scale.set(0.5, 0.5)
-
+        this.entityInfos = new PIXI.Container()
+        this.cursorBoxes = new PIXI.Container()
         this.undergroundLines = new PIXI.Container()
 
-        this.addChild(this.overlay, this.cursorBox, this.undergroundLines)
+        this.addChild(this.entityInfos, this.cursorBoxes, this.undergroundLines)
     }
 
     createEntityInfo(entityNumber: number, position: IPoint) {
@@ -359,7 +356,7 @@ export class OverlayContainer extends PIXI.Container {
 
         if (entityInfo.children.length !== 0) {
             entityInfo.position.set(position.x, position.y)
-            this.overlay.addChild(entityInfo)
+            this.entityInfos.addChild(entityInfo)
             return entityInfo
         }
 
@@ -396,9 +393,11 @@ export class OverlayContainer extends PIXI.Container {
         }
     }
 
-    // Cursor box
-    showCursorBox(position: IPoint, size: IPoint) {
-        this.cursorBox.removeChildren()
+    createCursorBox(position: IPoint, size: IPoint) {
+        const cursorBox = new PIXI.Container()
+        cursorBox.scale.set(0.5, 0.5)
+        cursorBox.position.set(position.x, position.y)
+        this.cursorBoxes.addChild(cursorBox)
 
         if (size.x === 1 && size.y === 1) {
             const spriteData = PIXI.Texture.from('graphics/cursor-boxes-32x32.png')
@@ -406,14 +405,14 @@ export class OverlayContainer extends PIXI.Container {
             frame.width = 64
             const s = new PIXI.Sprite(new PIXI.Texture(spriteData.baseTexture, frame))
             s.anchor.set(0.5, 0.5)
-            this.cursorBox.addChild(s)
+            cursorBox.addChild(s)
         } else {
-            this.cursorBox.addChild(
+            cursorBox.addChild(
                 ...createCorners('graphics/cursor-boxes.png', mapMinLengthToSpriteIndex(Math.min(size.x, size.y)))
             )
         }
 
-        this.cursorBox.position.set(position.x, position.y)
+        return cursorBox
 
         function mapMinLengthToSpriteIndex(minLength: number) {
             if (minLength < 0.4) {
@@ -453,16 +452,9 @@ export class OverlayContainer extends PIXI.Container {
         }
     }
 
-    hideCursorBox() {
-        this.cursorBox.removeChildren()
-    }
-
-    // Underground Lines
-    showUndergroundLines(name: string, position: IPoint, direction: number, searchDirection: number) {
+    createUndergroundLine(name: string, position: IPoint, direction: number, searchDirection: number) {
         const fd = FD.entities[name]
         if (fd.type === 'underground_belt' || name === 'pipe_to_ground') {
-            this.undergroundLines.removeChildren()
-
             const otherEntity = G.bp.entities.get(
                 G.bp.entityPositionGrid.getOpposingEntity(
                     name,
@@ -491,6 +483,11 @@ export class OverlayContainer extends PIXI.Container {
 
                 const sign = searchDirection === 0 || searchDirection === 6 ? -1 : 1
 
+                const lineParts = new PIXI.Container()
+                lineParts.x = position.x * 32
+                lineParts.y = position.y * 32
+                this.undergroundLines.addChild(lineParts)
+
                 for (let i = 1; i < distance; i++) {
                     const spriteData = PIXI.Texture.from('graphics/arrows/underground-lines.png')
                     const frame = spriteData.frame.clone()
@@ -501,18 +498,15 @@ export class OverlayContainer extends PIXI.Container {
                     s.scale.set(0.5, 0.5)
                     s.anchor.set(0.5, 0.5)
                     if (searchDirection % 4 === 0) {
-                        s.position.y += sign * i * 32
+                        s.y += sign * i * 32
                     } else {
-                        s.position.x += sign * i * 32
+                        s.x += sign * i * 32
                     }
-                    this.undergroundLines.addChild(s)
+                    lineParts.addChild(s)
                 }
+
+                return lineParts
             }
         }
-        this.undergroundLines.position.set(position.x * 32, position.y * 32)
-    }
-
-    hideUndergroundLines() {
-        this.undergroundLines.removeChildren()
     }
 }

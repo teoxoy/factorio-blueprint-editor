@@ -21,6 +21,8 @@ export class EntityPaintContainer extends PaintContainer {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[]
     directionType: 'input' | 'output'
     direction: number
+    /** This is only a reference */
+    undergroundLine: PIXI.Container
 
     constructor(name: string, direction: number) {
         super(name)
@@ -52,7 +54,7 @@ export class EntityPaintContainer extends PaintContainer {
     destroy() {
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
-        G.BPC.overlayContainer.hideUndergroundLines()
+        this.destroyUndergroundLine()
         super.destroy()
     }
 
@@ -101,13 +103,20 @@ export class EntityPaintContainer extends PaintContainer {
         }
     }
 
-    updateUndergroundLines() {
-        G.BPC.overlayContainer.showUndergroundLines(
+    updateUndergroundLine() {
+        this.destroyUndergroundLine()
+        this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.name,
             { x: this.position.x / 32, y: this.position.y / 32 },
             this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
             this.name === 'pipe_to_ground' ? (this.direction + 4) % 8 : this.direction
         )
+    }
+
+    destroyUndergroundLine() {
+        if (this.undergroundLine) {
+            this.undergroundLine.destroy()
+        }
     }
 
     rotate(ccw = false) {
@@ -123,7 +132,7 @@ export class EntityPaintContainer extends PaintContainer {
         this.redraw()
         this.checkBuildable()
         this.updateUndergroundBeltRotation()
-        this.updateUndergroundLines()
+        this.updateUndergroundLine()
     }
 
     redraw() {
@@ -158,7 +167,7 @@ export class EntityPaintContainer extends PaintContainer {
         }
 
         this.updateUndergroundBeltRotation()
-        this.updateUndergroundLines()
+        this.updateUndergroundLine()
 
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copyFrom(this.position))
 
@@ -216,7 +225,7 @@ export class EntityPaintContainer extends PaintContainer {
             if (fd.type === 'underground_belt' || this.name === 'pipe_to_ground') {
                 this.direction = (direction + 4) % 8
                 this.redraw()
-                G.BPC.overlayContainer.hideUndergroundLines()
+                this.destroyUndergroundLine()
             }
         }
 

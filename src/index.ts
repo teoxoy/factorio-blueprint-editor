@@ -328,7 +328,7 @@ actions.takePicture.bind(() => {
 })
 
 actions.showInfo.bind(() => {
-    G.BPC.overlayContainer.overlay.visible = !G.BPC.overlayContainer.overlay.visible
+    G.BPC.overlayContainer.entityInfos.visible = !G.BPC.overlayContainer.entityInfos.visible
 })
 
 actions.info.bind(() => {

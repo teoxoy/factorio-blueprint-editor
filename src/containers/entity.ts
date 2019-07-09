@@ -77,6 +77,10 @@ export class EntityContainer {
     areaVisualization: PIXI.Sprite | PIXI.Sprite[]
     entityInfo: PIXI.Container
     entitySprites: EntitySprite[]
+    /** This is only a reference */
+    private cursorBox: PIXI.Container
+    /** This is only a reference */
+    private undergroundLine: PIXI.Container
 
     private readonly m_Entity: Entity
 
@@ -112,7 +116,7 @@ export class EntityContainer {
             this.redraw()
             this.redrawSurroundingEntities()
 
-            this.updateUndergroundLines()
+            this.updateUndergroundLine()
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity)
         })
@@ -121,7 +125,7 @@ export class EntityContainer {
             this.redraw()
             this.redrawSurroundingEntities()
 
-            this.updateUndergroundLines()
+            this.updateUndergroundLine()
         })
 
         this.m_Entity.on('modules', () => this.redrawEntityInfo())
@@ -134,7 +138,7 @@ export class EntityContainer {
             this.redrawSurroundingEntities(oldPos)
             this.redrawSurroundingEntities(newPos)
 
-            this.updateUndergroundLines()
+            this.updateUndergroundLine()
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity)
             UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s =>
@@ -170,8 +174,19 @@ export class EntityContainer {
         }
     }
 
-    updateUndergroundLines() {
-        G.BPC.overlayContainer.showUndergroundLines(
+    createCursorBox() {
+        this.cursorBox = G.BPC.overlayContainer.createCursorBox(this.position, this.m_Entity.size)
+    }
+
+    destroyCursorBox() {
+        if (this.cursorBox) {
+            this.cursorBox.destroy()
+        }
+    }
+
+    updateUndergroundLine() {
+        this.destroyUndergroundLine()
+        this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.m_Entity.name,
             this.m_Entity.position,
             this.m_Entity.direction,
@@ -179,6 +194,12 @@ export class EntityContainer {
                 ? (this.m_Entity.direction + 4) % 8
                 : this.m_Entity.direction
         )
+    }
+
+    destroyUndergroundLine() {
+        if (this.undergroundLine) {
+            this.undergroundLine.destroy()
+        }
     }
 
     redrawEntityInfo() {
@@ -208,8 +229,8 @@ export class EntityContainer {
     }
 
     pointerOverEventHandler() {
-        G.BPC.overlayContainer.showCursorBox(this.position, this.m_Entity.size)
-        this.updateUndergroundLines()
+        this.createCursorBox()
+        this.updateUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(this.m_Entity)
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
@@ -218,8 +239,8 @@ export class EntityContainer {
     }
 
     pointerOutEventHandler() {
-        G.BPC.overlayContainer.hideCursorBox()
-        G.BPC.overlayContainer.hideUndergroundLines()
+        this.destroyCursorBox()
+        this.destroyUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(undefined)
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
