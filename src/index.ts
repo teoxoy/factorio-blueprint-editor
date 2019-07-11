@@ -255,236 +255,296 @@ window.addEventListener('unload', () => {
     }
 })
 
-actions.copyBPString.bind(e => {
-    if (G.bp.isEmpty()) {
-        return
-    }
-
-    const onSuccess = () => {
-        createToast({ text: 'Blueprint string copied to clipboard', type: 'success' })
-    }
-
-    const onError = (error: Error) => {
-        createErrorMessage('Blueprint string could not be generated.', error)
-    }
-
-    const bpOrBook = G.book ? G.book : G.bp
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        bpString
-            .encode(bpOrBook)
-            .then(s => navigator.clipboard.writeText(s))
-            .then(onSuccess)
-            .catch(onError)
-    } else {
-        const data = bpString.encodeSync(bpOrBook)
-        if (data.value) {
-            e.clipboardData.setData('text/plain', data.value)
-            onSuccess()
-        } else {
-            onError(data.error)
-        }
-    }
-})
-
-actions.pasteBPString.bind(e => {
-    G.loadingScreen.show()
-
-    const promise =
-        navigator.clipboard && navigator.clipboard.readText
-            ? navigator.clipboard.readText()
-            : Promise.resolve(e.clipboardData.getData('text'))
-
-    promise
-        .then(bpString.getBlueprintOrBookFromSource)
-        .then(loadBp)
-        .catch(error => {
-            G.loadingScreen.hide()
-            createBPImportError(error)
-        })
-})
-
-actions.clear.bind(() => {
-    loadBp(new Blueprint())
-})
-
-actions.takePicture.bind(() => {
-    if (G.bp.isEmpty()) {
-        return
-    }
-
-    // getLocalBounds is needed because it seems that it has sideeffects
-    // without it generateTexture returns an empty texture
-    G.BPC.getLocalBounds()
-    const region = G.BPC.getBlueprintBounds()
-    const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1, region)
-    const canvas = G.app.renderer.plugins.extract.canvas(texture as PIXI.RenderTexture)
-
-    canvas.toBlob(blob => {
-        FileSaver.saveAs(blob, `${G.bp.name}.png`)
-        createToast({ text: 'Blueprint image successfully generated', type: 'success' })
-
-        // Clear
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-    })
-})
-
-actions.showInfo.bind(() => {
-    G.BPC.overlayContainer.entityInfos.visible = !G.BPC.overlayContainer.entityInfos.visible
-})
-
-actions.info.bind(() => {
-    const infoPanel = document.getElementById('info-panel')
-    if (infoPanel.classList.contains('active')) {
-        infoPanel.classList.remove('active')
-    } else {
-        infoPanel.classList.add('active')
-    }
-})
-
-actions.closeWindow.bind(() => {
-    Dialog.closeLast()
-})
-
-actions.inventory.bind(() => {
-    if (G.interactive) {
-        // If there is a dialog open, assume user wants to close it
-        if (Dialog.anyOpen()) {
-            Dialog.closeLast()
-        } else {
-            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
-        }
-    }
-})
-
-actions.focus.bind(() => G.BPC.centerViewport())
-
-actions.rotate.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        G.BPC.hoverContainer.entity.rotate(false, true)
-    } else if (G.BPC.mode === EditorMode.PAINT) {
-        G.BPC.paintContainer.rotate()
-    }
-})
-
-actions.reverseRotate.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        G.BPC.hoverContainer.entity.rotate(true, true)
-    } else if (G.BPC.mode === EditorMode.PAINT) {
-        G.BPC.paintContainer.rotate(true)
-    }
-})
-
-actions.pipette.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        const entity = G.BPC.hoverContainer.entity
-        const itemName = Entity.getItemName(entity.name)
-        const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
-        G.BPC.spawnPaintContainer(itemName, direction)
-    } else if (G.BPC.mode === EditorMode.PAINT) {
-        G.BPC.paintContainer.destroy()
-    }
-})
-
-actions.increaseTileBuildingArea.bind(() => {
-    if (G.BPC.paintContainer instanceof TilePaintContainer) {
-        G.BPC.paintContainer.increaseSize()
-    }
-})
-
-actions.decreaseTileBuildingArea.bind(() => {
-    if (G.BPC.paintContainer instanceof TilePaintContainer) {
-        G.BPC.paintContainer.decreaseSize()
-    }
-})
-
-actions.undo.bind(() => {
-    G.bp.history.undo()
-})
-
-actions.redo.bind(() => {
-    G.bp.history.redo()
-})
-
-actions.generateOilOutpost.bind(() => {
-    const errorMessage = G.bp.generatePipes()
-    if (errorMessage) {
-        createToast({ text: errorMessage, type: 'warning' })
-    }
-})
-
-actions.pan.bind(G.BPC.enterPanMode.bind(G.BPC), G.BPC.exitPanMode.bind(G.BPC))
-
-actions.zoomIn.bind(() => {
-    G.BPC.zoom(true)
-})
-
-actions.zoomOut.bind(() => {
-    G.BPC.zoom(false)
-})
-
-actions.build.bind(() => {
-    if (G.BPC.mode === EditorMode.PAINT) {
-        G.BPC.paintContainer.placeEntityContainer()
-    }
-})
-
-actions.mine.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        G.bp.removeEntity(G.BPC.hoverContainer.entity)
-    }
-    if (G.BPC.mode === EditorMode.PAINT) {
-        G.BPC.paintContainer.removeContainerUnder()
-    }
-})
-
-actions.moveEntityUp.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
-    }
-})
-actions.moveEntityLeft.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
-    }
-})
-actions.moveEntityDown.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
-    }
-})
-actions.moveEntityRight.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
-    }
-})
-
-actions.openEntityGUI.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        if (G.debug) {
-            console.log(G.BPC.hoverContainer.entity.getRawData())
-        }
-
-        Dialog.closeAll()
-        const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
-        if (editor === undefined) {
+actions.copyBPString.bind({
+    press: e => {
+        if (G.bp.isEmpty()) {
             return
         }
-        editor.show()
+
+        const onSuccess = () => {
+            createToast({ text: 'Blueprint string copied to clipboard', type: 'success' })
+        }
+
+        const onError = (error: Error) => {
+            createErrorMessage('Blueprint string could not be generated.', error)
+        }
+
+        const bpOrBook = G.book ? G.book : G.bp
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            bpString
+                .encode(bpOrBook)
+                .then(s => navigator.clipboard.writeText(s))
+                .then(onSuccess)
+                .catch(onError)
+        } else {
+            const data = bpString.encodeSync(bpOrBook)
+            if (data.value) {
+                e.clipboardData.setData('text/plain', data.value)
+                onSuccess()
+            } else {
+                onError(data.error)
+            }
+        }
+    }
+})
+
+actions.pasteBPString.bind({
+    press: e => {
+        G.loadingScreen.show()
+
+        const promise =
+            navigator.clipboard && navigator.clipboard.readText
+                ? navigator.clipboard.readText()
+                : Promise.resolve(e.clipboardData.getData('text'))
+
+        promise
+            .then(bpString.getBlueprintOrBookFromSource)
+            .then(loadBp)
+            .catch(error => {
+                G.loadingScreen.hide()
+                createBPImportError(error)
+            })
+    }
+})
+
+actions.clear.bind({
+    press: () => {
+        loadBp(new Blueprint())
+    }
+})
+
+actions.takePicture.bind({
+    press: () => {
+        if (G.bp.isEmpty()) {
+            return
+        }
+
+        // getLocalBounds is needed because it seems that it has sideeffects
+        // without it generateTexture returns an empty texture
+        G.BPC.getLocalBounds()
+        const region = G.BPC.getBlueprintBounds()
+        const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1, region)
+        const canvas = G.app.renderer.plugins.extract.canvas(texture as PIXI.RenderTexture)
+
+        canvas.toBlob(blob => {
+            FileSaver.saveAs(blob, `${G.bp.name}.png`)
+            createToast({ text: 'Blueprint image successfully generated', type: 'success' })
+
+            // Clear
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+        })
+    }
+})
+
+actions.showInfo.bind({
+    press: () => {
+        G.BPC.overlayContainer.entityInfos.visible = !G.BPC.overlayContainer.entityInfos.visible
+    }
+})
+
+actions.info.bind({
+    press: () => {
+        const infoPanel = document.getElementById('info-panel')
+        if (infoPanel.classList.contains('active')) {
+            infoPanel.classList.remove('active')
+        } else {
+            infoPanel.classList.add('active')
+        }
+    }
+})
+
+actions.closeWindow.bind({
+    press: () => {
+        Dialog.closeLast()
+    }
+})
+
+actions.inventory.bind({
+    press: () => {
+        if (G.interactive) {
+            // If there is a dialog open, assume user wants to close it
+            if (Dialog.anyOpen()) {
+                Dialog.closeLast()
+            } else {
+                new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
+            }
+        }
+    }
+})
+
+actions.focus.bind({ press: () => G.BPC.centerViewport() })
+
+actions.rotate.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            G.BPC.hoverContainer.entity.rotate(false, true)
+        } else if (G.BPC.mode === EditorMode.PAINT) {
+            G.BPC.paintContainer.rotate()
+        }
+    }
+})
+
+actions.reverseRotate.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            G.BPC.hoverContainer.entity.rotate(true, true)
+        } else if (G.BPC.mode === EditorMode.PAINT) {
+            G.BPC.paintContainer.rotate(true)
+        }
+    }
+})
+
+actions.pipette.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            const entity = G.BPC.hoverContainer.entity
+            const itemName = Entity.getItemName(entity.name)
+            const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
+            G.BPC.spawnPaintContainer(itemName, direction)
+        } else if (G.BPC.mode === EditorMode.PAINT) {
+            G.BPC.paintContainer.destroy()
+        }
+    }
+})
+
+actions.increaseTileBuildingArea.bind({
+    press: () => {
+        if (G.BPC.paintContainer instanceof TilePaintContainer) {
+            G.BPC.paintContainer.increaseSize()
+        }
+    }
+})
+
+actions.decreaseTileBuildingArea.bind({
+    press: () => {
+        if (G.BPC.paintContainer instanceof TilePaintContainer) {
+            G.BPC.paintContainer.decreaseSize()
+        }
+    }
+})
+
+actions.undo.bind({
+    press: () => {
+        G.bp.history.undo()
+    }
+})
+
+actions.redo.bind({
+    press: () => {
+        G.bp.history.redo()
+    }
+})
+
+actions.generateOilOutpost.bind({
+    press: () => {
+        const errorMessage = G.bp.generatePipes()
+        if (errorMessage) {
+            createToast({ text: errorMessage, type: 'warning' })
+        }
+    }
+})
+
+actions.pan.bind({
+    press: () => G.BPC.enterPanMode(),
+    release: () => G.BPC.exitPanMode()
+})
+
+actions.zoomIn.bind({
+    press: () => {
+        G.BPC.zoom(true)
+    }
+})
+
+actions.zoomOut.bind({
+    press: () => {
+        G.BPC.zoom(false)
+    }
+})
+
+actions.build.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.PAINT) {
+            G.BPC.paintContainer.placeEntityContainer()
+        }
+    },
+    repeat: true
+})
+
+actions.mine.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            G.bp.removeEntity(G.BPC.hoverContainer.entity)
+        }
+        if (G.BPC.mode === EditorMode.PAINT) {
+            G.BPC.paintContainer.removeContainerUnder()
+        }
+    },
+    repeat: true
+})
+
+actions.moveEntityUp.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
+        }
+    }
+})
+actions.moveEntityLeft.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
+        }
+    }
+})
+actions.moveEntityDown.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
+        }
+    }
+})
+actions.moveEntityRight.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
+        }
+    }
+})
+
+actions.openEntityGUI.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            if (G.debug) {
+                console.log(G.BPC.hoverContainer.entity.getRawData())
+            }
+
+            Dialog.closeAll()
+            const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
+            if (editor === undefined) {
+                return
+            }
+            editor.show()
+        }
     }
 })
 
 let entityForCopyData: Entity | undefined
-actions.copyEntitySettings.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
-        // Store reference to source entity
-        entityForCopyData = G.BPC.hoverContainer.entity
+actions.copyEntitySettings.bind({
+    press: () => {
+        if (G.BPC.mode === EditorMode.EDIT) {
+            // Store reference to source entity
+            entityForCopyData = G.BPC.hoverContainer.entity
+        }
     }
 })
-actions.pasteEntitySettings.bind(() => {
-    if (entityForCopyData && G.BPC.mode === EditorMode.EDIT) {
-        // Hand over reference of source entity to target entity for pasting data
-        G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
-    }
+actions.pasteEntitySettings.bind({
+    press: () => {
+        if (entityForCopyData && G.BPC.mode === EditorMode.EDIT) {
+            // Hand over reference of source entity to target entity for pasting data
+            G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
+        }
+    },
+    repeat: true
 })
 // TODO: Move this somewhere else - I don't think this is the right place for it
 {
@@ -499,8 +559,8 @@ actions.pasteEntitySettings.bind(() => {
             const srcEnt = EntityContainer.mappings.get(entityForCopyData.entityNumber)
             copyCursorBox = G.BPC.overlayContainer.createCursorBox(srcEnt.position, entityForCopyData.size, 'copy')
             Promise.race([
-                new Promise(resolve => actions.tryPasteEntitySettings.bind(undefined, resolve, true)),
-                new Promise(resolve => actions.copyEntitySettings.bind(resolve, undefined, true)),
+                new Promise(resolve => actions.tryPasteEntitySettings.bind({ release: resolve, once: true })),
+                new Promise(resolve => actions.copyEntitySettings.bind({ press: resolve, once: true })),
                 new Promise(resolve => G.BPC.once('removeHoverContainer', resolve))
             ]).then(() => {
                 copyCursorBox.destroy()
@@ -508,7 +568,7 @@ actions.pasteEntitySettings.bind(() => {
             })
         }
     }
-    actions.tryPasteEntitySettings.bind(createCopyCursorBox, undefined, false, true)
+    actions.tryPasteEntitySettings.bind({ press: createCopyCursorBox })
     G.BPC.on('createHoverContainer', () => {
         if (actions.tryPasteEntitySettings.pressed) {
             createCopyCursorBox()
@@ -516,14 +576,14 @@ actions.pasteEntitySettings.bind(() => {
     })
 }
 
-actions.quickbar1.bind(() => G.quickbarContainer.bindKeyToSlot(0))
-actions.quickbar2.bind(() => G.quickbarContainer.bindKeyToSlot(1))
-actions.quickbar3.bind(() => G.quickbarContainer.bindKeyToSlot(2))
-actions.quickbar4.bind(() => G.quickbarContainer.bindKeyToSlot(3))
-actions.quickbar5.bind(() => G.quickbarContainer.bindKeyToSlot(4))
-actions.quickbar6.bind(() => G.quickbarContainer.bindKeyToSlot(5))
-actions.quickbar7.bind(() => G.quickbarContainer.bindKeyToSlot(6))
-actions.quickbar8.bind(() => G.quickbarContainer.bindKeyToSlot(7))
-actions.quickbar9.bind(() => G.quickbarContainer.bindKeyToSlot(8))
-actions.quickbar10.bind(() => G.quickbarContainer.bindKeyToSlot(9))
-actions.changeActiveQuickbar.bind(() => G.quickbarContainer.changeActiveQuickbar())
+actions.quickbar1.bind({ press: () => G.quickbarContainer.bindKeyToSlot(0) })
+actions.quickbar2.bind({ press: () => G.quickbarContainer.bindKeyToSlot(1) })
+actions.quickbar3.bind({ press: () => G.quickbarContainer.bindKeyToSlot(2) })
+actions.quickbar4.bind({ press: () => G.quickbarContainer.bindKeyToSlot(3) })
+actions.quickbar5.bind({ press: () => G.quickbarContainer.bindKeyToSlot(4) })
+actions.quickbar6.bind({ press: () => G.quickbarContainer.bindKeyToSlot(5) })
+actions.quickbar7.bind({ press: () => G.quickbarContainer.bindKeyToSlot(6) })
+actions.quickbar8.bind({ press: () => G.quickbarContainer.bindKeyToSlot(7) })
+actions.quickbar9.bind({ press: () => G.quickbarContainer.bindKeyToSlot(8) })
+actions.quickbar10.bind({ press: () => G.quickbarContainer.bindKeyToSlot(9) })
+actions.changeActiveQuickbar.bind({ press: () => G.quickbarContainer.changeActiveQuickbar() })

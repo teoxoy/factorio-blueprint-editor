@@ -54,8 +54,8 @@ class Action {
     private m_active = true
     private m_keyCombo: string
     private handlers: {
-        press(e?: keyboardJS.KeyEvent): void
-        release(e?: keyboardJS.KeyEvent): void
+        press: (e?: keyboardJS.KeyEvent) => void
+        release: (e?: keyboardJS.KeyEvent) => void
     }[] = []
     private _pressed = false
 
@@ -63,14 +63,14 @@ class Action {
         this.defaultKeyCombo = defaultKeyCombo
         this.m_keyCombo = defaultKeyCombo
 
-        this.bind(
-            () => {
+        this.bind({
+            press: () => {
                 this._pressed = true
             },
-            () => {
+            release: () => {
                 this._pressed = false
             }
-        )
+        })
     }
 
     private get active() {
@@ -119,37 +119,48 @@ class Action {
         this.keyCombo = this.defaultKeyCombo
     }
 
-    bind(
-        pressHandler?: (e: keyboardJS.KeyEvent) => void,
-        releaseHandler?: (e: keyboardJS.KeyEvent) => void,
-        once = false,
-        preventRepeat = false
-    ) {
+    bind(opts: {
+        /** Press Handler */
+        press?: (e: keyboardJS.KeyEvent) => void
+        /** Release Handler */
+        release?: (e: keyboardJS.KeyEvent) => void
+        /** Only runs both handlers once then removes them */
+        once?: boolean
+        /** Lets the press handler run multiple times per button press */
+        repeat?: boolean
+    }) {
+        if (opts.press === undefined && opts.release === undefined) {
+            return
+        }
+
+        opts.once = opts.once || false
+        opts.repeat = opts.repeat || false
+
         let pressHandlerRanOnce = false
 
         // Wrap pressHandler to preventDefault
-        const PRESS = pressHandler
+        const PRESS = opts.press
             ? (e: keyboardJS.KeyEvent) => {
-                  if (preventRepeat && pressHandlerRanOnce) {
+                  if (!opts.repeat && pressHandlerRanOnce) {
                       return
                   }
                   pressHandlerRanOnce = true
                   if (e && e.preventDefault) {
                       e.preventDefault()
                   }
-                  pressHandler(e)
+                  opts.press(e)
               }
             : undefined
 
         // Wrap releaseHandler for once
-        const RELEASE = releaseHandler
+        const RELEASE = opts.release
             ? (e: keyboardJS.KeyEvent) => {
                   pressHandlerRanOnce = false
-                  if (once) {
+                  if (opts.once) {
                       keyboardJS.unbind(this.keyCombo, handlerData.press, handlerData.release)
                       this.handlers = this.handlers.filter(h => h !== handlerData)
                   }
-                  releaseHandler(e)
+                  opts.release(e)
               }
             : () => {
                   pressHandlerRanOnce = false
@@ -226,25 +237,31 @@ const actions = {
     changeActiveQuickbar: new Action('x'),
 
     copyBPString: {
-        bind: (pressHandler?: (e: ClipboardEvent) => void) => {
+        bind: (opts: { press?: (e: ClipboardEvent) => void }) => {
+            if (opts.press === undefined) {
+                return
+            }
             document.addEventListener('copy', (e: ClipboardEvent) => {
                 if (document.activeElement !== canvasEl) {
                     return
                 }
                 e.preventDefault()
-                pressHandler(e)
+                opts.press(e)
             })
         }
     },
 
     pasteBPString: {
-        bind: (pressHandler?: (e: ClipboardEvent) => void) => {
+        bind: (opts: { press?: (e: ClipboardEvent) => void }) => {
+            if (opts.press === undefined) {
+                return
+            }
             document.addEventListener('paste', (e: ClipboardEvent) => {
                 if (document.activeElement !== canvasEl) {
                     return
                 }
                 e.preventDefault()
-                pressHandler(e)
+                opts.press(e)
             })
         }
     },
