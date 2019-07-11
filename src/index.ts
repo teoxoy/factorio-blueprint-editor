@@ -21,6 +21,7 @@ import * as Editors from './editors/factory'
 import Entity from './factorio-data/entity'
 import Dialog from './controls/dialog'
 import { EntityContainer } from './containers/entity'
+import U from './common/util'
 
 if (PIXI.utils.isMobile.any) {
     document.getElementById('loadingScreen').classList.add('mobileError')
@@ -549,6 +550,7 @@ actions.pasteEntitySettings.bind({
 // TODO: Move this somewhere else - I don't think this is the right place for it
 {
     let copyCursorBox: PIXI.Container | undefined
+    const deferred = new U.Deferred()
     const createCopyCursorBox = () => {
         if (
             copyCursorBox === undefined &&
@@ -559,16 +561,17 @@ actions.pasteEntitySettings.bind({
             const srcEnt = EntityContainer.mappings.get(entityForCopyData.entityNumber)
             copyCursorBox = G.BPC.overlayContainer.createCursorBox(srcEnt.position, entityForCopyData.size, 'copy')
             Promise.race([
-                new Promise(resolve => actions.tryPasteEntitySettings.bind({ release: resolve, once: true })),
+                deferred.promise,
                 new Promise(resolve => actions.copyEntitySettings.bind({ press: resolve, once: true })),
                 new Promise(resolve => G.BPC.once('removeHoverContainer', resolve))
             ]).then(() => {
+                deferred.reset()
                 copyCursorBox.destroy()
                 copyCursorBox = undefined
             })
         }
     }
-    actions.tryPasteEntitySettings.bind({ press: createCopyCursorBox })
+    actions.tryPasteEntitySettings.bind({ press: createCopyCursorBox, release: () => deferred.resolve() })
     G.BPC.on('createHoverContainer', () => {
         if (actions.tryPasteEntitySettings.pressed) {
             createCopyCursorBox()

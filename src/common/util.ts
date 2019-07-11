@@ -137,6 +137,19 @@ function timer(name: string) {
     }
 }
 
+class Deferred {
+    resolve: () => void
+    promise: Promise<void>
+    constructor() {
+        this.reset()
+    }
+    reset() {
+        this.promise = new Promise(r => {
+            this.resolve = r
+        })
+    }
+}
+
 export default {
     duplicate,
     getRandomInt,
@@ -150,5 +163,6 @@ export default {
     uniqueInArray,
     equalArrays,
     areObjectsEquivalent,
-    timer
+    timer,
+    Deferred
 }
