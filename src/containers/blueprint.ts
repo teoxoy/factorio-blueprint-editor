@@ -305,6 +305,7 @@ class BlueprintContainer extends PIXI.Container {
             this.hoverContainer = undefined
             this.mode = EditorMode.NONE
             this.cursor = 'inherit'
+            this.emit('removeHoverContainer')
         }
 
         if (forceRemove || !this.isPointerInside) {
@@ -334,6 +335,7 @@ class BlueprintContainer extends PIXI.Container {
             this.mode = EditorMode.EDIT
             this.cursor = 'pointer'
             e.pointerOverEventHandler()
+            this.emit('createHoverContainer')
         }
     }
 

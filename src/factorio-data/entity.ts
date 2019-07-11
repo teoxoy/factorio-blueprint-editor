@@ -744,9 +744,13 @@ export default class Entity extends EventEmitter {
         this.m_BP.history.commitTransaction()
     }
 
+    canPasteSettings(sourceEntity: Entity) {
+        return sourceEntity !== this && sourceEntity.type === this.type
+    }
+
     /** Paste relevant data from source entity */
     pasteSettings(sourceEntity: Entity) {
-        if (sourceEntity.type !== this.type) {
+        if (!this.canPasteSettings(sourceEntity)) {
             return
         }
 

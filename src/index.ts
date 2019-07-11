@@ -20,6 +20,7 @@ import spritesheetsLoader from './spritesheetsLoader'
 import * as Editors from './editors/factory'
 import Entity from './factorio-data/entity'
 import Dialog from './controls/dialog'
+import { EntityContainer } from './containers/entity'
 
 if (PIXI.utils.isMobile.any) {
     document.getElementById('loadingScreen').classList.add('mobileError')
@@ -472,7 +473,7 @@ actions.openEntityGUI.bind(() => {
     }
 })
 
-let entityForCopyData: Entity
+let entityForCopyData: Entity | undefined
 actions.copyEntitySettings.bind(() => {
     if (G.BPC.mode === EditorMode.EDIT) {
         // Store reference to source entity
@@ -480,11 +481,40 @@ actions.copyEntitySettings.bind(() => {
     }
 })
 actions.pasteEntitySettings.bind(() => {
-    if (G.BPC.mode === EditorMode.EDIT) {
+    if (entityForCopyData && G.BPC.mode === EditorMode.EDIT) {
         // Hand over reference of source entity to target entity for pasting data
         G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
     }
 })
+// TODO: Move this somewhere else - I don't think this is the right place for it
+{
+    let copyCursorBox: PIXI.Container | undefined
+    const createCopyCursorBox = () => {
+        if (
+            copyCursorBox === undefined &&
+            entityForCopyData &&
+            G.BPC.mode === EditorMode.EDIT &&
+            G.BPC.hoverContainer.entity.canPasteSettings(entityForCopyData)
+        ) {
+            const srcEnt = EntityContainer.mappings.get(entityForCopyData.entityNumber)
+            copyCursorBox = G.BPC.overlayContainer.createCursorBox(srcEnt.position, entityForCopyData.size, 'copy')
+            Promise.race([
+                new Promise(resolve => actions.tryPasteEntitySettings.bind(undefined, resolve, true)),
+                new Promise(resolve => actions.copyEntitySettings.bind(resolve, undefined, true)),
+                new Promise(resolve => G.BPC.once('removeHoverContainer', resolve))
+            ]).then(() => {
+                copyCursorBox.destroy()
+                copyCursorBox = undefined
+            })
+        }
+    }
+    actions.tryPasteEntitySettings.bind(createCopyCursorBox, undefined, false, true)
+    G.BPC.on('createHoverContainer', () => {
+        if (actions.tryPasteEntitySettings.pressed) {
+            createCopyCursorBox()
+        }
+    })
+}
 
 actions.quickbar1.bind(() => G.quickbarContainer.bindKeyToSlot(0))
 actions.quickbar2.bind(() => G.quickbarContainer.bindKeyToSlot(1))

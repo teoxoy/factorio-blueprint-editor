@@ -57,10 +57,20 @@ class Action {
         press(e?: keyboardJS.KeyEvent): void
         release(e?: keyboardJS.KeyEvent): void
     }[] = []
+    private _pressed = false
 
     constructor(defaultKeyCombo: string) {
         this.defaultKeyCombo = defaultKeyCombo
         this.m_keyCombo = defaultKeyCombo
+
+        this.bind(
+            () => {
+                this._pressed = true
+            },
+            () => {
+                this._pressed = false
+            }
+        )
     }
 
     private get active() {
@@ -97,6 +107,10 @@ class Action {
         this.m_keyCombo = value
     }
 
+    get pressed() {
+        return this._pressed
+    }
+
     get usesDefaultKeyCombo() {
         return this.keyCombo === this.defaultKeyCombo
     }
@@ -105,10 +119,21 @@ class Action {
         this.keyCombo = this.defaultKeyCombo
     }
 
-    bind(pressHandler?: (e: keyboardJS.KeyEvent) => void, releaseHandler?: (e: keyboardJS.KeyEvent) => void) {
+    bind(
+        pressHandler?: (e: keyboardJS.KeyEvent) => void,
+        releaseHandler?: (e: keyboardJS.KeyEvent) => void,
+        once = false,
+        preventRepeat = false
+    ) {
+        let pressHandlerRanOnce = false
+
         // Wrap pressHandler to preventDefault
-        const PRESSED = pressHandler
+        const PRESS = pressHandler
             ? (e: keyboardJS.KeyEvent) => {
+                  if (preventRepeat && pressHandlerRanOnce) {
+                      return
+                  }
+                  pressHandlerRanOnce = true
                   if (e && e.preventDefault) {
                       e.preventDefault()
                   }
@@ -116,38 +141,37 @@ class Action {
               }
             : undefined
 
+        // Wrap releaseHandler for once
+        const RELEASE = releaseHandler
+            ? (e: keyboardJS.KeyEvent) => {
+                  pressHandlerRanOnce = false
+                  if (once) {
+                      keyboardJS.unbind(this.keyCombo, handlerData.press, handlerData.release)
+                      this.handlers = this.handlers.filter(h => h !== handlerData)
+                  }
+                  releaseHandler(e)
+              }
+            : () => {
+                  pressHandlerRanOnce = false
+              }
+
         if (this.active) {
-            keyboardJS.bind(this.keyCombo, PRESSED, releaseHandler)
+            keyboardJS.bind(this.keyCombo, PRESS, RELEASE)
         }
-        this.handlers.push({
-            press: PRESSED,
-            release: releaseHandler
-        })
+        const handlerData = {
+            press: PRESS,
+            release: RELEASE
+        }
+        this.handlers.push(handlerData)
     }
 
-    unbind() {
+    unbindAll() {
         this.handlers.forEach(h => keyboardJS.unbind(this.keyCombo, h.press, h.release))
         this.handlers = []
     }
 
     call() {
         this.handlers.forEach(h => h.press())
-    }
-}
-
-class ToggleAction extends Action {
-    pressed = false
-
-    constructor(defaultKeyCombo: string) {
-        super(defaultKeyCombo)
-        this.bind(
-            () => {
-                this.pressed = true
-            },
-            () => {
-                this.pressed = false
-            }
-        )
     }
 }
 
@@ -167,16 +191,18 @@ const actions = {
     moveEntityRight: new Action('right'),
     generateOilOutpost: new Action('g'),
 
-    moveUp: new ToggleAction('w'),
-    moveLeft: new ToggleAction('a'),
-    moveDown: new ToggleAction('s'),
-    moveRight: new ToggleAction('d'),
+    moveUp: new Action('w'),
+    moveLeft: new Action('a'),
+    moveDown: new Action('s'),
+    moveRight: new Action('d'),
 
     inventory: new Action('e'),
-    build: new ToggleAction('lclick'),
-    mine: new ToggleAction('rclick'),
+    build: new Action('lclick'),
+    mine: new Action('rclick'),
     copyEntitySettings: new Action('shift+rclick'),
-    pasteEntitySettings: new ToggleAction('shift+lclick'),
+    pasteEntitySettings: new Action('shift+lclick'),
+    /** Used for highlighting the source entity */
+    tryPasteEntitySettings: new Action('shift'),
     openEntityGUI: new Action('lclick'),
     showInfo: new Action('alt'),
     pipette: new Action('q'),
