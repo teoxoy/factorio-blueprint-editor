@@ -6,7 +6,6 @@ interface ISize {
 }
 
 export class Viewport {
-    private container: PIXI.Container
     private size: ISize
     private viewPortPosition: IPoint
     private viewPortSize: ISize
@@ -21,15 +20,7 @@ export class Viewport {
     private origTransform: PIXI.Matrix
     private transform: PIXI.Matrix
 
-    constructor(
-        container: PIXI.Container,
-        size: ISize,
-        viewPortPosition: IPoint,
-        viewPortSize: ISize,
-        maxZoom: number
-    ) {
-        this.container = container
-
+    constructor(size: ISize, viewPortPosition: IPoint, viewPortSize: ISize, maxZoom: number) {
         this.size = size
         this.viewPortPosition = viewPortPosition
         this.viewPortSize = viewPortSize
@@ -49,11 +40,6 @@ export class Viewport {
         this.origTransform = new PIXI.Matrix()
 
         this.transform = new PIXI.Matrix()
-    }
-
-    updateTransform() {
-        const t = this.getTransform()
-        this.container.setTransform(t.tx, t.ty, t.a, t.d)
     }
 
     _updateMatrix() {
@@ -141,7 +127,6 @@ export class Viewport {
         this.scaleY = zoom
 
         this.dirty = true
-        this.updateTransform()
     }
 
     getTransform() {

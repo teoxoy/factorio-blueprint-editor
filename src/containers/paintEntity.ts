@@ -151,15 +151,14 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     moveAtCursor() {
-        const position = G.BPC.gridData
-
         switch (this.name) {
             case 'straight_rail':
             case 'curved_rail':
             case 'train_stop':
                 this.position.set(
-                    position.x - ((position.x + G.railMoveOffset.x * 32) % 64) + 32,
-                    position.y - ((position.y + G.railMoveOffset.y * 32) % 64) + 32
+                    // 64 pixel size grid
+                    Math.floor((G.BPC.gridData.x32 + G.railMoveOffset.x) / 2) * 64,
+                    Math.floor((G.BPC.gridData.y32 + G.railMoveOffset.y) / 2) * 64
                 )
                 break
             default:

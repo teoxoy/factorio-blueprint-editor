@@ -84,20 +84,18 @@ export abstract class PaintContainer extends PIXI.Container {
     }
 
     setNewPosition(size: IPoint) {
-        const mousePos = G.BPC.gridData
-
         if (size.x % 2 === 0) {
-            const npx = mousePos.x - (mousePos.x % 16)
+            const npx = G.BPC.gridData.x16 * 16
             this.x = npx + (npx % 32 === 0 ? 0 : 16)
         } else {
-            this.x = mousePos.x - (mousePos.x % 32) + 16
+            this.x = G.BPC.gridData.x32 * 32 + 16
         }
 
         if (size.y % 2 === 0) {
-            const npy = mousePos.y - (mousePos.y % 16)
+            const npy = G.BPC.gridData.y16 * 16
             this.y = npy + (npy % 32 === 0 ? 0 : 16)
         } else {
-            this.y = mousePos.y - (mousePos.y % 32) + 16
+            this.y = G.BPC.gridData.y32 * 32 + 16
         }
     }
 

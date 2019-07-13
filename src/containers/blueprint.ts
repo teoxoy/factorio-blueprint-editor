@@ -28,20 +28,12 @@ enum EditorMode {
 }
 
 class GridData extends EventEmitter {
-    /** mouse x */
-    x = 0
-    /** mouse y */
-    y = 0
-
-    /** mouse x in 16 pixel size grid */
-    private x16 = 0
-    /** mouse y in 16 pixel size grid */
-    private y16 = 0
-
-    /** mouse x in 32 pixel size grid */
-    x32 = 0
-    /** mouse y in 32 pixel size grid */
-    y32 = 0
+    private _x = 0
+    private _y = 0
+    private _x16 = 0
+    private _y16 = 0
+    private _x32 = 0
+    private _y32 = 0
 
     private lastMousePosX = 0
     private lastMousePosY = 0
@@ -51,47 +43,69 @@ class GridData extends EventEmitter {
         document.addEventListener('mousemove', e => this.update(e.clientX, e.clientY))
     }
 
+    /** mouse x */
+    public get x() {
+        return this._x
+    }
+    /** mouse y */
+    public get y() {
+        return this._y
+    }
+    /** mouse x in 16 pixel size grid */
+    public get x16() {
+        return this._x16
+    }
+    /** mouse y in 16 pixel size grid */
+    public get y16() {
+        return this._y16
+    }
+    /** mouse x in 32 pixel size grid */
+    public get x32() {
+        return this._x32
+    }
+    /** mouse y in 32 pixel size grid */
+    public get y32() {
+        return this._y32
+    }
+
     public recalculate() {
         this.update(this.lastMousePosX, this.lastMousePosY)
     }
 
-    private update(x: number, y: number) {
-        this.lastMousePosX = x
-        this.lastMousePosY = y
+    private update(mouseX: number, mouseY: number) {
+        this.lastMousePosX = mouseX
+        this.lastMousePosY = mouseY
 
-        this.x = Math.abs(G.BPC.position.x - x) / G.BPC.viewport.getCurrentScale()
-        this.y = Math.abs(G.BPC.position.y - y) / G.BPC.viewport.getCurrentScale()
+        const oldX = this._x
+        const oldY = this._y
+        this._x = Math.floor(Math.abs(G.BPC.position.x - mouseX) / G.BPC.viewport.getCurrentScale())
+        this._y = Math.floor(Math.abs(G.BPC.position.y - mouseY) / G.BPC.viewport.getCurrentScale())
 
-        // don't emit updates if panning
-        const notPanning = G.BPC.mode !== EditorMode.PAN
-        if (notPanning) {
-            this.emit('update', { x: this.x, y: this.y })
+        const oldX16 = this._x16
+        const oldY16 = this._y16
+        this._x16 = Math.floor(this._x / 16)
+        this._y16 = Math.floor(this._y / 16)
+
+        const oldX32 = this._x32
+        const oldY32 = this._y32
+        this._x32 = Math.floor(this._x / 32)
+        this._y32 = Math.floor(this._y / 32)
+
+        if (G.BPC.mode === EditorMode.PAN) {
+            return
         }
 
-        const gridCoordsOfCursor16 = {
-            x: (this.x - (this.x % 16)) / 16,
-            y: (this.y - (this.y % 16)) / 16
+        // emit update when mouse changes tile whithin the 1 pixel size grid
+        if (!(oldX === this._x && oldY === this._y)) {
+            this.emit('update', this._x, this._y)
         }
-
-        if (gridCoordsOfCursor16.x !== this.x16 || gridCoordsOfCursor16.y !== this.y16) {
-            const X = Math.floor(gridCoordsOfCursor16.x / 2)
-            const Y = Math.floor(gridCoordsOfCursor16.y / 2)
-            this.x16 = gridCoordsOfCursor16.x
-            this.y16 = gridCoordsOfCursor16.y
-
-            // emit update16 when mouse changes tile whithin the 16 pixel size grid
-            if (notPanning) {
-                this.emit('update16', { x: this.x16, y: this.y16 })
-            }
-
-            if (X !== this.x32 || Y !== this.y32) {
-                this.x32 = X
-                this.y32 = Y
-                // emit update32 when mouse changes tile whithin the 32 pixel size grid
-                if (notPanning) {
-                    this.emit('update32', { x: this.x32, y: this.y32 })
-                }
-            }
+        // emit update16 when mouse changes tile whithin the 16 pixel size grid
+        if (!(oldX16 === this._x16 && oldY16 === this._y16)) {
+            this.emit('update16', this._x16, this._y16)
+        }
+        // emit update32 when mouse changes tile whithin the 32 pixel size grid
+        if (!(oldX32 === this._x32 && oldY32 === this._y32)) {
+            this.emit('update32', this._x32, this._y32)
         }
     }
 }
@@ -165,7 +179,6 @@ class BlueprintContainer extends PIXI.Container {
         this.hitArea = new PIXI.Rectangle(0, 0, G.sizeBPContainer.width, G.sizeBPContainer.height)
 
         this.viewport = new Viewport(
-            this,
             G.sizeBPContainer,
             G.positionBPContainer,
             {
@@ -209,7 +222,7 @@ class BlueprintContainer extends PIXI.Container {
                         (WSXOR ? (actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
                     )
                     /* eslint-enable no-nested-ternary */
-                    this.viewport.updateTransform()
+                    this.applyViewportTransform()
                 }
             }
         })
@@ -251,13 +264,14 @@ class BlueprintContainer extends PIXI.Container {
         document.addEventListener('mousemove', e => {
             if (this.mode === EditorMode.PAN) {
                 this.viewport.translateBy(e.movementX, e.movementY)
-                this.viewport.updateTransform()
+                this.applyViewportTransform()
             }
         })
     }
 
-    updateTransform() {
-        super.updateTransform()
+    applyViewportTransform() {
+        const t = this.viewport.getTransform()
+        this.setTransform(t.tx, t.ty, t.a, t.d)
         this.gridData.recalculate()
     }
 
@@ -288,7 +302,7 @@ class BlueprintContainer extends PIXI.Container {
         const zoomFactor = 0.1
         this.viewport.setScaleCenter(this.gridData.x, this.gridData.y)
         this.viewport.zoomBy(zoomFactor * (zoomIn ? 1 : -1))
-        this.viewport.updateTransform()
+        this.applyViewportTransform()
     }
 
     get isPointerInside() {
@@ -490,7 +504,7 @@ class BlueprintContainer extends PIXI.Container {
                 -G.sizeBPContainer.width / 2 + G.app.screen.width / 2,
                 -G.sizeBPContainer.height / 2 + G.app.screen.width / 2
             )
-            this.viewport.updateTransform()
+            this.applyViewportTransform()
             return
         }
 
@@ -505,6 +519,7 @@ class BlueprintContainer extends PIXI.Container {
                 y: (G.sizeBPContainer.height - bounds.height) / 2 - bounds.y
             }
         )
+        this.applyViewportTransform()
     }
 
     getBlueprintBounds() {

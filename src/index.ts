@@ -152,7 +152,7 @@ window.addEventListener(
     () => {
         G.app.renderer.resize(window.innerWidth, window.innerHeight)
         G.BPC.viewport.setSize(G.app.screen.width, G.app.screen.height)
-        G.BPC.viewport.updateTransform()
+        G.BPC.applyViewportTransform()
     },
     false
 )
