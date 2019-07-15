@@ -24,7 +24,7 @@
         "last 2 Edge versions"
     ],
     "dependencies": {
-        "ajv": "^6.10.1",
+        "ajv": "^6.10.2",
         "dat.gui": "^0.7.6",
         "delaunator": "^4.0.0",
         "eventemitter3": "^4.0.0",
