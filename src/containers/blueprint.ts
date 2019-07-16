@@ -407,11 +407,19 @@ class BlueprintContainer extends PIXI.Container {
 
         // Render Bp
         G.bp.entities.forEach(e => new EntityContainer(e, false))
-        G.bp.entities.forEach(e => this.wiresContainer.add(e.connections))
+        G.bp.wireConnections.on('create', (hash, connection: IConnection) => {
+            this.wiresContainer.add(hash, connection)
+            EntityContainer.mappings.get(connection.entityNumber1).redraw()
+            EntityContainer.mappings.get(connection.entityNumber2).redraw()
+        })
+        G.bp.wireConnections.on('remove', (hash, connection: IConnection) => {
+            this.wiresContainer.remove(hash)
+            EntityContainer.mappings.get(connection.entityNumber1).redraw()
+            EntityContainer.mappings.get(connection.entityNumber2).redraw()
+        })
         G.bp.tiles.forEach(t => new TileContainer(t))
 
         G.bp.on('create-entity', (entity: Entity) => new EntityContainer(entity))
-        G.bp.on('create-entity', (entity: Entity) => this.wiresContainer.add(entity.connections))
         G.bp.on('create-entity', () => this.wiresContainer.updatePassiveWires())
         G.bp.on('remove-entity', () => this.wiresContainer.updatePassiveWires())
 
@@ -419,6 +427,8 @@ class BlueprintContainer extends PIXI.Container {
 
         G.bp.on('create-entity', () => this.updateHoverContainer())
         G.bp.on('remove-entity', () => this.updateHoverContainer())
+
+        G.bp.wireConnections.connections.forEach((connection, hash) => this.wiresContainer.add(hash, connection))
 
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()

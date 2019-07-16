@@ -5,14 +5,6 @@ import U from '../factorio-data/generators/util'
 import Entity from '../factorio-data/entity'
 import { EntityContainer } from './entity'
 
-const hashConn = (conn: IConnection) => {
-    const firstE = Math.min(conn.entityNumber1, conn.entityNumber2)
-    const secondE = Math.max(conn.entityNumber1, conn.entityNumber2)
-    const firstS = firstE === conn.entityNumber1 ? conn.entitySide1 : conn.entitySide2
-    const secondS = secondE === conn.entityNumber2 ? conn.entitySide2 : conn.entitySide1
-    return `${conn.color}-${firstE}-${secondE}-${firstS}-${secondS}`
-}
-
 export class WiresContainer extends PIXI.Container {
     static createWire(p1: IPoint, p2: IPoint, color: string) {
         const wire = new PIXI.Graphics()
@@ -78,24 +70,27 @@ export class WiresContainer extends PIXI.Container {
         this.passiveConnToSprite = new Map()
     }
 
-    add(connections: IConnection[]) {
-        connections.forEach(conn => {
-            const hash = hashConn(conn)
-            if (!this.connectionToSprite.has(hash)) {
-                const sprite = this.getWireSprite(conn)
-                this.addChild(sprite)
-                this.connectionToSprite.set(hash, sprite)
-            }
-        })
+    add(hash: string, connection: IConnection) {
+        const sprite = this.getWireSprite(connection)
+        this.addChild(sprite)
+        this.connectionToSprite.set(hash, sprite)
     }
 
-    remove(connection: IConnection) {
-        const hash = hashConn(connection)
+    remove(hash: string) {
         const sprite = this.connectionToSprite.get(hash)
         if (sprite) {
             sprite.destroy()
             this.connectionToSprite.delete(hash)
         }
+    }
+
+    /** This is done in cases where the connection doesn't change but the rotation does */
+    private redrawEntityConnections(entityNumber: number) {
+        G.bp.wireConnections.getEntityConnectionHashes(entityNumber).forEach(hash => {
+            const connection = G.bp.wireConnections.connections.get(hash)
+            this.remove(hash)
+            this.add(hash, connection)
+        })
     }
 
     update(entity: Entity) {
@@ -111,13 +106,7 @@ export class WiresContainer extends PIXI.Container {
             this.updatePassiveWires()
         }
 
-        if (!entity.hasConnections) {
-            return
-        }
-
-        const connections = entity.connections
-        connections.forEach(c => this.remove(c))
-        this.add(connections)
+        this.redrawEntityConnections(entity.entityNumber)
     }
 
     getWireSprite(connection: IConnection) {
@@ -326,11 +315,7 @@ export class WiresContainer extends PIXI.Container {
                 ec.redraw()
 
                 // redraw red and green connections if needed
-                if (ec.entity.hasConnections) {
-                    const connections = ec.entity.connections
-                    connections.forEach(c => this.remove(c))
-                    this.add(connections)
-                }
+                this.redrawEntityConnections(ec.entity.entityNumber)
 
                 // redraw connected wires
                 if (this.entNrToConnectedEntNrs.has(entNr)) {

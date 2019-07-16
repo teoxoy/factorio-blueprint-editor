@@ -127,6 +127,14 @@ namespace BPS {
         [key: string]: IWireColor[]
     }
 
+    interface IConnection {
+        1?: IConnSide
+        2?: IConnSide
+        Cu0?: IWireColor[]
+        Cu1?: IWireColor[]
+        [key: string]: IConnSide | IWireColor[]
+    }
+
     interface IEntity {
         entity_number: number
         name: string
@@ -235,13 +243,7 @@ namespace BPS {
         }
 
         /** wire connections */
-        connections?: {
-            1: IConnSide
-            2: IConnSide
-            Cu0: IWireColor[]
-            Cu1: IWireColor[]
-            [key: string]: IConnSide | IWireColor[]
-        }
+        connections?: IConnection
 
         control_behavior?: {
             /** only present if entity is constant-combinator */

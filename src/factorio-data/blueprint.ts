@@ -4,6 +4,7 @@ import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import util from '../common/util'
 import Entity from './entity'
+import { WireConnections } from './wireConnections'
 import { PositionGrid } from './positionGrid'
 import generators from './generators'
 import History from './history'
@@ -54,6 +55,7 @@ interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
 export default class Blueprint extends EventEmitter {
     name: string
     icons: string[]
+    wireConnections: WireConnections
     entityPositionGrid: PositionGrid
     entities: OurMap<number, Entity>
     tiles: OurMap<string, Tile>
@@ -68,6 +70,7 @@ export default class Blueprint extends EventEmitter {
         this.icons = []
         this.entities = new OurMap()
         this.tiles = new OurMap()
+        this.wireConnections = new WireConnections(this)
         this.entityPositionGrid = new PositionGrid(this)
         this.history = new History()
 
@@ -111,16 +114,22 @@ export default class Blueprint extends EventEmitter {
 
                 this.history.startTransaction()
 
+                data.entities.forEach(e => {
+                    this.wireConnections.createEntityConnections(e.entity_number, e.connections)
+                })
+
                 this.entities = new OurMap(
-                    data.entities.map(e =>
-                        this.createEntity({
+                    data.entities.map(e => {
+                        // remove connections from obj - connections are handled by wireConnections
+                        delete e.connections
+                        return this.createEntity({
                             ...e,
                             position: {
                                 x: e.position.x + offset.x,
                                 y: e.position.y + offset.y
                             }
                         })
-                    ),
+                    }),
                     e => e.entityNumber
                 )
 
@@ -155,7 +164,7 @@ export default class Blueprint extends EventEmitter {
     removeEntity(entity: Entity) {
         this.history.startTransaction('Remove entity')
 
-        entity.removeAllConnections()
+        this.wireConnections.removeEntityConnections(entity.entityNumber)
 
         this.history
             .updateMap(this.entities, entity.entityNumber, undefined, 'Remove entity')
@@ -449,7 +458,7 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    getEntitiesForExport() {
+    getEntitiesForExport(): BPS.IEntity[] {
         const entityInfo = this.entities.valuesArray().map(e => e.getRawData())
         let entitiesJSON = JSON.stringify(entityInfo)
 

@@ -91,8 +91,10 @@ export default class Entity extends EventEmitter {
 
         // Restrict movement of connected entities
         if (
-            !this.connections
-                .map(c => this.m_BP.entities.get(c.entityNumber2))
+            !this.m_BP.wireConnections
+                .getEntityConnections(this.entityNumber)
+                .map(c => (c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1))
+                .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
                 .every(e => U.pointInCircle(e.position, position, Math.min(e.maxWireDistance, this.maxWireDistance)))
         ) {
             return
@@ -523,133 +525,7 @@ export default class Entity extends EventEmitter {
     }
 
     get hasConnections() {
-        return this.connections.length > 0
-    }
-
-    get connections(): IConnection[] {
-        const connections: IConnection[] = []
-
-        const addConnSide = (side: string) => {
-            if (this.m_rawEntity.connections[side]) {
-                Object.keys(this.m_rawEntity.connections[side]).forEach(color => {
-                    ;(this.m_rawEntity.connections[side] as BPS.IConnSide)[color].forEach(data => {
-                        connections.push({
-                            color,
-                            entityNumber1: this.entityNumber,
-                            entityNumber2: data.entity_id,
-                            entitySide1: Number(side),
-                            entitySide2: data.circuit_id || 1
-                        })
-                    })
-                })
-            }
-        }
-
-        const addCopperConnSide = (side: string, color: string) => {
-            if (this.m_rawEntity.connections[side]) {
-                // For some reason Cu0 and Cu1 are arrays but the switch can only have 1 copper connection
-                const data = (this.m_rawEntity.connections[side] as BPS.IWireColor[])[0]
-                connections.push({
-                    color,
-                    entityNumber1: this.entityNumber,
-                    entityNumber2: data.entity_id,
-                    entitySide1: Number(side.slice(2, 3)) + 1,
-                    entitySide2: 1
-                })
-            }
-        }
-
-        if (this.m_rawEntity.connections) {
-            addConnSide('1')
-            addConnSide('2')
-            addCopperConnSide('Cu0', 'copper')
-            addCopperConnSide('Cu1', 'copper')
-        }
-
-        if (this.type === 'electric_pole') {
-            this.m_BP.entities
-                .filter(entity => entity.name === 'power_switch' && !!entity.getRawData().connections)
-                .filter(
-                    entity =>
-                        (entity.getRawData().connections.Cu0 &&
-                            entity.getRawData().connections.Cu0[0].entity_id === this.entityNumber) ||
-                        (entity.getRawData().connections.Cu1 &&
-                            entity.getRawData().connections.Cu1[0].entity_id === this.entityNumber)
-                )
-                .forEach(entity => {
-                    const c = entity.getRawData().connections
-                    connections.push({
-                        color: 'copper',
-                        entityNumber1: this.entityNumber,
-                        entityNumber2: entity.entityNumber,
-                        entitySide1: 1,
-                        entitySide2: c.Cu0 && c.Cu0[0].entity_id === this.entityNumber ? 1 : 2
-                    })
-                })
-        }
-
-        return connections.length > 0 ? connections : []
-    }
-
-    removeConnection(connection: IConnection) {
-        // If power pole doesn't have connections, we only have to fire the emit
-        if (this.type === 'electric_pole' && !this.m_rawEntity.connections) {
-            // Hack to get emit working
-            this.m_BP.history
-                .updateValue(this.m_rawEntity, ['entity_number'], this.entityNumber, '')
-                .onDone(() => this.emit('removedConnection', connection))
-                .commit()
-            return
-        }
-
-        const removeValueAtKey = (key: string[]) => {
-            this.m_BP.history
-                .updateValue(this.m_rawEntity, key, undefined, 'Remove connection')
-                .onDone(() => this.emit('removedConnection', connection))
-                .commit()
-        }
-
-        if (this.name === 'power_switch' && connection.color === 'copper') {
-            if (Object.keys(this.m_rawEntity.connections).length === 1) {
-                removeValueAtKey(['connections'])
-            } else {
-                removeValueAtKey(['connections', `Cu${(connection.entitySide2 - 1).toString()}`])
-            }
-            return
-        }
-
-        const side = connection.entitySide2.toString()
-        const color = connection.color
-        const otherEntNr = connection.entityNumber1
-
-        const a = Object.keys(this.m_rawEntity.connections).length === 1
-        const b = Object.keys(this.m_rawEntity.connections[side]).length === 1
-        const c = (this.m_rawEntity.connections[side] as BPS.IConnSide)[color].length === 1
-
-        if (a && b && c) {
-            removeValueAtKey(['connections'])
-        } else if (b && c) {
-            removeValueAtKey(['connections', side])
-        } else if (c) {
-            removeValueAtKey(['connections', side, color])
-        } else {
-            const i = (this.m_rawEntity.connections[side] as BPS.IConnSide)[color].findIndex(
-                d => d.entity_id === otherEntNr
-            )
-            removeValueAtKey(['connections', side, color, i.toString()])
-        }
-    }
-
-    removeAllConnections() {
-        const C = this.connections
-        if (C.length !== 0) {
-            C.forEach(conn => this.m_BP.entities.get(conn.entityNumber2).removeConnection(conn))
-        }
-
-        // Needed because it's different than this.connections
-        if (this.m_rawEntity.connections) {
-            this.m_BP.history.updateValue(this.m_rawEntity, ['connections'], undefined, 'Remove connection').commit()
-        }
+        return this.m_BP.wireConnections.getEntityConnections(this.entityNumber).length > 0
     }
 
     get chemicalPlantDontConnectOutput() {
@@ -935,7 +811,10 @@ export default class Entity extends EventEmitter {
         return e.circuit_wire_connection_points[direction / 2].wire[color]
     }
 
-    getRawData() {
-        return this.m_rawEntity
+    getRawData(): BPS.IEntity {
+        return {
+            ...this.m_rawEntity,
+            connections: this.m_BP.wireConnections.serializeConnectionData(this.entityNumber)
+        }
     }
 }

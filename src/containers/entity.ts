@@ -107,11 +107,6 @@ export class EntityContainer {
             }
         })
 
-        this.m_Entity.on('removedConnection', (connection: IConnection) => {
-            G.BPC.wiresContainer.remove(connection)
-            this.redraw()
-        })
-
         this.m_Entity.on('direction', () => {
             this.redraw()
             this.redrawSurroundingEntities()
