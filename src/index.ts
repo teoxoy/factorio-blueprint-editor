@@ -427,13 +427,15 @@ actions.decreaseTileBuildingArea.bind({
 actions.undo.bind({
     press: () => {
         G.bp.history.undo()
-    }
+    },
+    repeat: true
 })
 
 actions.redo.bind({
     press: () => {
         G.bp.history.redo()
-    }
+    },
+    repeat: true
 })
 
 actions.generateOilOutpost.bind({
