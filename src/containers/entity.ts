@@ -179,8 +179,7 @@ export class EntityContainer {
         }
     }
 
-    updateUndergroundLine() {
-        this.destroyUndergroundLine()
+    createUndergroundLine() {
         this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.m_Entity.name,
             this.m_Entity.position,
@@ -194,6 +193,14 @@ export class EntityContainer {
     destroyUndergroundLine() {
         if (this.undergroundLine) {
             this.undergroundLine.destroy()
+            this.undergroundLine = undefined
+        }
+    }
+
+    updateUndergroundLine() {
+        if (G.BPC.hoverContainer === this) {
+            this.destroyUndergroundLine()
+            this.createUndergroundLine()
         }
     }
 
@@ -225,7 +232,7 @@ export class EntityContainer {
 
     pointerOverEventHandler() {
         this.createCursorBox()
-        this.updateUndergroundLine()
+        this.createUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(this.m_Entity)
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
