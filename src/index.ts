@@ -518,7 +518,7 @@ actions.openEntityGUI.bind({
     press: () => {
         if (G.BPC.mode === EditorMode.EDIT) {
             if (G.debug) {
-                console.log(G.BPC.hoverContainer.entity.getRawData())
+                console.log(G.BPC.hoverContainer.entity.serialize())
             }
 
             Dialog.closeAll()

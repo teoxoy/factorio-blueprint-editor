@@ -811,7 +811,7 @@ export default class Entity extends EventEmitter {
         return e.circuit_wire_connection_points[direction / 2].wire[color]
     }
 
-    getRawData(): BPS.IEntity {
+    serialize(): BPS.IEntity {
         return {
             ...this.m_rawEntity,
             connections: this.m_BP.wireConnections.serializeConnectionData(this.entityNumber)

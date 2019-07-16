@@ -33,14 +33,14 @@ export class Book {
         return bp
     }
 
-    toObject() {
+    serialize() {
         const blueprints = []
         for (let i = 0; i < this.blueprints.length; i++) {
             blueprints.push({
                 index: i,
                 // TODO: modified instead of loaded
                 blueprint: this.blueprints[i].loaded
-                    ? this.blueprints[i].loaded.toObject().blueprint
+                    ? this.blueprints[i].loaded.serialize().blueprint
                     : this.blueprints[i].blueprint
             })
         }

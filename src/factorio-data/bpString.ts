@@ -118,7 +118,7 @@ function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: Error
         return {
             value: `0${btoa(
                 pako.deflate(
-                    JSON.stringify(bpOrBook.toObject()).replace(
+                    JSON.stringify(bpOrBook.serialize()).replace(
                         /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
                         (_: string, capture: string) => capture.replace(/_/g, '-')
                     ),

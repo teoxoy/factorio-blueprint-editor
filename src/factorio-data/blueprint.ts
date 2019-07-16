@@ -472,7 +472,7 @@ export default class Blueprint extends EventEmitter {
     }
 
     getEntitiesForExport(): BPS.IEntity[] {
-        const entityInfo = this.entities.valuesArray().map(e => e.getRawData())
+        const entityInfo = this.entities.valuesArray().map(e => e.serialize())
         let entitiesJSON = JSON.stringify(entityInfo)
 
         // Tag changed ids with !
@@ -491,7 +491,7 @@ export default class Blueprint extends EventEmitter {
         ).sort((a: BPS.IEntity, b: BPS.IEntity) => a.entity_number - b.entity_number)
     }
 
-    toObject() {
+    serialize() {
         if (!this.icons.length) {
             this.generateIcons()
         }
