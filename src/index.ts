@@ -556,8 +556,9 @@ actions.pasteEntitySettings.bind({
     const createCopyCursorBox = () => {
         if (
             copyCursorBox === undefined &&
-            entityForCopyData &&
             G.BPC.mode === EditorMode.EDIT &&
+            entityForCopyData &&
+            EntityContainer.mappings.has(entityForCopyData.entityNumber) &&
             G.BPC.hoverContainer.entity.canPasteSettings(entityForCopyData)
         ) {
             const srcEnt = EntityContainer.mappings.get(entityForCopyData.entityNumber)
