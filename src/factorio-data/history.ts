@@ -42,6 +42,7 @@ class Action<V> {
      * This allows for emits to be set up first
      */
     public commit() {
+        this.apply()
         this.history.commitTransaction()
 
         return this
@@ -90,19 +91,10 @@ class Transaction {
         return this.actions.length === 0
     }
 
-    /**
-     * Execute all actions and therfore apply all values of this transaction
-     * @param value Whether to apply the new or the old values (Default: New)
-     */
-    public apply(value: HistoryValue = HistoryValue.New) {
-        for (const action of this.actions) {
-            action.apply(value)
-        }
-    }
-
-    /** Undo all actions from this transaction */
+    /** Undo all actions from this transaction in reversed order */
     public undo() {
-        for (const action of this.actions) {
+        const reversed = this.actions.map((_, i, arr) => arr[arr.length - 1 - i])
+        for (const action of reversed) {
             action.apply(HistoryValue.Old)
         }
     }
@@ -302,7 +294,6 @@ export default class History {
                 this.transactionHistory.pop()
             }
 
-            this.activeTransaction.apply()
             this.transactionHistory.push(this.activeTransaction)
             if (this.logging) {
                 if (this.historyIndex !== 0 && this.historyIndex % 20 === 0) {

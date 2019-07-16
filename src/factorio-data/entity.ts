@@ -720,11 +720,7 @@ export default class Entity extends EventEmitter {
 
         this.m_BP.history.startTransaction('Rotate entity')
 
-        this.direction = newDir
-
         if (this.type === 'underground_belt' || this.type === 'loader') {
-            this.directionType = this.directionType === 'input' ? 'output' : 'input'
-
             if (rotateOpposingUB) {
                 const otherEntity = this.m_BP.entities.get(
                     this.m_BP.entityPositionGrid.getOpposingEntity(
@@ -739,7 +735,11 @@ export default class Entity extends EventEmitter {
                     otherEntity.rotate()
                 }
             }
+
+            this.directionType = this.directionType === 'input' ? 'output' : 'input'
         }
+
+        this.direction = newDir
 
         this.m_BP.history.commitTransaction()
     }
