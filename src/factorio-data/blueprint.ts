@@ -104,13 +104,13 @@ export default class Blueprint extends EventEmitter {
                 this.m_nextEntityNumber += data.entities.length
 
                 const firstEntity = data.entities.find(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
-                const firstEntityTopLeft = {
-                    x: firstEntity.position.x - FD.entities[firstEntity.name].size.width / 2,
-                    y: firstEntity.position.y - FD.entities[firstEntity.name].size.height / 2
-                }
+                const firstEntitySize = util.rotatePointBasedOnDir(
+                    [FD.entities[firstEntity.name].size.width / 2, FD.entities[firstEntity.name].size.height / 2],
+                    firstEntity.direction
+                )
 
-                offset.x += firstEntityTopLeft.x % 1 === 0 ? 0 : 0.5
-                offset.y += firstEntityTopLeft.y % 1 === 0 ? 0 : 0.5
+                offset.x += (firstEntity.position.x - firstEntitySize.x) % 1
+                offset.y += (firstEntity.position.y - firstEntitySize.y) % 1
 
                 this.history.startTransaction()
 
