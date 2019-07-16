@@ -102,7 +102,9 @@ class ConnectionMap extends Map<string, IConnection> {
             this.entNrToConnHash.set(entityNumber, [...conn, hash])
         }
         add(connection.entityNumber1)
-        add(connection.entityNumber2)
+        if (connection.entityNumber1 !== connection.entityNumber2) {
+            add(connection.entityNumber2)
+        }
 
         return super.set(hash, connection)
     }
@@ -118,7 +120,9 @@ class ConnectionMap extends Map<string, IConnection> {
             }
         }
         rem(connection.entityNumber1)
-        rem(connection.entityNumber2)
+        if (connection.entityNumber1 !== connection.entityNumber2) {
+            rem(connection.entityNumber2)
+        }
 
         return super.delete(hash)
     }
