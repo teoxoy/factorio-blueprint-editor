@@ -112,6 +112,19 @@ export default class Blueprint extends EventEmitter {
                 offset.x += (firstEntity.position.x - firstEntitySize.x) % 1
                 offset.y += (firstEntity.position.y - firstEntitySize.y) % 1
 
+                // Approximate position of placeable_off_grid entities (i.e. landmines)
+                data.entities
+                    .filter(e => FD.entities[e.name].flags.includes('placeable_off_grid'))
+                    .forEach(e => {
+                        const size = util.rotatePointBasedOnDir(
+                            [FD.entities[e.name].size.width / 2, FD.entities[e.name].size.height / 2],
+                            e.direction || 0
+                        )
+                        // Take the offset into account for accurate positioning
+                        e.position.x = Math.round(e.position.x + offset.x - size.x) + size.x - offset.x
+                        e.position.y = Math.round(e.position.y + offset.y - size.y) + size.y - offset.y
+                    })
+
                 this.history.startTransaction()
 
                 data.entities.forEach(e => {

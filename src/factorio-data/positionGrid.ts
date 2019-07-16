@@ -54,24 +54,25 @@ class PositionGrid {
         if (entityNumbers) {
             for (const entityNumber of entityNumbers) {
                 const entity = this.bp.entities.get(entityNumber)
-                if (!entity.entityData.flags.includes('placeable_off_grid')) {
-                    PositionGrid.tileDataAction(
-                        this.grid,
-                        entity.getArea(),
-                        (key, cell) => {
-                            if (cell) {
-                                if (typeof cell === 'number') {
-                                    this.grid.set(key, [cell, entityNumber])
-                                } else {
-                                    this.grid.set(key, [...cell, entityNumber])
-                                }
+                // if (entity.entityData.flags.includes('placeable_off_grid')) {
+                //     continue
+                // }
+                PositionGrid.tileDataAction(
+                    this.grid,
+                    entity.getArea(),
+                    (key, cell) => {
+                        if (cell) {
+                            if (typeof cell === 'number') {
+                                this.grid.set(key, [cell, entityNumber])
                             } else {
-                                this.grid.set(key, entityNumber)
+                                this.grid.set(key, [...cell, entityNumber])
                             }
-                        },
-                        true
-                    )
-                }
+                        } else {
+                            this.grid.set(key, entityNumber)
+                        }
+                    },
+                    true
+                )
             }
         }
     }
@@ -96,9 +97,9 @@ class PositionGrid {
     }
 
     setTileData(entity: Entity, position?: IPoint) {
-        if (entity.entityData.flags.includes('placeable_off_grid')) {
-            return
-        }
+        // if (entity.entityData.flags.includes('placeable_off_grid')) {
+        //     return
+        // }
 
         PositionGrid.tileDataAction(
             this.grid,
