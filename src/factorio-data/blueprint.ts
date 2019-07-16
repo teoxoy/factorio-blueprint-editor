@@ -106,7 +106,7 @@ export default class Blueprint extends EventEmitter {
                 const firstEntity = data.entities.find(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
                 const firstEntitySize = util.rotatePointBasedOnDir(
                     [FD.entities[firstEntity.name].size.width / 2, FD.entities[firstEntity.name].size.height / 2],
-                    firstEntity.direction
+                    firstEntity.direction || 0
                 )
 
                 offset.x += (firstEntity.position.x - firstEntitySize.x) % 1
