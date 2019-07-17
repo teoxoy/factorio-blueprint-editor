@@ -332,11 +332,11 @@ class BlueprintContainer extends PIXI.Container {
         if (!G.bp) {
             return
         }
-        const e = EntityContainer.mappings.get(
-            G.bp.entityPositionGrid.getCellAtPosition({ x: this.gridData.x32, y: this.gridData.y32 })
-        )
 
-        if (e && this.hoverContainer === e) {
+        const entity = G.bp.entityPositionGrid.getEntityAtPosition(this.gridData.x32, this.gridData.y32)
+        const eC = entity ? EntityContainer.mappings.get(entity.entityNumber) : undefined
+
+        if (eC && this.hoverContainer === eC) {
             return
         }
 
@@ -344,11 +344,11 @@ class BlueprintContainer extends PIXI.Container {
             removeHoverContainer()
         }
 
-        if (e && this.mode === EditorMode.NONE) {
-            this.hoverContainer = e
+        if (eC && this.mode === EditorMode.NONE) {
+            this.hoverContainer = eC
             this.mode = EditorMode.EDIT
             this.cursor = 'pointer'
-            e.pointerOverEventHandler()
+            eC.pointerOverEventHandler()
             this.emit('createHoverContainer')
         }
     }

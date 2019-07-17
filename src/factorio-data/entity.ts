@@ -3,7 +3,6 @@ import EventEmitter from 'eventemitter3'
 import util from '../common/util'
 import Blueprint from './blueprint'
 import spriteDataBuilder from './spriteDataBuilder'
-import { Area } from './positionGrid'
 import U from './generators/util'
 
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
@@ -555,20 +554,16 @@ export default class Entity extends EventEmitter {
         return undefined
     }
 
-    getArea(position?: IPoint) {
-        return new Area({
-            x: position ? position.x : this.position.x,
-            y: position ? position.y : this.position.y,
-            width: this.size.x,
-            height: this.size.y
-        })
-    }
-
     get canBeRotated() {
         if (
             ((this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3') &&
                 !this.assemblerCraftsWithFluid) ||
-            this.m_BP.entityPositionGrid.sharesCell(this.getArea()) ||
+            this.m_BP.entityPositionGrid.sharesCell({
+                x: this.position.x,
+                y: this.position.y,
+                w: this.size.x,
+                h: this.size.y
+            }) ||
             !this.entityData.possible_rotations
         ) {
             return false

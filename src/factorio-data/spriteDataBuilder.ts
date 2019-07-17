@@ -1,6 +1,5 @@
 import FD from 'factorio-data'
 import util from '../common/util'
-import { Area } from './positionGrid'
 import Blueprint from './blueprint'
 import Entity from './entity'
 
@@ -171,7 +170,7 @@ function generateCovers(e: FD.Entity, data: IDrawData) {
                     y: Math.floor(data.position.y + connection.y)
                 }
 
-                const ent = data.bp.entities.get(data.bp.entityPositionGrid.getCellAtPosition(pos))
+                const ent = data.bp.entityPositionGrid.getEntityAtPosition(pos.x, pos.y)
                 if (!ent) {
                     return true
                 }
@@ -489,7 +488,7 @@ function getBeltSprites(
             }
         })
 
-        const entAtPos = blueprint.entities.get(blueprint.entityPositionGrid.getCellAtPosition(pos))
+        const entAtPos = blueprint.entityPositionGrid.getEntityAtPosition(pos.x, pos.y)
         if (
             forceStraight ||
             entAtPos.type === 'splitter' ||
@@ -905,44 +904,39 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
                 if (data.bp && e.name === 'straight_rail' && (dir === 0 || dir === 2)) {
                     const size = util.switchSizeBasedOnDirection(e.size, dir)
-                    const gates = data.bp.entityPositionGrid.foreachOverlap(
-                        new Area({
+
+                    const railBases = data.bp.entityPositionGrid
+                        .getEntitiesInArea({
                             x: data.position.x,
                             y: data.position.y,
-                            width: size.x,
-                            height: size.y
-                        }),
-                        (entnr: number) => {
-                            const ent = data.bp.entities.get(entnr)
-                            if (ent && ent.name === 'gate') {
-                                return true
-                            }
-                        },
-                        true
-                    )
-                    if (gates) {
-                        const railBases: FD.SpriteData[] = []
-                        const assignShiftAndPushPicture = (shift: number[], picture: FD.SpriteData) => {
-                            railBases.push(addToShift(shift, util.duplicate(picture)))
-                        }
-                        if (dir === 0) {
-                            if (gates[0] || gates[2]) {
-                                assignShiftAndPushPicture([0, -0.5], FD.entities.gate.horizontal_rail_base)
-                            }
-                            if (gates[1] || gates[3]) {
-                                assignShiftAndPushPicture([0, 0.5], FD.entities.gate.horizontal_rail_base)
-                            }
-                        }
-                        if (dir === 2) {
-                            if (gates[0] || gates[1]) {
-                                assignShiftAndPushPicture([-0.5, 0], FD.entities.gate.vertical_rail_base)
-                            }
-                            if (gates[2] || gates[3]) {
-                                assignShiftAndPushPicture([0.5, 0], FD.entities.gate.vertical_rail_base)
-                            }
-                        }
-                        return [...getBaseSprites(), ...railBases]
-                    }
+                            w: size.x,
+                            h: size.y
+                        })
+                        .filter(e => e.name === 'gate')
+                        .map(e => ({
+                            x: e.position.x - data.position.x,
+                            y: e.position.y - data.position.y
+                        }))
+                        // Rotate relative to mid point
+                        .map(p => util.rotatePointBasedOnDir(p, dir).y)
+                        // Remove duplicates
+                        .sort()
+                        .filter((y, i, arr) => i === 0 || y !== arr[i - 1])
+                        // Reverse rotate relative to mid point
+                        .map(y => util.rotatePointBasedOnDir([0, y], (8 - dir) % 8))
+                        // Map positions to SpriteData
+                        .map(p =>
+                            addToShift(
+                                p,
+                                util.duplicate(
+                                    dir === 0
+                                        ? FD.entities.gate.horizontal_rail_base
+                                        : FD.entities.gate.vertical_rail_base
+                                )
+                            )
+                        )
+
+                    return [...getBaseSprites(), ...railBases]
                 }
                 return getBaseSprites()
             }
@@ -1066,11 +1060,9 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
                     const spawnFilling = [[-1, 0], [-1, 1], [0, 1]]
                         .map(o => {
-                            const ent = data.bp.entities.get(
-                                data.bp.entityPositionGrid.getCellAtPosition([
-                                    data.position.x + o[0],
-                                    data.position.y + o[1]
-                                ])
+                            const ent = data.bp.entityPositionGrid.getEntityAtPosition(
+                                data.position.x + o[0],
+                                data.position.y + o[1]
                             )
                             return !!ent && ent.name === 'stone_wall'
                         })
@@ -1103,19 +1095,14 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 function getBaseSprites() {
                     if (data.bp) {
                         const size = util.switchSizeBasedOnDirection(e.size, data.dir)
-                        const rail = data.bp.entityPositionGrid.getFirstFromArea(
-                            new Area({
+                        const rail = data.bp.entityPositionGrid.findInArea(
+                            {
                                 x: data.position.x,
                                 y: data.position.y,
-                                width: size.x,
-                                height: size.y
-                            }),
-                            (entnr: number) => {
-                                const ent = data.bp.entities.get(entnr)
-                                if (ent.name === 'straight_rail') {
-                                    return ent
-                                }
-                            }
+                                w: size.x,
+                                h: size.y
+                            },
+                            entity => entity.name === 'straight_rail'
                         )
                         if (rail) {
                             if (data.dir === 0) {
@@ -1139,9 +1126,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 }
 
                 if (data.dir === 0 && data.bp) {
-                    const wall = data.bp.entities.get(
-                        data.bp.entityPositionGrid.getCellAtPosition([data.position.x, data.position.y + 1])
-                    )
+                    const wall = data.bp.entityPositionGrid.getEntityAtPosition(data.position.x, data.position.y + 1)
                     if (wall && wall.name === 'stone_wall') {
                         return [...getBaseSprites(), e.wall_patch.layers[0]]
                     }

@@ -4,7 +4,6 @@ import G from '../common/globals'
 import { EntitySprite } from '../entitySprite'
 import util from '../common/util'
 import Entity from '../factorio-data/entity'
-import { Area } from '../factorio-data/positionGrid'
 import { UnderlayContainer } from './underlay'
 
 const updateGroups = [
@@ -250,19 +249,23 @@ export class EntityContainer {
         })
     }
 
-    redrawSurroundingEntities(position?: IPoint) {
+    redrawSurroundingEntities(position: IPoint = this.m_Entity.position) {
         if (!updateGroups[this.m_Entity.name]) {
             return
         }
+        const area = {
+            x: position.x,
+            y: position.y,
+            w: this.m_Entity.size.x,
+            h: this.m_Entity.size.y
+        }
         if (this.m_Entity.name === 'straight_rail') {
-            G.bp.entityPositionGrid.foreachOverlap(this.m_Entity.getArea(position), (entnr: number) => {
-                const ent = G.bp.entities.get(entnr)
-                if (ent.name === 'gate') {
-                    EntityContainer.mappings.get(ent.entityNumber).redraw()
-                }
-            })
+            G.bp.entityPositionGrid
+                .getEntitiesInArea(area)
+                .filter(e => e.name === 'gate')
+                .forEach(entity => EntityContainer.mappings.get(entity.entityNumber).redraw())
         } else {
-            const entities = G.bp.entityPositionGrid.getSurroundingEntities(this.m_Entity.getArea(position))
+            const entities = G.bp.entityPositionGrid.getSurroundingEntities(area)
 
             // We need to update a larger area because belt endings might change
             if (
@@ -271,13 +274,13 @@ export class EntityContainer {
                 this.m_Entity.type === 'underground_belt' ||
                 this.m_Entity.type === 'loader'
             ) {
-                const area = new Area({
-                    x: position ? position.x : this.m_Entity.position.x,
-                    y: position ? position.y : this.m_Entity.position.y,
-                    width: this.m_Entity.size.x + 2,
-                    height: this.m_Entity.size.y + 2
-                })
-                entities.push(...G.bp.entityPositionGrid.getSurroundingEntities(area))
+                entities.push(
+                    ...G.bp.entityPositionGrid.getSurroundingEntities({
+                        ...area,
+                        w: area.w + 2,
+                        h: area.h + 2
+                    })
+                )
             }
 
             entities

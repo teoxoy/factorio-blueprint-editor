@@ -174,9 +174,7 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     removeContainerUnder() {
-        const entity = G.bp.entities.get(
-            G.bp.entityPositionGrid.getCellAtPosition({ x: G.BPC.gridData.x32, y: G.BPC.gridData.y32 })
-        )
+        const entity = G.bp.entityPositionGrid.getEntityAtPosition(G.BPC.gridData.x32, G.BPC.gridData.y32)
         if (entity) {
             G.bp.removeEntity(entity)
             this.checkBuildable()
@@ -197,14 +195,14 @@ export class EntityPaintContainer extends PaintContainer {
             return
         }
 
-        const frgEntNr = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position)
-        if (frgEntNr) {
-            G.bp.fastReplaceEntity(G.bp.entities.get(frgEntNr), this.name, direction)
+        const frgEnt = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position)
+        if (frgEnt) {
+            G.bp.fastReplaceEntity(frgEnt, this.name, direction)
             return
         }
-        const snEntNr = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position)
-        if (snEntNr) {
-            G.bp.entities.get(snEntNr).direction = direction
+        const snEnt = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position)
+        if (snEnt) {
+            snEnt.direction = direction
             return
         }
 
