@@ -126,13 +126,8 @@ export class EntityPaintContainer extends PaintContainer {
         }
         this.direction = pr[(pr.indexOf(this.direction) + (ccw ? 3 : 1)) % pr.length]
 
-        const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
-        this.setNewPosition(size)
-
         this.redraw()
-        this.checkBuildable()
-        this.updateUndergroundBeltRotation()
-        this.updateUndergroundLine()
+        this.moveAtCursor()
     }
 
     redraw() {
