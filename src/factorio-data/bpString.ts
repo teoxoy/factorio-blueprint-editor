@@ -57,7 +57,7 @@ const validate = new Ajv({ verbose: true })
     })
     .compile(blueprintSchema)
 
-const nameMigrations: { [key: string]: string } = {
+const nameMigrations: Record<string, string> = {
     // if (blueprintVersion < getFactorioVersion(0, 17, 0))
     '"raw-wood"': '"wood"',
     '"science-pack-1"': '"automation-science-pack"',

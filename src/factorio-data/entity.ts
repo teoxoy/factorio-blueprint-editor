@@ -238,7 +238,7 @@ export default class Entity extends EventEmitter {
             return
         }
 
-        const ms: { [key: string]: number } = {}
+        const ms: Record<string, number> = {}
         for (const m of modules) {
             if (m) {
                 ms[m] = ms[m] ? ms[m] + 1 : 1

@@ -120,19 +120,17 @@ namespace BPS {
         wire_id?: number
     }
 
-    interface IConnSide {
+    interface IConnSide extends Record<string, IWireColor[]> {
         red?: IWireColor[]
         green?: IWireColor[]
         copper?: IWireColor[]
-        [key: string]: IWireColor[]
     }
 
-    interface IConnection {
+    interface IConnection extends Record<string, ConnSide | IWireColor[]> {
         1?: IConnSide
         2?: IConnSide
         Cu0?: IWireColor[]
         Cu1?: IWireColor[]
-        [key: string]: IConnSide | IWireColor[]
     }
 
     interface IEntity {
@@ -152,7 +150,7 @@ namespace BPS {
          * keys are item names and value nr of items, only present if entity is locomotive or has module_specification
          * for the locomotive it represents fuel and for an eintity with module_specification it represents modules
          */
-        items?: { [key: string]: number }
+        items?: Record<string, number>
 
         /** splitter input priority, only present if entity is of type splitter */
         input_priority?: 'left' | 'right'

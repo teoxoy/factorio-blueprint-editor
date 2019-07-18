@@ -5,9 +5,7 @@ enum HistoryValue {
 }
 
 /** Private interface hack to access properties of objects via `any` */
-interface IIndexedObject {
-    [key: string]: any
-}
+type IIndexedObject = Record<string, any>
 
 /** Private class for historical actions */
 class Action<V> {

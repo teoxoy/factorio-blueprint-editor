@@ -170,7 +170,7 @@ export default function initDatGui() {
                         obj[item.ui_name] = item.name
                         return obj
                     },
-                    { None: 'none' } as { [key: string]: string }
+                    { None: 'none' } as Record<string, string>
                 )
         )
     }

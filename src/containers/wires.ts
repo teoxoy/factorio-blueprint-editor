@@ -16,7 +16,7 @@ export class WiresContainer extends PIXI.Container {
         const dX = maxX - minX
         const dY = maxY - minY
 
-        const colorMap: { [key: string]: number } = {
+        const colorMap: Record<string, number> = {
             copper: 0xcf7c00,
             red: 0xc83718,
             green: 0x588c38

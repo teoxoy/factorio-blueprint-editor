@@ -7,11 +7,11 @@ import util from '../common/util'
 import F from '../controls/functions'
 
 function template(strings: TemplateStringsArray, ...keys: (number | string)[]) {
-    return (...values: (unknown | { [key: string]: unknown })[]) => {
+    return (...values: (unknown | Record<string, unknown>)[]) => {
         const result = [strings[0].replace('\n', '')]
         keys.forEach((key, i) => {
             result.push(
-                typeof key === 'number' ? (values as string[])[key] : (values[0] as { [key: string]: string })[key],
+                typeof key === 'number' ? (values as string[])[key] : (values[0] as Record<string, string>)[key],
                 strings[i + 1]
             )
         })

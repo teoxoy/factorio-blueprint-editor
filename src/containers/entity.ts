@@ -61,13 +61,13 @@ const updateGroups = [
         }
     })
     .reduce(
-        (pV: { [key: string]: string[] }, cV) => {
+        (pV: Record<string, string[]>, cV) => {
             cV.is.forEach(k => {
                 pV[k] = pV[k] ? util.uniqueInArray(pV[k].concat(cV.updates)) : cV.updates
             })
             return pV
         },
-        {} as { [key: string]: string[] }
+        {} as Record<string, string[]>
     )
 
 export class EntityContainer {
