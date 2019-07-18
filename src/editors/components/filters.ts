@@ -112,7 +112,7 @@ export default class Filters extends PIXI.Container {
      * @param index - Index of filter
      * @param count - New count
      */
-    public updateFilter(index: number, count: number) {
+    public updateFilter(index: number, count: number): void {
         if (this.m_Filters[index].count === count) {
             return
         }
@@ -125,12 +125,12 @@ export default class Filters extends PIXI.Container {
      * Return filter count of specific filter
      * @param index Index of filter
      */
-    public getFilterCount(index: number) {
+    public getFilterCount(index: number): number {
         return this.m_Filters[index].count
     }
 
     /** Update local filters array */
-    private m_UpdateFilters() {
+    private m_UpdateFilters(): void {
         const slots: number = this.m_Entity.filterSlots
         if (slots > 0) {
             this.m_Filters = new Array(slots)
@@ -150,7 +150,7 @@ export default class Filters extends PIXI.Container {
     }
 
     /** Update slot icons */
-    private m_UpdateSlots() {
+    private m_UpdateSlots(): void {
         for (const slot of this.children) {
             if (!(slot instanceof Slot)) {
                 continue

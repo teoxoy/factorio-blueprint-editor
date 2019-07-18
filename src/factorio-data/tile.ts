@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3'
 import FD from 'factorio-data'
 
 export default class Tile extends EventEmitter {
-    public static getItemName(name: string) {
+    public static getItemName(name: string): string {
         if (name === 'landfill') {
             return 'landfill'
         }
@@ -21,23 +21,23 @@ export default class Tile extends EventEmitter {
         this._y = y
     }
 
-    public get name() {
+    public get name(): string {
         return this._name
     }
 
-    public get x() {
+    public get x(): number {
         return this._x
     }
 
-    public get y() {
+    public get y(): number {
         return this._y
     }
 
-    public get hash() {
+    public get hash(): string {
         return `${this._x},${this._y}`
     }
 
-    public destroy() {
+    public destroy(): void {
         this.emit('destroy')
         this.removeAllListeners()
     }

@@ -15,7 +15,7 @@ import * as PIXI from 'pixi.js'
 import G from './common/globals'
 import util from './common/util'
 
-function getAllPromises() {
+function getAllPromises(): Promise<void>[] {
     return [
         [
             /* eslint-disable no-nested-ternary */
@@ -35,7 +35,7 @@ function getAllPromises() {
     ].map(data => loadSpritesheet(data[0], data[1]))
 }
 
-function changeQuality(hr: boolean, compressed: boolean) {
+function changeQuality(hr: boolean, compressed: boolean): void {
     G.loadingScreen.show()
 
     G.BPC.clearData()
@@ -74,7 +74,7 @@ function blobToImageBitmap(blob: Blob): Promise<ImageBitmap | HTMLImageElement> 
     })
 }
 
-function loadSpritesheet(src: string, json: any) {
+function loadSpritesheet(src: string, json: any): Promise<void> {
     return fetch(src)
         .then(response => response.blob())
         .then(blobToImageBitmap)

@@ -166,17 +166,17 @@ export class EntityContainer {
         }
     }
 
-    private createCursorBox() {
+    private createCursorBox(): void {
         this.cursorBox = G.BPC.overlayContainer.createCursorBox(this.position, this.m_Entity.size)
     }
 
-    private destroyCursorBox() {
+    private destroyCursorBox(): void {
         if (this.cursorBox) {
             this.cursorBox.destroy()
         }
     }
 
-    private createUndergroundLine() {
+    private createUndergroundLine(): void {
         this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.m_Entity.name,
             this.m_Entity.position,
@@ -187,33 +187,33 @@ export class EntityContainer {
         )
     }
 
-    private destroyUndergroundLine() {
+    private destroyUndergroundLine(): void {
         if (this.undergroundLine) {
             this.undergroundLine.destroy()
             this.undergroundLine = undefined
         }
     }
 
-    private updateUndergroundLine() {
+    private updateUndergroundLine(): void {
         if (G.BPC.hoverContainer === this) {
             this.destroyUndergroundLine()
             this.createUndergroundLine()
         }
     }
 
-    public showVisualizationArea() {
+    public showVisualizationArea(): void {
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
             s.visible = true
         })
     }
 
-    public hideVisualizationArea() {
+    public hideVisualizationArea(): void {
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
             s.visible = false
         })
     }
 
-    private redrawEntityInfo() {
+    private redrawEntityInfo(): void {
         if (
             this.m_Entity.moduleSlots !== 0 ||
             this.m_Entity.type === 'splitter' ||
@@ -239,7 +239,7 @@ export class EntityContainer {
         G.infoEntityPanel.updateVisualization(this.m_Entity)
     }
 
-    public pointerOverEventHandler() {
+    public pointerOverEventHandler(): void {
         this.createCursorBox()
         this.createUndergroundLine()
 
@@ -247,7 +247,7 @@ export class EntityContainer {
         this.showVisualizationArea()
     }
 
-    public pointerOutEventHandler() {
+    public pointerOutEventHandler(): void {
         this.destroyCursorBox()
         this.destroyUndergroundLine()
 
@@ -255,7 +255,7 @@ export class EntityContainer {
         this.hideVisualizationArea()
     }
 
-    private redrawSurroundingEntities(position: IPoint = this.m_Entity.position) {
+    private redrawSurroundingEntities(position: IPoint = this.m_Entity.position): void {
         if (!updateGroups[this.m_Entity.name]) {
             return
         }
@@ -300,7 +300,7 @@ export class EntityContainer {
         }
     }
 
-    public redraw(ignoreConnections?: boolean, sort?: boolean) {
+    public redraw(ignoreConnections?: boolean, sort?: boolean): void {
         for (const s of this.entitySprites) {
             s.destroy()
         }

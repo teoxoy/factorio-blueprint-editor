@@ -121,7 +121,7 @@ export default class Switch extends PIXI.Container {
     }
 
     /** Update Button Position based on value */
-    private updateButtonPosition() {
+    private updateButtonPosition(): void {
         const index: number = this.m_Value === undefined ? -1 : this.m_Values.indexOf(this.m_Value)
         if (index === -1) {
             this.m_Button.position.set(10, 0)

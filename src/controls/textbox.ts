@@ -76,7 +76,7 @@ class TextContainer extends PIXI.Container {
     }
 
     /** Add char at specific position (position is base 1 indexed) */
-    public insertChar(char: TextChar, position?: number) {
+    public insertChar(char: TextChar, position?: number): void {
         if (position === undefined) {
             // (PT) char.on('pointerdown', () => this.onTextCharDown(char))
             super.addChild(char)
@@ -95,7 +95,7 @@ class TextContainer extends PIXI.Container {
     }
 
     /** Remove char from specific position (position is base 1 indexed) */
-    public removeChar(position: number) {
+    public removeChar(position: number): void {
         if (position < 1 || position > this.children.length) {
             throw new RangeError('Argument position out of range')
         }
@@ -105,7 +105,7 @@ class TextContainer extends PIXI.Container {
     }
 
     /** Realign text chars if a character was inserted or removed */
-    private alignTextChars() {
+    private alignTextChars(): void {
         let x = 0
         for (const textChar of this.children) {
             textChar.x = x
@@ -246,7 +246,7 @@ export default class Textbox extends PIXI.Container {
      * Insert Character
      * @param char - Character to insert at current caret position
      */
-    private instertCharacter(char: string) {
+    private instertCharacter(char: string): void {
         if (char === undefined || char.length !== 1) {
             return
         }
@@ -266,7 +266,7 @@ export default class Textbox extends PIXI.Container {
      * Remove Character
      * @param direction - The direction in which to remove a character (-1: before current position; 1: after current position)
      */
-    private removeCharacter(direction: number) {
+    private removeCharacter(direction: number): void {
         if (direction === -1) {
             if (this.caretPosition < 1) {
                 return
@@ -294,7 +294,7 @@ export default class Textbox extends PIXI.Container {
 
     /** KeyboardJS key pressed event callback */
     private readonly keyPressedCallback = (e: keyboardJS.KeyEvent) => {
-        const disable = () => {
+        const disable = (): void => {
             this.m_CaretGraphic.visible = false
             // (PT) this.m_Text.deactivate()
             this.m_Active.visible = false

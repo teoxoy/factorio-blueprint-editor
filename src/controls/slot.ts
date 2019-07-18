@@ -6,7 +6,7 @@ import Button from './button'
  */
 export default class Slot extends Button {
     // Override Rollover Color of Button
-    public get hover() {
+    public get hover(): number {
         return G.colors.controls.slot.hover.color
     }
 

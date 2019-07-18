@@ -1,7 +1,7 @@
 import { EventEmitter } from 'eventemitter3'
 import Blueprint from './blueprint'
 
-const hashConn = (conn: IConnection) => {
+const hashConn = (conn: IConnection): string => {
     const firstE = Math.min(conn.entityNumber1, conn.entityNumber2)
     const secondE = Math.max(conn.entityNumber1, conn.entityNumber2)
     const firstS = firstE === conn.entityNumber1 ? conn.entitySide1 : conn.entitySide2
@@ -9,10 +9,10 @@ const hashConn = (conn: IConnection) => {
     return `${conn.color}-${firstE}-${secondE}-${firstS}-${secondS}`
 }
 
-const deserialize = (entityNumber: number, connections: BPS.IConnection) => {
+const deserialize = (entityNumber: number, connections: BPS.IConnection): IConnection[] => {
     const parsedConnections: IConnection[] = []
 
-    const addConnSide = (side: string) => {
+    const addConnSide = (side: string): void => {
         if (connections[side]) {
             Object.keys(connections[side]).forEach(color => {
                 const conn = connections[side] as BPS.IConnSide
@@ -29,7 +29,7 @@ const deserialize = (entityNumber: number, connections: BPS.IConnection) => {
         }
     }
 
-    const addCopperConnSide = (side: string, color: string) => {
+    const addCopperConnSide = (side: string, color: string): void => {
         if (connections[side]) {
             // For some reason Cu0 and Cu1 are arrays but the switch can only have 1 copper connection
             const data = (connections[side] as BPS.IWireColor[])[0]
@@ -92,12 +92,12 @@ const serialize = (entityNumber: number, connections: IConnection[]): BPS.IConne
 class ConnectionMap extends Map<string, IConnection> {
     private entNrToConnHash: Map<number, string[]> = new Map()
 
-    public getEntityConnectionHashes(entityNumber: number) {
+    public getEntityConnectionHashes(entityNumber: number): string[] {
         return this.entNrToConnHash.get(entityNumber) || []
     }
 
-    public set(hash: string, connection: IConnection) {
-        const add = (entityNumber: number) => {
+    public set(hash: string, connection: IConnection): this {
+        const add = (entityNumber: number): void => {
             const conn = this.entNrToConnHash.get(entityNumber) || []
             this.entNrToConnHash.set(entityNumber, [...conn, hash])
         }
@@ -109,9 +109,9 @@ class ConnectionMap extends Map<string, IConnection> {
         return super.set(hash, connection)
     }
 
-    public delete(hash: string) {
+    public delete(hash: string): boolean {
         const connection = this.get(hash)
-        const rem = (entityNumber: number) => {
+        const rem = (entityNumber: number): void => {
             const conn = this.entNrToConnHash.get(entityNumber).filter(h => h !== hash)
             if (conn.length > 0) {
                 this.entNrToConnHash.set(entityNumber, conn)
@@ -137,7 +137,7 @@ export class WireConnections extends EventEmitter {
         this.bp = bp
     }
 
-    private create(connection: IConnection) {
+    private create(connection: IConnection): void {
         const hash = hashConn(connection)
         if (this.connections.has(hash)) {
             return
@@ -149,7 +149,7 @@ export class WireConnections extends EventEmitter {
             .commit()
     }
 
-    private remove(connection: IConnection) {
+    private remove(connection: IConnection): void {
         const hash = hashConn(connection)
         if (!this.connections.has(hash)) {
             return
@@ -161,7 +161,7 @@ export class WireConnections extends EventEmitter {
             .commit()
     }
 
-    private onCreateOrRemoveConnection(newValue: IConnection, oldValue: IConnection) {
+    private onCreateOrRemoveConnection(newValue: IConnection, oldValue: IConnection): void {
         if (newValue) {
             this.emit('create', hashConn(newValue), newValue)
         } else if (oldValue) {
@@ -169,27 +169,27 @@ export class WireConnections extends EventEmitter {
         }
     }
 
-    public get(hash: string) {
+    public get(hash: string): IConnection {
         return this.connections.get(hash)
     }
 
-    public forEach(fn: (value: IConnection, key: string) => void) {
+    public forEach(fn: (value: IConnection, key: string) => void): void {
         this.connections.forEach(fn)
     }
 
-    public createEntityConnections(entityNumber: number, connections: BPS.IConnection) {
+    public createEntityConnections(entityNumber: number, connections: BPS.IConnection): void {
         deserialize(entityNumber, connections).forEach(c => this.create(c))
     }
 
-    public removeEntityConnections(entityNumber: number) {
+    public removeEntityConnections(entityNumber: number): void {
         this.getEntityConnections(entityNumber).forEach(c => this.remove(c))
     }
 
-    public getEntityConnectionHashes(entityNumber: number) {
+    public getEntityConnectionHashes(entityNumber: number): string[] {
         return this.connections.getEntityConnectionHashes(entityNumber)
     }
 
-    public getEntityConnections(entityNumber: number) {
+    public getEntityConnections(entityNumber: number): IConnection[] {
         return this.getEntityConnectionHashes(entityNumber).reduce((acc: IConnection[], hash) => {
             acc.push(this.connections.get(hash))
             return acc

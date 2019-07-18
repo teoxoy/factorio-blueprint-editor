@@ -1,4 +1,5 @@
 import U from './util'
+import { IVisualization } from './index'
 
 const POLE_TO_POLE_RADIUS = 9
 const POLE_EFFECT_RADIUS = 3
@@ -45,9 +46,20 @@ interface IGroup extends IPoint {
 
     DT = using delaunay triangulation to form lines between x (for optimization)
 */
-export default function generatePoles(entities: { position: IPoint; size: number; power: boolean }[]) {
-    const visualizations: { path: IPoint[]; size: number; alpha: number; color?: number }[] = []
-    function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number) {
+export default function generatePoles(
+    entities: { position: IPoint; size: number; power: boolean }[]
+): {
+    poles: {
+        name: string
+        position: IPoint
+    }[]
+    info: {
+        totalPoles: number
+    }
+    visualizations: IVisualization[]
+} {
+    const visualizations: IVisualization[] = []
+    function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number): void {
         visualizations.push({ path: path.map(p => ({ x: p.x + 0.5, y: p.y + 0.5 })), size, alpha, color })
     }
 

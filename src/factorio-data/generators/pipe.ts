@@ -1,5 +1,6 @@
 import PF from 'pathfinding'
 import U from './util'
+import { IVisualization } from './index'
 
 // FD.entities.pumpjack.output_fluid_box.pipe_connections[0].positions
 // define this here so we don't have to import FD
@@ -64,11 +65,27 @@ interface IGroup extends IPoint {
 function generatePipes(
     pumpjacks: { entity_number: number; position: IPoint }[],
     minGapBetweenUndergrounds = MIN_GAP_BETWEEN_UNDERGROUNDS
-) {
+): {
+    pumpjacksToRotate: {
+        entity_number: number
+        direction: number
+    }[]
+    pipes: {
+        name: string
+        position: IPoint
+        direction: number
+    }[]
+    info: {
+        nrOfPipes: number
+        nrOfUPipes: number
+        nrOfPipesReplacedByUPipes: number
+    }
+    visualizations: IVisualization[]
+} {
     MIN_GAP_BETWEEN_UNDERGROUNDS = minGapBetweenUndergrounds
 
-    const visualizations: { path: IPoint[]; size: number; alpha: number; color?: number }[] = []
-    function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number) {
+    const visualizations: IVisualization[] = []
+    function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number): void {
         visualizations.push({ path: path.map(localToGlobal), size, alpha, color })
     }
 
@@ -141,7 +158,7 @@ function generatePipes(
             })
             // promote group building
             .sort((a, b) => {
-                const lineContainsAnAddedPumpjack = (ent: ILine) =>
+                const lineContainsAnAddedPumpjack = (ent: ILine): boolean =>
                     !!addedPumpjacks.find(
                         e =>
                             ent.endpoints.map(endP => endP.entity_number).includes(e.entity_number) &&
@@ -428,7 +445,12 @@ function generatePipes(
     }
 }
 
-function generatePathFromLine(l: IPoint[]) {
+function generatePathFromLine(
+    l: IPoint[]
+): {
+    path: IPoint[]
+    distance: number
+} {
     const dX = Math.abs(l[0].x - l[1].x)
     const dY = Math.abs(l[0].y - l[1].y)
     const minX = Math.min(l[0].x, l[1].x)
@@ -443,7 +465,15 @@ function generatePathFromLine(l: IPoint[]) {
     }
 }
 
-function getPathBetweenGroups(grid: number[][], GROUPS: IGroup[], group: IGroup, maxTurns = 2) {
+function getPathBetweenGroups(
+    grid: number[][],
+    GROUPS: IGroup[],
+    group: IGroup,
+    maxTurns = 2
+): {
+    passtrough: any
+    path: IPoint[]
+} {
     const ret = GROUPS.map(g => connect2Groups(grid, g, group, g, maxTurns))
         .filter(p => p.lines.length)
         .sort((a, b) => a.minDistance - b.minDistance)[0]
@@ -455,7 +485,22 @@ function getPathBetweenGroups(grid: number[][], GROUPS: IGroup[], group: IGroup,
         path: ret.lines[0].path
     }
 
-    function connect2Groups(grid: number[][], g0: IGroup, g1: IGroup, passtrough?: any, maxTurns = 2) {
+    function connect2Groups(
+        grid: number[][],
+        g0: IGroup,
+        g1: IGroup,
+        passtrough?: any,
+        maxTurns = 2
+    ): {
+        lines: {
+            endpoints: IPoint[]
+            turns: number
+            path: IPoint[]
+            distance: number
+        }[]
+        minDistance: number
+        passtrough: any
+    } {
         const path0 = g0.paths.reduce((acc, p) => acc.concat(p), [])
         const path1 = g1.paths.reduce((acc, p) => acc.concat(p), [])
 

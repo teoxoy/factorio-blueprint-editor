@@ -1,4 +1,4 @@
-export default function initDoorbell() {
+export default function initDoorbell(): void {
     window.doorbellOptions = {
         id: '9657',
         appKey: 'z1scfSY8hpBNiIFWxBg50tkhjvFKhHMdhfGNMp6YCUZVttoLOqtrlhk4ca9asDCy',

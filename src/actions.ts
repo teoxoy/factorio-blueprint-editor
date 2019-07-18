@@ -36,9 +36,9 @@ canvasEl.addEventListener('wheel', e => {
  * Passes trough all events to the callback
  * @param cb Callback - return true if you want to stop the passtrough
  */
-function passtroughAllEvents(cb: (e: keyboardJS.KeyEvent) => boolean) {
+function passtroughAllEvents(cb: (e: keyboardJS.KeyEvent) => boolean): void {
     keyboardJS.setContext('passtrough')
-    const callback = (e: keyboardJS.KeyEvent) => {
+    const callback = (e: keyboardJS.KeyEvent): void => {
         const stop = cb(e)
         if (stop) {
             keyboardJS.unbind(undefined, callback)
@@ -73,7 +73,7 @@ class Action {
         })
     }
 
-    private get active() {
+    private get active(): boolean {
         return this.m_active
     }
 
@@ -86,7 +86,7 @@ class Action {
         this.m_active = value
     }
 
-    public get keyCombo() {
+    public get keyCombo(): string {
         return this.m_keyCombo
     }
 
@@ -107,15 +107,15 @@ class Action {
         this.m_keyCombo = value
     }
 
-    public get pressed() {
+    public get pressed(): boolean {
         return this._pressed
     }
 
-    public get usesDefaultKeyCombo() {
+    public get usesDefaultKeyCombo(): boolean {
         return this.keyCombo === this.defaultKeyCombo
     }
 
-    public resetKeyCombo() {
+    public resetKeyCombo(): void {
         this.keyCombo = this.defaultKeyCombo
     }
 
@@ -128,7 +128,7 @@ class Action {
         once?: boolean
         /** Lets the press handler run multiple times per button press */
         repeat?: boolean
-    }) {
+    }): void {
         if (opts.press === undefined && opts.release === undefined) {
             return
         }
@@ -182,7 +182,7 @@ class Action {
     //     this.handlers = []
     // }
 
-    public call() {
+    public call(): void {
         this.handlers.forEach(h => h.press())
     }
 }

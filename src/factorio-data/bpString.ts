@@ -102,7 +102,7 @@ function decode(str: string): Promise<Blueprint | Book> {
     })
 }
 
-function encode(bpOrBook: Blueprint | Book) {
+function encode(bpOrBook: Blueprint | Book): Promise<string> {
     return new Promise((resolve: (value: string) => void, reject) => {
         const data = encodeSync(bpOrBook)
         if (data.value) {
@@ -115,12 +115,13 @@ function encode(bpOrBook: Blueprint | Book) {
 
 function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: Error } {
     try {
+        const keyName = bpOrBook instanceof Blueprint ? 'blueprint' : 'blueprint_book'
+        const string = JSON.stringify({ [keyName]: bpOrBook.serialize() })
         return {
             value: `0${btoa(
                 pako.deflate(
-                    JSON.stringify(bpOrBook.serialize()).replace(
-                        /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
-                        (_: string, capture: string) => capture.replace(/_/g, '-')
+                    string.replace(/(:".+?"|"[a-z]+?_module(|_[0-9])")/g, (_: string, capture: string) =>
+                        capture.replace(/_/g, '-')
                     ),
                     { to: 'string' }
                 )
@@ -159,14 +160,13 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
             console.log(`Loading data from: ${url}`)
             const pathParts = url.pathname.slice(1).split('/')
 
-            function fetchData(url: string) {
-                return fetch(url).then(response => {
+            const fetchData = (url: string): Promise<Response> =>
+                fetch(url).then(response => {
                     if (response.ok) {
                         return response
                     }
                     throw new Error('Network response was not ok.')
                 })
-            }
 
             // TODO: add dropbox support https://www.dropbox.com/s/ID?raw=1
             switch (url.hostname.split('.')[0]) {

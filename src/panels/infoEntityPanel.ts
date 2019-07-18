@@ -25,9 +25,9 @@ Power consumption: ${'energyUsage'} kW ${'energyMultiplier'}`
 
 const SIZE_OF_ITEM_ON_BELT = 0.25
 
-const getBeltSpeed = (beltSpeed: number) => beltSpeed * 60 * (1 / SIZE_OF_ITEM_ON_BELT) * 2
+const getBeltSpeed = (beltSpeed: number): number => beltSpeed * 60 * (1 / SIZE_OF_ITEM_ON_BELT) * 2
 
-const containerToContainer = (rotationSpeed: number, n: number) => rotationSpeed * 60 * n
+const containerToContainer = (rotationSpeed: number, n: number): number => rotationSpeed * 60 * n
 
 /**
     nr of items to ignore the time it takes to place them on a belt
@@ -36,14 +36,14 @@ const containerToContainer = (rotationSpeed: number, n: number) => rotationSpeed
     this also reduces the time it takes to put down the second item by about 75%
 */
 const NR_OF_ITEMS_TO_IGNORE = 1.75
-const containerToBelt = (rotationSpeed: number, beltSpeed: number, n: number) => {
+const containerToBelt = (rotationSpeed: number, beltSpeed: number, n: number): number => {
     const armTime = 1 / (rotationSpeed * 60)
     const itemTime = (1 / (beltSpeed * 60)) * SIZE_OF_ITEM_ON_BELT
     return n / (armTime + itemTime * Math.max(n - NR_OF_ITEMS_TO_IGNORE, 0))
 }
 // TODO: add beltToContainer
 
-const roundToTwo = (n: number) => Math.round(n * 100) / 100
+const roundToTwo = (n: number): number => Math.round(n * 100) / 100
 
 /**
  * This class creates a panel to show detailed informations about each entity (as the original game and maybe more).
@@ -78,7 +78,7 @@ export class InfoEntityPanel extends Panel {
         this.addChild(this.m_EntityName, this.m_entityInfo, this.m_RecipeContainer, this.m_RecipeIOContainer)
     }
 
-    public updateVisualization(entity?: Entity) {
+    public updateVisualization(entity?: Entity): number {
         this.m_RecipeContainer.removeChildren()
         this.m_RecipeIOContainer.removeChildren()
 
@@ -179,7 +179,7 @@ export class InfoEntityPanel extends Panel {
             nextY = this.m_RecipeIOContainer.position.y + this.m_RecipeIOContainer.height + 20
         }
 
-        const isBelt = (e: Entity) =>
+        const isBelt = (e: Entity): boolean =>
             e.entityData.type === 'transport_belt' ||
             e.entityData.type === 'underground_belt' ||
             e.entityData.type === 'splitter' ||
@@ -214,7 +214,7 @@ export class InfoEntityPanel extends Panel {
         }
     }
 
-    protected setPosition() {
+    protected setPosition(): void {
         this.position.set(G.app.screen.width - this.width + 1, 0)
     }
 }

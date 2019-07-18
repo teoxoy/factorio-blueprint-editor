@@ -2,7 +2,7 @@ import Delaunator from 'delaunator'
 
 // TODO: maybe merge this file with the main util file
 
-const hashPoint = (p: IPoint) => `${p.x},${p.y}`
+const hashPoint = (p: IPoint): string => `${p.x},${p.y}`
 
 const equalPoints = <T extends IPoint>(a: T) => (b: T) => a.x === b.x && a.y === b.y
 
@@ -16,18 +16,19 @@ const arrayToPoint = (array: number[]): IPoint => ({ x: array[0], y: array[1] })
 
 const pointToArray = (point: IPoint): number[] => [point.x, point.y]
 
-const manhattenDistance = (p0: IPoint, p1: IPoint) => Math.abs(p0.x - p1.x) + Math.abs(p0.y - p1.y)
+const manhattenDistance = (p0: IPoint, p1: IPoint): number => Math.abs(p0.x - p1.x) + Math.abs(p0.y - p1.y)
 
-const euclideanDistance = (p0: IPoint, p1: IPoint) => Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2))
+const euclideanDistance = (p0: IPoint, p1: IPoint): number =>
+    Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2))
 
-const pointInCircle = (point: IPoint, origin: IPoint, r: number) =>
+const pointInCircle = (point: IPoint, origin: IPoint, r: number): boolean =>
     Math.pow(origin.x - point.x, 2) + Math.pow(origin.y - point.y, 2) <= r * r
 
-const range = (from: number, to: number) => [...Array(to - from).keys()].map(i => from + i)
+const range = (from: number, to: number): number[] => [...Array(to - from).keys()].map(i => from + i)
 
 // https://stackoverflow.com/a/38024982
 /** Returns the angle (0-360) anticlockwise from the horizontal for a point on a circle */
-function getAngle(cX: number, cY: number, pX: number, pY: number) {
+const getAngle = (cX: number, cY: number, pX: number, pY: number): number => {
     const x = pX - cX
     const y = pY - cY
     if (x === 0 && y === 0) {
@@ -40,7 +41,7 @@ function getAngle(cX: number, cY: number, pX: number, pY: number) {
     return angle
 }
 
-function getReflectedPoint(p: IPoint, lp0: IPoint, lp1: IPoint) {
+const getReflectedPoint = (p: IPoint, lp0: IPoint, lp1: IPoint): IPoint => {
     // get m and b from 2 points (y = xm + b)
     const m = (lp0.y - lp1.y) / (lp0.x - lp1.x)
     const b = lp0.y - lp0.x * m
@@ -53,12 +54,11 @@ function getReflectedPoint(p: IPoint, lp0: IPoint, lp1: IPoint) {
 }
 
 /** Returns 0 if p is on the line, +1 on one side and -1 on the other side. */
-function findSide(p: IPoint, lp0: IPoint, lp1: IPoint) {
-    return Math.sign((lp1.x - lp0.x) * (p.y - lp0.y) - (lp1.y - lp0.y) * (p.x - lp0.x))
-}
+const findSide = (p: IPoint, lp0: IPoint, lp1: IPoint): number =>
+    Math.sign((lp1.x - lp0.x) * (p.y - lp0.y) - (lp1.y - lp0.y) * (p.x - lp0.x))
 
 /** Creates lines between points based on delaunay triangulation */
-function pointsToLines<T extends IPoint>(nodes: T[]): T[][] {
+const pointsToLines = <T extends IPoint>(nodes: T[]): T[][] => {
     const filteredNodes = uniqPoints(nodes)
 
     if (filteredNodes.length === 1) {
@@ -114,7 +114,7 @@ function pointsToLines<T extends IPoint>(nodes: T[]): T[][] {
  *
  * If triangles can not be formed, it's going to return lines
  */
-function pointsToTriangles<T extends IPoint>(nodes: T[]): T[][] {
+const pointsToTriangles = <T extends IPoint>(nodes: T[]): T[][] => {
     const filteredNodes = uniqPoints(nodes)
 
     if (filteredNodes.length === 1) {

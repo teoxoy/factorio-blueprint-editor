@@ -13,15 +13,13 @@ const quality = {
     compressed: true
 }
 
-function getFactorioVersion(main?: 0, major?: 17, minor?: 14) {
-    // this is how it works in factorio but js doesn't support 64bit bitwise operations
-    //  uint64_t(developerVersion) |
-    // (uint64_t(minorVersion) << 16) |
-    // (uint64_t(majorVersion) << 32) |
-    // (uint64_t(mainVersion) << 48)
-    // workaround:
-    return (minor << 16) + (major | (main << 16)) * 0xffffffff
-}
+// this is how it works in factorio but js doesn't support 64bit bitwise operations
+//  uint64_t(developerVersion) |
+// (uint64_t(minorVersion) << 16) |
+// (uint64_t(majorVersion) << 32) |
+// (uint64_t(mainVersion) << 48)
+const getFactorioVersion = (main = 0, major = 17, minor = 14): number =>
+    (minor << 16) + (major | (main << 16)) * 0xffffffff
 
 let app: PIXI.Application
 

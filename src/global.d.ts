@@ -95,6 +95,13 @@ interface ISpriteData {
 
 /** Namespace for blueprint string interfaces */
 namespace BPS {
+    interface IColor {
+        r: number
+        g: number
+        b: number
+        a: number
+    }
+
     interface ISignal {
         name: string
         type: 'item' | 'virtual' | 'fluid'
@@ -133,6 +140,31 @@ namespace BPS {
         Cu1?: IWireColor[]
     }
 
+    interface IConstantCombinatorFilter {
+        index: number
+        count: number
+        signal: ISignal
+    }
+
+    interface IDeciderCondition {
+        comparator?: string
+        constant?: number
+        copy_count_from_input?: boolean
+        first_signal?: ISignal
+        second_signal?: ISignal
+        output_signal?: ISignal
+    }
+
+    interface IArithmeticCondition {
+        operation?: '+' | '-' | '*' | '/' | '%' | '^' | '<<' | '>>' | 'AND' | 'OR' | 'XOR'
+        constant?: number
+        first_constant?: number
+        second_constant?: number
+        first_signal?: ISignal
+        second_signal?: ISignal
+        output_signal?: ISignal
+    }
+
     interface IEntity {
         entity_number: number
         name: string
@@ -162,12 +194,7 @@ namespace BPS {
         /** train stop station name, only present if entity is train-stop */
         station?: string
         /** only present if entity is locomotive or train-stop */
-        color?: {
-            r: number
-            g: number
-            b: number
-            a: number
-        }
+        color?: IColor
         /** only present if entity is locomotive, cargo_wagon or fluid_wagon */
         orientation?: number
         /** only present if entity is cargo_wagon */
@@ -247,11 +274,7 @@ namespace BPS {
             /** only present if entity is constant-combinator */
             is_on?: boolean
             /** only present if entity is constant-combinator */
-            filters?: {
-                index: number
-                count: number
-                signal: ISignal
-            }[]
+            filters?: IConstantCombinatorFilter[]
 
             /** only present if entity is small-lamp */
             use_colors?: boolean
@@ -315,25 +338,10 @@ namespace BPS {
             }
 
             /** only present if entity is decider-combinator */
-            decider_conditions?: {
-                comparator?: string
-                constant?: number
-                copy_count_from_input?: boolean
-                first_signal?: ISignal
-                second_signal?: ISignal
-                output_signal?: ISignal
-            }
+            decider_conditions?: IDeciderCondition
 
             /** only present if entity is arithmetic-combinator */
-            arithmetic_conditions?: {
-                operation?: '+' | '-' | '*' | '/' | '%' | '^' | '<<' | '>>' | 'AND' | 'OR' | 'XOR'
-                constant?: number
-                first_constant?: number
-                second_constant?: number
-                first_signal?: ISignal
-                second_signal?: ISignal
-                output_signal?: ISignal
-            }
+            arithmetic_conditions?: IArithmeticCondition
 
             /**
              *  only present if entity is pump, offshore-pump, rail-signal, train-stop, small-lamp,

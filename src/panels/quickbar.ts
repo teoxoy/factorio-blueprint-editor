@@ -11,19 +11,19 @@ class QuickbarSlot extends Slot {
         return this.data as string
     }
 
-    public assignItem(itemName: string) {
+    public assignItem(itemName: string): void {
         this.data = itemName
         this.content = F.CreateIcon(itemName, false)
     }
 
-    public unassignItem() {
+    public unassignItem(): void {
         this.data = undefined
         this.content = undefined
     }
 }
 
 export class QuickbarContainer extends Panel {
-    private static createTriangleButton(width: number, height: number) {
+    private static createTriangleButton(width: number, height: number): PIXI.Graphics {
         const button = new PIXI.Graphics()
 
         button
@@ -78,7 +78,7 @@ export class QuickbarContainer extends Panel {
         this.addChild(t)
     }
 
-    public generateSlots(itemNames?: string[]) {
+    public generateSlots(itemNames?: string[]): void {
         for (let r = 0; r < this.rows; r++) {
             for (let i = 0; i < 10; i++) {
                 const quickbarSlot = new QuickbarSlot()
@@ -123,7 +123,7 @@ export class QuickbarContainer extends Panel {
         }
     }
 
-    public bindKeyToSlot(slot: number) {
+    public bindKeyToSlot(slot: number): void {
         const itemName = this.slots[slot].itemName
         if (!itemName) {
             return
@@ -137,7 +137,7 @@ export class QuickbarContainer extends Panel {
         G.BPC.spawnPaintContainer(itemName)
     }
 
-    public changeActiveQuickbar() {
+    public changeActiveQuickbar(): void {
         this.slotsContainer.removeChildren()
 
         let itemNames = this.getAllItemNames()
@@ -146,11 +146,11 @@ export class QuickbarContainer extends Panel {
         this.generateSlots(itemNames)
     }
 
-    public getAllItemNames() {
+    public getAllItemNames(): string[] {
         return this.slots.map(s => s.itemName)
     }
 
-    protected setPosition() {
+    protected setPosition(): void {
         this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height - this.height + 1)
     }
 }

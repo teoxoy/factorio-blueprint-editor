@@ -5,7 +5,7 @@ import Tile from '../factorio-data/tile'
 import { EntitySprite } from '../entitySprite'
 
 export class TileContainer {
-    public static generateSprite(name: string, x: number, y: number) {
+    public static generateSprite(name: string, x: number, y: number): EntitySprite {
         // TODO: maybe optimize this with PIXI.TilingSprite and masks
         // https://github.com/pixijs/pixi.js/wiki/v4-Gotchas#graphics--tilingsprite
 

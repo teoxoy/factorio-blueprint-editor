@@ -51,7 +51,7 @@ export default class Modules extends PIXI.Container {
     }
 
     /** Update Content Icon */
-    private updateContent(slot: Slot, module: string) {
+    private updateContent(slot: Slot, module: string): void {
         if (module === undefined) {
             if (slot.content !== undefined) {
                 slot.content = undefined
@@ -63,7 +63,7 @@ export default class Modules extends PIXI.Container {
     }
 
     /** Event handler for click on slot */
-    private onSlotPointerDown(e: PIXI.interaction.InteractionEvent) {
+    private onSlotPointerDown(e: PIXI.interaction.InteractionEvent): void {
         e.stopPropagation()
         const slot: Slot = e.target as Slot
         const index: number = slot.data as number

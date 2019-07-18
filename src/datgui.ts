@@ -1,4 +1,4 @@
-import { GUI } from 'dat.gui'
+import { GUI, GUIController } from 'dat.gui'
 import FD from 'factorio-data'
 import actions from './actions'
 import G from './common/globals'
@@ -8,7 +8,9 @@ import spritesheetsLoader from './spritesheetsLoader'
 GUI.TEXT_CLOSED = 'Close Settings'
 GUI.TEXT_OPEN = 'Open Settings'
 
-export default function initDatGui() {
+export default function initDatGui(): {
+    guiBPIndex: GUIController
+} {
     const gui = new GUI({
         autoPlace: false,
         hideable: false,
@@ -71,7 +73,7 @@ export default function initDatGui() {
         'Low. Res PNG 32 (5.55 MB)': 2,
         'High Res PNG 32 (18.20 MB)': 3
     }
-    const setQuality = (quality: number) => {
+    const setQuality = (quality: number): void => {
         G.quality.hr = quality % 2 === 1
         G.quality.compressed = quality < 2
     }
@@ -152,7 +154,7 @@ export default function initDatGui() {
     oilOutpostFolder.add(G.oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon')).name('Beacon Modules')
     oilOutpostFolder.add(actions.generateOilOutpost, 'call').name('Generate (g)')
 
-    function getModulesObjFor(entityName: string) {
+    function getModulesObjFor(entityName: string): Record<string, string> {
         return (
             Object.keys(FD.items)
                 .map(k => FD.items[k])

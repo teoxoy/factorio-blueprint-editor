@@ -4,9 +4,9 @@ interface IToastsOptions {
     timeout?: number
 }
 
-function initToasts() {
+function initToasts(): (options: IToastsOptions) => void {
     let autoincrement = 0
-    const getNextID = () => {
+    const getNextID = (): string => {
         autoincrement += 1
         return `toast-${autoincrement}`
     }

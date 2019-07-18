@@ -6,7 +6,7 @@ import Entity from '../factorio-data/entity'
 import { EntityContainer } from './entity'
 
 export class WiresContainer extends PIXI.Container {
-    private static createWire(p1: IPoint, p2: IPoint, color: string) {
+    private static createWire(p1: IPoint, p2: IPoint, color: string): PIXI.Graphics {
         const wire = new PIXI.Graphics()
 
         const minX = Math.min(p1.x, p2.x)
@@ -63,13 +63,13 @@ export class WiresContainer extends PIXI.Container {
     private passiveConnToSprite = new Map<string, PIXI.Graphics>()
     private entNrToConnectedEntNrs = new Map<number, number[]>()
 
-    public add(hash: string, connection: IConnection) {
+    public add(hash: string, connection: IConnection): void {
         const sprite = this.getWireSprite(connection)
         this.addChild(sprite)
         this.connectionToSprite.set(hash, sprite)
     }
 
-    public remove(hash: string) {
+    public remove(hash: string): void {
         const sprite = this.connectionToSprite.get(hash)
         if (sprite) {
             sprite.destroy()
@@ -78,7 +78,7 @@ export class WiresContainer extends PIXI.Container {
     }
 
     /** This is done in cases where the connection doesn't change but the rotation does */
-    private redrawEntityConnections(entityNumber: number) {
+    private redrawEntityConnections(entityNumber: number): void {
         G.bp.wireConnections.getEntityConnectionHashes(entityNumber).forEach(hash => {
             const connection = G.bp.wireConnections.get(hash)
             this.remove(hash)
@@ -86,7 +86,7 @@ export class WiresContainer extends PIXI.Container {
         })
     }
 
-    public update(entity: Entity) {
+    public update(entity: Entity): void {
         if (entity.type === 'electric_pole') {
             // Remove connection so that updatePassiveWires diffs correctly
             this.passiveConnToSprite.forEach((v, k) => {
@@ -102,8 +102,8 @@ export class WiresContainer extends PIXI.Container {
         this.redrawEntityConnections(entity.entityNumber)
     }
 
-    private getWireSprite(connection: IConnection) {
-        const getWirePos = (entityNumber: number, color: string, side: number) => {
+    private getWireSprite(connection: IConnection): PIXI.Graphics {
+        const getWirePos = (entityNumber: number, color: string, side: number): IPoint => {
             const entity = G.bp.entities.get(entityNumber)
             const direction = entity.type === 'electric_pole' ? this.getPowerPoleDirection(entity) : entity.direction
             const point = entity.getWireConnectionPoint(color, side, direction)
@@ -120,7 +120,7 @@ export class WiresContainer extends PIXI.Container {
         )
     }
 
-    public getPowerPoleDirection(entity: Entity) {
+    public getPowerPoleDirection(entity: Entity): number {
         const entNrArr = this.entNrToConnectedEntNrs.get(entity.entityNumber)
         if (!entNrArr) {
             return 0
@@ -138,7 +138,7 @@ export class WiresContainer extends PIXI.Container {
 
         return getPowerPoleRotation(entity.position, points)
 
-        function getPowerPoleRotation(centre: IPoint, points: IPoint[]) {
+        function getPowerPoleRotation(centre: IPoint, points: IPoint[]): number {
             const sectorSum = points
                 .map(p => U.getAngle(0, 0, p.x - centre.x, (p.y - centre.y) * -1 /* invert Y axis */))
                 .map(angleToSector)
@@ -146,7 +146,7 @@ export class WiresContainer extends PIXI.Container {
 
             return Math.floor(sectorSum / points.length) * 2
 
-            function angleToSector(angle: number) {
+            function angleToSector(angle: number): 0 | 1 | 2 | 3 {
                 const cwAngle = 360 - angle
                 const sectorAngle = 360 / 8
                 const offset = sectorAngle * 1.5
@@ -160,7 +160,7 @@ export class WiresContainer extends PIXI.Container {
         }
     }
 
-    public updatePassiveWires() {
+    public updatePassiveWires(): void {
         interface IPole extends IPoint {
             entityNumber: number
             name: string
@@ -183,7 +183,7 @@ export class WiresContainer extends PIXI.Container {
             return
         }
 
-        const lineHash = (line: { entityNumber: number }[]) => {
+        const lineHash = (line: { entityNumber: number }[]): string => {
             const min = Math.min(line[0].entityNumber, line[1].entityNumber)
             const max = Math.max(line[0].entityNumber, line[1].entityNumber)
             return `${min}-${max}`
@@ -215,7 +215,7 @@ export class WiresContainer extends PIXI.Container {
         const lines = setsOfLines
             .reduce((acc, val) => acc.concat(val), [])
             .sort((a, b) => {
-                const minPos = (l: IPole[]) => Math.min(l[0].x, l[1].x) + Math.min(l[0].y, l[1].y)
+                const minPos = (l: IPole[]): number => Math.min(l[0].x, l[1].x) + Math.min(l[0].y, l[1].y)
                 return minPos(a) - minPos(b)
             })
             .sort((a, b) => U.manhattenDistance(a[0], a[1]) - U.manhattenDistance(b[0], b[1]))
@@ -281,7 +281,7 @@ export class WiresContainer extends PIXI.Container {
             return arr
         }, [])
 
-        const addWire = (hash: string) => {
+        const addWire = (hash: string): void => {
             const sprite = this.getWireSprite({
                 color: 'copper',
                 entityNumber1: Number(hash.split('-')[0]),
@@ -293,7 +293,7 @@ export class WiresContainer extends PIXI.Container {
             this.passiveConnToSprite.set(hash, sprite)
         }
 
-        const removeWire = (hash: string) => {
+        const removeWire = (hash: string): void => {
             this.passiveConnToSprite.get(hash).destroy()
             this.passiveConnToSprite.delete(hash)
         }

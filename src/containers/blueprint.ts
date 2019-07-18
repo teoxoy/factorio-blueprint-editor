@@ -44,35 +44,35 @@ class GridData extends EventEmitter {
     }
 
     /** mouse x */
-    public get x() {
+    public get x(): number {
         return this._x
     }
     /** mouse y */
-    public get y() {
+    public get y(): number {
         return this._y
     }
     /** mouse x in 16 pixel size grid */
-    public get x16() {
+    public get x16(): number {
         return this._x16
     }
     /** mouse y in 16 pixel size grid */
-    public get y16() {
+    public get y16(): number {
         return this._y16
     }
     /** mouse x in 32 pixel size grid */
-    public get x32() {
+    public get x32(): number {
         return this._x32
     }
     /** mouse y in 32 pixel size grid */
-    public get y32() {
+    public get y32(): number {
         return this._y32
     }
 
-    public recalculate() {
+    public recalculate(): void {
         this.update(this.lastMousePosX, this.lastMousePosY)
     }
 
-    private update(mouseX: number, mouseY: number) {
+    private update(mouseX: number, mouseY: number): void {
         this.lastMousePosX = mouseX
         this.lastMousePosY = mouseY
 
@@ -269,51 +269,51 @@ class BlueprintContainer extends PIXI.Container {
         })
     }
 
-    public getViewportScale() {
+    public getViewportScale(): number {
         return this.viewport.getCurrentScale()
     }
 
-    public setViewportSize(width: number, height: number) {
+    public setViewportSize(width: number, height: number): void {
         this.viewport.setSize(width, height)
     }
 
-    public applyViewportTransform() {
+    public applyViewportTransform(): void {
         const t = this.viewport.getTransform()
         this.setTransform(t.tx, t.ty, t.a, t.d)
         this.gridData.recalculate()
     }
 
-    public get mode() {
+    public get mode(): EditorMode {
         return this._mode
     }
 
-    private setMode(mode: EditorMode) {
+    private setMode(mode: EditorMode): void {
         this._mode = mode
         this.emit('mode', mode)
     }
 
-    public enterPanMode() {
+    public enterPanMode(): void {
         if (this.mode === EditorMode.NONE && this.isPointerInside) {
             this.setMode(EditorMode.PAN)
             this.cursor = 'move'
         }
     }
 
-    public exitPanMode() {
+    public exitPanMode(): void {
         if (this.mode === EditorMode.PAN) {
             this.setMode(EditorMode.NONE)
             this.cursor = 'inherit'
         }
     }
 
-    public zoom(zoomIn = true) {
+    public zoom(zoomIn = true): void {
         const zoomFactor = 0.1
         this.viewport.setScaleCenter(this.gridData.x, this.gridData.y)
         this.viewport.zoomBy(zoomFactor * (zoomIn ? 1 : -1))
         this.applyViewportTransform()
     }
 
-    private get isPointerInside() {
+    private get isPointerInside(): boolean {
         const container = G.app.renderer.plugins.interaction.hitTest(
             G.app.renderer.plugins.interaction.mouse.global,
             G.app.stage
@@ -321,8 +321,8 @@ class BlueprintContainer extends PIXI.Container {
         return container === this
     }
 
-    private updateHoverContainer(forceRemove = false) {
-        const removeHoverContainer = () => {
+    private updateHoverContainer(forceRemove = false): void {
+        const removeHoverContainer = (): void => {
             this.hoverContainer.pointerOutEventHandler()
             this.hoverContainer = undefined
             this.setMode(EditorMode.NONE)
@@ -361,7 +361,7 @@ class BlueprintContainer extends PIXI.Container {
         }
     }
 
-    public generateGrid(pattern: 'checker' | 'grid' = 'checker') {
+    public generateGrid(pattern: 'checker' | 'grid' = 'checker'): void {
         const gridGraphics =
             pattern === 'checker'
                 ? new PIXI.Graphics()
@@ -404,7 +404,7 @@ class BlueprintContainer extends PIXI.Container {
         this.grid = grid
     }
 
-    public initBP() {
+    public initBP(): void {
         const firstRail = G.bp.getFirstRail()
         if (firstRail) {
             G.railMoveOffset = {
@@ -443,7 +443,7 @@ class BlueprintContainer extends PIXI.Container {
         this.centerViewport()
     }
 
-    public clearData() {
+    public clearData(): void {
         const opt = { children: true }
         this.tileSprites.destroy(opt)
         this.tilePaintSlot.destroy(opt)
@@ -482,29 +482,29 @@ class BlueprintContainer extends PIXI.Container {
         this.setMode(EditorMode.NONE)
     }
 
-    public addEntitySprites(entitySprites: EntitySprite[], sort = true) {
+    public addEntitySprites(entitySprites: EntitySprite[], sort = true): void {
         this.entitySprites.addChild(...entitySprites)
         if (sort) {
             this.sortEntities()
         }
     }
 
-    public addTileSprites(tileSprites: EntitySprite[]) {
+    public addTileSprites(tileSprites: EntitySprite[]): void {
         this.tileSprites.addChild(...tileSprites)
     }
 
-    private sortEntities() {
+    private sortEntities(): void {
         this.entitySprites.children.sort(EntitySprite.compareFn)
     }
 
-    public transparentEntities(bool = true) {
+    public transparentEntities(bool = true): void {
         const alpha = bool ? 0.5 : 1
         this.entitySprites.alpha = alpha
         this.wiresContainer.alpha = alpha
         this.overlayContainer.alpha = alpha
     }
 
-    public centerViewport() {
+    public centerViewport(): void {
         if (G.bp.isEmpty()) {
             this.viewport.setCurrentScale(1)
             this.viewport.setPosition(
@@ -529,10 +529,10 @@ class BlueprintContainer extends PIXI.Container {
         this.applyViewportTransform()
     }
 
-    public getBlueprintBounds() {
+    public getBlueprintBounds(): PIXI.Rectangle {
         const bounds = new PIXI.Bounds()
 
-        const addBounds = (sprite: EntitySprite) => {
+        const addBounds = (sprite: EntitySprite): void => {
             const sB = new PIXI.Bounds()
             const W = sprite.width * sprite.anchor.x
             const H = sprite.height * sprite.anchor.y
@@ -555,7 +555,7 @@ class BlueprintContainer extends PIXI.Container {
         return new PIXI.Rectangle(X, Y, W, H)
     }
 
-    public spawnPaintContainer(itemName: string, direction = 0) {
+    public spawnPaintContainer(itemName: string, direction = 0): void {
         const itemData = FD.items[itemName]
         const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
         const placeResult = itemData.place_result || tileResult

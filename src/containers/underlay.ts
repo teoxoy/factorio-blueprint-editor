@@ -3,10 +3,16 @@ import * as PIXI from 'pixi.js'
 
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
 
+interface IVisualizationData {
+    type: Type | Type[]
+    radius: number | number[]
+    color: number | number[]
+}
+
 export class UnderlayContainer extends PIXI.Container {
-    private static getDataForVisualizationArea(name: string) {
+    private static getDataForVisualizationArea(name: string): IVisualizationData {
         const ed = FD.entities[name]
-        function undoBlendModeColorShift(color0: number, color1: number, alpha: number) {
+        function undoBlendModeColorShift(color0: number, color1: number, alpha: number): number {
             // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendFunc
             // array[BLEND_MODES.NORMAL] = [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
             return color1 - color0 * (1 - alpha)
@@ -41,7 +47,7 @@ export class UnderlayContainer extends PIXI.Container {
         }
     }
 
-    public static modifyVisualizationArea(area: PIXI.Sprite | PIXI.Sprite[], fn: (s: PIXI.Sprite) => void) {
+    public static modifyVisualizationArea(area: PIXI.Sprite | PIXI.Sprite[], fn: (s: PIXI.Sprite) => void): void {
         if (area) {
             if (area instanceof PIXI.Sprite) {
                 fn(area)
@@ -70,7 +76,7 @@ export class UnderlayContainer extends PIXI.Container {
         this.addChild(this.logistics0, this.logistics1, this.poles, this.beacons, this.drills)
     }
 
-    public activateRelatedAreas(entityName: string) {
+    public activateRelatedAreas(entityName: string): void {
         const ed = FD.entities[entityName]
         const data = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (data) {
@@ -97,7 +103,7 @@ export class UnderlayContainer extends PIXI.Container {
         }
     }
 
-    public deactivateActiveAreas() {
+    public deactivateActiveAreas(): void {
         for (const type of this.active) {
             for (const s of this[type].children) {
                 s.visible = false
@@ -106,7 +112,7 @@ export class UnderlayContainer extends PIXI.Container {
         this.active = []
     }
 
-    public createNewArea(entityName: string, position?: IPoint) {
+    public createNewArea(entityName: string, position?: IPoint): PIXI.Sprite | PIXI.Sprite[] {
         const aVData = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (aVData) {
             if (aVData.type instanceof Array) {
@@ -133,7 +139,7 @@ export class UnderlayContainer extends PIXI.Container {
             }
         }
 
-        function createVisualizationArea(radius: number, color: number, position?: IPoint, alpha = 0.25) {
+        function createVisualizationArea(radius: number, color: number, position?: IPoint, alpha = 0.25): PIXI.Sprite {
             const aV = new PIXI.Sprite(PIXI.Texture.WHITE)
             const S = radius * 64
             aV.width = S

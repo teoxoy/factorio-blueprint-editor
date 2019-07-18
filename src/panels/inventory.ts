@@ -205,12 +205,12 @@ export class InventoryContainer extends Dialog {
     }
 
     /** Override automatically set position of dialog due to additional area for recipe */
-    protected setPosition() {
+    protected setPosition(): void {
         this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height / 2 - 520 / 2)
     }
 
     /** Update recipe visulaization */
-    private updateRecipeVisualization(recipeName?: string) {
+    private updateRecipeVisualization(recipeName?: string): void {
         // Update Recipe Label
         this.m_RecipeLabel.text = undefined
 

@@ -9,7 +9,7 @@ import U from './generators/util'
 
 /** Entity Base Class */
 export default class Entity extends EventEmitter {
-    public static getItemName(name: string) {
+    public static getItemName(name: string): string {
         return FD.entities[name].minable.result
     }
 
@@ -30,7 +30,7 @@ export default class Entity extends EventEmitter {
         this.m_rawEntity = rawEntity
     }
 
-    public destroy() {
+    public destroy(): void {
         this.emit('destroy')
         this.removeAllListeners()
     }
@@ -99,7 +99,7 @@ export default class Entity extends EventEmitter {
             .commit()
     }
 
-    private get maxWireDistance() {
+    private get maxWireDistance(): number {
         return (
             this.entityData.circuit_wire_max_distance ||
             this.entityData.wire_max_distance ||
@@ -107,7 +107,7 @@ export default class Entity extends EventEmitter {
         )
     }
 
-    public moveBy(offset: IPoint) {
+    public moveBy(offset: IPoint): void {
         this.position = {
             x: this.position.x + offset.x,
             y: this.position.y + offset.y
@@ -130,7 +130,7 @@ export default class Entity extends EventEmitter {
     }
 
     /** Direction Type (input|output) for underground belts */
-    public get directionType() {
+    public get directionType(): 'input' | 'output' {
         return this.m_rawEntity.type
     }
     public set directionType(type: 'input' | 'output') {
@@ -145,7 +145,7 @@ export default class Entity extends EventEmitter {
     }
 
     /** Entity recipe */
-    public get recipe() {
+    public get recipe(): string {
         return this.m_rawEntity.recipe
     }
     public set recipe(recipe: string) {
@@ -378,7 +378,7 @@ export default class Entity extends EventEmitter {
         this.m_BP.history.commitTransaction()
     }
 
-    public get filterMode() {
+    public get filterMode(): 'whitelist' | 'blacklist' {
         return this.m_rawEntity.filter_mode === 'blacklist' ? 'blacklist' : 'whitelist'
     }
 
@@ -483,7 +483,7 @@ export default class Entity extends EventEmitter {
             .commit()
     }
 
-    public get inserterStackSize() {
+    public get inserterStackSize(): number {
         if (this.m_rawEntity.override_stack_size) {
             return this.m_rawEntity.override_stack_size
         }
@@ -493,46 +493,46 @@ export default class Entity extends EventEmitter {
         return 3
     }
 
-    public get constantCombinatorFilters() {
+    public get constantCombinatorFilters(): BPS.IConstantCombinatorFilter[] {
         return this.m_rawEntity.control_behavior === undefined ? undefined : this.m_rawEntity.control_behavior.filters
     }
 
-    public get deciderCombinatorConditions() {
+    public get deciderCombinatorConditions(): BPS.IDeciderCondition {
         return this.m_rawEntity.control_behavior === undefined
             ? undefined
             : this.m_rawEntity.control_behavior.decider_conditions
     }
 
-    public get arithmeticCombinatorConditions() {
+    public get arithmeticCombinatorConditions(): BPS.IArithmeticCondition {
         return this.m_rawEntity.control_behavior === undefined
             ? undefined
             : this.m_rawEntity.control_behavior.arithmetic_conditions
     }
 
-    public get generateConnector() {
+    public get generateConnector(): boolean {
         return this.hasConnections || this.connectToLogisticNetwork
     }
 
-    private get connectToLogisticNetwork() {
+    private get connectToLogisticNetwork(): boolean {
         return this.m_rawEntity.control_behavior && this.m_rawEntity.control_behavior.connect_to_logistic_network
     }
 
-    private get hasConnections() {
+    private get hasConnections(): boolean {
         return this.m_BP.wireConnections.getEntityConnections(this.entityNumber).length > 0
     }
 
-    public get chemicalPlantDontConnectOutput() {
+    public get chemicalPlantDontConnectOutput(): boolean {
         if (!this.recipe) {
             return false
         }
         return !FD.recipes[this.recipe].results.find(result => result.type === 'fluid')
     }
 
-    public get trainStopColor() {
+    public get trainStopColor(): BPS.IColor {
         return this.m_rawEntity.color
     }
 
-    public get operator() {
+    public get operator(): string {
         if (this.name === 'decider_combinator') {
             const cb = this.m_rawEntity.control_behavior
             if (cb) {
@@ -548,7 +548,7 @@ export default class Entity extends EventEmitter {
         return undefined
     }
 
-    private get canBeRotated() {
+    private get canBeRotated(): boolean {
         if (
             ((this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3') &&
                 !this.assemblerCraftsWithFluid) ||
@@ -566,7 +566,7 @@ export default class Entity extends EventEmitter {
         return true
     }
 
-    public rotate(ccw = false, rotateOpposingUB = false) {
+    public rotate(ccw = false, rotateOpposingUB = false): void {
         if (!this.canBeRotated) {
             return
         }
@@ -609,12 +609,12 @@ export default class Entity extends EventEmitter {
         this.m_BP.history.commitTransaction()
     }
 
-    public canPasteSettings(sourceEntity: Entity) {
+    public canPasteSettings(sourceEntity: Entity): boolean {
         return sourceEntity !== this && sourceEntity.type === this.type
     }
 
     /** Paste relevant data from source entity */
-    public pasteSettings(sourceEntity: Entity) {
+    public pasteSettings(sourceEntity: Entity): void {
         if (!this.canPasteSettings(sourceEntity)) {
             return
         }
@@ -728,7 +728,7 @@ export default class Entity extends EventEmitter {
         */
     }
 
-    public get assemblerCraftsWithFluid() {
+    public get assemblerCraftsWithFluid(): boolean {
         return (
             this.recipe &&
             FD.recipes[this.recipe].category === 'crafting_with_fluid' &&
@@ -737,7 +737,7 @@ export default class Entity extends EventEmitter {
         )
     }
 
-    public get assemblerPipeDirection() {
+    public get assemblerPipeDirection(): 'input' | 'output' {
         if (!this.recipe) {
             return undefined
         }
@@ -751,7 +751,7 @@ export default class Entity extends EventEmitter {
         return undefined
     }
 
-    public getWireConnectionPoint(color: string, side: number, direction = this.direction) {
+    public getWireConnectionPoint(color: string, side: number, direction = this.direction): number[] {
         const e = this.entityData
         // poles
         if (e.connection_points) {

@@ -60,7 +60,7 @@ export default class Preview extends PIXI.Container {
 
         if (this.m_Entity.entityData !== undefined) {
             /** Adjust sprite size and offset based on drawing box */
-            const assignDataFromDrawingBox = (db: number[][]) => {
+            const assignDataFromDrawingBox = (db: number[][]): void => {
                 actualSpriteSize.x = Math.abs(db[0][0]) + db[1][0]
                 actualSpriteSize.y = Math.abs(db[0][1]) + db[1][1]
                 offset.x = actualSpriteSize.x / 2 - db[1][0]

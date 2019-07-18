@@ -25,7 +25,7 @@ interface IEntityData {
 
 export class EntitySprite extends PIXI.Sprite {
     private static nextID = 0
-    private static getNextID() {
+    private static getNextID(): number {
         this.nextID += 1
         return this.nextID
     }
@@ -93,7 +93,7 @@ export class EntitySprite extends PIXI.Sprite {
         return parts
     }
 
-    public static compareFn(a: EntitySprite, b: EntitySprite) {
+    public static compareFn(a: EntitySprite, b: EntitySprite): number {
         const dZ = a.zIndex - b.zIndex
         if (dZ !== 0) {
             return dZ
@@ -222,7 +222,7 @@ export class EntitySprite extends PIXI.Sprite {
     //     // this.cachedBounds = [minX, minY, maxX, maxY]
     // }
 
-    public setPosition(position: IPoint) {
+    public setPosition(position: IPoint): void {
         this.position.set(position.x + this.shift.x, position.y + this.shift.y)
     }
 }

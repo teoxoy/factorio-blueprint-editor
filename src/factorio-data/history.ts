@@ -41,7 +41,7 @@ class Action<V> {
      * Commit the action to the history
      * This allows for emits to be set up first
      */
-    public commit() {
+    public commit(): this {
         this.apply()
         this.history.commitTransaction()
 
@@ -52,7 +52,7 @@ class Action<V> {
      * Execute action and therfore apply value
      * @param value Whether to apply the new or the old value (Default: New)
      */
-    public apply(value: HistoryValue = HistoryValue.New) {
+    public apply(value: HistoryValue = HistoryValue.New): void {
         const newValue = value === HistoryValue.New ? this.newValue : this.oldValue
         const oldValue = value === HistoryValue.New ? this.oldValue : this.newValue
 
@@ -87,12 +87,12 @@ class Transaction {
         this.actions = []
     }
 
-    public empty() {
+    public empty(): boolean {
         return this.actions.length === 0
     }
 
     /** Undo all actions from this transaction in reversed order */
-    public undo() {
+    public undo(): void {
         const reversed = this.actions.map((_, i, arr) => arr[arr.length - 1 - i])
         for (const action of reversed) {
             action.apply(HistoryValue.Old)
@@ -100,20 +100,20 @@ class Transaction {
     }
 
     /** Redo all actions from this transaction */
-    public redo() {
+    public redo(): void {
         for (const action of this.actions) {
             action.apply(HistoryValue.New)
         }
     }
 
     /** Logs all actions */
-    public log() {
+    public log(): void {
         console.log(`[DO] ${this.text}:`)
         this.actions.forEach((a, i) => console.log('\t', i, a.text, ' - ', a.oldValue, ' -> ', a.newValue))
     }
 
     /** Add action to this transaction */
-    public push(action: Action<unknown>) {
+    public push(action: Action<unknown>): void {
         if (this.text === undefined && this.actions.length === 0) {
             this.text = action.text
         }
@@ -174,7 +174,7 @@ export default class History {
     private transactionHistory: Transaction[] = []
 
     /** Removes all history entries */
-    public reset() {
+    public reset(): void {
         this.historyIndex = 0
         this.transactionHistory = []
     }
@@ -226,7 +226,7 @@ export default class History {
      * Undo last action stored in history
      * @returns `false` if there are no actions left for undo
      * */
-    public undo() {
+    public undo(): boolean {
         if (this.historyIndex === 0) {
             return false
         }
@@ -246,7 +246,7 @@ export default class History {
      * Redo last action stored in history
      * @returns `false` if there are no actions left for redo
      * */
-    public redo() {
+    public redo(): boolean {
         if (this.historyIndex === this.transactionHistory.length) {
             return false
         }
@@ -282,7 +282,7 @@ export default class History {
      * Commits the active transaction and pushes it into the history
      * @returns `false` if `transactionCount` is not 0 or transaction is empty
      */
-    public commitTransaction() {
+    public commitTransaction(): boolean {
         this.transactionCount -= 1
 
         if (this.transactionCount === 0) {
@@ -330,7 +330,7 @@ export default class History {
     }
 
     /** Sets the value of the `Array` or `Object` at the specified path  */
-    private SetValue<V>(obj: IIndexedObject, path: string[], value: V) {
+    private SetValue<V>(obj: IIndexedObject, path: string[], value: V): void {
         if (path.length === 1) {
             if (Array.isArray(obj)) {
                 obj.push(value)
@@ -343,7 +343,7 @@ export default class History {
     }
 
     /** Deletes the value of the `Array` or `Object` at the specified path  */
-    private DeleteValue(obj: IIndexedObject, path: string[]) {
+    private DeleteValue(obj: IIndexedObject, path: string[]): void {
         if (path.length === 1) {
             if (Array.isArray(obj)) {
                 obj.splice(Number(path[0]), 1)

@@ -197,7 +197,7 @@ function CreateIcon(itemName: string, setAnchor: boolean = true): PIXI.DisplayOb
  * @param name - Name if item
  * @param amount - Amount to show
  */
-function CreateIconWithAmount(host: PIXI.Container, x: number, y: number, name: string, amount: number) {
+function CreateIconWithAmount(host: PIXI.Container, x: number, y: number, name: string, amount: number): void {
     const icon: PIXI.DisplayObject = CreateIcon(name, false)
     icon.position.set(x, y)
     host.addChild(icon)
@@ -216,7 +216,7 @@ function CreateRecipe(
     ingredients: FD.IngredientOrResult[],
     results: FD.IngredientOrResult[],
     time: number
-) {
+): void {
     let nextX = x
 
     for (const i of ingredients) {
@@ -238,7 +238,7 @@ function CreateRecipe(
     }
 }
 
-function applyTint(s: PIXI.Sprite, tint: FD.ColorWithAlpha) {
+function applyTint(s: PIXI.Sprite, tint: FD.ColorWithAlpha): void {
     s.tint = PIXI.utils.rgb2hex([tint.r || 0, tint.g || 0, tint.b || 0])
     s.alpha = tint.a || 1
 }

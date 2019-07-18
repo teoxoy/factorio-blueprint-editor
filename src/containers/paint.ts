@@ -19,7 +19,7 @@ export abstract class PaintContainer extends PIXI.Container {
         this.show()
     }
 
-    protected get blocked() {
+    protected get blocked(): boolean {
         return this._blocked
     }
 
@@ -28,7 +28,7 @@ export abstract class PaintContainer extends PIXI.Container {
         this.applyTint()
     }
 
-    private applyTint() {
+    private applyTint(): void {
         const t = {
             r: this.blocked ? 1 : 0.4,
             g: this.blocked ? 0.4 : 1,
@@ -38,18 +38,18 @@ export abstract class PaintContainer extends PIXI.Container {
         this.children.forEach((s: PIXI.Sprite) => F.applyTint(s, t))
     }
 
-    public hide() {
+    public hide(): void {
         this.visible = false
         this.updateIconPos()
         this.icon.visible = true
     }
 
-    public show() {
+    public show(): void {
         this.visible = true
         this.icon.visible = false
     }
 
-    public destroy() {
+    public destroy(): void {
         this.emit('destroy')
         window.removeEventListener('mousemove', this.updateIconPos)
         this.icon.destroy()
@@ -74,14 +74,14 @@ export abstract class PaintContainer extends PIXI.Container {
     // override
     public abstract placeEntityContainer(): void
 
-    protected getGridPosition() {
+    protected getGridPosition(): IPoint {
         return {
             x: Math.round((this.x / 32) * 10) / 10,
             y: Math.round((this.y / 32) * 10) / 10
         }
     }
 
-    protected setNewPosition(size: IPoint) {
+    protected setNewPosition(size: IPoint): void {
         if (size.x % 2 === 0) {
             const npx = G.BPC.gridData.x16 * 16
             this.x = npx + (npx % 32 === 0 ? 0 : 16)

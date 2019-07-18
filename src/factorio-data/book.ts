@@ -18,15 +18,15 @@ export class Book {
         }
     }
 
-    public get activeIndex() {
+    public get activeIndex(): number {
         return this._activeIndex
     }
 
-    public get lastBookIndex() {
+    public get lastBookIndex(): number {
         return Math.min(0, this.blueprints.length - 1)
     }
 
-    public getBlueprint(index?: number) {
+    public getBlueprint(index?: number): Blueprint {
         if (index !== undefined) {
             this._activeIndex = index < 0 || index > this.lastBookIndex ? 0 : index
         }
@@ -41,24 +41,22 @@ export class Book {
         return bp
     }
 
-    public serialize() {
+    public serialize(): BPS.IBlueprintBook {
         const blueprints = []
         for (let i = 0; i < this.blueprints.length; i++) {
             blueprints.push({
                 index: i,
                 // TODO: modified instead of loaded
                 blueprint: this.blueprints[i].loaded
-                    ? this.blueprints[i].loaded.serialize().blueprint
+                    ? this.blueprints[i].loaded.serialize()
                     : this.blueprints[i].blueprint
             })
         }
         return {
-            blueprint_book: {
-                blueprints,
-                item: 'blueprint_book',
-                active_index: this._activeIndex,
-                version: G.getFactorioVersion()
-            }
+            blueprints,
+            item: 'blueprint_book',
+            active_index: this._activeIndex,
+            version: G.getFactorioVersion()
         }
     }
 }

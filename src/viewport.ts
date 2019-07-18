@@ -42,7 +42,7 @@ export class Viewport {
         this.transform = new PIXI.Matrix()
     }
 
-    private _updateMatrix() {
+    private _updateMatrix(): void {
         // Accumulate zoom transformations.
         // origTransform is an intermediate accumulative matrix used for tracking the current zoom target.
         this.origTransform.append(new PIXI.Matrix(1, 0, 0, 1, this.scaleCenterX, this.scaleCenterY))
@@ -101,7 +101,7 @@ export class Viewport {
         this.transform.translate(this.positionX, this.positionY)
     }
 
-    public centerViewPort(focusObjectSize: IPoint, offset: IPoint) {
+    public centerViewPort(focusObjectSize: IPoint, offset: IPoint): void {
         this.origTransform = new PIXI.Matrix()
 
         this.positionX =
@@ -129,7 +129,7 @@ export class Viewport {
         this.dirty = true
     }
 
-    public getTransform() {
+    public getTransform(): PIXI.Matrix {
         if (this.dirty) {
             this._updateMatrix()
             this.dirty = false
@@ -137,19 +137,19 @@ export class Viewport {
         return this.transform
     }
 
-    public setSize(width: number, height: number) {
+    public setSize(width: number, height: number): void {
         this.viewPortSize.width = width
         this.viewPortSize.height = height
         this.dirty = true
     }
 
-    public setPosition(posX: number, posY: number) {
+    public setPosition(posX: number, posY: number): void {
         this.positionX = posX
         this.positionY = posY
         this.dirty = true
     }
 
-    public zoomBy(deltaX: number, deltaY?: number) {
+    public zoomBy(deltaX: number, deltaY?: number): void {
         if (Math.sign(deltaX) === 1 && this.origTransform.a > this.maxZoom) {
             return
         }
@@ -158,13 +158,13 @@ export class Viewport {
         this.dirty = true
     }
 
-    public translateBy(deltaX: number, deltaY: number) {
+    public translateBy(deltaX: number, deltaY: number): void {
         this.positionX += deltaX
         this.positionY += deltaY
         this.dirty = true
     }
 
-    public setCurrentScale(newScale: number) {
+    public setCurrentScale(newScale: number): void {
         if (this.dirty) {
             this._updateMatrix()
         }
@@ -182,11 +182,11 @@ export class Viewport {
         this.dirty = true
     }
 
-    public getCurrentScale() {
+    public getCurrentScale(): number {
         return this.origTransform.a
     }
 
-    public setScaleCenter(posX: number, posY: number) {
+    public setScaleCenter(posX: number, posY: number): void {
         this.scaleCenterX = posX
         this.scaleCenterY = posY
         this.dirty = true

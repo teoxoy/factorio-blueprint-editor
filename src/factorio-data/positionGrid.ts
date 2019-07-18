@@ -11,6 +11,11 @@ interface IArea {
     h: number
 }
 
+interface INeighbourData extends IPoint {
+    relDir: number
+    entity: Entity
+}
+
 /** Moves X and Y to top left corner from middle (anchor 0.5 0.5 => 0 0) */
 const processArea = (area: IArea): IArea => ({
     ...area,
@@ -23,7 +28,7 @@ const tileDataAction = (
     area: IArea,
     fn: (key: string, cell: number | number[]) => boolean | void,
     returnEmptyCells = false
-) => {
+): void => {
     const A = processArea(area)
 
     let stop = false
@@ -52,7 +57,7 @@ export class PositionGrid {
         this.bp = bp
     }
 
-    public getEntityAtPosition(x: number, y: number) {
+    public getEntityAtPosition(x: number, y: number): Entity {
         const cell = this.grid.get(`${Math.floor(x)},${Math.floor(y)}`)
         if (cell) {
             if (typeof cell === 'number') {
@@ -63,7 +68,7 @@ export class PositionGrid {
         }
     }
 
-    public setTileData(entity: Entity, position: IPoint = entity.position) {
+    public setTileData(entity: Entity, position: IPoint = entity.position): void {
         // if (entity.entityData.flags.includes('placeable_off_grid')) {
         //     return
         // }
@@ -95,7 +100,7 @@ export class PositionGrid {
         )
     }
 
-    public removeTileData(entity: Entity, position: IPoint = entity.position) {
+    public removeTileData(entity: Entity, position: IPoint = entity.position): void {
         tileDataAction(
             this.grid,
             {
@@ -125,14 +130,14 @@ export class PositionGrid {
         )
     }
 
-    public canMoveTo(entity: Entity, newPosition: IPoint) {
+    public canMoveTo(entity: Entity, newPosition: IPoint): boolean {
         this.removeTileData(entity)
         const spaceAvalible = this.isAreaAvalible(entity.name, newPosition, entity.direction)
         this.setTileData(entity)
         return spaceAvalible
     }
 
-    public isAreaAvalible(name: string, pos: IPoint, direction = 0) {
+    public isAreaAvalible(name: string, pos: IPoint, direction = 0): boolean {
         const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
 
         const straightRails: Entity[] = []
@@ -197,7 +202,7 @@ export class PositionGrid {
         return false
     }
 
-    public checkFastReplaceableGroup(name: string, direction: number, pos: IPoint) {
+    public checkFastReplaceableGroup(name: string, direction: number, pos: IPoint): Entity {
         const fd = FD.entities[name]
         const size = util.switchSizeBasedOnDirection(fd.size, direction)
         const area = {
@@ -224,7 +229,7 @@ export class PositionGrid {
         return entity
     }
 
-    public checkSameEntityAndDifferentDirection(name: string, direction: number, pos: IPoint) {
+    public checkSameEntityAndDifferentDirection(name: string, direction: number, pos: IPoint): Entity {
         if (name === 'straight_rail') {
             return
         }
@@ -278,7 +283,7 @@ export class PositionGrid {
     }
 
     /** Returns true if any of the cells in the area are an array */
-    public sharesCell(area: IArea) {
+    public sharesCell(area: IArea): boolean {
         let hasArrayCell = false
         tileDataAction(this.grid, area, (_, cell) => {
             if (typeof cell !== 'number') {
@@ -289,7 +294,7 @@ export class PositionGrid {
         return hasArrayCell
     }
 
-    public isAreaEmpty(area: IArea) {
+    public isAreaEmpty(area: IArea): boolean {
         let empty = true
         tileDataAction(this.grid, area, () => {
             empty = false
@@ -373,7 +378,7 @@ export class PositionGrid {
             .map(entNr => this.bp.entities.get(entNr))
     }
 
-    public getNeighbourData(point: IPoint) {
+    public getNeighbourData(point: IPoint): INeighbourData[] {
         return [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }].map((o, i) => {
             const x = Math.floor(point.x) + o.x
             const y = Math.floor(point.y) + o.y

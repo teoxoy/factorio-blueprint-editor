@@ -54,7 +54,7 @@ const { guiBPIndex } = initDatGui()
 initDoorbell()
 
 const createToast = initToasts()
-function createErrorMessage(text: string, error: unknown) {
+function createErrorMessage(text: string, error: unknown): void {
     console.error(error)
     createToast({
         text:
@@ -65,7 +65,7 @@ function createErrorMessage(text: string, error: unknown) {
         timeout: 10000
     })
 }
-function createBPImportError(error: Error | ModdedBlueprintError) {
+function createBPImportError(error: Error | ModdedBlueprintError): void {
     if (error instanceof TrainBlueprintError) {
         createErrorMessage(
             'Blueprint with train entities not supported yet. If you think this is a mistake:',
@@ -84,7 +84,7 @@ function createBPImportError(error: Error | ModdedBlueprintError) {
 
     createErrorMessage('Blueprint string could not be loaded.', error)
 }
-function createWelcomeMessage() {
+function createWelcomeMessage(): void {
     const notFirstRun = localStorage.getItem('firstRun') === 'false'
     if (notFirstRun) {
         return
@@ -117,13 +117,13 @@ PIXI.GRAPHICS_CURVES.adaptive = true
 // PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
 // PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 
-function getMonitorRefreshRate(iterations = 10) {
+function getMonitorRefreshRate(iterations = 10): Promise<number> {
     return new Promise(resolve => {
         const results: number[] = []
         let lastTimestamp = 0
         let i = 0
 
-        const fn = (timestamp: number) => {
+        const fn = (timestamp: number): void => {
             results.push(1000 / (timestamp - lastTimestamp))
             lastTimestamp = timestamp
             i += 1
@@ -136,7 +136,7 @@ function getMonitorRefreshRate(iterations = 10) {
         requestAnimationFrame(fn)
     })
 }
-getMonitorRefreshRate().then((fps: number) => {
+getMonitorRefreshRate().then(fps => {
     PIXI.settings.TARGET_FPMS = fps / 1000
 })
 
@@ -202,7 +202,7 @@ Promise.all([
     })
     .catch(error => createErrorMessage('Something went wrong.', error))
 
-function loadBp(bpOrBook: Blueprint | Book, clearData = true) {
+function loadBp(bpOrBook: Blueprint | Book, clearData = true): void {
     if (bpOrBook instanceof Book) {
         G.book = bpOrBook
         G.bp = G.book.getBlueprint(bpIndex ? bpIndex : undefined)
@@ -262,11 +262,11 @@ actions.copyBPString.bind({
             return
         }
 
-        const onSuccess = () => {
+        const onSuccess = (): void => {
             createToast({ text: 'Blueprint string copied to clipboard', type: 'success' })
         }
 
-        const onError = (error: Error) => {
+        const onError = (error: Error): void => {
             createErrorMessage('Blueprint string could not be generated.', error)
         }
 
@@ -551,7 +551,7 @@ actions.pasteEntitySettings.bind({
 {
     let copyCursorBox: PIXI.Container | undefined
     const deferred = new U.Deferred()
-    const createCopyCursorBox = () => {
+    const createCopyCursorBox = (): void => {
         if (
             copyCursorBox === undefined &&
             G.BPC.mode === EditorMode.EDIT &&

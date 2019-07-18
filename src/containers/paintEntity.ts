@@ -9,7 +9,7 @@ import { UnderlayContainer } from './underlay'
 import { PaintContainer } from './paint'
 
 export class EntityPaintContainer extends PaintContainer {
-    private static isContainerOutOfBpArea(newPos: IPoint, size: IPoint) {
+    private static isContainerOutOfBpArea(newPos: IPoint, size: IPoint): boolean {
         return (
             newPos.x - size.x / 2 < 0 ||
             newPos.y - size.y / 2 < 0 ||
@@ -41,28 +41,28 @@ export class EntityPaintContainer extends PaintContainer {
         this.redraw()
     }
 
-    public hide() {
+    public hide(): void {
         G.BPC.underlayContainer.deactivateActiveAreas()
         super.hide()
     }
 
-    public show() {
+    public show(): void {
         G.BPC.underlayContainer.activateRelatedAreas(this.name)
         super.show()
     }
 
-    public destroy() {
+    public destroy(): void {
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
         super.destroy()
     }
 
-    public getItemName() {
+    public getItemName(): string {
         return Entity.getItemName(this.name)
     }
 
-    private checkBuildable() {
+    private checkBuildable(): void {
         const position = this.getGridPosition()
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
         const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, direction)
@@ -78,7 +78,7 @@ export class EntityPaintContainer extends PaintContainer {
         }
     }
 
-    private updateUndergroundBeltRotation() {
+    private updateUndergroundBeltRotation(): void {
         const fd = FD.entities[this.name]
         if (fd.type === 'underground_belt') {
             const otherEntity = G.bp.entityPositionGrid.getOpposingEntity(
@@ -103,7 +103,7 @@ export class EntityPaintContainer extends PaintContainer {
         }
     }
 
-    private updateUndergroundLine() {
+    private updateUndergroundLine(): void {
         this.destroyUndergroundLine()
         this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.name,
@@ -113,13 +113,13 @@ export class EntityPaintContainer extends PaintContainer {
         )
     }
 
-    private destroyUndergroundLine() {
+    private destroyUndergroundLine(): void {
         if (this.undergroundLine) {
             this.undergroundLine.destroy()
         }
     }
 
-    public rotate(ccw = false) {
+    public rotate(ccw = false): void {
         const pr = FD.entities[this.name].possible_rotations
         if (!pr) {
             return
@@ -130,7 +130,7 @@ export class EntityPaintContainer extends PaintContainer {
         this.moveAtCursor()
     }
 
-    protected redraw() {
+    protected redraw(): void {
         this.removeChildren()
         this.addChild(
             ...EntitySprite.getParts(
@@ -145,7 +145,7 @@ export class EntityPaintContainer extends PaintContainer {
         )
     }
 
-    public moveAtCursor() {
+    public moveAtCursor(): void {
         switch (this.name) {
             case 'straight_rail':
             case 'curved_rail':
@@ -168,7 +168,7 @@ export class EntityPaintContainer extends PaintContainer {
         this.checkBuildable()
     }
 
-    public removeContainerUnder() {
+    public removeContainerUnder(): void {
         const entity = G.bp.entityPositionGrid.getEntityAtPosition(G.BPC.gridData.x32, G.BPC.gridData.y32)
         if (entity) {
             G.bp.removeEntity(entity)
@@ -176,7 +176,7 @@ export class EntityPaintContainer extends PaintContainer {
         }
     }
 
-    public placeEntityContainer() {
+    public placeEntityContainer(): void {
         if (!this.visible) {
             return
         }

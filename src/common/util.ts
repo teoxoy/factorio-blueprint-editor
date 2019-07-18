@@ -1,18 +1,14 @@
-function duplicate<T>(obj: T): T {
-    return JSON.parse(JSON.stringify(obj))
-}
+const duplicate = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
-function getRandomInt(min: number, max: number) {
+const getRandomInt = (min: number, max: number): number => {
     const MIN = Math.ceil(min)
     const MAX = Math.floor(max)
     return Math.floor(Math.random() * (MAX - MIN)) + MIN
 }
 
-function getRandomItem<T>(array: T[]): T {
-    return array[getRandomInt(0, array.length - 1)]
-}
+const getRandomItem = <T>(array: T[]): T => array[getRandomInt(0, array.length - 1)]
 
-function rotatePointBasedOnDir(p: IPoint | number[], dir: number) {
+const rotatePointBasedOnDir = (p: IPoint | number[], dir: number): IPoint => {
     const point: IPoint = { x: 0, y: 0 }
     const nP = p instanceof Array ? { x: p[0], y: p[1] } : { ...p }
     switch (dir) {
@@ -42,19 +38,15 @@ function rotatePointBasedOnDir(p: IPoint | number[], dir: number) {
 }
 
 /** returns the direction of the point in relation to the origin at (0, 0) */
-function getRelativeDirection(position: IPoint) {
-    /* eslint-disable no-nested-ternary */
-    return Math.abs(position.x) > Math.abs(position.y)
-        ? Math.sign(position.x) === 1
-            ? 2
-            : 6
-        : Math.sign(position.y) === 1
-        ? 4
-        : 0
-    /* eslint-enable no-nested-ternary */
+const getRelativeDirection = (position: IPoint): 0 | 2 | 4 | 6 => {
+    if (Math.abs(position.x) > Math.abs(position.y)) {
+        return Math.sign(position.x) === 1 ? 2 : 6
+    } else {
+        return Math.sign(position.y) === 1 ? 4 : 0
+    }
 }
 
-function transformConnectionPosition(position: IPoint, direction: number) {
+const transformConnectionPosition = (position: IPoint, direction: number): IPoint => {
     const dir = getRelativeDirection(position)
     switch (dir) {
         case 0:
@@ -72,14 +64,20 @@ function transformConnectionPosition(position: IPoint, direction: number) {
     return rotatePointBasedOnDir(position, direction)
 }
 
-function switchSizeBasedOnDirection(defaultSize: { width: number; height: number }, direction: number) {
-    if (defaultSize.width !== defaultSize.height && (direction === 2 || direction === 6)) {
-        return { x: defaultSize.height, y: defaultSize.width }
+const switchSizeBasedOnDirection = (
+    size: {
+        width: number
+        height: number
+    },
+    direction: number
+): IPoint => {
+    if (size.width !== size.height && (direction === 2 || direction === 6)) {
+        return { x: size.height, y: size.width }
     }
-    return { x: defaultSize.width, y: defaultSize.height }
+    return { x: size.width, y: size.height }
 }
 
-function intToDir(i: number) {
+const intToDir = (i: number): 'north' | 'east' | 'south' | 'west' => {
     switch (i) {
         case 0:
             return 'north'
@@ -92,24 +90,17 @@ function intToDir(i: number) {
     }
 }
 
-function nearestPowerOf2(n: number) {
-    return Math.pow(2, Math.ceil(Math.log2(n)))
-}
+const nearestPowerOf2 = (n: number): number => Math.pow(2, Math.ceil(Math.log2(n)))
 
-function uniqueInArray<T>(array: T[]) {
-    return [...new Set(array)]
-}
+const uniqueInArray = <T>(array: T[]): T[] => [...new Set(array)]
 
-function equalArrays<T>(array1: T[], array2: T[]) {
-    return (
-        array1 &&
-        array2 &&
-        array1.length === array2.length &&
-        array1.sort().every((value, index) => value === array2.sort()[index])
-    )
-}
+const equalArrays = <T>(array1: T[], array2: T[]): boolean =>
+    array1 &&
+    array2 &&
+    array1.length === array2.length &&
+    array1.sort().every((value, index) => value === array2.sort()[index])
 
-function areObjectsEquivalent<T extends Record<string, any>>(a: T, b: T) {
+const areObjectsEquivalent = <T extends Record<string, any>>(a: T, b: T): boolean => {
     const aProps = Object.getOwnPropertyNames(a)
     const bProps = Object.getOwnPropertyNames(b)
 
@@ -126,10 +117,14 @@ function areObjectsEquivalent<T extends Record<string, any>>(a: T, b: T) {
     return true
 }
 
-function timer(name: string) {
+const timer = (
+    name: string
+): {
+    stop: () => void
+} => {
     const start = new Date()
     return {
-        stop() {
+        stop: () => {
             const end = new Date()
             const time = end.getTime() - start.getTime()
             console.log('Timer:', name, 'finished in', time, 'ms')
@@ -143,16 +138,15 @@ class Deferred {
     public constructor() {
         this.reset()
     }
-    public reset() {
+    public reset(): void {
         this.promise = new Promise(r => {
             this.resolve = r
         })
     }
 }
 
-function objectHasOwnProperty(obj: Record<string, unknown>, key: string): boolean {
-    return Object.prototype.hasOwnProperty.call(obj, key)
-}
+const objectHasOwnProperty = (obj: Record<string, unknown>, key: string): boolean =>
+    Object.prototype.hasOwnProperty.call(obj, key)
 
 export default {
     duplicate,

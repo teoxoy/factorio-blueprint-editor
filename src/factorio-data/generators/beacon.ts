@@ -1,4 +1,5 @@
 import U from './util'
+import { IVisualization } from './index'
 
 let MIN_AFFECTED_ENTITIES = 1
 
@@ -35,11 +36,21 @@ interface IBeacon extends IPoint {
 export default function generateBeacons(
     entities: { position: IPoint; size: number; effect: boolean }[],
     minAffectedEntities = MIN_AFFECTED_ENTITIES
-) {
+): {
+    beacons: {
+        name: string
+        position: IPoint
+    }[]
+    info: {
+        totalBeacons: number
+        effectsGiven: number
+    }
+    visualizations: IVisualization[]
+} {
     MIN_AFFECTED_ENTITIES = minAffectedEntities
 
-    const visualizations: { path: IPoint[]; size: number; alpha: number; color?: number }[] = []
-    function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number) {
+    const visualizations: IVisualization[] = []
+    function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number): void {
         visualizations.push({ path: path.map(p => ({ x: p.x + 0.5, y: p.y + 0.5 })), size, alpha, color })
     }
 

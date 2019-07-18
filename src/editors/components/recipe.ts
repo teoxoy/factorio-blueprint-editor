@@ -19,7 +19,7 @@ export default class Recipe extends Slot {
     }
 
     /** Update Content Icon */
-    private updateContent(recipe: string) {
+    private updateContent(recipe: string): void {
         if (recipe === undefined) {
             if (this.content !== undefined) {
                 this.content = undefined
@@ -31,7 +31,7 @@ export default class Recipe extends Slot {
     }
 
     /** Event handler for click on slot */
-    private onSlotPointerDown(e: PIXI.interaction.InteractionEvent) {
+    private onSlotPointerDown(e: PIXI.interaction.InteractionEvent): void {
         e.stopPropagation()
         if (e.data.button === 0) {
             new InventoryContainer('Select Recipe', this.m_Entity.acceptedRecipes, name => {

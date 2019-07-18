@@ -120,7 +120,7 @@ export default class Slider extends PIXI.Container {
     }
 
     /** Update button position */
-    private updateButtonPosition() {
+    private updateButtonPosition(): void {
         let x = 0
         if (this.value >= 20000) {
             x = Slider.SLIDER_WIDTH / 4
@@ -146,7 +146,7 @@ export default class Slider extends PIXI.Container {
     }
 
     /** Update slider value */
-    private updateSliderValue() {
+    private updateSliderValue(): void {
         this.m_SliderValue.removeChildren()
         if (this.m_SliderButton.x > 0) {
             this.m_SliderValue.addChild(

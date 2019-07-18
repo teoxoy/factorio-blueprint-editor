@@ -19,11 +19,11 @@ class OurMap<K, V> extends Map<K, V> {
         }
     }
 
-    public isEmpty() {
+    public isEmpty(): boolean {
         return this.size === 0
     }
 
-    public valuesArray() {
+    public valuesArray(): V[] {
         return [...this.values()]
     }
 
@@ -145,7 +145,7 @@ export default class Blueprint extends EventEmitter {
         return this
     }
 
-    public createEntity(rawData: IEntityData) {
+    public createEntity(rawData: IEntityData): Entity {
         const rawEntity = new Entity(
             {
                 ...rawData,
@@ -162,7 +162,7 @@ export default class Blueprint extends EventEmitter {
         return rawEntity
     }
 
-    public removeEntity(entity: Entity) {
+    public removeEntity(entity: Entity): void {
         this.history.startTransaction('Remove entity')
 
         this.wireConnections.removeEntityConnections(entity.entityNumber)
@@ -175,7 +175,7 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    public fastReplaceEntity(entity: Entity, name: string, direction: number) {
+    public fastReplaceEntity(entity: Entity, name: string, direction: number): void {
         this.history.startTransaction('Fast replace entity')
 
         this.removeEntity(entity)
@@ -190,7 +190,7 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    private onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity) {
+    private onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity): void {
         if (newValue) {
             this.entityPositionGrid.setTileData(newValue)
             this.emit('create-entity', newValue)
@@ -201,7 +201,7 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    public createTiles(name: string, positions: IPoint[]) {
+    public createTiles(name: string, positions: IPoint[]): void {
         this.history.startTransaction('Create tiles')
 
         positions.forEach(p => {
@@ -215,7 +215,7 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    public removeTiles(positions: IPoint[]) {
+    public removeTiles(positions: IPoint[]): void {
         this.history.startTransaction('Remove tiles')
 
         positions
@@ -231,7 +231,7 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    private onCreateOrRemoveTile(newValue: Tile, oldValue: Tile) {
+    private onCreateOrRemoveTile(newValue: Tile, oldValue: Tile): void {
         if (oldValue) {
             oldValue.destroy()
         }
@@ -241,21 +241,21 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    private get nextEntityNumber() {
+    private get nextEntityNumber(): number {
         const nr = this.m_nextEntityNumber
         this.m_nextEntityNumber += 1
         return nr
     }
 
-    public getFirstRail() {
+    public getFirstRail(): Entity {
         return this.entities.find(e => e.name === 'straight_rail' /* || e.name === 'curved_rail' */)
     }
 
-    public isEmpty() {
+    public isEmpty(): boolean {
         return this.entities.isEmpty() && this.tiles.isEmpty()
     }
 
-    private getCenter() {
+    private getCenter(): IPoint {
         if (this.isEmpty()) {
             return { x: 0, y: 0 }
         }
@@ -276,7 +276,7 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    public generatePipes() {
+    public generatePipes(): string {
         const DEBUG = G.oilOutpostSettings.DEBUG
         const PUMPJACK_MODULE = G.oilOutpostSettings.PUMPJACK_MODULE
         const MIN_GAP_BETWEEN_UNDERGROUNDS = G.oilOutpostSettings.MIN_GAP_BETWEEN_UNDERGROUNDS
@@ -395,20 +395,21 @@ export default class Blueprint extends EventEmitter {
     }
 
     /** behaves like in Factorio 0.17.14 */
-    private generateIcons() {
+    private generateIcons(): void {
         /** returns [iconName, count][] */
-        function getIconPairs(tilesOrEntities: (Tile | Entity)[], getItemName: (name: string) => string) {
-            return [
-                ...tilesOrEntities.reduce((map, tileOrEntity) => {
-                    const itemName = getItemName(tileOrEntity.name)
-                    return map.set(itemName, map.has(itemName) ? map.get(itemName) + 1 : 0)
-                }, new Map<string, number>())
-            ]
-        }
+        const getIconPairs = (
+            tilesOrEntities: (Tile | Entity)[],
+            getItemName: (name: string) => string
+        ): [string, number][] => [
+            ...tilesOrEntities.reduce((map, tileOrEntity) => {
+                const itemName = getItemName(tileOrEntity.name)
+                return map.set(itemName, map.has(itemName) ? map.get(itemName) + 1 : 0)
+            }, new Map<string, number>())
+        ]
 
         if (!this.entities.isEmpty()) {
-            const getSize = (name: string) => FD.entities[name].size.width * FD.entities[name].size.height
-            const getItemScore = (item: [string, number]) => getSize(item[0]) * item[1]
+            const getSize = (name: string): number => FD.entities[name].size.width * FD.entities[name].size.height
+            const getItemScore = (item: [string, number]): number => getSize(item[0]) * item[1]
 
             const iconPairs = getIconPairs(this.entities.valuesArray(), Entity.getItemName).sort(
                 (a, b) => getItemScore(b) - getItemScore(a)
@@ -449,7 +450,7 @@ export default class Blueprint extends EventEmitter {
         ).sort((a: BPS.IEntity, b: BPS.IEntity) => a.entity_number - b.entity_number)
     }
 
-    public serialize() {
+    public serialize(): BPS.IBlueprint {
         if (!this.icons.length) {
             this.generateIcons()
         }
@@ -472,9 +473,7 @@ export default class Blueprint extends EventEmitter {
             name: v.name
         }))
         const iconData = this.icons.map((icon, i) => {
-            return { signal: { type: getItemTypeForBp(icon), name: icon }, index: i + 1 }
-
-            function getItemTypeForBp(name: string) {
+            const getItemTypeForBp = (name: string): 'virtual' | 'fluid' | 'item' => {
                 switch (FD.items[name].type) {
                     case 'virtual_signal':
                         return 'virtual'
@@ -484,16 +483,19 @@ export default class Blueprint extends EventEmitter {
                         return 'item'
                 }
             }
+
+            return {
+                signal: { type: getItemTypeForBp(icon), name: icon } as BPS.ISignal,
+                index: (i + 1) as 1 | 2 | 3 | 4
+            }
         })
         return {
-            blueprint: {
-                icons: iconData,
-                entities: this.entities.isEmpty() ? undefined : entityInfo,
-                tiles: this.tiles.isEmpty() ? undefined : tileInfo,
-                item: 'blueprint',
-                version: G.getFactorioVersion(),
-                label: this.name
-            }
+            icons: iconData,
+            entities: this.entities.isEmpty() ? undefined : entityInfo,
+            tiles: this.tiles.isEmpty() ? undefined : tileInfo,
+            item: 'blueprint',
+            version: G.getFactorioVersion(),
+            label: this.name
         }
     }
 }

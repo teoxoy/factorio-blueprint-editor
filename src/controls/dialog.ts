@@ -14,19 +14,19 @@ import Panel from './panel'
  */
 export default class Dialog extends Panel {
     /** Closes last open dialog */
-    public static closeLast() {
+    public static closeLast(): void {
         if (Dialog.anyOpen()) {
             Dialog.s_openDialogs[Dialog.s_openDialogs.length - 1].close()
         }
     }
 
     /** Closes all open dialogs */
-    public static closeAll() {
+    public static closeAll(): void {
         Dialog.s_openDialogs.forEach(d => d.close())
     }
 
     /** @returns True if there is at least one dialog open */
-    public static anyOpen() {
+    public static anyOpen(): boolean {
         return Dialog.s_openDialogs.length > 0
     }
 
@@ -60,7 +60,7 @@ export default class Dialog extends Panel {
     }
 
     /** Automatically sets position of dialog to center screen */
-    protected setPosition() {
+    protected setPosition(): void {
         this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height / 2 - this.height / 2)
     }
 
