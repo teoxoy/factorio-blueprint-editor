@@ -14,11 +14,9 @@ export abstract class PaintContainer extends PIXI.Container {
         this.on('added', this.applyTint.bind(this))
 
         this.icon = F.CreateIcon(this.getItemName())
-        this.icon.visible = false
         G.paintIconContainer.addChild(this.icon)
-        this.updateIconPos = this.updateIconPos.bind(this)
         window.addEventListener('mousemove', this.updateIconPos)
-        this.updateIconPos()
+        this.show()
     }
 
     protected get blocked() {
@@ -99,7 +97,7 @@ export abstract class PaintContainer extends PIXI.Container {
         }
     }
 
-    private updateIconPos() {
+    private readonly updateIconPos = () => {
         const position = G.app.renderer.plugins.interaction.mouse.global
         this.icon.position.set(position.x + 16, position.y + 16)
     }
