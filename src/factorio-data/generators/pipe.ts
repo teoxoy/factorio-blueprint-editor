@@ -279,8 +279,8 @@ function generatePipes(
         )
 
         if (conn) {
-            conn.passtrough.entities.push(...group.entities)
-            conn.passtrough.paths.push(...group.paths, conn.path)
+            conn.toGroup.entities.push(...group.entities)
+            conn.toGroup.paths.push(...group.paths, conn.path)
         } else {
             aloneGroups.push(group)
             continue
@@ -297,12 +297,22 @@ function generatePipes(
     while (leftoverPumpjacks.length) {
         const ent = leftoverPumpjacks.shift()
 
-        const plug = getPathBetweenGroups(grid, ent.plugs.map(p => ({ paths: [[p]], plug: p } as any)), finalGroup)
+        const conn = getPathBetweenGroups(
+            grid,
+            // Fake some group data - getPathBetweenGroups only cares about group.paths
+            ent.plugs.map(p => ({
+                x: 0,
+                y: 0,
+                paths: [[{ x: p.x, y: p.y }]],
+                entities: [{ x: 0, y: 0, entity_number: 0, plugs: [p], plug: p }]
+            })),
+            finalGroup
+        )
 
-        finalGroup.entities.push({ ...ent, plug: plug.passtrough.plug })
-        finalGroup.paths.push(plug.path)
+        finalGroup.entities.push({ ...ent, plug: conn.toGroup.entities[0].plug })
+        finalGroup.paths.push(conn.path)
 
-        addVisualization(plug.path, 8, 0.5)
+        addVisualization(conn.path, 8, 0.5)
     }
 
     let pipePositions = U.uniqPoints(finalGroup.paths.reduce((acc, val) => acc.concat(val), []))
@@ -465,23 +475,24 @@ function generatePathFromLine(
     }
 }
 
+/** Returns the shortest path between the given group and one group from the given array */
 function getPathBetweenGroups(
     grid: number[][],
     GROUPS: IGroup[],
     group: IGroup,
     maxTurns = 2
 ): {
-    passtrough: any
     path: IPoint[]
+    toGroup: IGroup
 } {
-    const ret = GROUPS.map(g => connect2Groups(grid, g, group, g, maxTurns))
+    const ret = GROUPS.map(g => connect2Groups(grid, g, group, maxTurns))
         .filter(p => p.lines.length)
         .sort((a, b) => a.minDistance - b.minDistance)[0]
     if (!ret) {
         return
     }
     return {
-        passtrough: ret.passtrough,
+        toGroup: ret.firstGroup,
         path: ret.lines[0].path
     }
 
@@ -489,7 +500,6 @@ function getPathBetweenGroups(
         grid: number[][],
         g0: IGroup,
         g1: IGroup,
-        passtrough?: any,
         maxTurns = 2
     ): {
         lines: {
@@ -499,7 +509,7 @@ function getPathBetweenGroups(
             distance: number
         }[]
         minDistance: number
-        passtrough: any
+        firstGroup: IGroup
     } {
         const path0 = g0.paths.reduce((acc, p) => acc.concat(p), [])
         const path1 = g1.paths.reduce((acc, p) => acc.concat(p), [])
@@ -547,7 +557,7 @@ function getPathBetweenGroups(
         return {
             lines: lines.sort((a, b) => a.distance - b.distance),
             minDistance: lines.reduce((acc, l) => Math.min(acc, l.distance), Infinity),
-            passtrough
+            firstGroup: g0
         }
     }
 }
