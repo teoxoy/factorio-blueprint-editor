@@ -32,7 +32,7 @@ function getSpriteData(data: IDrawData): ISpriteData[] {
 const entityToFunction = new Map()
 
 for (const e in FD.entities) {
-    if (FD.entities.hasOwnProperty(e)) {
+    if (util.objectHasOwnProperty(FD.entities, e)) {
         const entity = FD.entities[e]
 
         const generator = (data: IDrawData) => {

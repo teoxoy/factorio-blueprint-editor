@@ -150,6 +150,10 @@ class Deferred {
     }
 }
 
+function objectHasOwnProperty(obj: Record<string, unknown>, key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(obj, key)
+}
+
 export default {
     duplicate,
     getRandomInt,
@@ -164,5 +168,6 @@ export default {
     equalArrays,
     areObjectsEquivalent,
     timer,
-    Deferred
+    Deferred,
+    objectHasOwnProperty
 }

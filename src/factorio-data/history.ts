@@ -1,3 +1,5 @@
+import util from '../common/util'
+
 /** Private enumaration to determine the value (new value or old value) should be applied during action */
 enum HistoryValue {
     New,
@@ -317,7 +319,7 @@ export default class History {
     /** Gets the value of the `Array` or `Object` at the specified path  */
     private GetValue<V>(obj: IIndexedObject, path: string[]): V {
         if (path.length === 1) {
-            if (obj.hasOwnProperty(path[0])) {
+            if (util.objectHasOwnProperty(obj, path[0])) {
                 return obj[path[0]]
             } else {
                 return undefined
