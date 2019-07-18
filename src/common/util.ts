@@ -109,7 +109,7 @@ function equalArrays<T>(array1: T[], array2: T[]) {
     )
 }
 
-function areObjectsEquivalent(a: { [key: string]: unknown }, b: { [key: string]: unknown }) {
+function areObjectsEquivalent<T extends Record<string, any>>(a: T, b: T) {
     const aProps = Object.getOwnPropertyNames(a)
     const bProps = Object.getOwnPropertyNames(b)
 
