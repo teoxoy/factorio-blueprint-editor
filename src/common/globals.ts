@@ -45,11 +45,6 @@ let railMoveOffset: IPoint = { x: 0, y: 0 }
 let moveSpeed = 10
 let quickbarRows = 2
 
-const positionBPContainer = {
-    x: 0,
-    y: 0
-}
-
 const bpArea = {
     width: 400,
     height: 400
@@ -227,7 +222,6 @@ export default {
     dialogsContainer,
     paintIconContainer,
     bpArea,
-    positionBPContainer,
     sizeBPContainer,
     railMoveOffset,
     bp,

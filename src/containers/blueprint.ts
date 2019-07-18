@@ -180,7 +180,10 @@ class BlueprintContainer extends PIXI.Container {
 
         this.viewport = new Viewport(
             G.sizeBPContainer,
-            G.positionBPContainer,
+            {
+                x: 0,
+                y: 0
+            },
             {
                 width: G.app.screen.width,
                 height: G.app.screen.height
