@@ -11,7 +11,7 @@ import History from './history'
 import Tile from './tile'
 
 class OurMap<K, V> extends Map<K, V> {
-    constructor(values?: V[], mapFn?: (value: V) => K) {
+    public constructor(values?: V[], mapFn?: (value: V) => K) {
         if (values) {
             super(values.map(e => [mapFn(e), e] as [K, V]))
         } else {
@@ -19,15 +19,15 @@ class OurMap<K, V> extends Map<K, V> {
         }
     }
 
-    isEmpty() {
+    public isEmpty() {
         return this.size === 0
     }
 
-    valuesArray() {
+    public valuesArray() {
         return [...this.values()]
     }
 
-    find(predicate: (value: V, key: K) => boolean): V {
+    public find(predicate: (value: V, key: K) => boolean): V {
         for (const [k, v] of this) {
             if (predicate(v, k)) {
                 return v
@@ -36,7 +36,7 @@ class OurMap<K, V> extends Map<K, V> {
         return undefined
     }
 
-    filter(predicate: (value: V, key: K) => boolean): V[] {
+    public filter(predicate: (value: V, key: K) => boolean): V[] {
         const result: V[] = []
         this.forEach((v, k) => {
             if (predicate(v, k)) {
@@ -53,26 +53,18 @@ interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
 
 /** Blueprint base class */
 export default class Blueprint extends EventEmitter {
-    name: string
-    icons: string[]
-    wireConnections: WireConnections
-    entityPositionGrid: PositionGrid
-    entities: OurMap<number, Entity>
-    tiles: OurMap<string, Tile>
-    history: History
+    public name = 'Blueprint'
+    private readonly icons: string[] = []
+    public readonly wireConnections = new WireConnections(this)
+    public readonly entityPositionGrid = new PositionGrid(this)
+    public readonly entities = new OurMap<number, Entity>()
+    public readonly tiles = new OurMap<string, Tile>()
+    public readonly history = new History()
 
     private m_nextEntityNumber = 1
 
-    constructor(data?: BPS.IBlueprint) {
+    public constructor(data?: BPS.IBlueprint) {
         super()
-
-        this.name = 'Blueprint'
-        this.icons = []
-        this.entities = new OurMap()
-        this.tiles = new OurMap()
-        this.wireConnections = new WireConnections(this)
-        this.entityPositionGrid = new PositionGrid(this)
-        this.history = new History()
 
         if (data) {
             this.name = data.label
@@ -90,11 +82,7 @@ export default class Blueprint extends EventEmitter {
             if (data.tiles) {
                 this.tiles = new OurMap(
                     data.tiles.map(
-                        tile =>
-                            new Tile(tile.name, {
-                                x: tile.position.x + offset.x + 0.5,
-                                y: tile.position.y + offset.y + 0.5
-                            })
+                        tile => new Tile(tile.name, tile.position.x + offset.x + 0.5, tile.position.y + offset.y + 0.5)
                     ),
                     t => t.hash
                 )
@@ -157,7 +145,7 @@ export default class Blueprint extends EventEmitter {
         return this
     }
 
-    createEntity(rawData: IEntityData) {
+    public createEntity(rawData: IEntityData) {
         const rawEntity = new Entity(
             {
                 ...rawData,
@@ -174,7 +162,7 @@ export default class Blueprint extends EventEmitter {
         return rawEntity
     }
 
-    removeEntity(entity: Entity) {
+    public removeEntity(entity: Entity) {
         this.history.startTransaction('Remove entity')
 
         this.wireConnections.removeEntityConnections(entity.entityNumber)
@@ -187,7 +175,7 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    fastReplaceEntity(entity: Entity, name: string, direction: number) {
+    public fastReplaceEntity(entity: Entity, name: string, direction: number) {
         this.history.startTransaction('Fast replace entity')
 
         this.removeEntity(entity)
@@ -202,7 +190,7 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity) {
+    private onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity) {
         if (newValue) {
             this.entityPositionGrid.setTileData(newValue)
             this.emit('create-entity', newValue)
@@ -213,11 +201,11 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    createTiles(name: string, positions: IPoint[]) {
+    public createTiles(name: string, positions: IPoint[]) {
         this.history.startTransaction('Create tiles')
 
         positions.forEach(p => {
-            const tile = new Tile(name, p)
+            const tile = new Tile(name, p.x, p.y)
             this.history
                 .updateMap(this.tiles, tile.hash, tile, 'Create tile')
                 .onDone(this.onCreateOrRemoveTile.bind(this))
@@ -227,7 +215,7 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    removeTiles(positions: IPoint[]) {
+    public removeTiles(positions: IPoint[]) {
         this.history.startTransaction('Remove tiles')
 
         positions
@@ -243,7 +231,7 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    onCreateOrRemoveTile(newValue: Tile, oldValue: Tile) {
+    private onCreateOrRemoveTile(newValue: Tile, oldValue: Tile) {
         if (oldValue) {
             oldValue.destroy()
         }
@@ -253,72 +241,42 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    get nextEntityNumber() {
+    private get nextEntityNumber() {
         const nr = this.m_nextEntityNumber
         this.m_nextEntityNumber += 1
         return nr
     }
 
-    getFirstRail() {
+    public getFirstRail() {
         return this.entities.find(e => e.name === 'straight_rail' /* || e.name === 'curved_rail' */)
     }
 
-    isEmpty() {
+    public isEmpty() {
         return this.entities.isEmpty() && this.tiles.isEmpty()
     }
 
-    // Get corner/center positions
-    getPosition(
-        f: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight',
-        xcomp: (i: number, j: number) => number,
-        ycomp: (i: number, j: number) => number
-    ): IPoint {
+    private getCenter() {
         if (this.isEmpty()) {
             return { x: 0, y: 0 }
         }
 
-        const positions = [
-            ...[...this.entities.keys()].map(k => this.entities.get(k)[f]()),
-            ...[...this.tiles.keys()]
-                .map(k => ({ x: Number(k.split(',')[0]), y: Number(k.split(',')[1]) }))
-                .map(p => tileCorners(p)[f])
+        const data = [
+            ...[...this.entities.values()].map(e => ({ x: e.position.x, y: e.position.y, w: e.size.x, h: e.size.y })),
+            ...[...this.tiles.values()].map(t => ({ x: t.x, y: t.y, w: 1, h: 1 }))
         ]
 
+        const minX = data.reduce((min, d) => Math.min(min, d.x - d.w / 2), Infinity)
+        const minY = data.reduce((min, d) => Math.min(min, d.y - d.h / 2), Infinity)
+        const maxX = data.reduce((max, d) => Math.max(max, d.x + d.w / 2), -Infinity)
+        const maxY = data.reduce((max, d) => Math.max(max, d.y + d.h / 2), -Infinity)
+
         return {
-            x: positions.map(p => p.x).reduce((p, v) => xcomp(p, v), positions[0].x),
-            y: positions.map(p => p.y).reduce((p, v) => ycomp(p, v), positions[0].y)
-        }
-
-        function tileCorners(position: IPoint) {
-            return {
-                topLeft: { x: position.x - 0.5, y: position.y - 0.5 },
-                topRight: { x: position.x + 0.5, y: position.y - 0.5 },
-                bottomLeft: { x: position.x - 0.5, y: position.y + 0.5 },
-                bottomRight: { x: position.x + 0.5, y: position.y + 0.5 }
-            }
+            x: Math.floor((minX + maxX) / 2) + 0.5,
+            y: Math.floor((minY + maxY) / 2) + 0.5
         }
     }
 
-    center() {
-        return {
-            x: Math.floor((this.topLeft().x + this.topRight().x) / 2) + 0.5,
-            y: Math.floor((this.topLeft().y + this.bottomLeft().y) / 2) + 0.5
-        }
-    }
-    topLeft() {
-        return this.getPosition('topLeft', Math.min, Math.min)
-    }
-    topRight() {
-        return this.getPosition('topRight', Math.max, Math.min)
-    }
-    bottomLeft() {
-        return this.getPosition('bottomLeft', Math.min, Math.max)
-    }
-    bottomRight() {
-        return this.getPosition('bottomRight', Math.max, Math.max)
-    }
-
-    generatePipes() {
+    public generatePipes() {
         const DEBUG = G.oilOutpostSettings.DEBUG
         const PUMPJACK_MODULE = G.oilOutpostSettings.PUMPJACK_MODULE
         const MIN_GAP_BETWEEN_UNDERGROUNDS = G.oilOutpostSettings.MIN_GAP_BETWEEN_UNDERGROUNDS
@@ -437,7 +395,7 @@ export default class Blueprint extends EventEmitter {
     }
 
     /** behaves like in Factorio 0.17.14 */
-    generateIcons() {
+    private generateIcons() {
         /** returns [iconName, count][] */
         function getIconPairs(tilesOrEntities: (Tile | Entity)[], getItemName: (name: string) => string) {
             return [
@@ -471,7 +429,7 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    getEntitiesForExport(): BPS.IEntity[] {
+    private getEntitiesForExport(): BPS.IEntity[] {
         const entityInfo = this.entities.valuesArray().map(e => e.serialize())
         let entitiesJSON = JSON.stringify(entityInfo)
 
@@ -491,12 +449,12 @@ export default class Blueprint extends EventEmitter {
         ).sort((a: BPS.IEntity, b: BPS.IEntity) => a.entity_number - b.entity_number)
     }
 
-    serialize() {
+    public serialize() {
         if (!this.icons.length) {
             this.generateIcons()
         }
         const entityInfo = this.getEntitiesForExport()
-        const center = this.center()
+        const center = this.getCenter()
         const fR = this.getFirstRail()
         if (fR) {
             center.x += (fR.position.x - center.x) % 2

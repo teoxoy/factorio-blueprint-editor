@@ -3,7 +3,7 @@ import Editor from './editor'
 
 /** Electric Mining Drill Editor */
 export default class MiningEditor extends Editor {
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super(402, 171, entity)
 
         // Add Modules

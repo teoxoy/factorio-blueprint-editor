@@ -9,7 +9,7 @@ import { UnderlayContainer } from './underlay'
 import { PaintContainer } from './paint'
 
 export class EntityPaintContainer extends PaintContainer {
-    static isContainerOutOfBpArea(newPos: IPoint, size: IPoint) {
+    private static isContainerOutOfBpArea(newPos: IPoint, size: IPoint) {
         return (
             newPos.x - size.x / 2 < 0 ||
             newPos.y - size.y / 2 < 0 ||
@@ -18,13 +18,13 @@ export class EntityPaintContainer extends PaintContainer {
         )
     }
 
-    areaVisualization: PIXI.Sprite | PIXI.Sprite[]
-    directionType: 'input' | 'output'
-    direction: number
+    private areaVisualization: PIXI.Sprite | PIXI.Sprite[]
+    private directionType: 'input' | 'output'
+    private direction: number
     /** This is only a reference */
-    undergroundLine: PIXI.Container
+    private undergroundLine: PIXI.Container
 
-    constructor(name: string, direction: number) {
+    public constructor(name: string, direction: number) {
         super(name)
 
         this.direction = direction
@@ -41,28 +41,28 @@ export class EntityPaintContainer extends PaintContainer {
         this.redraw()
     }
 
-    hide() {
+    public hide() {
         G.BPC.underlayContainer.deactivateActiveAreas()
         super.hide()
     }
 
-    show() {
+    public show() {
         G.BPC.underlayContainer.activateRelatedAreas(this.name)
         super.show()
     }
 
-    destroy() {
+    public destroy() {
         UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
         G.BPC.underlayContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
         super.destroy()
     }
 
-    getItemName() {
+    public getItemName() {
         return Entity.getItemName(this.name)
     }
 
-    checkBuildable() {
+    private checkBuildable() {
         const position = this.getGridPosition()
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
         const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, direction)
@@ -78,7 +78,7 @@ export class EntityPaintContainer extends PaintContainer {
         }
     }
 
-    updateUndergroundBeltRotation() {
+    private updateUndergroundBeltRotation() {
         const fd = FD.entities[this.name]
         if (fd.type === 'underground_belt') {
             const otherEntity = G.bp.entityPositionGrid.getOpposingEntity(
@@ -103,7 +103,7 @@ export class EntityPaintContainer extends PaintContainer {
         }
     }
 
-    updateUndergroundLine() {
+    private updateUndergroundLine() {
         this.destroyUndergroundLine()
         this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.name,
@@ -113,13 +113,13 @@ export class EntityPaintContainer extends PaintContainer {
         )
     }
 
-    destroyUndergroundLine() {
+    private destroyUndergroundLine() {
         if (this.undergroundLine) {
             this.undergroundLine.destroy()
         }
     }
 
-    rotate(ccw = false) {
+    public rotate(ccw = false) {
         const pr = FD.entities[this.name].possible_rotations
         if (!pr) {
             return
@@ -130,7 +130,7 @@ export class EntityPaintContainer extends PaintContainer {
         this.moveAtCursor()
     }
 
-    redraw() {
+    protected redraw() {
         this.removeChildren()
         this.addChild(
             ...EntitySprite.getParts(
@@ -145,7 +145,7 @@ export class EntityPaintContainer extends PaintContainer {
         )
     }
 
-    moveAtCursor() {
+    public moveAtCursor() {
         switch (this.name) {
             case 'straight_rail':
             case 'curved_rail':
@@ -168,7 +168,7 @@ export class EntityPaintContainer extends PaintContainer {
         this.checkBuildable()
     }
 
-    removeContainerUnder() {
+    public removeContainerUnder() {
         const entity = G.bp.entityPositionGrid.getEntityAtPosition(G.BPC.gridData.x32, G.BPC.gridData.y32)
         if (entity) {
             G.bp.removeEntity(entity)
@@ -176,7 +176,7 @@ export class EntityPaintContainer extends PaintContainer {
         }
     }
 
-    placeEntityContainer() {
+    public placeEntityContainer() {
         if (!this.visible) {
             return
         }
@@ -210,9 +210,7 @@ export class EntityPaintContainer extends PaintContainer {
             })
 
             const ec = EntityContainer.mappings.get(newEntity.entityNumber)
-            UnderlayContainer.modifyVisualizationArea(ec.areaVisualization, s => {
-                s.visible = true
-            })
+            ec.showVisualizationArea()
 
             if (fd.type === 'underground_belt' || this.name === 'pipe_to_ground') {
                 this.direction = (direction + 4) % 8

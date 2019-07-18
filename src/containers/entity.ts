@@ -71,11 +71,11 @@ const updateGroups = [
     )
 
 export class EntityContainer {
-    static mappings: Map<number, EntityContainer> = new Map()
+    public static readonly mappings: Map<number, EntityContainer> = new Map()
 
-    areaVisualization: PIXI.Sprite | PIXI.Sprite[]
-    entityInfo: PIXI.Container
-    entitySprites: EntitySprite[]
+    private areaVisualization: PIXI.Sprite | PIXI.Sprite[]
+    private entityInfo: PIXI.Container
+    private entitySprites: EntitySprite[] = []
     /** This is only a reference */
     private cursorBox: PIXI.Container
     /** This is only a reference */
@@ -83,12 +83,10 @@ export class EntityContainer {
 
     private readonly m_Entity: Entity
 
-    constructor(entity: Entity, sort = true) {
+    public constructor(entity: Entity, sort = true) {
         this.m_Entity = entity
 
         EntityContainer.mappings.set(this.m_Entity.entityNumber, this)
-
-        this.entitySprites = []
 
         this.areaVisualization = G.BPC.underlayContainer.createNewArea(this.m_Entity.name, this.position)
         this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entityNumber, this.position)
@@ -161,24 +159,24 @@ export class EntityContainer {
         return this.m_Entity
     }
 
-    get position(): IPoint {
+    public get position(): IPoint {
         return {
             x: this.m_Entity.position.x * 32,
             y: this.m_Entity.position.y * 32
         }
     }
 
-    createCursorBox() {
+    private createCursorBox() {
         this.cursorBox = G.BPC.overlayContainer.createCursorBox(this.position, this.m_Entity.size)
     }
 
-    destroyCursorBox() {
+    private destroyCursorBox() {
         if (this.cursorBox) {
             this.cursorBox.destroy()
         }
     }
 
-    createUndergroundLine() {
+    private createUndergroundLine() {
         this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.m_Entity.name,
             this.m_Entity.position,
@@ -189,21 +187,33 @@ export class EntityContainer {
         )
     }
 
-    destroyUndergroundLine() {
+    private destroyUndergroundLine() {
         if (this.undergroundLine) {
             this.undergroundLine.destroy()
             this.undergroundLine = undefined
         }
     }
 
-    updateUndergroundLine() {
+    private updateUndergroundLine() {
         if (G.BPC.hoverContainer === this) {
             this.destroyUndergroundLine()
             this.createUndergroundLine()
         }
     }
 
-    redrawEntityInfo() {
+    public showVisualizationArea() {
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
+            s.visible = true
+        })
+    }
+
+    public hideVisualizationArea() {
+        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
+            s.visible = false
+        })
+    }
+
+    private redrawEntityInfo() {
         if (
             this.m_Entity.moduleSlots !== 0 ||
             this.m_Entity.type === 'splitter' ||
@@ -229,27 +239,23 @@ export class EntityContainer {
         G.infoEntityPanel.updateVisualization(this.m_Entity)
     }
 
-    pointerOverEventHandler() {
+    public pointerOverEventHandler() {
         this.createCursorBox()
         this.createUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(this.m_Entity)
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
-            s.visible = true
-        })
+        this.showVisualizationArea()
     }
 
-    pointerOutEventHandler() {
+    public pointerOutEventHandler() {
         this.destroyCursorBox()
         this.destroyUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(undefined)
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
-            s.visible = false
-        })
+        this.hideVisualizationArea()
     }
 
-    redrawSurroundingEntities(position: IPoint = this.m_Entity.position) {
+    private redrawSurroundingEntities(position: IPoint = this.m_Entity.position) {
         if (!updateGroups[this.m_Entity.name]) {
             return
         }
@@ -294,7 +300,7 @@ export class EntityContainer {
         }
     }
 
-    redraw(ignoreConnections?: boolean, sort = true) {
+    public redraw(ignoreConnections?: boolean, sort?: boolean) {
         for (const s of this.entitySprites) {
             s.destroy()
         }
@@ -302,10 +308,7 @@ export class EntityContainer {
         for (const s of EntitySprite.getParts(this.m_Entity, G.quality.hr, ignoreConnections)) {
             s.setPosition(this.position)
             this.entitySprites.push(s)
-            G.BPC.entitySprites.addChild(s)
         }
-        if (sort) {
-            G.BPC.sortEntities()
-        }
+        G.BPC.addEntitySprites(this.entitySprites, sort)
     }
 }

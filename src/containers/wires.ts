@@ -6,7 +6,7 @@ import Entity from '../factorio-data/entity'
 import { EntityContainer } from './entity'
 
 export class WiresContainer extends PIXI.Container {
-    static createWire(p1: IPoint, p2: IPoint, color: string) {
+    private static createWire(p1: IPoint, p2: IPoint, color: string) {
         const wire = new PIXI.Graphics()
 
         const minX = Math.min(p1.x, p2.x)
@@ -59,24 +59,17 @@ export class WiresContainer extends PIXI.Container {
         return wire
     }
 
-    connectionToSprite: Map<string, PIXI.Graphics>
-    passiveConnToSprite: Map<string, PIXI.Graphics>
-    entNrToConnectedEntNrs: Map<number, number[]>
+    private connectionToSprite = new Map<string, PIXI.Graphics>()
+    private passiveConnToSprite = new Map<string, PIXI.Graphics>()
+    private entNrToConnectedEntNrs = new Map<number, number[]>()
 
-    constructor() {
-        super()
-
-        this.connectionToSprite = new Map()
-        this.passiveConnToSprite = new Map()
-    }
-
-    add(hash: string, connection: IConnection) {
+    public add(hash: string, connection: IConnection) {
         const sprite = this.getWireSprite(connection)
         this.addChild(sprite)
         this.connectionToSprite.set(hash, sprite)
     }
 
-    remove(hash: string) {
+    public remove(hash: string) {
         const sprite = this.connectionToSprite.get(hash)
         if (sprite) {
             sprite.destroy()
@@ -87,13 +80,13 @@ export class WiresContainer extends PIXI.Container {
     /** This is done in cases where the connection doesn't change but the rotation does */
     private redrawEntityConnections(entityNumber: number) {
         G.bp.wireConnections.getEntityConnectionHashes(entityNumber).forEach(hash => {
-            const connection = G.bp.wireConnections.connections.get(hash)
+            const connection = G.bp.wireConnections.get(hash)
             this.remove(hash)
             this.add(hash, connection)
         })
     }
 
-    update(entity: Entity) {
+    public update(entity: Entity) {
         if (entity.type === 'electric_pole') {
             // Remove connection so that updatePassiveWires diffs correctly
             this.passiveConnToSprite.forEach((v, k) => {
@@ -109,7 +102,7 @@ export class WiresContainer extends PIXI.Container {
         this.redrawEntityConnections(entity.entityNumber)
     }
 
-    getWireSprite(connection: IConnection) {
+    private getWireSprite(connection: IConnection) {
         const getWirePos = (entityNumber: number, color: string, side: number) => {
             const entity = G.bp.entities.get(entityNumber)
             const direction = entity.type === 'electric_pole' ? this.getPowerPoleDirection(entity) : entity.direction
@@ -127,10 +120,7 @@ export class WiresContainer extends PIXI.Container {
         )
     }
 
-    getPowerPoleDirection(entity: Entity) {
-        if (!this.entNrToConnectedEntNrs) {
-            return 0
-        }
+    public getPowerPoleDirection(entity: Entity) {
         const entNrArr = this.entNrToConnectedEntNrs.get(entity.entityNumber)
         if (!entNrArr) {
             return 0
@@ -170,7 +160,7 @@ export class WiresContainer extends PIXI.Container {
         }
     }
 
-    updatePassiveWires() {
+    public updatePassiveWires() {
         interface IPole extends IPoint {
             entityNumber: number
             name: string

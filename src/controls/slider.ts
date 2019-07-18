@@ -29,7 +29,7 @@ export default class Slider extends PIXI.Container {
      * @param values - Possible values
      * @param value - Default value (If value is set to undefined - tri-state switch)
      */
-    constructor(value: number = 1) {
+    public constructor(value: number = 1) {
         super()
 
         this.interactive = true

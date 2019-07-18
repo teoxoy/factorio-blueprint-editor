@@ -20,7 +20,7 @@ export default abstract class Editor extends Dialog {
      * @param height - Height of the Editor Dialog
      * @param entity - Reference to Entity Data
      */
-    constructor(width: number, height: number, entity: Entity) {
+    public constructor(width: number, height: number, entity: Entity) {
         super(width, height, entity.entityData.ui_name)
 
         // Store reference to entity for later use

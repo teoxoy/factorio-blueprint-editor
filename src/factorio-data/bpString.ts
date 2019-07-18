@@ -6,15 +6,15 @@ import Blueprint from './blueprint'
 import { Book } from './book'
 
 class ModdedBlueprintError {
-    errors: Ajv.ErrorObject[]
-    constructor(errors: Ajv.ErrorObject[]) {
+    public errors: Ajv.ErrorObject[]
+    public constructor(errors: Ajv.ErrorObject[]) {
         this.errors = errors
     }
 }
 
 class TrainBlueprintError {
-    errors: Ajv.ErrorObject[]
-    constructor(errors: Ajv.ErrorObject[]) {
+    public errors: Ajv.ErrorObject[]
+    public constructor(errors: Ajv.ErrorObject[]) {
         this.errors = errors
     }
 }

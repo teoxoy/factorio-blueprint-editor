@@ -3,7 +3,7 @@ import Editor from './editor'
 
 /** Assembly Machines Editor */
 export default class MachineEditor extends Editor {
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super(402, 171, entity)
 
         // Add Recipe

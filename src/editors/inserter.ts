@@ -5,7 +5,7 @@ import Editor from './editor'
 
 /** Inserter Editor */
 export default class InserterEditor extends Editor {
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super(446, 171, entity)
 
         if (this.m_Entity.filterSlots > 0) {

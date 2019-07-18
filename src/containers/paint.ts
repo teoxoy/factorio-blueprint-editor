@@ -3,10 +3,10 @@ import G from '../common/globals'
 import F from '../controls/functions'
 
 export abstract class PaintContainer extends PIXI.Container {
-    icon: PIXI.DisplayObject
-    private _blocked: boolean = false
+    private readonly icon: PIXI.DisplayObject
+    private _blocked = false
 
-    constructor(name: string) {
+    protected constructor(name: string) {
         super()
 
         this.name = name
@@ -21,11 +21,11 @@ export abstract class PaintContainer extends PIXI.Container {
         this.updateIconPos()
     }
 
-    get blocked() {
+    protected get blocked() {
         return this._blocked
     }
 
-    set blocked(value: boolean) {
+    protected set blocked(value: boolean) {
         this._blocked = value
         this.applyTint()
     }
@@ -40,18 +40,18 @@ export abstract class PaintContainer extends PIXI.Container {
         this.children.forEach((s: PIXI.Sprite) => F.applyTint(s, t))
     }
 
-    hide() {
+    public hide() {
         this.visible = false
         this.updateIconPos()
         this.icon.visible = true
     }
 
-    show() {
+    public show() {
         this.visible = true
         this.icon.visible = false
     }
 
-    destroy() {
+    public destroy() {
         this.emit('destroy')
         window.removeEventListener('mousemove', this.updateIconPos)
         this.icon.destroy()
@@ -59,31 +59,31 @@ export abstract class PaintContainer extends PIXI.Container {
     }
 
     // override
-    abstract getItemName(): string
+    public abstract getItemName(): string
 
     // override
-    abstract rotate(ccw?: boolean): void
+    public abstract rotate(ccw?: boolean): void
 
     // override
-    redraw() {}
+    protected abstract redraw(): void
 
     // override
-    moveAtCursor() {}
+    public abstract moveAtCursor(): void
 
     // override
-    removeContainerUnder() {}
+    public abstract removeContainerUnder(): void
 
     // override
-    placeEntityContainer() {}
+    public abstract placeEntityContainer(): void
 
-    getGridPosition() {
+    protected getGridPosition() {
         return {
             x: Math.round((this.x / 32) * 10) / 10,
             y: Math.round((this.y / 32) * 10) / 10
         }
     }
 
-    setNewPosition(size: IPoint) {
+    protected setNewPosition(size: IPoint) {
         if (size.x % 2 === 0) {
             const npx = G.BPC.gridData.x16 * 16
             this.x = npx + (npx % 32 === 0 ? 0 : 16)

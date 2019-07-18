@@ -48,11 +48,11 @@ export class PositionGrid {
     private bp: Blueprint
     private grid: Map<string, number | number[]> = new Map()
 
-    constructor(bp: Blueprint) {
+    public constructor(bp: Blueprint) {
         this.bp = bp
     }
 
-    getEntityAtPosition(x: number, y: number) {
+    public getEntityAtPosition(x: number, y: number) {
         const cell = this.grid.get(`${Math.floor(x)},${Math.floor(y)}`)
         if (cell) {
             if (typeof cell === 'number') {
@@ -63,7 +63,7 @@ export class PositionGrid {
         }
     }
 
-    setTileData(entity: Entity, position: IPoint = entity.position) {
+    public setTileData(entity: Entity, position: IPoint = entity.position) {
         // if (entity.entityData.flags.includes('placeable_off_grid')) {
         //     return
         // }
@@ -95,7 +95,7 @@ export class PositionGrid {
         )
     }
 
-    removeTileData(entity: Entity, position: IPoint = entity.position) {
+    public removeTileData(entity: Entity, position: IPoint = entity.position) {
         tileDataAction(
             this.grid,
             {
@@ -125,14 +125,14 @@ export class PositionGrid {
         )
     }
 
-    canMoveTo(entity: Entity, newPosition: IPoint) {
+    public canMoveTo(entity: Entity, newPosition: IPoint) {
         this.removeTileData(entity)
         const spaceAvalible = this.isAreaAvalible(entity.name, newPosition, entity.direction)
         this.setTileData(entity)
         return spaceAvalible
     }
 
-    isAreaAvalible(name: string, pos: IPoint, direction = 0) {
+    public isAreaAvalible(name: string, pos: IPoint, direction = 0) {
         const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
 
         const straightRails: Entity[] = []
@@ -197,7 +197,7 @@ export class PositionGrid {
         return false
     }
 
-    checkFastReplaceableGroup(name: string, direction: number, pos: IPoint) {
+    public checkFastReplaceableGroup(name: string, direction: number, pos: IPoint) {
         const fd = FD.entities[name]
         const size = util.switchSizeBasedOnDirection(fd.size, direction)
         const area = {
@@ -224,7 +224,7 @@ export class PositionGrid {
         return entity
     }
 
-    checkSameEntityAndDifferentDirection(name: string, direction: number, pos: IPoint) {
+    public checkSameEntityAndDifferentDirection(name: string, direction: number, pos: IPoint) {
         if (name === 'straight_rail') {
             return
         }
@@ -248,7 +248,7 @@ export class PositionGrid {
         return entity
     }
 
-    getOpposingEntity(
+    public getOpposingEntity(
         name: string,
         direction: number,
         position: IPoint,
@@ -278,7 +278,7 @@ export class PositionGrid {
     }
 
     /** Returns true if any of the cells in the area are an array */
-    sharesCell(area: IArea) {
+    public sharesCell(area: IArea) {
         let hasArrayCell = false
         tileDataAction(this.grid, area, (_, cell) => {
             if (typeof cell !== 'number') {
@@ -289,7 +289,7 @@ export class PositionGrid {
         return hasArrayCell
     }
 
-    isAreaEmpty(area: IArea) {
+    public isAreaEmpty(area: IArea) {
         let empty = true
         tileDataAction(this.grid, area, () => {
             empty = false
@@ -298,7 +298,7 @@ export class PositionGrid {
         return empty
     }
 
-    findInArea(area: IArea, fn: (entity: Entity) => boolean): Entity {
+    public findInArea(area: IArea, fn: (entity: Entity) => boolean): Entity {
         let entity: Entity
         tileDataAction(this.grid, area, (_, cell) => {
             if (typeof cell === 'number') {
@@ -321,7 +321,7 @@ export class PositionGrid {
     }
 
     /** Returns all entities in the area and optinally filters them via the function */
-    getEntitiesInArea(area: IArea): Entity[] {
+    public getEntitiesInArea(area: IArea): Entity[] {
         const entities: Entity[] = []
         tileDataAction(this.grid, area, (_, cell) => {
             if (typeof cell === 'number') {
@@ -335,7 +335,7 @@ export class PositionGrid {
         return entities
     }
 
-    getSurroundingEntities(area: IArea): Entity[] {
+    public getSurroundingEntities(area: IArea): Entity[] {
         const A = processArea(area)
 
         const coordinates = []
@@ -373,7 +373,7 @@ export class PositionGrid {
             .map(entNr => this.bp.entities.get(entNr))
     }
 
-    getNeighbourData(point: IPoint) {
+    public getNeighbourData(point: IPoint) {
         return [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }].map((o, i) => {
             const x = Math.floor(point.x) + o.x
             const y = Math.floor(point.y) + o.y

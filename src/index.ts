@@ -151,7 +151,7 @@ window.addEventListener(
     'resize',
     () => {
         G.app.renderer.resize(window.innerWidth, window.innerHeight)
-        G.BPC.viewport.setSize(G.app.screen.width, G.app.screen.height)
+        G.BPC.setViewportSize(G.app.screen.width, G.app.screen.height)
         G.BPC.applyViewportTransform()
     },
     false
@@ -207,7 +207,7 @@ function loadBp(bpOrBook: Blueprint | Book, clearData = true) {
         G.book = bpOrBook
         G.bp = G.book.getBlueprint(bpIndex ? bpIndex : undefined)
 
-        guiBPIndex.max(G.book.blueprints.length - 1).setValue(G.book.activeIndex)
+        guiBPIndex.max(G.book.lastBookIndex).setValue(G.book.activeIndex)
     } else {
         G.book = undefined
         G.bp = bpOrBook
@@ -338,9 +338,7 @@ actions.takePicture.bind({
 })
 
 actions.showInfo.bind({
-    press: () => {
-        G.BPC.overlayContainer.entityInfos.visible = !G.BPC.overlayContainer.entityInfos.visible
-    }
+    press: () => G.BPC.overlayContainer.toggleEntityInfoVisibility()
 })
 
 actions.info.bind({

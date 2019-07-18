@@ -2,28 +2,36 @@ import G from '../common/globals'
 import Blueprint from './blueprint'
 
 export class Book {
-    activeIndex: number
-    blueprints: {
+    private _activeIndex: number
+    private readonly blueprints: {
         blueprint: BPS.IBlueprint
         loaded?: Blueprint
     }[]
 
-    constructor(data: BPS.IBlueprintBook) {
+    public constructor(data: BPS.IBlueprintBook) {
         if (data) {
-            this.activeIndex = data.active_index
+            this._activeIndex = data.active_index
             this.blueprints = data.blueprints
         } else {
-            this.activeIndex = 0
+            this._activeIndex = 0
             this.blueprints = []
         }
     }
 
-    getBlueprint(index?: number) {
+    public get activeIndex() {
+        return this._activeIndex
+    }
+
+    public get lastBookIndex() {
+        return Math.min(0, this.blueprints.length - 1)
+    }
+
+    public getBlueprint(index?: number) {
         if (index !== undefined) {
-            this.activeIndex = index < 0 || index > this.blueprints.length - 1 ? 0 : index
+            this._activeIndex = index < 0 || index > this.lastBookIndex ? 0 : index
         }
 
-        const blueprint = this.blueprints[this.activeIndex]
+        const blueprint = this.blueprints[this._activeIndex]
         if (blueprint.loaded) {
             return blueprint.loaded
         }
@@ -33,7 +41,7 @@ export class Book {
         return bp
     }
 
-    serialize() {
+    public serialize() {
         const blueprints = []
         for (let i = 0; i < this.blueprints.length; i++) {
             blueprints.push({
@@ -48,7 +56,7 @@ export class Book {
             blueprint_book: {
                 blueprints,
                 item: 'blueprint_book',
-                active_index: this.activeIndex,
+                active_index: this._activeIndex,
                 version: G.getFactorioVersion()
             }
         }

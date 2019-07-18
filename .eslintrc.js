@@ -27,7 +27,7 @@ module.exports = {
         '@typescript-eslint/interface-name-prefix': ['error', 'always'], // TODO: maybe turn off
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/no-object-literal-type-assertion': ['error', { allowAsParameter: true }],
-        '@typescript-eslint/explicit-member-accessibility': 'off', // TODO: turn on
+        '@typescript-eslint/explicit-member-accessibility': 'warn',
         '@typescript-eslint/explicit-function-return-type': 'off', // TODO: turn on
         '@typescript-eslint/camelcase': 'off', // TODO: turn on
 

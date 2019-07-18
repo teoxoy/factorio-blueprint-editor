@@ -13,7 +13,7 @@ import F from './functions'
  *  + automatically executes 'onBrowserResize()' on Browser Resizing
  *  + does not automatically set its position (hint: override onBrowserResize())
  */
-export default class Panel extends PIXI.Container {
+export default abstract class Panel extends PIXI.Container {
     /** Event string of browser resize */
     private static readonly WINDOW_RESIZE_EVENT_STRING = 'browserResized'
 
@@ -29,7 +29,7 @@ export default class Panel extends PIXI.Container {
      * @param alpha - Background Alpha of the Control (1...no transparency)
      * @param border - Border Width of the Control (0...no border)
      */
-    constructor(
+    public constructor(
         width: number,
         height: number,
         background: number = G.colors.controls.panel.background.color,
@@ -63,5 +63,5 @@ export default class Panel extends PIXI.Container {
     }
 
     /** Called by when the browser is resized */
-    protected setPosition() {}
+    protected abstract setPosition(): void
 }

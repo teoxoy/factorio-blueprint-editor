@@ -80,7 +80,7 @@ export default class Filters extends PIXI.Container {
     /** Field to hold data for module visualization */
     private m_Filters: IFilter[]
 
-    constructor(entity: Entity, amount: boolean = false) {
+    public constructor(entity: Entity, amount: boolean = false) {
         super()
 
         // Store entity data reference for later usage

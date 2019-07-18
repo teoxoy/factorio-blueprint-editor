@@ -2,7 +2,7 @@ import Entity from '../factorio-data/entity'
 import Editor from './editor'
 
 export default class TempEditor extends Editor {
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super(402, 171, entity)
 
         let i = 0

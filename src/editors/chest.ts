@@ -24,7 +24,7 @@ export default class ChestEditor extends Editor {
     /** Field to store filter slot index for further usage with amount */
     private m_Filter: number
 
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super(446, entity.name === 'logistic_chest_requester' ? 190 : 171, entity)
 
         this.m_Amount = entity.name !== 'logistic_chest_storage'

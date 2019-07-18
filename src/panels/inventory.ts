@@ -47,7 +47,7 @@ export class InventoryContainer extends Dialog {
     /** Hovered item for item pointerout check */
     private m_hoveredItem: string
 
-    constructor(
+    public constructor(
         title: string = 'Inventory',
         itemsFilter?: string[],
         selectedCallBack?: (selectedItem: string) => void
@@ -205,7 +205,7 @@ export class InventoryContainer extends Dialog {
     }
 
     /** Override automatically set position of dialog due to additional area for recipe */
-    setPosition() {
+    protected setPosition() {
         this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height / 2 - 520 / 2)
     }
 

@@ -25,21 +25,21 @@ const cursorBoxTypeToOffset = (type: CursorBoxType) => {
 }
 
 export class OverlayContainer extends PIXI.Container {
-    entityInfos: PIXI.Container
-    cursorBoxes: PIXI.Container
-    undergroundLines: PIXI.Container
+    private readonly entityInfos = new PIXI.Container()
+    private readonly cursorBoxes = new PIXI.Container()
+    private readonly undergroundLines = new PIXI.Container()
 
-    constructor() {
+    public constructor() {
         super()
-
-        this.entityInfos = new PIXI.Container()
-        this.cursorBoxes = new PIXI.Container()
-        this.undergroundLines = new PIXI.Container()
 
         this.addChild(this.entityInfos, this.cursorBoxes, this.undergroundLines)
     }
 
-    createEntityInfo(entityNumber: number, position: IPoint) {
+    public toggleEntityInfoVisibility() {
+        this.entityInfos.visible = !this.entityInfos.visible
+    }
+
+    public createEntityInfo(entityNumber: number, position: IPoint) {
         const entity = G.bp.entities.get(entityNumber)
         const entityInfo = new PIXI.Container()
 
@@ -225,10 +225,10 @@ export class OverlayContainer extends PIXI.Container {
                 filterInfo.addChild(arrow)
             }
 
-            if (entity.splitterFilter) {
+            if (entity.filters.length > 0) {
                 createIconWithBackground(
                     filterInfo,
-                    entity.splitterFilter,
+                    entity.filters[0].name,
                     util.rotatePointBasedOnDir(
                         { x: entity.splitterOutputPriority === 'right' ? 32 : -32, y: 0 },
                         entity.direction
@@ -413,7 +413,7 @@ export class OverlayContainer extends PIXI.Container {
         }
     }
 
-    createCursorBox(position: IPoint, size: IPoint, type: CursorBoxType = 'regular') {
+    public createCursorBox(position: IPoint, size: IPoint, type: CursorBoxType = 'regular') {
         const cursorBox = new PIXI.Container()
         cursorBox.scale.set(0.5, 0.5)
         cursorBox.position.set(position.x, position.y)
@@ -474,7 +474,7 @@ export class OverlayContainer extends PIXI.Container {
         }
     }
 
-    createUndergroundLine(name: string, position: IPoint, direction: number, searchDirection: number) {
+    public createUndergroundLine(name: string, position: IPoint, direction: number, searchDirection: number) {
         const fd = FD.entities[name]
         if (fd.type === 'underground_belt' || name === 'pipe_to_ground') {
             const otherEntity = G.bp.entities.get(

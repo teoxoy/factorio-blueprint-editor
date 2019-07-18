@@ -16,7 +16,7 @@ export default class Preview extends PIXI.Container {
     /** Container to host preview */
     private m_Preview: PIXI.Container
 
-    constructor(entity: Entity, size: number) {
+    public constructor(entity: Entity, size: number) {
         super()
 
         this.m_Entity = entity

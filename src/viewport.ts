@@ -20,7 +20,7 @@ export class Viewport {
     private origTransform: PIXI.Matrix
     private transform: PIXI.Matrix
 
-    constructor(size: ISize, viewPortPosition: IPoint, viewPortSize: ISize, maxZoom: number) {
+    public constructor(size: ISize, viewPortPosition: IPoint, viewPortSize: ISize, maxZoom: number) {
         this.size = size
         this.viewPortPosition = viewPortPosition
         this.viewPortSize = viewPortSize
@@ -42,7 +42,7 @@ export class Viewport {
         this.transform = new PIXI.Matrix()
     }
 
-    _updateMatrix() {
+    private _updateMatrix() {
         // Accumulate zoom transformations.
         // origTransform is an intermediate accumulative matrix used for tracking the current zoom target.
         this.origTransform.append(new PIXI.Matrix(1, 0, 0, 1, this.scaleCenterX, this.scaleCenterY))
@@ -101,7 +101,7 @@ export class Viewport {
         this.transform.translate(this.positionX, this.positionY)
     }
 
-    centerViewPort(focusObjectSize: IPoint, offset: IPoint) {
+    public centerViewPort(focusObjectSize: IPoint, offset: IPoint) {
         this.origTransform = new PIXI.Matrix()
 
         this.positionX =
@@ -129,7 +129,7 @@ export class Viewport {
         this.dirty = true
     }
 
-    getTransform() {
+    public getTransform() {
         if (this.dirty) {
             this._updateMatrix()
             this.dirty = false
@@ -137,27 +137,19 @@ export class Viewport {
         return this.transform
     }
 
-    setSize(width: number, height: number) {
+    public setSize(width: number, height: number) {
         this.viewPortSize.width = width
         this.viewPortSize.height = height
         this.dirty = true
     }
 
-    setPosition(posX: number, posY: number) {
+    public setPosition(posX: number, posY: number) {
         this.positionX = posX
         this.positionY = posY
         this.dirty = true
     }
 
-    getPositionX() {
-        return this.positionX
-    }
-
-    getPositionY() {
-        return this.positionY
-    }
-
-    zoomBy(deltaX: number, deltaY?: number) {
+    public zoomBy(deltaX: number, deltaY?: number) {
         if (Math.sign(deltaX) === 1 && this.origTransform.a > this.maxZoom) {
             return
         }
@@ -166,13 +158,13 @@ export class Viewport {
         this.dirty = true
     }
 
-    translateBy(deltaX: number, deltaY: number) {
+    public translateBy(deltaX: number, deltaY: number) {
         this.positionX += deltaX
         this.positionY += deltaY
         this.dirty = true
     }
 
-    setCurrentScale(newScale: number) {
+    public setCurrentScale(newScale: number) {
         if (this.dirty) {
             this._updateMatrix()
         }
@@ -190,11 +182,11 @@ export class Viewport {
         this.dirty = true
     }
 
-    getCurrentScale() {
+    public getCurrentScale() {
         return this.origTransform.a
     }
 
-    setScaleCenter(posX: number, posY: number) {
+    public setScaleCenter(posX: number, posY: number) {
         this.scaleCenterX = posX
         this.scaleCenterY = posY
         this.dirty = true

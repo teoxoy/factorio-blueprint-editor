@@ -138,12 +138,12 @@ function timer(name: string) {
 }
 
 class Deferred {
-    resolve: () => void
-    promise: Promise<void>
-    constructor() {
+    public resolve: () => void
+    public promise: Promise<void>
+    public constructor() {
         this.reset()
     }
-    reset() {
+    public reset() {
         this.promise = new Promise(r => {
             this.resolve = r
         })

@@ -21,7 +21,7 @@ export default class Button extends PIXI.Container {
     /** Data of Control */
     private m_Data: unknown
 
-    constructor(width: number = 36, height: number = 36, border: number = G.colors.controls.button.border) {
+    public constructor(width: number = 36, height: number = 36, border: number = G.colors.controls.button.border) {
         super()
 
         this.interactive = true

@@ -8,7 +8,7 @@ import Editor from './editor'
 
 /** Splitter Editor */
 export default class SplitterEditor extends Editor {
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super(504, 176, entity)
 
         const input: string = this.m_Entity.splitterInputPriority

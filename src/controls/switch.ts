@@ -18,7 +18,7 @@ export default class Switch extends PIXI.Container {
      * @param values - Possible values
      * @param value - Default value (If value is set to undefined - tri-state switch)
      */
-    constructor(values: string[], value?: string) {
+    public constructor(values: string[], value?: string) {
         super()
 
         this.interactive = true

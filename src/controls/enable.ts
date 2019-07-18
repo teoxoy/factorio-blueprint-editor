@@ -20,7 +20,7 @@ export default class Enable extends PIXI.Container {
      * @param values - Possible values
      * @param value - Default value
      */
-    constructor(active: boolean = false, text: string) {
+    public constructor(active: boolean = false, text: string) {
         super()
 
         this.interactive = true

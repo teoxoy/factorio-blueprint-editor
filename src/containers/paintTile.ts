@@ -4,9 +4,9 @@ import { TileContainer } from './tile'
 import { PaintContainer } from './paint'
 
 export class TilePaintContainer extends PaintContainer {
-    static size = 2
+    private static size = 2
 
-    static getTilePositions() {
+    private static getTilePositions() {
         return [...Array(Math.pow(TilePaintContainer.size, 2)).keys()].map(i => {
             const offset = TilePaintContainer.size / 2 - 0.5
             return {
@@ -16,7 +16,7 @@ export class TilePaintContainer extends PaintContainer {
         })
     }
 
-    constructor(name: string) {
+    public constructor(name: string) {
         super(name)
 
         G.BPC.transparentEntities()
@@ -25,26 +25,26 @@ export class TilePaintContainer extends PaintContainer {
         this.redraw()
     }
 
-    hide() {
+    public hide() {
         G.BPC.transparentEntities(false)
         super.hide()
     }
 
-    show() {
+    public show() {
         G.BPC.transparentEntities()
         super.show()
     }
 
-    destroy() {
+    public destroy() {
         G.BPC.transparentEntities(false)
         super.destroy()
     }
 
-    getItemName() {
+    public getItemName() {
         return Tile.getItemName(this.name)
     }
 
-    increaseSize() {
+    public increaseSize() {
         if (TilePaintContainer.size === 20) {
             return
         }
@@ -53,7 +53,7 @@ export class TilePaintContainer extends PaintContainer {
         this.redraw()
     }
 
-    decreaseSize() {
+    public decreaseSize() {
         if (TilePaintContainer.size === 1) {
             return
         }
@@ -62,7 +62,7 @@ export class TilePaintContainer extends PaintContainer {
         this.redraw()
     }
 
-    rotate() {
+    public rotate() {
         if (this.name.includes('hazard')) {
             this.name = this.name.includes('left')
                 ? this.name.replace('left', 'right')
@@ -71,7 +71,7 @@ export class TilePaintContainer extends PaintContainer {
         }
     }
 
-    redraw() {
+    protected redraw() {
         this.removeChildren()
 
         this.addChild(
@@ -87,20 +87,20 @@ export class TilePaintContainer extends PaintContainer {
         )
     }
 
-    moveAtCursor() {
+    public moveAtCursor() {
         this.setNewPosition({
             x: TilePaintContainer.size,
             y: TilePaintContainer.size
         })
     }
 
-    removeContainerUnder() {
+    public removeContainerUnder() {
         const position = this.getGridPosition()
 
         G.bp.removeTiles(TilePaintContainer.getTilePositions().map(p => ({ x: p.x + position.x, y: p.y + position.y })))
     }
 
-    placeEntityContainer() {
+    public placeEntityContainer() {
         if (!this.visible) {
             return
         }

@@ -53,13 +53,13 @@ const roundToTwo = (n: number) => Math.round(n * 100) / 100
  * @see instantiation in /index.ts - event in /containers/entity.ts
  */
 export class InfoEntityPanel extends Panel {
-    title: PIXI.Text
-    m_EntityName: PIXI.Text
-    m_entityInfo: PIXI.Text
-    m_RecipeContainer: PIXI.Container
-    m_RecipeIOContainer: PIXI.Container
+    private title: PIXI.Text
+    private m_EntityName: PIXI.Text
+    private m_entityInfo: PIXI.Text
+    private m_RecipeContainer: PIXI.Container
+    private m_RecipeIOContainer: PIXI.Container
 
-    constructor() {
+    public constructor() {
         super(270, 270)
 
         this.interactive = false
@@ -78,7 +78,7 @@ export class InfoEntityPanel extends Panel {
         this.addChild(this.m_EntityName, this.m_entityInfo, this.m_RecipeContainer, this.m_RecipeIOContainer)
     }
 
-    updateVisualization(entity?: Entity) {
+    public updateVisualization(entity?: Entity) {
         this.m_RecipeContainer.removeChildren()
         this.m_RecipeIOContainer.removeChildren()
 
@@ -214,7 +214,7 @@ export class InfoEntityPanel extends Panel {
         }
     }
 
-    setPosition() {
+    protected setPosition() {
         this.position.set(G.app.screen.width - this.width + 1, 0)
     }
 }

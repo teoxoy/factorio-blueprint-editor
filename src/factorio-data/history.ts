@@ -12,13 +12,13 @@ interface IIndexedObject {
 /** Private class for historical actions */
 class Action<V> {
     /** Field to store old value (=overwritten value) */
-    readonly oldValue: V
+    public readonly oldValue: V
 
     /** Field to store new value (=overwriting value) */
-    readonly newValue: V
+    public readonly newValue: V
 
     /** Field to store description */
-    readonly text: string
+    public readonly text: string
 
     /** Field to store apply function */
     private readonly applyFn: (value: V) => void
@@ -29,7 +29,7 @@ class Action<V> {
     /** Reference to History */
     private readonly history: History
 
-    constructor(history: History, oldValue: V, newValue: V, text: string, applyFn: (value: V) => void) {
+    public constructor(history: History, oldValue: V, newValue: V, text: string, applyFn: (value: V) => void) {
         this.history = history
         this.oldValue = oldValue
         this.newValue = newValue
@@ -77,12 +77,12 @@ class Action<V> {
 /** A wrapper that stores multiple `Action`s */
 class Transaction {
     /** Field to store description */
-    text: string
+    public text: string
 
     /** Field to store historical actions */
     private readonly actions: Action<unknown>[]
 
-    constructor(text?: string) {
+    public constructor(text?: string) {
         this.text = text
         this.actions = []
     }
@@ -161,7 +161,7 @@ class Transaction {
  * history.updateValue(o, ['name'], 'updated name', 'Update Object Name').onDone(name => console.log(name)).commit()
  */
 export default class History {
-    logging = false
+    public logging = false
 
     private readonly MAX_HISTORY_LENGTH = 1000
     private readonly MIN_HISTORY_LENGTH = 800
@@ -174,13 +174,13 @@ export default class History {
     private transactionHistory: Transaction[] = []
 
     /** Removes all history entries */
-    reset() {
+    public reset() {
         this.historyIndex = 0
         this.transactionHistory = []
     }
 
     /** Updates a value in an `Array` or `Object` at the specified path and stores it in the history  */
-    updateValue<T, V>(target: T, path: string[], value: V, text: string): Action<V> {
+    public updateValue<T, V>(target: T, path: string[], value: V, text: string): Action<V> {
         const oldValue = this.GetValue<V>(target, path)
         const newValue = value
 
@@ -202,7 +202,7 @@ export default class History {
     }
 
     /** Updates a value in a `Map` and stores it in the history */
-    updateMap<K, V>(target: Map<K, V>, key: K, value: V, text: string): Action<V> {
+    public updateMap<K, V>(target: Map<K, V>, key: K, value: V, text: string): Action<V> {
         const oldValue = target.get(key)
         const newValue = value
 
@@ -226,7 +226,7 @@ export default class History {
      * Undo last action stored in history
      * @returns `false` if there are no actions left for undo
      * */
-    undo() {
+    public undo() {
         if (this.historyIndex === 0) {
             return false
         }
@@ -246,7 +246,7 @@ export default class History {
      * Redo last action stored in history
      * @returns `false` if there are no actions left for redo
      * */
-    redo() {
+    public redo() {
         if (this.historyIndex === this.transactionHistory.length) {
             return false
         }
@@ -267,7 +267,7 @@ export default class History {
      * @param text Description of transaction - If not specified it will be the description of the first action
      * @returns `false` if there is already an active transaction
      */
-    startTransaction(text?: string): boolean {
+    public startTransaction(text?: string): boolean {
         this.transactionCount += 1
 
         if (this.activeTransaction === undefined) {
@@ -282,7 +282,7 @@ export default class History {
      * Commits the active transaction and pushes it into the history
      * @returns `false` if `transactionCount` is not 0 or transaction is empty
      */
-    commitTransaction() {
+    public commitTransaction() {
         this.transactionCount -= 1
 
         if (this.transactionCount === 0) {

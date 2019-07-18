@@ -11,7 +11,7 @@ class TextChar extends PIXI.Text {
     /** Text metrics for character */
     private readonly m_Metrics: PIXI.TextMetrics
 
-    constructor(char: string, left: number = 0) {
+    public constructor(char: string, left: number = 0) {
         super(char, G.styles.controls.textbox)
         // (PT) this.interactive = true
         this.position.set(left, 0)
@@ -35,7 +35,7 @@ class TextContainer extends PIXI.Container {
      * Construct text container
      * @param text Initial text
      */
-    constructor(text: string) {
+    public constructor(text: string) {
         super()
         this.text = text
         this.interactiveChildren = false
@@ -157,7 +157,7 @@ export default class Textbox extends PIXI.Container {
      * @param length - Maximum length of text (0 will automatically make it the length of the provided text)
      * @param filter - Filter for allowed characters (e.g. '1234567890')
      */
-    constructor(width: number, text: string = '', length: number = 0, filter: string = '') {
+    public constructor(width: number, text: string = '', length: number = 0, filter: string = '') {
         super()
 
         this.m_Length = length === 0 ? text.length : length

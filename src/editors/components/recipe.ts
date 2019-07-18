@@ -8,7 +8,7 @@ export default class Recipe extends Slot {
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super()
 
         this.m_Entity = entity

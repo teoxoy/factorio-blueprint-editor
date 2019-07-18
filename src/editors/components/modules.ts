@@ -12,7 +12,7 @@ export default class Modules extends PIXI.Container {
     /** Field to hold data for module visualization */
     private readonly m_Modules: string[]
 
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super()
 
         // Store entity data reference for later usage

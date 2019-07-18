@@ -24,13 +24,13 @@ interface IEntityData {
 }
 
 export class EntitySprite extends PIXI.Sprite {
-    static nextID = 0
-    static getNextID() {
+    private static nextID = 0
+    private static getNextID() {
         this.nextID += 1
         return this.nextID
     }
 
-    static getParts(entity: IEntityData | Entity, hr: boolean, ignoreConnections?: boolean): EntitySprite[] {
+    public static getParts(entity: IEntityData | Entity, hr: boolean, ignoreConnections?: boolean): EntitySprite[] {
         const anims = spriteDataBuilder.getSpriteData({
             hr,
             dir:
@@ -93,12 +93,37 @@ export class EntitySprite extends PIXI.Sprite {
         return parts
     }
 
-    id: number
-    shift: IPoint
-    zIndex: number
-    zOrder: number
+    public static compareFn(a: EntitySprite, b: EntitySprite) {
+        const dZ = a.zIndex - b.zIndex
+        if (dZ !== 0) {
+            return dZ
+        }
 
-    constructor(data: ISpriteData) {
+        const dY = a.y - a.shift.y - (b.y - b.shift.y)
+        if (dY !== 0) {
+            return dY
+        }
+
+        const dO = a.zOrder - b.zOrder
+        if (dO !== 0) {
+            return dO
+        }
+
+        const dX = a.x - a.shift.x - (b.x - b.shift.x)
+        if (dX !== 0) {
+            return dX
+        }
+
+        return a.id - b.id
+    }
+
+    private id: number
+    private shift: IPoint
+    /** Should be private but TS complains */
+    public zIndex: number
+    private zOrder: number
+
+    public constructor(data: ISpriteData) {
         if (!data.shift) {
             data.shift = [0, 0]
         }
@@ -163,41 +188,41 @@ export class EntitySprite extends PIXI.Sprite {
         return this
     }
 
-    /** Was needed for viewport culling but now with ParticleContainer we can't use viewport culling anymore */
-    cacheLocalBounds() {
-        // CACHE LOCAL BOUNDS
-        let minX = this.texture.orig.width * -this.anchor.x * this.scale.x
-        let minY = this.texture.orig.height * -this.anchor.y * this.scale.y
-        let maxX = this.texture.orig.width * (1 - this.anchor.x) * this.scale.x
-        let maxY = this.texture.orig.height * (1 - this.anchor.y) * this.scale.y
+    // Was needed for viewport culling but now with ParticleContainer we can't use viewport culling anymore
+    // private cacheLocalBounds() {
+    //     // CACHE LOCAL BOUNDS
+    //     let minX = this.texture.orig.width * -this.anchor.x * this.scale.x
+    //     let minY = this.texture.orig.height * -this.anchor.y * this.scale.y
+    //     let maxX = this.texture.orig.width * (1 - this.anchor.x) * this.scale.x
+    //     let maxY = this.texture.orig.height * (1 - this.anchor.y) * this.scale.y
 
-        if (this.rotation !== 0) {
-            const sin = Math.sin(this.rotation)
-            const cos = Math.cos(this.rotation)
-            // 01
-            // 23
-            const x0 = minX * cos - minY * sin
-            const y0 = minX * sin + minY * cos
+    //     if (this.rotation !== 0) {
+    //         const sin = Math.sin(this.rotation)
+    //         const cos = Math.cos(this.rotation)
+    //         // 01
+    //         // 23
+    //         const x0 = minX * cos - minY * sin
+    //         const y0 = minX * sin + minY * cos
 
-            const x1 = maxX * cos - minY * sin
-            const y1 = maxX * sin + minY * cos
+    //         const x1 = maxX * cos - minY * sin
+    //         const y1 = maxX * sin + minY * cos
 
-            const x2 = minX * cos - maxY * sin
-            const y2 = minX * sin + maxY * cos
+    //         const x2 = minX * cos - maxY * sin
+    //         const y2 = minX * sin + maxY * cos
 
-            const x3 = maxX * cos - maxY * sin
-            const y3 = maxX * sin + maxY * cos
+    //         const x3 = maxX * cos - maxY * sin
+    //         const y3 = maxX * sin + maxY * cos
 
-            minX = Math.min(x0, x1, x2, x3)
-            minY = Math.min(y0, y1, y2, y3)
-            maxX = Math.max(x0, x1, x2, x3)
-            maxY = Math.max(y0, y1, y2, y3)
-        }
+    //         minX = Math.min(x0, x1, x2, x3)
+    //         minY = Math.min(y0, y1, y2, y3)
+    //         maxX = Math.max(x0, x1, x2, x3)
+    //         maxY = Math.max(y0, y1, y2, y3)
+    //     }
 
-        // this.cachedBounds = [minX, minY, maxX, maxY]
-    }
+    //     // this.cachedBounds = [minX, minY, maxX, maxY]
+    // }
 
-    setPosition(position: IPoint) {
+    public setPosition(position: IPoint) {
         this.position.set(position.x + this.shift.x, position.y + this.shift.y)
     }
 }

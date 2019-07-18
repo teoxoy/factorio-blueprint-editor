@@ -3,7 +3,7 @@ import Editor from './editor'
 
 /** Beacon Editor */
 export default class BeaconEditor extends Editor {
-    constructor(entity: Entity) {
+    public constructor(entity: Entity) {
         super(402, 171, entity)
 
         // Add Modules

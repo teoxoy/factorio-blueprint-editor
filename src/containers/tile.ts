@@ -5,7 +5,7 @@ import Tile from '../factorio-data/tile'
 import { EntitySprite } from '../entitySprite'
 
 export class TileContainer {
-    static generateSprite(name: string, position: IPoint) {
+    public static generateSprite(name: string, x: number, y: number) {
         // TODO: maybe optimize this with PIXI.TilingSprite and masks
         // https://github.com/pixijs/pixi.js/wiki/v4-Gotchas#graphics--tilingsprite
 
@@ -22,23 +22,21 @@ export class TileContainer {
 
         return new EntitySprite({
             filename,
-            x: (Math.floor(position.x) % 8) * 64,
-            y: (Math.floor(position.y) % 8) * 64,
+            x: (Math.floor(x) % 8) * 64,
+            y: (Math.floor(y) % 8) * 64,
             width: 64,
             height: 64,
             scale: 0.5
         })
     }
 
-    tileSprites: PIXI.Sprite[]
+    private readonly tileSprites: PIXI.Sprite[] = []
 
-    constructor(tile: Tile) {
-        this.tileSprites = []
-
-        const sprite = TileContainer.generateSprite(tile.name, tile.position)
-        sprite.position.set(tile.position.x * 32, tile.position.y * 32)
+    public constructor(tile: Tile) {
+        const sprite = TileContainer.generateSprite(tile.name, tile.x, tile.y)
+        sprite.position.set(tile.x * 32, tile.y * 32)
         this.tileSprites.push(sprite)
-        G.BPC.tileSprites.addChild(sprite)
+        G.BPC.addTileSprites([sprite])
 
         tile.on('destroy', () => this.tileSprites.forEach(s => s.destroy()))
     }

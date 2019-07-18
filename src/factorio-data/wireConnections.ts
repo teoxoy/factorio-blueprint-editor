@@ -92,11 +92,11 @@ const serialize = (entityNumber: number, connections: IConnection[]): BPS.IConne
 class ConnectionMap extends Map<string, IConnection> {
     private entNrToConnHash: Map<number, string[]> = new Map()
 
-    getEntityConnectionHashes(entityNumber: number) {
+    public getEntityConnectionHashes(entityNumber: number) {
         return this.entNrToConnHash.get(entityNumber) || []
     }
 
-    set(hash: string, connection: IConnection) {
+    public set(hash: string, connection: IConnection) {
         const add = (entityNumber: number) => {
             const conn = this.entNrToConnHash.get(entityNumber) || []
             this.entNrToConnHash.set(entityNumber, [...conn, hash])
@@ -109,7 +109,7 @@ class ConnectionMap extends Map<string, IConnection> {
         return super.set(hash, connection)
     }
 
-    delete(hash: string) {
+    public delete(hash: string) {
         const connection = this.get(hash)
         const rem = (entityNumber: number) => {
             const conn = this.entNrToConnHash.get(entityNumber).filter(h => h !== hash)
@@ -130,14 +130,14 @@ class ConnectionMap extends Map<string, IConnection> {
 
 export class WireConnections extends EventEmitter {
     private bp: Blueprint
-    connections: ConnectionMap = new ConnectionMap()
+    private readonly connections = new ConnectionMap()
 
-    constructor(bp: Blueprint) {
+    public constructor(bp: Blueprint) {
         super()
         this.bp = bp
     }
 
-    create(connection: IConnection) {
+    private create(connection: IConnection) {
         const hash = hashConn(connection)
         if (this.connections.has(hash)) {
             return
@@ -149,7 +149,7 @@ export class WireConnections extends EventEmitter {
             .commit()
     }
 
-    remove(connection: IConnection) {
+    private remove(connection: IConnection) {
         const hash = hashConn(connection)
         if (!this.connections.has(hash)) {
             return
@@ -169,26 +169,34 @@ export class WireConnections extends EventEmitter {
         }
     }
 
-    createEntityConnections(entityNumber: number, connections: BPS.IConnection) {
+    public get(hash: string) {
+        return this.connections.get(hash)
+    }
+
+    public forEach(fn: (value: IConnection, key: string) => void) {
+        this.connections.forEach(fn)
+    }
+
+    public createEntityConnections(entityNumber: number, connections: BPS.IConnection) {
         deserialize(entityNumber, connections).forEach(c => this.create(c))
     }
 
-    removeEntityConnections(entityNumber: number) {
+    public removeEntityConnections(entityNumber: number) {
         this.getEntityConnections(entityNumber).forEach(c => this.remove(c))
     }
 
-    getEntityConnectionHashes(entityNumber: number) {
+    public getEntityConnectionHashes(entityNumber: number) {
         return this.connections.getEntityConnectionHashes(entityNumber)
     }
 
-    getEntityConnections(entityNumber: number) {
+    public getEntityConnections(entityNumber: number) {
         return this.getEntityConnectionHashes(entityNumber).reduce((acc: IConnection[], hash) => {
             acc.push(this.connections.get(hash))
             return acc
         }, [])
     }
 
-    serializeConnectionData(entityNumber: number): BPS.IConnection {
+    public serializeConnectionData(entityNumber: number): BPS.IConnection {
         const connections = this.getEntityConnections(entityNumber)
         if (connections.length === 0 || this.bp.entities.get(entityNumber).type === 'electric_pole') {
             return

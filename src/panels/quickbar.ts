@@ -7,7 +7,7 @@ import { EditorMode } from '../containers/blueprint'
 import { InventoryContainer } from './inventory'
 
 class QuickbarSlot extends Slot {
-    get itemName(): string {
+    public get itemName(): string {
         return this.data as string
     }
 
@@ -23,7 +23,7 @@ class QuickbarSlot extends Slot {
 }
 
 export class QuickbarContainer extends Panel {
-    static createTriangleButton(width: number, height: number) {
+    private static createTriangleButton(width: number, height: number) {
         const button = new PIXI.Graphics()
 
         button
@@ -53,7 +53,7 @@ export class QuickbarContainer extends Panel {
     private slots: QuickbarSlot[]
     private slotsContainer: PIXI.Container
 
-    constructor(rows = 1, itemNames?: string[]) {
+    public constructor(rows = 1, itemNames?: string[]) {
         super(
             442,
             24 + rows * 38,
@@ -78,7 +78,7 @@ export class QuickbarContainer extends Panel {
         this.addChild(t)
     }
 
-    generateSlots(itemNames?: string[]) {
+    public generateSlots(itemNames?: string[]) {
         for (let r = 0; r < this.rows; r++) {
             for (let i = 0; i < 10; i++) {
                 const quickbarSlot = new QuickbarSlot()
@@ -150,7 +150,7 @@ export class QuickbarContainer extends Panel {
         return this.slots.map(s => s.itemName)
     }
 
-    setPosition() {
+    protected setPosition() {
         this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height - this.height + 1)
     }
 }

@@ -4,7 +4,7 @@ import * as PIXI from 'pixi.js'
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
 
 export class UnderlayContainer extends PIXI.Container {
-    static getDataForVisualizationArea(name: string) {
+    private static getDataForVisualizationArea(name: string) {
         const ed = FD.entities[name]
         function undoBlendModeColorShift(color0: number, color1: number, alpha: number) {
             // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendFunc
@@ -41,7 +41,7 @@ export class UnderlayContainer extends PIXI.Container {
         }
     }
 
-    static modifyVisualizationArea(area: PIXI.Sprite | PIXI.Sprite[], fn: (s: PIXI.Sprite) => void) {
+    public static modifyVisualizationArea(area: PIXI.Sprite | PIXI.Sprite[], fn: (s: PIXI.Sprite) => void) {
         if (area) {
             if (area instanceof PIXI.Sprite) {
                 fn(area)
@@ -53,22 +53,15 @@ export class UnderlayContainer extends PIXI.Container {
         }
     }
 
-    active: Type[]
-    logistics0: PIXI.Container
-    logistics1: PIXI.Container
-    poles: PIXI.Container
-    beacons: PIXI.Container
-    drills: PIXI.Container
+    private active: Type[] = []
+    private readonly logistics0 = new PIXI.Container()
+    private readonly logistics1 = new PIXI.Container()
+    private readonly poles = new PIXI.Container()
+    private readonly beacons = new PIXI.Container()
+    private readonly drills = new PIXI.Container()
 
-    constructor() {
+    public constructor() {
         super()
-
-        this.active = []
-        this.logistics0 = new PIXI.Container()
-        this.logistics1 = new PIXI.Container()
-        this.poles = new PIXI.Container()
-        this.beacons = new PIXI.Container()
-        this.drills = new PIXI.Container()
 
         const filter = new PIXI.filters.AlphaFilter(0.25)
         this.logistics0.filters = [filter]
@@ -77,7 +70,7 @@ export class UnderlayContainer extends PIXI.Container {
         this.addChild(this.logistics0, this.logistics1, this.poles, this.beacons, this.drills)
     }
 
-    activateRelatedAreas(entityName: string) {
+    public activateRelatedAreas(entityName: string) {
         const ed = FD.entities[entityName]
         const data = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (data) {
@@ -104,7 +97,7 @@ export class UnderlayContainer extends PIXI.Container {
         }
     }
 
-    deactivateActiveAreas() {
+    public deactivateActiveAreas() {
         for (const type of this.active) {
             for (const s of this[type].children) {
                 s.visible = false
@@ -113,7 +106,7 @@ export class UnderlayContainer extends PIXI.Container {
         this.active = []
     }
 
-    createNewArea(entityName: string, position?: IPoint) {
+    public createNewArea(entityName: string, position?: IPoint) {
         const aVData = UnderlayContainer.getDataForVisualizationArea(entityName)
         if (aVData) {
             if (aVData.type instanceof Array) {

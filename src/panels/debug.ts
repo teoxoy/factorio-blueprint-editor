@@ -3,10 +3,10 @@ import G from '../common/globals'
 import { EditorMode } from '../containers/blueprint'
 
 export class DebugContainer extends PIXI.Container {
-    x = 145
-    y = 5
+    public x = 145
+    public y = 5
 
-    constructor() {
+    public constructor() {
         super()
 
         const fpsGUIText = new PIXI.Text('', {

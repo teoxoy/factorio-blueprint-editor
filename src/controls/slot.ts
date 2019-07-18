@@ -6,16 +6,16 @@ import Button from './button'
  */
 export default class Slot extends Button {
     // Override Rollover Color of Button
-    get hover() {
+    public get hover() {
         return G.colors.controls.slot.hover.color
     }
 
     // Override Pressed appearance of Button
-    get pressed(): boolean {
+    public get pressed(): boolean {
         return true
     }
 
-    constructor(width: number = 36, height: number = 36, border: number = 1) {
+    public constructor(width: number = 36, height: number = 36, border: number = 1) {
         super(width, height, border)
     }
 }

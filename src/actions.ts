@@ -49,7 +49,7 @@ function passtroughAllEvents(cb: (e: keyboardJS.KeyEvent) => boolean) {
 }
 
 class Action {
-    readonly defaultKeyCombo: string
+    private readonly defaultKeyCombo: string
 
     private m_active = true
     private m_keyCombo: string
@@ -59,7 +59,7 @@ class Action {
     }[] = []
     private _pressed = false
 
-    constructor(defaultKeyCombo: string) {
+    public constructor(defaultKeyCombo: string) {
         this.defaultKeyCombo = defaultKeyCombo
         this.m_keyCombo = defaultKeyCombo
 
@@ -86,11 +86,11 @@ class Action {
         this.m_active = value
     }
 
-    get keyCombo() {
+    public get keyCombo() {
         return this.m_keyCombo
     }
 
-    set keyCombo(value: string) {
+    public set keyCombo(value: string) {
         if (!this.active && value.length !== 0) {
             this.active = true
         }
@@ -107,19 +107,19 @@ class Action {
         this.m_keyCombo = value
     }
 
-    get pressed() {
+    public get pressed() {
         return this._pressed
     }
 
-    get usesDefaultKeyCombo() {
+    public get usesDefaultKeyCombo() {
         return this.keyCombo === this.defaultKeyCombo
     }
 
-    resetKeyCombo() {
+    public resetKeyCombo() {
         this.keyCombo = this.defaultKeyCombo
     }
 
-    bind(opts: {
+    public bind(opts: {
         /** Press Handler */
         press?: (e: keyboardJS.KeyEvent) => void
         /** Release Handler */
@@ -176,12 +176,13 @@ class Action {
         this.handlers.push(handlerData)
     }
 
-    unbindAll() {
-        this.handlers.forEach(h => keyboardJS.unbind(this.keyCombo, h.press, h.release))
-        this.handlers = []
-    }
+    // Not Used anywhere
+    // public unbindAll() {
+    //     this.handlers.forEach(h => keyboardJS.unbind(this.keyCombo, h.press, h.release))
+    //     this.handlers = []
+    // }
 
-    call() {
+    public call() {
         this.handlers.forEach(h => h.press())
     }
 }
