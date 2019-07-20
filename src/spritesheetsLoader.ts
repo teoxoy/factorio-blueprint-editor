@@ -80,7 +80,7 @@ function loadSpritesheet(src: string, json: any): Promise<void> {
         .then(blobToImageBitmap)
         .then(
             imageData =>
-                new Promise(resolve => {
+                new Promise<ImageBitmap | HTMLImageElement>(resolve => {
                     if (G.app.renderer.context.webGLVersion === 1) {
                         // WebGL1 --> make the spritesheet a power of 2 so that it generates mipmaps
                         const canvas = document.createElement('canvas')
@@ -96,7 +96,10 @@ function loadSpritesheet(src: string, json: any): Promise<void> {
                 })
         )
         .then(imageData => {
-            const resource = new PIXI.resources.BaseImageResource(imageData)
+            const resource =
+                imageData instanceof ImageBitmap
+                    ? new PIXI.resources.ImageBitmapResource(imageData)
+                    : new PIXI.resources.BaseImageResource(imageData)
             const baseTexture = new PIXI.BaseTexture(resource)
             // bind the baseTexture, this will also upload it to the GPU
             G.app.renderer.texture.bind(baseTexture)
