@@ -9,15 +9,6 @@ import { UnderlayContainer } from './underlay'
 import { PaintContainer } from './paint'
 
 export class EntityPaintContainer extends PaintContainer {
-    private static isContainerOutOfBpArea(newPos: IPoint, size: IPoint): boolean {
-        return (
-            newPos.x - size.x / 2 < 0 ||
-            newPos.y - size.y / 2 < 0 ||
-            newPos.x + size.x / 2 > G.bpArea.width ||
-            newPos.y + size.y / 2 > G.bpArea.height
-        )
-    }
-
     private areaVisualization: PIXI.Sprite | PIXI.Sprite[]
     private directionType: 'input' | 'output'
     private direction: number
@@ -67,7 +58,7 @@ export class EntityPaintContainer extends PaintContainer {
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
         const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, direction)
         if (
-            !EntityPaintContainer.isContainerOutOfBpArea(position, size) &&
+            !G.BPC.isContainerOutOfBpArea(position, size) &&
             (G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position) ||
                 G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position) ||
                 G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction))
@@ -186,7 +177,7 @@ export class EntityPaintContainer extends PaintContainer {
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
         const size = util.switchSizeBasedOnDirection(fd.size, direction)
 
-        if (EntityPaintContainer.isContainerOutOfBpArea(position, size)) {
+        if (G.BPC.isContainerOutOfBpArea(position, size)) {
             return
         }
 

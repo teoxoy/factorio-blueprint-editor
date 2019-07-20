@@ -22,8 +22,8 @@ export class TileContainer {
 
         return new EntitySprite({
             filename,
-            x: (Math.floor(x) % 8) * 64,
-            y: (Math.floor(y) % 8) * 64,
+            x: (Math.abs(Math.floor(x)) % 8) * 64,
+            y: (Math.abs(Math.floor(y)) % 8) * 64,
             width: 64,
             height: 64,
             scale: 0.5

@@ -103,8 +103,8 @@ function generatePipes(
 
     const minX = globalCoords.reduce((pV, cV) => Math.min(pV, cV.x), Infinity)
     const minY = globalCoords.reduce((pV, cV) => Math.min(pV, cV.y), Infinity)
-    const maxX = globalCoords.reduce((pV, cV) => Math.max(pV, cV.x), 0) + 1
-    const maxY = globalCoords.reduce((pV, cV) => Math.max(pV, cV.y), 0) + 1
+    const maxX = globalCoords.reduce((pV, cV) => Math.max(pV, cV.x), -Infinity) + 1
+    const maxY = globalCoords.reduce((pV, cV) => Math.max(pV, cV.y), -Infinity) + 1
     const middle = { x: (maxX - minX) / 2, y: (maxY - minY) / 2 }
 
     const isPumpjackAtPos = globalCoords.map(globalToLocal).reduce((map, p) => map.set(U.hashPoint(p), true), new Map())

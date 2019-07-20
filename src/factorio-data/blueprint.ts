@@ -74,16 +74,9 @@ export default class Blueprint extends EventEmitter {
                 })
             }
 
-            const offset = {
-                x: G.sizeBPContainer.width / 64,
-                y: G.sizeBPContainer.height / 64
-            }
-
             if (data.tiles) {
                 this.tiles = new OurMap(
-                    data.tiles.map(
-                        tile => new Tile(tile.name, tile.position.x + offset.x + 0.5, tile.position.y + offset.y + 0.5)
-                    ),
+                    data.tiles.map(tile => new Tile(tile.name, tile.position.x + 0.5, tile.position.y + 0.5)),
                     t => t.hash
                 )
             }
@@ -97,8 +90,10 @@ export default class Blueprint extends EventEmitter {
                     firstEntity.direction || 0
                 )
 
-                offset.x += (firstEntity.position.x - firstEntitySize.x) % 1
-                offset.y += (firstEntity.position.y - firstEntitySize.y) % 1
+                const offset = {
+                    x: (firstEntity.position.x - firstEntitySize.x) % 1,
+                    y: (firstEntity.position.y - firstEntitySize.y) % 1
+                }
 
                 // Approximate position of placeable_off_grid entities (i.e. landmines)
                 data.entities

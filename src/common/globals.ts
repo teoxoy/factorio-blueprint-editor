@@ -45,16 +45,6 @@ let railMoveOffset: IPoint = { x: 0, y: 0 }
 let moveSpeed = 10
 let quickbarRows = 2
 
-const bpArea = {
-    width: 400,
-    height: 400
-}
-
-const sizeBPContainer = {
-    width: bpArea.width * 32,
-    height: bpArea.height * 32
-}
-
 let bp: Blueprint
 let book: Book
 
@@ -221,8 +211,6 @@ export default {
     infoEntityPanel,
     dialogsContainer,
     paintIconContainer,
-    bpArea,
-    sizeBPContainer,
     railMoveOffset,
     bp,
     book,

@@ -78,8 +78,8 @@ class GridData extends EventEmitter {
 
         const oldX = this._x
         const oldY = this._y
-        this._x = Math.floor(Math.abs(G.BPC.position.x - mouseX) / G.BPC.getViewportScale())
-        this._y = Math.floor(Math.abs(G.BPC.position.y - mouseY) / G.BPC.getViewportScale())
+        this._x = Math.floor((mouseX - G.BPC.position.x) / G.BPC.getViewportScale())
+        this._y = Math.floor((mouseY - G.BPC.position.y) / G.BPC.getViewportScale())
 
         const oldX16 = this._x16
         const oldY16 = this._y16
@@ -170,29 +170,40 @@ class BlueprintContainer extends PIXI.Container {
     public paintContainer: PaintContainer
     public gridData: GridData
     private _mode: EditorMode = EditorMode.NONE
+    private size: IPoint
+    private anchor: IPoint = {
+        x: 0.5,
+        y: 0.5
+    }
 
     public constructor() {
         super()
 
+        this.size = {
+            x: 400 * 32,
+            y: 400 * 32
+        }
+
         this.interactive = true
         this.interactiveChildren = false
-        this.hitArea = new PIXI.Rectangle(0, 0, G.sizeBPContainer.width, G.sizeBPContainer.height)
+        this.hitArea = new PIXI.Rectangle(
+            -this.size.x * this.anchor.x,
+            -this.size.y * this.anchor.y,
+            this.size.x,
+            this.size.y
+        )
 
         this.viewport = new Viewport(
-            G.sizeBPContainer,
+            this.size,
             {
-                x: 0,
-                y: 0
+                x: G.app.screen.width,
+                y: G.app.screen.height
             },
-            {
-                width: G.app.screen.width,
-                height: G.app.screen.height
-            },
+            this.anchor,
             3
         )
 
         this.generateGrid(G.colors.pattern)
-
         this.tileSprites = new OptimizedContainer()
         this.tilePaintSlot = new PIXI.Container()
         this.underlayContainer = new UnderlayContainer()
@@ -270,17 +281,22 @@ class BlueprintContainer extends PIXI.Container {
                 this.applyViewportTransform()
             }
         })
+
+        window.addEventListener(
+            'resize',
+            () => {
+                this.viewport.setSize(G.app.screen.width, G.app.screen.height)
+                this.applyViewportTransform()
+            },
+            false
+        )
     }
 
     public getViewportScale(): number {
         return this.viewport.getCurrentScale()
     }
 
-    public setViewportSize(width: number, height: number): void {
-        this.viewport.setSize(width, height)
-    }
-
-    public applyViewportTransform(): void {
+    private applyViewportTransform(): void {
         const t = this.viewport.getTransform()
         this.setTransform(t.tx, t.ty, t.a, t.d)
         this.gridData.recalculate()
@@ -322,6 +338,15 @@ class BlueprintContainer extends PIXI.Container {
             G.app.stage
         )
         return container === this
+    }
+
+    public isContainerOutOfBpArea(newPos: IPoint, size: IPoint): boolean {
+        return (
+            newPos.x - size.x / 2 < -(this.size.x * this.anchor.x) / 32 ||
+            newPos.y - size.y / 2 < -(this.size.y * this.anchor.y) / 32 ||
+            newPos.x + size.x / 2 > (this.size.x * (1 - this.anchor.x)) / 32 ||
+            newPos.y + size.y / 2 > (this.size.y * (1 - this.anchor.y)) / 32
+        )
     }
 
     private updateHoverContainer(forceRemove = false): void {
@@ -392,7 +417,8 @@ class BlueprintContainer extends PIXI.Container {
         renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
         G.app.renderer.render(gridGraphics, renderTexture)
 
-        const grid = new PIXI.TilingSprite(renderTexture, G.sizeBPContainer.width, G.sizeBPContainer.height)
+        const grid = new PIXI.TilingSprite(renderTexture, this.size.x, this.size.y)
+        grid.anchor.set(this.anchor.x, this.anchor.y)
 
         G.colors.addSpriteForAutomaticTintChange(grid)
 
@@ -511,8 +537,8 @@ class BlueprintContainer extends PIXI.Container {
         if (G.bp.isEmpty()) {
             this.viewport.setCurrentScale(1)
             this.viewport.setPosition(
-                -G.sizeBPContainer.width / 2 + G.app.screen.width / 2,
-                -G.sizeBPContainer.height / 2 + G.app.screen.width / 2
+                -this.size.x / 2 + G.app.screen.width / 2,
+                -this.size.y / 2 + G.app.screen.width / 2
             )
             this.applyViewportTransform()
             return
@@ -525,8 +551,8 @@ class BlueprintContainer extends PIXI.Container {
                 y: bounds.height
             },
             {
-                x: (G.sizeBPContainer.width - bounds.width) / 2 - bounds.x,
-                y: (G.sizeBPContainer.height - bounds.height) / 2 - bounds.y
+                x: (this.size.x - bounds.width) / 2 - bounds.x,
+                y: (this.size.y - bounds.height) / 2 - bounds.y
             }
         )
         this.applyViewportTransform()

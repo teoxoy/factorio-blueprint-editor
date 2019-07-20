@@ -1,45 +1,25 @@
 import * as PIXI from 'pixi.js'
 
-interface ISize {
-    width: number
-    height: number
-}
-
 export class Viewport {
-    private size: ISize
-    private viewPortPosition: IPoint
-    private viewPortSize: ISize
+    private size: IPoint
+    private viewPortSize: IPoint
+    private anchor: IPoint
     private maxZoom: number
-    private dirty: boolean
-    private positionX: number
-    private positionY: number
-    private scaleX: number
-    private scaleY: number
-    private scaleCenterX: number
-    private scaleCenterY: number
-    private origTransform: PIXI.Matrix
-    private transform: PIXI.Matrix
+    private dirty = true
+    private positionX = 0
+    private positionY = 0
+    private scaleX = 1
+    private scaleY = 1
+    private scaleCenterX = 0
+    private scaleCenterY = 0
+    private origTransform = new PIXI.Matrix()
+    private transform = new PIXI.Matrix()
 
-    public constructor(size: ISize, viewPortPosition: IPoint, viewPortSize: ISize, maxZoom: number) {
+    public constructor(size: IPoint, viewPortSize: IPoint, anchor: IPoint, maxZoom: number) {
         this.size = size
-        this.viewPortPosition = viewPortPosition
         this.viewPortSize = viewPortSize
+        this.anchor = anchor
         this.maxZoom = maxZoom
-
-        this.dirty = true
-
-        this.positionX = 0
-        this.positionY = 0
-
-        this.scaleX = 1
-        this.scaleY = 1
-
-        this.scaleCenterX = 0
-        this.scaleCenterY = 0
-
-        this.origTransform = new PIXI.Matrix()
-
-        this.transform = new PIXI.Matrix()
     }
 
     private _updateMatrix(): void {
@@ -59,23 +39,23 @@ export class Viewport {
         this.transform = this.origTransform.clone()
 
         // UpperLeft Corner constraints
-        const minX = this.viewPortPosition.x - this.transform.tx
-        const minY = this.viewPortPosition.y - this.transform.ty
+        const minX = this.size.x * this.transform.a * this.anchor.x - this.transform.tx
+        const minY = this.size.y * this.transform.a * this.anchor.y - this.transform.ty
         // LowerRight Corner constraints
-        const maxX = -(this.size.width * this.transform.a - this.viewPortSize.width) - this.transform.tx
-        const maxY = -(this.size.height * this.transform.a - this.viewPortSize.height) - this.transform.ty
+        const maxX = -(this.size.x * (1 - this.anchor.x) * this.transform.a - this.viewPortSize.x) - this.transform.tx
+        const maxY = -(this.size.y * (1 - this.anchor.y) * this.transform.a - this.viewPortSize.y) - this.transform.ty
 
         // Check if viewport area is bigger than the container
         if (maxX - minX > 0 || maxY - minY > 0) {
             this.origTransform = new PIXI.Matrix()
 
-            this.scaleCenterX = this.size.width / 2
-            this.scaleCenterY = this.size.height / 2
+            this.scaleCenterX = this.size.x / 2
+            this.scaleCenterY = this.size.y / 2
 
             const maxZoom =
                 Math.max(
-                    this.viewPortSize.width / (this.size.width * this.transform.a),
-                    this.viewPortSize.height / (this.size.height * this.transform.a)
+                    this.viewPortSize.x / (this.size.x * this.transform.a),
+                    this.viewPortSize.y / (this.size.y * this.transform.a)
                 ) * this.transform.a
             this.scaleX = maxZoom
             this.scaleY = maxZoom
@@ -104,23 +84,15 @@ export class Viewport {
     public centerViewPort(focusObjectSize: IPoint, offset: IPoint): void {
         this.origTransform = new PIXI.Matrix()
 
-        this.positionX =
-            this.viewPortPosition.x -
-            this.size.width / 2 +
-            (this.viewPortSize.width - this.viewPortPosition.x) / 2 +
-            offset.x
-        this.positionY =
-            this.viewPortPosition.y -
-            this.size.height / 2 +
-            (this.viewPortSize.height - this.viewPortPosition.y) / 2 +
-            offset.y
+        this.positionX = -this.size.x / 2 + this.viewPortSize.x / 2 + offset.x
+        this.positionY = -this.size.y / 2 + this.viewPortSize.y / 2 + offset.y
 
-        this.scaleCenterX = this.size.width / 2 + -offset.x
-        this.scaleCenterY = this.size.height / 2 + -offset.y
+        this.scaleCenterX = this.size.x / 2 + -offset.x
+        this.scaleCenterY = this.size.y / 2 + -offset.y
 
         const zoom = Math.min(
-            (this.viewPortSize.width - this.viewPortPosition.x) / focusObjectSize.x,
-            (this.viewPortSize.height - this.viewPortPosition.y) / focusObjectSize.y,
+            this.viewPortSize.x / focusObjectSize.x,
+            this.viewPortSize.y / focusObjectSize.y,
             this.maxZoom
         )
         this.scaleX = zoom
@@ -137,9 +109,9 @@ export class Viewport {
         return this.transform
     }
 
-    public setSize(width: number, height: number): void {
-        this.viewPortSize.width = width
-        this.viewPortSize.height = height
+    public setSize(x: number, y: number): void {
+        this.viewPortSize.x = x
+        this.viewPortSize.y = y
         this.dirty = true
     }
 
