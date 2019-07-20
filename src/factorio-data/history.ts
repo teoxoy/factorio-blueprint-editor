@@ -29,6 +29,8 @@ class Action<V> {
     /** Reference to History */
     private readonly history: History
 
+    public applyImmediate = true
+
     public constructor(history: History, oldValue: V, newValue: V, text: string, applyFn: (value: V) => void) {
         this.history = history
         this.oldValue = oldValue
@@ -42,7 +44,9 @@ class Action<V> {
      * This allows for emits to be set up first
      */
     public commit(): this {
-        this.apply()
+        if (this.applyImmediate) {
+            this.apply()
+        }
         this.history.commitTransaction()
 
         return this
@@ -79,16 +83,28 @@ class Transaction {
     /** Field to store description */
     public text: string
 
-    /** Field to store historical actions */
-    private readonly actions: Action<unknown>[]
+    /** Should actions be applied immediately */
+    private applyImmediate: boolean
 
-    public constructor(text?: string) {
+    /** Field to store historical actions */
+    private readonly actions: Action<unknown>[] = []
+
+    public constructor(text?: string, applyImmediate?: boolean) {
         this.text = text
-        this.actions = []
+        this.applyImmediate = applyImmediate
     }
 
     public empty(): boolean {
         return this.actions.length === 0
+    }
+
+    public apply(): void {
+        if (this.applyImmediate) {
+            return
+        }
+        for (const action of this.actions) {
+            action.apply(HistoryValue.New)
+        }
     }
 
     /** Undo all actions from this transaction in reversed order */
@@ -117,6 +133,7 @@ class Transaction {
         if (this.text === undefined && this.actions.length === 0) {
             this.text = action.text
         }
+        action.applyImmediate = this.applyImmediate
         this.actions.push(action)
     }
 }
@@ -267,11 +284,11 @@ export default class History {
      * @param text Description of transaction - If not specified it will be the description of the first action
      * @returns `false` if there is already an active transaction
      */
-    public startTransaction(text?: string): boolean {
+    public startTransaction(text?: string, applyImmediate = true): boolean {
         this.transactionCount += 1
 
         if (this.activeTransaction === undefined) {
-            this.activeTransaction = new Transaction(text)
+            this.activeTransaction = new Transaction(text, applyImmediate)
             return true
         } else {
             return false
@@ -294,6 +311,7 @@ export default class History {
                 this.transactionHistory.pop()
             }
 
+            this.activeTransaction.apply()
             this.transactionHistory.push(this.activeTransaction)
             if (this.logging) {
                 if (this.historyIndex !== 0 && this.historyIndex % 20 === 0) {
