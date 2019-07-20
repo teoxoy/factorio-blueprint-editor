@@ -256,8 +256,8 @@ export default class Blueprint extends EventEmitter {
         }
 
         const data = [
-            ...[...this.entities.values()].map(e => ({ x: e.position.x, y: e.position.y, w: e.size.x, h: e.size.y })),
-            ...[...this.tiles.values()].map(t => ({ x: t.x, y: t.y, w: 1, h: 1 }))
+            ...this.entities.valuesArray().map(e => ({ x: e.position.x, y: e.position.y, w: e.size.x, h: e.size.y })),
+            ...this.tiles.valuesArray().map(t => ({ x: t.x, y: t.y, w: 1, h: 1 }))
         ]
 
         const minX = data.reduce((min, d) => Math.min(min, d.x - d.w / 2), Infinity)
