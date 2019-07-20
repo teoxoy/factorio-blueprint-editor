@@ -302,7 +302,7 @@ actions.takePicture.bind({
         G.BPC.getLocalBounds()
         const region = G.BPC.getBlueprintBounds()
         const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1, region)
-        const canvas = G.app.renderer.plugins.extract.canvas(texture as PIXI.RenderTexture)
+        const canvas = G.app.renderer.plugins.extract.canvas(texture)
 
         canvas.toBlob(blob => {
             FileSaver.saveAs(blob, `${G.bp.name}.png`)
