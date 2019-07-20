@@ -142,8 +142,8 @@ class BlueprintContainer extends PIXI.Container {
         super()
 
         this.size = {
-            x: 400 * 32,
-            y: 400 * 32
+            x: 1000 * 32,
+            y: 1000 * 32
         }
 
         this.interactive = true
