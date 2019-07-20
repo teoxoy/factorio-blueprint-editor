@@ -425,27 +425,35 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    /** Transforms sparse entity numbers into consecutive ones and sorts them */
+    /** Transforms sparse entity numbers into consecutive ones */
     private processRawEntities(entities: BPS.IEntity[]): BPS.IEntity[] {
-        let entitiesJSON = JSON.stringify(entities)
+        const oldToNewID = new Map(new Array(entities.length).fill(0).map((_, i) => [entities[i].entity_number, i + 1]))
 
-        // Tag changed IDs with !
-        let ID = 1
-        entities.forEach(e => {
-            entitiesJSON = entitiesJSON.replace(
-                new RegExp(`"(entity_number|entity_id)":${e.entity_number}([,}])`, 'g'),
-                (_, c, c2) => `"${c}":!${ID}${c2}`
-            )
-            ID += 1
+        return entities.map(e => {
+            e.entity_number = oldToNewID.get(e.entity_number)
+
+            if (e.connections) {
+                for (const side in e.connections) {
+                    if (util.objectHasOwnProperty(e.connections, side)) {
+                        const SIDE = e.connections[side] as BPS.IConnSide | BPS.IWireColor[]
+                        if (Array.isArray(SIDE)) {
+                            for (const c of SIDE) {
+                                c.entity_id = oldToNewID.get(c.entity_id)
+                            }
+                        } else {
+                            for (const color in SIDE) {
+                                if (util.objectHasOwnProperty(SIDE, color)) {
+                                    for (const c of SIDE[color]) {
+                                        c.entity_id = oldToNewID.get(c.entity_id)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return e
         })
-
-        // Remove tag
-        entitiesJSON = entitiesJSON.replace(/"(entity_number|entity_id)":![0-9]+?[,}]/g, s => s.replace('!', ''))
-
-        const processedEntities = JSON.parse(entitiesJSON) as BPS.IEntity[]
-
-        // Sort entities by entity_number
-        return processedEntities.sort((a, b) => a.entity_number - b.entity_number)
     }
 
     public serialize(): BPS.IBlueprint {
