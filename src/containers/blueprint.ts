@@ -302,15 +302,6 @@ class BlueprintContainer extends PIXI.Container {
         return container === this
     }
 
-    public isContainerOutOfBpArea(newPos: IPoint, size: IPoint): boolean {
-        return (
-            newPos.x - size.x / 2 < -(this.size.x * this.anchor.x) / 32 ||
-            newPos.y - size.y / 2 < -(this.size.y * this.anchor.y) / 32 ||
-            newPos.x + size.x / 2 > (this.size.x * (1 - this.anchor.x)) / 32 ||
-            newPos.y + size.y / 2 > (this.size.y * (1 - this.anchor.y)) / 32
-        )
-    }
-
     private updateHoverContainer(forceRemove = false): void {
         const removeHoverContainer = (): void => {
             this.hoverContainer.pointerOutEventHandler()

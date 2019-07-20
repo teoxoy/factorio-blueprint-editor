@@ -56,12 +56,11 @@ export class EntityPaintContainer extends PaintContainer {
     private checkBuildable(): void {
         const position = this.getGridPosition()
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
-        const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, direction)
+
         if (
-            !G.BPC.isContainerOutOfBpArea(position, size) &&
-            (G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position) ||
-                G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position) ||
-                G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction))
+            G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position) ||
+            G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position) ||
+            G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)
         ) {
             this.blocked = false
         } else {
@@ -175,11 +174,6 @@ export class EntityPaintContainer extends PaintContainer {
         const fd = FD.entities[this.name]
         const position = this.getGridPosition()
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
-        const size = util.switchSizeBasedOnDirection(fd.size, direction)
-
-        if (G.BPC.isContainerOutOfBpArea(position, size)) {
-            return
-        }
 
         const frgEnt = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position)
         if (frgEnt) {
