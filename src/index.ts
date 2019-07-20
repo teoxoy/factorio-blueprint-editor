@@ -117,29 +117,6 @@ PIXI.GRAPHICS_CURVES.adaptive = true
 // PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
 // PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 
-function getMonitorRefreshRate(iterations = 10): Promise<number> {
-    return new Promise(resolve => {
-        const results: number[] = []
-        let lastTimestamp = 0
-        let i = 0
-
-        const fn = (timestamp: number): void => {
-            results.push(1000 / (timestamp - lastTimestamp))
-            lastTimestamp = timestamp
-            i += 1
-            if (i < iterations) {
-                requestAnimationFrame(fn)
-            } else {
-                resolve(Math.ceil(Math.max(...results)))
-            }
-        }
-        requestAnimationFrame(fn)
-    })
-}
-getMonitorRefreshRate().then(fps => {
-    PIXI.settings.TARGET_FPMS = fps / 1000
-})
-
 G.app = new PIXI.Application({ view: document.getElementById('editor') as HTMLCanvasElement })
 
 // https://github.com/pixijs/pixi.js/issues/3928
