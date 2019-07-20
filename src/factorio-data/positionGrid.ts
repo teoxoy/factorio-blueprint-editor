@@ -337,7 +337,7 @@ export class PositionGrid {
                 }
             }
         })
-        return entities
+        return [...new Set(entities)]
     }
 
     public getSurroundingEntities(area: IArea): Entity[] {
