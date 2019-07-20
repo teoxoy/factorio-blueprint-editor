@@ -33,7 +33,7 @@
         "keyboardjs": "^2.5.1",
         "pako": "^1.0.10",
         "pathfinding": "^0.4.18",
-        "pixi.js": "^5.0.4"
+        "pixi.js": "^5.1.0"
     },
     "devDependencies": {
         "@types/dat.gui": "^0.7.2",
