@@ -460,12 +460,12 @@ export default class Blueprint extends EventEmitter {
             e.position.x -= center.x
             e.position.y -= center.y
         }
-        const tileInfo = [...this.tiles].map(([k, v]) => ({
+        const tileInfo = this.tiles.valuesArray().map(tile => ({
             position: {
-                x: Number(k.split(',')[0]) - Math.floor(center.x) - 0.5,
-                y: Number(k.split(',')[1]) - Math.floor(center.y) - 0.5
+                x: Math.floor(tile.x) - Math.floor(center.x),
+                y: Math.floor(tile.y) - Math.floor(center.y)
             },
-            name: v.name
+            name: tile.name
         }))
         const iconData = this.icons.map((icon, i) => {
             const getItemTypeForBp = (name: string): 'virtual' | 'fluid' | 'item' => {
