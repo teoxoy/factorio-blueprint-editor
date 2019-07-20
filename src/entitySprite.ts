@@ -188,40 +188,6 @@ export class EntitySprite extends PIXI.Sprite {
         return this
     }
 
-    // Was needed for viewport culling but now with ParticleContainer we can't use viewport culling anymore
-    // private cacheLocalBounds() {
-    //     // CACHE LOCAL BOUNDS
-    //     let minX = this.texture.orig.width * -this.anchor.x * this.scale.x
-    //     let minY = this.texture.orig.height * -this.anchor.y * this.scale.y
-    //     let maxX = this.texture.orig.width * (1 - this.anchor.x) * this.scale.x
-    //     let maxY = this.texture.orig.height * (1 - this.anchor.y) * this.scale.y
-
-    //     if (this.rotation !== 0) {
-    //         const sin = Math.sin(this.rotation)
-    //         const cos = Math.cos(this.rotation)
-    //         // 01
-    //         // 23
-    //         const x0 = minX * cos - minY * sin
-    //         const y0 = minX * sin + minY * cos
-
-    //         const x1 = maxX * cos - minY * sin
-    //         const y1 = maxX * sin + minY * cos
-
-    //         const x2 = minX * cos - maxY * sin
-    //         const y2 = minX * sin + maxY * cos
-
-    //         const x3 = maxX * cos - maxY * sin
-    //         const y3 = maxX * sin + maxY * cos
-
-    //         minX = Math.min(x0, x1, x2, x3)
-    //         minY = Math.min(y0, y1, y2, y3)
-    //         maxX = Math.max(x0, x1, x2, x3)
-    //         maxY = Math.max(y0, y1, y2, y3)
-    //     }
-
-    //     // this.cachedBounds = [minX, minY, maxX, maxY]
-    // }
-
     public setPosition(position: IPoint): void {
         this.position.set(position.x + this.shift.x, position.y + this.shift.y)
     }
