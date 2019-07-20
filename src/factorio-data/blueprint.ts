@@ -82,9 +82,11 @@ export default class Blueprint extends EventEmitter {
             }
 
             if (data.entities !== undefined) {
-                this.m_nextEntityNumber += data.entities.length
+                const ENTITIES = this.processRawEntities(data.entities)
 
-                const firstEntity = data.entities.find(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
+                this.m_nextEntityNumber += ENTITIES.length
+
+                const firstEntity = ENTITIES.find(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
                 const firstEntitySize = util.rotatePointBasedOnDir(
                     [FD.entities[firstEntity.name].size.width / 2, FD.entities[firstEntity.name].size.height / 2],
                     firstEntity.direction || 0
@@ -96,26 +98,24 @@ export default class Blueprint extends EventEmitter {
                 }
 
                 // Approximate position of placeable_off_grid entities (i.e. landmines)
-                data.entities
-                    .filter(e => FD.entities[e.name].flags.includes('placeable_off_grid'))
-                    .forEach(e => {
-                        const size = util.rotatePointBasedOnDir(
-                            [FD.entities[e.name].size.width / 2, FD.entities[e.name].size.height / 2],
-                            e.direction || 0
-                        )
-                        // Take the offset into account for accurate positioning
-                        e.position.x = Math.round(e.position.x + offset.x - size.x) + size.x - offset.x
-                        e.position.y = Math.round(e.position.y + offset.y - size.y) + size.y - offset.y
-                    })
+                ENTITIES.filter(e => FD.entities[e.name].flags.includes('placeable_off_grid')).forEach(e => {
+                    const size = util.rotatePointBasedOnDir(
+                        [FD.entities[e.name].size.width / 2, FD.entities[e.name].size.height / 2],
+                        e.direction || 0
+                    )
+                    // Take the offset into account for accurate positioning
+                    e.position.x = Math.round(e.position.x + offset.x - size.x) + size.x - offset.x
+                    e.position.y = Math.round(e.position.y + offset.y - size.y) + size.y - offset.y
+                })
 
                 this.history.startTransaction()
 
-                data.entities.forEach(e => {
+                ENTITIES.forEach(e => {
                     this.wireConnections.createEntityConnections(e.entity_number, e.connections)
                 })
 
                 this.entities = new OurMap(
-                    data.entities.map(e => {
+                    ENTITIES.map(e => {
                         // remove connections from obj - connections are handled by wireConnections
                         delete e.connections
                         return this.createEntity({
@@ -425,13 +425,13 @@ export default class Blueprint extends EventEmitter {
         }
     }
 
-    private getEntitiesForExport(): BPS.IEntity[] {
-        const entityInfo = this.entities.valuesArray().map(e => e.serialize())
-        let entitiesJSON = JSON.stringify(entityInfo)
+    /** Transforms sparse entity numbers into consecutive ones and sorts them */
+    private processRawEntities(entities: BPS.IEntity[]): BPS.IEntity[] {
+        let entitiesJSON = JSON.stringify(entities)
 
-        // Tag changed ids with !
+        // Tag changed IDs with !
         let ID = 1
-        entityInfo.forEach(e => {
+        entities.forEach(e => {
             entitiesJSON = entitiesJSON.replace(
                 new RegExp(`"(entity_number|entity_id)":${e.entity_number}([,}])`, 'g'),
                 (_, c, c2) => `"${c}":!${ID}${c2}`
@@ -439,17 +439,20 @@ export default class Blueprint extends EventEmitter {
             ID += 1
         })
 
-        // Remove tag and sort
-        return JSON.parse(
-            entitiesJSON.replace(/"(entity_number|entity_id)":![0-9]+?[,}]/g, s => s.replace('!', ''))
-        ).sort((a: BPS.IEntity, b: BPS.IEntity) => a.entity_number - b.entity_number)
+        // Remove tag
+        entitiesJSON = entitiesJSON.replace(/"(entity_number|entity_id)":![0-9]+?[,}]/g, s => s.replace('!', ''))
+
+        const processedEntities = JSON.parse(entitiesJSON) as BPS.IEntity[]
+
+        // Sort entities by entity_number
+        return processedEntities.sort((a, b) => a.entity_number - b.entity_number)
     }
 
     public serialize(): BPS.IBlueprint {
         if (!this.icons.length) {
             this.generateIcons()
         }
-        const entityInfo = this.getEntitiesForExport()
+        const entityInfo = this.processRawEntities(this.entities.valuesArray().map(e => e.serialize()))
         const center = this.getCenter()
         const fR = this.getFirstRail()
         if (fR) {
