@@ -4,8 +4,8 @@ import G from '../common/globals'
 import { EntitySprite } from '../entitySprite'
 import util from '../common/util'
 import Entity from '../factorio-data/entity'
-import { UnderlayContainer } from './underlay'
 import { CursorBoxType } from './overlay'
+import { VisualizationArea } from './visualizationArea'
 
 const updateGroups = [
     {
@@ -74,7 +74,7 @@ const updateGroups = [
 export class EntityContainer {
     public static readonly mappings: Map<number, EntityContainer> = new Map()
 
-    private areaVisualization: PIXI.Sprite | PIXI.Sprite[]
+    private visualizationArea: VisualizationArea
     private entityInfo: PIXI.Container
     private entitySprites: EntitySprite[] = []
     /** This is only a reference */
@@ -89,7 +89,7 @@ export class EntityContainer {
 
         EntityContainer.mappings.set(this.m_Entity.entityNumber, this)
 
-        this.areaVisualization = G.BPC.underlayContainer.createNewArea(this.m_Entity.name, this.position)
+        this.visualizationArea = G.BPC.visualizationAreaContainer.create(this.m_Entity.name, this.position)
         this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entityNumber, this.position)
 
         this.redraw(false, sort)
@@ -134,9 +134,7 @@ export class EntityContainer {
             this.updateUndergroundLine()
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity)
-            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s =>
-                s.position.set(this.position.x, this.position.y)
-            )
+            this.visualizationArea.moveTo(this.position)
         })
 
         this.m_Entity.on('destroy', () => {
@@ -150,7 +148,7 @@ export class EntityContainer {
 
             this.cursorBox = undefined
 
-            UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
+            this.visualizationArea.destroy()
 
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()
@@ -203,18 +201,6 @@ export class EntityContainer {
         }
     }
 
-    public showVisualizationArea(): void {
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
-            s.visible = true
-        })
-    }
-
-    public hideVisualizationArea(): void {
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
-            s.visible = false
-        })
-    }
-
     private redrawEntityInfo(): void {
         if (
             this.m_Entity.moduleSlots !== 0 ||
@@ -246,7 +232,7 @@ export class EntityContainer {
         this.createUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(this.m_Entity)
-        this.showVisualizationArea()
+        this.visualizationArea.show()
     }
 
     public pointerOutEventHandler(): void {
@@ -254,7 +240,7 @@ export class EntityContainer {
         this.destroyUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(undefined)
-        this.hideVisualizationArea()
+        this.visualizationArea.hide()
     }
 
     private redrawSurroundingEntities(position: IPoint = this.m_Entity.position): void {

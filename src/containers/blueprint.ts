@@ -8,7 +8,7 @@ import Tile from '../factorio-data/tile'
 import { Viewport } from '../viewport'
 import { EntitySprite } from '../entitySprite'
 import { WiresContainer } from './wires'
-import { UnderlayContainer } from './underlay'
+import { VisualizationAreaContainer } from './visualizationArea'
 import { EntityContainer } from './entity'
 import { OverlayContainer } from './overlay'
 import { EntityPaintContainer } from './paintEntity'
@@ -122,7 +122,7 @@ class BlueprintContainer extends PIXI.Container {
     private grid: PIXI.TilingSprite
     public wiresContainer: WiresContainer
     public overlayContainer: OverlayContainer
-    public underlayContainer: UnderlayContainer
+    public visualizationAreaContainer: VisualizationAreaContainer
     private tilePaintSlot: PIXI.Container
     private entityPaintSlot: PIXI.Container
     private tileSprites: OptimizedContainer
@@ -168,7 +168,7 @@ class BlueprintContainer extends PIXI.Container {
         this.generateGrid(G.colors.pattern)
         this.tileSprites = new OptimizedContainer()
         this.tilePaintSlot = new PIXI.Container()
-        this.underlayContainer = new UnderlayContainer()
+        this.visualizationAreaContainer = new VisualizationAreaContainer()
         this.entitySprites = new OptimizedContainer()
         this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer()
@@ -177,7 +177,7 @@ class BlueprintContainer extends PIXI.Container {
         this.addChild(
             this.tileSprites,
             this.tilePaintSlot,
-            this.underlayContainer,
+            this.visualizationAreaContainer,
             this.entitySprites,
             this.wiresContainer,
             this.overlayContainer,
@@ -429,7 +429,7 @@ class BlueprintContainer extends PIXI.Container {
         const opt = { children: true }
         this.tileSprites.destroy(opt)
         this.tilePaintSlot.destroy(opt)
-        this.underlayContainer.destroy(opt)
+        this.visualizationAreaContainer.destroy(opt)
         this.entitySprites.destroy(opt)
         this.entityPaintSlot.destroy(opt)
         this.wiresContainer.destroy(opt)
@@ -444,7 +444,7 @@ class BlueprintContainer extends PIXI.Container {
 
         this.tileSprites = new OptimizedContainer()
         this.tilePaintSlot = new PIXI.Container()
-        this.underlayContainer = new UnderlayContainer()
+        this.visualizationAreaContainer = new VisualizationAreaContainer()
         this.entitySprites = new OptimizedContainer()
         this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer()
@@ -454,7 +454,7 @@ class BlueprintContainer extends PIXI.Container {
             this.grid,
             this.tileSprites,
             this.tilePaintSlot,
-            this.underlayContainer,
+            this.visualizationAreaContainer,
             this.entitySprites,
             this.wiresContainer,
             this.overlayContainer,

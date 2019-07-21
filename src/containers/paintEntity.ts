@@ -4,12 +4,11 @@ import G from '../common/globals'
 import util from '../common/util'
 import { EntitySprite } from '../entitySprite'
 import Entity from '../factorio-data/entity'
-import { EntityContainer } from './entity'
-import { UnderlayContainer } from './underlay'
 import { PaintContainer } from './paint'
+import { VisualizationArea } from './visualizationArea'
 
 export class EntityPaintContainer extends PaintContainer {
-    private areaVisualization: PIXI.Sprite | PIXI.Sprite[]
+    private visualizationArea: VisualizationArea
     private directionType: 'input' | 'output'
     private direction: number
     /** This is only a reference */
@@ -21,32 +20,29 @@ export class EntityPaintContainer extends PaintContainer {
         this.direction = direction
         this.directionType = FD.entities[name].type === 'loader' ? 'output' : 'input'
 
-        this.areaVisualization = G.BPC.underlayContainer.createNewArea(this.name)
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => {
-            s.alpha += 0.25
-            s.visible = true
-        })
-        G.BPC.underlayContainer.activateRelatedAreas(this.name)
+        this.visualizationArea = G.BPC.visualizationAreaContainer.create(this.name, this.position)
+        this.visualizationArea.highlight()
+        G.BPC.visualizationAreaContainer.activateRelatedAreas(this.name)
 
         this.moveAtCursor()
         this.redraw()
     }
 
     public hide(): void {
-        G.BPC.underlayContainer.deactivateActiveAreas()
+        G.BPC.visualizationAreaContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
         super.hide()
     }
 
     public show(): void {
-        G.BPC.underlayContainer.activateRelatedAreas(this.name)
+        G.BPC.visualizationAreaContainer.activateRelatedAreas(this.name)
         this.updateUndergroundLine()
         super.show()
     }
 
     public destroy(): void {
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
-        G.BPC.underlayContainer.deactivateActiveAreas()
+        this.visualizationArea.destroy()
+        G.BPC.visualizationAreaContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
         super.destroy()
     }
@@ -163,7 +159,7 @@ export class EntityPaintContainer extends PaintContainer {
         this.updateUndergroundBeltRotation()
         this.updateUndergroundLine()
 
-        UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.position.copyFrom(this.position))
+        this.visualizationArea.moveTo(this.position)
 
         this.checkBuildable()
     }
@@ -204,15 +200,12 @@ export class EntityPaintContainer extends PaintContainer {
         }
 
         if (G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)) {
-            const newEntity = G.bp.createEntity({
+            G.bp.createEntity({
                 name: this.name,
                 position,
                 direction,
                 type: fd.type === 'underground_belt' || fd.type === 'loader' ? this.directionType : undefined
             })
-
-            const ec = EntityContainer.mappings.get(newEntity.entityNumber)
-            ec.showVisualizationArea()
 
             if (fd.type === 'underground_belt' || this.name === 'pipe_to_ground') {
                 this.direction = (direction + 4) % 8
