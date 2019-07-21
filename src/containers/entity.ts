@@ -5,6 +5,7 @@ import { EntitySprite } from '../entitySprite'
 import util from '../common/util'
 import Entity from '../factorio-data/entity'
 import { UnderlayContainer } from './underlay'
+import { CursorBoxType } from './overlay'
 
 const updateGroups = [
     {
@@ -77,7 +78,7 @@ export class EntityContainer {
     private entityInfo: PIXI.Container
     private entitySprites: EntitySprite[] = []
     /** This is only a reference */
-    private cursorBox: PIXI.Container
+    private cursorBoxContainer: PIXI.Container
     /** This is only a reference */
     private undergroundLine: PIXI.Container
 
@@ -147,6 +148,8 @@ export class EntityContainer {
 
             EntityContainer.mappings.delete(this.m_Entity.entityNumber)
 
+            this.cursorBox = undefined
+
             UnderlayContainer.modifyVisualizationArea(this.areaVisualization, s => s.destroy())
 
             if (this.entityInfo !== undefined) {
@@ -166,13 +169,12 @@ export class EntityContainer {
         }
     }
 
-    private createCursorBox(): void {
-        this.cursorBox = G.BPC.overlayContainer.createCursorBox(this.position, this.m_Entity.size)
-    }
-
-    private destroyCursorBox(): void {
-        if (this.cursorBox) {
-            this.cursorBox.destroy()
+    public set cursorBox(type: CursorBoxType) {
+        if (this.cursorBoxContainer) {
+            this.cursorBoxContainer.destroy()
+        }
+        if (type !== undefined) {
+            this.cursorBoxContainer = G.BPC.overlayContainer.createCursorBox(this.position, this.m_Entity.size, type)
         }
     }
 
@@ -240,7 +242,7 @@ export class EntityContainer {
     }
 
     public pointerOverEventHandler(): void {
-        this.createCursorBox()
+        this.cursorBox = 'regular'
         this.createUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(this.m_Entity)
@@ -248,7 +250,7 @@ export class EntityContainer {
     }
 
     public pointerOutEventHandler(): void {
-        this.destroyCursorBox()
+        this.cursorBox = undefined
         this.destroyUndergroundLine()
 
         G.infoEntityPanel.updateVisualization(undefined)
