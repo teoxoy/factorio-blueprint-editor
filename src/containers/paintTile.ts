@@ -92,6 +92,10 @@ export class TilePaintContainer extends PaintContainer {
     }
 
     public removeContainerUnder(): void {
+        if (!this.visible) {
+            return
+        }
+
         const position = this.getGridPosition()
 
         G.bp.removeTiles(TilePaintContainer.getTilePositions().map(p => ({ x: p.x + position.x, y: p.y + position.y })))

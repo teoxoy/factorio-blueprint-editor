@@ -34,11 +34,13 @@ export class EntityPaintContainer extends PaintContainer {
 
     public hide(): void {
         G.BPC.underlayContainer.deactivateActiveAreas()
+        this.destroyUndergroundLine()
         super.hide()
     }
 
     public show(): void {
         G.BPC.underlayContainer.activateRelatedAreas(this.name)
+        this.updateUndergroundLine()
         super.show()
     }
 
@@ -97,7 +99,7 @@ export class EntityPaintContainer extends PaintContainer {
         this.destroyUndergroundLine()
         this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.name,
-            { x: this.position.x / 32, y: this.position.y / 32 },
+            this.getGridPosition(),
             this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
             this.name === 'pipe_to_ground' ? (this.direction + 4) % 8 : this.direction
         )
@@ -110,6 +112,10 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     public rotate(ccw = false): void {
+        if (!this.visible) {
+            return
+        }
+
         const pr = FD.entities[this.name].possible_rotations
         if (!pr) {
             return
@@ -136,6 +142,10 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     public moveAtCursor(): void {
+        if (!this.visible) {
+            return
+        }
+
         switch (this.name) {
             case 'straight_rail':
             case 'curved_rail':
@@ -159,11 +169,18 @@ export class EntityPaintContainer extends PaintContainer {
     }
 
     public removeContainerUnder(): void {
-        const entity = G.bp.entityPositionGrid.getEntityAtPosition(G.BPC.gridData.x32, G.BPC.gridData.y32)
-        if (entity) {
-            G.bp.removeEntity(entity)
-            this.checkBuildable()
+        if (!this.visible) {
+            return
         }
+
+        const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
+        const entities = G.bp.entityPositionGrid.getEntitiesInArea({
+            ...this.getGridPosition(),
+            w: size.x,
+            h: size.y
+        })
+        G.bp.removeEntities(entities)
+        this.checkBuildable()
     }
 
     public placeEntityContainer(): void {

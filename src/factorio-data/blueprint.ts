@@ -170,6 +170,12 @@ export default class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
+    public removeEntities(entities: Entity[]): void {
+        this.history.startTransaction('Remove entities')
+        entities.forEach(e => this.removeEntity(e))
+        this.history.commitTransaction()
+    }
+
     public fastReplaceEntity(entity: Entity, name: string, direction: number): void {
         this.history.startTransaction('Fast replace entity')
 
@@ -454,6 +460,21 @@ export default class Blueprint extends EventEmitter {
             }
             return e
         })
+    }
+
+    public getSubset(entityNumbers: number[]): BPS.IEntity[] {
+        const center = this.getCenter()
+        const entityInfo = this.processRawEntities(
+            this.entities
+                .valuesArray()
+                .filter(e => entityNumbers.includes(e.entityNumber))
+                .map(e => e.serialize())
+        )
+        for (const e of entityInfo) {
+            e.position.x -= center.x
+            e.position.y -= center.y
+        }
+        return entityInfo
     }
 
     public serialize(): BPS.IBlueprint {
