@@ -131,8 +131,7 @@ export class EntityPaintContainer extends PaintContainer {
                     direction: this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
                     directionType: this.directionType
                 },
-                G.quality.hr,
-                true
+                G.quality.hr
             )
         )
     }

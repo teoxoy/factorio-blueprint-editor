@@ -1,6 +1,6 @@
 import FD from 'factorio-data'
 import util from '../common/util'
-import Blueprint from './blueprint'
+import { PositionGrid } from './positionGrid'
 import Entity from './entity'
 
 interface IDrawData {
@@ -8,7 +8,7 @@ interface IDrawData {
     dir: number
 
     name: string
-    bp: Blueprint
+    positionGrid: PositionGrid
     position: IPoint
     generateConnector: boolean
 
@@ -170,7 +170,7 @@ function generateCovers(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
                     y: Math.floor(data.position.y + connection.y)
                 }
 
-                const ent = data.bp.entityPositionGrid.getEntityAtPosition(pos.x, pos.y)
+                const ent = data.positionGrid.getEntityAtPosition(pos.x, pos.y)
                 if (!ent) {
                     return true
                 }
@@ -218,7 +218,7 @@ function generateCovers(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
                 return true
             }
 
-            if (!data.bp || needsCover()) {
+            if (!data.positionGrid || needsCover()) {
                 let temp = getPipeCovers(e)[util.intToDir(dir)].layers[0]
                 temp = addToShift(connection, util.duplicate(temp))
                 if (dir === 4) {
@@ -287,8 +287,8 @@ function getHeatConectionPoints(e: FD.Entity): FD.Connections[] {
     }
 }
 
-function getHeatConnections(position: IPoint, bp: Blueprint): boolean[] {
-    return bp.entityPositionGrid.getNeighbourData(position).map(({ x, y, entity }) => {
+function getHeatConnections(position: IPoint, positionGrid: PositionGrid): boolean[] {
+    return positionGrid.getNeighbourData(position).map(({ x, y, entity }) => {
         if (!entity) {
             return false
         }
@@ -310,8 +310,12 @@ function getHeatConnections(position: IPoint, bp: Blueprint): boolean[] {
     })
 }
 
-function getBeltWireConnectionIndex(bp: Blueprint, position: IPoint, dir: number): 0 | 1 | 2 | 3 | 4 | 5 | 6 {
-    let C = bp.entityPositionGrid.getNeighbourData(position).map(d => {
+function getBeltWireConnectionIndex(
+    positionGrid: PositionGrid,
+    position: IPoint,
+    dir: number
+): 0 | 1 | 2 | 3 | 4 | 5 | 6 {
+    let C = positionGrid.getNeighbourData(position).map(d => {
         if (
             d.entity &&
             (d.entity.type === 'transport_belt' ||
@@ -363,15 +367,15 @@ function getBeltSprites(
     bas: FD.BeltAnimationSet,
     position: IPoint,
     direction: number,
-    blueprint?: Blueprint,
+    positionGrid?: PositionGrid,
     stratingEnding = true,
     endingEnding = true,
     forceStraight = false
 ): FD.SpriteData[] {
     const parts = []
 
-    if (blueprint) {
-        const conn = getConnForPos(blueprint, position, direction, forceStraight)
+    if (positionGrid) {
+        const conn = getConnForPos(positionGrid, position, direction, forceStraight)
 
         parts.push(getBeltSpriteFromData(bas, direction, conn.curve))
 
@@ -379,7 +383,7 @@ function getBeltSprites(
             let spawn = true
 
             if (conn.from) {
-                const C = getConnForPos(blueprint, conn.from, conn.from.entity.direction)
+                const C = getConnForPos(positionGrid, conn.from, conn.from.entity.direction)
 
                 if (
                     (C.from && C.from.x === Math.floor(position.x) && C.from.y === Math.floor(position.y)) ||
@@ -403,7 +407,7 @@ function getBeltSprites(
             let spawn = true
 
             if (conn.to) {
-                const C = getConnForPos(blueprint, conn.to, conn.to.entity.direction)
+                const C = getConnForPos(positionGrid, conn.to, conn.to.entity.direction)
                 if (
                     (C.from && C.from.x === Math.floor(position.x) && C.from.y === Math.floor(position.y)) ||
                     (C.to && C.to.x === Math.floor(position.x) && C.to.y === Math.floor(position.y))
@@ -455,8 +459,13 @@ function getBeltSprites(
         curve: 'straight' | 'rightCurve' | 'leftCurve'
     }
 
-    function getConnForPos(blueprint: Blueprint, pos: IPoint, direction: number, forceStraight = false): IConnection {
-        let C = blueprint.entityPositionGrid.getNeighbourData(pos).map(d => {
+    function getConnForPos(
+        positionGrid: PositionGrid,
+        pos: IPoint,
+        direction: number,
+        forceStraight = false
+    ): IConnection {
+        let C = positionGrid.getNeighbourData(pos).map(d => {
             if (
                 d.entity &&
                 (d.entity.type === 'transport_belt' ||
@@ -484,7 +493,7 @@ function getBeltSprites(
             }
         })
 
-        const entAtPos = blueprint.entityPositionGrid.getEntityAtPosition(pos.x, pos.y)
+        const entAtPos = positionGrid.getEntityAtPosition(pos.x, pos.y)
         if (
             forceStraight ||
             entAtPos.type === 'splitter' ||
@@ -739,7 +748,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
         case 'heat_exchanger':
             return (data: IDrawData) => {
                 let needsEnding = true
-                if (data.bp) {
+                if (data.positionGrid) {
                     const conn = getHeatConectionPoints(e)[0]
                     const pos = util.rotatePointBasedOnDir(conn.position, data.dir)
                     const c = getHeatConnections(
@@ -747,7 +756,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                             x: Math.floor(data.position.x + pos.x),
                             y: Math.floor(data.position.y + pos.y)
                         },
-                        data.bp
+                        data.positionGrid
                     )
                     needsEnding = !c[((data.dir + conn.direction) % 8) / 2]
                 }
@@ -898,10 +907,10 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
                 }
 
-                if (data.bp && e.name === 'straight_rail' && (dir === 0 || dir === 2)) {
+                if (data.positionGrid && e.name === 'straight_rail' && (dir === 0 || dir === 2)) {
                     const size = util.switchSizeBasedOnDirection(e.size, dir)
 
-                    const railBases = data.bp.entityPositionGrid
+                    const railBases = data.positionGrid
                         .getEntitiesInArea({
                             x: data.position.x,
                             y: data.position.y,
@@ -975,13 +984,13 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 const patches = []
                 for (let i = 0; i < conn.length; i++) {
                     let patchSheet = e.connection_patches_disconnected.sheet
-                    if (data.bp) {
+                    if (data.positionGrid) {
                         const c = getHeatConnections(
                             {
                                 x: Math.floor(data.position.x) + conn[i].position[0],
                                 y: Math.floor(data.position.y) + conn[i].position[1]
                             },
-                            data.bp
+                            data.positionGrid
                         )
                         if (c[conn[i].direction / 2]) {
                             patchSheet = e.connection_patches_connected.sheet
@@ -997,10 +1006,10 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             return (data: IDrawData) => {
                 const pictures = e.pictures as FD.WallPictures
 
-                if (data.bp) {
+                if (data.positionGrid) {
                     const sprites = []
 
-                    const conn = data.bp.entityPositionGrid
+                    const conn = data.positionGrid
                         .getNeighbourData(data.position)
                         .map(
                             ({ entity, relDir }) =>
@@ -1033,7 +1042,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         duplicateAndSetPropertyUsing(wall, 'x', 'width', util.getRandomInt(0, wall.line_length))
                     )
 
-                    const neighbourDirections = data.bp.entityPositionGrid
+                    const neighbourDirections = data.positionGrid
                         .getNeighbourData(data.position)
                         .filter(
                             ({ entity, relDir }) => entity && entity.name === 'gate' && entity.direction === relDir % 4
@@ -1056,7 +1065,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
                     const spawnFilling = [[-1, 0], [-1, 1], [0, 1]]
                         .map(o => {
-                            const ent = data.bp.entityPositionGrid.getEntityAtPosition(
+                            const ent = data.positionGrid.getEntityAtPosition(
                                 data.position.x + o[0],
                                 data.position.y + o[1]
                             )
@@ -1089,9 +1098,9 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
         case 'gate':
             return (data: IDrawData) => {
                 function getBaseSprites(): FD.SpriteData[] {
-                    if (data.bp) {
+                    if (data.positionGrid) {
                         const size = util.switchSizeBasedOnDirection(e.size, data.dir)
-                        const rail = data.bp.entityPositionGrid.findInArea(
+                        const rail = data.positionGrid.findInArea(
                             {
                                 x: data.position.x,
                                 y: data.position.y,
@@ -1121,8 +1130,8 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     return [e.horizontal_animation.layers[0]]
                 }
 
-                if (data.dir === 0 && data.bp) {
-                    const wall = data.bp.entityPositionGrid.getEntityAtPosition(data.position.x, data.position.y + 1)
+                if (data.dir === 0 && data.positionGrid) {
+                    const wall = data.positionGrid.getEntityAtPosition(data.position.x, data.position.y + 1)
                     if (wall && wall.name === 'stone_wall') {
                         return [...getBaseSprites(), e.wall_patch.layers[0]]
                     }
@@ -1134,55 +1143,53 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
         case 'infinity_pipe':
             return (data: IDrawData) => {
                 const pictures = e.pictures as FD.PipePictures
-                if (data.bp) {
-                    const conn = data.bp.entityPositionGrid
-                        .getNeighbourData(data.position)
-                        .map(({ entity, relDir }) => {
-                            if (!entity) {
-                                return false
-                            }
+                if (data.positionGrid) {
+                    const conn = data.positionGrid.getNeighbourData(data.position).map(({ entity, relDir }) => {
+                        if (!entity) {
+                            return false
+                        }
 
-                            if (entity.name === 'pipe' || entity.name === 'infinity_pipe') {
-                                return true
-                            }
-                            if (entity.name === 'pipe_to_ground' && entity.direction === (relDir + 4) % 8) {
-                                return true
-                            }
+                        if (entity.name === 'pipe' || entity.name === 'infinity_pipe') {
+                            return true
+                        }
+                        if (entity.name === 'pipe_to_ground' && entity.direction === (relDir + 4) % 8) {
+                            return true
+                        }
 
-                            if (
-                                (entity.name === 'assembling_machine_2' || entity.name === 'assembling_machine_3') &&
-                                !entity.assemblerCraftsWithFluid
-                            ) {
-                                return false
-                            }
-                            if (
-                                entity.name === 'chemical_plant' &&
-                                entity.chemicalPlantDontConnectOutput &&
-                                entity.direction === relDir
-                            ) {
-                                return false
-                            }
+                        if (
+                            (entity.name === 'assembling_machine_2' || entity.name === 'assembling_machine_3') &&
+                            !entity.assemblerCraftsWithFluid
+                        ) {
+                            return false
+                        }
+                        if (
+                            entity.name === 'chemical_plant' &&
+                            entity.chemicalPlantDontConnectOutput &&
+                            entity.direction === relDir
+                        ) {
+                            return false
+                        }
 
-                            if (
-                                entity.entityData.fluid_box ||
-                                entity.entityData.output_fluid_box ||
-                                entity.entityData.fluid_boxes
-                            ) {
-                                const connections = getPipeConnectionPoints(
-                                    entity.entityData,
-                                    entity.direction,
-                                    entity.assemblerPipeDirection
-                                )
-                                for (const connection of connections) {
-                                    if (
-                                        Math.floor(data.position.x) === Math.floor(entity.position.x + connection.x) &&
-                                        Math.floor(data.position.y) === Math.floor(entity.position.y + connection.y)
-                                    ) {
-                                        return true
-                                    }
+                        if (
+                            entity.entityData.fluid_box ||
+                            entity.entityData.output_fluid_box ||
+                            entity.entityData.fluid_boxes
+                        ) {
+                            const connections = getPipeConnectionPoints(
+                                entity.entityData,
+                                entity.direction,
+                                entity.assemblerPipeDirection
+                            )
+                            for (const connection of connections) {
+                                if (
+                                    Math.floor(data.position.x) === Math.floor(entity.position.x + connection.x) &&
+                                    Math.floor(data.position.y) === Math.floor(entity.position.y + connection.y)
+                                ) {
+                                    return true
                                 }
                             }
-                        })
+                        }
+                    })
 
                     if (conn[0] && conn[1] && conn[2] && conn[3]) {
                         return [pictures.cross]
@@ -1238,8 +1245,8 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             }
         case 'heat_pipe':
             return (data: IDrawData) => {
-                if (data.bp) {
-                    const conn = getHeatConnections(data.position, data.bp)
+                if (data.positionGrid) {
+                    const conn = getHeatConnections(data.position, data.positionGrid)
                     if (conn[0] && conn[1] && conn[2] && conn[3]) {
                         return [util.getRandomItem(e.connection_sprites.cross)]
                     }
@@ -1309,14 +1316,14 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
                 const belt0Parts = getBeltSprites(
                     e.belt_animation_set,
-                    data.bp
+                    data.positionGrid
                         ? {
                               x: data.position.x + b0Offset.x,
                               y: data.position.y + b0Offset.y
                           }
                         : b0Offset,
                     data.dir,
-                    data.bp,
+                    data.positionGrid,
                     true,
                     true,
                     true
@@ -1324,14 +1331,14 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
                 const belt1Parts = getBeltSprites(
                     e.belt_animation_set,
-                    data.bp
+                    data.positionGrid
                         ? {
                               x: data.position.x + b1Offset.x,
                               y: data.position.y + b1Offset.y
                           }
                         : b1Offset,
                     data.dir,
-                    data.bp,
+                    data.positionGrid,
                     true,
                     true,
                     true
@@ -1352,7 +1359,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     e.belt_animation_set,
                     data.position,
                     data.dir,
-                    data.bp,
+                    data.positionGrid,
                     isInput,
                     !isInput,
                     true
@@ -1377,8 +1384,8 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 let sideloadingBack = false
                 let sideloadingFront = false
 
-                if (data.bp && (dir === 2 || dir === 6)) {
-                    let C = data.bp.entityPositionGrid.getNeighbourData(data.position).map(d => {
+                if (data.positionGrid && (dir === 2 || dir === 6)) {
+                    let C = data.positionGrid.getNeighbourData(data.position).map(d => {
                         if (
                             d.entity &&
                             (d.entity.type === 'transport_belt' ||
@@ -1439,8 +1446,8 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             }
         case 'transport_belt':
             return (data: IDrawData) => {
-                if (data.generateConnector && data.bp) {
-                    const connIndex = getBeltWireConnectionIndex(data.bp, data.position, data.dir)
+                if (data.generateConnector && data.positionGrid) {
+                    const connIndex = getBeltWireConnectionIndex(data.positionGrid, data.position, data.dir)
                     const patchIndex = (() => {
                         switch (connIndex) {
                             case 1:
@@ -1459,7 +1466,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         sprites.push(duplicateAndSetPropertyUsing(patch, 'x', 'width', patchIndex))
                     }
 
-                    sprites.push(...getBeltSprites(e.belt_animation_set, data.position, data.dir, data.bp))
+                    sprites.push(...getBeltSprites(e.belt_animation_set, data.position, data.dir, data.positionGrid))
 
                     let frame = e.connector_frame_sprites.frame_main.sheet
                     frame = duplicateAndSetPropertyUsing(frame, 'x', 'width', 1)
@@ -1467,7 +1474,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
                     return sprites
                 }
-                return [...getBeltSprites(e.belt_animation_set, data.position, data.dir, data.bp)]
+                return [...getBeltSprites(e.belt_animation_set, data.position, data.dir, data.positionGrid)]
             }
         case 'inserter':
             return (data: IDrawData) => {
@@ -1595,7 +1602,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     e.belt_animation_set,
                     data.position,
                     data.dir,
-                    data.bp,
+                    data.positionGrid,
                     isInput,
                     !isInput,
                     true

@@ -3,6 +3,7 @@ import spriteDataBuilder from './factorio-data/spriteDataBuilder'
 import Entity from './factorio-data/entity'
 import G from './common/globals'
 import F from './controls/functions'
+import { PositionGrid } from './factorio-data/positionGrid'
 
 interface IEntityData {
     name: string
@@ -30,16 +31,16 @@ export class EntitySprite extends PIXI.Sprite {
         return this.nextID
     }
 
-    public static getParts(entity: IEntityData | Entity, hr: boolean, ignoreConnections?: boolean): EntitySprite[] {
+    public static getParts(entity: IEntityData | Entity, hr: boolean, positionGrid?: PositionGrid): EntitySprite[] {
         const anims = spriteDataBuilder.getSpriteData({
             hr,
             dir:
-                !ignoreConnections && entity.type === 'electric_pole' && entity instanceof Entity
+                positionGrid && entity.type === 'electric_pole' && entity instanceof Entity
                     ? G.BPC.wiresContainer.getPowerPoleDirection(entity)
                     : entity.direction,
 
             name: entity.name,
-            bp: ignoreConnections ? undefined : G.bp,
+            positionGrid,
             position: entity.position,
             generateConnector: entity.generateConnector,
 

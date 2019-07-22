@@ -775,7 +775,7 @@ export default class Entity extends EventEmitter {
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[
-                spriteDataBuilder.getBeltWireConnectionIndex(this.m_BP, this.position, direction) * 4
+                spriteDataBuilder.getBeltWireConnectionIndex(this.m_BP.entityPositionGrid, this.position, direction) * 4
             ].wire[color]
         }
         if (e.circuit_wire_connection_points.length === 8) {

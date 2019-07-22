@@ -293,7 +293,11 @@ export class EntityContainer {
             s.destroy()
         }
         this.entitySprites = []
-        for (const s of EntitySprite.getParts(this.m_Entity, G.quality.hr, ignoreConnections)) {
+        for (const s of EntitySprite.getParts(
+            this.m_Entity,
+            G.quality.hr,
+            ignoreConnections ? undefined : G.bp.entityPositionGrid
+        )) {
             s.setPosition(this.position)
             this.entitySprites.push(s)
         }
