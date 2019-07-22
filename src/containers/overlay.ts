@@ -24,15 +24,17 @@ const cursorBoxTypeToOffset = (type: CursorBoxType): number => {
     }
 }
 
-export class OverlayContainer extends PIXI.Container {
+class OverlayContainer extends PIXI.Container {
     private readonly entityInfos = new PIXI.Container()
     private readonly cursorBoxes = new PIXI.Container()
     private readonly undergroundLines = new PIXI.Container()
+    private readonly selectionArea = new PIXI.Graphics()
+    private selectionAreaUpdateFn: (endX: number, endY: number) => void
 
     public constructor() {
         super()
 
-        this.addChild(this.entityInfos, this.cursorBoxes, this.undergroundLines)
+        this.addChild(this.entityInfos, this.cursorBoxes, this.undergroundLines, this.selectionArea)
     }
 
     public toggleEntityInfoVisibility(): void {
@@ -543,4 +545,33 @@ export class OverlayContainer extends PIXI.Container {
             }
         }
     }
+
+    public showSelectionArea(color: number): void {
+        const startPos = { x: G.BPC.gridData.x, y: G.BPC.gridData.y }
+
+        this.selectionAreaUpdateFn = (endX: number, endY: number) => {
+            const X = Math.min(startPos.x, endX)
+            const Y = Math.min(startPos.y, endY)
+            const W = Math.abs(endX - startPos.x)
+            const H = Math.abs(endY - startPos.y)
+
+            this.selectionArea
+                .clear()
+                .lineStyle(2 / G.BPC.getViewportScale(), color)
+                .moveTo(X, Y)
+                .lineTo(X + W, Y)
+                .lineTo(X + W, Y + H)
+                .lineTo(X, Y + H)
+                .lineTo(X, Y)
+        }
+
+        G.BPC.gridData.on('update', this.selectionAreaUpdateFn)
+    }
+
+    public hideSelectionArea(): void {
+        this.selectionArea.clear()
+        G.BPC.gridData.off('update', this.selectionAreaUpdateFn)
+    }
 }
+
+export { CursorBoxType, OverlayContainer }

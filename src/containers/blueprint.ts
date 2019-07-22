@@ -15,6 +15,7 @@ import { EntityPaintContainer } from './paintEntity'
 import { TileContainer } from './tile'
 import { TilePaintContainer } from './paintTile'
 import { PaintContainer } from './paint'
+import { BlueprintPaintContainer } from './paintBlueprint'
 
 enum EditorMode {
     /** Default */
@@ -24,7 +25,11 @@ enum EditorMode {
     /** Active when "painting" */
     PAINT,
     /** Active when panning */
-    PAN
+    PAN,
+    /** Active when selecting multiple entities for copy/stamp */
+    COPY,
+    /** Active when selecting multiple entities for deletion */
+    DELETE
 }
 
 class GridData extends EventEmitter {
@@ -137,6 +142,10 @@ class BlueprintContainer extends PIXI.Container {
         x: 0.5,
         y: 0.5
     }
+    private copyModeEntities: Entity[] = []
+    private deleteModeEntities: Entity[] = []
+    private copyModeUpdateFn: (endX: number, endY: number) => void
+    private deleteModeUpdateFn: (endX: number, endY: number) => void
 
     public constructor() {
         super()
@@ -271,6 +280,120 @@ class BlueprintContainer extends PIXI.Container {
     private setMode(mode: EditorMode): void {
         this._mode = mode
         this.emit('mode', mode)
+    }
+
+    public enterCopyMode(): void {
+        if (this.mode === EditorMode.COPY) {
+            return
+        }
+
+        this.updateHoverContainer(true)
+        this.setMode(EditorMode.COPY)
+
+        this.overlayContainer.showSelectionArea(0x00d400)
+
+        const startPos = { x: G.BPC.gridData.x32, y: G.BPC.gridData.y32 }
+        this.copyModeUpdateFn = (endX: number, endY: number) => {
+            const X = Math.min(startPos.x, endX)
+            const Y = Math.min(startPos.y, endY)
+            const W = Math.abs(endX - startPos.x) + 1
+            const H = Math.abs(endY - startPos.y) + 1
+
+            this.copyModeEntities.forEach(e => {
+                EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
+            })
+
+            this.copyModeEntities = G.bp.entityPositionGrid.getEntitiesInArea({
+                x: X + W / 2,
+                y: Y + H / 2,
+                w: W,
+                h: H
+            })
+
+            this.copyModeEntities.forEach(e => {
+                EntityContainer.mappings.get(e.entityNumber).cursorBox = 'copy'
+            })
+        }
+        this.copyModeUpdateFn(startPos.x, startPos.y)
+        this.gridData.on('update32', this.copyModeUpdateFn)
+    }
+
+    public exitCopyMode(cancel = false): void {
+        if (this.mode !== EditorMode.COPY) {
+            return
+        }
+
+        this.overlayContainer.hideSelectionArea()
+        this.gridData.off('update32', this.copyModeUpdateFn)
+
+        this.setMode(EditorMode.NONE)
+        this.updateHoverContainer()
+
+        if (!cancel && this.copyModeEntities.length !== 0) {
+            this.spawnPaintContainer(this.copyModeEntities)
+        }
+        this.copyModeEntities.forEach(e => {
+            EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
+        })
+        this.copyModeEntities = []
+    }
+
+    public enterDeleteMode(): void {
+        if (this.mode === EditorMode.DELETE) {
+            return
+        }
+
+        this.updateHoverContainer(true)
+        this.setMode(EditorMode.DELETE)
+
+        this.overlayContainer.showSelectionArea(0xff3200)
+
+        const startPos = { x: G.BPC.gridData.x32, y: G.BPC.gridData.y32 }
+        this.deleteModeUpdateFn = (endX: number, endY: number) => {
+            const X = Math.min(startPos.x, endX)
+            const Y = Math.min(startPos.y, endY)
+            const W = Math.abs(endX - startPos.x) + 1
+            const H = Math.abs(endY - startPos.y) + 1
+
+            this.deleteModeEntities.forEach(e => {
+                EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
+            })
+
+            this.deleteModeEntities = G.bp.entityPositionGrid.getEntitiesInArea({
+                x: X + W / 2,
+                y: Y + H / 2,
+                w: W,
+                h: H
+            })
+
+            this.deleteModeEntities.forEach(e => {
+                EntityContainer.mappings.get(e.entityNumber).cursorBox = 'not_allowed'
+            })
+        }
+        this.deleteModeUpdateFn(startPos.x, startPos.y)
+        this.gridData.on('update32', this.deleteModeUpdateFn)
+    }
+
+    public exitDeleteMode(cancel = false): void {
+        if (this.mode !== EditorMode.DELETE) {
+            return
+        }
+
+        this.overlayContainer.hideSelectionArea()
+        this.gridData.off('update32', this.deleteModeUpdateFn)
+
+        this.setMode(EditorMode.NONE)
+        this.updateHoverContainer()
+
+        if (cancel) {
+            this.deleteModeEntities.forEach(e => {
+                EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
+            })
+        } else {
+            G.bp.removeEntities(this.deleteModeEntities)
+        }
+
+        this.deleteModeEntities = []
     }
 
     public enterPanMode(): void {
@@ -537,11 +660,7 @@ class BlueprintContainer extends PIXI.Container {
         return new PIXI.Rectangle(X, Y, W, H)
     }
 
-    public spawnPaintContainer(itemName: string, direction = 0): void {
-        const itemData = FD.items[itemName]
-        const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
-        const placeResult = itemData.place_result || tileResult
-
+    public spawnPaintContainer(itemNameOrEntities: string | Entity[], direction = 0): void {
         if (this.mode === EditorMode.PAINT) {
             this.paintContainer.destroy()
         }
@@ -550,11 +669,20 @@ class BlueprintContainer extends PIXI.Container {
         this.setMode(EditorMode.PAINT)
         this.cursor = 'pointer'
 
-        if (tileResult) {
-            this.paintContainer = new TilePaintContainer(placeResult)
-            this.tilePaintSlot.addChild(this.paintContainer)
+        if (typeof itemNameOrEntities === 'string') {
+            const itemData = FD.items[itemNameOrEntities]
+            const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
+            const placeResult = itemData.place_result || tileResult
+
+            if (tileResult) {
+                this.paintContainer = new TilePaintContainer(placeResult)
+                this.tilePaintSlot.addChild(this.paintContainer)
+            } else {
+                this.paintContainer = new EntityPaintContainer(placeResult, direction)
+                this.entityPaintSlot.addChild(this.paintContainer)
+            }
         } else {
-            this.paintContainer = new EntityPaintContainer(placeResult, direction)
+            this.paintContainer = new BlueprintPaintContainer(itemNameOrEntities)
             this.entityPaintSlot.addChild(this.paintContainer)
         }
 

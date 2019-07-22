@@ -201,7 +201,10 @@ const actions = {
     moveEntityLeft: new Action('left'),
     moveEntityDown: new Action('down'),
     moveEntityRight: new Action('right'),
+
     generateOilOutpost: new Action('g'),
+    copySelection: new Action('modifier+lclick'),
+    deleteSelection: new Action('modifier+rclick'),
 
     moveUp: new Action('w'),
     moveLeft: new Action('a'),

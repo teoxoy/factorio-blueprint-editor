@@ -12,6 +12,9 @@ class QuickbarSlot extends Slot {
     }
 
     public assignItem(itemName: string): void {
+        if (itemName === 'blueprint') {
+            return
+        }
         this.data = itemName
         this.content = F.CreateIcon(itemName, false)
     }

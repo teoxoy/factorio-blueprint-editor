@@ -380,6 +380,8 @@ actions.pipette.bind({
         } else if (G.BPC.mode === EditorMode.PAINT) {
             G.BPC.paintContainer.destroy()
         }
+        G.BPC.exitCopyMode(true)
+        G.BPC.exitDeleteMode(true)
     }
 })
 
@@ -420,6 +422,15 @@ actions.generateOilOutpost.bind({
             createToast({ text: errorMessage, type: 'warning' })
         }
     }
+})
+
+actions.copySelection.bind({
+    press: () => G.BPC.enterCopyMode(),
+    release: () => G.BPC.exitCopyMode()
+})
+actions.deleteSelection.bind({
+    press: () => G.BPC.enterDeleteMode(),
+    release: () => G.BPC.exitDeleteMode()
 })
 
 actions.pan.bind({

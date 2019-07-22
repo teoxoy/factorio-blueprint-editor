@@ -63,11 +63,14 @@ export default class Blueprint extends EventEmitter {
 
     private m_nextEntityNumber = 1
 
-    public constructor(data?: BPS.IBlueprint) {
+    public constructor(data?: Partial<BPS.IBlueprint>) {
         super()
 
         if (data) {
-            this.name = data.label
+            if (data.label) {
+                this.name = data.label
+            }
+
             if (data.icons) {
                 data.icons.forEach(icon => {
                     this.icons[icon.index - 1] = icon.signal.name

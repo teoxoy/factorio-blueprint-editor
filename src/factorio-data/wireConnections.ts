@@ -128,7 +128,7 @@ class ConnectionMap extends Map<string, IConnection> {
     }
 }
 
-export class WireConnections extends EventEmitter {
+class WireConnections extends EventEmitter {
     private bp: Blueprint
     private readonly connections = new ConnectionMap()
 
@@ -137,7 +137,7 @@ export class WireConnections extends EventEmitter {
         this.bp = bp
     }
 
-    private create(connection: IConnection): void {
+    public create(connection: IConnection): void {
         const hash = hashConn(connection)
         if (this.connections.has(hash)) {
             return
@@ -204,3 +204,5 @@ export class WireConnections extends EventEmitter {
         return serialize(entityNumber, connections)
     }
 }
+
+export { deserialize, serialize, WireConnections }
