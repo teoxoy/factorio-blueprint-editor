@@ -130,22 +130,30 @@ class VisualizationAreaContainer extends PIXI.Container {
 
     public activateRelatedAreas(entityName: string): void {
         const ed = FD.entities[entityName]
-        getDataForVisualizationArea(entityName).forEach(data => this.active.push(data.type))
+
+        const toActivate = new Set<Type>()
+        getDataForVisualizationArea(entityName).forEach(data => toActivate.add(data.type))
+
         if (ed.type === 'logistic_container') {
-            this.active.push('logistics0', 'logistics1')
+            toActivate.add('logistics0')
+            toActivate.add('logistics1')
         }
         if (ed.energy_source && ed.energy_source.type === 'electric') {
-            this.active.push('poles')
+            toActivate.add('poles')
         }
         if (ed.module_specification) {
-            this.active.push('beacons')
+            toActivate.add('beacons')
         }
 
-        for (const type of this.active) {
+        this.active.forEach(type => toActivate.delete(type))
+
+        for (const type of toActivate) {
             for (const s of this[type].children) {
                 s.visible = true
             }
         }
+
+        this.active.push(...[...toActivate])
     }
 
     public deactivateActiveAreas(): void {
