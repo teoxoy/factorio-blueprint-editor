@@ -25,6 +25,7 @@ Example link that uses url query parameters: https://teoxoy.github.io/factorio-b
 # Features
 - rendering and editing blueprints
 - history (undo/redo)
+- copy and delete selections
 - import blueprints and books from multiple sources (direct bp string, pastebin, hastebin, gist, gitlab, factorioprints, google docs)
 - generating blueprint images
 - oil outpost generator
