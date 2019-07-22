@@ -77,9 +77,40 @@ export default class Blueprint extends EventEmitter {
                 })
             }
 
+            const positionData = [
+                ...(data.entities || [])
+                    .filter(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
+                    .map(entity => {
+                        const size = util.switchSizeBasedOnDirection(FD.entities[entity.name].size, entity.direction)
+                        return { x: entity.position.x, y: entity.position.y, w: size.x, h: size.y }
+                    }),
+                ...(data.tiles || []).map(tile => ({
+                    x: tile.position.x + 0.5,
+                    y: tile.position.y + 0.5,
+                    w: 1,
+                    h: 1
+                }))
+            ]
+            const minX = positionData.reduce((min, d) => Math.min(min, d.x - d.w / 2), Infinity)
+            const minY = positionData.reduce((min, d) => Math.min(min, d.y - d.h / 2), Infinity)
+            const maxX = positionData.reduce((max, d) => Math.max(max, d.x + d.w / 2), -Infinity)
+            const maxY = positionData.reduce((max, d) => Math.max(max, d.y + d.h / 2), -Infinity)
+            // The offset takes into account that the center of the blueprint might be shifted
+            const offset = {
+                x: -Math.floor((minX + maxX) / 2) + (minX % 1),
+                y: -Math.floor((minY + maxY) / 2) + (minY % 1)
+            }
+
             if (data.tiles) {
                 this.tiles = new OurMap(
-                    data.tiles.map(tile => new Tile(tile.name, tile.position.x + 0.5, tile.position.y + 0.5)),
+                    data.tiles.map(
+                        tile =>
+                            new Tile(
+                                tile.name,
+                                Math.floor(tile.position.x + offset.x) + 0.5,
+                                Math.floor(tile.position.y + offset.y) + 0.5
+                            )
+                    ),
                     t => t.hash
                 )
             }
@@ -88,17 +119,6 @@ export default class Blueprint extends EventEmitter {
                 const ENTITIES = this.processRawEntities(data.entities)
 
                 this.m_nextEntityNumber += ENTITIES.length
-
-                const firstEntity = ENTITIES.find(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
-                const firstEntitySize = util.rotatePointBasedOnDir(
-                    [FD.entities[firstEntity.name].size.width / 2, FD.entities[firstEntity.name].size.height / 2],
-                    firstEntity.direction || 0
-                )
-
-                const offset = {
-                    x: (firstEntity.position.x - firstEntitySize.x) % 1,
-                    y: (firstEntity.position.y - firstEntitySize.y) % 1
-                }
 
                 // Approximate position of placeable_off_grid entities (i.e. landmines)
                 ENTITIES.filter(e => FD.entities[e.name].flags.includes('placeable_off_grid')).forEach(e => {
