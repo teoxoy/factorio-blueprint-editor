@@ -462,21 +462,6 @@ export default class Blueprint extends EventEmitter {
         })
     }
 
-    public getSubset(entityNumbers: number[]): BPS.IEntity[] {
-        const center = this.getCenter()
-        const entityInfo = this.processRawEntities(
-            this.entities
-                .valuesArray()
-                .filter(e => entityNumbers.includes(e.entityNumber))
-                .map(e => e.serialize())
-        )
-        for (const e of entityInfo) {
-            e.position.x -= center.x
-            e.position.y -= center.y
-        }
-        return entityInfo
-    }
-
     public serialize(): BPS.IBlueprint {
         if (!this.icons.length) {
             this.generateIcons()
