@@ -409,7 +409,10 @@ export default class Blueprint extends EventEmitter {
         ]
 
         if (!this.entities.isEmpty()) {
-            const getSize = (name: string): number => FD.entities[name].size.width * FD.entities[name].size.height
+            const getSize = (name: string): number => {
+                const entity = FD.entities[FD.items[name].place_result]
+                return entity.size.width * entity.size.height
+            }
             const getItemScore = (item: [string, number]): number => getSize(item[0]) * item[1]
 
             const iconPairs = getIconPairs(this.entities.valuesArray(), Entity.getItemName).sort(
