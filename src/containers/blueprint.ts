@@ -125,6 +125,7 @@ class OptimizedContainer extends PIXI.ParticleContainer {
 
 class BlueprintContainer extends PIXI.Container {
     private grid: PIXI.TilingSprite
+    private chunkGrid: PIXI.TilingSprite
     public wiresContainer: WiresContainer
     public overlayContainer: OverlayContainer
     public visualizationAreaContainer: VisualizationAreaContainer
@@ -151,8 +152,8 @@ class BlueprintContainer extends PIXI.Container {
         super()
 
         this.size = {
-            x: 1000 * 32,
-            y: 1000 * 32
+            x: 1024 * 32,
+            y: 1024 * 32
         }
 
         this.interactive = true
@@ -182,8 +183,10 @@ class BlueprintContainer extends PIXI.Container {
         this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer()
         this.overlayContainer = new OverlayContainer()
+        this.generateChunkGrid()
 
         this.addChild(
+            this.chunkGrid,
             this.tileSprites,
             this.tilePaintSlot,
             this.visualizationAreaContainer,
@@ -509,6 +512,32 @@ class BlueprintContainer extends PIXI.Container {
         this.grid = grid
     }
 
+    public generateChunkGrid(): void {
+        const W = 32 * 32
+        const H = 32 * 32
+        const gridGraphics = new PIXI.Graphics()
+            .lineStyle(2, 0x000000)
+            .moveTo(0, 0)
+            .lineTo(W, 0)
+            .lineTo(W, H)
+            .lineTo(0, H)
+            .lineTo(0, 0)
+
+        const renderTexture = PIXI.RenderTexture.create({
+            width: W,
+            height: H
+        })
+
+        renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
+        G.app.renderer.render(gridGraphics, renderTexture)
+
+        const grid = new PIXI.TilingSprite(renderTexture, this.size.x, this.size.y)
+        grid.position.set(W / 2, H / 2)
+        grid.anchor.set(this.anchor.x, this.anchor.y)
+
+        this.chunkGrid = grid
+    }
+
     public initBP(): void {
         const firstRail = G.bp.getFirstRail()
         if (firstRail) {
@@ -575,6 +604,7 @@ class BlueprintContainer extends PIXI.Container {
 
         this.addChild(
             this.grid,
+            this.chunkGrid,
             this.tileSprites,
             this.tilePaintSlot,
             this.visualizationAreaContainer,
