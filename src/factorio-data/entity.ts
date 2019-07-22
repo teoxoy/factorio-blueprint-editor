@@ -788,9 +788,9 @@ export default class Entity extends EventEmitter {
     }
 
     public serialize(): BPS.IEntity {
-        return {
+        return util.duplicate({
             ...this.m_rawEntity,
             connections: this.m_BP.wireConnections.serializeConnectionData(this.entityNumber)
-        }
+        })
     }
 }
