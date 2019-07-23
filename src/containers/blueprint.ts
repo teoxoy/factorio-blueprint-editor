@@ -632,17 +632,10 @@ class BlueprintContainer extends PIXI.Container {
     }
 
     public centerViewport(): void {
-        if (G.bp.isEmpty()) {
-            this.viewport.setCurrentScale(1)
-            this.viewport.setPosition(
-                -this.size.x / 2 + G.app.screen.width / 2,
-                -this.size.y / 2 + G.app.screen.width / 2
-            )
-            this.applyViewportTransform()
-            return
-        }
+        const bounds = G.bp.isEmpty()
+            ? new PIXI.Rectangle(-16 * 32, -16 * 32, 32 * 32, 32 * 32)
+            : this.getBlueprintBounds()
 
-        const bounds = this.getBlueprintBounds()
         this.viewport.centerViewPort(
             {
                 x: bounds.width,
@@ -653,6 +646,7 @@ class BlueprintContainer extends PIXI.Container {
                 y: (this.size.y - bounds.height) / 2 - bounds.y
             }
         )
+
         this.applyViewportTransform()
     }
 
