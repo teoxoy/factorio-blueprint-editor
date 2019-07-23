@@ -151,9 +151,14 @@ class BlueprintContainer extends PIXI.Container {
     public constructor() {
         super()
 
+        // Nr of cunks needs to be odd because the chunk grid is offset
+        const chunks = 32 - 1
+        // Chunk offset - Measured in tiles
+        const chunkOffset = 16
+
         this.size = {
-            x: 1024 * 32,
-            y: 1024 * 32
+            x: chunks * 32 * 32,
+            y: chunks * 32 * 32
         }
 
         this.interactive = true
@@ -183,7 +188,7 @@ class BlueprintContainer extends PIXI.Container {
         this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer()
         this.overlayContainer = new OverlayContainer()
-        this.generateChunkGrid()
+        this.generateChunkGrid(chunkOffset)
 
         this.addChild(
             this.chunkGrid,
@@ -512,7 +517,7 @@ class BlueprintContainer extends PIXI.Container {
         this.grid = grid
     }
 
-    public generateChunkGrid(): void {
+    public generateChunkGrid(chunkOffset: number): void {
         const W = 32 * 32
         const H = 32 * 32
         const gridGraphics = new PIXI.Graphics()
@@ -531,8 +536,10 @@ class BlueprintContainer extends PIXI.Container {
         renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
         G.app.renderer.render(gridGraphics, renderTexture)
 
-        const grid = new PIXI.TilingSprite(renderTexture, this.size.x, this.size.y)
-        grid.position.set(W / 2, H / 2)
+        // Add one more chunk to the size because of the offset
+        const grid = new PIXI.TilingSprite(renderTexture, this.size.x + W, this.size.y + H)
+        // Offset chunk grid
+        grid.position.set(chunkOffset * 32, chunkOffset * 32)
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
         this.chunkGrid = grid
