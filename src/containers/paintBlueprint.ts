@@ -214,10 +214,19 @@ export class BlueprintPaintContainer extends PaintContainer {
     }
 
     public rotate(): void {
+        if (!this.visible) {
+            return
+        }
+
         // TODO: implement
+        return undefined
     }
 
     public moveAtCursor(): void {
+        if (!this.visible) {
+            return
+        }
+
         this.x = G.BPC.gridData.x32 * 32
         this.y = G.BPC.gridData.y32 * 32
         this.entities.forEach(c => c.moveAtCursor())
@@ -263,6 +272,10 @@ export class BlueprintPaintContainer extends PaintContainer {
     }
 
     public removeContainerUnder(): void {
+        if (!this.visible) {
+            return
+        }
+
         G.bp.history.startTransaction('Remove Entities')
         this.entities.forEach(c => c.removeContainerUnder())
         G.bp.history.commitTransaction()
