@@ -271,8 +271,10 @@ export default class Blueprint extends EventEmitter {
         return nr
     }
 
-    public getFirstRail(): Entity {
-        return this.entities.find(e => e.name === 'straight_rail' /* || e.name === 'curved_rail' */)
+    public getFirstRailRelatedEntity(): Entity {
+        return this.entities.find(
+            e => e.name === 'straight_rail' /* || e.name === 'curved_rail' */ || e.name === 'train_stop'
+        )
     }
 
     public isEmpty(): boolean {
@@ -494,7 +496,7 @@ export default class Blueprint extends EventEmitter {
         }
         const entityInfo = this.processRawEntities(this.entities.valuesArray().map(e => e.serialize()))
         const center = this.getCenter()
-        const fR = this.getFirstRail()
+        const fR = this.getFirstRailRelatedEntity()
         if (fR) {
             center.x += (fR.position.x - center.x) % 2
             center.y += (fR.position.y - center.y) % 2

@@ -539,14 +539,6 @@ class BlueprintContainer extends PIXI.Container {
     }
 
     public initBP(): void {
-        const firstRail = G.bp.getFirstRail()
-        if (firstRail) {
-            G.railMoveOffset = {
-                x: (Math.abs(firstRail.position.x) % 2) + 1,
-                y: (Math.abs(firstRail.position.y) % 2) + 1
-            }
-        }
-
         // Render Bp
         G.bp.entities.forEach(e => new EntityContainer(e, false))
         G.bp.wireConnections.on('create', (hash, connection: IConnection) => {

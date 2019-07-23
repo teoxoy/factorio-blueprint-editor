@@ -40,8 +40,6 @@ const loadingScreen = {
     }
 }
 
-let railMoveOffset: IPoint = { x: 0, y: 0 }
-
 let moveSpeed = 10
 let quickbarRows = 2
 
@@ -211,7 +209,6 @@ export default {
     infoEntityPanel,
     dialogsContainer,
     paintIconContainer,
-    railMoveOffset,
     bp,
     book,
     moveSpeed,

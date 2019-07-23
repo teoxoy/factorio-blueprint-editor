@@ -28,6 +28,10 @@ export class EntityPaintContainer extends PaintContainer {
         this.redraw()
     }
 
+    private get size(): IPoint {
+        return util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
+    }
+
     public hide(): void {
         G.BPC.visualizationAreaContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
@@ -141,18 +145,18 @@ export class EntityPaintContainer extends PaintContainer {
             return
         }
 
-        switch (this.name) {
-            case 'straight_rail':
-            case 'curved_rail':
-            case 'train_stop':
-                this.position.set(
-                    // 64 pixel size grid
-                    Math.floor((G.BPC.gridData.x32 + G.railMoveOffset.x) / 2) * 64,
-                    Math.floor((G.BPC.gridData.y32 + G.railMoveOffset.y) / 2) * 64
-                )
-                break
-            default:
-                this.setNewPosition(util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction))
+        const railRelatedNames = ['straight_rail', 'curved_rail', 'train_stop']
+        const firstRail = G.bp.getFirstRailRelatedEntity()
+
+        if (railRelatedNames.includes(this.name) && firstRail) {
+            // grid offsets
+            const oX = -Math.abs((Math.abs(G.BPC.gridData.x32) % 2) - (Math.abs(firstRail.position.x - 1) % 2)) + 1
+            const oY = -Math.abs((Math.abs(G.BPC.gridData.y32) % 2) - (Math.abs(firstRail.position.y - 1) % 2)) + 1
+
+            this.x = (G.BPC.gridData.x32 + oX) * 32
+            this.y = (G.BPC.gridData.y32 + oY) * 32
+        } else {
+            this.setNewPosition(this.size)
         }
 
         this.updateUndergroundBeltRotation()
@@ -168,11 +172,10 @@ export class EntityPaintContainer extends PaintContainer {
             return
         }
 
-        const size = util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
         const entities = G.bp.entityPositionGrid.getEntitiesInArea({
             ...this.getGridPosition(),
-            w: size.x,
-            h: size.y
+            w: this.size.x,
+            h: this.size.y
         })
         G.bp.removeEntities(entities)
         this.checkBuildable()
