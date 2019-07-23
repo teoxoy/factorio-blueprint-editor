@@ -190,7 +190,7 @@ class Action {
 const actions = {
     clear: new Action('shift+n'),
     focus: new Action('f'),
-    takePicture: new Action('shift+s'),
+    takePicture: new Action('modifier+s'),
     undo: new Action('modifier+z'),
     redo: new Action('modifier+y'),
     info: new Action('i'),
