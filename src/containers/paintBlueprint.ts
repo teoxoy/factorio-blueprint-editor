@@ -8,6 +8,7 @@ import { PaintContainer } from './paint'
 import { VisualizationArea } from './visualizationArea'
 
 class BlueprintEntityPaintContainer {
+    private readonly bpc: BlueprintPaintContainer
     private readonly bp: Blueprint
     private readonly entity: Entity
     private readonly visualizationArea: VisualizationArea
@@ -15,7 +16,8 @@ class BlueprintEntityPaintContainer {
     /** This is only a reference */
     private undergroundLine: PIXI.Container
 
-    public constructor(bp: Blueprint, entity: Entity) {
+    public constructor(bpc: BlueprintPaintContainer, bp: Blueprint, entity: Entity) {
+        this.bpc = bpc
         this.bp = bp
         this.entity = entity
 
@@ -26,15 +28,15 @@ class BlueprintEntityPaintContainer {
 
     private get entityPosition(): IPoint {
         return {
-            x: G.BPC.gridData.x32 + this.entity.position.x,
-            y: G.BPC.gridData.y32 + this.entity.position.y
+            x: this.bpc.x / 32 + this.entity.position.x,
+            y: this.bpc.y / 32 + this.entity.position.y
         }
     }
 
     private get position(): IPoint {
         return {
-            x: this.entityPosition.x * 32,
-            y: this.entityPosition.y * 32
+            x: this.bpc.x + this.entity.position.x,
+            y: this.bpc.y + this.entity.position.y
         }
     }
 
@@ -171,7 +173,7 @@ export class BlueprintPaintContainer extends PaintContainer {
         })
 
         this.bp.entities.forEach(e => {
-            const epc = new BlueprintEntityPaintContainer(this.bp, e)
+            const epc = new BlueprintEntityPaintContainer(this, this.bp, e)
 
             epc.entitySprites.forEach(sprite => {
                 sprite.setPosition({
@@ -227,8 +229,24 @@ export class BlueprintPaintContainer extends PaintContainer {
             return
         }
 
-        this.x = G.BPC.gridData.x32 * 32
-        this.y = G.BPC.gridData.y32 * 32
+        const firstRailHere = this.bp.getFirstRailRelatedEntity()
+        const firstRailInBP = G.bp.getFirstRailRelatedEntity()
+
+        if (firstRailHere && firstRailInBP) {
+            const frX = G.BPC.gridData.x32 + firstRailHere.position.x
+            const frY = G.BPC.gridData.y32 + firstRailHere.position.y
+
+            // grid offsets
+            const oX = -Math.abs((Math.abs(frX) % 2) - (Math.abs(firstRailInBP.position.x - 1) % 2)) + 1
+            const oY = -Math.abs((Math.abs(frY) % 2) - (Math.abs(firstRailInBP.position.y - 1) % 2)) + 1
+
+            this.x = (G.BPC.gridData.x32 + oX) * 32
+            this.y = (G.BPC.gridData.y32 + oY) * 32
+        } else {
+            this.x = G.BPC.gridData.x32 * 32
+            this.y = G.BPC.gridData.y32 * 32
+        }
+
         this.entities.forEach(c => c.moveAtCursor())
     }
 
