@@ -107,7 +107,7 @@ const colors = {
 
     _darkTheme: true,
     _tintsToChange: [] as PIXI.Sprite[],
-    pattern: 'checker' as 'checker' | 'grid',
+    pattern: 'grid' as 'checker' | 'grid',
     get darkTheme() {
         return this._darkTheme
     },
