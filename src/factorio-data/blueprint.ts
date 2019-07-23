@@ -6,9 +6,18 @@ import util from '../common/util'
 import Entity from './entity'
 import { WireConnections } from './wireConnections'
 import { PositionGrid } from './positionGrid'
-import generators from './generators'
+import generators, { IVisualization } from './generators'
 import History from './history'
 import Tile from './tile'
+
+const oilOutpostSettings = {
+    DEBUG: false,
+    PUMPJACK_MODULE: 'productivity_module_3',
+    MIN_GAP_BETWEEN_UNDERGROUNDS: 1,
+    BEACONS: true,
+    MIN_AFFECTED_ENTITIES: 1,
+    BEACON_MODULE: 'speed_module_3'
+}
 
 class OurMap<K, V> extends Map<K, V> {
     public constructor(values?: V[], mapFn?: (value: V) => K) {
@@ -303,12 +312,14 @@ export default class Blueprint extends EventEmitter {
     }
 
     public generatePipes(): string {
-        const DEBUG = G.oilOutpostSettings.DEBUG
-        const PUMPJACK_MODULE = G.oilOutpostSettings.PUMPJACK_MODULE
-        const MIN_GAP_BETWEEN_UNDERGROUNDS = G.oilOutpostSettings.MIN_GAP_BETWEEN_UNDERGROUNDS
-        const MIN_AFFECTED_ENTITIES = G.oilOutpostSettings.MIN_AFFECTED_ENTITIES
-        const BEACON_MODULE = G.oilOutpostSettings.BEACON_MODULE
-        const BEACONS = G.oilOutpostSettings.BEACONS && BEACON_MODULE !== 'none'
+        const {
+            DEBUG,
+            PUMPJACK_MODULE,
+            MIN_GAP_BETWEEN_UNDERGROUNDS,
+            MIN_AFFECTED_ENTITIES,
+            BEACON_MODULE,
+            BEACONS
+        } = oilOutpostSettings
 
         const pumpjacks = this.entities
             .filter(v => v.name === 'pumpjack')
@@ -322,16 +333,20 @@ export default class Blueprint extends EventEmitter {
             return 'Blueprint area should only contain pumpjacks!'
         }
 
+        const visualizations: IVisualization[][] = []
+
         console.log('Generating pipes...')
 
         const T = util.timer('Total generation')
 
+        // Generate pipes
         const GPT = util.timer('Pipe generation')
 
         // I wrapped generatePipes into a Web Worker but for some reason it sometimes takes x2 time to run the function
         // Usualy when there are more than 100 pumpjacks the function will block the main thread
         // which is not great but the user should wait for the generated entities anyway
         const GP = generators.generatePipes(pumpjacks, MIN_GAP_BETWEEN_UNDERGROUNDS)
+        visualizations.push(GP.visualizations)
 
         console.log('Pipes:', GP.info.nrOfPipes)
         console.log('Underground Pipes:', GP.info.nrOfUPipes)
@@ -339,56 +354,73 @@ export default class Blueprint extends EventEmitter {
         console.log('Ratio (pipes replaced/underground pipes):', GP.info.nrOfPipesReplacedByUPipes / GP.info.nrOfUPipes)
         GPT.stop()
 
-        const GBT = util.timer('Beacon generation')
+        // Generate beacons
+        let beacons: {
+            name: string
+            position: IPoint
+        }[] = []
+        if (BEACONS && BEACON_MODULE !== 'none') {
+            const GBT = util.timer('Beacon generation')
 
-        const entitiesForBeaconGen = [
-            ...pumpjacks.map(p => ({ ...p, size: 3, effect: true })),
-            ...GP.pipes.map(p => ({ ...p, size: 1, effect: false }))
-        ]
+            const entitiesForBeaconGen = [
+                ...pumpjacks.map(p => ({ ...p, size: 3, effect: true })),
+                ...GP.pipes.map(p => ({ ...p, size: 1, effect: false }))
+            ]
 
-        const GB = BEACONS ? generators.generateBeacons(entitiesForBeaconGen, MIN_AFFECTED_ENTITIES) : undefined
+            const GB = generators.generateBeacons(entitiesForBeaconGen, MIN_AFFECTED_ENTITIES)
+            beacons = GB.beacons
+            visualizations.push(GB.visualizations)
 
-        if (BEACONS) {
-            console.log('Beacons:', GB.info.totalBeacons)
-            console.log('Effects given by beacons:', GB.info.effectsGiven)
+            if (BEACONS) {
+                console.log('Beacons:', GB.info.totalBeacons)
+                console.log('Effects given by beacons:', GB.info.effectsGiven)
+            }
+
+            GBT.stop()
         }
-        GBT.stop()
 
+        // Generate poles
         const GPOT = util.timer('Pole generation')
 
         const entitiesForPoleGen = [
             ...pumpjacks.map(p => ({ ...p, size: 3, power: true })),
             ...GP.pipes.map(p => ({ ...p, size: 1, power: false })),
-            ...(BEACONS ? GB.beacons.map(p => ({ ...p, size: 3, power: true })) : [])
+            ...beacons.map(p => ({ ...p, size: 3, power: true }))
         ]
 
         const GPO = generators.generatePoles(entitiesForPoleGen)
+        visualizations.push(GPO.visualizations)
 
         console.log('Power Poles:', GPO.info.totalPoles)
         GPOT.stop()
 
         T.stop()
 
+        // Apply Changes
         this.history.logging = false
         this.history.startTransaction('Generate Oil Outpost')
 
         GP.pipes.forEach(pipe => this.createEntity(pipe))
-        if (BEACONS) {
-            GB.beacons.forEach(beacon => this.createEntity({ ...beacon, items: { [BEACON_MODULE]: 2 } }))
-        }
+        beacons.forEach(beacon =>
+            this.createEntity({
+                ...beacon,
+                items: { [BEACON_MODULE]: FD.entities.beacon.module_specification.module_slots }
+            })
+        )
         GPO.poles.forEach(pole => this.createEntity(pole))
 
         GP.pumpjacksToRotate.forEach(p => {
             const entity = this.entities.get(p.entity_number)
             entity.direction = p.direction
             if (PUMPJACK_MODULE !== 'none') {
-                entity.modules = [PUMPJACK_MODULE, PUMPJACK_MODULE]
+                entity.modules = new Array(entity.moduleSlots).fill(PUMPJACK_MODULE)
             }
         })
 
         this.history.commitTransaction()
         this.history.logging = true
 
+        // Create visualizations
         if (!DEBUG) {
             return
         }
@@ -397,7 +429,7 @@ export default class Blueprint extends EventEmitter {
         G.BPC.wiresContainer.removeChildren()
 
         const timePerVis = 1000
-        ;[GP.visualizations, BEACONS ? GB.visualizations : [], GPO.visualizations]
+        visualizations
             .filter(vis => vis.length)
             .forEach((vis, i) => {
                 vis.forEach((v, j, arr) => {
@@ -539,3 +571,5 @@ export default class Blueprint extends EventEmitter {
         }
     }
 }
+
+export { oilOutpostSettings }

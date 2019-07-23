@@ -4,6 +4,7 @@ import actions from './actions'
 import G from './common/globals'
 import { QuickbarContainer } from './panels/quickbar'
 import spritesheetsLoader from './spritesheetsLoader'
+import { oilOutpostSettings } from './factorio-data/blueprint'
 
 GUI.TEXT_CLOSED = 'Close Settings'
 GUI.TEXT_OPEN = 'Open Settings'
@@ -139,19 +140,25 @@ export default function initDatGui(): {
         })
 
     if (localStorage.getItem('oilOutpostSettings')) {
-        G.oilOutpostSettings = JSON.parse(localStorage.getItem('oilOutpostSettings'))
+        const settings = JSON.parse(localStorage.getItem('oilOutpostSettings'))
+        Object.keys(oilOutpostSettings).forEach(k => {
+            if (settings[k]) {
+                const S = oilOutpostSettings as Record<string, string | boolean | number>
+                S[k] = settings[k]
+            }
+        })
     }
     window.addEventListener('unload', () =>
-        localStorage.setItem('oilOutpostSettings', JSON.stringify(G.oilOutpostSettings))
+        localStorage.setItem('oilOutpostSettings', JSON.stringify(oilOutpostSettings))
     )
 
     const oilOutpostFolder = gui.addFolder('Oil Outpost Generator Settings')
-    oilOutpostFolder.add(G.oilOutpostSettings, 'DEBUG').name('Debug')
-    oilOutpostFolder.add(G.oilOutpostSettings, 'PUMPJACK_MODULE', getModulesObjFor('pumpjack')).name('Pumpjack Modules')
-    oilOutpostFolder.add(G.oilOutpostSettings, 'MIN_GAP_BETWEEN_UNDERGROUNDS', 1, 9, 1).name('Min Gap > < UPipes')
-    oilOutpostFolder.add(G.oilOutpostSettings, 'BEACONS').name('Beacons')
-    oilOutpostFolder.add(G.oilOutpostSettings, 'MIN_AFFECTED_ENTITIES', 1, 12, 1).name('Min Affect. Pumpjacks')
-    oilOutpostFolder.add(G.oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon')).name('Beacon Modules')
+    oilOutpostFolder.add(oilOutpostSettings, 'DEBUG').name('Debug')
+    oilOutpostFolder.add(oilOutpostSettings, 'PUMPJACK_MODULE', getModulesObjFor('pumpjack')).name('Pumpjack Modules')
+    oilOutpostFolder.add(oilOutpostSettings, 'MIN_GAP_BETWEEN_UNDERGROUNDS', 1, 9, 1).name('Min Gap > < UPipes')
+    oilOutpostFolder.add(oilOutpostSettings, 'BEACONS').name('Beacons')
+    oilOutpostFolder.add(oilOutpostSettings, 'MIN_AFFECTED_ENTITIES', 1, 12, 1).name('Min Affect. Pumpjacks')
+    oilOutpostFolder.add(oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon')).name('Beacon Modules')
     oilOutpostFolder.add(actions.generateOilOutpost, 'call').name('Generate (g)')
 
     function getModulesObjFor(entityName: string): Record<string, string> {
