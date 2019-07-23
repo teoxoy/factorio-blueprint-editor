@@ -20,7 +20,7 @@ A feature-rich [Factorio](https://www.factorio.com) Blueprint Editor. You can no
 
 Sample blueprint: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/uc4n81GP
 
-Example link that uses url query parameters: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/Xp9u7NaA&index=1&interactive=false
+Example blueprint book: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/Xp9u7NaA&index=1
 
 # Features
 - rendering and editing blueprints

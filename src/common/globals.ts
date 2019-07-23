@@ -46,8 +46,6 @@ let quickbarRows = 2
 let bp: Blueprint
 let book: Book
 
-let interactive = true
-
 const colors = {
     text: {
         title: 0xffe6c0,
@@ -201,7 +199,6 @@ export default {
     debug,
     quality,
     getFactorioVersion,
-    interactive,
     BPC,
     app,
     debugContainer,

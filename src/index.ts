@@ -35,10 +35,6 @@ console.log(
 
 const params = window.location.search.slice(1).split('&')
 
-if (params.includes('interactive=false')) {
-    G.interactive = false
-}
-
 let bpSource: string
 let bpIndex = 0
 for (const p of params) {
@@ -337,13 +333,11 @@ actions.closeWindow.bind({
 
 actions.inventory.bind({
     press: () => {
-        if (G.interactive) {
-            // If there is a dialog open, assume user wants to close it
-            if (Dialog.anyOpen()) {
-                Dialog.closeLast()
-            } else {
-                new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
-            }
+        // If there is a dialog open, assume user wants to close it
+        if (Dialog.anyOpen()) {
+            Dialog.closeLast()
+        } else {
+            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
         }
     }
 })
