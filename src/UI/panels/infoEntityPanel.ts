@@ -78,7 +78,7 @@ export class InfoEntityPanel extends Panel {
         this.addChild(this.m_EntityName, this.m_entityInfo, this.m_RecipeContainer, this.m_RecipeIOContainer)
     }
 
-    public updateVisualization(entity?: Entity): number {
+    public updateVisualization(entity?: Entity): void {
         this.m_RecipeContainer.removeChildren()
         this.m_RecipeIOContainer.removeChildren()
 

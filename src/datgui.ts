@@ -2,7 +2,6 @@ import { GUI, GUIController } from 'dat.gui'
 import FD from 'factorio-data'
 import actions from './actions'
 import G from './common/globals'
-import { QuickbarContainer } from './UI/panels/quickbar'
 import spritesheetsLoader from './spritesheetsLoader'
 import { oilOutpostSettings } from './factorio-data/blueprint'
 
@@ -54,18 +53,13 @@ export default function initDatGui(): {
     }
     gui.add(G, 'quickbarRows', 1, 5, 1)
         .name('Quickbar Rows')
-        .onChange((val: number) => {
-            localStorage.setItem('quickbarRows', val.toString())
-
-            const index = G.app.stage.getChildIndex(G.quickbarContainer)
-            const itemNames = G.quickbarContainer.getAllItemNames()
-            G.quickbarContainer.destroy()
-            G.quickbarContainer = new QuickbarContainer(val, itemNames)
-            G.app.stage.addChildAt(G.quickbarContainer, index)
+        .onChange((rows: number) => {
+            localStorage.setItem('quickbarRows', rows.toString())
+            G.UI.changeQuickbarRows(rows)
         })
 
     window.addEventListener('unload', () => {
-        localStorage.setItem('quickbarItemNames', JSON.stringify(G.quickbarContainer.getAllItemNames()))
+        localStorage.setItem('quickbarItemNames', JSON.stringify(G.UI.quickbarContainer.serialize()))
     })
 
     const entitiesQuality = {
@@ -110,11 +104,7 @@ export default function initDatGui(): {
             }
             // TODO: find a nice way to do this
             G.bp.history.logging = debug
-            if (debug) {
-                G.app.stage.addChild(G.debugContainer)
-            } else {
-                G.app.stage.removeChild(G.debugContainer)
-            }
+            G.UI.showDebuggingLayer = debug
         })
 
     // Theme folder

@@ -4,7 +4,6 @@ import Panel from '../controls/panel'
 import Slot from '../controls/slot'
 import F from '../controls/functions'
 import { EditorMode } from '../../containers/blueprint'
-import { InventoryContainer } from './inventory'
 
 class QuickbarSlot extends Slot {
     public get itemName(): string {
@@ -112,7 +111,7 @@ export class QuickbarContainer extends Panel {
                             G.BPC.spawnPaintContainer(quickbarSlot.itemName)
                         } else {
                             // UC3
-                            new InventoryContainer('Inventory', undefined, item => quickbarSlot.assignItem(item))
+                            G.UI.createInventory('Inventory', undefined, item => quickbarSlot.assignItem(item))
                         }
                     } else if (e.data.button === 2) {
                         // UC5
@@ -143,13 +142,13 @@ export class QuickbarContainer extends Panel {
     public changeActiveQuickbar(): void {
         this.slotsContainer.removeChildren()
 
-        let itemNames = this.getAllItemNames()
+        let itemNames = this.serialize()
         // Left shift array by 10
         itemNames = itemNames.concat(itemNames.splice(0, 10))
         this.generateSlots(itemNames)
     }
 
-    public getAllItemNames(): string[] {
+    public serialize(): string[] {
         return this.slots.map(s => s.itemName)
     }
 

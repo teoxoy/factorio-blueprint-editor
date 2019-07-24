@@ -2,7 +2,7 @@ import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
 import Slot from '../../controls/slot'
 import Entity from '../../../factorio-data/entity'
-import { InventoryContainer } from '../../panels/inventory'
+import G from '../../../common/globals'
 import F from '../../controls/functions'
 
 /** Module Slots for Entity */
@@ -198,7 +198,7 @@ export default class Filters extends PIXI.Container {
         const index: number = slot.data as number
         if (e.data.button === 0) {
             if (!this.m_Amount || this.m_Filters[index].name === undefined) {
-                new InventoryContainer('Select Filter', this.m_Entity.acceptedFilters, name => {
+                G.UI.createInventory('Select Filter', this.m_Entity.acceptedFilters, name => {
                     this.m_Filters[index].name = name
                     if (this.m_Amount) {
                         this.m_Filters[index].count = FD.items[name].stack_size

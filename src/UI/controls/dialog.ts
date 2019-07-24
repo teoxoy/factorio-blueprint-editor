@@ -50,25 +50,20 @@ export default class Dialog extends Panel {
             G.colors.dialog.background.border
         )
 
-        this.visible = false
+        this.visible = true
         this.interactive = true
         this.interactiveChildren = true
 
         if (title !== undefined) {
             this.addLabel(12, 10, title, G.styles.dialog.title)
         }
+
+        Dialog.s_openDialogs.push(this)
     }
 
     /** Automatically sets position of dialog to center screen */
     protected setPosition(): void {
         this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height / 2 - this.height / 2)
-    }
-
-    /** Show Dialog */
-    public show(): void {
-        Dialog.s_openDialogs.push(this)
-        G.dialogsContainer.addChild(this)
-        this.visible = true
     }
 
     /** Close Dialog */

@@ -14,7 +14,7 @@ export abstract class PaintContainer extends PIXI.Container {
         this.on('added', this.applyTint.bind(this))
 
         this.icon = F.CreateIcon(this.getItemName())
-        G.paintIconContainer.addChild(this.icon)
+        G.UI.addPaintIcon(this.icon)
         window.addEventListener('mousemove', this.updateIconPos)
         this.show()
     }

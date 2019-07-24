@@ -200,8 +200,6 @@ export class InventoryContainer extends Dialog {
         this.m_RecipeContainer = new PIXI.Container()
         this.m_RecipeContainer.position.set(12, 36)
         recipePanel.addChild(this.m_RecipeContainer)
-
-        this.show()
     }
 
     /** Override automatically set position of dialog due to additional area for recipe */

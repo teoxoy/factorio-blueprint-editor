@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import Slot from '../../controls/slot'
-import { InventoryContainer } from '../../panels/inventory'
+import G from '../../../common/globals'
 import Entity from '../../../factorio-data/entity'
 import F from '../../controls/functions'
 
@@ -68,7 +68,7 @@ export default class Modules extends PIXI.Container {
         const slot: Slot = e.target as Slot
         const index: number = slot.data as number
         if (e.data.button === 0) {
-            new InventoryContainer('Select Module', this.m_Entity.acceptedModules, name => {
+            G.UI.createInventory('Select Module', this.m_Entity.acceptedModules, name => {
                 this.m_Modules[index] = name
                 this.m_Entity.modules = this.m_Modules
             })

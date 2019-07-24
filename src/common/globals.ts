@@ -1,10 +1,8 @@
 import * as PIXI from 'pixi.js'
 import Blueprint from '../factorio-data/blueprint'
-import { DebugContainer } from '../UI/panels/debug'
-import { QuickbarContainer } from '../UI/panels/quickbar'
-import { InfoEntityPanel } from '../UI/panels/infoEntityPanel'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
+import UIContainer from '../UI/ui'
 
 let debug = false
 
@@ -22,13 +20,8 @@ const getFactorioVersion = (main = 0, major = 17, minor = 14): number =>
     (minor << 16) + (major | (main << 16)) * 0xffffffff
 
 let app: PIXI.Application
-
-let debugContainer: DebugContainer
-let quickbarContainer: QuickbarContainer
-let infoEntityPanel: InfoEntityPanel
-let dialogsContainer: PIXI.Container
-let paintIconContainer: PIXI.Container
 let BPC: BlueprintContainer
+let UI: UIContainer
 
 const loadingScreen = {
     el: document.getElementById('loadingScreen'),
@@ -191,12 +184,8 @@ export default {
     quality,
     getFactorioVersion,
     BPC,
+    UI,
     app,
-    debugContainer,
-    quickbarContainer,
-    infoEntityPanel,
-    dialogsContainer,
-    paintIconContainer,
     bp,
     book,
     moveSpeed,

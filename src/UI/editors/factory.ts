@@ -18,7 +18,7 @@ import TempEditor from './temp'
  *
  * @param entityNumber - Entity Number for which to create Editor for
  */
-export function createEditor(entity: Entity): Editor {
+export default function createEditor(entity: Entity): Editor {
     let editor: Editor
     switch (entity.name) {
         // Assembly Machines

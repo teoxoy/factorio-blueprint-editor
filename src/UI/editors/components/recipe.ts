@@ -1,5 +1,5 @@
 import Slot from '../../controls/slot'
-import { InventoryContainer } from '../../panels/inventory'
+import G from '../../../common/globals'
 import Entity from '../../../factorio-data/entity'
 import F from '../../controls/functions'
 
@@ -34,7 +34,7 @@ export default class Recipe extends Slot {
     private onSlotPointerDown(e: PIXI.interaction.InteractionEvent): void {
         e.stopPropagation()
         if (e.data.button === 0) {
-            new InventoryContainer('Select Recipe', this.m_Entity.acceptedRecipes, name => {
+            G.UI.createInventory('Select Recipe', this.m_Entity.acceptedRecipes, name => {
                 this.m_Entity.recipe = name
             })
         } else if (e.data.button === 2) {

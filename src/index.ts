@@ -5,23 +5,19 @@ import { Book } from './factorio-data/book'
 import bpString, { ModdedBlueprintError, TrainBlueprintError } from './factorio-data/bpString'
 
 import G from './common/globals'
-import { InventoryContainer } from './UI/panels/inventory'
 import { TilePaintContainer } from './containers/paintTile'
 import { BlueprintContainer, EditorMode } from './containers/blueprint'
-import { DebugContainer } from './UI/panels/debug'
-import { QuickbarContainer } from './UI/panels/quickbar'
-import { InfoEntityPanel } from './UI/panels/infoEntityPanel'
 import Blueprint from './factorio-data/blueprint'
 import initDoorbell from './doorbell'
 import actions from './actions'
 import initDatGui from './datgui'
 import initToasts from './toasts'
 import spritesheetsLoader from './spritesheetsLoader'
-import * as Editors from './UI/editors/factory'
 import Entity from './factorio-data/entity'
 import Dialog from './UI/controls/dialog'
 import { EntityContainer } from './containers/entity'
 import U from './common/util'
+import UIContainer from './UI/ui'
 
 if (PIXI.utils.isMobile.any) {
     document.getElementById('loadingScreen').classList.add('mobileError')
@@ -133,22 +129,9 @@ window.addEventListener(
 G.BPC = new BlueprintContainer()
 G.app.stage.addChild(G.BPC)
 
-G.debugContainer = new DebugContainer()
-if (G.debug) {
-    G.app.stage.addChild(G.debugContainer)
-}
-
-G.quickbarContainer = new QuickbarContainer(G.quickbarRows)
-G.app.stage.addChild(G.quickbarContainer)
-
-G.infoEntityPanel = new InfoEntityPanel()
-G.app.stage.addChild(G.infoEntityPanel)
-
-G.dialogsContainer = new PIXI.Container()
-G.app.stage.addChild(G.dialogsContainer)
-
-G.paintIconContainer = new PIXI.Container()
-G.app.stage.addChild(G.paintIconContainer)
+G.UI = new UIContainer()
+G.app.stage.addChild(G.UI)
+G.UI.showDebuggingLayer = G.debug
 
 Promise.all([
     // Get bp from source
@@ -166,7 +149,7 @@ Promise.all([
         // Load quickbarItemNames from localStorage
         if (localStorage.getItem('quickbarItemNames')) {
             const quickbarItemNames = JSON.parse(localStorage.getItem('quickbarItemNames'))
-            G.quickbarContainer.generateSlots(quickbarItemNames)
+            G.UI.quickbarContainer.generateSlots(quickbarItemNames)
         }
 
         loadBp(data[0], false)
@@ -337,7 +320,7 @@ actions.inventory.bind({
         if (Dialog.anyOpen()) {
             Dialog.closeLast()
         } else {
-            new InventoryContainer('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
+            G.UI.createInventory('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
         }
     }
 })
@@ -502,11 +485,7 @@ actions.openEntityGUI.bind({
             }
 
             Dialog.closeAll()
-            const editor = Editors.createEditor(G.BPC.hoverContainer.entity)
-            if (editor === undefined) {
-                return
-            }
-            editor.show()
+            G.UI.createEditor(G.BPC.hoverContainer.entity)
         }
     }
 })
@@ -562,14 +541,14 @@ actions.pasteEntitySettings.bind({
     })
 }
 
-actions.quickbar1.bind({ press: () => G.quickbarContainer.bindKeyToSlot(0) })
-actions.quickbar2.bind({ press: () => G.quickbarContainer.bindKeyToSlot(1) })
-actions.quickbar3.bind({ press: () => G.quickbarContainer.bindKeyToSlot(2) })
-actions.quickbar4.bind({ press: () => G.quickbarContainer.bindKeyToSlot(3) })
-actions.quickbar5.bind({ press: () => G.quickbarContainer.bindKeyToSlot(4) })
-actions.quickbar6.bind({ press: () => G.quickbarContainer.bindKeyToSlot(5) })
-actions.quickbar7.bind({ press: () => G.quickbarContainer.bindKeyToSlot(6) })
-actions.quickbar8.bind({ press: () => G.quickbarContainer.bindKeyToSlot(7) })
-actions.quickbar9.bind({ press: () => G.quickbarContainer.bindKeyToSlot(8) })
-actions.quickbar10.bind({ press: () => G.quickbarContainer.bindKeyToSlot(9) })
-actions.changeActiveQuickbar.bind({ press: () => G.quickbarContainer.changeActiveQuickbar() })
+actions.quickbar1.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(0) })
+actions.quickbar2.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(1) })
+actions.quickbar3.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(2) })
+actions.quickbar4.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(3) })
+actions.quickbar5.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(4) })
+actions.quickbar6.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(5) })
+actions.quickbar7.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(6) })
+actions.quickbar8.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(7) })
+actions.quickbar9.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(8) })
+actions.quickbar10.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(9) })
+actions.changeActiveQuickbar.bind({ press: () => G.UI.quickbarContainer.changeActiveQuickbar() })
