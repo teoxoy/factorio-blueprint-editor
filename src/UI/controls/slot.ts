@@ -1,4 +1,4 @@
-import G from '../common/globals'
+import G from '../../common/globals'
 import Button from './button'
 
 /**

@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js'
 import Blueprint from '../factorio-data/blueprint'
-import { DebugContainer } from '../panels/debug'
-import { QuickbarContainer } from '../panels/quickbar'
-import { InfoEntityPanel } from '../panels/infoEntityPanel'
+import { DebugContainer } from '../UI/panels/debug'
+import { QuickbarContainer } from '../UI/panels/quickbar'
+import { InfoEntityPanel } from '../UI/panels/infoEntityPanel'
 import { BlueprintContainer } from '../containers/blueprint'
 import { Book } from '../factorio-data/book'
 

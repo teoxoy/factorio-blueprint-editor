@@ -2,7 +2,7 @@ import { GUI, GUIController } from 'dat.gui'
 import FD from 'factorio-data'
 import actions from './actions'
 import G from './common/globals'
-import { QuickbarContainer } from './panels/quickbar'
+import { QuickbarContainer } from './UI/panels/quickbar'
 import spritesheetsLoader from './spritesheetsLoader'
 import { oilOutpostSettings } from './factorio-data/blueprint'
 

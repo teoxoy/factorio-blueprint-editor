@@ -1,5 +1,5 @@
 import Entity from '../factorio-data/entity'
-import F from '../controls/functions'
+import F from '../UI/controls/functions'
 import G from '../common/globals'
 import Blueprint from '../factorio-data/blueprint'
 import { EntitySprite } from '../entitySprite'

@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
-import F from '../controls/functions'
+import G from '../../common/globals'
+import F from './functions'
 
 /** Base Checkbox */
 export default class Switch extends PIXI.Container {

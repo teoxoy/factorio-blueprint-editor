@@ -1,9 +1,9 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
+import G from '../../common/globals'
 import Panel from '../controls/panel'
-import Entity from '../factorio-data/entity'
-import util from '../common/util'
+import Entity from '../../factorio-data/entity'
+import util from '../../common/util'
 import F from '../controls/functions'
 
 function template(strings: TemplateStringsArray, ...keys: (number | string)[]) {

@@ -1,6 +1,6 @@
 import Slot from '../../controls/slot'
 import { InventoryContainer } from '../../panels/inventory'
-import Entity from '../../factorio-data/entity'
+import Entity from '../../../factorio-data/entity'
 import F from '../../controls/functions'
 
 /** Module Slots for Entity */

@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import spriteDataBuilder from './factorio-data/spriteDataBuilder'
 import Entity from './factorio-data/entity'
 import G from './common/globals'
-import F from './controls/functions'
+import F from './UI/controls/functions'
 import { PositionGrid } from './factorio-data/positionGrid'
 
 interface IEntityData {

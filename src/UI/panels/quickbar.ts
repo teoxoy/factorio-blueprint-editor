@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
+import G from '../../common/globals'
 import Panel from '../controls/panel'
 import Slot from '../controls/slot'
 import F from '../controls/functions'
-import { EditorMode } from '../containers/blueprint'
+import { EditorMode } from '../../containers/blueprint'
 import { InventoryContainer } from './inventory'
 
 class QuickbarSlot extends Slot {

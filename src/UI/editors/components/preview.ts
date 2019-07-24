@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js'
-import G from '../../common/globals'
-import util from '../../common/util'
-import { EntitySprite } from '../../entitySprite'
-import { OverlayContainer } from '../../containers/overlay'
-import Entity from '../../factorio-data/entity'
+import G from '../../../common/globals'
+import util from '../../../common/util'
+import { EntitySprite } from '../../../entitySprite'
+import { OverlayContainer } from '../../../containers/overlay'
+import Entity from '../../../factorio-data/entity'
 
 /** Preview of Entity */
 export default class Preview extends PIXI.Container {

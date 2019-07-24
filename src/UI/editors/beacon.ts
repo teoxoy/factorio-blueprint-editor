@@ -1,8 +1,8 @@
-import Entity from '../factorio-data/entity'
+import Entity from '../../factorio-data/entity'
 import Editor from './editor'
 
-/** Electric Mining Drill Editor */
-export default class MiningEditor extends Editor {
+/** Beacon Editor */
+export default class BeaconEditor extends Editor {
     public constructor(entity: Entity) {
         super(402, 171, entity)
 

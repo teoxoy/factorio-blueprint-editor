@@ -1,7 +1,7 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
 import Slot from '../../controls/slot'
-import Entity from '../../factorio-data/entity'
+import Entity from '../../../factorio-data/entity'
 import { InventoryContainer } from '../../panels/inventory'
 import F from '../../controls/functions'
 

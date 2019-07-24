@@ -1,5 +1,5 @@
-import G from '../common/globals'
-import Entity from '../factorio-data/entity'
+import G from '../../common/globals'
+import Entity from '../../factorio-data/entity'
 import Checkbox from '../controls/checkbox'
 import Enable from '../controls/enable'
 import Switch from '../controls/switch'

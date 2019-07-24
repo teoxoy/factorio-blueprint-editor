@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
-import { passtroughAllEvents } from '../actions'
-import G from '../common/globals'
+import { passtroughAllEvents } from '../../actions'
+import G from '../../common/globals'
 import F from './functions'
 
 // TODO: Evaluate enhancement: Posibility to set caret with mouse (prototype commented ou with 'PT')

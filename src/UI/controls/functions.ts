@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import FD from 'factorio-data'
-import G from '../common/globals'
+import G from '../../common/globals'
 
 /**
  * Shade Color

@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
+import G from '../../common/globals'
 import F from './functions'
 import Panel from './panel'
 

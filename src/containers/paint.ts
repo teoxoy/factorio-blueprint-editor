@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
-import F from '../controls/functions'
+import F from '../UI/controls/functions'
 
 export abstract class PaintContainer extends PIXI.Container {
     private readonly icon: PIXI.DisplayObject
