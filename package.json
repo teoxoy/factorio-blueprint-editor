@@ -41,7 +41,7 @@
         "@types/file-saver": "^2.0.1",
         "@types/keyboardjs": "^2.4.1",
         "@types/pako": "^1.0.1",
-        "@types/pathfinding": "0.0.2",
+        "@types/pathfinding": "0.0.3",
         "@typescript-eslint/eslint-plugin": "^1.13.0",
         "@typescript-eslint/parser": "^1.13.0",
         "eslint": "^6.1.0",
