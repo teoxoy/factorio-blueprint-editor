@@ -36,7 +36,7 @@
         "pixi.js": "^5.1.0"
     },
     "devDependencies": {
-        "@types/dat.gui": "^0.7.2",
+        "@types/dat.gui": "^0.7.3",
         "@types/delaunator": "^3.0.0",
         "@types/file-saver": "^2.0.1",
         "@types/keyboardjs": "^2.4.1",
