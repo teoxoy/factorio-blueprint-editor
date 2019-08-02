@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import G from '../../common/globals'
+import { styles } from '../style'
 
 /** Base Checkbox */
 export default class Enable extends PIXI.Container {
@@ -27,17 +27,17 @@ export default class Enable extends PIXI.Container {
         this.m_Active = active
 
         // Draw text
-        this.m_TextText = new PIXI.Text(text, G.styles.controls.enable.text)
+        this.m_TextText = new PIXI.Text(text, styles.controls.enable.text)
         this.m_TextText.position.set(0, 0)
         this.m_TextText.visible = !active
         this.addChild(this.m_TextText)
 
-        this.m_HoverText = new PIXI.Text(text, G.styles.controls.enable.hover)
+        this.m_HoverText = new PIXI.Text(text, styles.controls.enable.hover)
         this.m_HoverText.position.set(0, 0)
         this.m_HoverText.visible = false
         this.addChild(this.m_HoverText)
 
-        this.m_ActiveText = new PIXI.Text(text, G.styles.controls.enable.active)
+        this.m_ActiveText = new PIXI.Text(text, styles.controls.enable.active)
         this.m_ActiveText.position.set(0, 0)
         this.m_ActiveText.visible = active
         this.addChild(this.m_ActiveText)

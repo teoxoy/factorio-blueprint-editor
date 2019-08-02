@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import G from '../../common/globals'
+import { styles } from '../style'
 import Slider from '../controls/slider'
 import Entity from '../../factorio-data/entity'
 import Textbox from '../controls/textbox'
@@ -40,7 +40,7 @@ export default class ChestEditor extends Editor {
         }
 
         // Add Label
-        const label: PIXI.Text = new PIXI.Text('Count:', G.styles.dialog.label)
+        const label: PIXI.Text = new PIXI.Text('Count:', styles.dialog.label)
         label.position.set(140, entity.name === 'logistic_chest_requester' ? 154 : 131)
         label.visible = false
         this.addChild(label)

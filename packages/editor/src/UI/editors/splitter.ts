@@ -1,8 +1,8 @@
-import G from '../../common/globals'
 import Entity from '../../factorio-data/entity'
 import Checkbox from '../controls/checkbox'
 import Enable from '../controls/enable'
 import Switch from '../controls/switch'
+import { styles } from '../style'
 import Filters from './components/filters'
 import Editor from './editor'
 
@@ -49,7 +49,7 @@ export default class SplitterEditor extends Editor {
         this.addChild(outputCheckbox)
 
         // Add Filters
-        this.addLabel(412, 88, 'Filter:', G.styles.controls.checkbox)
+        this.addLabel(412, 88, 'Filter:', styles.controls.checkbox)
         const filter: Filters = this.addFilters(456, 80)
         filter.position.set(456, 76)
 

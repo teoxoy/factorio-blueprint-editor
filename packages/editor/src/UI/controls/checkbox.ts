@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import G from '../../common/globals'
+import { colors, styles } from '../style'
 
 /** Base Checkbox */
 export default class Checkbox extends PIXI.Container {
@@ -20,17 +20,17 @@ export default class Checkbox extends PIXI.Container {
     private static drawGraphic(checked: boolean, hover: boolean, visible: boolean): PIXI.Graphics {
         const graphic: PIXI.Graphics = new PIXI.Graphics()
         graphic
-            .beginFill(G.colors.controls.checkbox.background.color, G.colors.controls.checkbox.background.alpha)
+            .beginFill(colors.controls.checkbox.background.color, colors.controls.checkbox.background.alpha)
             .drawRect(2, 2, 32, 32)
             .beginFill(
-                hover ? G.colors.controls.checkbox.hover.color : G.colors.controls.checkbox.background.color,
-                hover ? G.colors.controls.checkbox.hover.alpha : G.colors.controls.checkbox.background.alpha
+                hover ? colors.controls.checkbox.hover.color : colors.controls.checkbox.background.color,
+                hover ? colors.controls.checkbox.hover.alpha : colors.controls.checkbox.background.alpha
             )
             .drawRoundedRect(0, 0, 36, 36, 10)
-            .lineStyle(2, G.colors.controls.checkbox.checkmark.color, G.colors.controls.checkbox.checkmark.alpha, 0.5)
+            .lineStyle(2, colors.controls.checkbox.checkmark.color, colors.controls.checkbox.checkmark.alpha, 0.5)
         if (checked) {
             graphic
-                .beginFill(G.colors.controls.checkbox.checkmark.color, G.colors.controls.checkbox.checkmark.alpha)
+                .beginFill(colors.controls.checkbox.checkmark.color, colors.controls.checkbox.checkmark.alpha)
                 .drawPolygon(Checkbox.CHECK_POLYGON)
         }
         graphic.cacheAsBitmap = true
@@ -57,7 +57,7 @@ export default class Checkbox extends PIXI.Container {
 
         // Draw text
         if (text !== undefined) {
-            const label: PIXI.Text = new PIXI.Text(text, G.styles.controls.checkbox)
+            const label: PIXI.Text = new PIXI.Text(text, styles.controls.checkbox)
             label.position.set(24, 0)
             this.addChild(label)
         }

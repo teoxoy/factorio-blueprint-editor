@@ -4,6 +4,7 @@ import G from '../../common/globals'
 import F from '../controls/functions'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'
+import { colors, styles } from '../style'
 
 /*
     Cols
@@ -186,14 +187,14 @@ export class InventoryContainer extends Dialog {
         const recipeBackground: PIXI.Graphics = F.DrawRectangle(
             404,
             78,
-            G.colors.dialog.background.color,
-            G.colors.dialog.background.alpha,
-            G.colors.dialog.background.border
+            colors.dialog.background.color,
+            colors.dialog.background.alpha,
+            colors.dialog.background.border
         )
         recipeBackground.position.set(0, 0)
         recipePanel.addChild(recipeBackground)
 
-        this.m_RecipeLabel = new PIXI.Text('', G.styles.dialog.label)
+        this.m_RecipeLabel = new PIXI.Text('', styles.dialog.label)
         this.m_RecipeLabel.position.set(12, 10)
         recipePanel.addChild(this.m_RecipeLabel)
 

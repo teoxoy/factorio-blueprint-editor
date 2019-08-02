@@ -4,6 +4,7 @@ import Panel from '../controls/panel'
 import Slot from '../controls/slot'
 import F from '../controls/functions'
 import { EditorMode } from '../../containers/blueprint'
+import { colors } from '../style'
 
 class QuickbarSlot extends Slot {
     public get itemName(): string {
@@ -29,7 +30,7 @@ export class QuickbarContainer extends Panel {
         const button = new PIXI.Graphics()
 
         button
-            .beginFill(G.colors.controls.button.background.color)
+            .beginFill(colors.controls.button.background.color)
             .moveTo(0, height)
             .lineTo(width / 2, 0)
             .lineTo(width, height)
@@ -59,9 +60,9 @@ export class QuickbarContainer extends Panel {
         super(
             442,
             24 + rows * 38,
-            G.colors.quickbar.background.color,
-            G.colors.quickbar.background.alpha,
-            G.colors.quickbar.background.border
+            colors.quickbar.background.color,
+            colors.quickbar.background.alpha,
+            colors.quickbar.background.border
         )
 
         this.rows = rows

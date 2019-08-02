@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import G from '../../common/globals'
+import { colors } from '../style'
 import F from './functions'
 
 /**
@@ -21,7 +21,7 @@ export default class Button extends PIXI.Container {
     /** Data of Control */
     private m_Data: unknown
 
-    public constructor(width: number = 36, height: number = 36, border: number = G.colors.controls.button.border) {
+    public constructor(width: number = 36, height: number = 36, border: number = colors.controls.button.border) {
         super()
 
         this.interactive = true
@@ -31,7 +31,7 @@ export default class Button extends PIXI.Container {
             width,
             height,
             this.background,
-            G.colors.controls.button.background.alpha,
+            colors.controls.button.background.alpha,
             border,
             this.pressed
         )
@@ -40,8 +40,8 @@ export default class Button extends PIXI.Container {
         this.m_Active = F.DrawRectangle(
             width,
             height,
-            G.colors.controls.button.active.color,
-            G.colors.controls.button.active.alpha,
+            colors.controls.button.active.color,
+            colors.controls.button.active.alpha,
             border,
             !this.pressed
         )
@@ -51,8 +51,8 @@ export default class Button extends PIXI.Container {
         this.m_Hover = F.DrawRectangle(
             width,
             height,
-            G.colors.controls.button.hover.color,
-            G.colors.controls.button.hover.alpha,
+            colors.controls.button.hover.color,
+            colors.controls.button.hover.alpha,
             0
         )
         this.m_Hover.position.set(0, 1)
@@ -115,12 +115,12 @@ export default class Button extends PIXI.Container {
 
     /** Background color of the button (can be overriden) */
     protected get background(): number {
-        return G.colors.controls.button.background.color
+        return colors.controls.button.background.color
     }
 
     /** Rollover color of the button (can be overriden) */
     protected get hover(): number {
-        return G.colors.controls.button.hover.color
+        return colors.controls.button.hover.color
     }
 
     /** Shall button be raised or pressed (can be overridden) */

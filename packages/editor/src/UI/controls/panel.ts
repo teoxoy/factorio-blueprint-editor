@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import G from '../../common/globals'
+import { colors } from '../style'
 import F from './functions'
 
 /** Panel */
@@ -32,9 +32,9 @@ export default abstract class Panel extends PIXI.Container {
     public constructor(
         width: number,
         height: number,
-        background: number = G.colors.controls.panel.background.color,
-        alpha: number = G.colors.controls.panel.background.alpha,
-        border: number = G.colors.controls.panel.background.border
+        background: number = colors.controls.panel.background.color,
+        alpha: number = colors.controls.panel.background.alpha,
+        border: number = colors.controls.panel.background.border
     ) {
         super()
 

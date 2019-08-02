@@ -1,9 +1,9 @@
 import * as PIXI from 'pixi.js'
-import G from '../../../common/globals'
 import util from '../../../common/util'
 import { EntitySprite } from '../../../entitySprite'
 import { OverlayContainer } from '../../../containers/overlay'
 import Entity from '../../../factorio-data/entity'
+import { colors } from '../../style'
 
 /** Preview of Entity */
 export default class Preview extends PIXI.Container {
@@ -24,7 +24,7 @@ export default class Preview extends PIXI.Container {
 
         // Background of entity preview
         const background = new PIXI.Graphics()
-            .beginFill(G.colors.editor.sprite.background.color, G.colors.editor.sprite.background.alpha)
+            .beginFill(colors.editor.sprite.background.color, colors.editor.sprite.background.alpha)
             .drawRect(0, 0, size, size)
             .endFill()
         this.addChild(background)

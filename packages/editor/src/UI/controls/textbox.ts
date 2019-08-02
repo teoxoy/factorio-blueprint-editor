@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { passtroughAllEvents } from '../../actions'
-import G from '../../common/globals'
+import { colors, styles } from '../style'
 import F from './functions'
 
 // TODO: Evaluate enhancement: Posibility to set caret with mouse (prototype commented ou with 'PT')
@@ -12,10 +12,10 @@ class TextChar extends PIXI.Text {
     private readonly m_Metrics: PIXI.TextMetrics
 
     public constructor(char: string, left: number = 0) {
-        super(char, G.styles.controls.textbox)
+        super(char, styles.controls.textbox)
         // (PT) this.interactive = true
         this.position.set(left, 0)
-        this.m_Metrics = PIXI.TextMetrics.measureText(this.text, G.styles.controls.textbox)
+        this.m_Metrics = PIXI.TextMetrics.measureText(this.text, styles.controls.textbox)
     }
 
     /** Width in pixel of char */
@@ -164,13 +164,13 @@ export default class Textbox extends PIXI.Container {
         this.m_Filter = filter
 
         // 1 (Border) + 2 (Space) + Text Height + 2 (Space) + 1 Border = Text Height + 6
-        const height: number = PIXI.TextMetrics.measureText(text, G.styles.controls.textbox).height
+        const height: number = PIXI.TextMetrics.measureText(text, styles.controls.textbox).height
 
         this.m_Background = F.DrawRectangle(
             width,
             height + 6,
-            G.colors.controls.textbox.background.color,
-            G.colors.controls.textbox.background.alpha,
+            colors.controls.textbox.background.color,
+            colors.controls.textbox.background.alpha,
             1,
             true
         )
@@ -179,8 +179,8 @@ export default class Textbox extends PIXI.Container {
         this.m_Active = F.DrawRectangle(
             width,
             height + 6,
-            G.colors.controls.textbox.active.color,
-            G.colors.controls.textbox.active.alpha,
+            colors.controls.textbox.active.color,
+            colors.controls.textbox.active.alpha,
             1,
             true
         )
@@ -194,7 +194,7 @@ export default class Textbox extends PIXI.Container {
 
         this.m_CaretGraphic = new PIXI.Graphics()
         this.m_CaretGraphic
-            .lineStyle(1, G.colors.controls.textbox.foreground.color)
+            .lineStyle(1, colors.controls.textbox.foreground.color)
             .moveTo(0, 0)
             .lineTo(0, height)
         this.m_CaretGraphic.y = 3

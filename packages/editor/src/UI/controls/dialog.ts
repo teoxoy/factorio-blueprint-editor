@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js'
 import G from '../../common/globals'
+import { colors, styles } from '../style'
 import F from './functions'
 import Panel from './panel'
 
@@ -45,9 +46,9 @@ export default class Dialog extends Panel {
         super(
             width,
             height,
-            G.colors.dialog.background.color,
-            G.colors.dialog.background.alpha,
-            G.colors.dialog.background.border
+            colors.dialog.background.color,
+            colors.dialog.background.alpha,
+            colors.dialog.background.border
         )
 
         this.visible = true
@@ -55,7 +56,7 @@ export default class Dialog extends Panel {
         this.interactiveChildren = true
 
         if (title !== undefined) {
-            this.addLabel(12, 10, title, G.styles.dialog.title)
+            this.addLabel(12, 10, title, styles.dialog.title)
         }
 
         Dialog.s_openDialogs.push(this)
@@ -87,7 +88,7 @@ export default class Dialog extends Panel {
         x: number = 140,
         y: number = 56,
         text: string = 'Recipe:',
-        style: PIXI.TextStyle = G.styles.dialog.label
+        style: PIXI.TextStyle = styles.dialog.label
     ): PIXI.Text {
         const label: PIXI.Text = new PIXI.Text(text, style)
         label.position.set(x, y)
@@ -111,13 +112,13 @@ export default class Dialog extends Panel {
         y: number,
         width: number,
         height: number,
-        border: number = G.colors.dialog.line.background.border
+        border: number = colors.dialog.line.background.border
     ): PIXI.Graphics {
         const line: PIXI.Graphics = F.DrawRectangle(
             width,
             height,
-            G.colors.dialog.line.background.color,
-            G.colors.dialog.line.background.alpha,
+            colors.dialog.line.background.color,
+            colors.dialog.line.background.alpha,
             border,
             true
         )

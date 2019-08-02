@@ -5,6 +5,7 @@ import Panel from '../controls/panel'
 import Entity from '../../factorio-data/entity'
 import util from '../../common/util'
 import F from '../controls/functions'
+import { styles } from '../style'
 
 function template(strings: TemplateStringsArray, ...keys: (number | string)[]) {
     return (...values: (unknown | Record<string, unknown>)[]) => {
@@ -65,13 +66,13 @@ export class InfoEntityPanel extends Panel {
         this.interactive = false
         this.visible = false
 
-        this.title = new PIXI.Text('Information', G.styles.dialog.title)
+        this.title = new PIXI.Text('Information', styles.dialog.title)
         this.title.anchor.set(0.5, 0)
         this.title.position.set(super.width / 2, 2)
         this.addChild(this.title)
 
-        this.m_EntityName = new PIXI.Text('', G.styles.dialog.label)
-        this.m_entityInfo = new PIXI.Text('', G.styles.dialog.label)
+        this.m_EntityName = new PIXI.Text('', styles.dialog.label)
+        this.m_entityInfo = new PIXI.Text('', styles.dialog.label)
         this.m_RecipeContainer = new PIXI.Container()
         this.m_RecipeIOContainer = new PIXI.Container()
 
@@ -152,14 +153,14 @@ export class InfoEntityPanel extends Panel {
             }
 
             // Show the original recipe
-            this.m_RecipeContainer.addChild(new PIXI.Text('Recipe:', G.styles.dialog.label))
+            this.m_RecipeContainer.addChild(new PIXI.Text('Recipe:', styles.dialog.label))
             F.CreateRecipe(this.m_RecipeContainer, 0, 20, recipe.ingredients, recipe.results, recipe.time)
             this.m_RecipeContainer.position.set(10, nextY)
             nextY = this.m_RecipeContainer.position.y + this.m_RecipeContainer.height + 20
 
             // Show recipe that takes entity effects into account
             this.m_RecipeIOContainer.addChild(
-                new PIXI.Text('Recipe (takes entity effects into account):', G.styles.dialog.label)
+                new PIXI.Text('Recipe (takes entity effects into account):', styles.dialog.label)
             )
             F.CreateRecipe(
                 this.m_RecipeIOContainer,

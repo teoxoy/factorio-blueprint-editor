@@ -1,4 +1,4 @@
-import G from '../../common/globals'
+import { colors } from '../style'
 import Button from './button'
 
 /**
@@ -7,7 +7,7 @@ import Button from './button'
 export default class Slot extends Button {
     // Override Rollover Color of Button
     public get hover(): number {
-        return G.colors.controls.slot.hover.color
+        return colors.controls.slot.hover.color
     }
 
     // Override Pressed appearance of Button

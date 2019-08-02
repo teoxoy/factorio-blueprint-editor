@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
 import FD from 'factorio-data'
-import G from '../../common/globals'
+import { styles } from '../style'
 
 /**
  * Shade Color
@@ -203,8 +203,8 @@ function CreateIconWithAmount(host: PIXI.Container, x: number, y: number, name: 
     host.addChild(icon)
 
     const amountString: string = amount < 1000 ? amount.toString() : `${Math.floor(amount / 1000)}k`
-    const size: PIXI.TextMetrics = PIXI.TextMetrics.measureText(amountString, G.styles.icon.amount)
-    const text = new PIXI.Text(amountString, G.styles.icon.amount)
+    const size: PIXI.TextMetrics = PIXI.TextMetrics.measureText(amountString, styles.icon.amount)
+    const text = new PIXI.Text(amountString, styles.icon.amount)
     text.position.set(x + 33 - size.width, y + 33 - size.height)
     host.addChild(text)
 }
@@ -226,8 +226,8 @@ function CreateRecipe(
 
     nextX += 2
     const timeText = `=${time}s>`
-    const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, G.styles.dialog.label)
-    const timeObject: PIXI.Text = new PIXI.Text(timeText, G.styles.dialog.label)
+    const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, styles.dialog.label)
+    const timeObject: PIXI.Text = new PIXI.Text(timeText, styles.dialog.label)
     timeObject.position.set(nextX, 6 + y)
     host.addChild(timeObject)
     nextX += timeSize.width + 6

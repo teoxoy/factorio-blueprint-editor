@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import G from '../../common/globals'
+import { colors } from '../style'
 import F from './functions'
 
 /** Slider Control */
@@ -41,12 +41,12 @@ export default class Slider extends PIXI.Container {
             Slider.SLIDER_WIDTH + Slider.SLIDER_HEIGHT,
             Slider.SLIDER_HEIGHT,
             factor,
-            G.colors.controls.slider.slidebar.color,
+            colors.controls.slider.slidebar.color,
             1,
-            G.colors.controls.slider.slidebar.p0,
-            G.colors.controls.slider.slidebar.p1,
-            G.colors.controls.slider.slidebar.p2,
-            G.colors.controls.slider.slidebar.p3
+            colors.controls.slider.slidebar.p0,
+            colors.controls.slider.slidebar.p1,
+            colors.controls.slider.slidebar.p2,
+            colors.controls.slider.slidebar.p3
         )
         slidebar.position.set(0, 0)
         this.addChild(slidebar)
@@ -61,12 +61,12 @@ export default class Slider extends PIXI.Container {
             Slider.SLIDER_HEIGHT,
             Slider.SLIDER_HEIGHT,
             factor,
-            G.colors.controls.slider.button.color,
+            colors.controls.slider.button.color,
             1,
-            G.colors.controls.slider.button.p0,
-            G.colors.controls.slider.button.p1,
-            G.colors.controls.slider.button.p2,
-            G.colors.controls.slider.button.p3
+            colors.controls.slider.button.p0,
+            colors.controls.slider.button.p1,
+            colors.controls.slider.button.p2,
+            colors.controls.slider.button.p3
         )
         buttonFace.position.set(0, 0)
 
@@ -74,12 +74,12 @@ export default class Slider extends PIXI.Container {
             Slider.SLIDER_HEIGHT,
             Slider.SLIDER_HEIGHT,
             factor,
-            G.colors.controls.slider.hover.color,
+            colors.controls.slider.hover.color,
             1,
-            G.colors.controls.slider.hover.p0,
-            G.colors.controls.slider.hover.p1,
-            G.colors.controls.slider.hover.p2,
-            G.colors.controls.slider.hover.p3
+            colors.controls.slider.hover.p0,
+            colors.controls.slider.hover.p1,
+            colors.controls.slider.hover.p2,
+            colors.controls.slider.hover.p3
         )
         buttonHover.position.set(0, 0)
         buttonHover.visible = false
@@ -154,12 +154,12 @@ export default class Slider extends PIXI.Container {
                     this.m_SliderButton.x + 2,
                     Slider.SLIDER_HEIGHT,
                     2,
-                    G.colors.controls.slider.value.color,
+                    colors.controls.slider.value.color,
                     1,
-                    G.colors.controls.slider.value.p0,
-                    G.colors.controls.slider.value.p1,
-                    G.colors.controls.slider.value.p2,
-                    G.colors.controls.slider.value.p3
+                    colors.controls.slider.value.p0,
+                    colors.controls.slider.value.p1,
+                    colors.controls.slider.value.p2,
+                    colors.controls.slider.value.p3
                 )
             )
         }
