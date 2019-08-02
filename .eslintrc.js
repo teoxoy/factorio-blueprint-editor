@@ -9,8 +9,7 @@ module.exports = {
     },
     parser: '@typescript-eslint/parser',
     parserOptions: {
-        project: configs[0],
-        projects: configs
+        project: configs
     },
     plugins: ['@typescript-eslint'],
     extends: [
