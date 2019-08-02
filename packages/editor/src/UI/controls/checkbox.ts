@@ -5,12 +5,12 @@ import G from '../../common/globals'
 export default class Checkbox extends PIXI.Container {
     /** Checkmark Polygon */
     // prettier-ignore
-    private static readonly CHECK_POLYGON: PIXI.Polygon = new PIXI.Polygon(
+    private static readonly CHECK_POLYGON: PIXI.Polygon = new PIXI.Polygon([
          8,  8, 12,  8, 16, 12, 20, 12, 24,  8,
         28,  8, 28, 12, 24, 16, 24, 20, 28, 24,
         28, 28, 24, 28, 20, 24, 16, 24, 12, 28,
          8, 28,  8, 24, 12, 20, 12, 16,  8, 12,
-         8,  8)
+         8,  8])
 
     /**
      * Draw Checkbox Graphic

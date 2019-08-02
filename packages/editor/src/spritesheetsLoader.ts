@@ -1,7 +1,5 @@
-import LRentitySpritesheetPNG from 'factorio-data/data/graphics/LREntitySpritesheet.png'
 import LRentitySpritesheetCompressedPNG from 'factorio-data/data/graphics/LREntitySpritesheetCompressed.png'
 import LRentitySpritesheetJSON from 'factorio-data/data/graphics/LREntitySpritesheet.json'
-import HRentitySpritesheetPNG from 'factorio-data/data/graphics/HREntitySpritesheet.png'
 import HRentitySpritesheetCompressedPNG from 'factorio-data/data/graphics/HREntitySpritesheetCompressed.png'
 import HRentitySpritesheetJSON from 'factorio-data/data/graphics/HREntitySpritesheet.json'
 import iconSpritesheetPNG from 'factorio-data/data/graphics/iconSpritesheet.png'
@@ -18,47 +16,13 @@ import util from './common/util'
 function getAllPromises(): Promise<void>[] {
     return [
         [
-            /* eslint-disable no-nested-ternary */
-            G.quality.hr
-                ? G.quality.compressed
-                    ? HRentitySpritesheetCompressedPNG
-                    : HRentitySpritesheetPNG
-                : G.quality.compressed
-                ? LRentitySpritesheetCompressedPNG
-                : LRentitySpritesheetPNG,
-            /* eslint-enable no-nested-ternary */
-            G.quality.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
+            G.hr ? HRentitySpritesheetCompressedPNG : LRentitySpritesheetCompressedPNG,
+            G.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
         ],
         [iconSpritesheetPNG, iconSpritesheetJSON],
         [utilitySpritesheetPNG, utilitySpritesheetJSON],
         [tilesSpritesheetPNG, tilesSpritesheetJSON]
-    ].map(data => loadSpritesheet(data[0], data[1]))
-}
-
-function changeQuality(hr: boolean, compressed: boolean): void {
-    G.loadingScreen.show()
-
-    G.BPC.clearData()
-
-    Object.keys(PIXI.utils.TextureCache)
-        .filter(texture => texture.includes('graphics/entity/'))
-        .forEach(k => PIXI.utils.TextureCache[k].destroy(true))
-
-    loadSpritesheet(
-        /* eslint-disable no-nested-ternary */
-        hr
-            ? compressed
-                ? HRentitySpritesheetCompressedPNG
-                : HRentitySpritesheetPNG
-            : compressed
-            ? LRentitySpritesheetCompressedPNG
-            : LRentitySpritesheetPNG,
-        /* eslint-enable no-nested-ternary */
-        hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
-    ).then(() => {
-        G.BPC.initBP()
-        G.loadingScreen.hide()
-    })
+    ].map(data => loadSpritesheet(data[0] as string, data[1]))
 }
 
 function blobToImageBitmap(blob: Blob): Promise<ImageBitmap | HTMLImageElement> {
@@ -108,6 +72,5 @@ function loadSpritesheet(src: string, json: any): Promise<void> {
 }
 
 export default {
-    getAllPromises,
-    changeQuality
+    getAllPromises
 }

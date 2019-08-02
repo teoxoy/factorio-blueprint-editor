@@ -31,9 +31,9 @@ export class EntitySprite extends PIXI.Sprite {
         return this.nextID
     }
 
-    public static getParts(entity: IEntityData | Entity, hr: boolean, positionGrid?: PositionGrid): EntitySprite[] {
+    public static getParts(entity: IEntityData | Entity, positionGrid?: PositionGrid): EntitySprite[] {
         const anims = spriteDataBuilder.getSpriteData({
-            hr,
+            hr: G.hr,
             dir:
                 positionGrid && entity.type === 'electric_pole' && entity instanceof Entity
                     ? G.BPC.wiresContainer.getPowerPoleDirection(entity)

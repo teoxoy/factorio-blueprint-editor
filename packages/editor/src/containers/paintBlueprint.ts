@@ -23,7 +23,7 @@ class BlueprintEntityPaintContainer {
 
         this.visualizationArea = G.BPC.visualizationAreaContainer.create(this.entity.name, this.position)
 
-        this.entitySprites = EntitySprite.getParts(this.entity, G.quality.hr, this.bp.entityPositionGrid)
+        this.entitySprites = EntitySprite.getParts(this.entity, this.bp.entityPositionGrid)
     }
 
     private get entityPosition(): IPoint {

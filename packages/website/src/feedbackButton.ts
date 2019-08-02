@@ -1,4 +1,19 @@
-export default function initDoorbell(): void {
+declare global {
+    // eslint-disable-next-line @typescript-eslint/interface-name-prefix
+    interface Window {
+        doorbellOptions: {
+            tags?: string
+            id: string
+            appKey: string
+            windowLoaded?: boolean
+            onShow?: () => void
+            onHide?: () => void
+            onInitialized?: () => void
+        }
+    }
+}
+
+export default function initFeedbackButton(): void {
     window.doorbellOptions = {
         id: '9657',
         appKey: 'z1scfSY8hpBNiIFWxBg50tkhjvFKhHMdhfGNMp6YCUZVttoLOqtrlhk4ca9asDCy',

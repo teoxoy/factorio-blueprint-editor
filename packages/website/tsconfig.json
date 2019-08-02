@@ -1,0 +1,15 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "dist",
+
+        "target": "es5",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "lib": ["dom", "es6", "es2016.array.include"],
+
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
+    }
+}

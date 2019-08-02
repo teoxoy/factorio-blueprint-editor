@@ -1,43 +1,15 @@
 import * as PIXI from 'pixi.js'
 import Blueprint from '../factorio-data/blueprint'
 import { BlueprintContainer } from '../containers/blueprint'
-import { Book } from '../factorio-data/book'
 import UIContainer from '../UI/ui'
 
+const hr = false
 let debug = false
-
-const quality = {
-    hr: true,
-    compressed: true
-}
-
-// this is how it works in factorio but js doesn't support 64bit bitwise operations
-//  uint64_t(developerVersion) |
-// (uint64_t(minorVersion) << 16) |
-// (uint64_t(majorVersion) << 32) |
-// (uint64_t(mainVersion) << 48)
-const getFactorioVersion = (main = 0, major = 17, minor = 14): number =>
-    (minor << 16) + (major | (main << 16)) * 0xffffffff
 
 let app: PIXI.Application
 let BPC: BlueprintContainer
 let UI: UIContainer
-
-const loadingScreen = {
-    el: document.getElementById('loadingScreen'),
-    show() {
-        this.el.classList.add('active')
-    },
-    hide() {
-        this.el.classList.remove('active')
-    }
-}
-
-let moveSpeed = 10
-let quickbarRows = 2
-
 let bp: Blueprint
-let book: Book
 
 const colors = {
     text: {
@@ -96,23 +68,6 @@ const colors = {
     },
     quickbar: {
         background: { color: 0x303030, alpha: 1, border: 2 }
-    },
-
-    _darkTheme: true,
-    _tintsToChange: [] as PIXI.Sprite[],
-    pattern: 'grid' as 'checker' | 'grid',
-    get darkTheme() {
-        return this._darkTheme
-    },
-    set darkTheme(value: boolean) {
-        this._darkTheme = value
-        this._tintsToChange.forEach((s: PIXI.Sprite) => {
-            s.tint = value ? 0x303030 : 0xc9c9c9
-        })
-    },
-    addSpriteForAutomaticTintChange(sprite: PIXI.Sprite) {
-        sprite.tint = this.darkTheme ? 0x303030 : 0xc9c9c9
-        this._tintsToChange.push(sprite)
     }
 }
 
@@ -181,16 +136,11 @@ const styles = {
 
 export default {
     debug,
-    quality,
-    getFactorioVersion,
+    hr,
     BPC,
     UI,
     app,
     bp,
-    book,
-    moveSpeed,
-    quickbarRows,
-    loadingScreen,
     colors,
     fontFamily,
     styles

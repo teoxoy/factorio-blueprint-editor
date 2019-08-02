@@ -1,17 +1,15 @@
 {
     "compilerOptions": {
-        "lib": ["dom", "es6", "dom.iterable", "es2016.array.include", "es2017.object"],
-        "target": "es6",
-        "module": "es6",
-        "moduleResolution": "node",
-        "allowSyntheticDefaultImports": true,
+        "pretty": true,
+
+        "sourceMap": true,
+        "alwaysStrict": true,
+        "removeComments": true,
+
         "noImplicitAny": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "removeComments": true,
-        "preserveConstEnums": true,
-        "sourceMap": true,
-        "skipLibCheck": true,
-        "alwaysStrict": true
+
+        "preserveConstEnums": true
     }
 }

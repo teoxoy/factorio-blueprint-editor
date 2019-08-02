@@ -3,32 +3,6 @@ declare module '*.png' {
     export default path
 }
 
-declare module '*.json' {
-    const content: any
-    export default content
-}
-
-interface Navigator {
-    clipboard: {
-        writeText?: (s: string) => Promise<void>
-        readText?: () => Promise<string>
-    }
-}
-
-interface Window {
-    doorbellOptions: {
-        tags?: string
-        id: string
-        appKey: string
-        windowLoaded?: boolean
-        onShow?: () => void
-        onHide?: () => void
-        onInitialized?: () => void
-    }
-}
-
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
-
 interface IPoint {
     x: number
     y: number
@@ -94,7 +68,7 @@ interface ISpriteData {
 }
 
 /** Namespace for blueprint string interfaces */
-namespace BPS {
+declare namespace BPS {
     interface IColor {
         r: number
         g: number
@@ -133,7 +107,7 @@ namespace BPS {
         copper?: IWireColor[]
     }
 
-    interface IConnection extends Record<string, ConnSide | IWireColor[]> {
+    interface IConnection extends Record<string, IConnSide | IWireColor[]> {
         1?: IConnSide
         2?: IConnSide
         Cu0?: IWireColor[]

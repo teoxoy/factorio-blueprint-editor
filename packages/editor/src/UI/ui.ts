@@ -1,5 +1,4 @@
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
 import Entity from '../factorio-data/entity'
 import { DebugContainer } from './panels/debug'
 import { QuickbarContainer } from './panels/quickbar'
@@ -18,7 +17,7 @@ export default class UIContainer extends PIXI.Container {
         super()
 
         this.debugContainer = new DebugContainer()
-        this.quickbarContainer = new QuickbarContainer(G.quickbarRows)
+        this.quickbarContainer = new QuickbarContainer(2)
         this.infoEntityPanel = new InfoEntityPanel()
         this.dialogsContainer = new PIXI.Container()
         this.paintIconContainer = new PIXI.Container()
@@ -60,12 +59,12 @@ export default class UIContainer extends PIXI.Container {
         this.dialogsContainer.addChild(inv)
     }
 
-    public changeQuickbarRows(rows: number): void {
-        const itemNames = this.quickbarContainer.serialize()
-        this.quickbarContainer.destroy()
-        this.quickbarContainer = new QuickbarContainer(rows, itemNames)
+    // public changeQuickbarRows(rows: number): void {
+    //     const itemNames = this.quickbarContainer.serialize()
+    //     this.quickbarContainer.destroy()
+    //     this.quickbarContainer = new QuickbarContainer(rows, itemNames)
 
-        const index = this.getChildIndex(this.quickbarContainer)
-        this.addChildAt(this.quickbarContainer, index)
-    }
+    //     const index = this.getChildIndex(this.quickbarContainer)
+    //     this.addChildAt(this.quickbarContainer, index)
+    // }
 }

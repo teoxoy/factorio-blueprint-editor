@@ -1,36 +1,46 @@
 import keyboardJS from 'keyboardjs'
 
-// Set the general application keyboard context
-// Needed to have seperate context's for input controls (i.e. Textbox)
-keyboardJS.setContext('editor')
+function initActions(canvas: HTMLCanvasElement): void {
+    // Set the general application keyboard context
+    // Needed to have seperate context's for input controls (i.e. Textbox)
+    keyboardJS.setContext('editor')
 
-const canvasEl = document.getElementById('editor') as HTMLCanvasElement
+    // Bind the events on the canvas
+    // @ts-ignore
+    keyboardJS.watch(canvas)
 
-// Bind the events on the canvas
-keyboardJS.watch(canvasEl)
+    // keyboardJS.watch will bind keydown and keyup events on the canvas but
+    // keydown and keyup will only fire if the canvas is focused
+    canvas.addEventListener('mouseover', () => canvas.focus())
+    canvas.addEventListener('blur', () => {
+        keyboardJS.releaseAllKeys()
+    })
 
-// keyboardJS.watch will bind keydown and keyup events on the canvas but
-// keydown and keyup will only fire if the canvas is focused
-canvasEl.addEventListener('mouseover', () => canvasEl.focus())
-canvasEl.addEventListener('blur', () => {
-    keyboardJS.releaseAllKeys()
-})
+    // Hack for plugging the mouse into keyboardJS
+    // @ts-ignore
+    keyboardJS._locale.bindKeyCode(300, ['lclick'])
+    // @ts-ignore
+    keyboardJS._locale.bindKeyCode(301, ['mclick'])
+    // @ts-ignore
+    keyboardJS._locale.bindKeyCode(302, ['rclick'])
+    // @ts-ignore
+    keyboardJS._locale.bindKeyCode(303, ['wheelNeg'])
+    // @ts-ignore
+    keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
+    // @ts-ignore
+    canvas.addEventListener('mousedown', e => keyboardJS.pressKey(e.button + 300, e))
+    // attach mouseup to window so that releaseKey will be called even when mouseup is fired from outside the window
+    // @ts-ignore
+    window.addEventListener('mouseup', e => keyboardJS.releaseKey(e.button + 300, e))
 
-// Hack for plugging the mouse into keyboardJS
-keyboardJS._locale.bindKeyCode(300, ['lclick'])
-keyboardJS._locale.bindKeyCode(301, ['mclick'])
-keyboardJS._locale.bindKeyCode(302, ['rclick'])
-keyboardJS._locale.bindKeyCode(303, ['wheelNeg'])
-keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
-canvasEl.addEventListener('mousedown', e => keyboardJS.pressKey(e.button + 300, e))
-// attach mouseup to window so that releaseKey will be called even when mouseup is fired from outside the window
-window.addEventListener('mouseup', e => keyboardJS.releaseKey(e.button + 300, e))
-
-canvasEl.addEventListener('wheel', e => {
-    e.preventDefault()
-    keyboardJS.pressKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
-    keyboardJS.releaseKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
-})
+    canvas.addEventListener('wheel', e => {
+        e.preventDefault()
+        // @ts-ignore
+        keyboardJS.pressKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
+        // @ts-ignore
+        keyboardJS.releaseKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
+    })
+}
 
 /**
  * Passes trough all events to the callback
@@ -49,6 +59,7 @@ function passtroughAllEvents(cb: (e: keyboardJS.KeyEvent) => boolean): void {
 }
 
 class Action {
+    public readonly name: string
     private readonly defaultKeyCombo: string
 
     private m_active = true
@@ -59,7 +70,8 @@ class Action {
     }[] = []
     private _pressed = false
 
-    public constructor(defaultKeyCombo: string) {
+    public constructor(name: string, defaultKeyCombo: string) {
+        this.name = name
         this.defaultKeyCombo = defaultKeyCombo
         this.m_keyCombo = defaultKeyCombo
 
@@ -71,6 +83,13 @@ class Action {
                 this._pressed = false
             }
         })
+    }
+
+    public get prettyName(): string {
+        return this.name
+            .split(/(?=[A-Z1-9])/)
+            .join(' ')
+            .replace(/(\b\w)/, c => c.toUpperCase())
     }
 
     private get active(): boolean {
@@ -187,118 +206,68 @@ class Action {
     }
 }
 
-const actions = {
-    clear: new Action('shift+n'),
-    focus: new Action('f'),
-    takePicture: new Action('modifier+s'),
-    undo: new Action('modifier+z'),
-    redo: new Action('modifier+y'),
-    info: new Action('i'),
-    pan: new Action('lclick'),
-    zoomIn: new Action('wheelNeg'),
-    zoomOut: new Action('wheelPos'),
-    moveEntityUp: new Action('up'),
-    moveEntityLeft: new Action('left'),
-    moveEntityDown: new Action('down'),
-    moveEntityRight: new Action('right'),
+const actions = new Map<string, Action>()
 
-    generateOilOutpost: new Action('g'),
-    copySelection: new Action('modifier+lclick'),
-    deleteSelection: new Action('modifier+rclick'),
+function registerAction(name: string, keyCombo: string): Action {
+    const action = new Action(name, keyCombo)
+    actions.set(name, action)
+    return action
+}
 
-    moveUp: new Action('w'),
-    moveLeft: new Action('a'),
-    moveDown: new Action('s'),
-    moveRight: new Action('d'),
-
-    inventory: new Action('e'),
-    build: new Action('lclick'),
-    mine: new Action('rclick'),
-    copyEntitySettings: new Action('shift+rclick'),
-    pasteEntitySettings: new Action('shift+lclick'),
-    /** Used for highlighting the source entity */
-    tryPasteEntitySettings: new Action('shift'),
-    openEntityGUI: new Action('lclick'),
-    showInfo: new Action('alt'),
-    pipette: new Action('q'),
-    rotate: new Action('r'),
-    reverseRotate: new Action('shift+r'),
-    closeWindow: new Action('esc'),
-
-    increaseTileBuildingArea: new Action(']'),
-    decreaseTileBuildingArea: new Action('['),
-
-    quickbar1: new Action('1'),
-    quickbar2: new Action('2'),
-    quickbar3: new Action('3'),
-    quickbar4: new Action('4'),
-    quickbar5: new Action('5'),
-    quickbar6: new Action('shift+1'),
-    quickbar7: new Action('shift+2'),
-    quickbar8: new Action('shift+3'),
-    quickbar9: new Action('shift+4'),
-    quickbar10: new Action('shift+5'),
-    changeActiveQuickbar: new Action('x'),
-
-    copyBPString: {
-        bind: (opts: { press?: (e: ClipboardEvent) => void }) => {
-            if (opts.press === undefined) {
-                return
-            }
-            document.addEventListener('copy', (e: ClipboardEvent) => {
-                if (document.activeElement !== canvasEl) {
-                    return
-                }
-                e.preventDefault()
-                opts.press(e)
-            })
-        }
-    },
-
-    pasteBPString: {
-        bind: (opts: { press?: (e: ClipboardEvent) => void }) => {
-            if (opts.press === undefined) {
-                return
-            }
-            document.addEventListener('paste', (e: ClipboardEvent) => {
-                if (document.activeElement !== canvasEl) {
-                    return
-                }
-                e.preventDefault()
-                opts.press(e)
-            })
-        }
-    },
-
-    forEachAction(cb: (action: Action, actionName: string) => void) {
-        for (const actionName in this) {
-            if (this[actionName] instanceof Action) {
-                cb(this[actionName], actionName)
-            }
-        }
-    },
-
-    importKeybinds(keybinds: Record<string, string>) {
-        if (!keybinds) {
-            return
-        }
-        actions.forEachAction((action, actionName) => {
-            if (keybinds[actionName] !== undefined) {
-                action.keyCombo = keybinds[actionName]
-            }
-        })
-    },
-
-    exportKeybinds(changedOnly = true) {
-        const changedKeybinds: Record<string, string> = {}
-        actions.forEachAction((action, actionName) => {
-            if (!changedOnly || !action.usesDefaultKeyCombo) {
-                changedKeybinds[actionName] = action.keyCombo
-            }
-        })
-        return changedKeybinds
+function callAction(name: string): void {
+    const action = actions.get(name)
+    if (action) {
+        action.call()
     }
 }
 
-export { passtroughAllEvents }
-export default actions
+function isActionActive(name: string): boolean {
+    const action = actions.get(name)
+    if (action) {
+        return action.pressed
+    }
+    return false
+}
+
+function forEachAction(cb: (action: Action, actionName: string) => void): void {
+    actions.forEach((action, name) => cb(action, name))
+}
+
+function resetKeybinds(): void {
+    actions.forEach(action => {
+        action.resetKeyCombo()
+    })
+}
+
+function importKeybinds(keybinds: Record<string, string>): void {
+    if (!keybinds) {
+        return
+    }
+    actions.forEach((action, name) => {
+        if (keybinds[name] !== undefined) {
+            action.keyCombo = keybinds[name]
+        }
+    })
+}
+
+function exportKeybinds(changedOnly = true): Record<string, string> {
+    const changedKeybinds: Record<string, string> = {}
+    actions.forEach((action, name) => {
+        if (!changedOnly || !action.usesDefaultKeyCombo) {
+            changedKeybinds[name] = action.keyCombo
+        }
+    })
+    return changedKeybinds
+}
+
+export {
+    initActions,
+    passtroughAllEvents,
+    registerAction,
+    callAction,
+    isActionActive,
+    forEachAction,
+    resetKeybinds,
+    importKeybinds,
+    exportKeybinds
+}

@@ -120,8 +120,10 @@ function addToShift(shift: IPoint | number[], tab: FD.SpriteData): FD.SpriteData
 }
 
 function setProperty(img: FD.SpriteData, key: string, val: any): FD.SpriteData {
+    // @ts-ignore
     img[key] = val
     if (img.hr_version) {
+        // @ts-ignore
         img.hr_version[key] = val
     }
     return img
@@ -129,8 +131,10 @@ function setProperty(img: FD.SpriteData, key: string, val: any): FD.SpriteData {
 
 function setPropertyUsing(img: FD.SpriteData, key: string, key2: string, mult = 1): FD.SpriteData {
     if (key2) {
+        // @ts-ignore
         img[key] = img[key2] * mult
         if (img.hr_version) {
+            // @ts-ignore
             img.hr_version[key] = img.hr_version[key2] * mult
         }
     }

@@ -15,6 +15,7 @@ You can file new issues by selecting from our [new issue templates](https://gith
 ## Prerequisites
 
 -   [git](https://git-scm.com/)
+-   [yarn](https://yarnpkg.com)
 -   [node](https://nodejs.org/en/)
 -   [vscode](https://code.visualstudio.com/)
 
@@ -28,13 +29,13 @@ This project uses `eslint` and `prettier` to lint and format code. I would recom
 1. Clone your fork
 1. Download the recommended workspace extensions in vscode
 1. Make your changes in a new git branch (`git checkout -b my-fix-branch master`)
-1. Run `npm install`
-1. Run `npm start`
-1. Open the link in a browser or use the vscode debugger
-1. Make changes
-1. Commit your changes using a descriptive commit message
-1. Push your branch to GitHub `git push origin my-fix-branch`
-1. Start a pull request from GitHub
+2. Run `yarn`
+3. Run `yarn start`
+4. Open the link in a browser or use the vscode debugger
+5. Make changes
+6. Commit your changes using a descriptive commit message
+7. Push your branch to GitHub `git push origin my-fix-branch`
+8. Start a pull request from GitHub
 
 That's it! 🎉 Thank you for your contribution! 😃
 

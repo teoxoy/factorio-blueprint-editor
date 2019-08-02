@@ -2,7 +2,7 @@ import FD from 'factorio-data'
 import { EventEmitter } from 'eventemitter3'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
-import actions from '../actions'
+import { isActionActive, callAction } from '../actions'
 import Entity from '../factorio-data/entity'
 import Tile from '../factorio-data/tile'
 import { Viewport } from '../viewport'
@@ -123,7 +123,12 @@ class OptimizedContainer extends PIXI.ParticleContainer {
     }
 }
 
+type GridPattern = 'checker' | 'grid'
+
 class BlueprintContainer extends PIXI.Container {
+    public moveSpeed = 10
+    private _gridColor = 0x303030
+    private _gridPattern: GridPattern = 'grid'
     private grid: PIXI.TilingSprite
     private chunkGrid: PIXI.TilingSprite
     public wiresContainer: WiresContainer
@@ -180,7 +185,7 @@ class BlueprintContainer extends PIXI.Container {
             3
         )
 
-        this.generateGrid(G.colors.pattern)
+        this.generateGrid()
         this.tileSprites = new OptimizedContainer()
         this.tilePaintSlot = new PIXI.Container()
         this.visualizationAreaContainer = new VisualizationAreaContainer()
@@ -205,14 +210,14 @@ class BlueprintContainer extends PIXI.Container {
 
         G.app.ticker.add(() => {
             if (this.mode !== EditorMode.PAN) {
-                const WSXOR = actions.moveUp.pressed !== actions.moveDown.pressed
-                const ADXOR = actions.moveLeft.pressed !== actions.moveRight.pressed
+                const WSXOR = isActionActive('moveUp') !== isActionActive('moveDown')
+                const ADXOR = isActionActive('moveLeft') !== isActionActive('moveRight')
                 if (WSXOR || ADXOR) {
-                    const finalSpeed = G.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
+                    const finalSpeed = this.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
                     /* eslint-disable no-nested-ternary */
                     this.viewport.translateBy(
-                        (ADXOR ? (actions.moveLeft.pressed ? 1 : -1) : 0) * finalSpeed,
-                        (WSXOR ? (actions.moveUp.pressed ? 1 : -1) : 0) * finalSpeed
+                        (ADXOR ? (isActionActive('moveLeft') ? 1 : -1) : 0) * finalSpeed,
+                        (WSXOR ? (isActionActive('moveUp') ? 1 : -1) : 0) * finalSpeed
                     )
                     /* eslint-enable no-nested-ternary */
                     this.applyViewportTransform()
@@ -230,14 +235,14 @@ class BlueprintContainer extends PIXI.Container {
             // Instead of decreasing the global interactionFrequency, call the over and out entity events here
             this.updateHoverContainer()
 
-            if (actions.build.pressed) {
-                actions.build.call()
+            if (isActionActive('build')) {
+                callAction('build')
             }
-            if (actions.mine.pressed) {
-                actions.mine.call()
+            if (isActionActive('mine')) {
+                callAction('mine')
             }
-            if (actions.pasteEntitySettings.pressed) {
-                actions.pasteEntitySettings.call()
+            if (isActionActive('pasteEntitySettings')) {
+                callAction('pasteEntitySettings')
             }
         })
 
@@ -473,7 +478,25 @@ class BlueprintContainer extends PIXI.Container {
         }
     }
 
-    public generateGrid(pattern: 'checker' | 'grid' = 'checker'): void {
+    public get gridColor(): number {
+        return this._gridColor
+    }
+
+    public set gridColor(color: number) {
+        this._gridColor = color
+        this.grid.tint = color
+    }
+
+    public get gridPattern(): GridPattern {
+        return this._gridPattern
+    }
+
+    public set gridPattern(pattern: GridPattern) {
+        this._gridPattern = pattern
+        this.generateGrid()
+    }
+
+    private generateGrid(pattern = this.gridPattern): void {
         const gridGraphics =
             pattern === 'checker'
                 ? new PIXI.Graphics()
@@ -504,7 +527,7 @@ class BlueprintContainer extends PIXI.Container {
         const grid = new PIXI.TilingSprite(renderTexture, this.size.x, this.size.y)
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
-        G.colors.addSpriteForAutomaticTintChange(grid)
+        grid.tint = this.gridColor
 
         if (this.grid) {
             const index = this.getChildIndex(this.grid)
@@ -683,6 +706,22 @@ class BlueprintContainer extends PIXI.Container {
         return new PIXI.Rectangle(X, Y, W, H)
     }
 
+    public getPicture(): Promise<Blob> {
+        // getLocalBounds is needed because it seems that it has sideeffects
+        // without it generateTexture returns an empty texture
+        this.getLocalBounds()
+        const region = this.getBlueprintBounds()
+        const texture = G.app.renderer.generateTexture(this, PIXI.SCALE_MODES.LINEAR, 1, region)
+        const canvas = G.app.renderer.plugins.extract.canvas(texture)
+
+        return new Promise(resolve => {
+            canvas.toBlob(blob => {
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+                resolve(blob)
+            })
+        })
+    }
+
     public spawnPaintContainer(itemNameOrEntities: string | Entity[], direction = 0): void {
         if (this.mode === EditorMode.PAINT) {
             this.paintContainer.destroy()
@@ -722,4 +761,4 @@ class BlueprintContainer extends PIXI.Container {
     }
 }
 
-export { EditorMode, BlueprintContainer }
+export { EditorMode, BlueprintContainer, GridPattern }

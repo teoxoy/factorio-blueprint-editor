@@ -10,7 +10,16 @@ import generators, { IVisualization } from './generators'
 import History from './history'
 import Tile from './tile'
 
-const oilOutpostSettings = {
+interface IOilOutpostSettings extends Record<string, string | boolean | number> {
+    DEBUG: boolean
+    PUMPJACK_MODULE: string
+    MIN_GAP_BETWEEN_UNDERGROUNDS: number
+    BEACONS: boolean
+    MIN_AFFECTED_ENTITIES: number
+    BEACON_MODULE: string
+}
+
+const oilOutpostSettings: IOilOutpostSettings = {
     DEBUG: false,
     PUMPJACK_MODULE: 'productivity_module_3',
     MIN_GAP_BETWEEN_UNDERGROUNDS: 1,
@@ -18,6 +27,14 @@ const oilOutpostSettings = {
     MIN_AFFECTED_ENTITIES: 1,
     BEACON_MODULE: 'speed_module_3'
 }
+
+// this is how it works in factorio but js doesn't support 64bit bitwise operations
+//  uint64_t(developerVersion) |
+// (uint64_t(minorVersion) << 16) |
+// (uint64_t(majorVersion) << 32) |
+// (uint64_t(mainVersion) << 48)
+const getFactorioVersion = (main = 0, major = 17, minor = 14): number =>
+    (minor << 16) + (major | (main << 16)) * 0xffffffff
 
 class OurMap<K, V> extends Map<K, V> {
     public constructor(values?: V[], mapFn?: (value: V) => K) {
@@ -566,10 +583,10 @@ export default class Blueprint extends EventEmitter {
             entities: this.entities.isEmpty() ? undefined : entityInfo,
             tiles: this.tiles.isEmpty() ? undefined : tileInfo,
             item: 'blueprint',
-            version: G.getFactorioVersion(),
+            version: getFactorioVersion(),
             label: this.name
         }
     }
 }
 
-export { oilOutpostSettings }
+export { oilOutpostSettings, getFactorioVersion, IOilOutpostSettings }

@@ -1,554 +1,394 @@
 import * as PIXI from 'pixi.js'
 
-import FileSaver from 'file-saver'
+import G from './common/globals'
+import U from './common/util'
+
 import { Book } from './factorio-data/book'
+import Entity from './factorio-data/entity'
+import Blueprint, { oilOutpostSettings, IOilOutpostSettings } from './factorio-data/blueprint'
 import bpString, { ModdedBlueprintError, TrainBlueprintError } from './factorio-data/bpString'
 
-import G from './common/globals'
-import { TilePaintContainer } from './containers/paintTile'
-import { BlueprintContainer, EditorMode } from './containers/blueprint'
-import Blueprint from './factorio-data/blueprint'
-import initDoorbell from './doorbell'
-import actions from './actions'
-import initDatGui from './datgui'
-import initToasts from './toasts'
-import spritesheetsLoader from './spritesheetsLoader'
-import Entity from './factorio-data/entity'
-import Dialog from './UI/controls/dialog'
 import { EntityContainer } from './containers/entity'
-import U from './common/util'
+import { TilePaintContainer } from './containers/paintTile'
+import { BlueprintContainer, EditorMode, GridPattern } from './containers/blueprint'
+
 import UIContainer from './UI/ui'
+import Dialog from './UI/controls/dialog'
 
-if (PIXI.utils.isMobile.any) {
-    document.getElementById('loadingScreen').classList.add('mobileError')
-    throw new Error('MOBILE DEVICE DETECTED')
-}
+import {
+    initActions,
+    registerAction,
+    callAction,
+    forEachAction,
+    resetKeybinds,
+    importKeybinds,
+    exportKeybinds
+} from './actions'
+import spritesheetsLoader from './spritesheetsLoader'
 
-console.log(
-    '\n%cLooking for the source?\nhttps://github.com/Teoxoy/factorio-blueprint-editor\n',
-    'color: #1f79aa; font-weight: bold'
-)
+function initEditor(canvas: HTMLCanvasElement): Promise<void[]> {
+    PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
+    PIXI.settings.ROUND_PIXELS = true
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
+    PIXI.settings.WRAP_MODE = PIXI.WRAP_MODES.REPEAT
+    PIXI.settings.RENDER_OPTIONS.antialias = true // for wires
+    PIXI.settings.RENDER_OPTIONS.resolution = window.devicePixelRatio
+    PIXI.settings.RENDER_OPTIONS.autoDensity = true
+    PIXI.GRAPHICS_CURVES.adaptive = true
+    PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false
+    PIXI.settings.ANISOTROPIC_LEVEL = 16
+    // PIXI.settings.PREFER_ENV = 1
+    // PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
+    // PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 
-const params = window.location.search.slice(1).split('&')
+    G.app = new PIXI.Application({ view: canvas })
 
-let bpSource: string
-let bpIndex = 0
-for (const p of params) {
-    if (p.includes('source')) {
-        bpSource = p.split('=')[1]
-    }
-    if (p.includes('index')) {
-        bpIndex = Number(p.split('=')[1])
-    }
-}
+    // https://github.com/pixijs/pixi.js/issues/3928
+    // G.app.renderer.plugins.interaction.moveWhenInside = true
+    // G.app.renderer.plugins.interaction.interactionFrequency = 1
 
-const { guiBPIndex } = initDatGui()
-initDoorbell()
+    G.app.renderer.resize(window.innerWidth, window.innerHeight)
+    window.addEventListener('resize', () => G.app.renderer.resize(window.innerWidth, window.innerHeight), false)
 
-const createToast = initToasts()
-function createErrorMessage(text: string, error: unknown): void {
-    console.error(error)
-    createToast({
-        text:
-            `${text}<br>` +
-            'Please check out the console (F12) for an error message and ' +
-            'report this bug on github or using the feedback button.',
-        type: 'error',
-        timeout: 10000
+    G.BPC = new BlueprintContainer()
+    G.app.stage.addChild(G.BPC)
+
+    G.UI = new UIContainer()
+    G.app.stage.addChild(G.UI)
+    G.UI.showDebuggingLayer = G.debug
+
+    initActions(canvas)
+    registerActions()
+
+    window.addEventListener('unload', () => {
+        G.app.stop()
+        G.app.renderer.textureGC.unload(G.app.stage)
+        G.app.destroy()
     })
-}
-function createBPImportError(error: Error | ModdedBlueprintError): void {
-    if (error instanceof TrainBlueprintError) {
-        createErrorMessage(
-            'Blueprint with train entities not supported yet. If you think this is a mistake:',
-            error.errors
-        )
-        return
-    }
 
-    if (error instanceof ModdedBlueprintError) {
-        createErrorMessage(
-            'Blueprint with modded items not supported yet. If you think this is a mistake:',
-            error.errors
-        )
-        return
-    }
-
-    createErrorMessage('Blueprint string could not be loaded.', error)
-}
-function createWelcomeMessage(): void {
-    const notFirstRun = localStorage.getItem('firstRun') === 'false'
-    if (notFirstRun) {
-        return
-    }
-    localStorage.setItem('firstRun', 'false')
-
-    // Wait a bit just to capture the users attention
-    // This way they will see the toast animation
-    setTimeout(() => {
-        createToast({
-            text:
-                '> To access the inventory and start building press E<br>' +
-                '> To import/export a blueprint string use ctrl/cmd + C/V<br>' +
-                '> For more info press I<br>' +
-                '> Also check out the settings area',
-            timeout: 30000
-        })
-    }, 1000)
+    return Promise.all(
+        // Load spritesheets
+        spritesheetsLoader.getAllPromises()
+    )
 }
 
-PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
-PIXI.settings.ROUND_PIXELS = true
-PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
-PIXI.settings.WRAP_MODE = PIXI.WRAP_MODES.REPEAT
-PIXI.settings.RENDER_OPTIONS.antialias = true // for wires
-PIXI.settings.RENDER_OPTIONS.resolution = window.devicePixelRatio
-PIXI.settings.RENDER_OPTIONS.autoDensity = true
-PIXI.GRAPHICS_CURVES.adaptive = true
-PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false
-PIXI.settings.ANISOTROPIC_LEVEL = 16
-// PIXI.settings.PREFER_ENV = 1
-// PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
-// PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
+function loadBlueprint(bp: Blueprint): void {
+    G.bp = bp
 
-G.app = new PIXI.Application({ view: document.getElementById('editor') as HTMLCanvasElement })
-
-// https://github.com/pixijs/pixi.js/issues/3928
-// G.app.renderer.plugins.interaction.moveWhenInside = true
-// G.app.renderer.plugins.interaction.interactionFrequency = 1
-
-G.app.renderer.resize(window.innerWidth, window.innerHeight)
-window.addEventListener(
-    'resize',
-    () => {
-        G.app.renderer.resize(window.innerWidth, window.innerHeight)
-    },
-    false
-)
-
-G.BPC = new BlueprintContainer()
-G.app.stage.addChild(G.BPC)
-
-G.UI = new UIContainer()
-G.app.stage.addChild(G.UI)
-G.UI.showDebuggingLayer = G.debug
-
-Promise.all([
-    // Get bp from source
-    // catch the error here so that Promise.all can resolve
-    bpString.getBlueprintOrBookFromSource(bpSource).catch(error => {
-        createBPImportError(error)
-        return new Blueprint()
-    }),
-    // Wait for fonts to get loaded
-    document.fonts.ready,
-    // Load spritesheets
-    ...spritesheetsLoader.getAllPromises()
-])
-    .then(data => {
-        // Load quickbarItemNames from localStorage
-        if (localStorage.getItem('quickbarItemNames')) {
-            const quickbarItemNames = JSON.parse(localStorage.getItem('quickbarItemNames'))
-            G.UI.quickbarContainer.generateSlots(quickbarItemNames)
-        }
-
-        loadBp(data[0], false)
-
-        createWelcomeMessage()
-    })
-    .catch(error => createErrorMessage('Something went wrong.', error))
-
-function loadBp(bpOrBook: Blueprint | Book, clearData = true): void {
-    if (bpOrBook instanceof Book) {
-        G.book = bpOrBook
-        G.bp = G.book.getBlueprint(bpIndex ? bpIndex : undefined)
-
-        guiBPIndex.max(G.book.lastBookIndex).setValue(G.book.activeIndex)
-    } else {
-        G.book = undefined
-        G.bp = bpOrBook
-
-        guiBPIndex.setValue(0).max(0)
-    }
-
-    if (clearData) {
-        G.BPC.clearData()
-    }
+    G.BPC.clearData()
     G.BPC.initBP()
-    G.loadingScreen.hide()
-
-    if (!(bpOrBook instanceof Blueprint && bpOrBook.isEmpty())) {
-        createToast({ text: 'Blueprint string loaded successfully', type: 'success' })
-    }
-
     Dialog.closeAll()
 }
 
-// If the tab is not active then stop the app
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        G.app.start()
-    } else {
-        G.app.stop()
-    }
-})
+function registerActions(): void {
+    registerAction('moveUp', 'w')
+    registerAction('moveLeft', 'a')
+    registerAction('moveDown', 's')
+    registerAction('moveRight', 'd')
 
-window.addEventListener('unload', () => {
-    G.app.stop()
-    G.app.renderer.textureGC.unload(G.app.stage)
-    G.app.destroy()
-})
+    registerAction('showInfo', 'alt').bind({
+        press: () => G.BPC.overlayContainer.toggleEntityInfoVisibility()
+    })
 
-// ACTIONS //
-
-actions.importKeybinds(JSON.parse(localStorage.getItem('keybinds')))
-
-window.addEventListener('unload', () => {
-    const keybinds = actions.exportKeybinds()
-    if (Object.keys(keybinds).length) {
-        localStorage.setItem('keybinds', JSON.stringify(keybinds))
-    } else {
-        localStorage.removeItem('keybinds')
-    }
-})
-
-actions.copyBPString.bind({
-    press: e => {
-        if (G.bp.isEmpty()) {
-            return
+    registerAction('closeWindow', 'esc').bind({
+        press: () => {
+            Dialog.closeLast()
         }
+    })
 
-        const onSuccess = (): void => {
-            createToast({ text: 'Blueprint string copied to clipboard', type: 'success' })
-        }
-
-        const onError = (error: Error): void => {
-            createErrorMessage('Blueprint string could not be generated.', error)
-        }
-
-        const bpOrBook = G.book ? G.book : G.bp
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            bpString
-                .encode(bpOrBook)
-                .then(s => navigator.clipboard.writeText(s))
-                .then(onSuccess)
-                .catch(onError)
-        } else {
-            const data = bpString.encodeSync(bpOrBook)
-            if (data.value) {
-                e.clipboardData.setData('text/plain', data.value)
-                onSuccess()
+    registerAction('inventory', 'e').bind({
+        press: () => {
+            // If there is a dialog open, assume user wants to close it
+            if (Dialog.anyOpen()) {
+                Dialog.closeLast()
             } else {
-                onError(data.error)
+                G.UI.createInventory('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
             }
         }
-    }
-})
+    })
 
-actions.pasteBPString.bind({
-    press: e => {
-        G.loadingScreen.show()
+    registerAction('focus', 'f').bind({ press: () => G.BPC.centerViewport() })
 
-        const promise =
-            navigator.clipboard && navigator.clipboard.readText
-                ? navigator.clipboard.readText()
-                : Promise.resolve(e.clipboardData.getData('text'))
-
-        promise
-            .then(bpString.getBlueprintOrBookFromSource)
-            .then(loadBp)
-            .catch(error => {
-                G.loadingScreen.hide()
-                createBPImportError(error)
-            })
-    }
-})
-
-actions.clear.bind({
-    press: () => {
-        loadBp(new Blueprint())
-    }
-})
-
-actions.takePicture.bind({
-    press: () => {
-        if (G.bp.isEmpty()) {
-            return
+    registerAction('rotate', 'r').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                G.BPC.hoverContainer.entity.rotate(false, true)
+            } else if (G.BPC.mode === EditorMode.PAINT) {
+                G.BPC.paintContainer.rotate()
+            }
         }
+    })
 
-        // getLocalBounds is needed because it seems that it has sideeffects
-        // without it generateTexture returns an empty texture
-        G.BPC.getLocalBounds()
-        const region = G.BPC.getBlueprintBounds()
-        const texture = G.app.renderer.generateTexture(G.BPC, PIXI.SCALE_MODES.LINEAR, 1, region)
-        const canvas = G.app.renderer.plugins.extract.canvas(texture)
+    registerAction('reverseRotate', 'shift+r').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                G.BPC.hoverContainer.entity.rotate(true, true)
+            } else if (G.BPC.mode === EditorMode.PAINT) {
+                G.BPC.paintContainer.rotate(true)
+            }
+        }
+    })
 
-        canvas.toBlob(blob => {
-            FileSaver.saveAs(blob, `${G.bp.name}.png`)
-            createToast({ text: 'Blueprint image successfully generated', type: 'success' })
+    registerAction('pipette', 'q').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                const entity = G.BPC.hoverContainer.entity
+                const itemName = Entity.getItemName(entity.name)
+                const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
+                G.BPC.spawnPaintContainer(itemName, direction)
+            } else if (G.BPC.mode === EditorMode.PAINT) {
+                G.BPC.paintContainer.destroy()
+            }
+            G.BPC.exitCopyMode(true)
+            G.BPC.exitDeleteMode(true)
+        }
+    })
 
-            // Clear
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    registerAction('increaseTileBuildingArea', ']').bind({
+        press: () => {
+            if (G.BPC.paintContainer instanceof TilePaintContainer) {
+                G.BPC.paintContainer.increaseSize()
+            }
+        }
+    })
+
+    registerAction('decreaseTileBuildingArea', '[').bind({
+        press: () => {
+            if (G.BPC.paintContainer instanceof TilePaintContainer) {
+                G.BPC.paintContainer.decreaseSize()
+            }
+        }
+    })
+
+    registerAction('undo', 'modifier+z').bind({
+        press: () => {
+            G.bp.history.undo()
+        },
+        repeat: true
+    })
+
+    registerAction('redo', 'modifier+y').bind({
+        press: () => {
+            G.bp.history.redo()
+        },
+        repeat: true
+    })
+
+    registerAction('copySelection', 'modifier+lclick').bind({
+        press: () => G.BPC.enterCopyMode(),
+        release: () => G.BPC.exitCopyMode()
+    })
+    registerAction('deleteSelection', 'modifier+rclick').bind({
+        press: () => G.BPC.enterDeleteMode(),
+        release: () => G.BPC.exitDeleteMode()
+    })
+
+    registerAction('pan', 'lclick').bind({
+        press: () => G.BPC.enterPanMode(),
+        release: () => G.BPC.exitPanMode()
+    })
+
+    registerAction('zoomIn', 'wheelNeg').bind({
+        press: () => {
+            G.BPC.zoom(true)
+        }
+    })
+
+    registerAction('zoomOut', 'wheelPos').bind({
+        press: () => {
+            G.BPC.zoom(false)
+        }
+    })
+
+    registerAction('build', 'lclick').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.PAINT) {
+                G.BPC.paintContainer.placeEntityContainer()
+            }
+        },
+        repeat: true
+    })
+
+    registerAction('mine', 'rclick').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                G.bp.removeEntity(G.BPC.hoverContainer.entity)
+            }
+            if (G.BPC.mode === EditorMode.PAINT) {
+                G.BPC.paintContainer.removeContainerUnder()
+            }
+        },
+        repeat: true
+    })
+
+    registerAction('moveEntityUp', 'up').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
+            }
+        }
+    })
+    registerAction('moveEntityLeft', 'left').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
+            }
+        }
+    })
+    registerAction('moveEntityDown', 'down').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
+            }
+        }
+    })
+    registerAction('moveEntityRight', 'right').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
+            }
+        }
+    })
+
+    registerAction('openEntityGUI', 'lclick').bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                if (G.debug) {
+                    console.log(G.BPC.hoverContainer.entity.serialize())
+                }
+
+                Dialog.closeAll()
+                G.UI.createEditor(G.BPC.hoverContainer.entity)
+            }
+        }
+    })
+
+    let entityForCopyData: Entity | undefined
+    const copyEntitySettingsAction = registerAction('copyEntitySettings', 'shift+rclick')
+    copyEntitySettingsAction.bind({
+        press: () => {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                // Store reference to source entity
+                entityForCopyData = G.BPC.hoverContainer.entity
+            }
+        }
+    })
+    registerAction('pasteEntitySettings', 'shift+lclick').bind({
+        press: () => {
+            if (entityForCopyData && G.BPC.mode === EditorMode.EDIT) {
+                // Hand over reference of source entity to target entity for pasting data
+                G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
+            }
+        },
+        repeat: true
+    })
+    // TODO: Move this somewhere else - I don't think this is the right place for it
+    {
+        let copyCursorBox: PIXI.Container | undefined
+        const deferred = new U.Deferred()
+        const createCopyCursorBox = (): void => {
+            if (
+                copyCursorBox === undefined &&
+                G.BPC.mode === EditorMode.EDIT &&
+                entityForCopyData &&
+                EntityContainer.mappings.has(entityForCopyData.entityNumber) &&
+                G.BPC.hoverContainer.entity.canPasteSettings(entityForCopyData)
+            ) {
+                const srcEnt = EntityContainer.mappings.get(entityForCopyData.entityNumber)
+                copyCursorBox = G.BPC.overlayContainer.createCursorBox(srcEnt.position, entityForCopyData.size, 'copy')
+                Promise.race([
+                    deferred.promise,
+                    new Promise(resolve => copyEntitySettingsAction.bind({ press: resolve, once: true })),
+                    new Promise(resolve => G.BPC.once('removeHoverContainer', resolve))
+                ]).then(() => {
+                    deferred.reset()
+                    copyCursorBox.destroy()
+                    copyCursorBox = undefined
+                })
+            }
+        }
+        const action = registerAction('tryPasteEntitySettings', 'shift')
+        action.bind({ press: createCopyCursorBox, release: () => deferred.resolve() })
+        G.BPC.on('createHoverContainer', () => {
+            if (action.pressed) {
+                createCopyCursorBox()
+            }
         })
     }
-})
 
-actions.showInfo.bind({
-    press: () => G.BPC.overlayContainer.toggleEntityInfoVisibility()
-})
+    registerAction('quickbar1', '1').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(0) })
+    registerAction('quickbar2', '2').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(1) })
+    registerAction('quickbar3', '3').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(2) })
+    registerAction('quickbar4', '4').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(3) })
+    registerAction('quickbar5', '5').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(4) })
+    registerAction('quickbar6', 'shift+1').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(5) })
+    registerAction('quickbar7', 'shift+2').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(6) })
+    registerAction('quickbar8', 'shift+3').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(7) })
+    registerAction('quickbar9', 'shift+4').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(8) })
+    registerAction('quickbar10', 'shift+5').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(9) })
+    registerAction('changeActiveQuickbar', 'x').bind({ press: () => G.UI.quickbarContainer.changeActiveQuickbar() })
+}
 
-actions.info.bind({
-    press: () => {
-        const infoPanel = document.getElementById('info-panel')
-        if (infoPanel.classList.contains('active')) {
-            infoPanel.classList.remove('active')
-        } else {
-            infoPanel.classList.add('active')
-        }
-    }
-})
+const getPicture = (): Promise<Blob> => G.BPC.getPicture()
 
-actions.closeWindow.bind({
-    press: () => {
-        Dialog.closeLast()
-    }
-})
+const getMoveSpeed = (): number => G.BPC.moveSpeed
+const setMoveSpeed = (speed: number): void => {
+    G.BPC.moveSpeed = speed
+}
+const getGridColor = (): number => G.BPC.gridColor
+const setGridColor = (color: number): void => {
+    G.BPC.gridColor = color
+}
+const getGridPattern = (): GridPattern => G.BPC.gridPattern
+const setGridPattern = (pattern: GridPattern): void => {
+    G.BPC.gridPattern = pattern
+}
 
-actions.inventory.bind({
-    press: () => {
-        // If there is a dialog open, assume user wants to close it
-        if (Dialog.anyOpen()) {
-            Dialog.closeLast()
-        } else {
-            G.UI.createInventory('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
-        }
-    }
-})
+const getQuickbarItems = (): string[] => G.UI.quickbarContainer.serialize()
+const setQuickbarItems = (items: string[]): void => {
+    G.UI.quickbarContainer.generateSlots(items)
+}
 
-actions.focus.bind({ press: () => G.BPC.centerViewport() })
-
-actions.rotate.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            G.BPC.hoverContainer.entity.rotate(false, true)
-        } else if (G.BPC.mode === EditorMode.PAINT) {
-            G.BPC.paintContainer.rotate()
-        }
-    }
-})
-
-actions.reverseRotate.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            G.BPC.hoverContainer.entity.rotate(true, true)
-        } else if (G.BPC.mode === EditorMode.PAINT) {
-            G.BPC.paintContainer.rotate(true)
-        }
-    }
-})
-
-actions.pipette.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            const entity = G.BPC.hoverContainer.entity
-            const itemName = Entity.getItemName(entity.name)
-            const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
-            G.BPC.spawnPaintContainer(itemName, direction)
-        } else if (G.BPC.mode === EditorMode.PAINT) {
-            G.BPC.paintContainer.destroy()
-        }
-        G.BPC.exitCopyMode(true)
-        G.BPC.exitDeleteMode(true)
-    }
-})
-
-actions.increaseTileBuildingArea.bind({
-    press: () => {
-        if (G.BPC.paintContainer instanceof TilePaintContainer) {
-            G.BPC.paintContainer.increaseSize()
-        }
-    }
-})
-
-actions.decreaseTileBuildingArea.bind({
-    press: () => {
-        if (G.BPC.paintContainer instanceof TilePaintContainer) {
-            G.BPC.paintContainer.decreaseSize()
-        }
-    }
-})
-
-actions.undo.bind({
-    press: () => {
-        G.bp.history.undo()
-    },
-    repeat: true
-})
-
-actions.redo.bind({
-    press: () => {
-        G.bp.history.redo()
-    },
-    repeat: true
-})
-
-actions.generateOilOutpost.bind({
-    press: () => {
-        const errorMessage = G.bp.generatePipes()
-        if (errorMessage) {
-            createToast({ text: errorMessage, type: 'warning' })
-        }
-    }
-})
-
-actions.copySelection.bind({
-    press: () => G.BPC.enterCopyMode(),
-    release: () => G.BPC.exitCopyMode()
-})
-actions.deleteSelection.bind({
-    press: () => G.BPC.enterDeleteMode(),
-    release: () => G.BPC.exitDeleteMode()
-})
-
-actions.pan.bind({
-    press: () => G.BPC.enterPanMode(),
-    release: () => G.BPC.exitPanMode()
-})
-
-actions.zoomIn.bind({
-    press: () => {
-        G.BPC.zoom(true)
-    }
-})
-
-actions.zoomOut.bind({
-    press: () => {
-        G.BPC.zoom(false)
-    }
-})
-
-actions.build.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.PAINT) {
-            G.BPC.paintContainer.placeEntityContainer()
-        }
-    },
-    repeat: true
-})
-
-actions.mine.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            G.bp.removeEntity(G.BPC.hoverContainer.entity)
-        }
-        if (G.BPC.mode === EditorMode.PAINT) {
-            G.BPC.paintContainer.removeContainerUnder()
-        }
-    },
-    repeat: true
-})
-
-actions.moveEntityUp.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
-        }
-    }
-})
-actions.moveEntityLeft.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
-        }
-    }
-})
-actions.moveEntityDown.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
-        }
-    }
-})
-actions.moveEntityRight.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
-        }
-    }
-})
-
-actions.openEntityGUI.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            if (G.debug) {
-                console.log(G.BPC.hoverContainer.entity.serialize())
-            }
-
-            Dialog.closeAll()
-            G.UI.createEditor(G.BPC.hoverContainer.entity)
-        }
-    }
-})
-
-let entityForCopyData: Entity | undefined
-actions.copyEntitySettings.bind({
-    press: () => {
-        if (G.BPC.mode === EditorMode.EDIT) {
-            // Store reference to source entity
-            entityForCopyData = G.BPC.hoverContainer.entity
-        }
-    }
-})
-actions.pasteEntitySettings.bind({
-    press: () => {
-        if (entityForCopyData && G.BPC.mode === EditorMode.EDIT) {
-            // Hand over reference of source entity to target entity for pasting data
-            G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
-        }
-    },
-    repeat: true
-})
-// TODO: Move this somewhere else - I don't think this is the right place for it
-{
-    let copyCursorBox: PIXI.Container | undefined
-    const deferred = new U.Deferred()
-    const createCopyCursorBox = (): void => {
-        if (
-            copyCursorBox === undefined &&
-            G.BPC.mode === EditorMode.EDIT &&
-            entityForCopyData &&
-            EntityContainer.mappings.has(entityForCopyData.entityNumber) &&
-            G.BPC.hoverContainer.entity.canPasteSettings(entityForCopyData)
-        ) {
-            const srcEnt = EntityContainer.mappings.get(entityForCopyData.entityNumber)
-            copyCursorBox = G.BPC.overlayContainer.createCursorBox(srcEnt.position, entityForCopyData.size, 'copy')
-            Promise.race([
-                deferred.promise,
-                new Promise(resolve => actions.copyEntitySettings.bind({ press: resolve, once: true })),
-                new Promise(resolve => G.BPC.once('removeHoverContainer', resolve))
-            ]).then(() => {
-                deferred.reset()
-                copyCursorBox.destroy()
-                copyCursorBox = undefined
-            })
-        }
-    }
-    actions.tryPasteEntitySettings.bind({ press: createCopyCursorBox, release: () => deferred.resolve() })
-    G.BPC.on('createHoverContainer', () => {
-        if (actions.tryPasteEntitySettings.pressed) {
-            createCopyCursorBox()
+const getOilOutpostSettings = (): IOilOutpostSettings => oilOutpostSettings
+const setOilOutpostSettings = (settings: IOilOutpostSettings): void => {
+    Object.keys(oilOutpostSettings).forEach(k => {
+        if (settings[k]) {
+            oilOutpostSettings[k] = settings[k]
         }
     })
 }
 
-actions.quickbar1.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(0) })
-actions.quickbar2.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(1) })
-actions.quickbar3.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(2) })
-actions.quickbar4.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(3) })
-actions.quickbar5.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(4) })
-actions.quickbar6.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(5) })
-actions.quickbar7.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(6) })
-actions.quickbar8.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(7) })
-actions.quickbar9.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(8) })
-actions.quickbar10.bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(9) })
-actions.changeActiveQuickbar.bind({ press: () => G.UI.quickbarContainer.changeActiveQuickbar() })
+const isDebuggingOn = (): boolean => G.debug
+const setDebugging = (on: boolean): void => {
+    G.debug = on
+    G.UI.showDebuggingLayer = on
+    if (G.bp) {
+        G.bp.history.logging = on
+    }
+}
+
+export { Book, Blueprint, ModdedBlueprintError, TrainBlueprintError }
+export default {
+    initEditor,
+    bpStringEncodeDecode: bpString,
+    loadBlueprint,
+    registerAction,
+    getPicture,
+    getMoveSpeed,
+    setMoveSpeed,
+    getGridColor,
+    setGridColor,
+    getGridPattern,
+    setGridPattern,
+    getQuickbarItems,
+    setQuickbarItems,
+    getOilOutpostSettings,
+    setOilOutpostSettings,
+    isDebuggingOn,
+    setDebugging,
+    callAction,
+    forEachAction,
+    resetKeybinds,
+    importKeybinds,
+    exportKeybinds
+}

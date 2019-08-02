@@ -295,7 +295,7 @@ export class EntityContainer {
         this.entitySprites = []
         for (const s of EntitySprite.getParts(
             this.m_Entity,
-            G.quality.hr,
+
             ignoreConnections ? undefined : G.bp.entityPositionGrid
         )) {
             s.setPosition(this.position)

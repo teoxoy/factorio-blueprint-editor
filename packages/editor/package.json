@@ -1,6 +1,6 @@
 {
-    "name": "factorio-blueprint-editor",
-    "version": "0.1.0",
+    "name": "@fbe/editor",
+    "version": "1.0.0",
     "description": "A Factorio blueprint editor and renderer webapp",
     "author": "Teoxoy",
     "license": "MIT",
@@ -10,41 +10,29 @@
     },
     "bugs": "https://github.com/Teoxoy/factorio-blueprint-editor/issues",
     "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.js",
     "scripts": {
-        "start": "parcel src/index.html --port 8080",
-        "prebuild": "rimraf dist/*",
-        "build": "parcel build src/index.html --public-url ./",
-        "setupDist": "git worktree add dist gh-pages",
-        "deploy": "cd dist && git add --all && git reset -- stats && git commit -m \"new version\" && git push origin gh-pages"
+        "start": "concurrently \"tsc -w\" \"ts-cleaner -w\"",
+        "build": "tsc && ts-cleaner"
     },
-    "browserslist": [
-        "last 2 Chrome versions",
-        "last 2 Firefox versions",
-        "last 2 Safari versions",
-        "last 2 Edge versions"
-    ],
     "dependencies": {
         "ajv": "^6.10.2",
-        "dat.gui": "^0.7.6",
         "delaunator": "^4.0.0",
         "eventemitter3": "^4.0.0",
         "factorio-data": "4.0.4",
-        "file-saver": "^2.0.2",
         "keyboardjs": "^2.5.1",
         "pako": "^1.0.10",
         "pathfinding": "^0.4.18",
         "pixi.js": "^5.1.0"
     },
     "devDependencies": {
-        "@types/dat.gui": "^0.7.3",
         "@types/delaunator": "^3.0.0",
-        "@types/file-saver": "^2.0.1",
         "@types/keyboardjs": "^2.4.1",
         "@types/pako": "^1.0.1",
         "@types/pathfinding": "0.0.3",
-        "parcel-bundler": "^1.12.3",
-        "rimraf": "^2.6.3",
-        "stylus": "^0.54.5",
+        "concurrently": "^4.1.1",
+        "ts-cleaner": "^1.0.2",
         "typescript": "^3.5.3"
     }
 }

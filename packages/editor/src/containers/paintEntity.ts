@@ -129,14 +129,11 @@ export class EntityPaintContainer extends PaintContainer {
     protected redraw(): void {
         this.removeChildren()
         this.addChild(
-            ...EntitySprite.getParts(
-                {
-                    name: this.name,
-                    direction: this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
-                    directionType: this.directionType
-                },
-                G.quality.hr
-            )
+            ...EntitySprite.getParts({
+                name: this.name,
+                direction: this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
+                directionType: this.directionType
+            })
         )
     }
 

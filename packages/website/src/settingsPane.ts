@@ -1,14 +1,18 @@
 import { GUI, GUIController } from 'dat.gui'
 import FD from 'factorio-data'
-import actions from './actions'
-import G from './common/globals'
-import spritesheetsLoader from './spritesheetsLoader'
-import { oilOutpostSettings } from './factorio-data/blueprint'
+import EDITOR, { Blueprint, Book } from '@fbe/editor'
 
 GUI.TEXT_CLOSED = 'Close Settings'
 GUI.TEXT_OPEN = 'Open Settings'
 
-export default function initDatGui(): {
+const COLOR_DARK = 0x303030
+const COLOR_LIGHT = 0xc9c9c9
+const isDarkColor = (color: number): boolean => color === COLOR_DARK
+
+export default function initSettingsPane(shared: {
+    bp: Blueprint
+    book: Book
+}): {
     guiBPIndex: GUIController
 } {
     const gui = new GUI({
@@ -34,67 +38,33 @@ export default function initDatGui(): {
         .add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1)
         .name('BP Index')
         .onFinishChange((value: number) => {
-            if (G.book) {
-                G.bp = G.book.getBlueprint(value)
-                G.BPC.clearData()
-                G.BPC.initBP()
+            if (shared.book) {
+                shared.bp = shared.book.getBlueprint(value)
+                EDITOR.loadBlueprint(shared.bp)
             }
         })
 
     if (localStorage.getItem('moveSpeed')) {
-        G.moveSpeed = Number(localStorage.getItem('moveSpeed'))
+        const moveSpeed = Number(localStorage.getItem('moveSpeed'))
+        EDITOR.setMoveSpeed(moveSpeed)
     }
-    gui.add(G, 'moveSpeed', 5, 20)
+    gui.add({ moveSpeed: EDITOR.getMoveSpeed() }, 'moveSpeed', 5, 20)
         .name('Move Speed')
-        .onChange((val: boolean) => localStorage.setItem('moveSpeed', val.toString()))
-
-    if (localStorage.getItem('quickbarRows')) {
-        G.quickbarRows = Number(localStorage.getItem('quickbarRows'))
-    }
-    gui.add(G, 'quickbarRows', 1, 5, 1)
-        .name('Quickbar Rows')
-        .onChange((rows: number) => {
-            localStorage.setItem('quickbarRows', rows.toString())
-            G.UI.changeQuickbarRows(rows)
+        .onChange((speed: number) => {
+            localStorage.setItem('moveSpeed', speed.toString())
+            EDITOR.setMoveSpeed(speed)
         })
 
-    window.addEventListener('unload', () => {
-        localStorage.setItem('quickbarItemNames', JSON.stringify(G.UI.quickbarContainer.serialize()))
-    })
-
-    const entitiesQuality = {
-        'Low. Res PNG 8 (1.52 MB)': 0,
-        'High Res PNG 8 (5.52 MB)': 1,
-        'Low. Res PNG 32 (5.55 MB)': 2,
-        'High Res PNG 32 (18.20 MB)': 3
+    if (localStorage.getItem('debug')) {
+        const debug = Boolean(localStorage.getItem('debug'))
+        EDITOR.setDebugging(debug)
     }
-    const setQuality = (quality: number): void => {
-        G.quality.hr = quality % 2 === 1
-        G.quality.compressed = quality < 2
-    }
-
-    const gl = document.createElement('canvas').getContext('webgl')
-    if (gl.getParameter(gl.MAX_TEXTURE_SIZE) < 8192) {
-        delete entitiesQuality['High Res PNG 8 (5.52 MB)']
-        delete entitiesQuality['High Res PNG 32 (18.20 MB)']
-        G.quality.hr = false
-    }
-
-    const quality = localStorage.getItem('quality')
-        ? Number(localStorage.getItem('quality'))
-        : (G.quality.hr ? 1 : 0) + (G.quality.compressed ? 0 : 2)
-    setQuality(quality)
-
-    gui.add({ quality }, 'quality', entitiesQuality)
-        .name('Entities Quality')
-        .onChange((quality: number) => {
-            localStorage.setItem('quality', quality.toString())
-            setQuality(quality)
-            spritesheetsLoader.changeQuality(G.quality.hr, G.quality.compressed)
-        })
-
-    G.debug = Boolean(localStorage.getItem('debug'))
-    gui.add(G, 'debug')
+    gui.add(
+        {
+            debug: EDITOR.isDebuggingOn()
+        },
+        'debug'
+    )
         .name('Debug')
         .onChange((debug: boolean) => {
             if (debug) {
@@ -102,45 +72,51 @@ export default function initDatGui(): {
             } else {
                 localStorage.removeItem('debug')
             }
-            // TODO: find a nice way to do this
-            G.bp.history.logging = debug
-            G.UI.showDebuggingLayer = debug
+            EDITOR.setDebugging(debug)
         })
 
-    // Theme folder
-    const themeFolder = gui.addFolder('Theme')
+    // Grid theme folder
+    const themeFolder = gui.addFolder('Grid Theme')
 
     if (localStorage.getItem('darkTheme')) {
-        G.colors.darkTheme = localStorage.getItem('darkTheme') === 'true'
+        const darkTheme = localStorage.getItem('darkTheme') === 'true'
+        EDITOR.setGridColor(darkTheme ? COLOR_DARK : COLOR_LIGHT)
     }
     themeFolder
-        .add(G.colors, 'darkTheme')
+        .add({ darkTheme: isDarkColor(EDITOR.getGridColor()) }, 'darkTheme')
         .name('Dark Mode')
-        .onChange((val: boolean) => localStorage.setItem('darkTheme', val.toString()))
+        .onChange((darkTheme: boolean) => {
+            localStorage.setItem('darkTheme', darkTheme.toString())
+            EDITOR.setGridColor(darkTheme ? COLOR_DARK : COLOR_LIGHT)
+        })
 
     if (localStorage.getItem('pattern')) {
-        G.colors.pattern = localStorage.getItem('pattern') as 'checker' | 'grid'
+        const pattern = localStorage.getItem('pattern') as 'checker' | 'grid'
+        EDITOR.setGridPattern(pattern)
     }
     themeFolder
-        .add(G.colors, 'pattern', ['checker', 'grid'])
+        .add({ pattern: EDITOR.getGridPattern() }, 'pattern', ['checker', 'grid'])
         .name('Pattern')
-        .onChange((val: 'checker' | 'grid') => {
-            G.BPC.generateGrid(val)
-            localStorage.setItem('pattern', val)
+        .onChange((pattern: 'checker' | 'grid') => {
+            localStorage.setItem('pattern', pattern)
+            EDITOR.setGridPattern(pattern)
         })
 
     if (localStorage.getItem('oilOutpostSettings')) {
         const settings = JSON.parse(localStorage.getItem('oilOutpostSettings'))
-        Object.keys(oilOutpostSettings).forEach(k => {
-            if (settings[k]) {
-                const S = oilOutpostSettings as Record<string, string | boolean | number>
-                S[k] = settings[k]
-            }
-        })
+        EDITOR.setOilOutpostSettings(settings)
     }
     window.addEventListener('unload', () =>
-        localStorage.setItem('oilOutpostSettings', JSON.stringify(oilOutpostSettings))
+        localStorage.setItem('oilOutpostSettings', JSON.stringify(EDITOR.getOilOutpostSettings()))
     )
+
+    const oilOutpostSettings = new Proxy(EDITOR.getOilOutpostSettings(), {
+        set: (settings, key, value) => {
+            settings[key as string] = value
+            EDITOR.setOilOutpostSettings(settings)
+            return true
+        }
+    })
 
     const oilOutpostFolder = gui.addFolder('Oil Outpost Generator Settings')
     oilOutpostFolder.add(oilOutpostSettings, 'DEBUG').name('Debug')
@@ -149,8 +125,14 @@ export default function initDatGui(): {
     oilOutpostFolder.add(oilOutpostSettings, 'BEACONS').name('Beacons')
     oilOutpostFolder.add(oilOutpostSettings, 'MIN_AFFECTED_ENTITIES', 1, 12, 1).name('Min Affect. Pumpjacks')
     oilOutpostFolder.add(oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon')).name('Beacon Modules')
-    oilOutpostFolder.add(actions.generateOilOutpost, 'call').name('Generate (g)')
-
+    oilOutpostFolder
+        .add(
+            {
+                generate: () => EDITOR.callAction('generateOilOutpost')
+            },
+            'generate'
+        )
+        .name('Generate')
     function getModulesObjFor(entityName: string): Record<string, string> {
         return (
             Object.keys(FD.items)
@@ -177,11 +159,8 @@ export default function initDatGui(): {
     // Keybinds folder
     const keybindsFolder = gui.addFolder('Keybinds')
 
-    actions.forEachAction((action, actionName) => {
-        const name = actionName
-            .split(/(?=[A-Z1-9])/)
-            .join(' ')
-            .replace(/(\b\w)/, c => c.toUpperCase())
+    EDITOR.forEachAction(action => {
+        const name = action.prettyName
         if (name.includes('Quickbar')) {
             return
         }
@@ -193,11 +172,8 @@ export default function initDatGui(): {
 
     const quickbarFolder = keybindsFolder.addFolder('Quickbar')
 
-    actions.forEachAction((action, actionName) => {
-        const name = actionName
-            .split(/(?=[A-Z1-9])/)
-            .join(' ')
-            .replace(/(\b\w)/, c => c.toUpperCase())
+    EDITOR.forEachAction(action => {
+        const name = action.prettyName
         if (!name.includes('Quickbar')) {
             return
         }
@@ -210,7 +186,7 @@ export default function initDatGui(): {
     keybindsFolder
         .add(
             {
-                resetDefaults: () => actions.forEachAction(action => action.resetKeyCombo())
+                resetDefaults: () => EDITOR.resetKeybinds()
             },
             'resetDefaults'
         )
