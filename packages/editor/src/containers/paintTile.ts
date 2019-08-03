@@ -1,5 +1,5 @@
-import G from '../common/globals'
-import Tile from '../factorio-data/tile'
+import G from '~/common/globals'
+import Tile from '~/factorio-data/tile'
 import { TileContainer } from './tile'
 import { PaintContainer } from './paint'
 

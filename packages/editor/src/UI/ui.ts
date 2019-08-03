@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import Entity from '../factorio-data/entity'
+import Entity from '~/factorio-data/entity'
 import { DebugContainer } from './panels/debug'
 import { QuickbarContainer } from './panels/quickbar'
 import { InfoEntityPanel } from './panels/infoEntityPanel'

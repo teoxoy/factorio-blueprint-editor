@@ -13,8 +13,8 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.js",
     "scripts": {
-        "start": "concurrently \"tsc -w\" \"ts-cleaner -w\"",
-        "build": "tsc && ts-cleaner"
+        "start": "concurrently \"ttsc -w\" \"ts-cleaner -w\"",
+        "build": "ttsc && ts-cleaner"
     },
     "dependencies": {
         "ajv": "^6.10.2",
@@ -24,15 +24,17 @@
         "keyboardjs": "^2.5.1",
         "pako": "^1.0.10",
         "pathfinding": "^0.4.18",
-        "pixi.js": "^5.1.0"
+        "pixi.js": "^5.1.1"
     },
     "devDependencies": {
         "@types/delaunator": "^3.0.0",
         "@types/keyboardjs": "^2.4.1",
         "@types/pako": "^1.0.1",
         "@types/pathfinding": "0.0.3",
+        "@zerollup/ts-transform-paths": "^1.7.3",
         "concurrently": "^4.1.1",
         "ts-cleaner": "^1.0.2",
+        "ttypescript": "^1.5.7",
         "typescript": "^3.5.3"
     }
 }

@@ -1,11 +1,11 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
-import { EntitySprite } from '../entitySprite'
-import util from '../common/util'
-import Entity from '../factorio-data/entity'
-import { CursorBoxType } from './overlay'
+import G from '~/common/globals'
+import { EntitySprite } from '~/entitySprite'
+import util from '~/common/util'
+import Entity from '~/factorio-data/entity'
 import { VisualizationArea } from './visualizationArea'
+import { CursorBoxType } from './overlay'
 
 const updateGroups = [
     {

@@ -1,6 +1,6 @@
 import FD from 'factorio-data'
 import EventEmitter from 'eventemitter3'
-import util from '../common/util'
+import util from '~/common/util'
 import Blueprint from './blueprint'
 import spriteDataBuilder from './spriteDataBuilder'
 import U from './generators/util'

@@ -1,9 +1,9 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '../../common/globals'
+import G from '~/common/globals'
+import Entity from '~/factorio-data/entity'
+import util from '~/common/util'
 import Panel from '../controls/panel'
-import Entity from '../../factorio-data/entity'
-import util from '../../common/util'
 import F from '../controls/functions'
 import { styles } from '../style'
 

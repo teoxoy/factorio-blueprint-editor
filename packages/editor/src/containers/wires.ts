@@ -1,8 +1,8 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
-import U from '../factorio-data/generators/util'
-import Entity from '../factorio-data/entity'
+import G from '~/common/globals'
+import U from '~/factorio-data/generators/util'
+import Entity from '~/factorio-data/entity'
 import { EntityContainer } from './entity'
 
 export class WiresContainer extends PIXI.Container {

@@ -1,6 +1,6 @@
+import G from '~/common/globals'
+import Entity from '~/factorio-data/entity'
 import Slot from '../../controls/slot'
-import G from '../../../common/globals'
-import Entity from '../../../factorio-data/entity'
 import F from '../../controls/functions'
 
 /** Module Slots for Entity */

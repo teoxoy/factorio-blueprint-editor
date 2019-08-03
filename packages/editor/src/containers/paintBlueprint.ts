@@ -1,11 +1,11 @@
-import Entity from '../factorio-data/entity'
-import F from '../UI/controls/functions'
-import G from '../common/globals'
-import Blueprint from '../factorio-data/blueprint'
-import { EntitySprite } from '../entitySprite'
-import { serialize, deserialize } from '../factorio-data/wireConnections'
-import { PaintContainer } from './paint'
+import Entity from '~/factorio-data/entity'
+import F from '~/UI/controls/functions'
+import G from '~/common/globals'
+import Blueprint from '~/factorio-data/blueprint'
+import { EntitySprite } from '~/entitySprite'
+import { serialize, deserialize } from '~/factorio-data/wireConnections'
 import { VisualizationArea } from './visualizationArea'
+import { PaintContainer } from './paint'
 
 class BlueprintEntityPaintContainer {
     private readonly bpc: BlueprintPaintContainer

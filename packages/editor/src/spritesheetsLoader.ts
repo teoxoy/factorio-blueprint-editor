@@ -9,7 +9,6 @@ import utilitySpritesheetJSON from 'factorio-data/data/graphics/utilitySpriteshe
 import tilesSpritesheetPNG from 'factorio-data/data/graphics/tileSpritesheet.png'
 import tilesSpritesheetJSON from 'factorio-data/data/graphics/tileSpritesheet.json'
 import * as PIXI from 'pixi.js'
-
 import G from './common/globals'
 import util from './common/util'
 

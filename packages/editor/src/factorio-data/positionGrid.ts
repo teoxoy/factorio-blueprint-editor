@@ -1,5 +1,5 @@
 import FD from 'factorio-data'
-import util from '../common/util'
+import util from '~/common/util'
 import Blueprint from './blueprint'
 import Entity from './entity'
 

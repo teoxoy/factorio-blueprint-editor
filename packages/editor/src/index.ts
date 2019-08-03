@@ -1,20 +1,15 @@
 import * as PIXI from 'pixi.js'
-
 import G from './common/globals'
 import U from './common/util'
-
 import { Book } from './factorio-data/book'
 import Entity from './factorio-data/entity'
 import Blueprint, { oilOutpostSettings, IOilOutpostSettings } from './factorio-data/blueprint'
 import bpString, { ModdedBlueprintError, TrainBlueprintError } from './factorio-data/bpString'
-
 import { EntityContainer } from './containers/entity'
 import { TilePaintContainer } from './containers/paintTile'
 import { BlueprintContainer, EditorMode, GridPattern } from './containers/blueprint'
-
 import UIContainer from './UI/ui'
 import Dialog from './UI/controls/dialog'
-
 import {
     initActions,
     registerAction,

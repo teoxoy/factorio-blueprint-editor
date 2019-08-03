@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
+import Entity from '~/factorio-data/entity'
 import { styles } from '../style'
 import Slider from '../controls/slider'
-import Entity from '../../factorio-data/entity'
 import Textbox from '../controls/textbox'
 import Checkbox from '../controls/checkbox'
 import Filters from './components/filters'

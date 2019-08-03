@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import { passtroughAllEvents } from '../../actions'
+import { passtroughAllEvents } from '~/actions'
 import { colors, styles } from '../style'
 import F from './functions'
 

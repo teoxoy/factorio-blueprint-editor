@@ -1,8 +1,8 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
-import Tile from '../factorio-data/tile'
-import { EntitySprite } from '../entitySprite'
+import G from '~/common/globals'
+import Tile from '~/factorio-data/tile'
+import { EntitySprite } from '~/entitySprite'
 
 export class TileContainer {
     public static generateSprite(name: string, x: number, y: number): EntitySprite {

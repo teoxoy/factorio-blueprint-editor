@@ -1,4 +1,4 @@
-import Entity from '../../factorio-data/entity'
+import Entity from '~/factorio-data/entity'
 import Switch from '../controls/switch'
 import Enable from '../controls/enable'
 import Editor from './editor'

@@ -1,4 +1,4 @@
-import util from '../common/util'
+import util from '~/common/util'
 
 /** Private enumaration to determine the value (new value or old value) should be applied during action */
 enum HistoryValue {

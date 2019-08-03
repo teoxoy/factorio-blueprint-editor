@@ -1,8 +1,8 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import F from '../UI/controls/functions'
-import G from '../common/globals'
-import util from '../common/util'
+import F from '~/UI/controls/functions'
+import G from '~/common/globals'
+import util from '~/common/util'
 
 type CursorBoxType = 'regular' | 'not_allowed' | 'logistics' | 'electricity' | 'pair' | 'copy' | 'train_visualization'
 const cursorBoxTypeToOffset = (type: CursorBoxType): number => {
