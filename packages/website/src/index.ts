@@ -1,7 +1,7 @@
 import { utils as pixiUtils } from 'pixi.js'
 import FileSaver from 'file-saver'
 import { GUIController } from 'dat.gui'
-import EDITOR, { Blueprint, Book, TrainBlueprintError, ModdedBlueprintError } from '../../editor/src/index'
+import EDITOR, { Blueprint, Book, TrainBlueprintError, ModdedBlueprintError } from '@fbe/editor'
 import initToasts from './toasts'
 import initFeedbackButton from './feedbackButton'
 import initSettingsPane from './settingsPane'
