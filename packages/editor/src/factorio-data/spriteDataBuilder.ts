@@ -1466,7 +1466,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     const sprites = []
 
                     if (patchIndex !== undefined) {
-                        let patch = e.connector_frame_sprites.frame_back_patch.sheet
+                        const patch = e.connector_frame_sprites.frame_back_patch.sheet
                         sprites.push(duplicateAndSetPropertyUsing(patch, 'x', 'width', patchIndex))
                     }
 

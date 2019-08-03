@@ -4,7 +4,7 @@ import { BlueprintContainer } from '~/containers/blueprint'
 import UIContainer from '~/UI/ui'
 
 const hr = false
-let debug = false
+const debug = false
 
 let app: PIXI.Application
 let BPC: BlueprintContainer
