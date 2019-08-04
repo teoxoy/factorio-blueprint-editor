@@ -1,6 +1,6 @@
 import { GUI, GUIController } from 'dat.gui'
 import FD from 'factorio-data'
-import EDITOR, { Blueprint, Book } from '@fbe/editor'
+import EDITOR, { Blueprint, Book, GridPattern } from '@fbe/editor'
 
 GUI.TEXT_CLOSED = 'Close Settings'
 GUI.TEXT_OPEN = 'Open Settings'
@@ -91,13 +91,13 @@ export default function initSettingsPane(shared: {
         })
 
     if (localStorage.getItem('pattern')) {
-        const pattern = localStorage.getItem('pattern') as 'checker' | 'grid'
+        const pattern = localStorage.getItem('pattern') as GridPattern
         EDITOR.setGridPattern(pattern)
     }
     themeFolder
         .add({ pattern: EDITOR.getGridPattern() }, 'pattern', ['checker', 'grid'])
         .name('Pattern')
-        .onChange((pattern: 'checker' | 'grid') => {
+        .onChange((pattern: GridPattern) => {
             localStorage.setItem('pattern', pattern)
             EDITOR.setGridPattern(pattern)
         })

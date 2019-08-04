@@ -362,7 +362,7 @@ const setDebugging = (on: boolean): void => {
     }
 }
 
-export { Book, Blueprint, ModdedBlueprintError, TrainBlueprintError }
+export { Book, Blueprint, ModdedBlueprintError, TrainBlueprintError, GridPattern }
 export default {
     initEditor,
     bpStringEncodeDecode: bpString,
