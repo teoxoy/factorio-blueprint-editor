@@ -32,7 +32,7 @@
         "@types/pako": "^1.0.1",
         "@types/pathfinding": "0.0.3",
         "@zerollup/ts-transform-paths": "^1.7.3",
-        "concurrently": "^4.1.1",
+        "concurrently": "^4.1.2",
         "ts-cleaner": "^1.0.2",
         "ttypescript": "^1.5.7",
         "typescript": "^3.5.3"
