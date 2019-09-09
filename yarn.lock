@@ -504,10 +504,10 @@
   resolved "https://registry.yarnpkg.com/@types/pako/-/pako-1.0.1.tgz#33b237f3c9aff44d0f82fe63acffa4a365ef4a61"
   integrity sha512-GdZbRSJ3Cv5fiwT6I0SQ3ckeN2PWNqxd26W9Z2fCK1tGrrasGy4puvNFtnddqH9UJFMQYXxEuuB7B8UK+LLwSg==
 
-"@types/pathfinding@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@types/pathfinding/-/pathfinding-0.0.3.tgz#9ab1ee4438c5ccf82c72ebe1aaa9663689a627ff"
-  integrity sha512-btHPWb2dly2EGLeegznZenhe816soMUHBQwxOls/3Z1SO0zOlDe+xqDDPZN1B/4di5/XSv2zY117pLuXzwf2Cw==
+"@types/pathfinding@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@types/pathfinding/-/pathfinding-0.0.4.tgz#e878b8ef5c014743e95495afc4291df2b1c94726"
+  integrity sha512-W/gYSgsGaA6gofQNktySOL3ekUqgcrGmmS/XUdCMO+RgOkaqQVnk7yri1vbfU9Dun3jgQxsOphdbOlbNZlr4Nw==
 
 "@types/q@^1.5.1":
   version "1.5.2"
