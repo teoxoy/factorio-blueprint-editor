@@ -29,7 +29,7 @@ export default class Slider extends PIXI.Container {
      * @param values - Possible values
      * @param value - Default value (If value is set to undefined - tri-state switch)
      */
-    public constructor(value: number = 1) {
+    public constructor(value = 1) {
         super()
 
         this.interactive = true
@@ -166,7 +166,7 @@ export default class Slider extends PIXI.Container {
     }
 
     /** Drag start event responder */
-    private readonly onButtonDragStart = (event: PIXI.interaction.InteractionEvent) => {
+    private readonly onButtonDragStart = (event: PIXI.interaction.InteractionEvent): void => {
         if (!this.m_Dragging) {
             this.m_Dragging = true
             this.m_Dragpoint = event.data.getLocalPosition(this.m_SliderButton.parent).x - this.m_SliderButton.x
@@ -175,7 +175,7 @@ export default class Slider extends PIXI.Container {
     }
 
     /** Drag move event callback  */
-    private readonly onButtonDragMove = (event: PIXI.interaction.InteractionEvent) => {
+    private readonly onButtonDragMove = (event: PIXI.interaction.InteractionEvent): void => {
         if (this.m_Dragging) {
             const position: PIXI.Point = event.data.getLocalPosition(this.m_SliderButton.parent)
 
@@ -208,7 +208,7 @@ export default class Slider extends PIXI.Container {
     }
 
     /** Drag end event callback */
-    private readonly onButtonDragEnd = () => {
+    private readonly onButtonDragEnd = (): void => {
         if (this.m_Dragging) {
             this.m_Dragging = false
             this.m_SliderButton.getChildAt(1).visible = false

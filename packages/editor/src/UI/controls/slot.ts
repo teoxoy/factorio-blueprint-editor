@@ -15,7 +15,7 @@ export default class Slot extends Button {
         return true
     }
 
-    public constructor(width: number = 36, height: number = 36, border: number = 1) {
+    public constructor(width = 36, height = 36, border = 1) {
         super(width, height, border)
     }
 }

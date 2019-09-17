@@ -146,7 +146,7 @@ function DrawControlFace(
  * @param item - Item to create Sprite from
  * @param setAnchor - Temporar parameter to disable anchoring (this parameter may be removed again in the future)
  */
-function CreateIcon(itemName: string, setAnchor: boolean = true): PIXI.DisplayObject {
+function CreateIcon(itemName: string, setAnchor = true): PIXI.DisplayObject {
     // inventory group icon is not present in FD.items
     const iconName = FD.items[itemName]
         ? FD.items[itemName].icon

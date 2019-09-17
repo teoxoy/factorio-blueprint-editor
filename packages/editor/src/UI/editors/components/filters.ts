@@ -80,7 +80,7 @@ export default class Filters extends PIXI.Container {
     /** Field to hold data for module visualization */
     private m_Filters: IFilter[]
 
-    public constructor(entity: Entity, amount: boolean = false) {
+    public constructor(entity: Entity, amount = false) {
         super()
 
         // Store entity data reference for later usage
@@ -192,7 +192,7 @@ export default class Filters extends PIXI.Container {
     }
 
     /** Slot pointer down event handler */
-    private readonly onSlotPointerDown = (e: PIXI.interaction.InteractionEvent) => {
+    private readonly onSlotPointerDown = (e: PIXI.interaction.InteractionEvent): void => {
         e.stopPropagation()
         const slot: Slot = e.target as Slot
         const index: number = slot.data as number

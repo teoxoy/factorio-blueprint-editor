@@ -1,6 +1,6 @@
-import pako from 'pako'
 import Ajv from 'ajv'
 import FD from 'factorio-data'
+import pako from 'pako'
 import blueprintSchema from '../blueprintSchema.json'
 import Blueprint from './blueprint'
 import { Book } from './book'

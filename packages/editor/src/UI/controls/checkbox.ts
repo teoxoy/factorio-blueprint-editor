@@ -49,7 +49,7 @@ export default class Checkbox extends PIXI.Container {
     /** Data of Checkbox */
     private m_Checked: boolean
 
-    public constructor(checked: boolean = false, text?: string) {
+    public constructor(checked = false, text?: string) {
         super()
 
         this.interactive = true

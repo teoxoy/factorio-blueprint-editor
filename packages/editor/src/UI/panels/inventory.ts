@@ -48,11 +48,7 @@ export class InventoryContainer extends Dialog {
     /** Hovered item for item pointerout check */
     private m_hoveredItem: string
 
-    public constructor(
-        title: string = 'Inventory',
-        itemsFilter?: string[],
-        selectedCallBack?: (selectedItem: string) => void
-    ) {
+    public constructor(title = 'Inventory', itemsFilter?: string[], selectedCallBack?: (selectedItem: string) => void) {
         super(404, 442, title)
 
         this.m_InventoryGroups = new PIXI.Container()

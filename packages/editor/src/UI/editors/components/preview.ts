@@ -90,7 +90,7 @@ export default class Preview extends PIXI.Container {
     }
 
     /** Entity changed event callback */
-    private readonly onEntityChanged = () => {
+    private readonly onEntityChanged = (): void => {
         this.m_Preview.destroy()
         this.m_Preview = this.generatePreview()
     }

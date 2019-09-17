@@ -84,12 +84,7 @@ export default class Dialog extends Panel {
      * @param style - Style of label
      * @returns Reference to PIXI.Text for further usage
      */
-    protected addLabel(
-        x: number = 140,
-        y: number = 56,
-        text: string = 'Recipe:',
-        style: PIXI.TextStyle = styles.dialog.label
-    ): PIXI.Text {
+    protected addLabel(x = 140, y = 56, text = 'Recipe:', style = styles.dialog.label): PIXI.Text {
         const label: PIXI.Text = new PIXI.Text(text, style)
         label.position.set(x, y)
         this.addChild(label)

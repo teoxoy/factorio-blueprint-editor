@@ -41,7 +41,7 @@ export default abstract class Editor extends Dialog {
      * @param x - Horizontal position of Recipe Slot from top left corner
      * @param y - Vertical position of Recipe Slot from top left corner
      */
-    protected addRecipe(x: number = 208, y: number = 45): Recipe {
+    protected addRecipe(x = 208, y = 45): Recipe {
         const recipe: Recipe = new Recipe(this.m_Entity)
         recipe.position.set(x, y)
         this.addChild(recipe)
@@ -56,7 +56,7 @@ export default abstract class Editor extends Dialog {
      * @param x - Horizontal position of Module Slots from top left corner
      * @param y - Vertical position of Module Slots from top left corner
      */
-    protected addModules(x: number = 208, y: number = 83): Modules {
+    protected addModules(x = 208, y = 83): Modules {
         const modules: Modules = new Modules(this.m_Entity)
         modules.position.set(x, y)
         this.addChild(modules)
@@ -72,7 +72,7 @@ export default abstract class Editor extends Dialog {
      * @param y - Vertical position of Filter Slots from top left corner
      * @param counts - Shall filter counts be shown
      */
-    protected addFilters(x: number = 208, y: number = 83, amount: boolean = false): Filters {
+    protected addFilters(x = 208, y = 83, amount = false): Filters {
         const filters: Filters = new Filters(this.m_Entity, amount)
         filters.position.set(x, y)
         this.addChild(filters)

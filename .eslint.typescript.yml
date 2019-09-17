@@ -7,9 +7,10 @@ rules:
         - error
         - always
     '@typescript-eslint/no-use-before-define': 'off'
-    '@typescript-eslint/no-object-literal-type-assertion':
+    '@typescript-eslint/consistent-type-assertions':
         - error
-        - allowAsParameter: true
+        - assertionStyle: 'as'
+          objectLiteralTypeAssertions: 'allow-as-parameter'
     '@typescript-eslint/explicit-member-accessibility': warn
     '@typescript-eslint/explicit-function-return-type':
         - warn
@@ -18,3 +19,4 @@ rules:
           allowHigherOrderFunctions: true
     # TODO: turn on
     '@typescript-eslint/camelcase': 'off'
+    '@typescript-eslint/ban-ts-ignore': 'off'

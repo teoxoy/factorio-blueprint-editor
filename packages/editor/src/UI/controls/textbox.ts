@@ -11,7 +11,7 @@ class TextChar extends PIXI.Text {
     /** Text metrics for character */
     private readonly m_Metrics: PIXI.TextMetrics
 
-    public constructor(char: string, left: number = 0) {
+    public constructor(char: string, left = 0) {
         super(char, styles.controls.textbox)
         // (PT) this.interactive = true
         this.position.set(left, 0)
@@ -157,7 +157,7 @@ export default class Textbox extends PIXI.Container {
      * @param length - Maximum length of text (0 will automatically make it the length of the provided text)
      * @param filter - Filter for allowed characters (e.g. '1234567890')
      */
-    public constructor(width: number, text: string = '', length: number = 0, filter: string = '') {
+    public constructor(width: number, text = '', length = 0, filter = '') {
         super()
 
         this.m_Length = length === 0 ? text.length : length
@@ -283,7 +283,7 @@ export default class Textbox extends PIXI.Container {
     }
 
     /** Pointer up event callback */
-    private readonly onPointerUp = () => {
+    private readonly onPointerUp = (): void => {
         if (!this.m_Active.visible) {
             passtroughAllEvents(this.keyPressedCallback.bind(this))
             this.m_CaretGraphic.visible = true
@@ -293,7 +293,7 @@ export default class Textbox extends PIXI.Container {
     }
 
     /** KeyboardJS key pressed event callback */
-    private readonly keyPressedCallback = (e: keyboardJS.KeyEvent) => {
+    private readonly keyPressedCallback = (e: keyboardJS.KeyEvent): boolean => {
         const disable = (): void => {
             this.m_CaretGraphic.visible = false
             // (PT) this.m_Text.deactivate()

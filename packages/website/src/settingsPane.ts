@@ -1,6 +1,6 @@
-import { GUI, GUIController } from 'dat.gui'
 import FD from 'factorio-data'
 import EDITOR, { Blueprint, Book, GridPattern } from '@fbe/editor'
+import { GUI, GUIController } from 'dat.gui'
 
 GUI.TEXT_CLOSED = 'Close Settings'
 GUI.TEXT_OPEN = 'Open Settings'

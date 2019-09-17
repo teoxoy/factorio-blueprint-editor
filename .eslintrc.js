@@ -1,7 +1,3 @@
-const glob = require('glob')
-
-const globPattern = './packages/**/tsconfig.json'
-
 module.exports = {
     env: {
         browser: true,
@@ -11,7 +7,7 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     parserOptions: {
         sourceType: 'module',
-        project: glob.sync(globPattern)
+        project: './packages/**/tsconfig.json'
     },
     plugins: ['@typescript-eslint', 'import', 'prettier'],
     settings: {
@@ -20,8 +16,8 @@ module.exports = {
             '@typescript-eslint/parser': ['.ts']
         },
         'import/resolver': {
-            typescript: {
-                directory: globPattern
+            ts: {
+                directory: './packages/**/tsconfig.json'
             }
         }
     },
