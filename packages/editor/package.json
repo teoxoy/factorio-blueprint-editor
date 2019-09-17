@@ -11,7 +11,7 @@
     "bugs": "https://github.com/Teoxoy/factorio-blueprint-editor/issues",
     "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
     "main": "./dist/index.js",
-    "types": "./dist/index.d.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "start": "concurrently \"ttsc -w\" \"ts-cleaner -w\"",
         "build": "ttsc && ts-cleaner"
