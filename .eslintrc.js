@@ -7,7 +7,7 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     parserOptions: {
         sourceType: 'module',
-        project: './packages/**/tsconfig.json'
+        project: './packages/*/tsconfig.json'
     },
     plugins: ['@typescript-eslint', 'import', 'prettier'],
     settings: {
@@ -17,7 +17,7 @@ module.exports = {
         },
         'import/resolver': {
             ts: {
-                directory: './packages/**/tsconfig.json'
+                directory: './packages/*/tsconfig.json'
             }
         }
     },
