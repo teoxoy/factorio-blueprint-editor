@@ -11,7 +11,7 @@
         "dat.gui": "^0.7.6",
         "factorio-data": "^4.0.4",
         "file-saver": "^2.0.2",
-        "pixi.js": "^5.1.4"
+        "pixi.js": "^5.1.5"
     },
     "devDependencies": {
         "@types/dat.gui": "^0.7.4",
