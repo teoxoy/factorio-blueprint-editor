@@ -6898,10 +6898,10 @@ tree-kill@^1.2.1:
   resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.1.tgz#5398f374e2f292b9dcc7b2e71e30a5c3bb6c743a"
   integrity sha512-4hjqbObwlh2dLyW4tcz0Ymw0ggoaVDMveUB9w8kFSQScdRLo0gxO9J7WFcUBo+W3C1TLdFIEwNOWebgZZ0RH9Q==
 
-ts-cleaner@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/ts-cleaner/-/ts-cleaner-1.0.2.tgz#5d0fc745ad14193467d7b7795a02e4a8f119fc34"
-  integrity sha512-5B5oYH9FpJC6nreFZ081AOhhASySF/STm1m08Xb38SBowzNVqTLTjOuYxyUHqXUGl/eF9PrDdYxUo8wyb9NJmA==
+ts-cleaner@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/ts-cleaner/-/ts-cleaner-1.0.3.tgz#890f7b5001b862e8439710680ac8af29b73ce94a"
+  integrity sha512-I338BlrrHdd+rnMhpm6qDs/EI4Ayi6y2BH7vnRR3OK7NbhGMrmxg4BgavoIbgthWZYvvggB4TSLepirhUfuWyA==
   dependencies:
     args "^5.0.1"
     chokidar "^3.0.0"
