@@ -2463,10 +2463,10 @@ eslint-import-resolver-node@^0.3.2:
     debug "^2.6.9"
     resolve "^1.5.0"
 
-eslint-import-resolver-ts@0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/eslint-import-resolver-ts/-/eslint-import-resolver-ts-0.4.0.tgz#9862cd60c01f90001c07e3eb071db455ce875b8b"
-  integrity sha512-aq8E6YRs+v4gzMtbmvkXWT11J+MVayYBWaEp14U+l8ktw0CKFUkwa3YbEdnuRy7fymFr7uqRAoNCY0xwLhrP7w==
+eslint-import-resolver-ts@0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/eslint-import-resolver-ts/-/eslint-import-resolver-ts-0.4.2.tgz#cd1a4a31144d15b5b6ec7aa88920df4b0e07a385"
+  integrity sha512-M5WH0xJ3nnwSZZ8f6J550elDmsf/86mau66irHm+qBr5n0soqfuKqr41Qd6oZNBCY6FoSAkiLgnVFEvXAoBvZA==
   dependencies:
     debug "^4.1.1"
     is-glob "^4.0.1"
