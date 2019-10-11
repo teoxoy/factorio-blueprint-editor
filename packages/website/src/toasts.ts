@@ -35,10 +35,13 @@ function initToasts(): (options: IToastsOptions) => void {
             { once: true }
         )
 
-        Promise.race([
-            new Promise(resolve => setTimeout(resolve, options.timeout || 5000)),
-            new Promise(resolve => toast.addEventListener('click', resolve, { once: true }))
-        ]).then(() => {
+        const promises = [new Promise(resolve => toast.addEventListener('click', resolve, { once: true }))]
+
+        if (options.timeout !== Infinity) {
+            promises.push(new Promise(resolve => setTimeout(resolve, options.timeout || 5000)))
+        }
+
+        Promise.race(promises).then(() => {
             toast.classList.add('toasts-toast-fadeOut')
             toast.addEventListener(
                 'transitionend',

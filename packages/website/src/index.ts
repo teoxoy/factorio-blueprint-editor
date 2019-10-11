@@ -20,11 +20,6 @@ const loadingScreen = {
     }
 }
 
-if (pixiUtils.isMobile.any) {
-    loadingScreen.el.classList.add('mobileError')
-    throw new Error('MOBILE DEVICE DETECTED')
-}
-
 console.log(
     '\n%cLooking for the source?\nhttps://github.com/Teoxoy/factorio-blueprint-editor\n',
     'color: #1f79aa; font-weight: bold'
@@ -32,6 +27,18 @@ console.log(
 
 initFeedbackButton()
 const createToast = initToasts()
+
+if (pixiUtils.isMobile.any) {
+    createToast({
+        text:
+            'Application is not compatible with mobile devices.<br>' +
+            'If you think this is a mistake, feel free to report this bug on github or using the feedback button.',
+        type: 'error',
+        timeout: Infinity
+    })
+    loadingScreen.el.classList.add('error')
+    throw new Error('MOBILE_DEVICE_NOT_SUPPORTED')
+}
 
 const params = window.location.search.slice(1).split('&')
 
@@ -49,8 +56,6 @@ for (const p of params) {
 let changeBookForIndexSelector: (bpOrBook: Book | Blueprint) => void
 
 EDITOR.initEditor(CANVAS)
-    .catch(error => createErrorMessage('Something went wrong.', error))
-
     .then(() => {
         if (localStorage.getItem('quickbarItemNames')) {
             const quickbarItems = JSON.parse(localStorage.getItem('quickbarItemNames'))
@@ -64,14 +69,21 @@ EDITOR.initEditor(CANVAS)
             EDITOR.loadBlueprint(bp)
         }
         changeBookForIndexSelector = initSettingsPane(changeBookIndex).changeBook
+
+        EDITOR.bpStringEncodeDecode
+            .getBlueprintOrBookFromSource(bpSource)
+            .catch(error => createBPImportError(error))
+
+            .then(bpOrBook => loadBp(bpOrBook || new Blueprint()))
+
+            .then(() => createWelcomeMessage())
+            .catch(error => createBPImportError(error))
     })
-
-    .then(() => EDITOR.bpStringEncodeDecode.getBlueprintOrBookFromSource(bpSource))
-    .catch(error => createBPImportError(error))
-    .then(bpOrBook => loadBp(bpOrBook || new Blueprint()))
-
-    .then(() => createWelcomeMessage())
-    .catch(error => createBPImportError(error))
+    .catch(error => {
+        createErrorMessage('Something went wrong.', error, Infinity)
+        loadingScreen.el.classList.add('error')
+        throw new Error('UNRECOVERABLE_ERROR')
+    })
 
 window.addEventListener('unload', () => {
     localStorage.setItem('quickbarItemNames', JSON.stringify(EDITOR.getQuickbarItems()))
@@ -226,7 +238,7 @@ function createWelcomeMessage(): void {
         })
     }, 1000)
 }
-function createErrorMessage(text: string, error: unknown): void {
+function createErrorMessage(text: string, error: unknown, timeout = 10000): void {
     console.error(error)
     createToast({
         text:
@@ -234,7 +246,7 @@ function createErrorMessage(text: string, error: unknown): void {
             'Please check out the console (F12) for an error message and ' +
             'report this bug on github or using the feedback button.',
         type: 'error',
-        timeout: 10000
+        timeout
     })
 }
 function createBPImportError(error: Error | TrainBlueprintError | ModdedBlueprintError): void {

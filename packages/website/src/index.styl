@@ -32,12 +32,12 @@ html
         z-index: 10
         .loadingWheel
             animation: rotating 2s linear infinite
-    &.mobileError
+    &.error
+        z-index: 4
+        cursor: default
         .loadingWheel
             animation-fill-mode: forwards
             animation-iteration-count: 1
-        #mobileError
-            visibility: visible
 
 #corner-panel
     z-index: 5
@@ -67,16 +67,6 @@ html
     transform: rotate(0deg)
   to
     transform: rotate(360deg)
-
-#mobileError
-    position: fixed
-    left: 50%
-    top: 60%
-    transform: translate(-50%, -60%)
-    width: 90%
-    text-align: center
-    color: #ff3a3a
-    visibility: hidden
 
 #logo
     position: fixed
@@ -263,6 +253,7 @@ canvas
         bottom: 0
         right: 0
         width: 320px
+        z-index: 20
 
     &-toast
         position: relative
