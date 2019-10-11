@@ -1,7 +1,6 @@
 import { utils as pixiUtils } from 'pixi.js'
 import EDITOR, { Blueprint, Book, TrainBlueprintError, ModdedBlueprintError } from '@fbe/editor'
 import FileSaver from 'file-saver'
-import { GUIController } from 'dat.gui'
 import initToasts from './toasts'
 import initFeedbackButton from './feedbackButton'
 import initSettingsPane from './settingsPane'
@@ -47,7 +46,7 @@ for (const p of params) {
     }
 }
 
-let guiBPIndex: GUIController
+let changeBookForIndexSelector: (bpOrBook: Book | Blueprint) => void
 
 EDITOR.initEditor(CANVAS)
     .catch(error => createErrorMessage('Something went wrong.', error))
@@ -60,10 +59,11 @@ EDITOR.initEditor(CANVAS)
 
         registerActions()
 
-        guiBPIndex = initSettingsPane({
-            bp,
-            book
-        }).guiBPIndex
+        const changeBookIndex = (index: number): void => {
+            bp = book.getBlueprint(index)
+            EDITOR.loadBlueprint(bp)
+        }
+        changeBookForIndexSelector = initSettingsPane(changeBookIndex).changeBook
     })
 
     .then(() => EDITOR.bpStringEncodeDecode.getBlueprintOrBookFromSource(bpSource))
@@ -81,15 +81,12 @@ function loadBp(bpOrBook: Blueprint | Book): void {
     if (bpOrBook instanceof Book) {
         book = bpOrBook
         bp = book.getBlueprint(bpIndex ? bpIndex : undefined)
-        EDITOR.loadBlueprint(bp)
-
-        guiBPIndex.max(book.lastBookIndex).setValue(book.activeIndex)
     } else {
         bp = bpOrBook
-        EDITOR.loadBlueprint(bpOrBook)
-
-        guiBPIndex.setValue(0).max(0)
     }
+
+    EDITOR.loadBlueprint(bp)
+    changeBookForIndexSelector(bpOrBook)
 
     loadingScreen.hide()
 

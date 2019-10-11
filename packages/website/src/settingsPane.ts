@@ -1,6 +1,6 @@
 import FD from 'factorio-data'
 import EDITOR, { Blueprint, Book, GridPattern } from '@fbe/editor'
-import { GUI, GUIController } from 'dat.gui'
+import { GUI } from 'dat.gui'
 
 GUI.TEXT_CLOSED = 'Close Settings'
 GUI.TEXT_OPEN = 'Open Settings'
@@ -9,11 +9,10 @@ const COLOR_DARK = 0x303030
 const COLOR_LIGHT = 0xc9c9c9
 const isDarkColor = (color: number): boolean => color === COLOR_DARK
 
-export default function initSettingsPane(shared: {
-    bp: Blueprint
-    book: Book
-}): {
-    guiBPIndex: GUIController
+export default function initSettingsPane(
+    changeBookIndex: (index: number) => void
+): {
+    changeBook: (bpOrBook: Book | Blueprint) => void
 } {
     const gui = new GUI({
         autoPlace: false,
@@ -36,13 +35,18 @@ export default function initSettingsPane(shared: {
 
     const guiBPIndex = gui
         .add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1)
-        .name('BP Index')
-        .onFinishChange((value: number) => {
-            if (shared.book) {
-                shared.bp = shared.book.getBlueprint(value)
-                EDITOR.loadBlueprint(shared.bp)
-            }
-        })
+        .name('BP Book Index')
+        .onFinishChange(changeBookIndex)
+
+    const changeBook = (bpOrBook: Book | Blueprint): void => {
+        console.log(bpOrBook)
+        if (bpOrBook instanceof Book) {
+            guiBPIndex.max(bpOrBook.lastBookIndex).setValue(bpOrBook.activeIndex)
+            guiBPIndex.domElement.style.visibility = 'visible'
+        } else {
+            guiBPIndex.domElement.style.visibility = 'hidden'
+        }
+    }
 
     if (localStorage.getItem('moveSpeed')) {
         const moveSpeed = Number(localStorage.getItem('moveSpeed'))
@@ -193,6 +197,6 @@ export default function initSettingsPane(shared: {
         .name('Reset Defaults')
 
     return {
-        guiBPIndex
+        changeBook
     }
 }

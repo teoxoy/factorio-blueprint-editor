@@ -22,7 +22,7 @@ export class Book {
     }
 
     public get lastBookIndex(): number {
-        return Math.min(0, this.blueprints.length - 1)
+        return Math.max(0, this.blueprints.length - 1)
     }
 
     public getBlueprint(index?: number): Blueprint {
