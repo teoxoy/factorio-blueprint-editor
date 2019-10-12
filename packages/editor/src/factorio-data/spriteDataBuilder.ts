@@ -1421,7 +1421,6 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
                 sprites.push(mainBelt)
 
-                /* eslint-disable no-nested-ternary */
                 sprites.push(
                     duplicateAndSetPropertyUsing(
                         sideloadingFront
@@ -1436,7 +1435,6 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         dir / 2
                     )
                 )
-                /* eslint-enable no-nested-ternary */
 
                 if (!sideloadingFront) {
                     sprites.push(duplicateAndSetPropertyUsing(structure.front_patch.sheet, 'x', 'width', dir / 2))

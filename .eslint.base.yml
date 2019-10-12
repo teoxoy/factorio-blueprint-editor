@@ -65,7 +65,6 @@ rules:
           allowSamePrecedence: true
     no-multi-assign: error
     no-negated-condition: error
-    no-nested-ternary: error
     no-new-object: error
     no-plusplus:
         - error

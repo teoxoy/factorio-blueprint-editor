@@ -214,12 +214,10 @@ class BlueprintContainer extends PIXI.Container {
                 const ADXOR = isActionActive('moveLeft') !== isActionActive('moveRight')
                 if (WSXOR || ADXOR) {
                     const finalSpeed = this.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
-                    /* eslint-disable no-nested-ternary */
                     this.viewport.translateBy(
                         (ADXOR ? (isActionActive('moveLeft') ? 1 : -1) : 0) * finalSpeed,
                         (WSXOR ? (isActionActive('moveUp') ? 1 : -1) : 0) * finalSpeed
                     )
-                    /* eslint-enable no-nested-ternary */
                     this.applyViewportTransform()
                 }
             }
