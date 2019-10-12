@@ -59,6 +59,28 @@ export default function initSettingsPane(
             EDITOR.setMoveSpeed(speed)
         })
 
+    if (localStorage.getItem('pattern')) {
+        const pattern = localStorage.getItem('pattern') as GridPattern
+        EDITOR.setGridPattern(pattern)
+    }
+    gui.add({ pattern: EDITOR.getGridPattern() }, 'pattern', ['checker', 'grid'])
+        .name('Grid Pattern')
+        .onChange((pattern: GridPattern) => {
+            localStorage.setItem('pattern', pattern)
+            EDITOR.setGridPattern(pattern)
+        })
+
+    if (localStorage.getItem('darkTheme')) {
+        const darkTheme = localStorage.getItem('darkTheme') === 'true'
+        EDITOR.setGridColor(darkTheme ? COLOR_DARK : COLOR_LIGHT)
+    }
+    gui.add({ darkTheme: isDarkColor(EDITOR.getGridColor()) }, 'darkTheme')
+        .name('Dark Mode')
+        .onChange((darkTheme: boolean) => {
+            localStorage.setItem('darkTheme', darkTheme.toString())
+            EDITOR.setGridColor(darkTheme ? COLOR_DARK : COLOR_LIGHT)
+        })
+
     if (localStorage.getItem('debug')) {
         const debug = Boolean(localStorage.getItem('debug'))
         EDITOR.setDebugging(debug)
@@ -77,33 +99,6 @@ export default function initSettingsPane(
                 localStorage.removeItem('debug')
             }
             EDITOR.setDebugging(debug)
-        })
-
-    // Grid theme folder
-    const themeFolder = gui.addFolder('Grid Theme')
-
-    if (localStorage.getItem('darkTheme')) {
-        const darkTheme = localStorage.getItem('darkTheme') === 'true'
-        EDITOR.setGridColor(darkTheme ? COLOR_DARK : COLOR_LIGHT)
-    }
-    themeFolder
-        .add({ darkTheme: isDarkColor(EDITOR.getGridColor()) }, 'darkTheme')
-        .name('Dark Mode')
-        .onChange((darkTheme: boolean) => {
-            localStorage.setItem('darkTheme', darkTheme.toString())
-            EDITOR.setGridColor(darkTheme ? COLOR_DARK : COLOR_LIGHT)
-        })
-
-    if (localStorage.getItem('pattern')) {
-        const pattern = localStorage.getItem('pattern') as GridPattern
-        EDITOR.setGridPattern(pattern)
-    }
-    themeFolder
-        .add({ pattern: EDITOR.getGridPattern() }, 'pattern', ['checker', 'grid'])
-        .name('Pattern')
-        .onChange((pattern: GridPattern) => {
-            localStorage.setItem('pattern', pattern)
-            EDITOR.setGridPattern(pattern)
         })
 
     if (localStorage.getItem('oilOutpostSettings')) {
