@@ -14,7 +14,7 @@
         "lint:fix": "eslint . --ignore-path .gitignore --ext .ts --fix"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^2.3.3",
+        "@typescript-eslint/eslint-plugin": "^2.9.0",
         "@typescript-eslint/parser": "^2.4.0",
         "concurrently": "^5.0.0",
         "eslint": "^6.6.0",
