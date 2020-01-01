@@ -33,7 +33,7 @@
         "@types/pathfinding": "0.0.4",
         "@zerollup/ts-transform-paths": "^1.7.3",
         "concurrently": "^5.0.0",
-        "ts-cleaner": "^1.0.3",
+        "ts-cleaner": "^1.0.5",
         "ttypescript": "^1.5.7",
         "typescript": "^3.6.4"
     }
