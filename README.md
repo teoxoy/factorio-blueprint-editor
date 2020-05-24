@@ -16,14 +16,15 @@ Sample blueprint: https://teoxoy.github.io/factorio-blueprint-editor/?source=htt
 Example blueprint book: https://teoxoy.github.io/factorio-blueprint-editor/?source=https://pastebin.com/Xp9u7NaA&index=1
 
 # Features
-- rendering and editing blueprints
-- history (undo/redo)
-- copy and delete selections
-- import blueprints and books from multiple sources (direct bp string, pastebin, hastebin, gist, gitlab, factorioprints, google docs)
-- generating blueprint images
-- oil outpost generator
-- customizable keybinds
-- "creative" entities
+
+-   rendering and editing blueprints
+-   history (undo/redo)
+-   copy and delete selections
+-   import blueprints and books from multiple sources (direct bp string, pastebin, hastebin, gist, gitlab, factorioprints, google docs)
+-   generating blueprint images
+-   oil outpost generator
+-   customizable keybinds
+-   "creative" entities
 
 # Contributing
 
