@@ -1,22 +1,13 @@
----
 rules:
     # Best Practices (https://eslint.org/docs/rules/#best-practices)
-    curly:
-        - warn
-        - all
-    dot-notation:
-        - error
-        - allowPattern: '^[a-z]+(_[a-z]+)+$'
-    eqeqeq:
-        - warn
-        - always
+    curly: [warn, all]
+    dot-notation: [error, allowPattern: '^[a-z]+(_[a-z]+)+$']
+    eqeqeq: [warn, always]
     guard-for-in: error
     no-new-func: error
     no-new-wrappers: error
     no-param-reassign: error
-    no-return-assign:
-        - error
-        - always
+    no-return-assign: [warn, always]
     no-return-await: error
     no-self-compare: error
     no-sequences: error
@@ -27,52 +18,25 @@ rules:
     no-useless-return: error
     no-void: error
     no-with: error
-    wrap-iife:
-        - error
-        - inside
-    yoda:
-        - error
-        - never
-        - exceptRange: true
+    wrap-iife: [error, inside]
+    yoda: [error, never, exceptRange: true]
 
     # Stylistic Issues (https://eslint.org/docs/rules/#stylistic-issues)
-    func-style:
-        - error
-        - declaration
-        - allowArrowFunctions: true
+    func-style: [error, declaration, allowArrowFunctions: true]
     no-mixed-operators:
         - error
         - groups:
-              - - '&'
-                - '|'
-                - '^'
-                - '~'
-                - '<<'
-                - '>>'
-                - '>>>'
-              - - '=='
-                - '!='
-                - '==='
-                - '!=='
-                - '>'
-                - '>='
-                - '<'
-                - '<='
-              - - '&&'
-                - '||'
-              - - in
-                - instanceof
+              - ['&', '|', '^', '~', '<<', '>>', '>>>']
+              - ['==', '!=', '===', '!==', '>', '>=', '<', '<=']
+              - ['&&', '||']
+              - [in, instanceof]
           allowSamePrecedence: true
     no-multi-assign: error
     no-negated-condition: error
     no-new-object: error
-    no-plusplus:
-        - error
-        - allowForLoopAfterthoughts: true
+    no-plusplus: [error, allowForLoopAfterthoughts: true]
     no-unneeded-ternary: error
-    operator-assignment:
-        - error
-        - always
+    operator-assignment: [error, always]
     prefer-object-spread: error
     spaced-comment:
         - warn
@@ -81,12 +45,8 @@ rules:
               balanced: true
 
     # ECMAScript 6 (https://eslint.org/docs/rules/#ecmascript-6)
-    arrow-body-style:
-        - error
-        - as-needed
-    no-confusing-arrow:
-        - error
-        - allowParens: true
+    arrow-body-style: [error, as-needed]
+    no-confusing-arrow: [error, allowParens: true]
     no-var: error
     prefer-const: error
     prefer-rest-params: error

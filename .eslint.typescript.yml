@@ -1,22 +1,23 @@
----
 rules:
+    # TODO: turn on
+    '@typescript-eslint/camelcase': off
+    # TODO: maybe turn off
+    '@typescript-eslint/interface-name-prefix': [error, always]
+    # '@typescript-eslint/naming-conventions':
+    #     - error
+    #     - selector: default
+    #       format: [camelCase]
     '@typescript-eslint/no-useless-constructor': warn
     '@typescript-eslint/restrict-plus-operands': error
-    # TODO: maybe turn off
-    '@typescript-eslint/interface-name-prefix':
-        - error
-        - always
-    '@typescript-eslint/no-use-before-define': 'off'
+    '@typescript-eslint/no-use-before-define': off
     '@typescript-eslint/consistent-type-assertions':
         - error
-        - assertionStyle: 'as'
-          objectLiteralTypeAssertions: 'allow-as-parameter'
+        - assertionStyle: as
+          objectLiteralTypeAssertions: allow-as-parameter
     '@typescript-eslint/explicit-member-accessibility': warn
     '@typescript-eslint/explicit-function-return-type':
         - warn
         - allowExpressions: true
           allowTypedFunctionExpressions: true
           allowHigherOrderFunctions: true
-    # TODO: turn on
-    '@typescript-eslint/camelcase': 'off'
-    '@typescript-eslint/ban-ts-ignore': 'off'
+    '@typescript-eslint/ban-ts-ignore': off

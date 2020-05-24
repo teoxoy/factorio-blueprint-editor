@@ -1,17 +1,16 @@
----
 rules:
-    import/no-unresolved: 2
-    import/named: 2
-    # import/default: 2
-    import/namespace: 2
-    import/export: 2
+    import/no-unresolved: error
+    import/named: error
+    # import/default: error
+    import/namespace: error
+    import/export: error
 
-    import/no-named-as-default: 1
-    # import/no-named-as-default-member: 1
-    import/no-duplicates: 1
-    import/first: 1
+    import/no-named-as-default: warn
+    # import/no-named-as-default-member: warn
+    import/no-duplicates: warn
+    import/first: warn
     import/order:
-        - 1
+        - warn
         - groups:
               - builtin
               - external
@@ -21,19 +20,19 @@ rules:
               - sibling
               - index
           newlines-between: never
-    import/no-useless-path-segments: 2
-    import/no-self-import: 2
-    import/no-absolute-path: 2
-    import/no-commonjs: 2
-    import/no-amd: 2
+    import/no-useless-path-segments: error
+    import/no-self-import: error
+    import/no-absolute-path: error
+    import/no-commonjs: error
+    import/no-amd: error
     import/no-extraneous-dependencies:
-        - 2
+        - error
         - devDependencies: true
           peerDependencies: false
           optionalDependencies: false
 
-    import/exports-last: 1
-    import/group-exports: 1
-    # import/no-default-export: 2
-    import/no-mutable-exports: 2
-    import/no-named-default: 2
+    import/exports-last: warn
+    import/group-exports: warn
+    # import/no-default-export: error
+    import/no-mutable-exports: error
+    import/no-named-default: error
