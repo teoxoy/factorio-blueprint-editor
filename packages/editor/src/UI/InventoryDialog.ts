@@ -48,7 +48,11 @@ export class InventoryDialog extends Dialog {
     /** Hovered item for item pointerout check */
     private m_hoveredItem: string
 
-    public constructor(title = 'Inventory', itemsFilter?: string[], selectedCallBack?: (selectedItem: string) => void) {
+    public constructor(
+        title = 'Inventory',
+        itemsFilter?: string[],
+        selectedCallBack?: (selectedItem: string) => void
+    ) {
         super(404, 442, title)
 
         this.m_InventoryGroups = new PIXI.Container()
@@ -82,7 +86,8 @@ export class InventoryDialog extends Dialog {
                             : false
                         if (!entityFindable) {
                             const tilePlaceable =
-                                itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
+                                itemData.place_as_tile !== undefined &&
+                                itemData.place_as_tile.result !== undefined
                             const tileFindable = tilePlaceable
                                 ? FD.tiles[itemData.place_as_tile.result] !== undefined ||
                                   itemData.place_as_tile.result === 'landfill'
@@ -156,15 +161,18 @@ export class InventoryDialog extends Dialog {
                 button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     if (e.data.button === 0) {
                         if (!button.active) {
-                            for (const inventoryGroup of this.m_InventoryGroups.children as Button[]) {
+                            for (const inventoryGroup of this.m_InventoryGroups
+                                .children as Button[]) {
                                 inventoryGroup.active = inventoryGroup === button
                             }
                         }
                         const buttonData: PIXI.Container = button.data as PIXI.Container
                         if (!buttonData.visible) {
-                            for (const inventoryGroupItems of this.m_InventoryItems.children as PIXI.Container[]) {
+                            for (const inventoryGroupItems of this.m_InventoryItems
+                                .children as PIXI.Container[]) {
                                 inventoryGroupItems.visible = inventoryGroupItems === buttonData
-                                inventoryGroupItems.interactiveChildren = inventoryGroupItems === buttonData
+                                inventoryGroupItems.interactiveChildren =
+                                    inventoryGroupItems === buttonData
                             }
                         }
                     }
@@ -201,7 +209,10 @@ export class InventoryDialog extends Dialog {
 
     /** Override automatically set position of dialog due to additional area for recipe */
     protected setPosition(): void {
-        this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height / 2 - 520 / 2)
+        this.position.set(
+            G.app.screen.width / 2 - this.width / 2,
+            G.app.screen.height / 2 - 520 / 2
+        )
     }
 
     /** Update recipe visulaization */
@@ -223,6 +234,13 @@ export class InventoryDialog extends Dialog {
 
         this.m_RecipeLabel.text = recipe.ui_name
 
-        F.CreateRecipe(this.m_RecipeContainer, 0, 0, recipe.ingredients, recipe.results, recipe.time)
+        F.CreateRecipe(
+            this.m_RecipeContainer,
+            0,
+            0,
+            recipe.ingredients,
+            recipe.results,
+            recipe.time
+        )
     }
 }

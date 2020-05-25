@@ -16,7 +16,8 @@ const arrayToPoint = (array: number[]): IPoint => ({ x: array[0], y: array[1] })
 
 const pointToArray = (point: IPoint): number[] => [point.x, point.y]
 
-const manhattenDistance = (p0: IPoint, p1: IPoint): number => Math.abs(p0.x - p1.x) + Math.abs(p0.y - p1.y)
+const manhattenDistance = (p0: IPoint, p1: IPoint): number =>
+    Math.abs(p0.x - p1.x) + Math.abs(p0.y - p1.y)
 
 const euclideanDistance = (p0: IPoint, p1: IPoint): number =>
     Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2))
@@ -24,7 +25,8 @@ const euclideanDistance = (p0: IPoint, p1: IPoint): number =>
 const pointInCircle = (point: IPoint, origin: IPoint, r: number): boolean =>
     Math.pow(origin.x - point.x, 2) + Math.pow(origin.y - point.y, 2) <= r * r
 
-const range = (from: number, to: number): number[] => [...Array(to - from).keys()].map(i => from + i)
+const range = (from: number, to: number): number[] =>
+    [...Array(to - from).keys()].map(i => from + i)
 
 // https://stackoverflow.com/a/38024982
 /** Returns the angle (0-360) anticlockwise from the horizontal for a point on a circle */
@@ -49,7 +51,7 @@ const getReflectedPoint = (p: IPoint, lp0: IPoint, lp1: IPoint): IPoint => {
     const d = (p.x + (p.y - b) * m) / (1 + m ** 2)
     return {
         x: 2 * d - p.x,
-        y: 2 * d * m - p.y + 2 * b
+        y: 2 * d * m - p.y + 2 * b,
     }
 }
 
@@ -162,5 +164,5 @@ export default {
     range,
     getAngle,
     getReflectedPoint,
-    findSide
+    findSide,
 }

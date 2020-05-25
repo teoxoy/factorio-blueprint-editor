@@ -12,7 +12,9 @@ function template(strings: TemplateStringsArray, ...keys: (number | string)[]) {
         const result = [strings[0].replace('\n', '')]
         keys.forEach((key, i) => {
             result.push(
-                typeof key === 'number' ? (values as string[])[key] : (values[0] as Record<string, string>)[key],
+                typeof key === 'number'
+                    ? (values as string[])[key]
+                    : (values[0] as Record<string, string>)[key],
                 strings[i + 1]
             )
         })
@@ -76,7 +78,12 @@ export class EntityInfoPanel extends Panel {
         this.m_RecipeContainer = new PIXI.Container()
         this.m_RecipeIOContainer = new PIXI.Container()
 
-        this.addChild(this.m_EntityName, this.m_entityInfo, this.m_RecipeContainer, this.m_RecipeIOContainer)
+        this.addChild(
+            this.m_EntityName,
+            this.m_entityInfo,
+            this.m_RecipeContainer,
+            this.m_RecipeIOContainer
+        )
     }
 
     public updateVisualization(entity?: Entity): void {
@@ -124,18 +131,23 @@ export class EntityInfoPanel extends Panel {
 
             consumption = consumption < -0.8 ? -0.8 : consumption
             const newCraftingSpeed = entity.entityData.crafting_speed * (1 + speed)
-            const newEnergyUsage = parseInt(entity.entityData.energy_usage.slice(0, -2)) * (1 + consumption)
+            const newEnergyUsage =
+                parseInt(entity.entityData.energy_usage.slice(0, -2)) * (1 + consumption)
 
             // Show modules effect and some others informations
             this.m_entityInfo.text = entityInfoTemplate({
                 craftingSpeed: roundToTwo(newCraftingSpeed),
                 speedMultiplier: speed
-                    ? `(${Math.sign(speed) === 1 ? '+' : '-'}${String(roundToTwo(Math.abs(speed)) * 100)}%)`
+                    ? `(${Math.sign(speed) === 1 ? '+' : '-'}${String(
+                          roundToTwo(Math.abs(speed)) * 100
+                      )}%)`
                     : '',
                 energyUsage: roundToTwo(newEnergyUsage),
                 energyMultiplier: consumption
-                    ? `(${Math.sign(consumption) === 1 ? '+' : '-'}${String(roundToTwo(Math.abs(consumption)) * 100)}%)`
-                    : ''
+                    ? `(${Math.sign(consumption) === 1 ? '+' : '-'}${String(
+                          roundToTwo(Math.abs(consumption)) * 100
+                      )}%)`
+                    : '',
             })
 
             this.m_entityInfo.position.set(10, nextY)
@@ -154,7 +166,14 @@ export class EntityInfoPanel extends Panel {
 
             // Show the original recipe
             this.m_RecipeContainer.addChild(new PIXI.Text('Recipe:', styles.dialog.label))
-            F.CreateRecipe(this.m_RecipeContainer, 0, 20, recipe.ingredients, recipe.results, recipe.time)
+            F.CreateRecipe(
+                this.m_RecipeContainer,
+                0,
+                20,
+                recipe.ingredients,
+                recipe.results,
+                recipe.time
+            )
             this.m_RecipeContainer.position.set(10, nextY)
             nextY = this.m_RecipeContainer.position.y + this.m_RecipeContainer.height + 20
 
@@ -168,11 +187,13 @@ export class EntityInfoPanel extends Panel {
                 20,
                 recipe.ingredients.map(i => ({
                     name: i.name,
-                    amount: roundToTwo((i.amount * newCraftingSpeed) / recipe.time)
+                    amount: roundToTwo((i.amount * newCraftingSpeed) / recipe.time),
                 })),
                 recipe.results.map(r => ({
                     name: r.name,
-                    amount: roundToTwo(((r.amount * newCraftingSpeed) / recipe.time) * (1 + productivity))
+                    amount: roundToTwo(
+                        ((r.amount * newCraftingSpeed) / recipe.time) * (1 + productivity)
+                    ),
                 })),
                 1
             )
@@ -188,7 +209,10 @@ export class EntityInfoPanel extends Panel {
 
         if (entity.entityData.type === 'inserter') {
             // Details for inserters
-            let speed = containerToContainer(entity.entityData.rotation_speed, entity.inserterStackSize)
+            let speed = containerToContainer(
+                entity.entityData.rotation_speed,
+                entity.inserterStackSize
+            )
             const tiles = entity.name === 'long_handed_inserter' ? 2 : 1
             // const fromP = util.rotatePointBasedOnDir([0, -tiles], entity.direction)
             const toP = util.rotatePointBasedOnDir([0, tiles], entity.direction)
@@ -198,18 +222,29 @@ export class EntityInfoPanel extends Panel {
             //         y: entity.position.y + fromP.y
             //     })
             // )
-            const to = G.bp.entityPositionGrid.getEntityAtPosition(entity.position.x + toP.x, entity.position.y + toP.y)
+            const to = G.bp.entityPositionGrid.getEntityAtPosition(
+                entity.position.x + toP.x,
+                entity.position.y + toP.y
+            )
             if (to && isBelt(to)) {
-                speed = containerToBelt(entity.entityData.rotation_speed, to.entityData.speed, entity.inserterStackSize)
+                speed = containerToBelt(
+                    entity.entityData.rotation_speed,
+                    to.entityData.speed,
+                    entity.inserterStackSize
+                )
             }
-            this.m_entityInfo.text = `Speed: ${roundToTwo(speed)} items/s\n> changes if inserter unloads to a belt`
+            this.m_entityInfo.text = `Speed: ${roundToTwo(
+                speed
+            )} items/s\n> changes if inserter unloads to a belt`
             this.m_entityInfo.position.set(10, nextY)
             nextY = this.m_entityInfo.position.y + this.m_entityInfo.height + 20
         }
 
         if (isBelt(entity)) {
             // Details for belts
-            this.m_entityInfo.text = `Speed: ${roundToTwo(getBeltSpeed(entity.entityData.speed))} items/s`
+            this.m_entityInfo.text = `Speed: ${roundToTwo(
+                getBeltSpeed(entity.entityData.speed)
+            )} items/s`
             this.m_entityInfo.position.set(10, nextY)
             nextY = this.m_entityInfo.position.y + this.m_entityInfo.height + 20
         }

@@ -137,7 +137,11 @@ export class Filters extends PIXI.Container {
             const filters = this.m_Entity.filters
             if (filters !== undefined) {
                 for (const item of filters) {
-                    this.m_Filters[item.index - 1] = { index: item.index, name: item.name, count: item.count }
+                    this.m_Filters[item.index - 1] = {
+                        index: item.index,
+                        name: item.name,
+                        count: item.count,
+                    }
                 }
             }
             for (let slotIndex = 0; slotIndex < slots; slotIndex++) {

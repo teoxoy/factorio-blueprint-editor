@@ -169,7 +169,8 @@ export class Slider extends PIXI.Container {
     private readonly onButtonDragStart = (event: PIXI.interaction.InteractionEvent): void => {
         if (!this.m_Dragging) {
             this.m_Dragging = true
-            this.m_Dragpoint = event.data.getLocalPosition(this.m_SliderButton.parent).x - this.m_SliderButton.x
+            this.m_Dragpoint =
+                event.data.getLocalPosition(this.m_SliderButton.parent).x - this.m_SliderButton.x
             this.m_SliderButton.getChildAt(1).visible = true
         }
     }

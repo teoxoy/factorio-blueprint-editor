@@ -98,7 +98,10 @@ export class ChestEditor extends Editor {
 
         // For Requester Chest: Add Request from Buffer Chest for
         if (entity.name === 'logistic_chest_requester') {
-            const checkbox: Checkbox = new Checkbox(this.m_Entity.requestFromBufferChest, 'Request from buffer chests')
+            const checkbox: Checkbox = new Checkbox(
+                this.m_Entity.requestFromBufferChest,
+                'Request from buffer chests'
+            )
             checkbox.position.set(208, 128)
             checkbox.on('changed', () => {
                 this.m_Entity.requestFromBufferChest = checkbox.checked

@@ -301,8 +301,19 @@ export interface Entity {
     animation?: SpriteData | SpriteLayers | DirectionalSpriteData | DirectionalSpriteLayers
     animations?: SpriteData | DirectionalSpriteData | DirectionalSpriteLayers
     picture?: SpriteData | SpriteLayers | DirectionalSpriteData | DirectionalSpriteLayers
-    pictures?: SpriteLayers | DirectionalSpriteData | PipePictures | WallPictures | RailPictures | StorageTankPictures
-    base_picture?: SpriteData | SpriteLayers | DirectionalSpriteData | SpriteSheets | DirectionalSpriteLayers
+    pictures?:
+        | SpriteLayers
+        | DirectionalSpriteData
+        | PipePictures
+        | WallPictures
+        | RailPictures
+        | StorageTankPictures
+    base_picture?:
+        | SpriteData
+        | SpriteLayers
+        | DirectionalSpriteData
+        | SpriteSheets
+        | DirectionalSpriteLayers
     structure?: DirectionalSpriteData | DirectionalSpriteLayers | UndergroundBeltStructure
 
     /** https://forums.factorio.com/65627 */
@@ -1180,4 +1191,7 @@ export type CursorBoxType =
     | 'train_visualization'
     | 'logistics'
 
-export type UtilitySprites = { cursor_box: Record<CursorBoxType, CursorBox[]> } & Record<string, SpriteData>
+export type UtilitySprites = { cursor_box: Record<CursorBoxType, CursorBox[]> } & Record<
+    string,
+    SpriteData
+>

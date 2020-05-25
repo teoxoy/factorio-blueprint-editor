@@ -18,7 +18,7 @@ import {
     forEachAction,
     resetKeybinds,
     importKeybinds,
-    exportKeybinds
+    exportKeybinds,
 } from './actions'
 import { spritesheetsLoader } from './spritesheetsLoader'
 
@@ -44,7 +44,11 @@ function initEditor(canvas: HTMLCanvasElement): Promise<void[]> {
     // G.app.renderer.plugins.interaction.interactionFrequency = 1
 
     G.app.renderer.resize(window.innerWidth, window.innerHeight)
-    window.addEventListener('resize', () => G.app.renderer.resize(window.innerWidth, window.innerHeight), false)
+    window.addEventListener(
+        'resize',
+        () => G.app.renderer.resize(window.innerWidth, window.innerHeight),
+        false
+    )
 
     G.BPC = new BlueprintContainer()
     G.app.stage.addChild(G.BPC)
@@ -83,13 +87,13 @@ function registerActions(): void {
     registerAction('moveRight', 'd')
 
     registerAction('showInfo', 'alt').bind({
-        press: () => G.BPC.overlayContainer.toggleEntityInfoVisibility()
+        press: () => G.BPC.overlayContainer.toggleEntityInfoVisibility(),
     })
 
     registerAction('closeWindow', 'esc').bind({
         press: () => {
             Dialog.closeLast()
-        }
+        },
     })
 
     registerAction('inventory', 'e').bind({
@@ -100,7 +104,7 @@ function registerActions(): void {
             } else {
                 G.UI.createInventory('Inventory', undefined, G.BPC.spawnPaintContainer.bind(G.BPC))
             }
-        }
+        },
     })
 
     registerAction('focus', 'f').bind({ press: () => G.BPC.centerViewport() })
@@ -112,7 +116,7 @@ function registerActions(): void {
             } else if (G.BPC.mode === EditorMode.PAINT) {
                 G.BPC.paintContainer.rotate()
             }
-        }
+        },
     })
 
     registerAction('reverseRotate', 'shift+r').bind({
@@ -122,7 +126,7 @@ function registerActions(): void {
             } else if (G.BPC.mode === EditorMode.PAINT) {
                 G.BPC.paintContainer.rotate(true)
             }
-        }
+        },
     })
 
     registerAction('pipette', 'q').bind({
@@ -130,14 +134,17 @@ function registerActions(): void {
             if (G.BPC.mode === EditorMode.EDIT) {
                 const entity = G.BPC.hoverContainer.entity
                 const itemName = Entity.getItemName(entity.name)
-                const direction = entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
+                const direction =
+                    entity.directionType === 'output'
+                        ? (entity.direction + 4) % 8
+                        : entity.direction
                 G.BPC.spawnPaintContainer(itemName, direction)
             } else if (G.BPC.mode === EditorMode.PAINT) {
                 G.BPC.paintContainer.destroy()
             }
             G.BPC.exitCopyMode(true)
             G.BPC.exitDeleteMode(true)
-        }
+        },
     })
 
     registerAction('increaseTileBuildingArea', ']').bind({
@@ -145,7 +152,7 @@ function registerActions(): void {
             if (G.BPC.paintContainer instanceof PaintTileContainer) {
                 G.BPC.paintContainer.increaseSize()
             }
-        }
+        },
     })
 
     registerAction('decreaseTileBuildingArea', '[').bind({
@@ -153,47 +160,47 @@ function registerActions(): void {
             if (G.BPC.paintContainer instanceof PaintTileContainer) {
                 G.BPC.paintContainer.decreaseSize()
             }
-        }
+        },
     })
 
     registerAction('undo', 'modifier+z').bind({
         press: () => {
             G.bp.history.undo()
         },
-        repeat: true
+        repeat: true,
     })
 
     registerAction('redo', 'modifier+y').bind({
         press: () => {
             G.bp.history.redo()
         },
-        repeat: true
+        repeat: true,
     })
 
     registerAction('copySelection', 'modifier+lclick').bind({
         press: () => G.BPC.enterCopyMode(),
-        release: () => G.BPC.exitCopyMode()
+        release: () => G.BPC.exitCopyMode(),
     })
     registerAction('deleteSelection', 'modifier+rclick').bind({
         press: () => G.BPC.enterDeleteMode(),
-        release: () => G.BPC.exitDeleteMode()
+        release: () => G.BPC.exitDeleteMode(),
     })
 
     registerAction('pan', 'lclick').bind({
         press: () => G.BPC.enterPanMode(),
-        release: () => G.BPC.exitPanMode()
+        release: () => G.BPC.exitPanMode(),
     })
 
     registerAction('zoomIn', 'wheelNeg').bind({
         press: () => {
             G.BPC.zoom(true)
-        }
+        },
     })
 
     registerAction('zoomOut', 'wheelPos').bind({
         press: () => {
             G.BPC.zoom(false)
-        }
+        },
     })
 
     registerAction('build', 'lclick').bind({
@@ -202,7 +209,7 @@ function registerActions(): void {
                 G.BPC.paintContainer.placeEntityContainer()
             }
         },
-        repeat: true
+        repeat: true,
     })
 
     registerAction('mine', 'rclick').bind({
@@ -214,7 +221,7 @@ function registerActions(): void {
                 G.BPC.paintContainer.removeContainerUnder()
             }
         },
-        repeat: true
+        repeat: true,
     })
 
     registerAction('moveEntityUp', 'up').bind({
@@ -222,28 +229,28 @@ function registerActions(): void {
             if (G.BPC.mode === EditorMode.EDIT) {
                 G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
             }
-        }
+        },
     })
     registerAction('moveEntityLeft', 'left').bind({
         press: () => {
             if (G.BPC.mode === EditorMode.EDIT) {
                 G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
             }
-        }
+        },
     })
     registerAction('moveEntityDown', 'down').bind({
         press: () => {
             if (G.BPC.mode === EditorMode.EDIT) {
                 G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
             }
-        }
+        },
     })
     registerAction('moveEntityRight', 'right').bind({
         press: () => {
             if (G.BPC.mode === EditorMode.EDIT) {
                 G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
             }
-        }
+        },
     })
 
     registerAction('openEntityGUI', 'lclick').bind({
@@ -256,7 +263,7 @@ function registerActions(): void {
                 Dialog.closeAll()
                 G.UI.createEditor(G.BPC.hoverContainer.entity)
             }
-        }
+        },
     })
 
     let entityForCopyData: Entity | undefined
@@ -267,7 +274,7 @@ function registerActions(): void {
                 // Store reference to source entity
                 entityForCopyData = G.BPC.hoverContainer.entity
             }
-        }
+        },
     })
     registerAction('pasteEntitySettings', 'shift+lclick').bind({
         press: () => {
@@ -276,7 +283,7 @@ function registerActions(): void {
                 G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
             }
         },
-        repeat: true
+        repeat: true,
     })
     // TODO: Move this somewhere else - I don't think this is the right place for it
     {
@@ -291,11 +298,17 @@ function registerActions(): void {
                 G.BPC.hoverContainer.entity.canPasteSettings(entityForCopyData)
             ) {
                 const srcEnt = EntityContainer.mappings.get(entityForCopyData.entityNumber)
-                copyCursorBox = G.BPC.overlayContainer.createCursorBox(srcEnt.position, entityForCopyData.size, 'copy')
+                copyCursorBox = G.BPC.overlayContainer.createCursorBox(
+                    srcEnt.position,
+                    entityForCopyData.size,
+                    'copy'
+                )
                 Promise.race([
                     deferred.promise,
-                    new Promise(resolve => copyEntitySettingsAction.bind({ press: resolve, once: true })),
-                    new Promise(resolve => G.BPC.once('removeHoverContainer', resolve))
+                    new Promise(resolve =>
+                        copyEntitySettingsAction.bind({ press: resolve, once: true })
+                    ),
+                    new Promise(resolve => G.BPC.once('removeHoverContainer', resolve)),
                 ]).then(() => {
                     deferred.reset()
                     copyCursorBox.destroy()
@@ -317,12 +330,24 @@ function registerActions(): void {
     registerAction('quickbar3', '3').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(2) })
     registerAction('quickbar4', '4').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(3) })
     registerAction('quickbar5', '5').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(4) })
-    registerAction('quickbar6', 'shift+1').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(5) })
-    registerAction('quickbar7', 'shift+2').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(6) })
-    registerAction('quickbar8', 'shift+3').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(7) })
-    registerAction('quickbar9', 'shift+4').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(8) })
-    registerAction('quickbar10', 'shift+5').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(9) })
-    registerAction('changeActiveQuickbar', 'x').bind({ press: () => G.UI.quickbarContainer.changeActiveQuickbar() })
+    registerAction('quickbar6', 'shift+1').bind({
+        press: () => G.UI.quickbarContainer.bindKeyToSlot(5),
+    })
+    registerAction('quickbar7', 'shift+2').bind({
+        press: () => G.UI.quickbarContainer.bindKeyToSlot(6),
+    })
+    registerAction('quickbar8', 'shift+3').bind({
+        press: () => G.UI.quickbarContainer.bindKeyToSlot(7),
+    })
+    registerAction('quickbar9', 'shift+4').bind({
+        press: () => G.UI.quickbarContainer.bindKeyToSlot(8),
+    })
+    registerAction('quickbar10', 'shift+5').bind({
+        press: () => G.UI.quickbarContainer.bindKeyToSlot(9),
+    })
+    registerAction('changeActiveQuickbar', 'x').bind({
+        press: () => G.UI.quickbarContainer.changeActiveQuickbar(),
+    })
 }
 
 const getPicture = (): Promise<Blob> => G.BPC.getPicture()
@@ -386,5 +411,5 @@ export default {
     forEachAction,
     resetKeybinds,
     importKeybinds,
-    exportKeybinds
+    exportKeybinds,
 }

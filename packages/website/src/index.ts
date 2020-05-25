@@ -19,7 +19,7 @@ const loadingScreen = {
     },
     hide() {
         this.el.classList.remove('active')
-    }
+    },
 }
 
 console.log(
@@ -36,7 +36,7 @@ if (pixiUtils.isMobile.any) {
             'Application is not compatible with mobile devices.<br>' +
             'If you think this is a mistake, feel free to report this bug on github or using the feedback button.',
         type: 'error',
-        timeout: Infinity
+        timeout: Infinity,
     })
     loadingScreen.el.classList.add('error')
     throw new Error('MOBILE_DEVICE_NOT_SUPPORTED')
@@ -172,7 +172,7 @@ function registerActions(): void {
     EDITOR.registerAction('clear', 'shift+n').bind({
         press: () => {
             loadBp(new Blueprint())
-        }
+        },
     })
 
     EDITOR.registerAction('generateOilOutpost', 'g').bind({
@@ -181,7 +181,7 @@ function registerActions(): void {
             if (errorMessage) {
                 createToast({ text: errorMessage, type: 'warning' })
             }
-        }
+        },
     })
 
     EDITOR.registerAction('info', 'i').bind({
@@ -192,7 +192,7 @@ function registerActions(): void {
             } else {
                 infoPanel.classList.add('active')
             }
-        }
+        },
     })
 
     EDITOR.registerAction('takePicture', 'modifier+s').bind({
@@ -205,7 +205,7 @@ function registerActions(): void {
                 FileSaver.saveAs(blob, `${bp.name}.png`)
                 createToast({ text: 'Blueprint image successfully generated', type: 'success' })
             })
-        }
+        },
     })
 
     EDITOR.importKeybinds(JSON.parse(localStorage.getItem('keybinds')))
@@ -236,7 +236,7 @@ function createWelcomeMessage(): void {
                 '> To import/export a blueprint string use ctrl/cmd + C/V<br>' +
                 '> For more info press I<br>' +
                 '> Also check out the settings area',
-            timeout: 30000
+            timeout: 30000,
         })
     }, 1000)
 }
@@ -248,7 +248,7 @@ function createErrorMessage(text: string, error: unknown, timeout = 10000): void
             'Please check out the console (F12) for an error message and ' +
             'report this bug on github or using the feedback button.',
         type: 'error',
-        timeout
+        timeout,
     })
 }
 function createBPImportError(error: Error | TrainBlueprintError | ModdedBlueprintError): void {

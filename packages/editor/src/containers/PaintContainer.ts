@@ -33,7 +33,7 @@ export abstract class PaintContainer extends PIXI.Container {
             r: this.blocked ? 1 : 0.4,
             g: this.blocked ? 0.4 : 1,
             b: 0.4,
-            a: 1
+            a: 1,
         }
         this.children.forEach((s: PIXI.Sprite) => F.applyTint(s, t))
     }
@@ -77,7 +77,7 @@ export abstract class PaintContainer extends PIXI.Container {
     protected getGridPosition(): IPoint {
         return {
             x: Math.round((this.x / 32) * 10) / 10,
-            y: Math.round((this.y / 32) * 10) / 10
+            y: Math.round((this.y / 32) * 10) / 10,
         }
     }
 

@@ -61,7 +61,11 @@ export class PaintEntityContainer extends PaintContainer {
 
         if (
             G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position) ||
-            G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position) ||
+            G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
+                this.name,
+                direction,
+                position
+            ) ||
             G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)
         ) {
             this.blocked = false
@@ -78,7 +82,7 @@ export class PaintEntityContainer extends PaintContainer {
                 (this.direction + 4) % 8,
                 {
                     x: this.x / 32,
-                    y: this.y / 32
+                    y: this.y / 32,
                 },
                 this.direction,
                 fd.max_distance
@@ -131,8 +135,9 @@ export class PaintEntityContainer extends PaintContainer {
         this.addChild(
             ...EntitySprite.getParts({
                 name: this.name,
-                direction: this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
-                directionType: this.directionType
+                direction:
+                    this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
+                directionType: this.directionType,
             })
         )
     }
@@ -147,8 +152,14 @@ export class PaintEntityContainer extends PaintContainer {
 
         if (railRelatedNames.includes(this.name) && firstRail) {
             // grid offsets
-            const oX = -Math.abs((Math.abs(G.BPC.gridData.x32) % 2) - (Math.abs(firstRail.position.x - 1) % 2)) + 1
-            const oY = -Math.abs((Math.abs(G.BPC.gridData.y32) % 2) - (Math.abs(firstRail.position.y - 1) % 2)) + 1
+            const oX =
+                -Math.abs(
+                    (Math.abs(G.BPC.gridData.x32) % 2) - (Math.abs(firstRail.position.x - 1) % 2)
+                ) + 1
+            const oY =
+                -Math.abs(
+                    (Math.abs(G.BPC.gridData.y32) % 2) - (Math.abs(firstRail.position.y - 1) % 2)
+                ) + 1
 
             this.x = (G.BPC.gridData.x32 + oX) * 32
             this.y = (G.BPC.gridData.y32 + oY) * 32
@@ -172,7 +183,7 @@ export class PaintEntityContainer extends PaintContainer {
         const entities = G.bp.entityPositionGrid.getEntitiesInArea({
             ...this.getGridPosition(),
             w: this.size.x,
-            h: this.size.y
+            h: this.size.y,
         })
         G.bp.removeEntities(entities)
         this.checkBuildable()
@@ -187,12 +198,20 @@ export class PaintEntityContainer extends PaintContainer {
         const position = this.getGridPosition()
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
 
-        const frgEnt = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position)
+        const frgEnt = G.bp.entityPositionGrid.checkFastReplaceableGroup(
+            this.name,
+            direction,
+            position
+        )
         if (frgEnt) {
             G.bp.fastReplaceEntity(frgEnt, this.name, direction)
             return
         }
-        const snEnt = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.name, direction, position)
+        const snEnt = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
+            this.name,
+            direction,
+            position
+        )
         if (snEnt) {
             snEnt.direction = direction
             return
@@ -203,7 +222,10 @@ export class PaintEntityContainer extends PaintContainer {
                 name: this.name,
                 position,
                 direction,
-                type: fd.type === 'underground_belt' || fd.type === 'loader' ? this.directionType : undefined
+                type:
+                    fd.type === 'underground_belt' || fd.type === 'loader'
+                        ? this.directionType
+                        : undefined,
             })
 
             if (fd.type === 'underground_belt' || this.name === 'pipe_to_ground') {

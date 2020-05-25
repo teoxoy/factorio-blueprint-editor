@@ -60,14 +60,19 @@ export function generatePoles(
 } {
     const visualizations: IVisualization[] = []
     function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number): void {
-        visualizations.push({ path: path.map(p => ({ x: p.x + 0.5, y: p.y + 0.5 })), size, alpha, color })
+        visualizations.push({
+            path: path.map(p => ({ x: p.x + 0.5, y: p.y + 0.5 })),
+            size,
+            alpha,
+            color,
+        })
     }
 
     const entityAreas = entities.map(e =>
         U.range(0, e.size * e.size).map(i => ({
             x: Math.floor(e.position.x) + ((i % e.size) - Math.floor(e.size / 2)),
             y: Math.floor(e.position.y) + (Math.floor(i / e.size) - Math.floor(e.size / 2)),
-            power: e.power
+            power: e.power,
         }))
     )
 
@@ -86,7 +91,9 @@ export function generatePoles(
                 const searchSize = e.size + POLE_SIZE * 2 + (POLE_EFFECT_RADIUS - 1) * 2
                 return U.range(0, searchSize * searchSize).map(i => ({
                     x: Math.floor(e.position.x) + ((i % searchSize) - Math.floor(searchSize / 2)),
-                    y: Math.floor(e.position.y) + (Math.floor(i / searchSize) - Math.floor(searchSize / 2))
+                    y:
+                        Math.floor(e.position.y) +
+                        (Math.floor(i / searchSize) - Math.floor(searchSize / 2)),
                 }))
             })
             .reduce((acc, val) => acc.concat(val), [])
@@ -106,7 +113,7 @@ export function generatePoles(
         const D = POLE_SIZE + POLE_EFFECT_RADIUS * 2
         const powerArea = U.range(0, D * D).map(i => ({
             x: mid.x + ((i % D) - Math.floor(D / 2)),
-            y: mid.y + (Math.floor(i / D) - Math.floor(D / 2))
+            y: mid.y + (Math.floor(i / D) - Math.floor(D / 2)),
         }))
 
         const powerGiven = powerArea.reduce((acc, p) => {
@@ -137,7 +144,7 @@ export function generatePoles(
             powerArea,
             poweredEntityAreas: powerGiven,
             powerGiven: powerGiven.length,
-            distFromMidOfConsumers
+            distFromMidOfConsumers,
         }
     })
 
@@ -183,7 +190,9 @@ export function generatePoles(
     addVisualization(poles, 16, 1, 0x00bfff)
 
     // GENERATE LINES
-    const lines = U.pointsToLines(poles).filter(l => U.pointInCircle(l[0], l[1], POLE_TO_POLE_RADIUS))
+    const lines = U.pointsToLines(poles).filter(l =>
+        U.pointInCircle(l[0], l[1], POLE_TO_POLE_RADIUS)
+    )
 
     // GENERATE GROUPS
     let groups: IGroup[] = []
@@ -219,7 +228,9 @@ export function generatePoles(
     }
 
     // ADD LEFTOVER POLES
-    groups = groups.concat(poles.filter(p => !addedPoles.includes(p)).map(p => ({ poles: [p], lines: [], x: 0, y: 0 })))
+    groups = groups.concat(
+        poles.filter(p => !addedPoles.includes(p)).map(p => ({ poles: [p], lines: [], x: 0, y: 0 }))
+    )
 
     poles.forEach(p => occupiedPositions.set(U.hashPoint(p), true))
 
@@ -231,7 +242,7 @@ export function generatePoles(
     const circleOffsets = U.range(0, r2 * r2)
         .map(i => ({
             x: (i % r2) - Math.floor(r2 / 2),
-            y: Math.floor(i / r2) - Math.floor(r2 / 2)
+            y: Math.floor(i / r2) - Math.floor(r2 / 2),
         }))
         .filter(o => U.pointInCircle(o, { x: 0, y: 0 }, POLE_TO_POLE_RADIUS))
 
@@ -267,7 +278,7 @@ export function generatePoles(
                     )
                     .map(l => ({
                         poles: l,
-                        dist: U.euclideanDistance(l[0], l[1])
+                        dist: U.euclideanDistance(l[0], l[1]),
                     }))
                     .sort((a, b) => a.dist - b.dist)[0]
 
@@ -276,7 +287,7 @@ export function generatePoles(
 
                 const betweenG1AndG2Poles = {
                     x: (g1pole.x + g2pole.x) / 2,
-                    y: (g1pole.y + g2pole.y) / 2
+                    y: (g1pole.y + g2pole.y) / 2,
                 }
 
                 return {
@@ -284,7 +295,7 @@ export function generatePoles(
                     g2pole,
                     otherGroup,
                     dist: shortestLine.dist,
-                    betweenG1AndG2Poles
+                    betweenG1AndG2Poles,
                 }
             })
             .sort((a, b) => a.dist - b.dist)[0]
@@ -292,11 +303,12 @@ export function generatePoles(
         const newPolePos = circleOffsets
             .map(o => ({
                 x: DATA.g1pole.x + o.x,
-                y: DATA.g1pole.y + o.y
+                y: DATA.g1pole.y + o.y,
             }))
             .filter(p => occupiedPositions.get(U.hashPoint(p)) !== true)
             .sort((a, b) => {
-                const point = DATA.dist > POLE_TO_POLE_RADIUS + 2 ? DATA.g2pole : DATA.betweenG1AndG2Poles
+                const point =
+                    DATA.dist > POLE_TO_POLE_RADIUS + 2 ? DATA.g2pole : DATA.betweenG1AndG2Poles
                 return U.manhattenDistance(a, point) - U.manhattenDistance(b, point)
             })[0]
 
@@ -313,15 +325,15 @@ export function generatePoles(
     addVisualization(connectionPoles, 16, 1, 0x8a2be2)
 
     const info = {
-        totalPoles: finalGroup.poles.length
+        totalPoles: finalGroup.poles.length,
     }
 
     return {
         poles: finalGroup.poles.map(p => ({
             name: 'medium_electric_pole',
-            position: { x: p.x + 0.5, y: p.y + 0.5 }
+            position: { x: p.x + 0.5, y: p.y + 0.5 },
         })),
         info,
-        visualizations
+        visualizations,
     }
 }

@@ -14,14 +14,26 @@ export class PaintBlueprintContainer extends PaintContainer {
     public constructor(entities: Entity[]) {
         super('blueprint')
 
-        const minX = entities.reduce((min, e) => Math.min(min, e.position.x - e.size.x / 2), Infinity)
-        const minY = entities.reduce((min, e) => Math.min(min, e.position.y - e.size.y / 2), Infinity)
-        const maxX = entities.reduce((max, e) => Math.max(max, e.position.x + e.size.x / 2), -Infinity)
-        const maxY = entities.reduce((max, e) => Math.max(max, e.position.y + e.size.y / 2), -Infinity)
+        const minX = entities.reduce(
+            (min, e) => Math.min(min, e.position.x - e.size.x / 2),
+            Infinity
+        )
+        const minY = entities.reduce(
+            (min, e) => Math.min(min, e.position.y - e.size.y / 2),
+            Infinity
+        )
+        const maxX = entities.reduce(
+            (max, e) => Math.max(max, e.position.x + e.size.x / 2),
+            -Infinity
+        )
+        const maxY = entities.reduce(
+            (max, e) => Math.max(max, e.position.y + e.size.y / 2),
+            -Infinity
+        )
 
         const center = {
             x: Math.floor((minX + maxX) / 2),
-            y: Math.floor((minY + maxY) / 2)
+            y: Math.floor((minY + maxY) / 2),
         }
 
         const entMap = new Map(entities.map(e => [e.entityNumber, e]))
@@ -38,7 +50,7 @@ export class PaintBlueprintContainer extends PaintContainer {
             )
         })
         this.bp = new Blueprint({
-            entities: rawEntities
+            entities: rawEntities,
         })
 
         this.bp.entities.forEach(e => {
@@ -47,7 +59,7 @@ export class PaintBlueprintContainer extends PaintContainer {
             epc.entitySprites.forEach(sprite => {
                 sprite.setPosition({
                     x: e.position.x * 32,
-                    y: e.position.y * 32
+                    y: e.position.y * 32,
                 })
             })
 
@@ -57,7 +69,9 @@ export class PaintBlueprintContainer extends PaintContainer {
 
         this.children.sort(EntitySprite.compareFn)
 
-        this.entities.forEach((_, e) => G.BPC.visualizationAreaContainer.activateRelatedAreas(e.name))
+        this.entities.forEach((_, e) =>
+            G.BPC.visualizationAreaContainer.activateRelatedAreas(e.name)
+        )
 
         this.moveAtCursor()
     }
@@ -69,7 +83,9 @@ export class PaintBlueprintContainer extends PaintContainer {
 
     public show(): void {
         if (this.entities) {
-            this.entities.forEach((_, e) => G.BPC.visualizationAreaContainer.activateRelatedAreas(e.name))
+            this.entities.forEach((_, e) =>
+                G.BPC.visualizationAreaContainer.activateRelatedAreas(e.name)
+            )
         }
         super.show()
     }
@@ -106,8 +122,10 @@ export class PaintBlueprintContainer extends PaintContainer {
             const frY = G.BPC.gridData.y32 + firstRailHere.position.y
 
             // grid offsets
-            const oX = -Math.abs((Math.abs(frX) % 2) - (Math.abs(firstRailInBP.position.x - 1) % 2)) + 1
-            const oY = -Math.abs((Math.abs(frY) % 2) - (Math.abs(firstRailInBP.position.y - 1) % 2)) + 1
+            const oX =
+                -Math.abs((Math.abs(frX) % 2) - (Math.abs(firstRailInBP.position.x - 1) % 2)) + 1
+            const oY =
+                -Math.abs((Math.abs(frY) % 2) - (Math.abs(firstRailInBP.position.y - 1) % 2)) + 1
 
             this.x = (G.BPC.gridData.x32 + oX) * 32
             this.y = (G.BPC.gridData.y32 + oY) * 32
@@ -149,7 +167,7 @@ export class PaintBlueprintContainer extends PaintContainer {
                     .map(connection => ({
                         ...connection,
                         entityNumber1: oldEntIDToNewEntID.get(connection.entityNumber1),
-                        entityNumber2: oldEntIDToNewEntID.get(connection.entityNumber2)
+                        entityNumber2: oldEntIDToNewEntID.get(connection.entityNumber2),
                     }))
                     .forEach(conn => G.bp.wireConnections.create(conn))
             })

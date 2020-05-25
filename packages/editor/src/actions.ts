@@ -81,7 +81,7 @@ class Action {
             },
             release: () => {
                 this._pressed = false
-            }
+            },
         })
     }
 
@@ -190,7 +190,7 @@ class Action {
         }
         const handlerData = {
             press: PRESS,
-            release: RELEASE
+            release: RELEASE,
         }
         this.handlers.push(handlerData)
     }
@@ -269,5 +269,5 @@ export {
     forEachAction,
     resetKeybinds,
     importKeybinds,
-    exportKeybinds
+    exportKeybinds,
 }

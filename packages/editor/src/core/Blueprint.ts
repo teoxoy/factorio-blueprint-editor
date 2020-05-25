@@ -26,7 +26,7 @@ const oilOutpostSettings: IOilOutpostSettings = {
     MIN_GAP_BETWEEN_UNDERGROUNDS: 1,
     BEACONS: true,
     MIN_AFFECTED_ENTITIES: 1,
-    BEACON_MODULE: 'speed_module_3'
+    BEACON_MODULE: 'speed_module_3',
 }
 
 // this is how it works in factorio but js doesn't support 64bit bitwise operations
@@ -108,15 +108,18 @@ export class Blueprint extends EventEmitter {
                 ...(data.entities || [])
                     .filter(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
                     .map(entity => {
-                        const size = util.switchSizeBasedOnDirection(FD.entities[entity.name].size, entity.direction)
+                        const size = util.switchSizeBasedOnDirection(
+                            FD.entities[entity.name].size,
+                            entity.direction
+                        )
                         return { x: entity.position.x, y: entity.position.y, w: size.x, h: size.y }
                     }),
                 ...(data.tiles || []).map(tile => ({
                     x: tile.position.x + 0.5,
                     y: tile.position.y + 0.5,
                     w: 1,
-                    h: 1
-                }))
+                    h: 1,
+                })),
             ]
             const minX = positionData.reduce((min, d) => Math.min(min, d.x - d.w / 2), Infinity)
             const minY = positionData.reduce((min, d) => Math.min(min, d.y - d.h / 2), Infinity)
@@ -125,7 +128,7 @@ export class Blueprint extends EventEmitter {
             // The offset takes into account that the center of the blueprint might be shifted
             const offset = {
                 x: -Math.floor((minX + maxX) / 2) + (minX % 1),
-                y: -Math.floor((minY + maxY) / 2) + (minY % 1)
+                y: -Math.floor((minY + maxY) / 2) + (minY % 1),
             }
 
             if (data.tiles) {
@@ -148,7 +151,9 @@ export class Blueprint extends EventEmitter {
                 this.m_nextEntityNumber += ENTITIES.length
 
                 // Approximate position of placeable_off_grid entities (i.e. landmines)
-                ENTITIES.filter(e => FD.entities[e.name].flags.includes('placeable_off_grid')).forEach(e => {
+                ENTITIES.filter(e =>
+                    FD.entities[e.name].flags.includes('placeable_off_grid')
+                ).forEach(e => {
                     const size = util.rotatePointBasedOnDir(
                         [FD.entities[e.name].size.width / 2, FD.entities[e.name].size.height / 2],
                         e.direction || 0
@@ -172,8 +177,8 @@ export class Blueprint extends EventEmitter {
                             ...e,
                             position: {
                                 x: e.position.x + offset.x,
-                                y: e.position.y + offset.y
-                            }
+                                y: e.position.y + offset.y,
+                            },
                         })
                     }),
                     e => e.entityNumber
@@ -194,7 +199,9 @@ export class Blueprint extends EventEmitter {
         const rawEntity = new Entity(
             {
                 ...rawData,
-                entity_number: rawData.entity_number ? rawData.entity_number : this.nextEntityNumber
+                entity_number: rawData.entity_number
+                    ? rawData.entity_number
+                    : this.nextEntityNumber,
             },
             this
         )
@@ -235,7 +242,7 @@ export class Blueprint extends EventEmitter {
         this.createEntity({
             name,
             direction,
-            position: entity.position
+            position: entity.position,
         }).pasteSettings(entity)
 
         this.history.commitTransaction()
@@ -300,7 +307,9 @@ export class Blueprint extends EventEmitter {
 
     public getFirstRailRelatedEntity(): Entity {
         return this.entities.find(
-            e => e.name === 'straight_rail' /* || e.name === 'curved_rail' */ || e.name === 'train_stop'
+            e =>
+                e.name === 'straight_rail' /* || e.name === 'curved_rail' */ ||
+                e.name === 'train_stop'
         )
     }
 
@@ -314,8 +323,10 @@ export class Blueprint extends EventEmitter {
         }
 
         const data = [
-            ...this.entities.valuesArray().map(e => ({ x: e.position.x, y: e.position.y, w: e.size.x, h: e.size.y })),
-            ...this.tiles.valuesArray().map(t => ({ x: t.x, y: t.y, w: 1, h: 1 }))
+            ...this.entities
+                .valuesArray()
+                .map(e => ({ x: e.position.x, y: e.position.y, w: e.size.x, h: e.size.y })),
+            ...this.tiles.valuesArray().map(t => ({ x: t.x, y: t.y, w: 1, h: 1 })),
         ]
 
         const minX = data.reduce((min, d) => Math.min(min, d.x - d.w / 2), Infinity)
@@ -325,7 +336,7 @@ export class Blueprint extends EventEmitter {
 
         return {
             x: Math.floor((minX + maxX) / 2) + 0.5,
-            y: Math.floor((minY + maxY) / 2) + 0.5
+            y: Math.floor((minY + maxY) / 2) + 0.5,
         }
     }
 
@@ -336,7 +347,7 @@ export class Blueprint extends EventEmitter {
             MIN_GAP_BETWEEN_UNDERGROUNDS,
             MIN_AFFECTED_ENTITIES,
             BEACON_MODULE,
-            BEACONS
+            BEACONS,
         } = oilOutpostSettings
 
         const pumpjacks = this.entities
@@ -369,7 +380,10 @@ export class Blueprint extends EventEmitter {
         console.log('Pipes:', GP.info.nrOfPipes)
         console.log('Underground Pipes:', GP.info.nrOfUPipes)
         console.log('Pipes replaced by underground pipes:', GP.info.nrOfPipesReplacedByUPipes)
-        console.log('Ratio (pipes replaced/underground pipes):', GP.info.nrOfPipesReplacedByUPipes / GP.info.nrOfUPipes)
+        console.log(
+            'Ratio (pipes replaced/underground pipes):',
+            GP.info.nrOfPipesReplacedByUPipes / GP.info.nrOfUPipes
+        )
         GPT.stop()
 
         // Generate beacons
@@ -382,7 +396,7 @@ export class Blueprint extends EventEmitter {
 
             const entitiesForBeaconGen = [
                 ...pumpjacks.map(p => ({ ...p, size: 3, effect: true })),
-                ...GP.pipes.map(p => ({ ...p, size: 1, effect: false }))
+                ...GP.pipes.map(p => ({ ...p, size: 1, effect: false })),
             ]
 
             const GB = generators.generateBeacons(entitiesForBeaconGen, MIN_AFFECTED_ENTITIES)
@@ -403,7 +417,7 @@ export class Blueprint extends EventEmitter {
         const entitiesForPoleGen = [
             ...pumpjacks.map(p => ({ ...p, size: 3, power: true })),
             ...GP.pipes.map(p => ({ ...p, size: 1, power: false })),
-            ...beacons.map(p => ({ ...p, size: 3, power: true }))
+            ...beacons.map(p => ({ ...p, size: 3, power: true })),
         ]
 
         const GPO = generators.generatePoles(entitiesForPoleGen)
@@ -422,7 +436,7 @@ export class Blueprint extends EventEmitter {
         beacons.forEach(beacon =>
             this.createEntity({
                 ...beacon,
-                items: { [BEACON_MODULE]: FD.entities.beacon.module_specification.module_slots }
+                items: { [BEACON_MODULE]: FD.entities.beacon.module_specification.module_slots },
             })
         )
         GPO.poles.forEach(pole => this.createEntity(pole))
@@ -480,7 +494,7 @@ export class Blueprint extends EventEmitter {
             ...tilesOrEntities.reduce((map, tileOrEntity) => {
                 const itemName = getItemName(tileOrEntity.name)
                 return map.set(itemName, map.has(itemName) ? map.get(itemName) + 1 : 0)
-            }, new Map<string, number>())
+            }, new Map<string, number>()),
         ]
 
         if (!this.entities.isEmpty()) {
@@ -503,7 +517,9 @@ export class Blueprint extends EventEmitter {
                 this.icons[1] = iconPairs[1][0]
             }
         } else if (!this.tiles.isEmpty()) {
-            const iconPairs = getIconPairs(this.tiles.valuesArray(), Tile.getItemName).sort((a, b) => b[1] - a[1])
+            const iconPairs = getIconPairs(this.tiles.valuesArray(), Tile.getItemName).sort(
+                (a, b) => b[1] - a[1]
+            )
 
             this.icons[0] = iconPairs[0][0]
         }
@@ -511,7 +527,9 @@ export class Blueprint extends EventEmitter {
 
     /** Transforms sparse entity numbers into consecutive ones */
     private processRawEntities(entities: BPS.IEntity[]): BPS.IEntity[] {
-        const oldToNewID = new Map(new Array(entities.length).fill(0).map((_, i) => [entities[i].entity_number, i + 1]))
+        const oldToNewID = new Map(
+            new Array(entities.length).fill(0).map((_, i) => [entities[i].entity_number, i + 1])
+        )
 
         return entities.map(e => {
             e.entity_number = oldToNewID.get(e.entity_number)
@@ -544,7 +562,9 @@ export class Blueprint extends EventEmitter {
         if (!this.icons.length) {
             this.generateIcons()
         }
-        const entityInfo = this.processRawEntities(this.entities.valuesArray().map(e => e.serialize()))
+        const entityInfo = this.processRawEntities(
+            this.entities.valuesArray().map(e => e.serialize())
+        )
         const center = this.getCenter()
         const fR = this.getFirstRailRelatedEntity()
         if (fR) {
@@ -558,9 +578,9 @@ export class Blueprint extends EventEmitter {
         const tileInfo = this.tiles.valuesArray().map(tile => ({
             position: {
                 x: Math.floor(tile.x) - Math.floor(center.x),
-                y: Math.floor(tile.y) - Math.floor(center.y)
+                y: Math.floor(tile.y) - Math.floor(center.y),
             },
-            name: tile.name
+            name: tile.name,
         }))
         const iconData = this.icons.map((icon, i) => {
             const getItemTypeForBp = (name: string): 'virtual' | 'fluid' | 'item' => {
@@ -576,7 +596,7 @@ export class Blueprint extends EventEmitter {
 
             return {
                 signal: { type: getItemTypeForBp(icon), name: icon } as BPS.ISignal,
-                index: (i + 1) as 1 | 2 | 3 | 4
+                index: (i + 1) as 1 | 2 | 3 | 4,
             }
         })
         return {
@@ -585,7 +605,7 @@ export class Blueprint extends EventEmitter {
             tiles: this.tiles.isEmpty() ? undefined : tileInfo,
             item: 'blueprint',
             version: getFactorioVersion(),
-            label: this.name
+            label: this.name,
         }
     }
 }

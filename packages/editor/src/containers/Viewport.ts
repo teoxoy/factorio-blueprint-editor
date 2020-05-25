@@ -27,7 +27,9 @@ export class Viewport {
         // origTransform is an intermediate accumulative matrix used for tracking the current zoom target.
         this.origTransform.append(new PIXI.Matrix(1, 0, 0, 1, this.scaleCenterX, this.scaleCenterY))
         this.origTransform.append(new PIXI.Matrix(this.scaleX, 0, 0, this.scaleY, 0, 0))
-        this.origTransform.append(new PIXI.Matrix(1, 0, 0, 1, -this.scaleCenterX, -this.scaleCenterY))
+        this.origTransform.append(
+            new PIXI.Matrix(1, 0, 0, 1, -this.scaleCenterX, -this.scaleCenterY)
+        )
 
         // We reset Scale because origTransform is accumulative and has "captured" the information.
         this.scaleX = 1
@@ -42,8 +44,12 @@ export class Viewport {
         const minX = this.size.x * this.transform.a * this.anchor.x - this.transform.tx
         const minY = this.size.y * this.transform.a * this.anchor.y - this.transform.ty
         // LowerRight Corner constraints
-        const maxX = -(this.size.x * (1 - this.anchor.x) * this.transform.a - this.viewPortSize.x) - this.transform.tx
-        const maxY = -(this.size.y * (1 - this.anchor.y) * this.transform.a - this.viewPortSize.y) - this.transform.ty
+        const maxX =
+            -(this.size.x * (1 - this.anchor.x) * this.transform.a - this.viewPortSize.x) -
+            this.transform.tx
+        const maxY =
+            -(this.size.y * (1 - this.anchor.y) * this.transform.a - this.viewPortSize.y) -
+            this.transform.ty
 
         // Check if viewport area is bigger than the container
         if (maxX - minX > 0 || maxY - minY > 0) {

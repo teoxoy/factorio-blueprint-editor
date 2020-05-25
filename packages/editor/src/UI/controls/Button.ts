@@ -85,7 +85,10 @@ export class Button extends PIXI.Container {
         return this.m_Content
     }
     public set content(content: PIXI.DisplayObject) {
-        if (this.m_Content !== undefined || (this.m_Content !== undefined && content === undefined)) {
+        if (
+            this.m_Content !== undefined ||
+            (this.m_Content !== undefined && content === undefined)
+        ) {
             this.removeChild(this.m_Content)
             this.m_Content.destroy()
             this.m_Content = undefined
@@ -97,7 +100,10 @@ export class Button extends PIXI.Container {
 
             // Set content for button
             this.m_Content = content
-            this.m_Content.position.set((this.width - bounds.width) / 2, (this.height - bounds.height) / 2)
+            this.m_Content.position.set(
+                (this.width - bounds.width) / 2,
+                (this.height - bounds.height) / 2
+            )
 
             // Add content to button
             this.addChild(this.m_Content)

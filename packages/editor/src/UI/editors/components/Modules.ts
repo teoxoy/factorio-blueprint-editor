@@ -24,7 +24,9 @@ export class Modules extends PIXI.Container {
         if (modules !== undefined) {
             for (let slotIndex = 0; slotIndex < this.m_Modules.length; slotIndex++) {
                 this.m_Modules[slotIndex] =
-                    modules.length > slotIndex && modules[slotIndex] !== undefined ? modules[slotIndex] : undefined
+                    modules.length > slotIndex && modules[slotIndex] !== undefined
+                        ? modules[slotIndex]
+                        : undefined
             }
         }
 
@@ -33,7 +35,9 @@ export class Modules extends PIXI.Container {
             const slot: Slot = new Slot()
             slot.position.set(slotIndex * 38, 0)
             slot.data = slotIndex
-            slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => this.onSlotPointerDown(e))
+            slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) =>
+                this.onSlotPointerDown(e)
+            )
             if (this.m_Modules[slotIndex] !== undefined) {
                 slot.content = F.CreateIcon(this.m_Modules[slotIndex], false)
             }
@@ -41,12 +45,13 @@ export class Modules extends PIXI.Container {
         }
 
         this.m_Entity.on('modules', modules =>
-            [...modules, ...Array(this.m_Entity.moduleSlots - modules.length).fill(undefined)].forEach(
-                (m: string, i: number) => {
-                    this.m_Modules[i] = m
-                    this.updateContent(this.getChildAt(i) as Slot, m)
-                }
-            )
+            [
+                ...modules,
+                ...Array(this.m_Entity.moduleSlots - modules.length).fill(undefined),
+            ].forEach((m: string, i: number) => {
+                this.m_Modules[i] = m
+                this.updateContent(this.getChildAt(i) as Slot, m)
+            })
         )
     }
 

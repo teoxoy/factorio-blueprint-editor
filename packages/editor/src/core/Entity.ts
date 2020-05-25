@@ -82,9 +82,17 @@ export class Entity extends EventEmitter {
         if (
             !this.m_BP.wireConnections
                 .getEntityConnections(this.entityNumber)
-                .map(c => (c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1))
+                .map(c =>
+                    c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1
+                )
                 .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
-                .every(e => U.pointInCircle(e.position, position, Math.min(e.maxWireDistance, this.maxWireDistance)))
+                .every(e =>
+                    U.pointInCircle(
+                        e.position,
+                        position,
+                        Math.min(e.maxWireDistance, this.maxWireDistance)
+                    )
+                )
         ) {
             return
         }
@@ -110,7 +118,7 @@ export class Entity extends EventEmitter {
     public moveBy(offset: IPoint): void {
         this.position = {
             x: this.position.x + offset.x,
-            y: this.position.y + offset.y
+            y: this.position.y + offset.y,
         }
     }
 
@@ -164,7 +172,9 @@ export class Entity extends EventEmitter {
             // Some modules on the entity may not be compatible with the new selected recipe, filter those out
             this.modules = this.modules
                 .map(k => FD.items[k])
-                .filter(item => !(item.limitation !== undefined && !item.limitation.includes(recipe)))
+                .filter(
+                    item => !(item.limitation !== undefined && !item.limitation.includes(recipe))
+                )
                 .map(item => item.name)
         }
 
@@ -202,12 +212,17 @@ export class Entity extends EventEmitter {
                 .map(k => FD.items[k])
                 .filter(item => item.type === 'module')
                 // filter modules based on module limitation
-                .filter(item => !this.recipe || !(item.limitation && !item.limitation.includes(this.recipe)))
+                .filter(
+                    item =>
+                        !this.recipe || !(item.limitation && !item.limitation.includes(this.recipe))
+                )
                 // filter modules based on entity allowed_effects (ex: beacons don't accept productivity effect)
                 .filter(
                     item =>
                         !this.entityData.allowed_effects ||
-                        Object.keys(item.effect).every(effect => this.entityData.allowed_effects.includes(effect))
+                        Object.keys(item.effect).every(effect =>
+                            this.entityData.allowed_effects.includes(effect)
+                        )
                 )
                 .map(item => item.name)
         )
@@ -231,7 +246,10 @@ export class Entity extends EventEmitter {
         if (modulesObj === undefined || Object.keys(modulesObj).length === 0) {
             return []
         }
-        return Object.keys(modulesObj).reduce((acc, k) => acc.concat(Array(modulesObj[k]).fill(k)), [])
+        return Object.keys(modulesObj).reduce(
+            (acc, k) => acc.concat(Array(modulesObj[k]).fill(k)),
+            []
+        )
     }
     public set modules(modules: string[]) {
         if (util.equalArrays(this.modules, modules)) {
@@ -291,7 +309,8 @@ export class Entity extends EventEmitter {
         }
     }
     public set filters(list: IFilter[]) {
-        const FILTERS = list === undefined || list.length === 0 ? undefined : list.filter(f => !!f.name)
+        const FILTERS =
+            list === undefined || list.length === 0 ? undefined : list.filter(f => !!f.name)
         switch (this.name) {
             case 'splitter':
             case 'fast_splitter':
@@ -322,7 +341,12 @@ export class Entity extends EventEmitter {
         }
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['input_priority'], priority, 'Change splitter input priority')
+            .updateValue(
+                this.m_rawEntity,
+                ['input_priority'],
+                priority,
+                'Change splitter input priority'
+            )
             .onDone(() => this.emit('splitterInputPriority', this.splitterInputPriority))
             .commit()
     }
@@ -339,7 +363,12 @@ export class Entity extends EventEmitter {
         this.m_BP.history.startTransaction()
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['output_priority'], priority, 'Change splitter output priority')
+            .updateValue(
+                this.m_rawEntity,
+                ['output_priority'],
+                priority,
+                'Change splitter output priority'
+            )
             .onDone(() => this.emit('splitterOutputPriority', this.splitterOutputPriority))
             .commit()
 
@@ -403,7 +432,9 @@ export class Entity extends EventEmitter {
             filters !== undefined &&
             this.m_rawEntity.filters !== undefined &&
             this.m_rawEntity.filters.length === filters.length &&
-            this.m_rawEntity.filters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
+            this.m_rawEntity.filters.every((filter, i) =>
+                util.areObjectsEquivalent(filter, filters[i])
+            )
         ) {
             return
         }
@@ -442,7 +473,9 @@ export class Entity extends EventEmitter {
             filters !== undefined &&
             this.m_rawEntity.request_filters !== undefined &&
             this.m_rawEntity.request_filters.length === filters.length &&
-            this.m_rawEntity.request_filters.every((filter, i) => util.areObjectsEquivalent(filter, filters[i]))
+            this.m_rawEntity.request_filters.every((filter, i) =>
+                util.areObjectsEquivalent(filter, filters[i])
+            )
         ) {
             return
         }
@@ -478,7 +511,12 @@ export class Entity extends EventEmitter {
         }
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['request_from_buffers'], request, 'Change request from buffer chest')
+            .updateValue(
+                this.m_rawEntity,
+                ['request_from_buffers'],
+                request,
+                'Change request from buffer chest'
+            )
             .onDone(() => this.emit('requestFromBufferChest'))
             .commit()
     }
@@ -494,7 +532,9 @@ export class Entity extends EventEmitter {
     }
 
     public get constantCombinatorFilters(): BPS.IConstantCombinatorFilter[] {
-        return this.m_rawEntity.control_behavior === undefined ? undefined : this.m_rawEntity.control_behavior.filters
+        return this.m_rawEntity.control_behavior === undefined
+            ? undefined
+            : this.m_rawEntity.control_behavior.filters
     }
 
     public get deciderCombinatorConditions(): BPS.IDeciderCondition {
@@ -514,7 +554,10 @@ export class Entity extends EventEmitter {
     }
 
     private get connectToLogisticNetwork(): boolean {
-        return this.m_rawEntity.control_behavior && this.m_rawEntity.control_behavior.connect_to_logistic_network
+        return (
+            this.m_rawEntity.control_behavior &&
+            this.m_rawEntity.control_behavior.connect_to_logistic_network
+        )
     }
 
     private get hasConnections(): boolean {
@@ -536,13 +579,17 @@ export class Entity extends EventEmitter {
         if (this.name === 'decider_combinator') {
             const cb = this.m_rawEntity.control_behavior
             if (cb) {
-                return cb.decider_conditions === undefined ? undefined : cb.decider_conditions.comparator
+                return cb.decider_conditions === undefined
+                    ? undefined
+                    : cb.decider_conditions.comparator
             }
         }
         if (this.name === 'arithmetic_combinator') {
             const cb = this.m_rawEntity.control_behavior
             if (cb) {
-                return cb.arithmetic_conditions === undefined ? undefined : cb.arithmetic_conditions.operation
+                return cb.arithmetic_conditions === undefined
+                    ? undefined
+                    : cb.arithmetic_conditions.operation
             }
         }
         return undefined
@@ -556,7 +603,7 @@ export class Entity extends EventEmitter {
                 x: this.position.x,
                 y: this.position.y,
                 w: this.size.x,
-                h: this.size.y
+                h: this.size.y,
             }) ||
             !this.entityData.possible_rotations
         ) {
@@ -575,7 +622,8 @@ export class Entity extends EventEmitter {
         const newDir =
             pr[
                 (pr.indexOf(this.direction) +
-                    (this.size.x !== this.size.y || this.type === 'underground_belt' ? 2 : 1) * (ccw ? 3 : 1)) %
+                    (this.size.x !== this.size.y || this.type === 'underground_belt' ? 2 : 1) *
+                        (ccw ? 3 : 1)) %
                     pr.length
             ]
 
@@ -626,7 +674,9 @@ export class Entity extends EventEmitter {
         const aR = this.acceptedRecipes
         if (aR.length > 0 && sourceEntity.acceptedRecipes) {
             tRecipe =
-                sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe) ? sourceEntity.recipe : undefined
+                sourceEntity.recipe !== undefined && aR.includes(sourceEntity.recipe)
+                    ? sourceEntity.recipe
+                    : undefined
             this.recipe = tRecipe
         }
 
@@ -644,7 +694,9 @@ export class Entity extends EventEmitter {
         const aM = this.acceptedModules
         if (aM.length > 0 && sourceEntity.acceptedModules) {
             if (sourceEntity.modules && sourceEntity.modules.length > 0) {
-                this.modules = sourceEntity.modules.filter(m => aM.includes(m)).slice(0, this.moduleSlots)
+                this.modules = sourceEntity.modules
+                    .filter(m => aM.includes(m))
+                    .slice(0, this.moduleSlots)
             } else {
                 this.modules = []
             }
@@ -660,14 +712,19 @@ export class Entity extends EventEmitter {
         const aF = this.acceptedFilters
         if (aF.length > 0 && sourceEntity.acceptedFilters) {
             if (sourceEntity.filters && sourceEntity.filters.length > 0) {
-                this.filters = sourceEntity.filters.filter(f => aF.includes(f.name)).slice(0, this.filterSlots)
+                this.filters = sourceEntity.filters
+                    .filter(f => aF.includes(f.name))
+                    .slice(0, this.filterSlots)
             } else {
                 this.filters = []
             }
         }
 
         // PASTE REQUESTER CHEST SETTINGS
-        if (this.type === 'logistic_chest_requester' && sourceEntity.type === 'logistic_chest_requester') {
+        if (
+            this.type === 'logistic_chest_requester' &&
+            sourceEntity.type === 'logistic_chest_requester'
+        ) {
             this.requestFromBufferChest = sourceEntity.requestFromBufferChest
         }
 
@@ -751,7 +808,11 @@ export class Entity extends EventEmitter {
         return undefined
     }
 
-    public getWireConnectionPoint(color: string, side: number, direction = this.direction): number[] {
+    public getWireConnectionPoint(
+        color: string,
+        side: number,
+        direction = this.direction
+    ): number[] {
         const e = this.entityData
         // poles
         if (e.connection_points) {
@@ -766,7 +827,9 @@ export class Entity extends EventEmitter {
         }
 
         if (this.name === 'power_switch' && color === 'copper') {
-            return side === 1 ? e.left_wire_connection_point.wire.copper : e.right_wire_connection_point.wire.copper
+            return side === 1
+                ? e.left_wire_connection_point.wire.copper
+                : e.right_wire_connection_point.wire.copper
         }
 
         if (e.circuit_wire_connection_point) {
@@ -775,7 +838,11 @@ export class Entity extends EventEmitter {
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[
-                spriteDataBuilder.getBeltWireConnectionIndex(this.m_BP.entityPositionGrid, this.position, direction) * 4
+                spriteDataBuilder.getBeltWireConnectionIndex(
+                    this.m_BP.entityPositionGrid,
+                    this.position,
+                    direction
+                ) * 4
             ].wire[color]
         }
         if (e.circuit_wire_connection_points.length === 8) {
@@ -790,7 +857,7 @@ export class Entity extends EventEmitter {
     public serialize(): BPS.IEntity {
         return util.duplicate({
             ...this.m_rawEntity,
-            connections: this.m_BP.wireConnections.serializeConnectionData(this.entityNumber)
+            connections: this.m_BP.wireConnections.serializeConnectionData(this.entityNumber),
         })
     }
 }

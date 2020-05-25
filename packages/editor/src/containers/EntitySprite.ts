@@ -31,7 +31,10 @@ export class EntitySprite extends PIXI.Sprite {
         return this.nextID
     }
 
-    public static getParts(entity: IEntityData | Entity, positionGrid?: PositionGrid): EntitySprite[] {
+    public static getParts(
+        entity: IEntityData | Entity,
+        positionGrid?: PositionGrid
+    ): EntitySprite[] {
         const anims = spriteDataBuilder.getSpriteData({
             hr: G.hr,
             dir:
@@ -49,7 +52,7 @@ export class EntitySprite extends PIXI.Sprite {
             assemblerCraftsWithFluid: entity.assemblerCraftsWithFluid,
             assemblerPipeDirection: entity.assemblerPipeDirection,
             trainStopColor: entity.trainStopColor,
-            chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput
+            chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput,
         })
 
         // TODO: maybe move the zIndex logic to spriteDataBuilder
@@ -62,7 +65,10 @@ export class EntitySprite extends PIXI.Sprite {
                 img.zIndex = 1
             } else if (entity.name === 'artillery_turret' && i > 0) {
                 img.zIndex = 2
-            } else if ((entity.name === 'rail_signal' || entity.name === 'rail_chain_signal') && i === 0) {
+            } else if (
+                (entity.name === 'rail_signal' || entity.name === 'rail_chain_signal') &&
+                i === 0
+            ) {
                 img.zIndex = -8
             } else if (entity.name === 'straight_rail' || entity.name === 'curved_rail') {
                 if (i < 2) {
@@ -75,10 +81,17 @@ export class EntitySprite extends PIXI.Sprite {
             } else if (entity.type === 'transport_belt' || entity.name === 'heat_pipe') {
                 img.zIndex = i === 0 ? -6 : -5
 
-                if (anims[i].filename.includes('connector') && !anims[i].filename.includes('back-patch')) {
+                if (
+                    anims[i].filename.includes('connector') &&
+                    !anims[i].filename.includes('back-patch')
+                ) {
                     img.zIndex = 0
                 }
-            } else if (entity.type === 'splitter' || entity.type === 'underground_belt' || entity.type === 'loader') {
+            } else if (
+                entity.type === 'splitter' ||
+                entity.type === 'underground_belt' ||
+                entity.type === 'loader'
+            ) {
                 if (!foundMainBelt && anims[i].filename.includes('transport-belt')) {
                     foundMainBelt = true
                     img.zIndex = -6
@@ -141,7 +154,9 @@ export class EntitySprite extends PIXI.Sprite {
             data.divH = 1
         }
 
-        const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${data.height / data.divH}`
+        const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${
+            data.height / data.divH
+        }`
         let texture = PIXI.utils.TextureCache[textureKey]
         if (!texture) {
             const spriteData = PIXI.Texture.from(data.filename)
@@ -162,7 +177,7 @@ export class EntitySprite extends PIXI.Sprite {
 
         this.shift = {
             x: data.shift[0] * 32,
-            y: data.shift[1] * 32
+            y: data.shift[1] * 32,
         }
 
         this.position.set(this.shift.x, this.shift.y)

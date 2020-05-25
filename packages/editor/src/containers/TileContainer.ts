@@ -26,7 +26,7 @@ export class TileContainer {
             y: (Math.abs(Math.floor(y)) % 8) * 64,
             width: 64,
             height: 64,
-            scale: 0.5
+            scale: 0.5,
         })
     }
 

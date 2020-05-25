@@ -35,7 +35,9 @@ export function initToasts(): (options: IToastsOptions) => void {
             { once: true }
         )
 
-        const promises = [new Promise(resolve => toast.addEventListener('click', resolve, { once: true }))]
+        const promises = [
+            new Promise(resolve => toast.addEventListener('click', resolve, { once: true })),
+        ]
 
         if (options.timeout !== Infinity) {
             promises.push(new Promise(resolve => setTimeout(resolve, options.timeout || 5000)))

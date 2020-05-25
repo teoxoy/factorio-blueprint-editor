@@ -69,13 +69,18 @@ export class Preview extends PIXI.Container {
             }
 
             if (this.m_Entity.entityData.drawing_boxes !== undefined) {
-                assignDataFromDrawingBox(this.m_Entity.entityData.drawing_boxes[util.intToDir(this.m_Entity.direction)])
+                assignDataFromDrawingBox(
+                    this.m_Entity.entityData.drawing_boxes[util.intToDir(this.m_Entity.direction)]
+                )
             }
         }
 
         const SCALE = this.m_Size / (Math.max(actualSpriteSize.x, actualSpriteSize.y, 3) * 32 + 32)
         entityParts.scale.set(SCALE)
-        entityParts.position.set(this.m_Size / 2 + offset.x * 32 * SCALE, this.m_Size / 2 + offset.y * 32 * SCALE)
+        entityParts.position.set(
+            this.m_Size / 2 + offset.x * 32 * SCALE,
+            this.m_Size / 2 + offset.y * 32 * SCALE
+        )
 
         const oc: OverlayContainer = new OverlayContainer()
         const o: PIXI.Container = oc.createEntityInfo(this.m_Entity.entityNumber, { x: 0, y: 0 })

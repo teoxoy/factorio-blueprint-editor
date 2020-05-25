@@ -22,7 +22,7 @@ const deserialize = (entityNumber: number, connections: BPS.IConnection): IConne
                         entityNumber1: entityNumber,
                         entityNumber2: data.entity_id,
                         entitySide1: Number(side),
-                        entitySide2: data.circuit_id || 1
+                        entitySide2: data.circuit_id || 1,
                     })
                 })
             })
@@ -38,7 +38,7 @@ const deserialize = (entityNumber: number, connections: BPS.IConnection): IConne
                 entityNumber1: entityNumber,
                 entityNumber2: data.entity_id,
                 entitySide1: Number(side.slice(2, 3)) + 1,
-                entitySide2: 1
+                entitySide2: 1,
             })
         }
     }
@@ -70,7 +70,7 @@ const serialize = (entityNumber: number, connections: IConnection[]): BPS.IConne
             }
             const c = serialized[SIDE] as BPS.IWireColor[]
             c.push({
-                entity_id: otherEntNr
+                entity_id: otherEntNr,
             })
         } else {
             if (serialized[side] === undefined) {
@@ -81,7 +81,7 @@ const serialize = (entityNumber: number, connections: IConnection[]): BPS.IConne
                 SIDE[color] = []
             }
             SIDE[color].push({
-                entity_id: otherEntNr
+                entity_id: otherEntNr,
             })
         }
     })
@@ -198,7 +198,10 @@ class WireConnections extends EventEmitter {
 
     public serializeConnectionData(entityNumber: number): BPS.IConnection {
         const connections = this.getEntityConnections(entityNumber)
-        if (connections.length === 0 || this.bp.entities.get(entityNumber).type === 'electric_pole') {
+        if (
+            connections.length === 0 ||
+            this.bp.entities.get(entityNumber).type === 'electric_pole'
+        ) {
             return
         }
         return serialize(entityNumber, connections)

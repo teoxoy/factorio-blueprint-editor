@@ -36,7 +36,9 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "index": { "type": "integer" },
-                                    "blueprint": { "$ref": "blueprintSchema.json#/definitions/blueprint" }
+                                    "blueprint": {
+                                        "$ref": "blueprintSchema.json#/definitions/blueprint"
+                                    }
                                 }
                             }
                         }
@@ -281,7 +283,9 @@
                                 "properties": {
                                     "filters": {
                                         "type": "array",
-                                        "items": { "$ref": "blueprintSchema.json#/definitions/filter" }
+                                        "items": {
+                                            "$ref": "blueprintSchema.json#/definitions/filter"
+                                        }
                                     }
                                 }
                             },
@@ -332,7 +336,9 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "alert_message": { "type": "string" },
-                                    "icon_signal_id": { "$ref": "blueprintSchema.json#/definitions/signal" },
+                                    "icon_signal_id": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
                                     "show_alert": { "type": "boolean" },
                                     "show_on_map": { "type": "boolean" }
                                 }
@@ -377,7 +383,10 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "name": { "type": "string", "itemName": true },
-                                    "mode": { "type": "string", "enum": ["at_least", "at_most", "exactly"] },
+                                    "mode": {
+                                        "type": "string",
+                                        "enum": ["at_least", "at_most", "exactly"]
+                                    },
                                     "percentage": { "type": "number" },
                                     "temperature": { "type": "number" },
                                     "filters": {
@@ -407,7 +416,9 @@
                                 "properties": {
                                     "1": { "$ref": "blueprintSchema.json#/definitions/connSide" },
                                     "2": { "$ref": "blueprintSchema.json#/definitions/connSide" },
-                                    "Cu0": { "$ref": "blueprintSchema.json#/definitions/wireColor" },
+                                    "Cu0": {
+                                        "$ref": "blueprintSchema.json#/definitions/wireColor"
+                                    },
                                     "Cu1": { "$ref": "blueprintSchema.json#/definitions/wireColor" }
                                 }
                             },
@@ -430,7 +441,9 @@
                                             "properties": {
                                                 "index": { "type": "integer" },
                                                 "count": { "type": "integer" },
-                                                "signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
+                                                "signal": {
+                                                    "$ref": "blueprintSchema.json#/definitions/signal"
+                                                }
                                             }
                                         }
                                     },
@@ -520,7 +533,9 @@
                                         "enum": [true],
                                         "$comment": "only present if entity is train-stop"
                                     },
-                                    "train_stopped_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
+                                    "train_stopped_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
 
                                     "circuit_close_signal": {
                                         "type": "boolean",
@@ -530,12 +545,22 @@
                                         "type": "boolean",
                                         "$comment": "only present if entity is rail-signal, for chain signals: you have the same signals"
                                     },
-                                    "red_output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                    "orange_output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                    "green_output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                    "blue_output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
+                                    "red_output_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
+                                    "orange_output_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
+                                    "green_output_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
+                                    "blue_output_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
 
-                                    "output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
+                                    "output_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
 
                                     "circuit_parameters": {
                                         "type": "object",
@@ -555,9 +580,15 @@
                                             "comparator": { "type": "string" },
                                             "constant": { "type": "integer" },
                                             "copy_count_from_input": { "type": "boolean" },
-                                            "first_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                            "second_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                            "output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
+                                            "first_signal": {
+                                                "$ref": "blueprintSchema.json#/definitions/signal"
+                                            },
+                                            "second_signal": {
+                                                "$ref": "blueprintSchema.json#/definitions/signal"
+                                            },
+                                            "output_signal": {
+                                                "$ref": "blueprintSchema.json#/definitions/signal"
+                                            }
                                         }
                                     },
                                     "arithmetic_conditions": {
@@ -567,23 +598,45 @@
                                         "properties": {
                                             "operation": {
                                                 "type": "string",
-                                                "enum": ["+", "-", "*", "/", "%", "^", "<<", ">>", "AND", "OR", "XOR"]
+                                                "enum": [
+                                                    "+",
+                                                    "-",
+                                                    "*",
+                                                    "/",
+                                                    "%",
+                                                    "^",
+                                                    "<<",
+                                                    ">>",
+                                                    "AND",
+                                                    "OR",
+                                                    "XOR"
+                                                ]
                                             },
                                             "constant": { "type": "integer" },
                                             "first_constant": { "type": "integer" },
                                             "second_constant": { "type": "integer" },
-                                            "first_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                            "second_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
-                                            "output_signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
+                                            "first_signal": {
+                                                "$ref": "blueprintSchema.json#/definitions/signal"
+                                            },
+                                            "second_signal": {
+                                                "$ref": "blueprintSchema.json#/definitions/signal"
+                                            },
+                                            "output_signal": {
+                                                "$ref": "blueprintSchema.json#/definitions/signal"
+                                            }
                                         }
                                     },
-                                    "circuit_condition": { "$ref": "blueprintSchema.json#/definitions/condition" },
+                                    "circuit_condition": {
+                                        "$ref": "blueprintSchema.json#/definitions/condition"
+                                    },
                                     "connect_to_logistic_network": {
                                         "type": "boolean",
                                         "enum": [true],
                                         "$comment": "only present if entity is pump, offshore-pump, train-stop, small-lamp, power-switch or of type: inserter, transport-belt or mining-drill"
                                     },
-                                    "logistic_condition": { "$ref": "blueprintSchema.json#/definitions/condition" }
+                                    "logistic_condition": {
+                                        "$ref": "blueprintSchema.json#/definitions/condition"
+                                    }
                                 }
                             }
                         }

@@ -29,7 +29,7 @@ enum EditorMode {
     /** Active when selecting multiple entities for copy/stamp */
     COPY,
     /** Active when selecting multiple entities for deletion */
-    DELETE
+    DELETE,
 }
 
 class OptimizedContainer extends PIXI.ParticleContainer {
@@ -63,7 +63,7 @@ class BlueprintContainer extends PIXI.Container {
     private size: IPoint
     private anchor: IPoint = {
         x: 0.5,
-        y: 0.5
+        y: 0.5,
     }
     private copyModeEntities: Entity[] = []
     private deleteModeEntities: Entity[] = []
@@ -80,7 +80,7 @@ class BlueprintContainer extends PIXI.Container {
 
         this.size = {
             x: chunks * 32 * 32,
-            y: chunks * 32 * 32
+            y: chunks * 32 * 32,
         }
 
         this.interactive = true
@@ -96,7 +96,7 @@ class BlueprintContainer extends PIXI.Container {
             this.size,
             {
                 x: G.app.screen.width,
-                y: G.app.screen.height
+                y: G.app.screen.height,
             },
             this.anchor,
             3
@@ -235,7 +235,7 @@ class BlueprintContainer extends PIXI.Container {
                 x: X + W / 2,
                 y: Y + H / 2,
                 w: W,
-                h: H
+                h: H,
             })
 
             this.copyModeEntities.forEach(e => {
@@ -291,7 +291,7 @@ class BlueprintContainer extends PIXI.Container {
                 x: X + W / 2,
                 y: Y + H / 2,
                 w: W,
-                h: H
+                h: H,
             })
 
             this.deleteModeEntities.forEach(e => {
@@ -373,7 +373,10 @@ class BlueprintContainer extends PIXI.Container {
             return
         }
 
-        const entity = G.bp.entityPositionGrid.getEntityAtPosition(this.gridData.x32, this.gridData.y32)
+        const entity = G.bp.entityPositionGrid.getEntityAtPosition(
+            this.gridData.x32,
+            this.gridData.y32
+        )
         const eC = entity ? EntityContainer.mappings.get(entity.entityNumber) : undefined
 
         if (eC && this.hoverContainer === eC) {
@@ -433,7 +436,7 @@ class BlueprintContainer extends PIXI.Container {
 
         const renderTexture = PIXI.RenderTexture.create({
             width: gridGraphics.width,
-            height: gridGraphics.height
+            height: gridGraphics.height,
         })
 
         renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
@@ -468,7 +471,7 @@ class BlueprintContainer extends PIXI.Container {
 
         const renderTexture = PIXI.RenderTexture.create({
             width: W,
-            height: H
+            height: H,
         })
 
         renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
@@ -507,7 +510,9 @@ class BlueprintContainer extends PIXI.Container {
         G.bp.on('create-entity', () => this.updateHoverContainer())
         G.bp.on('remove-entity', () => this.updateHoverContainer())
 
-        G.bp.wireConnections.forEach((connection, hash) => this.wiresContainer.add(hash, connection))
+        G.bp.wireConnections.forEach((connection, hash) =>
+            this.wiresContainer.add(hash, connection)
+        )
 
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()
@@ -584,11 +589,11 @@ class BlueprintContainer extends PIXI.Container {
         this.viewport.centerViewPort(
             {
                 x: bounds.width,
-                y: bounds.height
+                y: bounds.height,
             },
             {
                 x: (this.size.x - bounds.width) / 2 - bounds.x,
-                y: (this.size.y - bounds.height) / 2 - bounds.y
+                y: (this.size.y - bounds.height) / 2 - bounds.y,
             }
         )
 

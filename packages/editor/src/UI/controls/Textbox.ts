@@ -193,7 +193,10 @@ export class Textbox extends PIXI.Container {
         this.addChild(this.m_Text)
 
         this.m_CaretGraphic = new PIXI.Graphics()
-        this.m_CaretGraphic.lineStyle(1, colors.controls.textbox.foreground.color).moveTo(0, 0).lineTo(0, height)
+        this.m_CaretGraphic
+            .lineStyle(1, colors.controls.textbox.foreground.color)
+            .moveTo(0, 0)
+            .lineTo(0, height)
         this.m_CaretGraphic.y = 3
         this.m_CaretGraphic.visible = false
         this.addChild(this.m_CaretGraphic)

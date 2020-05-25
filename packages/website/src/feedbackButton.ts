@@ -26,7 +26,7 @@ export function initFeedbackButton(): void {
                 { name: 'Other', color: '#757575' },
                 { name: 'Bug', color: '#e53935' },
                 { name: 'Enhancement', color: '#00ACC1' },
-                { name: 'Feature Request', color: '#FFB300' }
+                { name: 'Feature Request', color: '#FFB300' },
             ]
             tags.forEach((tag, i) => {
                 const tagEl = document.createElement('div')
@@ -55,7 +55,7 @@ export function initFeedbackButton(): void {
             button.attributes.removeNamedItem('style')
             button.className = 'doorbell-button'
             document.getElementById('buttons').appendChild(button)
-        }
+        },
     }
 
     document.body.appendChild(
@@ -63,7 +63,7 @@ export function initFeedbackButton(): void {
             id: 'doorbellScript',
             type: 'text/javascript',
             async: true,
-            src: `https://embed.doorbell.io/button/${window.doorbellOptions.id}?t=${Date.now()}`
+            src: `https://embed.doorbell.io/button/${window.doorbellOptions.id}?t=${Date.now()}`,
         })
     )
 }

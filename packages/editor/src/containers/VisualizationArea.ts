@@ -21,14 +21,14 @@ const getDataForVisualizationArea = (name: string): IVisualizationData[] => {
                 type: 'logistics0',
                 radius: ed.construction_radius,
                 color: 0x83d937,
-                alpha: 1
+                alpha: 1,
             },
             {
                 type: 'logistics1',
                 radius: ed.logistics_radius,
                 color: undoBlendModeColorShift(0xff8800, 0x83d937, ALPHA),
-                alpha: 1
-            }
+                alpha: 1,
+            },
         ]
     }
     if (ed.type === 'electric_pole') {
@@ -37,8 +37,8 @@ const getDataForVisualizationArea = (name: string): IVisualizationData[] => {
                 type: 'poles',
                 radius: ed.supply_area_distance,
                 color: 0x33755d9,
-                alpha: ALPHA
-            }
+                alpha: ALPHA,
+            },
         ]
     }
     if (name === 'beacon') {
@@ -47,8 +47,8 @@ const getDataForVisualizationArea = (name: string): IVisualizationData[] => {
                 type: 'beacons',
                 radius: ed.supply_area_distance,
                 color: 0xd9c037,
-                alpha: ALPHA
-            }
+                alpha: ALPHA,
+            },
         ]
     }
     if (name === 'electric_mining_drill') {
@@ -57,8 +57,8 @@ const getDataForVisualizationArea = (name: string): IVisualizationData[] => {
                 type: 'drills',
                 radius: ed.resource_searching_radius,
                 color: 0x4ead9f,
-                alpha: ALPHA
-            }
+                alpha: ALPHA,
+            },
         ]
     }
 

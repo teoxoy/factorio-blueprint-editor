@@ -112,7 +112,9 @@ export class QuickbarPanel extends Panel {
                             G.BPC.spawnPaintContainer(quickbarSlot.itemName)
                         } else {
                             // UC3
-                            G.UI.createInventory('Inventory', undefined, item => quickbarSlot.assignItem(item))
+                            G.UI.createInventory('Inventory', undefined, item =>
+                                quickbarSlot.assignItem(item)
+                            )
                         }
                     } else if (e.data.button === 2) {
                         // UC5
@@ -154,6 +156,9 @@ export class QuickbarPanel extends Panel {
     }
 
     protected setPosition(): void {
-        this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height - this.height + 1)
+        this.position.set(
+            G.app.screen.width / 2 - this.width / 2,
+            G.app.screen.height - this.height + 1
+        )
     }
 }

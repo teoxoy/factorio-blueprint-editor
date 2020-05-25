@@ -3,7 +3,7 @@ import util from '../common/util'
 /** Private enumaration to determine the value (new value or old value) should be applied during action */
 enum HistoryValue {
     New,
-    Old
+    Old,
 }
 
 /** Private interface hack to access properties of objects via `any` */
@@ -31,7 +31,13 @@ class Action<V> {
 
     public applyImmediate = true
 
-    public constructor(history: History, oldValue: V, newValue: V, text: string, applyFn: (value: V) => void) {
+    public constructor(
+        history: History,
+        oldValue: V,
+        newValue: V,
+        text: string,
+        applyFn: (value: V) => void
+    ) {
         this.history = history
         this.oldValue = oldValue
         this.newValue = newValue
@@ -125,7 +131,9 @@ class Transaction {
     /** Logs all actions */
     public log(): void {
         console.log(`[DO] ${this.text}:`)
-        this.actions.forEach((a, i) => console.log('\t', i, a.text, ' - ', a.oldValue, ' -> ', a.newValue))
+        this.actions.forEach((a, i) =>
+            console.log('\t', i, a.text, ' - ', a.oldValue, ' -> ', a.newValue)
+        )
     }
 
     /** Add action to this transaction */

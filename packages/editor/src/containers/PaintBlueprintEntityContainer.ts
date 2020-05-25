@@ -20,7 +20,10 @@ export class PaintBlueprintEntityContainer {
         this.bp = bp
         this.entity = entity
 
-        this.visualizationArea = G.BPC.visualizationAreaContainer.create(this.entity.name, this.position)
+        this.visualizationArea = G.BPC.visualizationAreaContainer.create(
+            this.entity.name,
+            this.position
+        )
 
         this.entitySprites = EntitySprite.getParts(this.entity, this.bp.entityPositionGrid)
     }
@@ -28,14 +31,14 @@ export class PaintBlueprintEntityContainer {
     private get entityPosition(): IPoint {
         return {
             x: this.bpc.x / 32 + this.entity.position.x,
-            y: this.bpc.y / 32 + this.entity.position.y
+            y: this.bpc.y / 32 + this.entity.position.y,
         }
     }
 
     private get position(): IPoint {
         return {
             x: this.bpc.x + this.entity.position.x,
-            y: this.bpc.y + this.entity.position.y
+            y: this.bpc.y + this.entity.position.y,
         }
     }
 
@@ -49,8 +52,16 @@ export class PaintBlueprintEntityContainer {
         const direction = this.entity.direction
 
         const allow =
-            G.bp.entityPositionGrid.checkFastReplaceableGroup(this.entity.name, direction, position) ||
-            G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(this.entity.name, direction, position) ||
+            G.bp.entityPositionGrid.checkFastReplaceableGroup(
+                this.entity.name,
+                direction,
+                position
+            ) ||
+            G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
+                this.entity.name,
+                direction,
+                position
+            ) ||
             G.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)
 
         this.entitySprites.forEach(s =>
@@ -58,7 +69,7 @@ export class PaintBlueprintEntityContainer {
                 r: allow ? 0.4 : 1,
                 g: allow ? 1 : 0.4,
                 b: 0.4,
-                a: 1
+                a: 1,
             })
         )
     }
@@ -68,7 +79,9 @@ export class PaintBlueprintEntityContainer {
         this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
             this.entity.name,
             this.entityPosition,
-            this.entity.directionType === 'input' ? this.entity.direction : (this.entity.direction + 4) % 8,
+            this.entity.directionType === 'input'
+                ? this.entity.direction
+                : (this.entity.direction + 4) % 8,
             this.entity.name === 'pipe_to_ground' || this.entity.directionType === 'output'
                 ? (this.entity.direction + 4) % 8
                 : this.entity.direction
@@ -95,7 +108,7 @@ export class PaintBlueprintEntityContainer {
         const entities = G.bp.entityPositionGrid.getEntitiesInArea({
             ...this.entityPosition,
             w: size.x,
-            h: size.y
+            h: size.y,
         })
         G.bp.removeEntities(entities)
         this.checkBuildable()
@@ -105,7 +118,11 @@ export class PaintBlueprintEntityContainer {
         const position = this.entityPosition
         const direction = this.entity.direction
 
-        const frgEnt = G.bp.entityPositionGrid.checkFastReplaceableGroup(this.entity.name, direction, position)
+        const frgEnt = G.bp.entityPositionGrid.checkFastReplaceableGroup(
+            this.entity.name,
+            direction,
+            position
+        )
         if (frgEnt) {
             G.bp.fastReplaceEntity(frgEnt, this.entity.name, direction)
             return
@@ -126,7 +143,7 @@ export class PaintBlueprintEntityContainer {
                 ...this.entity.serialize(),
                 entity_number: undefined,
                 connections: undefined,
-                position
+                position,
             })
         }
 

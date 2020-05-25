@@ -193,7 +193,13 @@ function CreateIcon(itemName: string, setAnchor = true): PIXI.DisplayObject {
  * @param name - Name if item
  * @param amount - Amount to show
  */
-function CreateIconWithAmount(host: PIXI.Container, x: number, y: number, name: string, amount: number): void {
+function CreateIconWithAmount(
+    host: PIXI.Container,
+    x: number,
+    y: number,
+    name: string,
+    amount: number
+): void {
     const icon: PIXI.DisplayObject = CreateIcon(name, false)
     icon.position.set(x, y)
     host.addChild(icon)
@@ -246,5 +252,5 @@ export default {
     CreateIcon,
     CreateIconWithAmount,
     CreateRecipe,
-    applyTint
+    applyTint,
 }

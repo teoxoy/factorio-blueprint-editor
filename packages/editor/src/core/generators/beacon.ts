@@ -51,14 +51,19 @@ export function generateBeacons(
 
     const visualizations: IVisualization[] = []
     function addVisualization(path: IPoint[], size = 32, alpha = 1, color?: number): void {
-        visualizations.push({ path: path.map(p => ({ x: p.x + 0.5, y: p.y + 0.5 })), size, alpha, color })
+        visualizations.push({
+            path: path.map(p => ({ x: p.x + 0.5, y: p.y + 0.5 })),
+            size,
+            alpha,
+            color,
+        })
     }
 
     const entityAreas = entities.map(e =>
         U.range(0, e.size * e.size).map(i => ({
             x: Math.floor(e.position.x) + ((i % e.size) - Math.floor(e.size / 2)),
             y: Math.floor(e.position.y) + (Math.floor(i / e.size) - Math.floor(e.size / 2)),
-            effect: e.effect
+            effect: e.effect,
         }))
     )
 
@@ -75,7 +80,9 @@ export function generateBeacons(
                 const searchSize = e.size + BEACON_SIZE * 2 + (BEACON_EFFECT_RADIUS - 1) * 2
                 return U.range(0, searchSize * searchSize).map(i => ({
                     x: Math.floor(e.position.x) + ((i % searchSize) - Math.floor(searchSize / 2)),
-                    y: Math.floor(e.position.y) + (Math.floor(i / searchSize) - Math.floor(searchSize / 2))
+                    y:
+                        Math.floor(e.position.y) +
+                        (Math.floor(i / searchSize) - Math.floor(searchSize / 2)),
                 }))
             })
             .reduce((acc, val) => acc.concat(val), [])
@@ -89,7 +96,7 @@ export function generateBeacons(
             U.range(0, BEACON_SIZE * BEACON_SIZE)
                 .map(i => ({
                     x: coord.x + (i % BEACON_SIZE),
-                    y: coord.y + Math.floor(i / BEACON_SIZE)
+                    y: coord.y + Math.floor(i / BEACON_SIZE),
                 }))
                 .filter(p => grid.get(U.hashPoint(p)))
         )
@@ -122,7 +129,7 @@ export function generateBeacons(
             const effectsGiven = U.range(0, D * D)
                 .map(i => ({
                     x: mid.x + ((i % D) - Math.floor(D / 2)),
-                    y: mid.y + (Math.floor(i / D) - Math.floor(D / 2))
+                    y: mid.y + (Math.floor(i / D) - Math.floor(D / 2)),
                 }))
                 .reduce((acc, p) => {
                     const area = pointToEntityArea.get(U.hashPoint(p))
@@ -147,7 +154,7 @@ export function generateBeacons(
                 collisionArea,
                 effectsGiven: effectsGiven.length,
                 avgDistToEntities,
-                nrOfOverlaps
+                nrOfOverlaps,
             }
         })
         .filter(c => c.effectsGiven >= MIN_AFFECTED_ENTITIES)
@@ -196,15 +203,15 @@ export function generateBeacons(
 
     const info = {
         totalBeacons: beacons.length,
-        effectsGiven: beacons.reduce((acc, b) => acc + b.effectsGiven, 0)
+        effectsGiven: beacons.reduce((acc, b) => acc + b.effectsGiven, 0),
     }
 
     return {
         beacons: beacons.map(b => ({
             name: 'beacon',
-            position: { x: b.x + 0.5, y: b.y + 0.5 }
+            position: { x: b.x + 0.5, y: b.y + 0.5 },
         })),
         info,
-        visualizations
+        visualizations,
     }
 }

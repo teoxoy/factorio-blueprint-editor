@@ -17,5 +17,5 @@ export default {
     BPC,
     UI,
     app,
-    bp
+    bp,
 }

@@ -16,11 +16,11 @@ function getAllPromises(): Promise<void>[] {
     return [
         [
             G.hr ? HRentitySpritesheetCompressedPNG : LRentitySpritesheetCompressedPNG,
-            G.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON
+            G.hr ? HRentitySpritesheetJSON : LRentitySpritesheetJSON,
         ],
         [iconSpritesheetPNG, iconSpritesheetJSON],
         [utilitySpritesheetPNG, utilitySpritesheetJSON],
-        [tilesSpritesheetPNG, tilesSpritesheetJSON]
+        [tilesSpritesheetPNG, tilesSpritesheetJSON],
     ].map(data => loadSpritesheet(data[0] as string, data[1]))
 }
 

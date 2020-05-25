@@ -16,7 +16,12 @@ const cachePath = join(__dirname, './cache')
 const luaBC = join(cachePath, 'lualib.bc')
 const rapidjsonBC = join(cachePath, 'rapidjson.bc')
 
-const emccConfigArgs = ['--em-config', join(emsdkPath, '.emscripten'), '--cache', join(emsdkPath, '.emscripten_cache')]
+const emccConfigArgs = [
+    '--em-config',
+    join(emsdkPath, '.emscripten'),
+    '--cache',
+    join(emsdkPath, '.emscripten_cache'),
+]
 
 switch (process.argv[2]) {
     case 'setup':
@@ -33,7 +38,13 @@ switch (process.argv[2]) {
 async function setup(): Promise<void> {
     console.log('Setting up emsdk')
 
-    await run('git', ['clone', '--depth', '1', 'https://github.com/emscripten-core/emsdk.git', emsdkPath])
+    await run('git', [
+        'clone',
+        '--depth',
+        '1',
+        'https://github.com/emscripten-core/emsdk.git',
+        emsdkPath,
+    ])
     const emsdkReleases = JSON.parse(await fs.readFile(emsdkReleasesPath, { encoding: 'utf8' }))
     const latestReleaseHash = emsdkReleases.releases[emsdkReleases.latest]
     const toolName = `releases-upstream-${latestReleaseHash}-64bit`
@@ -52,7 +63,7 @@ async function compileDeps(): Promise<void> {
         const LUA_FILES = await glob('*.c', {
             ignore: ['lua.c', 'luac.c'],
             cwd: join(libsPath, 'lua'),
-            absolute: true
+            absolute: true,
         })
         // prettier-ignore
         const lualib = [
@@ -75,7 +86,7 @@ async function compileDeps(): Promise<void> {
     async function compileRapidJSON(): Promise<void> {
         const RAPIDJSON_FILES = await glob('*.cpp', {
             cwd: join(libsPath, 'lua-rapidjson'),
-            absolute: true
+            absolute: true,
         })
         // prettier-ignore
         const rapidjson = [

@@ -128,7 +128,7 @@ const timer = (
             const end = new Date()
             const time = end.getTime() - start.getTime()
             console.log('Timer:', name, 'finished in', time, 'ms')
-        }
+        },
     }
 }
 
@@ -163,5 +163,5 @@ export default {
     areObjectsEquivalent,
     timer,
     Deferred,
-    objectHasOwnProperty
+    objectHasOwnProperty,
 }

@@ -19,7 +19,7 @@ export function initSettingsPane(
         hideable: false,
         closeOnTop: true,
         closed: localStorage.getItem('dat.gui.closed') === 'true',
-        width: 320
+        width: 320,
     })
 
     gui.domElement.style.overflowX = 'hidden'
@@ -29,11 +29,16 @@ export function initSettingsPane(
         gui.domElement.style.maxHeight = `${window.innerHeight}px`
     })
 
-    window.addEventListener('unload', () => localStorage.setItem('dat.gui.closed', String(gui.closed)))
+    window.addEventListener('unload', () =>
+        localStorage.setItem('dat.gui.closed', String(gui.closed))
+    )
 
     document.body.appendChild(gui.domElement)
 
-    const guiBPIndex = gui.add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1).name('BP Book Index').onFinishChange(changeBookIndex)
+    const guiBPIndex = gui
+        .add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1)
+        .name('BP Book Index')
+        .onFinishChange(changeBookIndex)
 
     const changeBook = (bpOrBook: Book | Blueprint): void => {
         console.log(bpOrBook)
@@ -84,7 +89,7 @@ export function initSettingsPane(
     }
     gui.add(
         {
-            debug: EDITOR.isDebuggingOn()
+            debug: EDITOR.isDebuggingOn(),
         },
         'debug'
     )
@@ -111,20 +116,28 @@ export function initSettingsPane(
             settings[key as string] = value
             EDITOR.setOilOutpostSettings(settings)
             return true
-        }
+        },
     })
 
     const oilOutpostFolder = gui.addFolder('Oil Outpost Generator Settings')
     oilOutpostFolder.add(oilOutpostSettings, 'DEBUG').name('Debug')
-    oilOutpostFolder.add(oilOutpostSettings, 'PUMPJACK_MODULE', getModulesObjFor('pumpjack')).name('Pumpjack Modules')
-    oilOutpostFolder.add(oilOutpostSettings, 'MIN_GAP_BETWEEN_UNDERGROUNDS', 1, 9, 1).name('Min Gap > < UPipes')
+    oilOutpostFolder
+        .add(oilOutpostSettings, 'PUMPJACK_MODULE', getModulesObjFor('pumpjack'))
+        .name('Pumpjack Modules')
+    oilOutpostFolder
+        .add(oilOutpostSettings, 'MIN_GAP_BETWEEN_UNDERGROUNDS', 1, 9, 1)
+        .name('Min Gap > < UPipes')
     oilOutpostFolder.add(oilOutpostSettings, 'BEACONS').name('Beacons')
-    oilOutpostFolder.add(oilOutpostSettings, 'MIN_AFFECTED_ENTITIES', 1, 12, 1).name('Min Affect. Pumpjacks')
-    oilOutpostFolder.add(oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon')).name('Beacon Modules')
+    oilOutpostFolder
+        .add(oilOutpostSettings, 'MIN_AFFECTED_ENTITIES', 1, 12, 1)
+        .name('Min Affect. Pumpjacks')
+    oilOutpostFolder
+        .add(oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon'))
+        .name('Beacon Modules')
     oilOutpostFolder
         .add(
             {
-                generate: () => EDITOR.callAction('generateOilOutpost')
+                generate: () => EDITOR.callAction('generateOilOutpost'),
             },
             'generate'
         )
@@ -176,13 +189,13 @@ export function initSettingsPane(
     keybindsFolder
         .add(
             {
-                resetDefaults: () => EDITOR.resetKeybinds()
+                resetDefaults: () => EDITOR.resetKeybinds(),
             },
             'resetDefaults'
         )
         .name('Reset Defaults')
 
     return {
-        changeBook
+        changeBook,
     }
 }

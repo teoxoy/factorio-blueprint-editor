@@ -8,7 +8,7 @@ const PUMPJACK_PLUGS = [
     { x: 1, y: -2 },
     { x: 2, y: -1 },
     { x: -1, y: 2 },
-    { x: -2, y: 1 }
+    { x: -2, y: 1 },
 ]
 
 // if there are groups that couldn't get connected, try x more times - every try increase maxTurns
@@ -101,7 +101,7 @@ function generatePipes(
                 .map(i => [(i % 3) - 1, Math.floor(i / 3) - 1])
                 .map(offset => ({
                     x: pos[0] + offset[0],
-                    y: pos[1] + offset[1]
+                    y: pos[1] + offset[1],
                 }))
         )
         .reduce((acc, val) => acc.concat(val), [])
@@ -112,10 +112,14 @@ function generatePipes(
     const maxY = globalCoords.reduce((pV, cV) => Math.max(pV, cV.y), -Infinity) + 1
     const middle = { x: (maxX - minX) / 2, y: (maxY - minY) / 2 }
 
-    const isPumpjackAtPos = globalCoords.map(globalToLocal).reduce((map, p) => map.set(U.hashPoint(p), true), new Map())
+    const isPumpjackAtPos = globalCoords
+        .map(globalToLocal)
+        .reduce((map, p) => map.set(U.hashPoint(p), true), new Map())
 
     const grid = U.range(0, maxY - minY + GRID_MARGIN * 2).map(y =>
-        U.range(0, maxX - minX + GRID_MARGIN * 2).map(x => (isPumpjackAtPos.get(`${x},${y}`) ? 1 : 0))
+        U.range(0, maxX - minX + GRID_MARGIN * 2).map(x =>
+            isPumpjackAtPos.get(`${x},${y}`) ? 1 : 0
+        )
     )
 
     const dataset: IPumpjack[] = pumpjacks
@@ -124,7 +128,7 @@ function generatePipes(
             const plugs = PUMPJACK_PLUGS.map((o, i) => ({
                 dir: i * 2,
                 x: pos.x + o.x,
-                y: pos.y + o.y
+                y: pos.y + o.y,
             })).filter(p => !isPumpjackAtPos.get(U.hashPoint(p)))
 
             return { entity_number: e.entity_number, x: pos.x, y: pos.y, plugs }
@@ -144,7 +148,7 @@ function generatePipes(
             return {
                 endpoints: line,
                 connections: conn,
-                avgDistance: conn.reduce((acc, val) => acc + val.distance, 0) / conn.length
+                avgDistance: conn.reduce((acc, val) => acc + val.distance, 0) / conn.length,
             }
         })
         .filter(l => l.connections.length !== 0)
@@ -157,8 +161,12 @@ function generatePipes(
         LINES = LINES.sort((a, b) => a.avgDistance - b.avgDistance)
             .sort((a, b) => a.connections.length - b.connections.length)
             .sort((a, b) => {
-                const A = U.manhattenDistance(a.endpoints[0], middle) + U.manhattenDistance(a.endpoints[1], middle)
-                const B = U.manhattenDistance(b.endpoints[0], middle) + U.manhattenDistance(b.endpoints[1], middle)
+                const A =
+                    U.manhattenDistance(a.endpoints[0], middle) +
+                    U.manhattenDistance(a.endpoints[1], middle)
+                const B =
+                    U.manhattenDistance(b.endpoints[0], middle) +
+                    U.manhattenDistance(b.endpoints[1], middle)
                 return B - A
             })
             // promote group building
@@ -166,8 +174,12 @@ function generatePipes(
                 const lineContainsAnAddedPumpjack = (ent: ILine): boolean =>
                     !!addedPumpjacks.find(
                         e =>
-                            ent.endpoints.map(endP => endP.entity_number).includes(e.entity_number) &&
-                            !!ent.connections.find(t => t.plugs.map(endP => endP.dir).includes(e.plug.dir))
+                            ent.endpoints
+                                .map(endP => endP.entity_number)
+                                .includes(e.entity_number) &&
+                            !!ent.connections.find(t =>
+                                t.plugs.map(endP => endP.dir).includes(e.plug.dir)
+                            )
                     )
 
                 if (lineContainsAnAddedPumpjack(a)) {
@@ -185,13 +197,17 @@ function generatePipes(
 
         l.connections
             // sort outside edges by how close they are to the middle
-            .sort((a, b) => U.manhattenDistance(a.plugs[0], middle) - U.manhattenDistance(b.plugs[0], middle))
+            .sort(
+                (a, b) =>
+                    U.manhattenDistance(a.plugs[0], middle) -
+                    U.manhattenDistance(b.plugs[0], middle)
+            )
             .sort((a, b) => a.distance - b.distance)
 
         for (const t of l.connections) {
             const entities = [
                 { ...l.endpoints[0], plug: t.plugs[0] },
-                { ...l.endpoints[1], plug: t.plugs[1] }
+                { ...l.endpoints[1], plug: t.plugs[1] },
             ]
             if (!addedEnt1 && !addedEnt2) {
                 groups.push({ entities, paths: [t.path], x: 0, y: 0 })
@@ -229,14 +245,14 @@ function generatePipes(
                         return {
                             path,
                             distance: path.length,
-                            plugs: l
+                            plugs: l,
                         }
                     })
                     .sort((a, b) => a.distance - b.distance)[0]
 
                 return {
                     endpoints: line.map((p, i) => ({ ...p, plug: conn.plugs[i] })),
-                    conn
+                    conn,
                 }
             })
             .sort((a, b) => a.conn.distance - b.conn.distance)[0]
@@ -245,11 +261,13 @@ function generatePipes(
             entities: line.endpoints,
             paths: [line.conn.path],
             x: 0,
-            y: 0
+            y: 0,
         })
     }
 
-    groups.map(g => g.paths.reduce((acc, val) => acc.concat(val), [])).forEach(p => addVisualization(p, 32, 0.5))
+    groups
+        .map(g => g.paths.reduce((acc, val) => acc.concat(val), []))
+        .forEach(p => addVisualization(p, 32, 0.5))
 
     // CONNECT GROUPS
     let tries = MAX_TRIES
@@ -261,7 +279,9 @@ function generatePipes(
             g.y = g.entities.reduce((acc, e) => acc + e.y, 0) / g.entities.length
         })
         groups = groups.sort(
-            (a, b) => a.paths.reduce((acc, p) => acc + p.length, 0) - b.paths.reduce((acc, p) => acc + p.length, 0)
+            (a, b) =>
+                a.paths.reduce((acc, p) => acc + p.length, 0) -
+                b.paths.reduce((acc, p) => acc + p.length, 0)
         )
 
         const groupsCopy = [...groups]
@@ -312,7 +332,7 @@ function generatePipes(
                 x: 0,
                 y: 0,
                 paths: [[{ x: p.x, y: p.y }]],
-                entities: [{ x: 0, y: 0, entity_number: 0, plugs: [p], plug: p }]
+                entities: [{ x: 0, y: 0, entity_number: 0, plugs: [p], plug: p }],
             })),
             finalGroup
         )
@@ -345,7 +365,9 @@ function generatePipes(
         )
         // return true if there are no pipes to the left and right of the plug
         .filter(plug => {
-            return [2, 6].map(dir => posFromDir(plug, dir)).every(pos => !pipePositions.find(U.equalPoints(pos)))
+            return [2, 6]
+                .map(dir => posFromDir(plug, dir))
+                .every(pos => !pipePositions.find(U.equalPoints(pos)))
 
             function posFromDir(plug: IPlug, dir: number): IPoint {
                 switch ((plug.dir + dir) % 8) {
@@ -408,11 +430,11 @@ function generatePipes(
             return U.range(0, segments)
                 .map(i => ({
                     start: Math.floor(segmentLength * i),
-                    end: Math.floor(segmentLength * (i + 1)) - 1
+                    end: Math.floor(segmentLength * (i + 1)) - 1,
                 }))
                 .map(segment => [
                     { ...PATH[segment.start], dir: HOR ? 6 : 0 },
-                    { ...PATH[segment.end], dir: HOR ? 2 : 4 }
+                    { ...PATH[segment.end], dir: HOR ? 2 : 4 },
                 ])
                 .reduce((acc, val) => acc.concat(val), [])
         }, [])
@@ -423,34 +445,43 @@ function generatePipes(
     // addVisualization(straightPathsCoords)
 
     // GENERATE PIPE DATA
-    pipePositions = pipePositions.filter(coord => !straightPathsCoords.find(U.equalPoints(coord))).map(localToGlobal)
+    pipePositions = pipePositions
+        .filter(coord => !straightPathsCoords.find(U.equalPoints(coord)))
+        .map(localToGlobal)
 
-    const pumpjacksToRotate = finalGroup.entities.map(e => ({ entity_number: e.entity_number, direction: e.plug.dir }))
+    const pumpjacksToRotate = finalGroup.entities.map(e => ({
+        entity_number: e.entity_number,
+        direction: e.plug.dir,
+    }))
 
     // UNIFY PIPE DATA
     const pipes = [
         ...pipePositions.map(pos => ({ name: 'pipe', position: pos, direction: 0 })),
-        ...undergroundPipes.map(e => ({ name: 'pipe_to_ground', position: { x: e.x, y: e.y }, direction: e.dir }))
+        ...undergroundPipes.map(e => ({
+            name: 'pipe_to_ground',
+            position: { x: e.x, y: e.y },
+            direction: e.dir,
+        })),
     ]
 
     const info = {
         nrOfPipes: pipePositions.length,
         nrOfUPipes: undergroundPipes.length,
-        nrOfPipesReplacedByUPipes: straightPathsCoords.length
+        nrOfPipesReplacedByUPipes: straightPathsCoords.length,
     }
 
     return {
         pumpjacksToRotate,
         pipes,
         info,
-        visualizations
+        visualizations,
     }
 
     function globalToLocal<T extends IPoint>(point: T): T {
         return {
             ...point,
             x: Math.floor(point.x) - minX + GRID_MARGIN,
-            y: Math.floor(point.y) - minY + GRID_MARGIN
+            y: Math.floor(point.y) - minY + GRID_MARGIN,
         }
     }
 
@@ -458,7 +489,7 @@ function generatePipes(
         return {
             ...point,
             x: point.x + minX - GRID_MARGIN + 0.5,
-            y: point.y + minY - GRID_MARGIN + 0.5
+            y: point.y + minY - GRID_MARGIN + 0.5,
         }
     }
 }
@@ -479,7 +510,7 @@ function generatePathFromLine(
 
     return {
         path,
-        distance: dX + dY
+        distance: dX + dY,
     }
 }
 
@@ -501,7 +532,7 @@ function getPathBetweenGroups(
     }
     return {
         toGroup: ret.firstGroup,
-        path: ret.lines[0].path
+        path: ret.lines[0].path,
     }
 
     function connect2Groups(
@@ -524,7 +555,9 @@ function getPathBetweenGroups(
 
         const lines = path0
             .reduce((acc: IPoint[][], coord) => {
-                const all = path1.filter(p => p.x === coord.x || p.y === coord.y).map(found => [found, coord])
+                const all = path1
+                    .filter(p => p.x === coord.x || p.y === coord.y)
+                    .map(found => [found, coord])
                 return acc.concat(all)
             }, [])
             .map(l => ({ ...generatePathFromLine(l), endpoints: l, turns: 0 }))
@@ -535,24 +568,39 @@ function getPathBetweenGroups(
         // optimization for spread out pumpjacks
         const PATH1 =
             path0.length === 1
-                ? path1.sort((a, b) => U.manhattenDistance(a, path0[0]) - U.manhattenDistance(b, path0[0])).slice(0, 20)
+                ? path1
+                      .sort(
+                          (a, b) =>
+                              U.manhattenDistance(a, path0[0]) - U.manhattenDistance(b, path0[0])
+                      )
+                      .slice(0, 20)
                 : path1
 
         const L = U.pointsToLines([...path0, ...PATH1])
             // filter out lines that are in the same group
             .filter(
-                l => !((path0.includes(l[0]) && path0.includes(l[1])) || (path1.includes(l[0]) && path1.includes(l[1])))
+                l =>
+                    !(
+                        (path0.includes(l[0]) && path0.includes(l[1])) ||
+                        (path1.includes(l[0]) && path1.includes(l[1]))
+                    )
             )
             .sort((a, b) => U.manhattenDistance(a[0], a[1]) - U.manhattenDistance(b[0], b[1]))
             .slice(0, 5)
             .map(l => {
-                const path = new PF.BreadthFirstFinder().findPath(l[0].x, l[0].y, l[1].x, l[1].y, new PF.Grid(grid))
+                const path = new PF.BreadthFirstFinder().findPath(
+                    l[0].x,
+                    l[0].y,
+                    l[1].x,
+                    l[1].y,
+                    new PF.Grid(grid)
+                )
 
                 return {
                     endpoints: l,
                     distance: path.length,
                     path: path.map(U.arrayToPoint),
-                    turns: PF.Util.compressPath(path).length - 2
+                    turns: PF.Util.compressPath(path).length - 2,
                 }
             })
             // .filter(l => l.distance > 9)
@@ -565,7 +613,7 @@ function getPathBetweenGroups(
         return {
             lines: lines.sort((a, b) => a.distance - b.distance),
             minDistance: lines.reduce((acc, l) => Math.min(acc, l.distance), Infinity),
-            firstGroup: g0
+            firstGroup: g0,
         }
     }
 }

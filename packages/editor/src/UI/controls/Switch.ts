@@ -34,16 +34,28 @@ export class Switch extends PIXI.Container {
         // Draw line
         const buttonLine: PIXI.Graphics = new PIXI.Graphics()
         buttonLine
-            .lineStyle(2, F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p0))
+            .lineStyle(
+                2,
+                F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p0)
+            )
             .moveTo(1, 0)
             .lineTo(72, 0)
-            .lineStyle(2, F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p1))
+            .lineStyle(
+                2,
+                F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p1)
+            )
             .moveTo(1, 2)
             .lineTo(72, 2)
-            .lineStyle(2, F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p2))
+            .lineStyle(
+                2,
+                F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p2)
+            )
             .moveTo(1, 4)
             .lineTo(72, 4)
-            .lineStyle(2, F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p3))
+            .lineStyle(
+                2,
+                F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p3)
+            )
             .moveTo(1, 6)
             .lineTo(72, 6)
         buttonLine.cacheAsBitmap = true
@@ -91,7 +103,8 @@ export class Switch extends PIXI.Container {
 
         // Attach events
         this.on('pointerdown', () => {
-            const index: number = this.m_Value === undefined ? 1 : this.m_Values.indexOf(this.m_Value)
+            const index: number =
+                this.m_Value === undefined ? 1 : this.m_Values.indexOf(this.m_Value)
             this.value = this.m_Values[index === 0 ? 1 : 0]
             this.emit('changed')
         })

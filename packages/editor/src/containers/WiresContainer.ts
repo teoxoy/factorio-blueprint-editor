@@ -19,7 +19,7 @@ export class WiresContainer extends PIXI.Container {
         const colorMap: Record<string, number> = {
             copper: 0xcf7c00,
             red: 0xc83718,
-            green: 0x588c38
+            green: 0x588c38,
         }
 
         wire.lineStyle(1.5, colorMap[color])
@@ -105,11 +105,14 @@ export class WiresContainer extends PIXI.Container {
     private getWireSprite(connection: IConnection): PIXI.Graphics {
         const getWirePos = (entityNumber: number, color: string, side: number): IPoint => {
             const entity = G.bp.entities.get(entityNumber)
-            const direction = entity.type === 'electric_pole' ? this.getPowerPoleDirection(entity) : entity.direction
+            const direction =
+                entity.type === 'electric_pole'
+                    ? this.getPowerPoleDirection(entity)
+                    : entity.direction
             const point = entity.getWireConnectionPoint(color, side, direction)
             return {
                 x: (entity.position.x + point[0]) * 32,
-                y: (entity.position.y + point[1]) * 32
+                y: (entity.position.y + point[1]) * 32,
             }
         }
 
@@ -140,7 +143,9 @@ export class WiresContainer extends PIXI.Container {
 
         function getPowerPoleRotation(centre: IPoint, points: IPoint[]): number {
             const sectorSum = points
-                .map(p => U.getAngle(0, 0, p.x - centre.x, (p.y - centre.y) * -1 /* invert Y axis */))
+                .map(p =>
+                    U.getAngle(0, 0, p.x - centre.x, (p.y - centre.y) * -1 /* invert Y axis */)
+                )
                 .map(angleToSector)
                 .reduce((acc, sec) => acc + sec, 0)
 
@@ -172,7 +177,7 @@ export class WiresContainer extends PIXI.Container {
                 entityNumber: e.entityNumber,
                 name: e.name,
                 x: e.position.x,
-                y: e.position.y
+                y: e.position.y,
             }))
 
         if (poles.length < 2) {
@@ -212,12 +217,15 @@ export class WiresContainer extends PIXI.Container {
         const lines = setsOfLines
             .reduce((acc, val) => acc.concat(val), [])
             .sort((a, b) => {
-                const minPos = (l: IPole[]): number => Math.min(l[0].x, l[1].x) + Math.min(l[0].y, l[1].y)
+                const minPos = (l: IPole[]): number =>
+                    Math.min(l[0].x, l[1].x) + Math.min(l[0].y, l[1].y)
                 return minPos(a) - minPos(b)
             })
             .sort((a, b) => U.manhattenDistance(a[0], a[1]) - U.manhattenDistance(b[0], b[1]))
 
-        const triangles = setsOfLines.filter(lines => lines.length === 3).map(lines => lines.map(lineHash))
+        const triangles = setsOfLines
+            .filter(lines => lines.length === 3)
+            .map(lines => lines.map(lineHash))
 
         const finalLines: IPole[][] = []
         const addedMap: Map<string, boolean> = new Map()
@@ -261,7 +269,10 @@ export class WiresContainer extends PIXI.Container {
             return map
         }, new Map<number, number[]>())
 
-        const finalLinesHashes = finalLines.reduce((map, line) => map.set(lineHash(line), line), new Map())
+        const finalLinesHashes = finalLines.reduce(
+            (map, line) => map.set(lineHash(line), line),
+            new Map()
+        )
         const toAdd = [...finalLinesHashes.keys()].filter(k => !this.passiveConnToSprite.get(k))
         const toDel = [...this.passiveConnToSprite.keys()].filter(k => !finalLinesHashes.get(k))
 
@@ -284,7 +295,7 @@ export class WiresContainer extends PIXI.Container {
                 entityNumber1: Number(hash.split('-')[0]),
                 entityNumber2: Number(hash.split('-')[1]),
                 entitySide1: 1,
-                entitySide2: 1
+                entitySide2: 1,
             })
             this.addChild(sprite)
             this.passiveConnToSprite.set(hash, sprite)

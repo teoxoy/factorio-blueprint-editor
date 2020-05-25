@@ -64,7 +64,10 @@ export class Dialog extends Panel {
 
     /** Automatically sets position of dialog to center screen */
     protected setPosition(): void {
-        this.position.set(G.app.screen.width / 2 - this.width / 2, G.app.screen.height / 2 - this.height / 2)
+        this.position.set(
+            G.app.screen.width / 2 - this.width / 2,
+            G.app.screen.height / 2 - this.height / 2
+        )
     }
 
     /** Close Dialog */

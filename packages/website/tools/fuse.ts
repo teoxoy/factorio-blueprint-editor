@@ -15,7 +15,7 @@ const p = (p: string): string => join(__dirname, p)
 class Context {
     public readonly paths = {
         cache: p('.fusebox'),
-        dist: p('../dist')
+        dist: p('../dist'),
     }
     public runDev(runProps?: IRunProps): Promise<IRunResponse> {
         return fusebox(this.getConfig(true)).runDev(runProps)
@@ -26,7 +26,7 @@ class Context {
     private getConfig(runServer = false): IPublicConfig {
         return {
             compilerOptions: {
-                tsConfig: p('../tsconfig.json')
+                tsConfig: p('../tsconfig.json'),
             },
             entry: p('../src/index.ts'),
             target: 'browser',
@@ -37,8 +37,13 @@ class Context {
             hmr: { plugin: p('./hmr.ts') },
             // sourceMap: { sourceRoot: '' },
             watcher: {
-                root: [p('../src'), p('../../editor/src'), p('../../factorio-data/src'), p('../../lua-runtime/dist')]
-            }
+                root: [
+                    p('../src'),
+                    p('../../editor/src'),
+                    p('../../factorio-data/src'),
+                    p('../../lua-runtime/dist'),
+                ],
+            },
         }
     }
     private getServerConfig(): IDevServerProps {
@@ -49,11 +54,11 @@ class Context {
                 {
                     path: '/api',
                     options: {
-                        target: `http://localhost:8888`
+                        target: `http://localhost:8888`,
                         // pathRewrite: { '^/api': '' },
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         }
     }
     private readonly luaPlugin = (ctx: FuseBoxContext): void => {
@@ -85,8 +90,8 @@ task('dev', async ctx => {
     await ctx.runDev({
         bundles: {
             distRoot: ctx.paths.dist,
-            app: 'app.js'
-        }
+            app: 'app.js',
+        },
     })
 })
 
@@ -96,7 +101,7 @@ task('build', async ctx => {
     await ctx.runProd({
         bundles: {
             distRoot: ctx.paths.dist,
-            app: 'app.js'
-        }
+            app: 'app.js',
+        },
     })
 })

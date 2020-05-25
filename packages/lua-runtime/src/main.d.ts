@@ -8,6 +8,8 @@ declare module '@fbe/lua-runtime' {
         allocateUTF8: typeof allocateUTF8
         getValue: typeof getValue
     }
-    const createLuaEnv: (module?: Partial<EmscriptenModule>) => { then: (cb: (module: IModule) => void) => void }
+    const createLuaEnv: (
+        module?: Partial<EmscriptenModule>
+    ) => { then: (cb: (module: IModule) => void) => void }
     export default createLuaEnv
 }

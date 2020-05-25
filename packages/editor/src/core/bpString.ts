@@ -26,12 +26,12 @@ const validate = new Ajv({ verbose: true })
     .addKeyword('entityName', {
         validate: (data: string) => !!FD.entities[data],
         errors: false,
-        schema: false
+        schema: false,
     })
     .addKeyword('itemName', {
         validate: (data: string) => !!FD.items[data],
         errors: false,
-        schema: false
+        schema: false,
     })
     .addKeyword('objectWithItemNames', {
         validate: (data: object) => {
@@ -43,17 +43,17 @@ const validate = new Ajv({ verbose: true })
             return true
         },
         errors: false,
-        schema: false
+        schema: false,
     })
     .addKeyword('recipeName', {
         validate: (data: string) => !!FD.recipes[data],
         errors: false,
-        schema: false
+        schema: false,
     })
     .addKeyword('tileName', {
         validate: (data: string) => !!FD.tiles[data] || data === 'landfill',
         errors: false,
-        schema: false
+        schema: false,
     })
     .compile(blueprintSchema)
 
@@ -68,7 +68,7 @@ const nameMigrations: Record<string, string> = {
     // ',"recipe":"iron-axe"': ''
 
     // if (blueprintVersion < getFactorioVersion(0, 17, 10))
-    '"grass-1"': '"landfill"'
+    '"grass-1"': '"landfill"',
 }
 const nameMigrationsRegex = new RegExp(Object.keys(nameMigrations).join('|'), 'g')
 
@@ -79,7 +79,9 @@ function decode(str: string): Promise<Blueprint | Book> {
                 pako
                     .inflate(atob(str.slice(1)), { to: 'string' })
                     .replace(nameMigrationsRegex, match => nameMigrations[match])
-                    .replace(/("[^,]{3,}?")/g, (_: string, capture: string) => capture.replace(/-/g, '_'))
+                    .replace(/("[^,]{3,}?")/g, (_: string, capture: string) =>
+                        capture.replace(/-/g, '_')
+                    )
             )
             console.log(data)
             if (!validate(data)) {
@@ -87,7 +89,9 @@ function decode(str: string): Promise<Blueprint | Book> {
                 if (trainRelated) {
                     reject(new TrainBlueprintError(validate.errors))
                 } else {
-                    const moddedBlueprint = !!validate.errors.find(e => customKeywords.includes(e.keyword))
+                    const moddedBlueprint = !!validate.errors.find(e =>
+                        customKeywords.includes(e.keyword)
+                    )
                     if (moddedBlueprint) {
                         reject(new ModdedBlueprintError(validate.errors))
                     } else {
@@ -95,7 +99,11 @@ function decode(str: string): Promise<Blueprint | Book> {
                     }
                 }
             }
-            resolve(data.blueprint_book === undefined ? new Blueprint(data.blueprint) : new Book(data.blueprint_book))
+            resolve(
+                data.blueprint_book === undefined
+                    ? new Blueprint(data.blueprint)
+                    : new Book(data.blueprint_book)
+            )
         } catch (e) {
             reject(e)
         }
@@ -120,12 +128,13 @@ function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: Error
         return {
             value: `0${btoa(
                 pako.deflate(
-                    string.replace(/(:".+?"|"[a-z]+?_module(|_[0-9])")/g, (_: string, capture: string) =>
-                        capture.replace(/_/g, '-')
+                    string.replace(
+                        /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
+                        (_: string, capture: string) => capture.replace(/_/g, '-')
                     ),
                     { to: 'string' }
                 )
-            )}`
+            )}`,
         }
     } catch (e) {
         return { error: e }
@@ -171,24 +180,30 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
             // TODO: add dropbox support https://www.dropbox.com/s/ID?raw=1
             switch (url.hostname.split('.')[0]) {
                 case 'pastebin':
-                    return fetchData(`${corsProxy}https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
+                    return fetchData(
+                        `${corsProxy}https://pastebin.com/raw/${pathParts[0]}`
+                    ).then(r => r.text())
                 case 'hastebin':
-                    return fetchData(`${corsProxy}https://hastebin.com/raw/${pathParts[0]}`).then(r => r.text())
+                    return fetchData(
+                        `${corsProxy}https://hastebin.com/raw/${pathParts[0]}`
+                    ).then(r => r.text())
                 case 'gist':
                     return fetchData(`https://api.github.com/gists/${pathParts[1]}`).then(r =>
                         r.json().then(data => data.files[Object.keys(data.files)[0]].content)
                     )
                 case 'gitlab':
                     // https://gitlab.com/gitlab-org/gitlab-ce/issues/24596
-                    return fetchData(`${corsProxy}https://gitlab.com/snippets/${pathParts[1]}/raw`).then(r => r.text())
+                    return fetchData(
+                        `${corsProxy}https://gitlab.com/snippets/${pathParts[1]}/raw`
+                    ).then(r => r.text())
                 case 'factorioprints':
                     return fetchData(
                         `https://facorio-blueprints.firebaseio.com/blueprints/${pathParts[1]}.json`
                     ).then(r => r.json().then(data => data.blueprintString))
                 case 'docs':
-                    return fetchData(`https://docs.google.com/document/d/${pathParts[2]}/export?format=txt`).then(r =>
-                        r.text()
-                    )
+                    return fetchData(
+                        `https://docs.google.com/document/d/${pathParts[2]}/export?format=txt`
+                    ).then(r => r.text())
                 default:
                     return fetchData(url.href).then(r => r.text())
             }

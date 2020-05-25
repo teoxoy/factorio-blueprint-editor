@@ -4,7 +4,14 @@ import F from '../UI/controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
 
-type CursorBoxType = 'regular' | 'not_allowed' | 'logistics' | 'electricity' | 'pair' | 'copy' | 'train_visualization'
+type CursorBoxType =
+    | 'regular'
+    | 'not_allowed'
+    | 'logistics'
+    | 'electricity'
+    | 'pair'
+    | 'copy'
+    | 'train_visualization'
 const cursorBoxTypeToOffset = (type: CursorBoxType): number => {
     switch (type) {
         case 'regular':
@@ -61,7 +68,7 @@ class OverlayContainer extends PIXI.Container {
                 for (const fb of entity.entityData.fluid_boxes) {
                     ;(fb.production_type === 'input' ? inputPositions : outputPositions).push({
                         x: fb.pipe_connections[0].position[0],
-                        y: fb.pipe_connections[0].position[1]
+                        y: fb.pipe_connections[0].position[1],
                     })
                 }
 
@@ -87,7 +94,9 @@ class OverlayContainer extends PIXI.Container {
                     createIconsForType('output')
                 }
             } else if (recipe.category === 'crafting_with_fluid') {
-                for (const io of entity.assemblerPipeDirection === 'input' ? recipe.ingredients : recipe.results) {
+                for (const io of entity.assemblerPipeDirection === 'input'
+                    ? recipe.ingredients
+                    : recipe.results) {
                     if (io.type === 'fluid') {
                         const position = util.rotatePointBasedOnDir(
                             entity.entityData.fluid_boxes.find(
@@ -97,7 +106,7 @@ class OverlayContainer extends PIXI.Container {
                         )
                         createIconWithBackground(fluidIcons, io.name, {
                             x: position.x * 32,
-                            y: position.y * 32
+                            y: position.y * 32,
                         })
                     }
                 }
@@ -123,7 +132,10 @@ class OverlayContainer extends PIXI.Container {
             entityInfo.addChild(moduleInfo)
         }
 
-        const filters = entity.filters === undefined ? undefined : entity.filters.filter(v => v.name !== undefined)
+        const filters =
+            entity.filters === undefined
+                ? undefined
+                : entity.filters.filter(v => v.name !== undefined)
         if (
             filters !== undefined &&
             (entity.type === 'inserter' ||
@@ -142,7 +154,7 @@ class OverlayContainer extends PIXI.Container {
 
                 createIconWithBackground(filterInfo, filters[i].name, {
                     x: (i % 2) * 32 - (filters.length === 1 ? 0 : 16),
-                    y: filters.length < 3 ? 0 : (i < 2 ? -1 : 1) * 16
+                    y: filters.length < 3 ? 0 : (i < 2 ? -1 : 1) * 16,
                 })
             }
             let S = 0.5
@@ -165,14 +177,15 @@ class OverlayContainer extends PIXI.Container {
                 }
                 createIconWithBackground(filterInfo, filters[i].signal.name, {
                     x: (i % 2) * 32 - (filters.length === 1 ? 0 : 16),
-                    y: filters.length < 3 ? 0 : (i < 2 ? -1 : 1) * 16
+                    y: filters.length < 3 ? 0 : (i < 2 ? -1 : 1) * 16,
                 })
             }
             filterInfo.scale.set(0.5, 0.5)
             entityInfo.addChild(filterInfo)
         }
 
-        const combinatorConditions = entity.deciderCombinatorConditions || entity.arithmeticCombinatorConditions
+        const combinatorConditions =
+            entity.deciderCombinatorConditions || entity.arithmeticCombinatorConditions
         if (combinatorConditions) {
             const filterInfo = new PIXI.Container()
             const cFS = combinatorConditions.first_signal
@@ -203,7 +216,7 @@ class OverlayContainer extends PIXI.Container {
                     )
                     createIconWithBackground(filteredFluidInputs, fluidBox.filter, {
                         x: position.x * 64,
-                        y: position.y * 64
+                        y: position.y * 64,
                     })
                 }
             }
@@ -220,7 +233,10 @@ class OverlayContainer extends PIXI.Container {
 
             const createArrowForDirection = (direction: string, offsetY: number): void => {
                 const arrow = createArrow(
-                    util.rotatePointBasedOnDir({ x: direction === 'right' ? 32 : -32, y: offsetY }, entity.direction)
+                    util.rotatePointBasedOnDir(
+                        { x: direction === 'right' ? 32 : -32, y: offsetY },
+                        entity.direction
+                    )
                 )
                 arrow.scale.set(0.75, 0.75)
                 arrow.rotation = entity.direction * Math.PI * 0.25
@@ -259,7 +275,7 @@ class OverlayContainer extends PIXI.Container {
             arrows.addChild(
                 createArrow({
                     x: entity.entityData.vector_to_place_result[0] * 64,
-                    y: entity.entityData.vector_to_place_result[1] * 64 + 18
+                    y: entity.entityData.vector_to_place_result[1] * 64 + 18,
                 })
             )
             arrows.rotation = entity.direction * Math.PI * 0.25
@@ -303,7 +319,7 @@ class OverlayContainer extends PIXI.Container {
                 const arrow = createArrow(
                     {
                         x: position.x * 64,
-                        y: position.y * 64
+                        y: position.y * 64,
                     },
                     type
                 )
@@ -322,19 +338,23 @@ class OverlayContainer extends PIXI.Container {
             const arrows = new PIXI.Container()
             if (entity.entityData.fluid_boxes) {
                 if (entity.assemblerCraftsWithFluid) {
-                    const c = entity.entityData.fluid_boxes[entity.assemblerPipeDirection === 'input' ? 1 : 0]
+                    const c =
+                        entity.entityData.fluid_boxes[
+                            entity.assemblerPipeDirection === 'input' ? 1 : 0
+                        ]
                     createFluidArrow({
                         x: c.pipe_connections[0].position[0],
-                        y: c.pipe_connections[0].position[1]
+                        y: c.pipe_connections[0].position[1],
                     })
                 } else {
-                    const dontConnectOutput = entity.name === 'chemical_plant' && entity.chemicalPlantDontConnectOutput
+                    const dontConnectOutput =
+                        entity.name === 'chemical_plant' && entity.chemicalPlantDontConnectOutput
                     for (const c of entity.entityData.fluid_boxes) {
                         // fluid_boxes are reversed
                         if (!(c.production_type === 'input' && dontConnectOutput)) {
                             createFluidArrow({
                                 x: c.pipe_connections[0].position[0],
-                                y: c.pipe_connections[0].position[1]
+                                y: c.pipe_connections[0].position[1],
                             })
                         }
                     }
@@ -342,13 +362,16 @@ class OverlayContainer extends PIXI.Container {
             } else {
                 if (entity.entityData.fluid_box) {
                     for (const p of entity.entityData.fluid_box.pipe_connections) {
-                        if (entity.name === 'pump' && p === entity.entityData.fluid_box.pipe_connections[1]) {
+                        if (
+                            entity.name === 'pump' &&
+                            p === entity.entityData.fluid_box.pipe_connections[1]
+                        ) {
                             break
                         }
                         createFluidArrow(
                             {
                                 x: p.position[0],
-                                y: p.position[1]
+                                y: p.position[1],
                             },
                             entity.entityData.fluid_box.production_type === 'input_output' ? 2 : 1
                         )
@@ -358,7 +381,7 @@ class OverlayContainer extends PIXI.Container {
                     for (const p of entity.entityData.output_fluid_box.pipe_connections) {
                         createFluidArrow({
                             x: p.position ? p.position[0] : p.positions[entity.direction / 2][0],
-                            y: p.position ? p.position[1] : p.positions[entity.direction / 2][1]
+                            y: p.position ? p.position[1] : p.positions[entity.direction / 2][1],
                         })
                     }
                 }
@@ -366,7 +389,9 @@ class OverlayContainer extends PIXI.Container {
 
             if (entity.name !== 'pumpjack') {
                 arrows.rotation =
-                    (entity.name === 'oil_refinery' || entity.name === 'pump' || entity.type === 'boiler'
+                    (entity.name === 'oil_refinery' ||
+                    entity.name === 'pump' ||
+                    entity.type === 'boiler'
                         ? entity.direction
                         : (entity.direction + 4) % 8) *
                     Math.PI *
@@ -382,7 +407,11 @@ class OverlayContainer extends PIXI.Container {
             return entityInfo
         }
 
-        function createIconWithBackground(container: PIXI.Container, itemName: string, position?: IPoint): void {
+        function createIconWithBackground(
+            container: PIXI.Container,
+            itemName: string,
+            position?: IPoint
+        ): void {
             const icon = F.CreateIcon(itemName)
             const background = PIXI.Sprite.from('graphics/entity-info-dark-background.png')
             background.anchor.set(0.5, 0.5)
@@ -393,7 +422,10 @@ class OverlayContainer extends PIXI.Container {
             const lastLength = container.children.length
             container.addChild(background, icon)
             if (lastLength !== 0) {
-                container.swapChildren(container.getChildAt(lastLength / 2), container.getChildAt(lastLength))
+                container.swapChildren(
+                    container.getChildAt(lastLength / 2),
+                    container.getChildAt(lastLength)
+                )
             }
         }
 
@@ -415,7 +447,11 @@ class OverlayContainer extends PIXI.Container {
         }
     }
 
-    public createCursorBox(position: IPoint, size: IPoint, type: CursorBoxType = 'regular'): PIXI.Container {
+    public createCursorBox(
+        position: IPoint,
+        size: IPoint,
+        type: CursorBoxType = 'regular'
+    ): PIXI.Container {
         const cursorBox = new PIXI.Container()
         cursorBox.scale.set(0.5, 0.5)
         cursorBox.position.set(position.x, position.y)
@@ -431,7 +467,10 @@ class OverlayContainer extends PIXI.Container {
             cursorBox.addChild(s)
         } else {
             cursorBox.addChild(
-                ...createCorners('graphics/cursor-boxes.png', mapMinLengthToSpriteIndex(Math.min(size.x, size.y)))
+                ...createCorners(
+                    'graphics/cursor-boxes.png',
+                    mapMinLengthToSpriteIndex(Math.min(size.x, size.y))
+                )
             )
         }
 
@@ -534,7 +573,7 @@ class OverlayContainer extends PIXI.Container {
                 const otherEntityCursorBox = G.BPC.overlayContainer.createCursorBox(
                     {
                         x: searchingAlongY ? 0 : sign * distance * 32,
-                        y: searchingAlongY ? sign * distance * 32 : 0
+                        y: searchingAlongY ? sign * distance * 32 : 0,
                     },
                     otherEntity.size,
                     'pair'

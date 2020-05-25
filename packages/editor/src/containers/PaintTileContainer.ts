@@ -11,7 +11,7 @@ export class PaintTileContainer extends PaintContainer {
             const offset = PaintTileContainer.size / 2 - 0.5
             return {
                 x: (i % PaintTileContainer.size) - offset,
-                y: (i - (i % PaintTileContainer.size)) / PaintTileContainer.size - offset
+                y: (i - (i % PaintTileContainer.size)) / PaintTileContainer.size - offset,
             }
         })
     }
@@ -76,7 +76,11 @@ export class PaintTileContainer extends PaintContainer {
 
         this.addChild(
             ...PaintTileContainer.getTilePositions().map(p => {
-                const s = TileContainer.generateSprite(this.name, p.x + this.position.x, p.y + this.position.y)
+                const s = TileContainer.generateSprite(
+                    this.name,
+                    p.x + this.position.x,
+                    p.y + this.position.y
+                )
                 s.position.set(p.x * 32, p.y * 32)
                 s.alpha = 0.5
                 return s
@@ -87,7 +91,7 @@ export class PaintTileContainer extends PaintContainer {
     public moveAtCursor(): void {
         this.setNewPosition({
             x: PaintTileContainer.size,
-            y: PaintTileContainer.size
+            y: PaintTileContainer.size,
         })
     }
 
@@ -98,7 +102,12 @@ export class PaintTileContainer extends PaintContainer {
 
         const position = this.getGridPosition()
 
-        G.bp.removeTiles(PaintTileContainer.getTilePositions().map(p => ({ x: p.x + position.x, y: p.y + position.y })))
+        G.bp.removeTiles(
+            PaintTileContainer.getTilePositions().map(p => ({
+                x: p.x + position.x,
+                y: p.y + position.y,
+            }))
+        )
     }
 
     public placeEntityContainer(): void {
@@ -110,7 +119,10 @@ export class PaintTileContainer extends PaintContainer {
 
         G.bp.createTiles(
             this.name,
-            PaintTileContainer.getTilePositions().map(p => ({ x: p.x + position.x, y: p.y + position.y }))
+            PaintTileContainer.getTilePositions().map(p => ({
+                x: p.x + position.x,
+                y: p.y + position.y,
+            }))
         )
     }
 }

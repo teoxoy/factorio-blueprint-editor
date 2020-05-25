@@ -20,17 +20,32 @@ export class Checkbox extends PIXI.Container {
     private static drawGraphic(checked: boolean, hover: boolean, visible: boolean): PIXI.Graphics {
         const graphic: PIXI.Graphics = new PIXI.Graphics()
         graphic
-            .beginFill(colors.controls.checkbox.background.color, colors.controls.checkbox.background.alpha)
+            .beginFill(
+                colors.controls.checkbox.background.color,
+                colors.controls.checkbox.background.alpha
+            )
             .drawRect(2, 2, 32, 32)
             .beginFill(
-                hover ? colors.controls.checkbox.hover.color : colors.controls.checkbox.background.color,
-                hover ? colors.controls.checkbox.hover.alpha : colors.controls.checkbox.background.alpha
+                hover
+                    ? colors.controls.checkbox.hover.color
+                    : colors.controls.checkbox.background.color,
+                hover
+                    ? colors.controls.checkbox.hover.alpha
+                    : colors.controls.checkbox.background.alpha
             )
             .drawRoundedRect(0, 0, 36, 36, 10)
-            .lineStyle(2, colors.controls.checkbox.checkmark.color, colors.controls.checkbox.checkmark.alpha, 0.5)
+            .lineStyle(
+                2,
+                colors.controls.checkbox.checkmark.color,
+                colors.controls.checkbox.checkmark.alpha,
+                0.5
+            )
         if (checked) {
             graphic
-                .beginFill(colors.controls.checkbox.checkmark.color, colors.controls.checkbox.checkmark.alpha)
+                .beginFill(
+                    colors.controls.checkbox.checkmark.color,
+                    colors.controls.checkbox.checkmark.alpha
+                )
                 .drawPolygon(Checkbox.CHECK_POLYGON)
         }
         graphic.cacheAsBitmap = true

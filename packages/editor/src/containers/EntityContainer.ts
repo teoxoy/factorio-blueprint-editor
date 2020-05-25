@@ -21,7 +21,7 @@ const updateGroups = [
             'express_underground_belt',
             'loader',
             'fast_loader',
-            'express_loader'
+            'express_loader',
         ],
         updates: [
             'transport_belt',
@@ -35,21 +35,21 @@ const updateGroups = [
             'express_underground_belt',
             'loader',
             'fast_loader',
-            'express_loader'
-        ]
+            'express_loader',
+        ],
     },
     {
         is: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
-        updates: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface']
+        updates: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
     },
     {
         has: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
-        updates: ['fluid_box', 'output_fluid_box', 'fluid_boxes']
+        updates: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
     },
     {
         is: ['stone_wall', 'gate', 'straight_rail'],
-        updates: ['stone_wall', 'gate', 'straight_rail']
-    }
+        updates: ['stone_wall', 'gate', 'straight_rail'],
+    },
 ]
     .map(uG => {
         if (!uG.has) {
@@ -58,7 +58,9 @@ const updateGroups = [
         const entities = Object.values(FD.entities)
         return {
             is: entities.filter(e => Object.keys(e).find(k => uG.has.includes(k))).map(e => e.name),
-            updates: entities.filter(e => Object.keys(e).find(k => uG.updates.includes(k))).map(e => e.name)
+            updates: entities
+                .filter(e => Object.keys(e).find(k => uG.updates.includes(k)))
+                .map(e => e.name),
         }
     })
     .reduce((pV: Record<string, string[]>, cV) => {
@@ -86,8 +88,14 @@ export class EntityContainer {
 
         EntityContainer.mappings.set(this.m_Entity.entityNumber, this)
 
-        this.visualizationArea = G.BPC.visualizationAreaContainer.create(this.m_Entity.name, this.position)
-        this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entityNumber, this.position)
+        this.visualizationArea = G.BPC.visualizationAreaContainer.create(
+            this.m_Entity.name,
+            this.position
+        )
+        this.entityInfo = G.BPC.overlayContainer.createEntityInfo(
+            this.m_Entity.entityNumber,
+            this.position
+        )
 
         this.redraw(false, sort)
         if (sort) {
@@ -160,7 +168,7 @@ export class EntityContainer {
     public get position(): IPoint {
         return {
             x: this.m_Entity.position.x * 32,
-            y: this.m_Entity.position.y * 32
+            y: this.m_Entity.position.y * 32,
         }
     }
 
@@ -169,7 +177,11 @@ export class EntityContainer {
             this.cursorBoxContainer.destroy()
         }
         if (type !== undefined) {
-            this.cursorBoxContainer = G.BPC.overlayContainer.createCursorBox(this.position, this.m_Entity.size, type)
+            this.cursorBoxContainer = G.BPC.overlayContainer.createCursorBox(
+                this.position,
+                this.m_Entity.size,
+                type
+            )
         }
     }
 
@@ -218,7 +230,10 @@ export class EntityContainer {
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()
             }
-            this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity.entityNumber, this.position)
+            this.entityInfo = G.BPC.overlayContainer.createEntityInfo(
+                this.m_Entity.entityNumber,
+                this.position
+            )
         }
 
         G.UI.updateInfoEntityPanel(this.m_Entity)
@@ -248,7 +263,7 @@ export class EntityContainer {
             x: position.x,
             y: position.y,
             w: this.m_Entity.size.x,
-            h: this.m_Entity.size.y
+            h: this.m_Entity.size.y,
         }
         if (this.m_Entity.name === 'straight_rail') {
             G.bp.entityPositionGrid
@@ -269,7 +284,7 @@ export class EntityContainer {
                     ...G.bp.entityPositionGrid.getSurroundingEntities({
                         ...area,
                         w: area.w + 2,
-                        h: area.h + 2
+                        h: area.h + 2,
                     })
                 )
             }

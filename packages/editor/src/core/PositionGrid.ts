@@ -20,7 +20,7 @@ interface INeighbourData extends IPoint {
 const processArea = (area: IArea): IArea => ({
     ...area,
     x: Math.round(area.x - area.w / 2),
-    y: Math.round(area.y - area.h / 2)
+    y: Math.round(area.y - area.h / 2),
 })
 
 const tileDataAction = (
@@ -79,11 +79,14 @@ export class PositionGrid {
                 x: position.x,
                 y: position.y,
                 w: entity.size.x,
-                h: entity.size.y
+                h: entity.size.y,
             },
             (key, cell) => {
                 if (cell) {
-                    const entityNumbers = [entity.entityNumber, ...(typeof cell === 'number' ? [cell] : cell)]
+                    const entityNumbers = [
+                        entity.entityNumber,
+                        ...(typeof cell === 'number' ? [cell] : cell),
+                    ]
                         // Sort entities by their size
                         .sort((a, b) => {
                             const sA = this.bp.entities.get(a).size
@@ -107,7 +110,7 @@ export class PositionGrid {
                 x: position.x,
                 y: position.y,
                 w: entity.size.x,
-                h: entity.size.y
+                h: entity.size.y,
             },
             (key, cell) => {
                 if (typeof cell === 'number') {
@@ -156,7 +159,7 @@ export class PositionGrid {
             x: pos.x,
             y: pos.y,
             w: size.x,
-            h: size.y
+            h: size.y,
         }
 
         if (this.isAreaEmpty(area)) {
@@ -188,7 +191,10 @@ export class PositionGrid {
         const sameDirStrRails = straightRails.some(rail => rail.direction === direction)
 
         if (
-            (name === 'gate' && straightRails.length === 1 && straightRails[0].direction !== direction && !gate) ||
+            (name === 'gate' &&
+                straightRails.length === 1 &&
+                straightRails[0].direction !== direction &&
+                !gate) ||
             (name === 'straight_rail' &&
                 gate &&
                 gate.direction !== direction &&
@@ -199,7 +205,8 @@ export class PositionGrid {
             (name === 'straight_rail' && curvedRail) ||
             (name === 'curved_rail' && curvedRail && curvedRail.direction !== direction) ||
             // TODO: remove this when we add better rail support
-            ((name === 'rail_signal' || name === 'rail_chain_signal') && (curvedRail || straightRails.length > 0)) ||
+            ((name === 'rail_signal' || name === 'rail_chain_signal') &&
+                (curvedRail || straightRails.length > 0)) ||
             ((name === 'straight_rail' || name === 'curved_rail') && signal)
         ) {
             return true
@@ -215,7 +222,7 @@ export class PositionGrid {
             x: pos.x,
             y: pos.y,
             w: size.x,
-            h: size.y
+            h: size.y,
         }
 
         if (this.sharesCell(area)) {
@@ -235,7 +242,11 @@ export class PositionGrid {
         return entity
     }
 
-    public checkSameEntityAndDifferentDirection(name: string, direction: number, pos: IPoint): Entity {
+    public checkSameEntityAndDifferentDirection(
+        name: string,
+        direction: number,
+        pos: IPoint
+    ): Entity {
         if (name === 'straight_rail') {
             return
         }
@@ -245,7 +256,7 @@ export class PositionGrid {
             x: pos.x,
             y: pos.y,
             w: size.x,
-            h: size.y
+            h: size.y,
         }
 
         if (this.sharesCell(area)) {
@@ -253,7 +264,12 @@ export class PositionGrid {
         }
         const entity = this.findInArea(area, entity => entity.name === name)
 
-        if (!entity || pos.x !== entity.position.x || pos.y !== entity.position.y || entity.direction === direction) {
+        if (
+            !entity ||
+            pos.x !== entity.position.x ||
+            pos.y !== entity.position.y ||
+            entity.direction === direction
+        ) {
             return
         }
         return entity
@@ -389,7 +405,7 @@ export class PositionGrid {
             { x: 0, y: -1 },
             { x: 1, y: 0 },
             { x: 0, y: 1 },
-            { x: -1, y: 0 }
+            { x: -1, y: 0 },
         ].map((o, i) => {
             const x = Math.floor(point.x) + o.x
             const y = Math.floor(point.y) + o.y

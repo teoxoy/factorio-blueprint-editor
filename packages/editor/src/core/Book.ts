@@ -48,14 +48,14 @@ export class Book {
                 // TODO: modified instead of loaded
                 blueprint: this.blueprints[i].loaded
                     ? this.blueprints[i].loaded.serialize()
-                    : this.blueprints[i].blueprint
+                    : this.blueprints[i].blueprint,
             })
         }
         return {
             blueprints,
             item: 'blueprint_book',
             active_index: this._activeIndex,
-            version: getFactorioVersion()
+            version: getFactorioVersion(),
         }
     }
 }
