@@ -11,7 +11,9 @@
         "start": "yarn build:editor && concurrently \"yarn:start:editor\" \"yarn:start:website\"",
         "build": "yarn build:editor && yarn build:website",
         "lint": "eslint . --ignore-path .gitignore --ext .ts",
-        "lint:fix": "eslint . --ignore-path .gitignore --ext .ts --fix"
+        "lint:fix": "eslint . --ignore-path .gitignore --ext .ts --fix",
+        "format": "prettier **/*.{js,ts,html,json,yml,md} --check --config .prettierrc.yml --ignore-path .gitignore",
+        "format:fix": "prettier **/*.{js,ts,html,json,yml,md} --write --config .prettierrc.yml --ignore-path .gitignore"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^2.33.0",
