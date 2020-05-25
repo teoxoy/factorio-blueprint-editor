@@ -1,15 +1,15 @@
 import * as PIXI from 'pixi.js'
 import G from './common/globals'
 import U from './common/util'
-import { Book } from './factorio-data/book'
-import Entity from './factorio-data/entity'
-import Blueprint, { oilOutpostSettings, IOilOutpostSettings } from './factorio-data/blueprint'
-import bpString, { ModdedBlueprintError, TrainBlueprintError } from './factorio-data/bpString'
-import { EntityContainer } from './containers/entity'
-import { TilePaintContainer } from './containers/paintTile'
-import { BlueprintContainer, EditorMode, GridPattern } from './containers/blueprint'
-import UIContainer from './UI/ui'
-import Dialog from './UI/controls/dialog'
+import { Book } from './core/Book'
+import Entity from './core/Entity'
+import Blueprint, { oilOutpostSettings, IOilOutpostSettings } from './core/Blueprint'
+import bpString, { ModdedBlueprintError, TrainBlueprintError } from './core/bpString'
+import { EntityContainer } from './containers/EntityContainer'
+import { PaintTileContainer } from './containers/PaintTileContainer'
+import { BlueprintContainer, EditorMode, GridPattern } from './containers/BlueprintContainer'
+import UIContainer from './UI/UIContainer'
+import Dialog from './UI/controls/Dialog'
 import {
     initActions,
     registerAction,
@@ -141,7 +141,7 @@ function registerActions(): void {
 
     registerAction('increaseTileBuildingArea', ']').bind({
         press: () => {
-            if (G.BPC.paintContainer instanceof TilePaintContainer) {
+            if (G.BPC.paintContainer instanceof PaintTileContainer) {
                 G.BPC.paintContainer.increaseSize()
             }
         }
@@ -149,7 +149,7 @@ function registerActions(): void {
 
     registerAction('decreaseTileBuildingArea', '[').bind({
         press: () => {
-            if (G.BPC.paintContainer instanceof TilePaintContainer) {
+            if (G.BPC.paintContainer instanceof PaintTileContainer) {
                 G.BPC.paintContainer.decreaseSize()
             }
         }

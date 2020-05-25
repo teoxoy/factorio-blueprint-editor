@@ -1,12 +1,12 @@
-import Entity from '../../factorio-data/entity'
-import Editor from './editor'
-import BeaconEditor from './beacon'
-import InserterEditor from './inserter'
-import MachineEditor from './machine'
-import MiningEditor from './mining'
-import SplitterEditor from './splitter'
-import ChestEditor from './chest'
-import TempEditor from './temp'
+import Entity from '../../core/Entity'
+import Editor from './Editor'
+import BeaconEditor from './BeaconEditor'
+import InserterEditor from './InserterEditor'
+import MachineEditor from './MachineEditor'
+import MiningEditor from './MiningEditor'
+import SplitterEditor from './SplitterEditor'
+import ChestEditor from './ChestEditor'
+import TempEditor from './TempEditor'
 
 /**
  * Factory Function for creating Editor based on Entity Number
