@@ -13,15 +13,16 @@
 
         <title>Factorio Blueprint Editor</title>
 
-        <link rel="icon" href="assets/favicon.png" />
+        <link rel="icon" href="$import('assets/favicon.png')" />
         <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet" />
+        $css
     </head>
 
     <body oncontextmenu="return false;">
         <div id="loadingScreen" class="active">
-            <img id="logo" src="assets/logo.svg" />
-            <img class="loadingWheel" src="assets/loadingWheel.svg" />
+            <img id="logo" src="$import('assets/logo.svg')" />
+            <img class="loadingWheel" src="$import('assets/loadingWheel.svg')" />
         </div>
         <div id="corner-panel">
             <!-- prettier-ignore -->
@@ -89,5 +90,6 @@
             </p>
         </div>
         <canvas id="editor" tabindex="1"></canvas>
+        $bundles
     </body>
 </html>

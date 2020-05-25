@@ -1,3 +1,5 @@
+import './index.styl'
+
 import { utils as pixiUtils } from 'pixi.js'
 import EDITOR, { Blueprint, Book, TrainBlueprintError, ModdedBlueprintError } from '@fbe/editor'
 import FileSaver from 'file-saver'

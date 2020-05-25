@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "start": "webpack-dev-server",
-        "build": "webpack --mode=production"
+        "start": "ts-node -T tools/fuse dev",
+        "build": "ts-node -T tools/fuse build"
     },
     "dependencies": {
         "@fbe/editor": "*",
@@ -16,32 +16,11 @@
     "devDependencies": {
         "@types/dat.gui": "^0.7.5",
         "@types/file-saver": "^2.0.1",
-        "@types/html-webpack-plugin": "^3.2.1",
-        "@types/mini-css-extract-plugin": "^0.8.0",
-        "@types/node": "^12.12.7",
-        "@types/optimize-css-assets-webpack-plugin": "^5.0.1",
-        "@types/terser-webpack-plugin": "^1.2.1",
-        "@types/webpack": "^4.41.0",
-        "@types/webpack-dev-server": "^3.4.0",
-        "clean-webpack-plugin": "^3.0.0",
-        "css-loader": "^3.2.0",
-        "extract-loader": "^3.1.0",
-        "file-loader": "^4.2.0",
-        "html-loader": "^0.5.5",
-        "html-webpack-plugin": "^3.2.0",
-        "mini-css-extract-plugin": "^0.8.0",
-        "optimize-css-assets-webpack-plugin": "^5.0.3",
-        "postcss-loader": "^3.0.0",
-        "postcss-preset-env": "^6.7.0",
+        "@types/node": "^14.0.1",
+        "fuse-box": "4.0.0-next.430",
+        "luamin": "^1.0.4",
         "stylus": "^0.54.7",
-        "stylus-loader": "^3.0.2",
-        "svg-inline-loader": "^0.8.0",
-        "terser-webpack-plugin": "^2.2.1",
-        "ts-loader": "^6.2.0",
-        "ts-node": "^8.4.1",
-        "typescript": "^3.6.4",
-        "webpack": "^4.41.2",
-        "webpack-cli": "^3.3.9",
-        "webpack-dev-server": "^3.9.0"
+        "ts-node": "^8.10.1",
+        "typescript": "^3.9.2"
     }
 }

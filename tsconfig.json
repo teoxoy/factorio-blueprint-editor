@@ -1,15 +1,20 @@
 {
     "compilerOptions": {
         "pretty": true,
-
         "sourceMap": true,
         "alwaysStrict": true,
         "removeComments": true,
-
         "noImplicitAny": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
+        "preserveConstEnums": true,
 
-        "preserveConstEnums": true
+        "rootDir": ".",
+        "baseUrl": ".",
+        "paths": {
+            "@fbe/*": ["packages/*/src/index.ts"]
+        },
+
+        "typeRoots": ["./node_modules/@types", "./typings"]
     }
 }
