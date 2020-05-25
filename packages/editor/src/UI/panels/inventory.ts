@@ -1,6 +1,6 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '~/common/globals'
+import G from '../../common/globals'
 import F from '../controls/functions'
 import Dialog from '../controls/dialog'
 import Button from '../controls/button'

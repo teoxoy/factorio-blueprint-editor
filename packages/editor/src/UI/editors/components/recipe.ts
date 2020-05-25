@@ -1,5 +1,5 @@
-import G from '~/common/globals'
-import Entity from '~/factorio-data/entity'
+import G from '../../../common/globals'
+import Entity from '../../../factorio-data/entity'
 import Slot from '../../controls/slot'
 import F from '../../controls/functions'
 

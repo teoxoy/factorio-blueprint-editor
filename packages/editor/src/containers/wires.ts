@@ -1,8 +1,8 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '~/common/globals'
-import U from '~/factorio-data/generators/util'
-import Entity from '~/factorio-data/entity'
+import G from '../common/globals'
+import U from '../factorio-data/generators/util'
+import Entity from '../factorio-data/entity'
 import { EntityContainer } from './entity'
 
 export class WiresContainer extends PIXI.Container {
@@ -191,15 +191,12 @@ export class WiresContainer extends PIXI.Container {
 
         const setsOfLines = U.pointsToTriangles(poles).map(tri =>
             tri
-                .reduce(
-                    (acc, _, i, arr) => {
-                        if (i === arr.length - 1) {
-                            return acc.concat([[arr[0], arr[i]]])
-                        }
-                        return acc.concat([[arr[i], arr[i + 1]]])
-                    },
-                    [] as IPole[][]
-                )
+                .reduce((acc, _, i, arr) => {
+                    if (i === arr.length - 1) {
+                        return acc.concat([[arr[0], arr[i]]])
+                    }
+                    return acc.concat([[arr[i], arr[i + 1]]])
+                }, [] as IPole[][])
                 .filter(line =>
                     U.pointInCircle(
                         line[0],

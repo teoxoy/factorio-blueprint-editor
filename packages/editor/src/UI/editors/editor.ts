@@ -1,4 +1,4 @@
-import Entity from '~/factorio-data/entity'
+import Entity from '../../factorio-data/entity'
 import Dialog from '../controls/dialog'
 import Preview from './components/preview'
 import Recipe from './components/recipe'

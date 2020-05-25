@@ -1,5 +1,5 @@
 import FD from 'factorio-data'
-import util from '~/common/util'
+import util from '../common/util'
 import Blueprint from './blueprint'
 import Entity from './entity'
 
@@ -120,9 +120,15 @@ export class PositionGrid {
                         if (cell.length === 1) {
                             this.grid.delete(key)
                         } else if (cell.length === 2) {
-                            this.grid.set(key, cell.find((_, k) => k !== res))
+                            this.grid.set(
+                                key,
+                                cell.find((_, k) => k !== res)
+                            )
                         } else {
-                            this.grid.set(key, cell.filter((_, k) => k !== res))
+                            this.grid.set(
+                                key,
+                                cell.filter((_, k) => k !== res)
+                            )
                         }
                     }
                 }
@@ -379,7 +385,12 @@ export class PositionGrid {
     }
 
     public getNeighbourData(point: IPoint): INeighbourData[] {
-        return [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }].map((o, i) => {
+        return [
+            { x: 0, y: -1 },
+            { x: 1, y: 0 },
+            { x: 0, y: 1 },
+            { x: -1, y: 0 }
+        ].map((o, i) => {
             const x = Math.floor(point.x) + o.x
             const y = Math.floor(point.y) + o.y
             const cell = this.grid.get(`${x},${y}`)

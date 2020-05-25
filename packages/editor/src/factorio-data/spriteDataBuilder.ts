@@ -1,5 +1,5 @@
 import FD from 'factorio-data'
-import util from '~/common/util'
+import util from '../common/util'
 import { PositionGrid } from './positionGrid'
 import Entity from './entity'
 
@@ -1067,7 +1067,11 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         }
                     })
 
-                    const spawnFilling = [[-1, 0], [-1, 1], [0, 1]]
+                    const spawnFilling = [
+                        [-1, 0],
+                        [-1, 1],
+                        [0, 1]
+                    ]
                         .map(o => {
                             const ent = data.positionGrid.getEntityAtPosition(
                                 data.position.x + o[0],

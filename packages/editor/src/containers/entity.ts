@@ -1,9 +1,9 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '~/common/globals'
-import { EntitySprite } from '~/entitySprite'
-import util from '~/common/util'
-import Entity from '~/factorio-data/entity'
+import G from '../common/globals'
+import { EntitySprite } from '../entitySprite'
+import util from '../common/util'
+import Entity from '../factorio-data/entity'
 import { VisualizationArea } from './visualizationArea'
 import { CursorBoxType } from './overlay'
 
@@ -61,15 +61,12 @@ const updateGroups = [
             updates: entities.filter(e => Object.keys(e).find(k => uG.updates.includes(k))).map(e => e.name)
         }
     })
-    .reduce(
-        (pV: Record<string, string[]>, cV) => {
-            cV.is.forEach(k => {
-                pV[k] = pV[k] ? util.uniqueInArray(pV[k].concat(cV.updates)) : cV.updates
-            })
-            return pV
-        },
-        {} as Record<string, string[]>
-    )
+    .reduce((pV: Record<string, string[]>, cV) => {
+        cV.is.forEach(k => {
+            pV[k] = pV[k] ? util.uniqueInArray(pV[k].concat(cV.updates)) : cV.updates
+        })
+        return pV
+    }, {} as Record<string, string[]>)
 
 export class EntityContainer {
     public static readonly mappings: Map<number, EntityContainer> = new Map()

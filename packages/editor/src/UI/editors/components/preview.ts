@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js'
-import util from '~/common/util'
-import { EntitySprite } from '~/entitySprite'
-import { OverlayContainer } from '~/containers/overlay'
-import Entity from '~/factorio-data/entity'
+import util from '../../../common/util'
+import { EntitySprite } from '../../../entitySprite'
+import { OverlayContainer } from '../../../containers/overlay'
+import Entity from '../../../factorio-data/entity'
 import { colors } from '../../style'
 
 /** Preview of Entity */
@@ -30,10 +30,7 @@ export default class Preview extends PIXI.Container {
         this.addChild(background)
 
         // Mask for the entity parts
-        const mask = new PIXI.Graphics()
-            .beginFill(0xffffff)
-            .drawRect(0, 0, size, size)
-            .endFill()
+        const mask = new PIXI.Graphics().beginFill(0xffffff).drawRect(0, 0, size, size).endFill()
         this.addChild(mask)
         this.mask = mask
 

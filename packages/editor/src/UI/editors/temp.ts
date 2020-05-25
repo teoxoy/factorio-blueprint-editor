@@ -1,4 +1,4 @@
-import Entity from '~/factorio-data/entity'
+import Entity from '../../factorio-data/entity'
 import Editor from './editor'
 
 export default class TempEditor extends Editor {

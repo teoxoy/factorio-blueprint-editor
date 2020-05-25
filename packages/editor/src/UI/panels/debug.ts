@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
-import G from '~/common/globals'
-import { EditorMode } from '~/containers/blueprint'
+import G from '../../common/globals'
+import { EditorMode } from '../../containers/blueprint'
 import { styles } from '../style'
 
 export class DebugContainer extends PIXI.Container {

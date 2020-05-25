@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import Entity from '~/factorio-data/entity'
+import Entity from '../../factorio-data/entity'
 import { styles } from '../style'
 import Slider from '../controls/slider'
 import Textbox from '../controls/textbox'

@@ -1,9 +1,9 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '~/common/globals'
-import util from '~/common/util'
-import { EntitySprite } from '~/entitySprite'
-import Entity from '~/factorio-data/entity'
+import G from '../common/globals'
+import util from '../common/util'
+import { EntitySprite } from '../entitySprite'
+import Entity from '../factorio-data/entity'
 import { VisualizationArea } from './visualizationArea'
 import { PaintContainer } from './paint'
 
