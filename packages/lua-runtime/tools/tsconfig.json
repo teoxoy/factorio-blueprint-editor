@@ -1,0 +1,10 @@
+{
+    "extends": "../../../tsconfig.json",
+    "compilerOptions": {
+        "target": "ES2016",
+        "module": "CommonJS",
+        "lib": ["ES2016"],
+        "esModuleInterop": true
+    },
+    "include": ["*.ts"]
+}
