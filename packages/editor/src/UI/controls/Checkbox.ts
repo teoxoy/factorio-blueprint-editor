@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import { colors, styles } from '../style'
 
 /** Base Checkbox */
-export default class Checkbox extends PIXI.Container {
+export class Checkbox extends PIXI.Container {
     /** Checkmark Polygon */
     // prettier-ignore
     private static readonly CHECK_POLYGON: PIXI.Polygon = new PIXI.Polygon([

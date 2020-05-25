@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import G from '../../common/globals'
 import { colors, styles } from '../style'
 import F from './functions'
-import Panel from './Panel'
+import { Panel } from './Panel'
 
 /**
  * Base Dialog for usage whenever a dialog shall be shown to the user
@@ -13,7 +13,7 @@ import Panel from './Panel'
  *  + has interactive children (this.interactiveChildren = true)
  *  + automatically executes 'setDialogPosition()' on Browser Resizing
  */
-export default class Dialog extends Panel {
+export class Dialog extends Panel {
     /** Closes last open dialog */
     public static closeLast(): void {
         if (Dialog.anyOpen()) {

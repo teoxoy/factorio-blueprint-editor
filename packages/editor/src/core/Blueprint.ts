@@ -3,12 +3,13 @@ import EventEmitter from 'eventemitter3'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import util from '../common/util'
-import Entity from './Entity'
+import { Entity } from './Entity'
 import { WireConnections } from './WireConnections'
 import { PositionGrid } from './PositionGrid'
-import generators, { IVisualization } from './generators'
-import History from './History'
-import Tile from './Tile'
+import * as generators from './generators'
+import { IVisualization } from './generators'
+import { History } from './History'
+import { Tile } from './Tile'
 
 interface IOilOutpostSettings extends Record<string, string | boolean | number> {
     DEBUG: boolean
@@ -78,7 +79,7 @@ interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
 }
 
 /** Blueprint base class */
-export default class Blueprint extends EventEmitter {
+export class Blueprint extends EventEmitter {
     public name = 'Blueprint'
     private readonly icons: string[] = []
     public readonly wireConnections = new WireConnections(this)

@@ -1,14 +1,14 @@
 import FD from 'factorio-data'
 import EventEmitter from 'eventemitter3'
 import util from '../common/util'
-import Blueprint from './Blueprint'
-import spriteDataBuilder from './spriteDataBuilder'
+import { Blueprint } from './Blueprint'
+import { spriteDataBuilder } from './spriteDataBuilder'
 import U from './generators/util'
 
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
 
 /** Entity Base Class */
-export default class Entity extends EventEmitter {
+export class Entity extends EventEmitter {
     public static getItemName(name: string): string {
         return FD.entities[name].minable.result
     }

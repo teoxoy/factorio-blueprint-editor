@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
-import Blueprint from '../core/Blueprint'
+import { Blueprint } from '../core/Blueprint'
 import { BlueprintContainer } from '../containers/BlueprintContainer'
-import UIContainer from '../UI/UIContainer'
+import { UIContainer } from '../UI/UIContainer'
 
 const hr = false
 const debug = false

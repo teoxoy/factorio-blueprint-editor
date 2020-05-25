@@ -1,6 +1,6 @@
-import generatePipes from './pipe'
-import generateBeacons from './beacon'
-import generatePoles from './pole'
+import { generatePipes } from './pipe'
+import { generateBeacons } from './beacon'
+import { generatePoles } from './pole'
 
 export interface IVisualization {
     path: IPoint[]
@@ -9,8 +9,4 @@ export interface IVisualization {
     color?: number
 }
 
-export default {
-    generatePipes,
-    generateBeacons,
-    generatePoles
-}
+export { generatePipes, generateBeacons, generatePoles }

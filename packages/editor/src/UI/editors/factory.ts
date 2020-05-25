@@ -1,12 +1,12 @@
-import Entity from '../../core/Entity'
-import Editor from './Editor'
-import BeaconEditor from './BeaconEditor'
-import InserterEditor from './InserterEditor'
-import MachineEditor from './MachineEditor'
-import MiningEditor from './MiningEditor'
-import SplitterEditor from './SplitterEditor'
-import ChestEditor from './ChestEditor'
-import TempEditor from './TempEditor'
+import { Entity } from '../../core/Entity'
+import { Editor } from './Editor'
+import { BeaconEditor } from './BeaconEditor'
+import { InserterEditor } from './InserterEditor'
+import { MachineEditor } from './MachineEditor'
+import { MiningEditor } from './MiningEditor'
+import { SplitterEditor } from './SplitterEditor'
+import { ChestEditor } from './ChestEditor'
+import { TempEditor } from './TempEditor'
 
 /**
  * Factory Function for creating Editor based on Entity Number
@@ -18,7 +18,7 @@ import TempEditor from './TempEditor'
  *
  * @param entityNumber - Entity Number for which to create Editor for
  */
-export default function createEditor(entity: Entity): Editor {
+export function createEditor(entity: Entity): Editor {
     let editor: Editor
     switch (entity.name) {
         // Assembly Machines

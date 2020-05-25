@@ -1,13 +1,13 @@
-import Entity from '../../core/Entity'
-import Checkbox from '../controls/Checkbox'
-import Enable from '../controls/Enable'
-import Switch from '../controls/Switch'
+import { Entity } from '../../core/Entity'
+import { Checkbox } from '../controls/Checkbox'
+import { Enable } from '../controls/Enable'
+import { Switch } from '../controls/Switch'
 import { styles } from '../style'
-import Filters from './components/Filters'
-import Editor from './Editor'
+import { Filters } from './components/Filters'
+import { Editor } from './Editor'
 
 /** Splitter Editor */
-export default class SplitterEditor extends Editor {
+export class SplitterEditor extends Editor {
     public constructor(entity: Entity) {
         super(504, 176, entity)
 

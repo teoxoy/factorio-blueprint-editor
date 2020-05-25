@@ -4,7 +4,7 @@ interface IToastsOptions {
     timeout?: number
 }
 
-function initToasts(): (options: IToastsOptions) => void {
+export function initToasts(): (options: IToastsOptions) => void {
     let autoincrement = 0
     const getNextID = (): string => {
         autoincrement += 1
@@ -55,5 +55,3 @@ function initToasts(): (options: IToastsOptions) => void {
         container.prepend(toast)
     }
 }
-
-export default initToasts

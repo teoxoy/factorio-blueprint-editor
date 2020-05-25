@@ -1,6 +1,6 @@
-import Entity from '../core/Entity'
+import { Entity } from '../core/Entity'
 import G from '../common/globals'
-import Blueprint from '../core/Blueprint'
+import { Blueprint } from '../core/Blueprint'
 import { serialize, deserialize } from '../core/WireConnections'
 import { EntitySprite } from './EntitySprite'
 import { PaintContainer } from './PaintContainer'

@@ -1,14 +1,14 @@
 import * as PIXI from 'pixi.js'
-import Entity from '../../core/Entity'
+import { Entity } from '../../core/Entity'
 import { styles } from '../style'
-import Slider from '../controls/Slider'
-import Textbox from '../controls/Textbox'
-import Checkbox from '../controls/Checkbox'
-import Filters from './components/Filters'
-import Editor from './Editor'
+import { Slider } from '../controls/Slider'
+import { Textbox } from '../controls/Textbox'
+import { Checkbox } from '../controls/Checkbox'
+import { Filters } from './components/Filters'
+import { Editor } from './Editor'
 
 /** Assembly Machines Editor */
-export default class ChestEditor extends Editor {
+export class ChestEditor extends Editor {
     // logistic_chest_buffer
     // >> 12 Slots / Counts
 

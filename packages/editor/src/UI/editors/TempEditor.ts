@@ -1,7 +1,7 @@
-import Entity from '../../core/Entity'
-import Editor from './Editor'
+import { Entity } from '../../core/Entity'
+import { Editor } from './Editor'
 
-export default class TempEditor extends Editor {
+export class TempEditor extends Editor {
     public constructor(entity: Entity) {
         super(402, 171, entity)
 

@@ -1,12 +1,12 @@
-import Entity from '../../core/Entity'
-import Dialog from '../controls/Dialog'
-import Preview from './components/Preview'
-import Recipe from './components/Recipe'
-import Modules from './components/Modules'
-import Filters from './components/Filters'
+import { Entity } from '../../core/Entity'
+import { Dialog } from '../controls/Dialog'
+import { Preview } from './components/Preview'
+import { Recipe } from './components/Recipe'
+import { Modules } from './components/Modules'
+import { Filters } from './components/Filters'
 
 /** Editor */
-export default abstract class Editor extends Dialog {
+export abstract class Editor extends Dialog {
     /** Blueprint Editor Entity reference */
     protected readonly m_Entity: Entity
 

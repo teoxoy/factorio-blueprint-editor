@@ -2,8 +2,8 @@ import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import F from './controls/functions'
-import Dialog from './controls/Dialog'
-import Button from './controls/Button'
+import { Dialog } from './controls/Dialog'
+import { Button } from './controls/Button'
 import { colors, styles } from './style'
 
 /*

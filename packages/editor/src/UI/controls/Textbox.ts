@@ -123,7 +123,7 @@ class TextContainer extends PIXI.Container {
 }
 
 /** Base Textbox Control */
-export default class Textbox extends PIXI.Container {
+export class Textbox extends PIXI.Container {
     /** Textbox regular background graphic */
     private readonly m_Background: PIXI.Graphics
 

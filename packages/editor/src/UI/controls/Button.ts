@@ -5,7 +5,7 @@ import F from './functions'
 /**
  * Base Button
  */
-export default class Button extends PIXI.Container {
+export class Button extends PIXI.Container {
     /** Background Graphic */
     private readonly m_Background: PIXI.Graphics
 

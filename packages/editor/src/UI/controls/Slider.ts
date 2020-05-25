@@ -3,7 +3,7 @@ import { colors } from '../style'
 import F from './functions'
 
 /** Slider Control */
-export default class Slider extends PIXI.Container {
+export class Slider extends PIXI.Container {
     /** Static width of slider */
     private static readonly SLIDER_WIDTH = 148 // Actual Width is 164 ... this is a necessary constant to improve calculation
     /** Static height of slider */

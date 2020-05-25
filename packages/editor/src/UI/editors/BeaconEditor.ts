@@ -1,8 +1,8 @@
-import Entity from '../../core/Entity'
-import Editor from './Editor'
+import { Entity } from '../../core/Entity'
+import { Editor } from './Editor'
 
 /** Beacon Editor */
-export default class BeaconEditor extends Editor {
+export class BeaconEditor extends Editor {
     public constructor(entity: Entity) {
         super(402, 171, entity)
 

@@ -1,11 +1,11 @@
 import * as PIXI from 'pixi.js'
 import G from '../../../common/globals'
-import Entity from '../../../core/Entity'
-import Slot from '../../controls/Slot'
+import { Entity } from '../../../core/Entity'
+import { Slot } from '../../controls/Slot'
 import F from '../../controls/functions'
 
 /** Module Slots for Entity */
-export default class Modules extends PIXI.Container {
+export class Modules extends PIXI.Container {
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 

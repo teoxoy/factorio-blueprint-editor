@@ -177,7 +177,7 @@ class Transaction {
  * const o = { name: 'test name'}
  * history.updateValue(o, ['name'], 'updated name', 'Update Object Name').onDone(name => console.log(name)).commit()
  */
-export default class History {
+export class History {
     public logging = false
 
     private readonly MAX_HISTORY_LENGTH = 1000

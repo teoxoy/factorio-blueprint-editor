@@ -2,7 +2,7 @@ import Ajv from 'ajv'
 import FD from 'factorio-data'
 import pako from 'pako'
 import blueprintSchema from './blueprintSchema.json'
-import Blueprint from './Blueprint'
+import { Blueprint } from './Blueprint'
 import { Book } from './Book'
 
 class ModdedBlueprintError {
@@ -199,8 +199,4 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
 }
 
 export { ModdedBlueprintError, TrainBlueprintError }
-export default {
-    encode,
-    encodeSync,
-    getBlueprintOrBookFromSource
-}
+export { encode, encodeSync, getBlueprintOrBookFromSource }

@@ -1,7 +1,7 @@
 import FD from 'factorio-data'
 import util from '../common/util'
 import { PositionGrid } from './PositionGrid'
-import Entity from './Entity'
+import { Entity } from './Entity'
 
 interface IDrawData {
     hr: boolean
@@ -1654,7 +1654,4 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
     }
 }
 
-export default {
-    getSpriteData,
-    getBeltWireConnectionIndex
-}
+export { getSpriteData, getBeltWireConnectionIndex }

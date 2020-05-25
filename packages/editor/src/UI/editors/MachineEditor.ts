@@ -1,8 +1,8 @@
-import Entity from '../../core/Entity'
-import Editor from './Editor'
+import { Entity } from '../../core/Entity'
+import { Editor } from './Editor'
 
 /** Assembly Machines Editor */
-export default class MachineEditor extends Editor {
+export class MachineEditor extends Editor {
     public constructor(entity: Entity) {
         super(402, 171, entity)
 

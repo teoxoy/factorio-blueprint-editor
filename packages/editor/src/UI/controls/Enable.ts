@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import { styles } from '../style'
 
 /** Base Checkbox */
-export default class Enable extends PIXI.Container {
+export class Enable extends PIXI.Container {
     /** Reference to regular text */
     private readonly m_TextText: PIXI.Text
 

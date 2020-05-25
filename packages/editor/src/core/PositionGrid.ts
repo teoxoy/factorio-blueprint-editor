@@ -1,7 +1,7 @@
 import FD from 'factorio-data'
 import util from '../common/util'
-import Blueprint from './Blueprint'
-import Entity from './Entity'
+import { Blueprint } from './Blueprint'
+import { Entity } from './Entity'
 
 /** Anchor is in the middle */
 interface IArea {

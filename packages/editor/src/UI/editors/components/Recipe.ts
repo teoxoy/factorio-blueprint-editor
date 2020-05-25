@@ -1,10 +1,10 @@
 import G from '../../../common/globals'
-import Entity from '../../../core/Entity'
-import Slot from '../../controls/Slot'
+import { Entity } from '../../../core/Entity'
+import { Slot } from '../../controls/Slot'
 import F from '../../controls/functions'
 
 /** Module Slots for Entity */
-export default class Recipe extends Slot {
+export class Recipe extends Slot {
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 

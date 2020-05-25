@@ -1,4 +1,4 @@
-import Blueprint, { getFactorioVersion } from './Blueprint'
+import { Blueprint, getFactorioVersion } from './Blueprint'
 
 export class Book {
     private _activeIndex: number

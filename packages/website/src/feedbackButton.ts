@@ -13,7 +13,7 @@ declare global {
     }
 }
 
-export default function initFeedbackButton(): void {
+export function initFeedbackButton(): void {
     window.doorbellOptions = {
         id: '9657',
         appKey: 'z1scfSY8hpBNiIFWxBg50tkhjvFKhHMdhfGNMp6YCUZVttoLOqtrlhk4ca9asDCy',

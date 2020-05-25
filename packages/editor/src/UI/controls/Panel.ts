@@ -13,7 +13,7 @@ import F from './functions'
  *  + automatically executes 'onBrowserResize()' on Browser Resizing
  *  + does not automatically set its position (hint: override onBrowserResize())
  */
-export default abstract class Panel extends PIXI.Container {
+export abstract class Panel extends PIXI.Container {
     /** Event string of browser resize */
     private static readonly WINDOW_RESIZE_EVENT_STRING = 'browserResized'
 

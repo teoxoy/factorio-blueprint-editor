@@ -46,7 +46,7 @@ interface IGroup extends IPoint {
 
     DT = using delaunay triangulation to form lines between x (for optimization)
 */
-export default function generatePoles(
+export function generatePoles(
     entities: { position: IPoint; size: number; power: boolean }[]
 ): {
     poles: {

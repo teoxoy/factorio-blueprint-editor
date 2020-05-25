@@ -3,7 +3,7 @@ import { colors } from '../style'
 import F from './functions'
 
 /** Base Checkbox */
-export default class Switch extends PIXI.Container {
+export class Switch extends PIXI.Container {
     /** Container to hold switch button */
     private readonly m_Button: PIXI.Container
 

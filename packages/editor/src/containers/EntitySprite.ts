@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js'
-import spriteDataBuilder from '../core/spriteDataBuilder'
-import Entity from '../core/Entity'
+import { spriteDataBuilder } from '../core/spriteDataBuilder'
+import { Entity } from '../core/Entity'
 import G from '../common/globals'
 import F from '../UI/controls/functions'
 import { PositionGrid } from '../core/PositionGrid'

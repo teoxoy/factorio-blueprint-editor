@@ -1,6 +1,6 @@
 import FD from 'factorio-data'
-import EDITOR, { Blueprint, Book, GridPattern } from '@fbe/editor'
 import { GUI } from 'dat.gui'
+import EDITOR, { Blueprint, Book, GridPattern } from '@fbe/editor'
 
 GUI.TEXT_CLOSED = 'Close Settings'
 GUI.TEXT_OPEN = 'Open Settings'
@@ -9,7 +9,7 @@ const COLOR_DARK = 0x303030
 const COLOR_LIGHT = 0xc9c9c9
 const isDarkColor = (color: number): boolean => color === COLOR_DARK
 
-export default function initSettingsPane(
+export function initSettingsPane(
     changeBookIndex: (index: number) => void
 ): {
     changeBook: (bpOrBook: Book | Blueprint) => void

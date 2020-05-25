@@ -1,8 +1,8 @@
-import Entity from '../../core/Entity'
-import Editor from './Editor'
+import { Entity } from '../../core/Entity'
+import { Editor } from './Editor'
 
 /** Electric Mining Drill Editor */
-export default class MiningEditor extends Editor {
+export class MiningEditor extends Editor {
     public constructor(entity: Entity) {
         super(402, 171, entity)
 

@@ -33,7 +33,7 @@ interface IBeacon extends IPoint {
                 - else: least nr of overlaps (least nr of possible beacons that could spawn on the area of the current beacon)
         and removing beacons from the array that occupied the same area as the added beacon
 */
-export default function generateBeacons(
+export function generateBeacons(
     entities: { position: IPoint; size: number; effect: boolean }[],
     minAffectedEntities = MIN_AFFECTED_ENTITIES
 ): {

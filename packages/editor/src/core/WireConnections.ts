@@ -1,5 +1,5 @@
 import { EventEmitter } from 'eventemitter3'
-import Blueprint from './Blueprint'
+import { Blueprint } from './Blueprint'
 
 const hashConn = (conn: IConnection): string => {
     const firstE = Math.min(conn.entityNumber1, conn.entityNumber2)

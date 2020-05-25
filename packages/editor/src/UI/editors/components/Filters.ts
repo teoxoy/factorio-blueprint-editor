@@ -1,12 +1,12 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import Entity from '../../../core/Entity'
+import { Entity } from '../../../core/Entity'
 import G from '../../../common/globals'
-import Slot from '../../controls/Slot'
+import { Slot } from '../../controls/Slot'
 import F from '../../controls/functions'
 
 /** Module Slots for Entity */
-export default class Filters extends PIXI.Container {
+export class Filters extends PIXI.Container {
     /* Blueprint Splitters
     ########################
     entity_number: 1

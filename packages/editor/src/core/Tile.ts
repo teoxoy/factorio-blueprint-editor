@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import FD from 'factorio-data'
 
-export default class Tile extends EventEmitter {
+export class Tile extends EventEmitter {
     public static getItemName(name: string): string {
         if (name === 'landfill') {
             return 'landfill'

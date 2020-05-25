@@ -70,6 +70,4 @@ function loadSpritesheet(src: string, json: any): Promise<void> {
         })
 }
 
-export default {
-    getAllPromises
-}
+export { getAllPromises }

@@ -570,4 +570,4 @@ function getPathBetweenGroups(
     }
 }
 
-export default generatePipes
+export { generatePipes }

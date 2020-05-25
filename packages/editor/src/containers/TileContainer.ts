@@ -1,7 +1,7 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
-import Tile from '../core/Tile'
+import { Tile } from '../core/Tile'
 import { EntitySprite } from './EntitySprite'
 
 export class TileContainer {

@@ -1,10 +1,10 @@
 import { colors } from '../style'
-import Button from './Button'
+import { Button } from './Button'
 
 /**
  * Base Slot
  */
-export default class Slot extends Button {
+export class Slot extends Button {
     // Override Rollover Color of Button
     public get hover(): number {
         return colors.controls.slot.hover.color

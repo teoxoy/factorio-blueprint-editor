@@ -2,14 +2,15 @@ import * as PIXI from 'pixi.js'
 import G from './common/globals'
 import U from './common/util'
 import { Book } from './core/Book'
-import Entity from './core/Entity'
-import Blueprint, { oilOutpostSettings, IOilOutpostSettings } from './core/Blueprint'
-import bpString, { ModdedBlueprintError, TrainBlueprintError } from './core/bpString'
+import { Entity } from './core/Entity'
+import { Blueprint, oilOutpostSettings, IOilOutpostSettings } from './core/Blueprint'
+import * as bpString from './core/bpString'
+import { ModdedBlueprintError, TrainBlueprintError } from './core/bpString'
 import { EntityContainer } from './containers/EntityContainer'
 import { PaintTileContainer } from './containers/PaintTileContainer'
 import { BlueprintContainer, EditorMode, GridPattern } from './containers/BlueprintContainer'
-import UIContainer from './UI/UIContainer'
-import Dialog from './UI/controls/Dialog'
+import { UIContainer } from './UI/UIContainer'
+import { Dialog } from './UI/controls/Dialog'
 import {
     initActions,
     registerAction,
@@ -19,7 +20,7 @@ import {
     importKeybinds,
     exportKeybinds
 } from './actions'
-import spritesheetsLoader from './spritesheetsLoader'
+import { spritesheetsLoader } from './spritesheetsLoader'
 
 function initEditor(canvas: HTMLCanvasElement): Promise<void[]> {
     PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON

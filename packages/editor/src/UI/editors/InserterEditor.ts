@@ -1,10 +1,10 @@
-import Entity from '../../core/Entity'
-import Switch from '../controls/Switch'
-import Enable from '../controls/Enable'
-import Editor from './Editor'
+import { Entity } from '../../core/Entity'
+import { Switch } from '../controls/Switch'
+import { Enable } from '../controls/Enable'
+import { Editor } from './Editor'
 
 /** Inserter Editor */
-export default class InserterEditor extends Editor {
+export class InserterEditor extends Editor {
     public constructor(entity: Entity) {
         super(446, 171, entity)
 

@@ -1,11 +1,11 @@
 import './index.styl'
 
 import { utils as pixiUtils } from 'pixi.js'
-import EDITOR, { Blueprint, Book, TrainBlueprintError, ModdedBlueprintError } from '@fbe/editor'
 import FileSaver from 'file-saver'
-import initToasts from './toasts'
-import initFeedbackButton from './feedbackButton'
-import initSettingsPane from './settingsPane'
+import EDITOR, { Blueprint, Book, TrainBlueprintError, ModdedBlueprintError } from '@fbe/editor'
+import { initToasts } from './toasts'
+import { initFeedbackButton } from './feedbackButton'
+import { initSettingsPane } from './settingsPane'
 
 const CANVAS = document.getElementById('editor') as HTMLCanvasElement
 

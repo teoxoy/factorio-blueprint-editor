@@ -1,12 +1,12 @@
 import * as PIXI from 'pixi.js'
-import Entity from '../core/Entity'
+import { Entity } from '../core/Entity'
 import { DebugContainer } from './DebugContainer'
 import { QuickbarPanel } from './QuickbarPanel'
 import { EntityInfoPanel } from './EntityInfoPanel'
 import { InventoryDialog } from './InventoryDialog'
-import createEditor from './editors/factory'
+import { createEditor } from './editors/factory'
 
-export default class UIContainer extends PIXI.Container {
+export class UIContainer extends PIXI.Container {
     private debugContainer: DebugContainer
     public quickbarContainer: QuickbarPanel
     private infoEntityPanel: EntityInfoPanel

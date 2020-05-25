@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js'
 import { EditorMode } from '../containers/BlueprintContainer'
 import G from '../common/globals'
-import Panel from './controls/Panel'
-import Slot from './controls/Slot'
+import { Panel } from './controls/Panel'
+import { Slot } from './controls/Slot'
 import F from './controls/functions'
 import { colors } from './style'
 

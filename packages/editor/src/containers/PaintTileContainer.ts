@@ -1,5 +1,5 @@
 import G from '../common/globals'
-import Tile from '../core/Tile'
+import { Tile } from '../core/Tile'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
 

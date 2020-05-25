@@ -2,11 +2,11 @@ import * as PIXI from 'pixi.js'
 import util from '../../../common/util'
 import { EntitySprite } from '../../../containers/EntitySprite'
 import { OverlayContainer } from '../../../containers/OverlayContainer'
-import Entity from '../../../core/Entity'
+import { Entity } from '../../../core/Entity'
 import { colors } from '../../style'
 
 /** Preview of Entity */
-export default class Preview extends PIXI.Container {
+export class Preview extends PIXI.Container {
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 
