@@ -32,7 +32,7 @@ rules:
           optionalDependencies: false
 
     import/exports-last: warn
-    import/group-exports: warn
+    # import/group-exports: warn
     # import/no-default-export: error
     import/no-mutable-exports: error
     import/no-named-default: error
