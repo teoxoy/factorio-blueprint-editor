@@ -10,8 +10,8 @@
         "build:website": "yarn workspace @fbe/website run build",
         "start": "yarn build:editor && concurrently \"yarn:start:editor\" \"yarn:start:website\"",
         "build": "yarn build:editor && yarn build:website",
-        "lint": "eslint . --ignore-path .gitignore --ext .ts",
-        "lint:fix": "eslint . --ignore-path .gitignore --ext .ts --fix",
+        "lint": "eslint **/*.ts --config .eslintrc.yml --ignore-path .gitignore",
+        "lint:fix": "eslint **/*.ts --fix --config .eslintrc.yml --ignore-path .gitignore",
         "format": "prettier **/*.{js,ts,html,json,yml,md} --check --config .prettierrc.yml --ignore-path .gitignore",
         "format:fix": "prettier **/*.{js,ts,html,json,yml,md} --write --config .prettierrc.yml --ignore-path .gitignore"
     },
