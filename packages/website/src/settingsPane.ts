@@ -33,10 +33,7 @@ export default function initSettingsPane(
 
     document.body.appendChild(gui.domElement)
 
-    const guiBPIndex = gui
-        .add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1)
-        .name('BP Book Index')
-        .onFinishChange(changeBookIndex)
+    const guiBPIndex = gui.add({ bpIndex: 0 }, 'bpIndex', 0, 0, 1).name('BP Book Index').onFinishChange(changeBookIndex)
 
     const changeBook = (bpOrBook: Book | Blueprint): void => {
         console.log(bpOrBook)
@@ -163,10 +160,7 @@ export default function initSettingsPane(
         if (name.includes('Quickbar')) {
             return
         }
-        keybindsFolder
-            .add(action, 'keyCombo')
-            .name(name)
-            .listen()
+        keybindsFolder.add(action, 'keyCombo').name(name).listen()
     })
 
     const quickbarFolder = keybindsFolder.addFolder('Quickbar')
@@ -176,10 +170,7 @@ export default function initSettingsPane(
         if (!name.includes('Quickbar')) {
             return
         }
-        quickbarFolder
-            .add(action, 'keyCombo')
-            .name(name)
-            .listen()
+        quickbarFolder.add(action, 'keyCombo').name(name).listen()
     })
 
     keybindsFolder

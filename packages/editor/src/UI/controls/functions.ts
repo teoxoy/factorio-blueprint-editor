@@ -108,9 +108,7 @@ function DrawControlFace(
     const hf = h * f
 
     const mask: PIXI.Graphics = new PIXI.Graphics()
-    mask.beginFill(0x000000)
-        .drawRoundedRect(0, 0, wf, hf, 6)
-        .endFill()
+    mask.beginFill(0x000000).drawRoundedRect(0, 0, wf, hf, 6).endFill()
 
     const face: PIXI.Graphics = new PIXI.Graphics()
     face.beginFill(c, a)

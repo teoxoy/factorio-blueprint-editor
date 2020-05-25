@@ -27,10 +27,7 @@ export default class Switch extends PIXI.Container {
 
         // Draw bounds (needed so mouse click will react at the entire switch area)
         const boundaryGraphic: PIXI.Graphics = new PIXI.Graphics()
-        boundaryGraphic
-            .beginFill(0x000000, 0)
-            .drawRect(0, 0, 36, 16)
-            .endFill()
+        boundaryGraphic.beginFill(0x000000, 0).drawRect(0, 0, 36, 16).endFill()
         boundaryGraphic.position.set(0, 0)
         this.addChild(boundaryGraphic)
 
@@ -56,10 +53,7 @@ export default class Switch extends PIXI.Container {
 
         // Draw button
         const buttonMask: PIXI.Graphics = new PIXI.Graphics()
-        buttonMask
-            .beginFill(0x000000)
-            .drawRoundedRect(0, 0, 32, 32, 6)
-            .endFill()
+        buttonMask.beginFill(0x000000).drawRoundedRect(0, 0, 32, 32, 6).endFill()
 
         // Draw button
         const buttonFace = F.DrawControlFace(

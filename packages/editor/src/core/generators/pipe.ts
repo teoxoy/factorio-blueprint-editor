@@ -4,7 +4,12 @@ import { IVisualization } from './index'
 
 // FD.entities.pumpjack.output_fluid_box.pipe_connections[0].positions
 // define this here so we don't have to import FD
-const PUMPJACK_PLUGS = [{ x: 1, y: -2 }, { x: 2, y: -1 }, { x: -1, y: 2 }, { x: -2, y: 1 }]
+const PUMPJACK_PLUGS = [
+    { x: 1, y: -2 },
+    { x: 2, y: -1 },
+    { x: -1, y: 2 },
+    { x: -2, y: 1 }
+]
 
 // if there are groups that couldn't get connected, try x more times - every try increase maxTurns
 const MAX_TRIES = 3
@@ -184,7 +189,10 @@ function generatePipes(
             .sort((a, b) => a.distance - b.distance)
 
         for (const t of l.connections) {
-            const entities = [{ ...l.endpoints[0], plug: t.plugs[0] }, { ...l.endpoints[1], plug: t.plugs[1] }]
+            const entities = [
+                { ...l.endpoints[0], plug: t.plugs[0] },
+                { ...l.endpoints[1], plug: t.plugs[1] }
+            ]
             if (!addedEnt1 && !addedEnt2) {
                 groups.push({ entities, paths: [t.path], x: 0, y: 0 })
                 addedPumpjacks.push(...entities)

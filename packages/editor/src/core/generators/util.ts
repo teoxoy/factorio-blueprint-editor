@@ -72,15 +72,12 @@ const pointsToLines = <T extends IPoint>(nodes: T[]): T[][] => {
     let lastSlope = 0
     for (let i = 0; i < filteredNodes.length; i++) {
         if (i === filteredNodes.length - 1) {
-            return filteredNodes.reduce(
-                (pV, _, i, arr) => {
-                    if (i === 0) {
-                        return pV
-                    }
-                    return pV.concat([[arr[i - 1], arr[i]]])
-                },
-                [] as T[][]
-            )
+            return filteredNodes.reduce((pV, _, i, arr) => {
+                if (i === 0) {
+                    return pV
+                }
+                return pV.concat([[arr[i - 1], arr[i]]])
+            }, [] as T[][])
         }
         const node = filteredNodes[i]
         const next = filteredNodes[i + 1]
@@ -96,17 +93,14 @@ const pointsToLines = <T extends IPoint>(nodes: T[]): T[][] => {
     const delaunay = Delaunator.from(filteredNodes.map(pointToArray))
 
     // Return lines from delaunay data
-    return delaunay.triangles.reduce(
-        (pV, _, i, arr) => {
-            if (i <= delaunay.halfedges[i]) {
-                return pV
-            }
-            const p = filteredNodes[arr[i]]
-            const q = filteredNodes[arr[i % 3 === 2 ? i - 2 : i + 1]]
-            return pV.concat([[p, q]])
-        },
-        [] as T[][]
-    )
+    return delaunay.triangles.reduce((pV, _, i, arr) => {
+        if (i <= delaunay.halfedges[i]) {
+            return pV
+        }
+        const p = filteredNodes[arr[i]]
+        const q = filteredNodes[arr[i % 3 === 2 ? i - 2 : i + 1]]
+        return pV.concat([[p, q]])
+    }, [] as T[][])
 }
 
 /**
@@ -128,15 +122,12 @@ const pointsToTriangles = <T extends IPoint>(nodes: T[]): T[][] => {
     let lastSlope = 0
     for (let i = 0; i < filteredNodes.length; i++) {
         if (i === filteredNodes.length - 1) {
-            return filteredNodes.reduce(
-                (pV, _, i, arr) => {
-                    if (i === 0) {
-                        return pV
-                    }
-                    return pV.concat([[arr[i - 1], arr[i]]])
-                },
-                [] as T[][]
-            )
+            return filteredNodes.reduce((pV, _, i, arr) => {
+                if (i === 0) {
+                    return pV
+                }
+                return pV.concat([[arr[i - 1], arr[i]]])
+            }, [] as T[][])
         }
         const node = filteredNodes[i]
         const next = filteredNodes[i + 1]
