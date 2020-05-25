@@ -4,12 +4,11 @@
         "packages/*"
     ],
     "scripts": {
-        "start:editor": "yarn workspace @fbe/editor run start",
         "start:website": "yarn workspace @fbe/website run start",
-        "build:editor": "yarn workspace @fbe/editor run build",
+        "start:backend": "cd ./packages/backend && systemfd --no-pid -s http::8888 -- cargo watch -w ./src -x \"run --features dev\"",
         "build:website": "yarn workspace @fbe/website run build",
-        "start": "yarn build:editor && concurrently \"yarn:start:editor\" \"yarn:start:website\"",
-        "build": "yarn build:editor && yarn build:website",
+        "build:backend": "cd ./packages/backend && cargo build --release",
+        "start": "concurrently \"yarn:start:backend\" \"yarn:start:website\"",
         "lint": "eslint **/*.ts --config .eslintrc.yml --ignore-path .gitignore",
         "lint:fix": "eslint **/*.ts --fix --config .eslintrc.yml --ignore-path .gitignore",
         "format": "prettier **/*.{js,ts,html,json,yml,md} --check --config .prettierrc.yml --ignore-path .gitignore",
