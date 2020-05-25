@@ -4,6 +4,7 @@
         "esbenp.prettier-vscode",
         "eamodio.gitlens",
         "ms-vscode.cpptools",
-        "sumneko.lua"
+        "sumneko.lua",
+        "rust-lang.rust"
     ]
 }
