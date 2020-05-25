@@ -3,6 +3,7 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "eamodio.gitlens",
-        "ms-vscode.cpptools"
+        "ms-vscode.cpptools",
+        "sumneko.lua"
     ]
 }

@@ -3,5 +3,6 @@
     "eslint.validate": ["typescript"],
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
-    }
+    },
+    "Lua.diagnostics.globals": ["data", "rapidjson", "optrequire"]
 }
