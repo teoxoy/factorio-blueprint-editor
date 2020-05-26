@@ -215,7 +215,7 @@ export class WiresContainer extends PIXI.Container {
         )
 
         const lines = setsOfLines
-            .reduce((acc, val) => acc.concat(val), [])
+            .flat()
             .sort((a, b) => {
                 const minPos = (l: IPole[]): number =>
                     Math.min(l[0].x, l[1].x) + Math.min(l[0].y, l[1].y)

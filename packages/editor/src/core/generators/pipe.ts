@@ -265,9 +265,7 @@ function generatePipes(
         })
     }
 
-    groups
-        .map(g => g.paths.reduce((acc, val) => acc.concat(val), []))
-        .forEach(p => addVisualization(p, 32, 0.5))
+    groups.map(g => g.paths.flat()).forEach(p => addVisualization(p, 32, 0.5))
 
     // CONNECT GROUPS
     let tries = MAX_TRIES
@@ -343,7 +341,7 @@ function generatePipes(
         addVisualization(conn.path, 8, 0.5)
     }
 
-    let pipePositions = U.uniqPoints(finalGroup.paths.reduce((acc, val) => acc.concat(val), []))
+    let pipePositions = U.uniqPoints(finalGroup.paths.flat())
 
     // GENERATE ALL INTERSECTION POINTS (WILL INCLUDE ALL PUMPJACKS PLUGS TOO)
     const intersectionPositions = U.uniqPoints(
@@ -441,7 +439,7 @@ function generatePipes(
         .reduce((acc, val) => acc.concat(val), [])
         .map(localToGlobal)
 
-    const straightPathsCoords = straightPaths.reduce((acc, val) => acc.concat(val), [])
+    const straightPathsCoords = straightPaths.flat()
     // addVisualization(straightPathsCoords)
 
     // GENERATE PIPE DATA
@@ -550,8 +548,8 @@ function getPathBetweenGroups(
         minDistance: number
         firstGroup: IGroup
     } {
-        const path0 = g0.paths.reduce((acc, p) => acc.concat(p), [])
-        const path1 = g1.paths.reduce((acc, p) => acc.concat(p), [])
+        const path0 = g0.paths.flat()
+        const path1 = g1.paths.flat()
 
         const lines = path0
             .reduce((acc: IPoint[][], coord) => {

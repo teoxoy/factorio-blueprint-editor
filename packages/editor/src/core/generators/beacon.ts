@@ -67,10 +67,7 @@ export function generateBeacons(
         }))
     )
 
-    const occupiedPositions = entityAreas
-        .reduce((acc, val) => acc.concat(val), [])
-        .map(U.hashPoint)
-        .reduce((map, key) => map.set(key, true), new Map())
+    const occupiedPositions = new Set(entityAreas.flat().map(U.hashPoint))
 
     // GENERATE VALID BEACON POSITIONS
     const validBeaconPositions = U.uniqPoints(
@@ -86,7 +83,7 @@ export function generateBeacons(
                 }))
             })
             .reduce((acc, val) => acc.concat(val), [])
-    ).filter(p => occupiedPositions.get(U.hashPoint(p)) !== true)
+    ).filter(p => !occupiedPositions.has(U.hashPoint(p)))
 
     const grid = validBeaconPositions.reduce((map, p) => map.set(U.hashPoint(p), true), new Map())
 
@@ -103,7 +100,7 @@ export function generateBeacons(
         .filter(arr => arr.length === BEACON_SIZE * BEACON_SIZE)
 
     const pointToBeaconCount = possibleBeaconAreas
-        .reduce((acc, val) => acc.concat(val), [])
+        .flat()
         .map(U.hashPoint)
         .reduce((map, key) => {
             const C = map.get(key)
