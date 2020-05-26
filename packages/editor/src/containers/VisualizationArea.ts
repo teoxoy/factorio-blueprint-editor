@@ -79,35 +79,34 @@ class VisualizationArea {
     }
 
     public destroy(): void {
-        this.sprites.forEach(sprite => {
+        for (const sprite of this.sprites) {
             sprite.destroy()
-        })
+        }
     }
 
     public show(): void {
-        this.sprites.forEach(sprite => {
+        for (const sprite of this.sprites) {
             sprite.visible = true
-        })
+        }
     }
 
     public hide(): void {
-        this.sprites.forEach(sprite => {
+        for (const sprite of this.sprites) {
             sprite.visible = false
-        })
+        }
     }
 
     public highlight(): void {
-        this.sprites.forEach(sprite => {
+        for (const sprite of this.sprites) {
             sprite.alpha += ALPHA
-        })
+        }
     }
 
     public moveTo(position: IPoint): void {
-        this.sprites.forEach(sprite => {
+        for (const sprite of this.sprites) {
             sprite.position.set(position.x, position.y)
-        })
+        }
     }
-}
 
 class VisualizationAreaContainer extends PIXI.Container {
     private active: Type[] = []

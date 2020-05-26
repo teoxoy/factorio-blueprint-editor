@@ -46,7 +46,9 @@ export class Dialog extends Panel {
 
     /** Closes all open dialogs */
     public static closeAll(): void {
-        Dialog.s_openDialogs.forEach(d => d.close())
+        for (const d of Dialog.s_openDialogs) {
+            d.close()
+        }
     }
 
     /** @returns True if there is at least one dialog open */

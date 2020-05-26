@@ -100,7 +100,9 @@ export function generatePoles(
     const pointToEntityArea = entityAreas
         .filter(area => area.every(p => p.power))
         .reduce<Map<string, IArea[]>>((map, area) => {
-            area.forEach(p => map.set(U.hashPoint(p), area))
+            for (const p of area) {
+                map.set(U.hashPoint(p), area)
+            }
             return map
         }, new Map())
 
@@ -145,14 +147,14 @@ export function generatePoles(
     })
 
     const entAreaToPoles = possiblePoles.reduce<Map<IPoint[], IPole[]>>((map, p) => {
-        p.poweredEntityAreas.forEach(area => {
+        for (const area of p.poweredEntityAreas) {
             const exists = map.get(area)
             if (exists) {
                 exists.push(p)
             } else {
                 map.set(area, [p])
             }
-        })
+        }
         return map
     }, new Map())
 
@@ -172,10 +174,10 @@ export function generatePoles(
                 return []
             }
 
-            poles.forEach(p => {
+            for (const p of poles) {
                 p.poweredEntityAreas = p.poweredEntityAreas.filter(a => a !== area)
                 p.powerGiven -= 1
-            })
+            }
 
             return poles.filter(p => p.poweredEntityAreas.length === 0)
         })
@@ -228,7 +230,9 @@ export function generatePoles(
         poles.filter(p => !addedPoles.includes(p)).map(p => ({ poles: [p], lines: [], x: 0, y: 0 }))
     )
 
-    poles.forEach(p => occupiedPositions.add(U.hashPoint(p)))
+    for (const p of poles) {
+        occupiedPositions.add(U.hashPoint(p))
+    }
 
     // groups
     //     .map(g => g.poles.flat())
@@ -246,10 +250,10 @@ export function generatePoles(
     const connectionPoles: IPoint[] = []
     let finalGroup: IGroup
     while (groups.length) {
-        groups.forEach(g => {
+        for (const g of groups) {
             g.x = g.poles.reduce((acc, e) => acc + e.x, 0) / g.poles.length
             g.y = g.poles.reduce((acc, e) => acc + e.y, 0) / g.poles.length
-        })
+        }
         groups = groups.sort((a, b) => a.poles.length - b.poles.length)
 
         const groupsCopy = [...groups]

@@ -65,11 +65,11 @@ class OurMap<K, V> extends Map<K, V> {
 
     public filter(predicate: (value: V, key: K) => boolean): V[] {
         const result: V[] = []
-        this.forEach((v, k) => {
+        for (const [k, v] of this) {
             if (predicate(v, k)) {
                 result.push(v)
             }
-        })
+        }
         return result
     }
 }
@@ -99,9 +99,9 @@ export class Blueprint extends EventEmitter {
             }
 
             if (data.icons) {
-                data.icons.forEach(icon => {
+                for (const icon of data.icons) {
                     this.icons[icon.index - 1] = icon.signal.name
-                })
+                }
             }
 
             const positionData = [
@@ -151,9 +151,9 @@ export class Blueprint extends EventEmitter {
                 this.m_nextEntityNumber += ENTITIES.length
 
                 // Approximate position of placeable_off_grid entities (i.e. landmines)
-                ENTITIES.filter(e =>
-                    FD.entities[e.name].flags.includes('placeable_off_grid')
-                ).forEach(e => {
+                for (const e of ENTITIES) {
+                    if (FD.entities[e.name].flags.includes('placeable_off_grid')) continue
+
                     const size = util.rotatePointBasedOnDir(
                         [FD.entities[e.name].size.width / 2, FD.entities[e.name].size.height / 2],
                         e.direction || 0
@@ -161,13 +161,13 @@ export class Blueprint extends EventEmitter {
                     // Take the offset into account for accurate positioning
                     e.position.x = Math.round(e.position.x + offset.x - size.x) + size.x - offset.x
                     e.position.y = Math.round(e.position.y + offset.y - size.y) + size.y - offset.y
-                })
+                }
 
                 this.history.startTransaction()
 
-                ENTITIES.forEach(e => {
+                for (const e of ENTITIES) {
                     this.wireConnections.createEntityConnections(e.entity_number, e.connections)
-                })
+                }
 
                 this.entities = new OurMap(
                     ENTITIES.map(e => {
@@ -229,7 +229,9 @@ export class Blueprint extends EventEmitter {
 
     public removeEntities(entities: Entity[]): void {
         this.history.startTransaction('Remove entities')
-        entities.forEach(e => this.removeEntity(e))
+        for (const e of entities) {
+            this.removeEntity(e)
+        }
         this.history.commitTransaction()
     }
 
@@ -262,13 +264,13 @@ export class Blueprint extends EventEmitter {
     public createTiles(name: string, positions: IPoint[]): void {
         this.history.startTransaction('Create tiles')
 
-        positions.forEach(p => {
+        for (const p of positions) {
             const tile = new Tile(name, p.x, p.y)
             this.history
                 .updateMap(this.tiles, tile.hash, tile, 'Create tile')
                 .onDone(this.onCreateOrRemoveTile.bind(this))
                 .commit()
-        })
+        }
 
         this.history.commitTransaction()
     }
@@ -432,22 +434,26 @@ export class Blueprint extends EventEmitter {
         this.history.logging = false
         this.history.startTransaction('Generate Oil Outpost')
 
-        GP.pipes.forEach(pipe => this.createEntity(pipe))
-        beacons.forEach(beacon =>
+        for (const pipe of GP.pipes) {
+            this.createEntity(pipe)
+        }
+        for (const beacon of beacons) {
             this.createEntity({
                 ...beacon,
                 items: { [BEACON_MODULE]: FD.entities.beacon.module_specification.module_slots },
             })
-        )
-        GPO.poles.forEach(pole => this.createEntity(pole))
+        }
+        for (const pole of GPO.poles) {
+            this.createEntity(pole)
+        }
 
-        GP.pumpjacksToRotate.forEach(p => {
+        for (const p of GP.pumpjacksToRotate) {
             const entity = this.entities.get(p.entity_number)
             entity.direction = p.direction
             if (PUMPJACK_MODULE !== 'none') {
                 entity.modules = new Array(entity.moduleSlots).fill(PUMPJACK_MODULE)
             }
-        })
+        }
 
         this.history.commitTransaction()
         this.history.logging = true

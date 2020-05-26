@@ -166,7 +166,7 @@ export class PositionGrid {
             return true
         }
 
-        this.getEntitiesInArea(area).forEach(entity => {
+        for (const entity of this.getEntitiesInArea(area)) {
             switch (entity.name) {
                 case 'gate':
                     gate = entity
@@ -186,7 +186,7 @@ export class PositionGrid {
                 default:
                     otherEntities = true
             }
-        })
+        }
 
         const sameDirStrRails = straightRails.some(rail => rail.direction === direction)
 

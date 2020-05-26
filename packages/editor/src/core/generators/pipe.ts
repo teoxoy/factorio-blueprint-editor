@@ -269,10 +269,10 @@ function generatePipes(
     let aloneGroups: IGroup[] = []
     let finalGroup: IGroup
     while (groups.length) {
-        groups.forEach(g => {
+        for (const g of groups) {
             g.x = g.entities.reduce((acc, e) => acc + e.x, 0) / g.entities.length
             g.y = g.entities.reduce((acc, e) => acc + e.y, 0) / g.entities.length
-        })
+        }
         groups = groups.sort(
             (a, b) =>
                 a.paths.reduce((acc, p) => acc + p.length, 0) -

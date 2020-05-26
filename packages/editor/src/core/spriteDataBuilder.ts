@@ -1144,7 +1144,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         )
                         .map(({ relDir }) => relDir)
 
-                    neighbourDirections.forEach(relDir => {
+                    for (const relDir of neighbourDirections) {
                         const patch = duplicateAndSetPropertyUsing(
                             pictures.gate_connection_patch.sheets[0],
                             'x',
@@ -1156,7 +1156,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         } else {
                             sprites.push(patch)
                         }
-                    })
+                    }
 
                     const spawnFilling = [
                         [-1, 0],

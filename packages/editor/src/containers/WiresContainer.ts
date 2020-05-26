@@ -79,22 +79,23 @@ export class WiresContainer extends PIXI.Container {
 
     /** This is done in cases where the connection doesn't change but the rotation does */
     private redrawEntityConnections(entityNumber: number): void {
-        G.bp.wireConnections.getEntityConnectionHashes(entityNumber).forEach(hash => {
+        const hashes = G.bp.wireConnections.getEntityConnectionHashes(entityNumber)
+        for (const hash of hashes) {
             const connection = G.bp.wireConnections.get(hash)
             this.remove(hash)
             this.add(hash, connection)
-        })
+        }
     }
 
     public update(entity: Entity): void {
         if (entity.type === 'electric_pole') {
             // Remove connection so that updatePassiveWires diffs correctly
-            this.passiveConnToSprite.forEach((v, k) => {
+            for (const [k, v] of this.passiveConnToSprite) {
                 if (k.includes(entity.entityNumber.toString())) {
                     v.destroy()
                     this.passiveConnToSprite.delete(k)
                 }
-            })
+            }
 
             this.updatePassiveWires()
         }
@@ -181,10 +182,10 @@ export class WiresContainer extends PIXI.Container {
             }))
 
         if (poles.length < 2) {
-            this.passiveConnToSprite.forEach((_, hash) => {
-                this.passiveConnToSprite.get(hash).destroy()
+            for (const [hash, sprite] of this.passiveConnToSprite) {
+                sprite.destroy()
                 this.passiveConnToSprite.delete(hash)
-            })
+            }
             return
         }
 
@@ -304,7 +305,7 @@ export class WiresContainer extends PIXI.Container {
             this.passiveConnToSprite.delete(hash)
         }
 
-        toUpdate.forEach(entNr => {
+        for (const entNr of toUpdate) {
             const ec = EntityContainer.mappings.get(entNr)
             if (G.bp.entities.get(entNr) && ec) {
                 // redraw to update direction
@@ -315,18 +316,16 @@ export class WiresContainer extends PIXI.Container {
 
                 // redraw connected wires
                 if (this.entNrToConnectedEntNrs.has(entNr)) {
-                    this.entNrToConnectedEntNrs.get(entNr).forEach((eNr: number) => {
+                    for (const eNr of this.entNrToConnectedEntNrs.get(entNr)) {
                         const hash = lineHash([{ entityNumber: eNr }, { entityNumber: entNr }])
                         if (this.passiveConnToSprite.has(hash)) {
                             removeWire(hash)
                             addWire(hash)
                         }
-                    })
+                    }
                 }
             }
-        })
-
-        // console.log(toAdd, toDel)
+        }
 
         toAdd.forEach(addWire)
         toDel.forEach(removeWire)

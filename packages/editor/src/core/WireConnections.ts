@@ -14,9 +14,10 @@ const deserialize = (entityNumber: number, connections: BPS.IConnection): IConne
 
     const addConnSide = (side: string): void => {
         if (connections[side]) {
-            Object.keys(connections[side]).forEach(color => {
+            // eslint-disable-next-line guard-for-in
+            for (const color in connections[side]) {
                 const conn = connections[side] as BPS.IConnSide
-                conn[color].forEach(data => {
+                for (const data of conn[color]) {
                     parsedConnections.push({
                         color,
                         entityNumber1: entityNumber,
@@ -24,8 +25,8 @@ const deserialize = (entityNumber: number, connections: BPS.IConnection): IConne
                         entitySide1: Number(side),
                         entitySide2: data.circuit_id || 1,
                     })
-                })
-            })
+                }
+            }
         }
     }
 
@@ -57,7 +58,7 @@ const deserialize = (entityNumber: number, connections: BPS.IConnection): IConne
 const serialize = (entityNumber: number, connections: IConnection[]): BPS.IConnection => {
     const serialized: BPS.IConnection = {}
 
-    connections.forEach(connection => {
+    for (const connection of connections) {
         const isEntity1 = connection.entityNumber1 === entityNumber
         const side = isEntity1 ? connection.entitySide1 : connection.entitySide2
         const color = connection.color
@@ -84,7 +85,7 @@ const serialize = (entityNumber: number, connections: IConnection[]): BPS.IConne
                 entity_id: otherEntNr,
             })
         }
-    })
+    }
 
     return serialized
 }
@@ -178,11 +179,17 @@ class WireConnections extends EventEmitter {
     }
 
     public createEntityConnections(entityNumber: number, connections: BPS.IConnection): void {
-        deserialize(entityNumber, connections).forEach(c => this.create(c))
+        const conns = deserialize(entityNumber, connections)
+        for (const conn of conns) {
+            this.create(conn)
+        }
     }
 
     public removeEntityConnections(entityNumber: number): void {
-        this.getEntityConnections(entityNumber).forEach(c => this.remove(c))
+        const conns = this.getEntityConnections(entityNumber)
+        for (const conn of conns) {
+            this.remove(conn)
+        }
     }
 
     public getEntityConnectionHashes(entityNumber: number): string[] {

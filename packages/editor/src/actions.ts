@@ -97,10 +97,12 @@ class Action {
     }
 
     private set active(value: boolean) {
-        if (value) {
-            this.handlers.forEach(h => keyboardJS.bind(this.keyCombo, h.press, h.release))
-        } else {
-            this.handlers.forEach(h => keyboardJS.unbind(this.keyCombo, h.press, h.release))
+        for (const h of this.handlers) {
+            if (value) {
+                keyboardJS.bind(this.keyCombo, h.press, h.release)
+            } else {
+                keyboardJS.unbind(this.keyCombo, h.press, h.release)
+            }
         }
         this.m_active = value
     }
@@ -117,10 +119,10 @@ class Action {
         if (value.length === 0) {
             this.active = false
         } else {
-            this.handlers.forEach(h => {
+            for (const h of this.handlers) {
                 keyboardJS.unbind(this.keyCombo, h.press, h.release)
                 keyboardJS.bind(value, h.press, h.release)
-            })
+            }
         }
 
         this.m_keyCombo = value
@@ -195,14 +197,8 @@ class Action {
         this.handlers.push(handlerData)
     }
 
-    // Not Used anywhere
-    // public unbindAll() {
-    //     this.handlers.forEach(h => keyboardJS.unbind(this.keyCombo, h.press, h.release))
-    //     this.handlers = []
-    // }
-
     public call(): void {
-        this.handlers.forEach(h => h.press())
+        for (const h of this.handlers) h.press()
     }
 }
 
@@ -230,33 +226,35 @@ function isActionActive(name: string): boolean {
 }
 
 function forEachAction(cb: (action: Action, actionName: string) => void): void {
-    actions.forEach((action, name) => cb(action, name))
+    for (const [name, action] of actions) {
+        cb(action, name)
+    }
 }
 
 function resetKeybinds(): void {
-    actions.forEach(action => {
+    for (const [, action] of actions) {
         action.resetKeyCombo()
-    })
+    }
 }
 
 function importKeybinds(keybinds: Record<string, string>): void {
     if (!keybinds) {
         return
     }
-    actions.forEach((action, name) => {
+    for (const [name, action] of actions) {
         if (keybinds[name] !== undefined) {
             action.keyCombo = keybinds[name]
         }
-    })
+    }
 }
 
 function exportKeybinds(changedOnly = true): Record<string, string> {
     const changedKeybinds: Record<string, string> = {}
-    actions.forEach((action, name) => {
+    for (const [name, action] of actions) {
         if (!changedOnly || !action.usesDefaultKeyCombo) {
             changedKeybinds[name] = action.keyCombo
         }
-    })
+    }
     return changedKeybinds
 }
 

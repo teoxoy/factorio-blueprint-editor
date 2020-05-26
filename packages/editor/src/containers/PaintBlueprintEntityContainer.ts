@@ -64,14 +64,14 @@ export class PaintBlueprintEntityContainer {
             ) ||
             G.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)
 
-        this.entitySprites.forEach(s =>
+        for (const s of this.entitySprites) {
             F.applyTint(s, {
                 r: allow ? 0.4 : 1,
                 g: allow ? 1 : 0.4,
                 b: 0.4,
                 a: 1,
             })
-        )
+        }
     }
 
     private updateUndergroundLine(): void {

@@ -227,9 +227,9 @@ class BlueprintContainer extends PIXI.Container {
             const W = Math.abs(endX - startPos.x) + 1
             const H = Math.abs(endY - startPos.y) + 1
 
-            this.copyModeEntities.forEach(e => {
+            for (const e of this.copyModeEntities) {
                 EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
-            })
+            }
 
             this.copyModeEntities = G.bp.entityPositionGrid.getEntitiesInArea({
                 x: X + W / 2,
@@ -238,9 +238,9 @@ class BlueprintContainer extends PIXI.Container {
                 h: H,
             })
 
-            this.copyModeEntities.forEach(e => {
+            for (const e of this.copyModeEntities) {
                 EntityContainer.mappings.get(e.entityNumber).cursorBox = 'copy'
-            })
+            }
         }
         this.copyModeUpdateFn(startPos.x, startPos.y)
         this.gridData.on('update32', this.copyModeUpdateFn)
@@ -260,9 +260,9 @@ class BlueprintContainer extends PIXI.Container {
         if (!cancel && this.copyModeEntities.length !== 0) {
             this.spawnPaintContainer(this.copyModeEntities)
         }
-        this.copyModeEntities.forEach(e => {
+        for (const e of this.copyModeEntities) {
             EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
-        })
+        }
         this.copyModeEntities = []
     }
 
@@ -283,9 +283,9 @@ class BlueprintContainer extends PIXI.Container {
             const W = Math.abs(endX - startPos.x) + 1
             const H = Math.abs(endY - startPos.y) + 1
 
-            this.deleteModeEntities.forEach(e => {
+            for (const e of this.deleteModeEntities) {
                 EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
-            })
+            }
 
             this.deleteModeEntities = G.bp.entityPositionGrid.getEntitiesInArea({
                 x: X + W / 2,
@@ -294,9 +294,9 @@ class BlueprintContainer extends PIXI.Container {
                 h: H,
             })
 
-            this.deleteModeEntities.forEach(e => {
+            for (const e of this.deleteModeEntities) {
                 EntityContainer.mappings.get(e.entityNumber).cursorBox = 'not_allowed'
-            })
+            }
         }
         this.deleteModeUpdateFn(startPos.x, startPos.y)
         this.gridData.on('update32', this.deleteModeUpdateFn)
@@ -314,9 +314,9 @@ class BlueprintContainer extends PIXI.Container {
         this.updateHoverContainer()
 
         if (cancel) {
-            this.deleteModeEntities.forEach(e => {
+            for (const e of this.deleteModeEntities) {
                 EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
-            })
+            }
         } else {
             G.bp.removeEntities(this.deleteModeEntities)
         }

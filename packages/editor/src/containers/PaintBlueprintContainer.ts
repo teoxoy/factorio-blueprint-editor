@@ -38,7 +38,7 @@ export class PaintBlueprintContainer extends PaintContainer {
 
         const entMap = new Map(entities.map(e => [e.entityNumber, e]))
         const rawEntities = entities.map(e => e.serialize())
-        rawEntities.forEach(e => {
+        for (const e of rawEntities) {
             e.position.x -= center.x
             e.position.y -= center.y
             // Filter out connections outside selection
@@ -48,12 +48,12 @@ export class PaintBlueprintContainer extends PaintContainer {
                     c => entMap.has(c.entityNumber1) && entMap.has(c.entityNumber2)
                 )
             )
-        })
+        }
         this.bp = new Blueprint({
             entities: rawEntities,
         })
 
-        this.bp.entities.forEach(e => {
+        for (const [, e] of this.bp.entities) {
             const epc = new PaintBlueprintEntityContainer(this, this.bp, e)
 
             epc.entitySprites.forEach(sprite => {
@@ -65,14 +65,12 @@ export class PaintBlueprintContainer extends PaintContainer {
 
             this.entities.set(e, epc)
             this.addChild(...epc.entitySprites)
-        })
+        }
 
         this.children.sort(EntitySprite.compareFn)
-
-        this.entities.forEach((_, e) =>
+        for (const [e] of this.entities) {
             G.BPC.visualizationAreaContainer.activateRelatedAreas(e.name)
-        )
-
+        }
         this.moveAtCursor()
     }
 
@@ -83,16 +81,18 @@ export class PaintBlueprintContainer extends PaintContainer {
 
     public show(): void {
         if (this.entities) {
-            this.entities.forEach((_, e) =>
+            for (const [e] of this.entities) {
                 G.BPC.visualizationAreaContainer.activateRelatedAreas(e.name)
-            )
+            }
         }
         super.show()
     }
 
     public destroy(): void {
         G.BPC.visualizationAreaContainer.deactivateActiveAreas()
-        this.entities.forEach(c => c.destroy())
+        for (const [, c] of this.entities) {
+            c.destroy()
+        }
         super.destroy()
     }
 
@@ -134,7 +134,9 @@ export class PaintBlueprintContainer extends PaintContainer {
             this.y = G.BPC.gridData.y32 * 32
         }
 
-        this.entities.forEach(c => c.moveAtCursor())
+        for (const [, c] of this.entities) {
+            c.moveAtCursor()
+        }
     }
 
     protected redraw(): void {}
@@ -147,16 +149,16 @@ export class PaintBlueprintContainer extends PaintContainer {
         G.bp.history.startTransaction('Create Entities')
 
         const oldEntIDToNewEntID = new Map<number, number>()
-        this.entities.forEach((c, entity) => {
+        for (const [entity, c] of this.entities) {
             const e = c.placeEntityContainer()
             if (e) {
                 oldEntIDToNewEntID.set(entity.entityNumber, e.entityNumber)
             }
-        })
+        }
 
         // Create wire connections
         if (oldEntIDToNewEntID.size !== 0) {
-            oldEntIDToNewEntID.forEach((_, oldID) => {
+            for (const [oldID] of oldEntIDToNewEntID) {
                 this.bp.wireConnections
                     .getEntityConnections(oldID)
                     .filter(
@@ -170,7 +172,7 @@ export class PaintBlueprintContainer extends PaintContainer {
                         entityNumber2: oldEntIDToNewEntID.get(connection.entityNumber2),
                     }))
                     .forEach(conn => G.bp.wireConnections.create(conn))
-            })
+            }
         }
 
         G.bp.history.commitTransaction()
@@ -182,7 +184,9 @@ export class PaintBlueprintContainer extends PaintContainer {
         }
 
         G.bp.history.startTransaction('Remove Entities')
-        this.entities.forEach(c => c.removeContainerUnder())
+        for (const [, c] of this.entities) {
+            c.removeContainerUnder()
+        }
         G.bp.history.commitTransaction()
     }
 }
