@@ -25,6 +25,48 @@ interface IDrawData {
     chemicalPlantDontConnectOutput: boolean
 }
 
+interface ISpriteData {
+    filename: string
+    // filenames?: string[]
+    // stripes?: Stripes[]
+
+    width: number
+    height: number
+
+    scale?: number
+    x?: number
+    y?: number
+    // priority?: string
+    // frame_count?: number
+    // line_length?: number
+    // direction_count?: number
+    // axially_symmetrical?: boolean
+    shift?: number[]
+    // draw_as_shadow?: boolean
+    // repeat_count?: number
+    // blend_mode?: string
+    // animation_speed?: number
+    // run_mode?: string
+    // apply_runtime_tint?: boolean
+    // apply_projection?: boolean
+    // flags?: string[]
+    // counterclockwise?: boolean
+    tint?: {
+        r: number
+        g: number
+        b: number
+        a: number
+    }
+    // lines_per_file?: number
+
+    anchorX?: number
+    anchorY?: number
+    divW?: number
+    divH?: number
+    squishY?: number
+    rotAngle?: number
+}
+
 function getSpriteData(data: IDrawData): ISpriteData[] {
     return entityToFunction.get(data.name)(data)
 }

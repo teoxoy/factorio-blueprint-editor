@@ -4,6 +4,7 @@ import { Entity } from '../core/Entity'
 import G from '../common/globals'
 import F from '../UI/controls/functions'
 import { PositionGrid } from '../core/PositionGrid'
+import { getSpriteData, ISpriteData } from '../core/spriteDataBuilder'
 
 interface IEntityData {
     name: string
