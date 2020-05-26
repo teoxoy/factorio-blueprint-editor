@@ -76,9 +76,11 @@ declare namespace BPS {
         a: number
     }
 
+    type SignalType = 'item' | 'virtual' | 'fluid'
+
     interface ISignal {
         name: string
-        type: 'item' | 'virtual' | 'fluid'
+        type: SignalType
     }
 
     interface ICondition {

@@ -583,19 +583,14 @@ export class Blueprint extends EventEmitter {
             name: tile.name,
         }))
         const iconData = this.icons.map((icon, i) => {
-            const getItemTypeForBp = (name: string): 'virtual' | 'fluid' | 'item' => {
-                switch (FD.items[name].type) {
-                    case 'virtual_signal':
-                        return 'virtual'
-                    case 'fluid':
-                        return 'fluid'
-                    default:
-                        return 'item'
-                }
+            const getItemTypeForBp = (name: string): BPS.SignalType => {
+                if (FD.signals[name]) return 'virtual'
+                if (FD.fluids[name]) return 'fluid'
+                return 'item'
             }
 
             return {
-                signal: { type: getItemTypeForBp(icon), name: icon } as BPS.ISignal,
+                signal: { type: getItemTypeForBp(icon), name: icon },
                 index: (i + 1) as 1 | 2 | 3 | 4,
             }
         })
