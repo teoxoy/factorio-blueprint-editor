@@ -126,9 +126,7 @@ export class WiresContainer extends PIXI.Container {
 
     public getPowerPoleDirection(entity: Entity): number {
         const entNrArr = this.entNrToConnectedEntNrs.get(entity.entityNumber)
-        if (!entNrArr) {
-            return 0
-        }
+        if (!entNrArr) return 0
 
         const points = entNrArr
             .map(entNr => G.bp.entities.get(entNr))
@@ -136,9 +134,7 @@ export class WiresContainer extends PIXI.Container {
             .map(ent => ent.position)
 
         // TODO: this should not happen - find out why it does
-        if (points.length === 0) {
-            return 0
-        }
+        if (points.length === 0) return 0
 
         return getPowerPoleRotation(entity.position, points)
 

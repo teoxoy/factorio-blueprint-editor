@@ -56,9 +56,7 @@ class OurMap<K, V> extends Map<K, V> {
 
     public find(predicate: (value: V, key: K) => boolean): V {
         for (const [k, v] of this) {
-            if (predicate(v, k)) {
-                return v
-            }
+            if (predicate(v, k)) return v
         }
         return undefined
     }
@@ -320,9 +318,7 @@ export class Blueprint extends EventEmitter {
     }
 
     private getCenter(): IPoint {
-        if (this.isEmpty()) {
-            return { x: 0, y: 0 }
-        }
+        if (this.isEmpty()) return { x: 0, y: 0 }
 
         const data = [
             ...this.entities
@@ -459,9 +455,7 @@ export class Blueprint extends EventEmitter {
         this.history.logging = true
 
         // Create visualizations
-        if (!DEBUG) {
-            return
-        }
+        if (!DEBUG) return
 
         // TODO: make a container special for debugging purposes
         G.BPC.wiresContainer.removeChildren()

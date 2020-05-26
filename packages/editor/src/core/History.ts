@@ -105,9 +105,7 @@ class Transaction {
     }
 
     public apply(): void {
-        if (this.applyImmediate) {
-            return
-        }
+        if (this.applyImmediate) return
         for (const action of this.actions) {
             action.apply(HistoryValue.New)
         }
@@ -252,10 +250,7 @@ export class History {
      * @returns `false` if there are no actions left for undo
      * */
     public undo(): boolean {
-        if (this.historyIndex === 0) {
-            return false
-        }
-
+        if (this.historyIndex === 0) return false
         const historyEntry = this.transactionHistory[this.historyIndex - 1]
         historyEntry.undo()
         this.historyIndex -= 1
@@ -272,10 +267,7 @@ export class History {
      * @returns `false` if there are no actions left for redo
      * */
     public redo(): boolean {
-        if (this.historyIndex === this.transactionHistory.length) {
-            return false
-        }
-
+        if (this.historyIndex === this.transactionHistory.length) return false
         const historyEntry = this.transactionHistory[this.historyIndex]
         historyEntry.redo()
         this.historyIndex += 1
@@ -311,10 +303,7 @@ export class History {
         this.transactionCount -= 1
 
         if (this.transactionCount === 0) {
-            if (this.activeTransaction.empty()) {
-                return false
-            }
-
+            if (this.activeTransaction.empty()) return false
             while (this.transactionHistory.length > this.historyIndex) {
                 this.transactionHistory.pop()
             }

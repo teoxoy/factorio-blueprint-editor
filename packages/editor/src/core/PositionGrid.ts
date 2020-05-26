@@ -162,9 +162,7 @@ export class PositionGrid {
             h: size.y,
         }
 
-        if (this.isAreaEmpty(area)) {
-            return true
-        }
+        if (this.isAreaEmpty(area)) return true
 
         for (const entity of this.getEntitiesInArea(area)) {
             switch (entity.name) {
@@ -225,9 +223,7 @@ export class PositionGrid {
             h: size.y,
         }
 
-        if (this.sharesCell(area)) {
-            return
-        }
+        if (this.sharesCell(area)) return
         const entity = this.findInArea(
             area,
             entity =>
@@ -236,9 +232,7 @@ export class PositionGrid {
                 fd.fast_replaceable_group &&
                 entity.entityData.fast_replaceable_group === fd.fast_replaceable_group
         )
-        if (!entity || pos.x !== entity.position.x || pos.y !== entity.position.y) {
-            return
-        }
+        if (!entity || pos.x !== entity.position.x || pos.y !== entity.position.y) return
         return entity
     }
 
@@ -247,9 +241,7 @@ export class PositionGrid {
         direction: number,
         pos: IPoint
     ): Entity {
-        if (name === 'straight_rail') {
-            return
-        }
+        if (name === 'straight_rail') return
 
         const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
         const area = {
@@ -259,9 +251,7 @@ export class PositionGrid {
             h: size.y,
         }
 
-        if (this.sharesCell(area)) {
-            return
-        }
+        if (this.sharesCell(area)) return
         const entity = this.findInArea(area, entity => entity.name === name)
 
         if (
@@ -293,12 +283,8 @@ export class PositionGrid {
             if (typeof cell === 'number') {
                 const entity = this.bp.entities.get(cell)
                 if (entity.name === name) {
-                    if (entity.direction === direction) {
-                        return cell
-                    }
-                    if ((entity.direction + 4) % 8 === direction) {
-                        return
-                    }
+                    if (entity.direction === direction) return cell
+                    if ((entity.direction + 4) % 8 === direction) return
                 }
             }
         }
@@ -386,9 +372,7 @@ export class PositionGrid {
             .uniqueInArray(
                 coordinates.reduce((acc, coord) => {
                     const cell = this.grid.get(`${coord[0]},${coord[1]}`)
-                    if (!cell) {
-                        return acc
-                    }
+                    if (!cell) return acc
                     if (typeof cell === 'number') {
                         acc.push(cell)
                     } else {

@@ -230,9 +230,7 @@ export class Textbox extends PIXI.Container {
         return this.p_CaretPosition
     }
     private set caretPosition(position: number) {
-        if (position < 0 || position > this.m_Text.children.length) {
-            return
-        }
+        if (position < 0 || position > this.m_Text.children.length) return
         this.p_CaretPosition = position
         if (this.p_CaretPosition === 0) {
             this.m_CaretGraphic.x = 3
@@ -247,15 +245,9 @@ export class Textbox extends PIXI.Container {
      * @param char - Character to insert at current caret position
      */
     private instertCharacter(char: string): void {
-        if (char === undefined || char.length !== 1) {
-            return
-        }
-        if (this.m_Text.children.length >= this.m_Length) {
-            return
-        }
-        if (this.m_Filter !== '' && this.m_Filter.indexOf(char) < 0) {
-            return
-        }
+        if (char === undefined || char.length !== 1) return
+        if (this.m_Text.children.length >= this.m_Length) return
+        if (this.m_Filter !== '' && this.m_Filter.indexOf(char) < 0) return
 
         this.m_Text.insertChar(new TextChar(char), this.caretPosition)
         this.caretPosition += 1
@@ -268,15 +260,11 @@ export class Textbox extends PIXI.Container {
      */
     private removeCharacter(direction: number): void {
         if (direction === -1) {
-            if (this.caretPosition < 1) {
-                return
-            }
+            if (this.caretPosition < 1) return
             this.m_Text.removeChar(this.caretPosition)
             this.caretPosition -= 1
         } else if (direction === 1) {
-            if (this.caretPosition >= this.m_Text.children.length) {
-                return
-            }
+            if (this.caretPosition >= this.m_Text.children.length) return
             this.m_Text.removeChar(this.caretPosition + 1)
         }
         this.emit('changed')

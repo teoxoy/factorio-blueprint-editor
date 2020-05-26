@@ -12,9 +12,7 @@ class QuickbarSlot extends Slot {
     }
 
     public assignItem(itemName: string): void {
-        if (itemName === 'blueprint') {
-            return
-        }
+        if (itemName === 'blueprint') return
         this.data = itemName
         this.content = F.CreateIcon(itemName)
     }
@@ -130,9 +128,7 @@ export class QuickbarPanel extends Panel {
 
     public bindKeyToSlot(slot: number): void {
         const itemName = this.slots[slot].itemName
-        if (!itemName) {
-            return
-        }
+        if (!itemName) return
 
         if (G.BPC.mode === EditorMode.PAINT && G.BPC.paintContainer.getItemName() === itemName) {
             G.BPC.paintContainer.destroy()

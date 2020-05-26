@@ -150,9 +150,7 @@ class Action {
         /** Lets the press handler run multiple times per button press */
         repeat?: boolean
     }): void {
-        if (opts.press === undefined && opts.release === undefined) {
-            return
-        }
+        if (opts.press === undefined && opts.release === undefined) return
 
         opts.once = opts.once || false
         opts.repeat = opts.repeat || false
@@ -162,9 +160,7 @@ class Action {
         // Wrap pressHandler to preventDefault
         const PRESS = opts.press
             ? (e: keyboardJS.KeyEvent) => {
-                  if (!opts.repeat && pressHandlerRanOnce) {
-                      return
-                  }
+                  if (!opts.repeat && pressHandlerRanOnce) return
                   pressHandlerRanOnce = true
                   if (e && e.preventDefault) {
                       e.preventDefault()
@@ -219,9 +215,7 @@ function callAction(name: string): void {
 
 function isActionActive(name: string): boolean {
     const action = actions.get(name)
-    if (action) {
-        return action.pressed
-    }
+    if (action) return action.pressed
     return false
 }
 
@@ -238,9 +232,7 @@ function resetKeybinds(): void {
 }
 
 function importKeybinds(keybinds: Record<string, string>): void {
-    if (!keybinds) {
-        return
-    }
+    if (!keybinds) return
     for (const [name, action] of actions) {
         if (keybinds[name] !== undefined) {
             action.keyCombo = keybinds[name]

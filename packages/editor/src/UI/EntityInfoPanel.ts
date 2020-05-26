@@ -153,16 +153,12 @@ export class EntityInfoPanel extends Panel {
             this.m_entityInfo.position.set(10, nextY)
             nextY = this.m_entityInfo.position.y + this.m_entityInfo.height + 10
 
-            if (!entity.recipe) {
-                return
-            }
+            if (!entity.recipe) return
 
             // Details for assembling machines with recipe
             this.m_RecipeContainer.removeChildren()
             const recipe = FD.recipes[entity.recipe]
-            if (recipe === undefined) {
-                return
-            }
+            if (recipe === undefined) return
 
             // Show the original recipe
             this.m_RecipeContainer.addChild(new PIXI.Text('Recipe:', styles.dialog.label))

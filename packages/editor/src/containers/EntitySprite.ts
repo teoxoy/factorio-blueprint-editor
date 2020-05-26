@@ -183,24 +183,16 @@ export class EntitySprite extends PIXI.Sprite {
 
     public static compareFn(a: EntitySprite, b: EntitySprite): number {
         const dZ = a.zIndex - b.zIndex
-        if (dZ !== 0) {
-            return dZ
-        }
+        if (dZ !== 0) return dZ
 
         const dY = a.y - a.shift.y - (b.y - b.shift.y)
-        if (dY !== 0) {
-            return dY
-        }
+        if (dY !== 0) return dY
 
         const dO = a.zOrder - b.zOrder
-        if (dO !== 0) {
-            return dO
-        }
+        if (dO !== 0) return dO
 
         const dX = a.x - a.shift.x - (b.x - b.shift.x)
-        if (dX !== 0) {
-            return dX
-        }
+        if (dX !== 0) return dX
 
         return a.id - b.id
     }

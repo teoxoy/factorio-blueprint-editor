@@ -211,9 +211,7 @@ class BlueprintContainer extends PIXI.Container {
     }
 
     public enterCopyMode(): void {
-        if (this.mode === EditorMode.COPY) {
-            return
-        }
+        if (this.mode === EditorMode.COPY) return
 
         this.updateHoverContainer(true)
         this.setMode(EditorMode.COPY)
@@ -247,9 +245,7 @@ class BlueprintContainer extends PIXI.Container {
     }
 
     public exitCopyMode(cancel = false): void {
-        if (this.mode !== EditorMode.COPY) {
-            return
-        }
+        if (this.mode !== EditorMode.COPY) return
 
         this.overlayContainer.hideSelectionArea()
         this.gridData.off('update32', this.copyModeUpdateFn)
@@ -267,9 +263,7 @@ class BlueprintContainer extends PIXI.Container {
     }
 
     public enterDeleteMode(): void {
-        if (this.mode === EditorMode.DELETE) {
-            return
-        }
+        if (this.mode === EditorMode.DELETE) return
 
         this.updateHoverContainer(true)
         this.setMode(EditorMode.DELETE)
@@ -303,9 +297,7 @@ class BlueprintContainer extends PIXI.Container {
     }
 
     public exitDeleteMode(cancel = false): void {
-        if (this.mode !== EditorMode.DELETE) {
-            return
-        }
+        if (this.mode !== EditorMode.DELETE) return
 
         this.overlayContainer.hideSelectionArea()
         this.gridData.off('update32', this.deleteModeUpdateFn)
@@ -369,9 +361,7 @@ class BlueprintContainer extends PIXI.Container {
             return
         }
 
-        if (!G.bp) {
-            return
-        }
+        if (!G.bp) return
 
         const entity = G.bp.entityPositionGrid.getEntityAtPosition(
             this.gridData.x32,
@@ -379,9 +369,7 @@ class BlueprintContainer extends PIXI.Container {
         )
         const eC = entity ? EntityContainer.mappings.get(entity.entityNumber) : undefined
 
-        if (eC && this.hoverContainer === eC) {
-            return
-        }
+        if (eC && this.hoverContainer === eC) return
 
         if (this.mode === EditorMode.EDIT) {
             removeHoverContainer()

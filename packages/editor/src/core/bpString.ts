@@ -142,9 +142,7 @@ function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: Error
 }
 
 function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book> {
-    if (source === undefined) {
-        return Promise.resolve(new Blueprint())
-    }
+    if (source === undefined) return Promise.resolve(new Blueprint())
 
     // trim whitespace
     const DATA = source.replace(/\s/g, '')
@@ -171,9 +169,7 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
 
             const fetchData = (url: string): Promise<Response> =>
                 fetch(url).then(response => {
-                    if (response.ok) {
-                        return response
-                    }
+                    if (response.ok) return response
                     throw new Error('Network response was not ok.')
                 })
 

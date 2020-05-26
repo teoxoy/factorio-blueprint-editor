@@ -170,9 +170,7 @@ export function generatePoles(
 
         const toRemove = pole.poweredEntityAreas.flatMap(area => {
             const poles = entAreaToPoles.get(area)
-            if (!poles) {
-                return []
-            }
+            if (!poles) return []
 
             for (const p of poles) {
                 p.poweredEntityAreas = p.poweredEntityAreas.filter(a => a !== area)

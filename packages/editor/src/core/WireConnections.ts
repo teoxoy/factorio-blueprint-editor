@@ -140,9 +140,7 @@ class WireConnections extends EventEmitter {
 
     public create(connection: IConnection): void {
         const hash = hashConn(connection)
-        if (this.connections.has(hash)) {
-            return
-        }
+        if (this.connections.has(hash)) return
 
         this.bp.history
             .updateMap(this.connections, hash, connection, 'Connect entities')
@@ -152,9 +150,7 @@ class WireConnections extends EventEmitter {
 
     private remove(connection: IConnection): void {
         const hash = hashConn(connection)
-        if (!this.connections.has(hash)) {
-            return
-        }
+        if (!this.connections.has(hash)) return
 
         this.bp.history
             .updateMap(this.connections, hash, undefined, 'Disconnect entities')

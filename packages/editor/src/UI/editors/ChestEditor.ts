@@ -35,9 +35,7 @@ export class ChestEditor extends Editor {
         const filters: Filters = this.addFilters(208, 45, this.m_Amount)
 
         /** Remaining controls are not needed if amount shall not be shown */
-        if (!this.m_Amount) {
-            return
-        }
+        if (!this.m_Amount) return
 
         // Add Label
         const label: PIXI.Text = new PIXI.Text('Count:', styles.dialog.label)

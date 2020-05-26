@@ -256,9 +256,7 @@ export class EntityContainer {
     }
 
     private redrawSurroundingEntities(position: IPoint = this.m_Entity.position): void {
-        if (!updateGroups[this.m_Entity.name]) {
-            return
-        }
+        if (!updateGroups[this.m_Entity.name]) return
         const area = {
             x: position.x,
             y: position.y,

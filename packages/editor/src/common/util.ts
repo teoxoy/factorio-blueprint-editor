@@ -104,18 +104,20 @@ const areObjectsEquivalent = <T extends Record<string, any>>(a: T, b: T): boolea
     const aProps = Object.getOwnPropertyNames(a)
     const bProps = Object.getOwnPropertyNames(b)
 
-    if (aProps.length !== bProps.length) {
-        return false
-    }
+    if (aProps.length !== bProps.length) return false
 
     for (const propName of aProps) {
-        if (a[propName] !== b[propName]) {
-            return false
-        }
+        if (a[propName] !== b[propName]) return false
     }
 
     return true
 }
+
+const areArraysEquivalent = <T>(a: T[], b: T[]): boolean =>
+    a !== undefined &&
+    b !== undefined &&
+    a.length === b.length &&
+    a.every((v, i) => areObjectsEquivalent(v, b[i]))
 
 const timer = (
     name: string
@@ -161,6 +163,7 @@ export default {
     uniqueInArray,
     equalArrays,
     areObjectsEquivalent,
+    areArraysEquivalent,
     timer,
     Deferred,
     objectHasOwnProperty,

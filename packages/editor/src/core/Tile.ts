@@ -15,9 +15,7 @@ export class Tile extends EventEmitter {
     }
 
     public static getItemName(name: string): string {
-        if (name === 'landfill') {
-            return 'landfill'
-        }
+        if (name === 'landfill') return 'landfill'
         return FD.tiles[name].minable.result
     }
 

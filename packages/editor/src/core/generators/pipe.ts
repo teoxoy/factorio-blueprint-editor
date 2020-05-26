@@ -179,12 +179,8 @@ function generatePipes(
                             )
                     )
 
-                if (lineContainsAnAddedPumpjack(a)) {
-                    return -10
-                }
-                if (lineContainsAnAddedPumpjack(b)) {
-                    return 10
-                }
+                if (lineContainsAnAddedPumpjack(a)) return -10
+                if (lineContainsAnAddedPumpjack(b)) return 10
                 return 0
             })
 
@@ -397,9 +393,7 @@ function generatePipes(
         // remove ends of pipes if they are not in validStraightPipeEnds
         .map(path =>
             path.filter((pos, i, arr) => {
-                if (i > 0 && i < arr.length - 1) {
-                    return true
-                }
+                if (i > 0 && i < arr.length - 1) return true
                 return validCoordsForUPipes.find(U.equalPoints(pos))
             })
         )
@@ -513,9 +507,7 @@ function getPathBetweenGroups(
     const ret = GROUPS.map(g => connect2Groups(grid, g, group, maxTurns))
         .filter(p => p.lines.length)
         .sort((a, b) => a.minDistance - b.minDistance)[0]
-    if (!ret) {
-        return
-    }
+    if (!ret) return
     return {
         toGroup: ret.firstGroup,
         path: ret.lines[0].path,

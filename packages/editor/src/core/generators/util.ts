@@ -33,13 +33,9 @@ const range = (from: number, to: number): number[] =>
 const getAngle = (cX: number, cY: number, pX: number, pY: number): number => {
     const x = pX - cX
     const y = pY - cY
-    if (x === 0 && y === 0) {
-        return 0
-    }
+    if (x === 0 && y === 0) return 0
     const angle = (Math.acos(x / Math.sqrt(x * x + y * y)) * 180) / Math.PI
-    if (y < 0) {
-        return 360 - angle
-    }
+    if (y < 0) return 360 - angle
     return angle
 }
 
@@ -63,12 +59,8 @@ const findSide = (p: IPoint, lp0: IPoint, lp1: IPoint): number =>
 const pointsToLines = <T extends IPoint>(nodes: T[]): T[][] => {
     const filteredNodes = uniqPoints(nodes)
 
-    if (filteredNodes.length === 1) {
-        return [[filteredNodes[0], filteredNodes[0]]]
-    }
-    if (filteredNodes.length === 2) {
-        return [filteredNodes]
-    }
+    if (filteredNodes.length === 1) return [[filteredNodes[0], filteredNodes[0]]]
+    if (filteredNodes.length === 2) return [filteredNodes]
 
     // Check that nodes are not collinear
     let lastSlope = 0
@@ -91,9 +83,7 @@ const pointsToLines = <T extends IPoint>(nodes: T[]): T[][] => {
 
     // Return lines from delaunay data
     return delaunay.triangles.reduce<T[][]>((pV, _, i, arr) => {
-        if (i <= delaunay.halfedges[i]) {
-            return pV
-        }
+        if (i <= delaunay.halfedges[i]) return pV
         const p = filteredNodes[arr[i]]
         const q = filteredNodes[arr[i % 3 === 2 ? i - 2 : i + 1]]
         return pV.concat([[p, q]])
@@ -108,12 +98,8 @@ const pointsToLines = <T extends IPoint>(nodes: T[]): T[][] => {
 const pointsToTriangles = <T extends IPoint>(nodes: T[]): T[][] => {
     const filteredNodes = uniqPoints(nodes)
 
-    if (filteredNodes.length === 1) {
-        return [[filteredNodes[0], filteredNodes[0]]]
-    }
-    if (filteredNodes.length === 2) {
-        return [filteredNodes]
-    }
+    if (filteredNodes.length === 1) return [[filteredNodes[0], filteredNodes[0]]]
+    if (filteredNodes.length === 2) return [filteredNodes]
 
     // Check that nodes are not collinear
     let lastSlope = 0

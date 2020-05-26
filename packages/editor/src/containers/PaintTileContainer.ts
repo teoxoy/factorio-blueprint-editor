@@ -45,18 +45,14 @@ export class PaintTileContainer extends PaintContainer {
     }
 
     public increaseSize(): void {
-        if (PaintTileContainer.size === 20) {
-            return
-        }
+        if (PaintTileContainer.size === 20) return
         PaintTileContainer.size += 1
         this.moveAtCursor()
         this.redraw()
     }
 
     public decreaseSize(): void {
-        if (PaintTileContainer.size === 1) {
-            return
-        }
+        if (PaintTileContainer.size === 1) return
         PaintTileContainer.size -= 1
         this.moveAtCursor()
         this.redraw()
@@ -96,9 +92,7 @@ export class PaintTileContainer extends PaintContainer {
     }
 
     public removeContainerUnder(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         const position = this.getGridPosition()
 
@@ -111,9 +105,7 @@ export class PaintTileContainer extends PaintContainer {
     }
 
     public placeEntityContainer(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         const position = this.getGridPosition()
 

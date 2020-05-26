@@ -61,29 +61,19 @@ for (const e in FD.entities) {
 }
 
 function getPipeCovers(e: FD.Entity): FD.DirectionalSpriteLayers {
-    if (e.fluid_box && e.output_fluid_box) {
-        return e.fluid_box.pipe_covers
-    }
-    if (e.fluid_box) {
-        return e.fluid_box.pipe_covers
-    }
-    if (e.output_fluid_box) {
-        return e.output_fluid_box.pipe_covers
-    }
+    if (e.fluid_box && e.output_fluid_box) return e.fluid_box.pipe_covers
+    if (e.fluid_box) return e.fluid_box.pipe_covers
+    if (e.output_fluid_box) return e.output_fluid_box.pipe_covers
     if (e.fluid_boxes) {
         for (const fb of e.fluid_boxes) {
-            if (fb instanceof Object) {
-                return fb.pipe_covers
-            }
+            if (fb instanceof Object) return fb.pipe_covers
         }
     }
 }
 
 function generateConnection(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
     const hasWireConnectionFeature = (e: FD.Entity): boolean => {
-        if (e.type === 'transport_belt') {
-            return false
-        }
+        if (e.type === 'transport_belt') return false
         if (
             e.connection_points ||
             e.input_connection_points ||
@@ -93,9 +83,7 @@ function generateConnection(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
             return true
         }
     }
-    if (!hasWireConnectionFeature(e)) {
-        return []
-    }
+    if (!hasWireConnectionFeature(e)) return []
     if (data.generateConnector) {
         if (e.circuit_connector_sprites) {
             const ccs =
@@ -156,9 +144,7 @@ function duplicateAndSetPropertyUsing(
 
 function generateCovers(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
     // entity doesn't have PipeCoverFeature
-    if (!(e.fluid_box || e.fluid_boxes || e.output_fluid_box)) {
-        return []
-    }
+    if (!(e.fluid_box || e.fluid_boxes || e.output_fluid_box)) return []
 
     if (
         e.name === 'pipe' ||
@@ -189,9 +175,7 @@ function generateCovers(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
                 }
 
                 const ent = data.positionGrid.getEntityAtPosition(pos.x, pos.y)
-                if (!ent) {
-                    return true
-                }
+                if (!ent) return true
 
                 if (
                     ent.name === 'chemical_plant' &&
@@ -264,14 +248,10 @@ function getPipeConnectionPoints(
             return [...e.fluid_box.pipe_connections, ...e.output_fluid_box.pipe_connections]
         }
         if (e.fluid_box) {
-            if (e.name === 'pipe_to_ground') {
-                return [e.fluid_box.pipe_connections[0]]
-            }
+            if (e.name === 'pipe_to_ground') return [e.fluid_box.pipe_connections[0]]
             return e.fluid_box.pipe_connections
         }
-        if (e.output_fluid_box) {
-            return e.output_fluid_box.pipe_connections
-        }
+        if (e.output_fluid_box) return e.output_fluid_box.pipe_connections
         if (e.fluid_boxes) {
             const conn = []
             for (const fb of e.fluid_boxes) {
@@ -284,9 +264,7 @@ function getPipeConnectionPoints(
         return undefined
     }
     const connections = getConn()
-    if (!connections) {
-        return undefined
-    }
+    if (!connections) return undefined
     const positions = []
     if (e.name === 'pumpjack') {
         positions.push({
@@ -310,24 +288,16 @@ function getPipeConnectionPoints(
 
 function getHeatConectionPoints(e: FD.Entity): FD.Connections[] {
     // nuclear reactor
-    if (e.heat_buffer) {
-        return e.heat_buffer.connections
-    }
+    if (e.heat_buffer) return e.heat_buffer.connections
     // heat exchanger
-    if (e.energy_source) {
-        return e.energy_source.connections
-    }
+    if (e.energy_source) return e.energy_source.connections
 }
 
 function getHeatConnections(position: IPoint, positionGrid: PositionGrid): boolean[] {
     return positionGrid.getNeighbourData(position).map(({ x, y, entity }) => {
-        if (!entity) {
-            return false
-        }
+        if (!entity) return false
 
-        if (entity.name === 'heat_pipe' || entity.name === 'heat_interface') {
-            return true
-        }
+        if (entity.name === 'heat_pipe' || entity.name === 'heat_interface') return true
         if (entity.name === 'heat_exchanger' || entity.name === 'nuclear_reactor') {
             return (
                 getHeatConectionPoints(entity.entityData)
@@ -363,9 +333,7 @@ function getBeltWireConnectionIndex(
     C = [...C, ...C].splice(dir / 2, 4)
 
     if (!C[1] && C[2] && !C[3]) {
-        if (dir === 0 || dir === 4) {
-            return 2
-        }
+        if (dir === 0 || dir === 4) return 2
         return 1
     }
     if (C[1] && !C[2] && !C[3]) {
@@ -524,9 +492,7 @@ function getBeltSprites(
             ) {
                 return
             }
-            if (d.entity.direction === (d.relDir + 4) % 8) {
-                return d
-            }
+            if (d.entity.direction === (d.relDir + 4) % 8) return d
         })
 
         const entAtPos = positionGrid.getEntityAtPosition(pos.x, pos.y)
@@ -708,9 +674,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         util.duplicate(e.fluid_boxes[0].pipe_picture[util.intToDir(pipeDirection)])
                     ),
                 ]
-                if (pipeDirection === 0) {
-                    return [out[1], out[0]]
-                }
+                if (pipeDirection === 0) return [out[1], out[0]]
                 return out
             }
             return [(e.animation as FD.SpriteLayers).layers[0]]
@@ -1228,9 +1192,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                         }
                     }
 
-                    if (data.dir === 0) {
-                        return [e.vertical_animation.layers[0]]
-                    }
+                    if (data.dir === 0) return [e.vertical_animation.layers[0]]
                     return [e.horizontal_animation.layers[0]]
                 }
 
@@ -1254,9 +1216,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     const conn = data.positionGrid
                         .getNeighbourData(data.position)
                         .map(({ entity, relDir }) => {
-                            if (!entity) {
-                                return false
-                            }
+                            if (!entity) return false
 
                             if (entity.name === 'pipe' || entity.name === 'infinity_pipe') {
                                 return true
@@ -1306,21 +1266,11 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                             }
                         })
 
-                    if (conn[0] && conn[1] && conn[2] && conn[3]) {
-                        return [pictures.cross]
-                    }
-                    if (conn[0] && conn[1] && conn[3]) {
-                        return [pictures.t_up]
-                    }
-                    if (conn[1] && conn[2] && conn[3]) {
-                        return [pictures.t_down]
-                    }
-                    if (conn[0] && conn[1] && conn[2]) {
-                        return [pictures.t_right]
-                    }
-                    if (conn[0] && conn[2] && conn[3]) {
-                        return [pictures.t_left]
-                    }
+                    if (conn[0] && conn[1] && conn[2] && conn[3]) return [pictures.cross]
+                    if (conn[0] && conn[1] && conn[3]) return [pictures.t_up]
+                    if (conn[1] && conn[2] && conn[3]) return [pictures.t_down]
+                    if (conn[0] && conn[1] && conn[2]) return [pictures.t_right]
+                    if (conn[0] && conn[2] && conn[3]) return [pictures.t_left]
                     if (conn[0] && conn[2]) {
                         return Math.floor(data.position.y) % 2 === 0
                             ? [pictures.straight_vertical]
@@ -1337,82 +1287,42 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                                   pictures.straight_horizontal_window,
                               ]
                     }
-                    if (conn[0] && conn[1]) {
-                        return [pictures.corner_up_right]
-                    }
-                    if (conn[0] && conn[3]) {
-                        return [pictures.corner_up_left]
-                    }
-                    if (conn[1] && conn[2]) {
-                        return [pictures.corner_down_right]
-                    }
-                    if (conn[2] && conn[3]) {
-                        return [pictures.corner_down_left]
-                    }
-                    if (conn[0]) {
-                        return [pictures.ending_up]
-                    }
-                    if (conn[2]) {
-                        return [pictures.ending_down]
-                    }
-                    if (conn[1]) {
-                        return [pictures.ending_right]
-                    }
-                    if (conn[3]) {
-                        return [pictures.ending_left]
-                    }
+                    if (conn[0] && conn[1]) return [pictures.corner_up_right]
+                    if (conn[0] && conn[3]) return [pictures.corner_up_left]
+                    if (conn[1] && conn[2]) return [pictures.corner_down_right]
+                    if (conn[2] && conn[3]) return [pictures.corner_down_left]
+                    if (conn[0]) return [pictures.ending_up]
+                    if (conn[2]) return [pictures.ending_down]
+                    if (conn[1]) return [pictures.ending_right]
+                    if (conn[3]) return [pictures.ending_left]
                 }
                 return [pictures.straight_vertical_single]
             }
         case 'heat_pipe':
             return (data: IDrawData) => {
                 if (data.positionGrid) {
-                    const conn = getHeatConnections(data.position, data.positionGrid)
-                    if (conn[0] && conn[1] && conn[2] && conn[3]) {
-                        return [util.getRandomItem(e.connection_sprites.cross)]
+                    const getOpt = (): SpriteData[] => {
+                        const conn = getHeatConnections(data.position, data.positionGrid)
+                        if (conn[0] && conn[1] && conn[2] && conn[3]) {
+                            return e.connection_sprites.cross
+                        }
+                        if (conn[0] && conn[1] && conn[3]) return e.connection_sprites.t_up
+                        if (conn[1] && conn[2] && conn[3]) return e.connection_sprites.t_down
+                        if (conn[0] && conn[1] && conn[2]) return e.connection_sprites.t_right
+                        if (conn[0] && conn[2] && conn[3]) return e.connection_sprites.t_left
+                        if (conn[0] && conn[2]) return e.connection_sprites.straight_vertical
+                        if (conn[1] && conn[3]) return e.connection_sprites.straight_horizontal
+                        if (conn[0] && conn[1]) return e.connection_sprites.corner_right_up
+                        if (conn[0] && conn[3]) return e.connection_sprites.corner_left_up
+                        if (conn[1] && conn[2]) return e.connection_sprites.corner_right_down
+                        if (conn[2] && conn[3]) return e.connection_sprites.corner_left_down
+                        if (conn[0]) return e.connection_sprites.ending_up
+                        if (conn[2]) return e.connection_sprites.ending_down
+                        if (conn[1]) return e.connection_sprites.ending_right
+                        if (conn[3]) return e.connection_sprites.ending_left
+                        return e.connection_sprites.single
                     }
-                    if (conn[0] && conn[1] && conn[3]) {
-                        return [util.getRandomItem(e.connection_sprites.t_up)]
-                    }
-                    if (conn[1] && conn[2] && conn[3]) {
-                        return [util.getRandomItem(e.connection_sprites.t_down)]
-                    }
-                    if (conn[0] && conn[1] && conn[2]) {
-                        return [util.getRandomItem(e.connection_sprites.t_right)]
-                    }
-                    if (conn[0] && conn[2] && conn[3]) {
-                        return [util.getRandomItem(e.connection_sprites.t_left)]
-                    }
-                    if (conn[0] && conn[2]) {
-                        return [util.getRandomItem(e.connection_sprites.straight_vertical)]
-                    }
-                    if (conn[1] && conn[3]) {
-                        return [util.getRandomItem(e.connection_sprites.straight_horizontal)]
-                    }
-                    if (conn[0] && conn[1]) {
-                        return [util.getRandomItem(e.connection_sprites.corner_right_up)]
-                    }
-                    if (conn[0] && conn[3]) {
-                        return [util.getRandomItem(e.connection_sprites.corner_left_up)]
-                    }
-                    if (conn[1] && conn[2]) {
-                        return [util.getRandomItem(e.connection_sprites.corner_right_down)]
-                    }
-                    if (conn[2] && conn[3]) {
-                        return [util.getRandomItem(e.connection_sprites.corner_left_down)]
-                    }
-                    if (conn[0]) {
-                        return [util.getRandomItem(e.connection_sprites.ending_up)]
-                    }
-                    if (conn[2]) {
-                        return [util.getRandomItem(e.connection_sprites.ending_down)]
-                    }
-                    if (conn[1]) {
-                        return [util.getRandomItem(e.connection_sprites.ending_right)]
-                    }
-                    if (conn[3]) {
-                        return [util.getRandomItem(e.connection_sprites.ending_left)]
-                    }
+                    return [util.getRandomItem(getOpt())]
                 }
                 return [util.getRandomItem(e.connection_sprites.single)]
             }
@@ -1526,9 +1436,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
 
                     // Belt facing this belt
                     C = C.map(d => {
-                        if (d && d.entity.direction === (d.relDir + 4) % 8) {
-                            return d
-                        }
+                        if (d && d.entity.direction === (d.relDir + 4) % 8) return d
                     })
 
                     sideloadingBack = C[0] !== undefined

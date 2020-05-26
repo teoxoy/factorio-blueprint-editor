@@ -70,32 +70,23 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.position
     }
     public set position(position: IPoint) {
-        if (util.areObjectsEquivalent(this.m_rawEntity.position, position)) {
-            return
-        }
+        if (util.areObjectsEquivalent(this.m_rawEntity.position, position)) return
 
-        if (!this.m_BP.entityPositionGrid.canMoveTo(this, position)) {
-            return
-        }
+        if (!this.m_BP.entityPositionGrid.canMoveTo(this, position)) return
 
-        // Restrict movement of connected entities
-        if (
-            !this.m_BP.wireConnections
-                .getEntityConnections(this.entityNumber)
-                .map(c =>
-                    c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1
+        // Make sure all entity connections reach the new position
+        const connectionsReach = this.m_BP.wireConnections
+            .getEntityConnections(this.entityNumber)
+            .map(c => (c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1))
+            .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
+            .every(e =>
+                U.pointInCircle(
+                    e.position,
+                    position,
+                    Math.min(e.maxWireDistance, this.maxWireDistance)
                 )
-                .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
-                .every(e =>
-                    U.pointInCircle(
-                        e.position,
-                        position,
-                        Math.min(e.maxWireDistance, this.maxWireDistance)
-                    )
-                )
-        ) {
-            return
-        }
+            )
+        if (!connectionsReach) return
 
         this.m_BP.history
             .updateValue(this.m_rawEntity, ['position'], position, 'Change position')
@@ -127,9 +118,7 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.direction === undefined ? 0 : this.m_rawEntity.direction
     }
     public set direction(direction: number) {
-        if (this.m_rawEntity.direction === direction) {
-            return
-        }
+        if (this.m_rawEntity.direction === direction) return
 
         this.m_BP.history
             .updateValue(this.m_rawEntity, ['direction'], direction, 'Change direction')
@@ -142,9 +131,7 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.type
     }
     public set directionType(type: 'input' | 'output') {
-        if (this.m_rawEntity.type === type) {
-            return
-        }
+        if (this.m_rawEntity.type === type) return
 
         this.m_BP.history
             .updateValue(this.m_rawEntity, ['type'], type, 'Change direction type')
@@ -157,9 +144,7 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.recipe
     }
     public set recipe(recipe: string) {
-        if (this.m_rawEntity.recipe === recipe) {
-            return
-        }
+        if (this.m_rawEntity.recipe === recipe) return
 
         this.m_BP.history.startTransaction()
 
@@ -183,9 +168,7 @@ export class Entity extends EventEmitter {
 
     /** Recipes this entity can accept */
     public get acceptedRecipes(): string[] {
-        if (this.entityData.crafting_categories === undefined) {
-            return []
-        }
+        if (this.entityData.crafting_categories === undefined) return []
 
         return Object.keys(FD.recipes)
             .map(k => FD.recipes[k])
@@ -195,17 +178,13 @@ export class Entity extends EventEmitter {
 
     /** Count of module slots */
     public get moduleSlots(): number {
-        if (this.entityData.module_specification === undefined) {
-            return 0
-        }
+        if (this.entityData.module_specification === undefined) return 0
         return this.entityData.module_specification.module_slots
     }
 
     /** Modules this entity can accept */
     public get acceptedModules(): string[] {
-        if (this.entityData.module_specification === undefined) {
-            return []
-        }
+        if (this.entityData.module_specification === undefined) return []
 
         return (
             Object.keys(FD.items)
@@ -230,9 +209,7 @@ export class Entity extends EventEmitter {
 
     /** Filters this entity can accept (only splitters, inserters and logistic chests) */
     public get acceptedFilters(): string[] {
-        if (this.filterSlots === 0) {
-            return []
-        }
+        if (this.filterSlots === 0) return []
 
         return Object.keys(FD.items)
             .map(k => FD.items[k])
@@ -243,15 +220,11 @@ export class Entity extends EventEmitter {
     /** List of all modules */
     public get modules(): string[] {
         const modulesObj = this.m_rawEntity.items
-        if (modulesObj === undefined || Object.keys(modulesObj).length === 0) {
-            return []
-        }
+        if (modulesObj === undefined || Object.keys(modulesObj).length === 0) return []
         return Object.keys(modulesObj).flatMap(k => Array<string>(modulesObj[k]).fill(k))
     }
     public set modules(modules: string[]) {
-        if (util.equalArrays(this.modules, modules)) {
-            return
-        }
+        if (util.equalArrays(this.modules, modules)) return
 
         const ms: Record<string, number> = {}
         for (const m of modules) {
@@ -268,12 +241,8 @@ export class Entity extends EventEmitter {
 
     /** Count of filter slots */
     public get filterSlots(): number {
-        if (this.name.includes('splitter')) {
-            return 1
-        }
-        if (this.entityData.filter_count !== undefined) {
-            return this.entityData.filter_count
-        }
+        if (this.name.includes('splitter')) return 1
+        if (this.entityData.filter_count !== undefined) return this.entityData.filter_count
         if (this.entityData.logistic_slots_count !== undefined) {
             return this.entityData.logistic_slots_count
         }
@@ -333,9 +302,7 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.input_priority
     }
     public set splitterInputPriority(priority: string) {
-        if (this.m_rawEntity.input_priority === priority) {
-            return
-        }
+        if (this.m_rawEntity.input_priority === priority) return
 
         this.m_BP.history
             .updateValue(
@@ -353,9 +320,7 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.output_priority
     }
     public set splitterOutputPriority(priority: string) {
-        if (this.m_rawEntity.output_priority === priority) {
-            return
-        }
+        if (this.m_rawEntity.output_priority === priority) return
 
         this.m_BP.history.startTransaction()
 
@@ -378,16 +343,12 @@ export class Entity extends EventEmitter {
 
     /** Splitter filter */
     private get splitterFilter(): IFilter[] {
-        if (!this.m_rawEntity.filter) {
-            return []
-        }
+        if (!this.m_rawEntity.filter) return []
         return [{ index: 1, name: this.m_rawEntity.filter }]
     }
     private set splitterFilter(filters: IFilter[]) {
         const filter = filters === undefined ? undefined : filters[0].name
-        if (this.m_rawEntity.filter === filter) {
-            return
-        }
+        if (this.m_rawEntity.filter === filter) return
 
         this.m_BP.history.startTransaction()
 
@@ -422,19 +383,8 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.filters
     }
     private set inserterFilters(filters: IFilter[]) {
-        if (filters === undefined && this.m_rawEntity.filters === undefined) {
-            return
-        }
-        if (
-            filters !== undefined &&
-            this.m_rawEntity.filters !== undefined &&
-            this.m_rawEntity.filters.length === filters.length &&
-            this.m_rawEntity.filters.every((filter, i) =>
-                util.areObjectsEquivalent(filter, filters[i])
-            )
-        ) {
-            return
-        }
+        if (filters === undefined && this.m_rawEntity.filters === undefined) return
+        if (util.areArraysEquivalent(filters, this.m_rawEntity.filters)) return
 
         this.m_BP.history
             .updateValue(this.m_rawEntity, ['filters'], filters, 'Change inserter filter')
@@ -448,34 +398,8 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.request_filters
     }
     private set logisticChestFilters(filters: IFilter[]) {
-        // TODO: Check if it makes sense to ignore count changes for history - which can be done with the following routine
-        // if (this.m_rawEntity.request_filters === undefined && filters === undefined) return
-        // if (this.m_rawEntity.request_filters !== undefined && filters !== undefined) {
-        //     let equal = this.m_rawEntity.request_filters.length === filters.length
-        //     if (equal) {
-        //         for (let index = 0; index < this.m_rawEntity.request_filters.length; index++) {
-        //             if (!equal) continue
-        //             if (equal && this.m_rawEntity.request_filters[index].name !== filters[index].name) {
-        //                 equal = false
-        //             }
-        //         }
-        //     }
-        //     if (equal) return
-        // }
-
-        if (filters === undefined && this.m_rawEntity.request_filters === undefined) {
-            return
-        }
-        if (
-            filters !== undefined &&
-            this.m_rawEntity.request_filters !== undefined &&
-            this.m_rawEntity.request_filters.length === filters.length &&
-            this.m_rawEntity.request_filters.every((filter, i) =>
-                util.areObjectsEquivalent(filter, filters[i])
-            )
-        ) {
-            return
-        }
+        if (filters === undefined && this.m_rawEntity.request_filters === undefined) return
+        if (util.areArraysEquivalent(filters, this.m_rawEntity.request_filters)) return
 
         this.m_BP.history
             .updateValue(this.m_rawEntity, ['request_filters'], filters, 'Change chest filter')
@@ -485,16 +409,12 @@ export class Entity extends EventEmitter {
     }
 
     private get infinityChestFilters(): IFilter[] {
-        if (!this.m_rawEntity.infinity_settings) {
-            return []
-        }
+        if (!this.m_rawEntity.infinity_settings) return []
         return this.m_rawEntity.infinity_settings.filters
     }
 
     private get infinityPipeFilters(): IFilter[] {
-        if (!this.m_rawEntity.infinity_settings) {
-            return []
-        }
+        if (!this.m_rawEntity.infinity_settings) return []
         return [{ name: this.m_rawEntity.infinity_settings.name, index: 1 }]
     }
 
@@ -503,9 +423,7 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.request_from_buffers
     }
     public set requestFromBufferChest(request: boolean) {
-        if (this.m_rawEntity.request_from_buffers === request) {
-            return
-        }
+        if (this.m_rawEntity.request_from_buffers === request) return
 
         this.m_BP.history
             .updateValue(
@@ -519,12 +437,8 @@ export class Entity extends EventEmitter {
     }
 
     public get inserterStackSize(): number {
-        if (this.m_rawEntity.override_stack_size) {
-            return this.m_rawEntity.override_stack_size
-        }
-        if (this.name.includes('stack')) {
-            return 12
-        }
+        if (this.m_rawEntity.override_stack_size) return this.m_rawEntity.override_stack_size
+        if (this.name.includes('stack')) return 12
         return 3
     }
 
@@ -562,9 +476,7 @@ export class Entity extends EventEmitter {
     }
 
     public get chemicalPlantDontConnectOutput(): boolean {
-        if (!this.recipe) {
-            return false
-        }
+        if (!this.recipe) return false
         return !FD.recipes[this.recipe].results.find(result => result.type === 'fluid')
     }
 
@@ -611,9 +523,7 @@ export class Entity extends EventEmitter {
     }
 
     public rotate(ccw = false, rotateOpposingUB = false): void {
-        if (!this.canBeRotated) {
-            return
-        }
+        if (!this.canBeRotated) return
 
         const pr = this.entityData.possible_rotations
         const newDir =
@@ -624,9 +534,7 @@ export class Entity extends EventEmitter {
                     pr.length
             ]
 
-        if (newDir === this.direction) {
-            return
-        }
+        if (newDir === this.direction) return
 
         this.m_BP.history.startTransaction('Rotate entity')
 
@@ -660,9 +568,7 @@ export class Entity extends EventEmitter {
 
     /** Paste relevant data from source entity */
     public pasteSettings(sourceEntity: Entity): void {
-        if (!this.canPasteSettings(sourceEntity)) {
-            return
-        }
+        if (!this.canPasteSettings(sourceEntity)) return
 
         this.m_BP.history.startTransaction('Paste settings to entity')
 
@@ -792,16 +698,10 @@ export class Entity extends EventEmitter {
     }
 
     public get assemblerPipeDirection(): 'input' | 'output' {
-        if (!this.recipe) {
-            return undefined
-        }
+        if (!this.recipe) return undefined
         const recipe = FD.recipes[this.recipe]
-        if (recipe.ingredients.find(ingredient => ingredient.type === 'fluid')) {
-            return 'input'
-        }
-        if (recipe.results.find(result => result.type === 'fluid')) {
-            return 'output'
-        }
+        if (recipe.ingredients.find(ingredient => ingredient.type === 'fluid')) return 'input'
+        if (recipe.results.find(result => result.type === 'fluid')) return 'output'
         return undefined
     }
 
@@ -812,14 +712,10 @@ export class Entity extends EventEmitter {
     ): number[] {
         const e = this.entityData
         // poles
-        if (e.connection_points) {
-            return e.connection_points[direction / 2].wire[color]
-        }
+        if (e.connection_points) return e.connection_points[direction / 2].wire[color]
         // combinators
         if (e.input_connection_points) {
-            if (side === 1) {
-                return e.input_connection_points[direction / 2].wire[color]
-            }
+            if (side === 1) return e.input_connection_points[direction / 2].wire[color]
             return e.output_connection_points[direction / 2].wire[color]
         }
 
@@ -829,9 +725,7 @@ export class Entity extends EventEmitter {
                 : e.right_wire_connection_point.wire.copper
         }
 
-        if (e.circuit_wire_connection_point) {
-            return e.circuit_wire_connection_point.wire[color]
-        }
+        if (e.circuit_wire_connection_point) return e.circuit_wire_connection_point.wire[color]
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[

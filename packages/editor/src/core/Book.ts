@@ -31,9 +31,7 @@ export class Book {
         }
 
         const blueprint = this.blueprints[this._activeIndex]
-        if (blueprint.loaded) {
-            return blueprint.loaded
-        }
+        if (blueprint.loaded) return blueprint.loaded
 
         const bp = new Blueprint(blueprint.blueprint)
         blueprint.loaded = bp

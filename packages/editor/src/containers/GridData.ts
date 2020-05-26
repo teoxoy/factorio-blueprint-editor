@@ -66,9 +66,7 @@ export class GridData extends EventEmitter {
         this._x32 = Math.floor(this._x / 32)
         this._y32 = Math.floor(this._y / 32)
 
-        if (G.BPC.mode === EditorMode.PAN) {
-            return
-        }
+        if (G.BPC.mode === EditorMode.PAN) return
 
         // emit update when mouse changes tile whithin the 1 pixel size grid
         if (!(oldX === this._x && oldY === this._y)) {

@@ -113,9 +113,7 @@ export class Filters extends PIXI.Container {
      * @param count - New count
      */
     public updateFilter(index: number, count: number): void {
-        if (this.m_Filters[index].count === count) {
-            return
-        }
+        if (this.m_Filters[index].count === count) return
         this.m_Filters[index].count = count
         this.m_Entity.filters = this.m_Filters
         this.m_UpdateSlots()

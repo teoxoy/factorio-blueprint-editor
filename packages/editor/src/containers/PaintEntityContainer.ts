@@ -116,14 +116,10 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     public rotate(ccw = false): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         const pr = FD.entities[this.name].possible_rotations
-        if (!pr) {
-            return
-        }
+        if (!pr) return
         this.direction = pr[(pr.indexOf(this.direction) + (ccw ? 3 : 1)) % pr.length]
 
         this.redraw()
@@ -143,9 +139,7 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     public moveAtCursor(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         const railRelatedNames = ['straight_rail', 'curved_rail', 'train_stop']
         const firstRail = G.bp.getFirstRailRelatedEntity()
@@ -176,9 +170,7 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     public removeContainerUnder(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         const entities = G.bp.entityPositionGrid.getEntitiesInArea({
             ...this.getGridPosition(),
@@ -190,9 +182,7 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     public placeEntityContainer(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         const fd = FD.entities[this.name]
         const position = this.getGridPosition()

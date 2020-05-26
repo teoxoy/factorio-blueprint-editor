@@ -101,18 +101,14 @@ export class PaintBlueprintContainer extends PaintContainer {
     }
 
     public rotate(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         // TODO: implement
         return undefined
     }
 
     public moveAtCursor(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         const firstRailHere = this.bp.getFirstRailRelatedEntity()
         const firstRailInBP = G.bp.getFirstRailRelatedEntity()
@@ -142,9 +138,7 @@ export class PaintBlueprintContainer extends PaintContainer {
     protected redraw(): void {}
 
     public placeEntityContainer(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         G.bp.history.startTransaction('Create Entities')
 
@@ -179,9 +173,7 @@ export class PaintBlueprintContainer extends PaintContainer {
     }
 
     public removeContainerUnder(): void {
-        if (!this.visible) {
-            return
-        }
+        if (!this.visible) return
 
         G.bp.history.startTransaction('Remove Entities')
         for (const [, c] of this.entities) {

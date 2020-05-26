@@ -111,14 +111,10 @@ function loadBp(bpOrBook: Blueprint | Book): void {
 }
 
 document.addEventListener('copy', (e: ClipboardEvent) => {
-    if (document.activeElement !== CANVAS) {
-        return
-    }
+    if (document.activeElement !== CANVAS) return
     e.preventDefault()
 
-    if (bp.isEmpty()) {
-        return
-    }
+    if (bp.isEmpty()) return
 
     const onSuccess = (): void => {
         createToast({ text: 'Blueprint string copied to clipboard', type: 'success' })
@@ -147,9 +143,7 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
 })
 
 document.addEventListener('paste', (e: ClipboardEvent) => {
-    if (document.activeElement !== CANVAS) {
-        return
-    }
+    if (document.activeElement !== CANVAS) return
     e.preventDefault()
 
     loadingScreen.show()
@@ -197,9 +191,7 @@ function registerActions(): void {
 
     EDITOR.registerAction('takePicture', 'modifier+s').bind({
         press: () => {
-            if (bp.isEmpty()) {
-                return
-            }
+            if (bp.isEmpty()) return
 
             EDITOR.getPicture().then(blob => {
                 FileSaver.saveAs(blob, `${bp.name}.png`)
@@ -222,9 +214,7 @@ function registerActions(): void {
 
 function createWelcomeMessage(): void {
     const notFirstRun = localStorage.getItem('firstRun') === 'false'
-    if (notFirstRun) {
-        return
-    }
+    if (notFirstRun) return
     localStorage.setItem('firstRun', 'false')
 
     // Wait a bit just to capture the users attention
