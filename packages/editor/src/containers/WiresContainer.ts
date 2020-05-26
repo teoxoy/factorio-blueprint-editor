@@ -244,7 +244,7 @@ export class WiresContainer extends PIXI.Container {
             }
         }
 
-        this.entNrToConnectedEntNrs = finalLines.reduce((map: Map<number, number[]>, line) => {
+        this.entNrToConnectedEntNrs = finalLines.reduce<Map<number, number[]>>((map, line) => {
             const eNr0 = line[0].entityNumber
             const eNr1 = line[1].entityNumber
 
@@ -265,7 +265,7 @@ export class WiresContainer extends PIXI.Container {
             }
 
             return map
-        }, new Map<number, number[]>())
+        }, new Map())
 
         const finalLinesHashes = finalLines.reduce(
             (map, line) => map.set(lineHash(line), line),
@@ -275,7 +275,7 @@ export class WiresContainer extends PIXI.Container {
         const toDel = [...this.passiveConnToSprite.keys()].filter(k => !finalLinesHashes.get(k))
 
         // update rotations
-        const toUpdate: number[] = [...toAdd, ...toDel].reduce((arr, hash) => {
+        const toUpdate = [...toAdd, ...toDel].reduce<number[]>((arr, hash) => {
             const entNr0 = Number(hash.split('-')[0])
             const entNr1 = Number(hash.split('-')[1])
             if (!arr.includes(entNr0)) {

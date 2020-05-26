@@ -491,10 +491,10 @@ export class Blueprint extends EventEmitter {
             tilesOrEntities: (Tile | Entity)[],
             getItemName: (name: string) => string
         ): [string, number][] => [
-            ...tilesOrEntities.reduce((map, tileOrEntity) => {
+            ...tilesOrEntities.reduce<Map<string, number>>((map, tileOrEntity) => {
                 const itemName = getItemName(tileOrEntity.name)
                 return map.set(itemName, map.has(itemName) ? map.get(itemName) + 1 : 0)
-            }, new Map<string, number>()),
+            }, new Map()),
         ]
 
         if (!this.entities.isEmpty()) {

@@ -99,7 +99,7 @@ export function generatePoles(
 
     const pointToEntityArea = entityAreas
         .filter(area => area.every(p => p.power))
-        .reduce((map, area) => {
+        .reduce<Map<string, IArea[]>>((map, area) => {
             area.forEach(p => map.set(U.hashPoint(p), area))
             return map
         }, new Map())
@@ -112,7 +112,7 @@ export function generatePoles(
             y: mid.y + (Math.floor(i / D) - Math.floor(D / 2)),
         }))
 
-        const powerGiven = powerArea.reduce((acc, p) => {
+        const powerGiven = powerArea.reduce<IArea[][]>((acc, p) => {
             const area = pointToEntityArea.get(U.hashPoint(p))
             if (!area || acc.includes(area)) {
                 return acc
@@ -122,7 +122,7 @@ export function generatePoles(
 
         const midOfConsumers = powerGiven
             .map(p => p[4])
-            .reduce(
+            .reduce<IPoint>(
                 (m, p) => {
                     m.x += p.x
                     m.y += p.y
@@ -144,7 +144,7 @@ export function generatePoles(
         }
     })
 
-    const entAreaToPoles = possiblePoles.reduce((map, p) => {
+    const entAreaToPoles = possiblePoles.reduce<Map<IPoint[], IPole[]>>((map, p) => {
         p.poweredEntityAreas.forEach(area => {
             const exists = map.get(area)
             if (exists) {

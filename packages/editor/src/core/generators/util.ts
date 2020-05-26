@@ -90,14 +90,14 @@ const pointsToLines = <T extends IPoint>(nodes: T[]): T[][] => {
     const delaunay = Delaunator.from(filteredNodes.map(pointToArray))
 
     // Return lines from delaunay data
-    return delaunay.triangles.reduce((pV, _, i, arr) => {
+    return delaunay.triangles.reduce<T[][]>((pV, _, i, arr) => {
         if (i <= delaunay.halfedges[i]) {
             return pV
         }
         const p = filteredNodes[arr[i]]
         const q = filteredNodes[arr[i % 3 === 2 ? i - 2 : i + 1]]
         return pV.concat([[p, q]])
-    }, [] as T[][])
+    }, [])
 }
 
 /**

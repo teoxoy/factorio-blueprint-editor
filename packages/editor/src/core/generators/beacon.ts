@@ -90,7 +90,7 @@ export function generateBeacons(
     const possibleBeaconAreas = validBeaconPositions
         .map(coord =>
             U.range(0, BEACON_SIZE * BEACON_SIZE)
-                .map(i => ({
+                .map<IPoint>(i => ({
                     x: coord.x + (i % BEACON_SIZE),
                     y: coord.y + Math.floor(i / BEACON_SIZE),
                 }))
@@ -101,17 +101,17 @@ export function generateBeacons(
     const pointToBeaconCount = possibleBeaconAreas
         .flat()
         .map(U.hashPoint)
-        .reduce((map, key) => {
+        .reduce<Map<string, number>>((map, key) => {
             const C = map.get(key)
             if (!C) {
                 return map.set(key, 1)
             }
             return map.set(key, C + 1)
-        }, new Map<string, number>())
+        }, new Map())
 
     const pointToEntityArea = entityAreas
         .filter(area => area.every(p => p.effect))
-        .reduce((map, area) => {
+        .reduce<Map<string, IArea[]>>((map, area) => {
             area.forEach(p => map.set(U.hashPoint(p), area))
             return map
         }, new Map())
@@ -127,7 +127,7 @@ export function generateBeacons(
                     x: mid.x + ((i % D) - Math.floor(D / 2)),
                     y: mid.y + (Math.floor(i / D) - Math.floor(D / 2)),
                 }))
-                .reduce((acc, p) => {
+                .reduce<IArea[][]>((acc, p) => {
                     const area = pointToEntityArea.get(U.hashPoint(p))
                     if (!area || acc.includes(area)) {
                         return acc
@@ -157,7 +157,7 @@ export function generateBeacons(
 
     // addVisualization(U.uniqPoints(possibleBeacons.flatMap(c => c.collisionArea)))
 
-    const pointToBeacons = possibleBeacons.reduce((map, b) => {
+    const pointToBeacons = possibleBeacons.reduce<Map<string, IBeacon[]>>((map, b) => {
         b.collisionArea.forEach(p => {
             const P = map.get(U.hashPoint(p))
             if (P) {
