@@ -6,11 +6,46 @@ export class Checkbox extends PIXI.Container {
     /** Checkmark Polygon */
     // prettier-ignore
     private static readonly CHECK_POLYGON: PIXI.Polygon = new PIXI.Polygon([
-         8,  8, 12,  8, 16, 12, 20, 12, 24,  8,
-        28,  8, 28, 12, 24, 16, 24, 20, 28, 24,
-        28, 28, 24, 28, 20, 24, 16, 24, 12, 28,
-         8, 28,  8, 24, 12, 20, 12, 16,  8, 12,
-         8,  8])
+        8,  8, 12,  8, 16, 12, 20, 12, 24,  8,
+       28,  8, 28, 12, 24, 16, 24, 20, 28, 24,
+       28, 28, 24, 28, 20, 24, 16, 24, 12, 28,
+        8, 28,  8, 24, 12, 20, 12, 16,  8, 12,
+        8,  8])
+
+    /** Checkbox Graphic */
+    private m_Checkbox: PIXI.Graphics
+
+    /** Checkbox Hover */
+    private m_Hover: PIXI.Graphics
+
+    /** Data of Checkbox */
+    private m_Checked: boolean
+
+    public constructor(checked = false, text?: string) {
+        super()
+
+        this.interactive = true
+        this.checked = checked
+
+        // Draw text
+        if (text !== undefined) {
+            const label: PIXI.Text = new PIXI.Text(text, styles.controls.checkbox)
+            label.position.set(24, 0)
+            this.addChild(label)
+        }
+
+        // Attach events
+        this.on('pointerdown', () => {
+            this.checked = !this.checked
+            this.emit('changed')
+        })
+        this.on('pointerover', () => {
+            this.m_Hover.visible = true
+        })
+        this.on('pointerout', () => {
+            this.m_Hover.visible = false
+        })
+    }
 
     /**
      * Draw Checkbox Graphic
@@ -53,41 +88,6 @@ export class Checkbox extends PIXI.Container {
         graphic.position.set(0, 0)
         graphic.visible = visible
         return graphic
-    }
-
-    /** Checkbox Graphic */
-    private m_Checkbox: PIXI.Graphics
-
-    /** Checkbox Hover */
-    private m_Hover: PIXI.Graphics
-
-    /** Data of Checkbox */
-    private m_Checked: boolean
-
-    public constructor(checked = false, text?: string) {
-        super()
-
-        this.interactive = true
-        this.checked = checked
-
-        // Draw text
-        if (text !== undefined) {
-            const label: PIXI.Text = new PIXI.Text(text, styles.controls.checkbox)
-            label.position.set(24, 0)
-            this.addChild(label)
-        }
-
-        // Attach events
-        this.on('pointerdown', () => {
-            this.checked = !this.checked
-            this.emit('changed')
-        })
-        this.on('pointerover', () => {
-            this.m_Hover.visible = true
-        })
-        this.on('pointerout', () => {
-            this.m_Hover.visible = false
-        })
     }
 
     /** Is checkbox checked */

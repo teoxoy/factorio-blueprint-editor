@@ -14,33 +14,8 @@ import { Panel } from './Panel'
  *  + automatically executes 'setDialogPosition()' on Browser Resizing
  */
 export class Dialog extends Panel {
-    /** Closes last open dialog */
-    public static closeLast(): void {
-        if (Dialog.anyOpen()) {
-            Dialog.s_openDialogs[Dialog.s_openDialogs.length - 1].close()
-        }
-    }
-
-    /** Closes all open dialogs */
-    public static closeAll(): void {
-        Dialog.s_openDialogs.forEach(d => d.close())
-    }
-
-    /** @returns True if there is at least one dialog open */
-    public static anyOpen(): boolean {
-        return Dialog.s_openDialogs.length > 0
-    }
-
     /** Stores all open dialogs */
     protected static s_openDialogs: Dialog[] = []
-
-    /** Capitalize String */
-    protected static capitalize(text: string): string {
-        return text
-            .split('_')
-            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
-            .join(' ')
-    }
 
     public constructor(width: number, height: number, title?: string) {
         super(
@@ -60,6 +35,31 @@ export class Dialog extends Panel {
         }
 
         Dialog.s_openDialogs.push(this)
+    }
+
+    /** Closes last open dialog */
+    public static closeLast(): void {
+        if (Dialog.anyOpen()) {
+            Dialog.s_openDialogs[Dialog.s_openDialogs.length - 1].close()
+        }
+    }
+
+    /** Closes all open dialogs */
+    public static closeAll(): void {
+        Dialog.s_openDialogs.forEach(d => d.close())
+    }
+
+    /** @returns True if there is at least one dialog open */
+    public static anyOpen(): boolean {
+        return Dialog.s_openDialogs.length > 0
+    }
+
+    /** Capitalize String */
+    protected static capitalize(text: string): string {
+        return text
+            .split('_')
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(' ')
     }
 
     /** Automatically sets position of dialog to center screen */

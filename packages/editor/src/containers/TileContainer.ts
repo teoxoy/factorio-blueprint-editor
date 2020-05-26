@@ -5,6 +5,17 @@ import { Tile } from '../core/Tile'
 import { EntitySprite } from './EntitySprite'
 
 export class TileContainer {
+    private readonly tileSprites: PIXI.Sprite[] = []
+
+    public constructor(tile: Tile) {
+        const sprite = TileContainer.generateSprite(tile.name, tile.x, tile.y)
+        sprite.position.set(tile.x * 32, tile.y * 32)
+        this.tileSprites.push(sprite)
+        G.BPC.addTileSprites([sprite])
+
+        tile.on('destroy', () => this.tileSprites.forEach(s => s.destroy()))
+    }
+
     public static generateSprite(name: string, x: number, y: number): EntitySprite {
         // TODO: maybe optimize this with PIXI.TilingSprite and masks
         // https://github.com/pixijs/pixi.js/wiki/v4-Gotchas#graphics--tilingsprite
@@ -28,16 +39,5 @@ export class TileContainer {
             height: 64,
             scale: 0.5,
         })
-    }
-
-    private readonly tileSprites: PIXI.Sprite[] = []
-
-    public constructor(tile: Tile) {
-        const sprite = TileContainer.generateSprite(tile.name, tile.x, tile.y)
-        sprite.position.set(tile.x * 32, tile.y * 32)
-        this.tileSprites.push(sprite)
-        G.BPC.addTileSprites([sprite])
-
-        tile.on('destroy', () => this.tileSprites.forEach(s => s.destroy()))
     }
 }

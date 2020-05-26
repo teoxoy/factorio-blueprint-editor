@@ -26,29 +26,6 @@ class QuickbarSlot extends Slot {
 }
 
 export class QuickbarPanel extends Panel {
-    private static createTriangleButton(width: number, height: number): PIXI.Graphics {
-        const button = new PIXI.Graphics()
-
-        button
-            .beginFill(colors.controls.button.background.color)
-            .moveTo(0, height)
-            .lineTo(width / 2, 0)
-            .lineTo(width, height)
-            .lineTo(0, height)
-            .endFill()
-
-        button.interactive = true
-
-        button.on('pointerover', () => {
-            button.alpha = 0.8
-        })
-        button.on('pointerout', () => {
-            button.alpha = 1
-        })
-
-        return button
-    }
-
     private iWidth = 442
     private iHeight: number
     private rows: number
@@ -79,6 +56,29 @@ export class QuickbarPanel extends Panel {
         t.position.set((this.iWidth - t.width) / 2, (this.iHeight - t.height) / 2)
         t.on('pointerdown', () => this.changeActiveQuickbar())
         this.addChild(t)
+    }
+
+    private static createTriangleButton(width: number, height: number): PIXI.Graphics {
+        const button = new PIXI.Graphics()
+
+        button
+            .beginFill(colors.controls.button.background.color)
+            .moveTo(0, height)
+            .lineTo(width / 2, 0)
+            .lineTo(width, height)
+            .lineTo(0, height)
+            .endFill()
+
+        button.interactive = true
+
+        button.on('pointerover', () => {
+            button.alpha = 0.8
+        })
+        button.on('pointerout', () => {
+            button.alpha = 1
+        })
+
+        return button
     }
 
     public generateSlots(itemNames?: string[]): void {

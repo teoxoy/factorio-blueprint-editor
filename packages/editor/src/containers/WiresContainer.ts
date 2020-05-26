@@ -6,6 +6,10 @@ import { Entity } from '../core/Entity'
 import { EntityContainer } from './EntityContainer'
 
 export class WiresContainer extends PIXI.Container {
+    private connectionToSprite = new Map<string, PIXI.Graphics>()
+    private passiveConnToSprite = new Map<string, PIXI.Graphics>()
+    private entNrToConnectedEntNrs = new Map<number, number[]>()
+
     private static createWire(p1: IPoint, p2: IPoint, color: string): PIXI.Graphics {
         const wire = new PIXI.Graphics()
 
@@ -58,10 +62,6 @@ export class WiresContainer extends PIXI.Container {
 
         return wire
     }
-
-    private connectionToSprite = new Map<string, PIXI.Graphics>()
-    private passiveConnToSprite = new Map<string, PIXI.Graphics>()
-    private entNrToConnectedEntNrs = new Map<number, number[]>()
 
     public add(hash: string, connection: IConnection): void {
         const sprite = this.getWireSprite(connection)

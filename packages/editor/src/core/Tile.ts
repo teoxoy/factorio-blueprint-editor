@@ -2,13 +2,6 @@ import EventEmitter from 'eventemitter3'
 import FD from 'factorio-data'
 
 export class Tile extends EventEmitter {
-    public static getItemName(name: string): string {
-        if (name === 'landfill') {
-            return 'landfill'
-        }
-        return FD.tiles[name].minable.result
-    }
-
     private readonly _name: string
     private readonly _x: number
     private readonly _y: number
@@ -19,6 +12,13 @@ export class Tile extends EventEmitter {
         this._name = name
         this._x = x
         this._y = y
+    }
+
+    public static getItemName(name: string): string {
+        if (name === 'landfill') {
+            return 'landfill'
+        }
+        return FD.tiles[name].minable.result
     }
 
     public get name(): string {

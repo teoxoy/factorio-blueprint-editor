@@ -56,24 +56,6 @@ export abstract class PaintContainer extends PIXI.Container {
         super.destroy()
     }
 
-    // override
-    public abstract getItemName(): string
-
-    // override
-    public abstract rotate(ccw?: boolean): void
-
-    // override
-    protected abstract redraw(): void
-
-    // override
-    public abstract moveAtCursor(): void
-
-    // override
-    public abstract removeContainerUnder(): void
-
-    // override
-    public abstract placeEntityContainer(): void
-
     protected getGridPosition(): IPoint {
         return {
             x: Math.round((this.x / 32) * 10) / 10,
@@ -101,4 +83,22 @@ export abstract class PaintContainer extends PIXI.Container {
         const position = G.app.renderer.plugins.interaction.mouse.global
         this.icon.position.set(position.x + 16, position.y + 16)
     }
+
+    // override
+    public abstract getItemName(): string
+
+    // override
+    public abstract rotate(ccw?: boolean): void
+
+    // override
+    protected abstract redraw(): void
+
+    // override
+    public abstract moveAtCursor(): void
+
+    // override
+    public abstract removeContainerUnder(): void
+
+    // override
+    public abstract placeEntityContainer(): void
 }

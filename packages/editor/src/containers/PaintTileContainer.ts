@@ -6,6 +6,15 @@ import { PaintContainer } from './PaintContainer'
 export class PaintTileContainer extends PaintContainer {
     private static size = 2
 
+    public constructor(name: string) {
+        super(name)
+
+        G.BPC.transparentEntities()
+
+        this.moveAtCursor()
+        this.redraw()
+    }
+
     private static getTilePositions(): IPoint[] {
         return [...Array(Math.pow(PaintTileContainer.size, 2)).keys()].map(i => {
             const offset = PaintTileContainer.size / 2 - 0.5
@@ -14,15 +23,6 @@ export class PaintTileContainer extends PaintContainer {
                 y: (i - (i % PaintTileContainer.size)) / PaintTileContainer.size - offset,
             }
         })
-    }
-
-    public constructor(name: string) {
-        super(name)
-
-        G.BPC.transparentEntities()
-
-        this.moveAtCursor()
-        this.redraw()
     }
 
     public hide(): void {

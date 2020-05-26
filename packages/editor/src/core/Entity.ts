@@ -9,10 +9,6 @@ import U from './generators/util'
 
 /** Entity Base Class */
 export class Entity extends EventEmitter {
-    public static getItemName(name: string): string {
-        return FD.entities[name].minable.result
-    }
-
     /** Field to hold raw entity */
     private readonly m_rawEntity: BPS.IEntity
 
@@ -28,6 +24,10 @@ export class Entity extends EventEmitter {
         super()
         this.m_BP = blueprint
         this.m_rawEntity = rawEntity
+    }
+
+    public static getItemName(name: string): string {
+        return FD.entities[name].minable.result
     }
 
     public destroy(): void {

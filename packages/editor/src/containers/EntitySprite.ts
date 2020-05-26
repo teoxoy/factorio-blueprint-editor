@@ -26,6 +26,80 @@ interface IEntityData {
 
 export class EntitySprite extends PIXI.Sprite {
     private static nextID = 0
+
+    private id: number
+    private shift: IPoint
+    /** Should be private but TS complains */
+    public zIndex: number
+    private zOrder: number
+
+    public constructor(data: ISpriteData) {
+        if (!data.shift) {
+            data.shift = [0, 0]
+        }
+        if (!data.x) {
+            data.x = 0
+        }
+        if (!data.y) {
+            data.y = 0
+        }
+        if (!data.divW) {
+            data.divW = 1
+        }
+        if (!data.divH) {
+            data.divH = 1
+        }
+
+        const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${
+            data.height / data.divH
+        }`
+        let texture = PIXI.utils.TextureCache[textureKey]
+        if (!texture) {
+            const spriteData = PIXI.Texture.from(data.filename)
+            texture = new PIXI.Texture(
+                spriteData.baseTexture,
+                new PIXI.Rectangle(
+                    spriteData.frame.x + data.x,
+                    spriteData.frame.y + data.y,
+                    data.width / data.divW,
+                    data.height / data.divH
+                )
+            )
+            PIXI.Texture.addToCache(texture, textureKey)
+        }
+        super(texture)
+
+        this.id = EntitySprite.getNextID()
+
+        this.shift = {
+            x: data.shift[0] * 32,
+            y: data.shift[1] * 32,
+        }
+
+        this.position.set(this.shift.x, this.shift.y)
+
+        if (data.scale) {
+            this.scale.set(data.scale, data.scale)
+        }
+
+        this.anchor.x = data.anchorX === undefined ? 0.5 : data.anchorX
+        this.anchor.y = data.anchorY === undefined ? 0.5 : data.anchorY
+
+        if (data.squishY) {
+            this.height /= data.squishY
+        }
+
+        if (data.rotAngle) {
+            this.angle = data.rotAngle
+        }
+
+        if (data.tint) {
+            F.applyTint(this, data.tint)
+        }
+
+        return this
+    }
+
     private static getNextID(): number {
         this.nextID += 1
         return this.nextID
@@ -129,79 +203,6 @@ export class EntitySprite extends PIXI.Sprite {
         }
 
         return a.id - b.id
-    }
-
-    private id: number
-    private shift: IPoint
-    /** Should be private but TS complains */
-    public zIndex: number
-    private zOrder: number
-
-    public constructor(data: ISpriteData) {
-        if (!data.shift) {
-            data.shift = [0, 0]
-        }
-        if (!data.x) {
-            data.x = 0
-        }
-        if (!data.y) {
-            data.y = 0
-        }
-        if (!data.divW) {
-            data.divW = 1
-        }
-        if (!data.divH) {
-            data.divH = 1
-        }
-
-        const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${
-            data.height / data.divH
-        }`
-        let texture = PIXI.utils.TextureCache[textureKey]
-        if (!texture) {
-            const spriteData = PIXI.Texture.from(data.filename)
-            texture = new PIXI.Texture(
-                spriteData.baseTexture,
-                new PIXI.Rectangle(
-                    spriteData.frame.x + data.x,
-                    spriteData.frame.y + data.y,
-                    data.width / data.divW,
-                    data.height / data.divH
-                )
-            )
-            PIXI.Texture.addToCache(texture, textureKey)
-        }
-        super(texture)
-
-        this.id = EntitySprite.getNextID()
-
-        this.shift = {
-            x: data.shift[0] * 32,
-            y: data.shift[1] * 32,
-        }
-
-        this.position.set(this.shift.x, this.shift.y)
-
-        if (data.scale) {
-            this.scale.set(data.scale, data.scale)
-        }
-
-        this.anchor.x = data.anchorX === undefined ? 0.5 : data.anchorX
-        this.anchor.y = data.anchorY === undefined ? 0.5 : data.anchorY
-
-        if (data.squishY) {
-            this.height /= data.squishY
-        }
-
-        if (data.rotAngle) {
-            this.angle = data.rotAngle
-        }
-
-        if (data.tint) {
-            F.applyTint(this, data.tint)
-        }
-
-        return this
     }
 
     public setPosition(position: IPoint): void {

@@ -21,3 +21,14 @@ rules:
           allowTypedFunctionExpressions: true
           allowHigherOrderFunctions: true
     '@typescript-eslint/ban-ts-ignore': off
+    '@typescript-eslint/member-ordering':
+        - warn
+        - default:
+              - signature
+              - static-field
+              - instance-field
+              - abstract-field
+              - constructor
+              - static-method
+              - instance-method
+              - abstract-method
