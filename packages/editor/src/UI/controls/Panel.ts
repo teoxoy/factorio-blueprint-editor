@@ -10,15 +10,14 @@ import F from './functions'
  *  + is visible (this.visible = true)
  *  + is interactive (this.interactive = true)
  *  + has interactive children (this.interactiveChildren = true)
- *  + automatically executes 'onBrowserResize()' on Browser Resizing
- *  + does not automatically set its position (hint: override onBrowserResize())
+ *  + automatically calls 'setPosition()' on Browser Resizing
+ *  + does not automatically set its position (hint: override setPosition())
  */
 export abstract class Panel extends PIXI.Container {
-    /** Event string of browser resize */
-    private static readonly WINDOW_RESIZE_EVENT_STRING = 'browserResized'
-
     /** Background Graphic */
     private readonly m_Background: PIXI.Graphics
+
+    private _setPosition: () => void
 
     /**
      * Constructor
@@ -38,18 +37,22 @@ export abstract class Panel extends PIXI.Container {
     ) {
         super()
 
-        // Subscribe to browser window resized to amit a panel contained event
-        window.addEventListener('resize', () => this.emit(Panel.WINDOW_RESIZE_EVENT_STRING, this))
-        // Based on panel event, fire protected method setPosition()
-        this.on(Panel.WINDOW_RESIZE_EVENT_STRING, () => this.setPosition())
-
         this.interactive = true
         this.interactiveChildren = true
 
         this.m_Background = F.DrawRectangle(width, height, background, alpha, border, false)
         this.addChild(this.m_Background)
 
+        this._setPosition = () => this.setPosition()
+        window.addEventListener('resize', this._setPosition)
+
         this.setPosition()
+    }
+
+    public destroy(): void {
+        this.emit('destroy')
+        window.removeEventListener('resize', this._setPosition)
+        super.destroy({ children: true })
     }
 
     /** Width of the Control */
