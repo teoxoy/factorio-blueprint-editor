@@ -4,6 +4,7 @@ import { Entity } from '../../../core/Entity'
 import G from '../../../common/globals'
 import { Slot } from '../../controls/Slot'
 import F from '../../controls/functions'
+import { Entity, IFilter } from '../../../core/Entity'
 
 /** Module Slots for Entity */
 export class Filters extends PIXI.Container {
