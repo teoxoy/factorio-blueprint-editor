@@ -1,7 +1,7 @@
 import { Entity } from '../core/Entity'
 import G from '../common/globals'
 import { Blueprint } from '../core/Blueprint'
-import { serialize, deserialize } from '../core/WireConnections'
+import { WireConnections } from '../core/WireConnections'
 import { EntitySprite } from './EntitySprite'
 import { PaintContainer } from './PaintContainer'
 import { PaintBlueprintEntityContainer } from './PaintBlueprintEntityContainer'
@@ -42,9 +42,9 @@ export class PaintBlueprintContainer extends PaintContainer {
             e.position.x -= center.x
             e.position.y -= center.y
             // Filter out connections outside selection
-            e.connections = serialize(
+            e.connections = WireConnections.serialize(
                 e.entity_number,
-                deserialize(e.entity_number, e.connections).filter(
+                WireConnections.deserialize(e.entity_number, e.connections).filter(
                     c => entMap.has(c.entityNumber1) && entMap.has(c.entityNumber2)
                 )
             )
