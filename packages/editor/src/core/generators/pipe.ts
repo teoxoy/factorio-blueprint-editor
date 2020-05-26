@@ -96,15 +96,14 @@ function generatePipes(
 
     const globalCoords = pumpjacks
         .map(e => [Math.floor(e.position.x), Math.floor(e.position.y)])
-        .map(pos =>
+        .flatMap(pos =>
             U.range(0, 9)
                 .map(i => [(i % 3) - 1, Math.floor(i / 3) - 1])
-                .map(offset => ({
+                .map<IPoint>(offset => ({
                     x: pos[0] + offset[0],
                     y: pos[1] + offset[1],
                 }))
         )
-        .reduce((acc, val) => acc.concat(val), [])
 
     const minX = globalCoords.reduce((pV, cV) => Math.min(pV, cV.x), Infinity)
     const minY = globalCoords.reduce((pV, cV) => Math.min(pV, cV.y), Infinity)
@@ -137,7 +136,7 @@ function generatePipes(
     let LINES: ILine[] = U.pointsToLines(dataset)
         .map(line => {
             const conn = line[0].plugs
-                .reduce((acc, p) => acc.concat(line[1].plugs.map(p2 => [p, p2])), [])
+                .flatMap(p => line[1].plugs.map(p2 => [p, p2]))
                 .filter(l => l[0].x === l[1].x || l[0].y === l[1].y)
                 .map(l => ({ ...generatePathFromLine(l), plugs: l }))
                 // check for other pumpjack collision
@@ -235,7 +234,7 @@ function generatePipes(
         const line = U.pointsToLines(dataset)
             .map(line => {
                 const conn = line[0].plugs
-                    .reduce((acc, p) => acc.concat(line[1].plugs.map(p2 => [p, p2])), [])
+                    .flatMap(p => line[1].plugs.map(p2 => [p, p2]))
                     .map(l => {
                         const path = new PF.BreadthFirstFinder()
                             .findPath(l[0].x, l[0].y, l[1].x, l[1].y, new PF.Grid(grid))
@@ -343,9 +342,9 @@ function generatePipes(
 
     // GENERATE ALL INTERSECTION POINTS (WILL INCLUDE ALL PUMPJACKS PLUGS TOO)
     const intersectionPositions = U.uniqPoints(
-        finalGroup.paths
-            .map(p => PF.Util.compressPath(p.map(U.pointToArray)).map(U.arrayToPoint))
-            .reduce((acc, val) => acc.concat(val), [])
+        finalGroup.paths.flatMap(p =>
+            PF.Util.compressPath(p.map(U.pointToArray)).map(U.arrayToPoint)
+        )
     )
     // addVisualization(intersectionPositions)
 
@@ -384,24 +383,17 @@ function generatePipes(
     const straightPaths = finalGroup.paths
         // not length - 4 because one of the ends might be in validStraightPipeEnds
         .filter(p => p.length - 3 >= MIN_GAP_BETWEEN_UNDERGROUNDS)
-        .reduce((acc: IPoint[][], p) => {
-            const I = p
+        .flatMap(p =>
+            p
                 // find intersections in path
                 .filter(pos => intersectionPositions.find(U.equalPoints(pos)))
                 // map intersections in path to indexes on the path
                 .map(iPos => p.findIndex(U.equalPoints(iPos)))
                 // transform indexes array into pairs of indexes
-                .reduce((acc: number[][], index, i, arr) => {
-                    if (i === arr.length - 1) {
-                        return acc
-                    }
-                    return acc.concat([[index, arr[i + 1]]])
-                }, [])
+                .flatMap((_, i, arr) => (i === 0 ? [] : [[arr[i - 1], arr[i]]]))
                 // map pairs of indexes to the corresponding part of path
                 .map(pair => p.slice(pair[0], pair[1] + 1))
-
-            return acc.concat(I)
-        }, [])
+        )
         // remove ends of pipes if they are not in validStraightPipeEnds
         .map(path =>
             path.filter((pos, i, arr) => {
@@ -415,7 +407,7 @@ function generatePipes(
 
     // GENERATE UNDERGROUND PIPE DATA
     const undergroundPipes = straightPaths
-        .map(path => {
+        .flatMap(path => {
             const HOR = path[0].y === path[1].y
             const PATH = path.sort((a, b) => (HOR ? a.x - b.x : a.y - b.y))
 
@@ -428,13 +420,11 @@ function generatePipes(
                     start: Math.floor(segmentLength * i),
                     end: Math.floor(segmentLength * (i + 1)) - 1,
                 }))
-                .map(segment => [
+                .flatMap<IPlug>(segment => [
                     { ...PATH[segment.start], dir: HOR ? 6 : 0 },
                     { ...PATH[segment.end], dir: HOR ? 2 : 4 },
                 ])
-                .reduce((acc, val) => acc.concat(val), [])
-        }, [])
-        .reduce((acc, val) => acc.concat(val), [])
+        })
         .map(localToGlobal)
 
     const straightPathsCoords = straightPaths.flat()
@@ -550,12 +540,9 @@ function getPathBetweenGroups(
         const path1 = g1.paths.flat()
 
         const lines = path0
-            .reduce((acc: IPoint[][], coord) => {
-                const all = path1
-                    .filter(p => p.x === coord.x || p.y === coord.y)
-                    .map(found => [found, coord])
-                return acc.concat(all)
-            }, [])
+            .flatMap(coord =>
+                path1.filter(p => p.x === coord.x || p.y === coord.y).map(found => [found, coord])
+            )
             .map(l => ({ ...generatePathFromLine(l), endpoints: l, turns: 0 }))
             // check for other pumpjack collision
             .filter(l => l.path.every(p => !grid[p.y][p.x]))

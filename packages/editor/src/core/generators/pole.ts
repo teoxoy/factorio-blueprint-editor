@@ -84,16 +84,15 @@ export function generatePoles(
     const validPolePositions = U.uniqPoints(
         entities
             .filter(e => e.power)
-            .map(e => {
+            .flatMap(e => {
                 const searchSize = e.size + POLE_SIZE * 2 + (POLE_EFFECT_RADIUS - 1) * 2
-                return U.range(0, searchSize * searchSize).map(i => ({
+                return U.range(0, searchSize * searchSize).map<IPoint>(i => ({
                     x: Math.floor(e.position.x) + ((i % searchSize) - Math.floor(searchSize / 2)),
                     y:
                         Math.floor(e.position.y) +
                         (Math.floor(i / searchSize) - Math.floor(searchSize / 2)),
                 }))
             })
-            .reduce((acc, val) => acc.concat(val), [])
     ).filter(p => !occupiedPositions.has(U.hashPoint(p)))
 
     // addVisualization(validPolePositions)
@@ -167,10 +166,10 @@ export function generatePoles(
         const pole = possiblePoles.shift()
         poles.push(pole)
 
-        const toRemove = pole.poweredEntityAreas.reduce((acc, area) => {
-            const poles: IPole[] = entAreaToPoles.get(area)
+        const toRemove = pole.poweredEntityAreas.flatMap(area => {
+            const poles = entAreaToPoles.get(area)
             if (!poles) {
-                return acc
+                return []
             }
 
             poles.forEach(p => {
@@ -178,8 +177,8 @@ export function generatePoles(
                 p.powerGiven -= 1
             })
 
-            return acc.concat(poles.filter(p => p.poweredEntityAreas.length === 0))
-        }, [])
+            return poles.filter(p => p.poweredEntityAreas.length === 0)
+        })
 
         possiblePoles = possiblePoles.filter(p => !toRemove.includes(p))
     }

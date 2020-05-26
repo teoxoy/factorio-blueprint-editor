@@ -246,10 +246,7 @@ export class Entity extends EventEmitter {
         if (modulesObj === undefined || Object.keys(modulesObj).length === 0) {
             return []
         }
-        return Object.keys(modulesObj).reduce(
-            (acc, k) => acc.concat(Array(modulesObj[k]).fill(k)),
-            []
-        )
+        return Object.keys(modulesObj).flatMap(k => Array<string>(modulesObj[k]).fill(k))
     }
     public set modules(modules: string[]) {
         if (util.equalArrays(this.modules, modules)) {

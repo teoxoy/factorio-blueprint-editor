@@ -196,12 +196,10 @@ export class WiresContainer extends PIXI.Container {
 
         const setsOfLines = U.pointsToTriangles(poles).map(tri =>
             tri
-                .reduce((acc, _, i, arr) => {
-                    if (i === arr.length - 1) {
-                        return acc.concat([[arr[0], arr[i]]])
-                    }
-                    return acc.concat([[arr[i], arr[i + 1]]])
-                }, [] as IPole[][])
+                .flatMap((_, i, arr) => {
+                    if (i === arr.length - 1) return [[arr[0], arr[i]]]
+                    return [[arr[i], arr[i + 1]]]
+                })
                 .filter(line =>
                     U.pointInCircle(
                         line[0],

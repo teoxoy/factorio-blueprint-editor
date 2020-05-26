@@ -73,16 +73,15 @@ export function generateBeacons(
     const validBeaconPositions = U.uniqPoints(
         entities
             .filter(e => e.effect)
-            .map(e => {
+            .flatMap(e => {
                 const searchSize = e.size + BEACON_SIZE * 2 + (BEACON_EFFECT_RADIUS - 1) * 2
-                return U.range(0, searchSize * searchSize).map(i => ({
+                return U.range(0, searchSize * searchSize).map<IPoint>(i => ({
                     x: Math.floor(e.position.x) + ((i % searchSize) - Math.floor(searchSize / 2)),
                     y:
                         Math.floor(e.position.y) +
                         (Math.floor(i / searchSize) - Math.floor(searchSize / 2)),
                 }))
             })
-            .reduce((acc, val) => acc.concat(val), [])
     ).filter(p => !occupiedPositions.has(U.hashPoint(p)))
 
     const grid = new Set(validBeaconPositions.map(p => U.hashPoint(p)))
@@ -156,7 +155,7 @@ export function generateBeacons(
         })
         .filter(c => c.effectsGiven >= MIN_AFFECTED_ENTITIES)
 
-    // addVisualization(U.uniqPoints(possibleBeacons.map(c => c.collisionArea).reduce((acc, val) => acc.concat(val), [])))
+    // addVisualization(U.uniqPoints(possibleBeacons.flatMap(c => c.collisionArea)))
 
     const pointToBeacons = possibleBeacons.reduce((map, b) => {
         b.collisionArea.forEach(p => {
@@ -185,15 +184,11 @@ export function generateBeacons(
         const beacon = possibleBeacons.shift()
         beacons.push(beacon)
 
-        const toRemove: IBeacon[] = beacon.collisionArea.reduce((acc, p) => {
-            const beacons: IBeacon[] = pointToBeacons.get(U.hashPoint(p))
-            if (!beacons) {
-                return acc
-            }
-            return acc.concat(beacons.filter(b => !acc.includes(b)))
-        }, [])
+        const toRemove = new Set(
+            beacon.collisionArea.flatMap(p => pointToBeacons.get(U.hashPoint(p)) || [])
+        )
 
-        possibleBeacons = possibleBeacons.filter(b => !toRemove.includes(b))
+        possibleBeacons = possibleBeacons.filter(b => !toRemove.has(b))
     }
 
     addVisualization(beacons, 16, 1, 0x800000)

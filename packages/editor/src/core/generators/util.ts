@@ -74,12 +74,7 @@ const pointsToLines = <T extends IPoint>(nodes: T[]): T[][] => {
     let lastSlope = 0
     for (let i = 0; i < filteredNodes.length; i++) {
         if (i === filteredNodes.length - 1) {
-            return filteredNodes.reduce((pV, _, i, arr) => {
-                if (i === 0) {
-                    return pV
-                }
-                return pV.concat([[arr[i - 1], arr[i]]])
-            }, [] as T[][])
+            return filteredNodes.flatMap((_, i, arr) => (i === 0 ? [] : [[arr[i - 1], arr[i]]]))
         }
         const node = filteredNodes[i]
         const next = filteredNodes[i + 1]
@@ -124,12 +119,7 @@ const pointsToTriangles = <T extends IPoint>(nodes: T[]): T[][] => {
     let lastSlope = 0
     for (let i = 0; i < filteredNodes.length; i++) {
         if (i === filteredNodes.length - 1) {
-            return filteredNodes.reduce((pV, _, i, arr) => {
-                if (i === 0) {
-                    return pV
-                }
-                return pV.concat([[arr[i - 1], arr[i]]])
-            }, [] as T[][])
+            return filteredNodes.flatMap((_, i, arr) => (i === 0 ? [] : [[arr[i - 1], arr[i]]]))
         }
         const node = filteredNodes[i]
         const next = filteredNodes[i + 1]
