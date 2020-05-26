@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import U from '../core/generators/util'
 import { Entity } from '../core/Entity'
+import { IConnection } from '../core/WireConnections'
 import { EntityContainer } from './EntityContainer'
 
 export class WiresContainer extends PIXI.Container {

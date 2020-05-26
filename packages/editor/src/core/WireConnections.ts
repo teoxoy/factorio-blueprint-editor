@@ -1,6 +1,14 @@
 import { EventEmitter } from 'eventemitter3'
 import { Blueprint } from './Blueprint'
 
+export interface IConnection {
+    color: string
+    entityNumber1: number
+    entityNumber2: number
+    entitySide1: number
+    entitySide2: number
+}
+
 const hashConn = (conn: IConnection): string => {
     const firstE = Math.min(conn.entityNumber1, conn.entityNumber2)
     const secondE = Math.max(conn.entityNumber1, conn.entityNumber2)

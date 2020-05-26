@@ -8,14 +8,6 @@ interface IPoint {
     y: number
 }
 
-interface IConnection {
-    color: string
-    entityNumber1: number
-    entityNumber2: number
-    entitySide1: number
-    entitySide2: number
-}
-
 /** Namespace for blueprint string interfaces */
 declare namespace BPS {
     interface IColor {
