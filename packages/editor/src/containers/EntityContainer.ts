@@ -1,77 +1,21 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
-import util from '../common/util'
 import { Entity } from '../core/Entity'
 import { EntitySprite } from './EntitySprite'
 import { VisualizationArea } from './VisualizationArea'
 import { CursorBoxType } from './OverlayContainer'
 
-const updateGroups = [
-    {
-        is: [
-            'transport_belt',
-            'fast_transport_belt',
-            'express_transport_belt',
-            'splitter',
-            'fast_splitter',
-            'express_splitter',
-            'underground_belt',
-            'fast_underground_belt',
-            'express_underground_belt',
-            'loader',
-            'fast_loader',
-            'express_loader',
-        ],
-        updates: [
-            'transport_belt',
-            'fast_transport_belt',
-            'express_transport_belt',
-            'splitter',
-            'fast_splitter',
-            'express_splitter',
-            'underground_belt',
-            'fast_underground_belt',
-            'express_underground_belt',
-            'loader',
-            'fast_loader',
-            'express_loader',
-        ],
-    },
-    {
-        is: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
-        updates: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
-    },
-    {
-        has: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
-        updates: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
-    },
-    {
-        is: ['stone_wall', 'gate', 'straight_rail'],
-        updates: ['stone_wall', 'gate', 'straight_rail'],
-    },
-]
-    .map(uG => {
-        if (!uG.has) {
-            return uG
-        }
-        const entities = Object.values(FD.entities)
-        return {
-            is: entities.filter(e => Object.keys(e).find(k => uG.has.includes(k))).map(e => e.name),
-            updates: entities
-                .filter(e => Object.keys(e).find(k => uG.updates.includes(k)))
-                .map(e => e.name),
-        }
-    })
-    .reduce((pV: Record<string, string[]>, cV) => {
-        cV.is.forEach(k => {
-            pV[k] = pV[k] ? util.uniqueInArray(pV[k].concat(cV.updates)) : cV.updates
-        })
-        return pV
-    }, {} as Record<string, string[]>)
-
 export class EntityContainer {
     public static readonly mappings: Map<number, EntityContainer> = new Map()
+
+    private static _updateGroups: Map<string, Set<string>>
+    private static get updateGroups(): Map<string, Set<string>> {
+        if (!EntityContainer._updateGroups) {
+            EntityContainer._updateGroups = EntityContainer.generateUpdateGroups()
+        }
+        return EntityContainer._updateGroups
+    }
 
     private visualizationArea: VisualizationArea
     private entityInfo: PIXI.Container
@@ -159,6 +103,79 @@ export class EntityContainer {
                 this.entityInfo.destroy()
             }
         })
+    }
+
+    private static generateUpdateGroups(): Map<string, Set<string>> {
+        const mappigs = [
+            {
+                is: [
+                    'transport_belt',
+                    'fast_transport_belt',
+                    'express_transport_belt',
+                    'splitter',
+                    'fast_splitter',
+                    'express_splitter',
+                    'underground_belt',
+                    'fast_underground_belt',
+                    'express_underground_belt',
+                    'loader',
+                    'fast_loader',
+                    'express_loader',
+                ],
+                updates: [
+                    'transport_belt',
+                    'fast_transport_belt',
+                    'express_transport_belt',
+                    'splitter',
+                    'fast_splitter',
+                    'express_splitter',
+                    'underground_belt',
+                    'fast_underground_belt',
+                    'express_underground_belt',
+                    'loader',
+                    'fast_loader',
+                    'express_loader',
+                ],
+            },
+            {
+                is: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
+                updates: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
+            },
+            {
+                has: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
+                updates: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
+            },
+            {
+                is: ['stone_wall', 'gate', 'straight_rail'],
+                updates: ['stone_wall', 'gate', 'straight_rail'],
+            },
+        ]
+
+        return mappigs
+            .map(uG => {
+                if (!uG.has) return uG
+                const entities = Object.values(FD.entities)
+                return {
+                    is: entities
+                        .filter(e => Object.keys(e).find(k => uG.has.includes(k)))
+                        .map(e => e.name),
+                    updates: entities
+                        .filter(e => Object.keys(e).find(k => uG.updates.includes(k)))
+                        .map(e => e.name),
+                }
+            })
+            .reduce<Map<string, Set<string>>>((map, cV) => {
+                for (const k of cV.is) {
+                    if (map.has(k)) {
+                        for (const v of cV.updates) {
+                            map.get(k).add(v)
+                        }
+                    } else {
+                        map.set(k, new Set(cV.updates))
+                    }
+                }
+                return map
+            }, new Map())
     }
 
     public get entity(): Entity {
@@ -256,7 +273,8 @@ export class EntityContainer {
     }
 
     private redrawSurroundingEntities(position: IPoint = this.m_Entity.position): void {
-        if (!updateGroups[this.m_Entity.name]) return
+        const updatesEntities = EntityContainer.updateGroups.get(this.m_Entity.name)
+        if (!updatesEntities) return
         const area = {
             x: position.x,
             y: position.y,
@@ -288,7 +306,7 @@ export class EntityContainer {
             }
 
             entities
-                .filter(entity => updateGroups[this.m_Entity.name].includes(entity.name))
+                .filter(entity => updatesEntities.has(entity.name))
                 .forEach(entity => {
                     EntityContainer.mappings.get(entity.entityNumber).redraw()
                     if (entity.type === 'transport_belt') {
