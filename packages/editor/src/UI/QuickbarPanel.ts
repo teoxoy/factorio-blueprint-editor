@@ -16,7 +16,7 @@ class QuickbarSlot extends Slot {
             return
         }
         this.data = itemName
-        this.content = F.CreateIcon(itemName, false)
+        this.content = F.CreateIcon(itemName)
     }
 
     public unassignItem(): void {

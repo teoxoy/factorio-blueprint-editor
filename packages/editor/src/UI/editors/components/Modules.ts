@@ -39,7 +39,7 @@ export class Modules extends PIXI.Container {
                 this.onSlotPointerDown(e)
             )
             if (this.m_Modules[slotIndex] !== undefined) {
-                slot.content = F.CreateIcon(this.m_Modules[slotIndex], false)
+                slot.content = F.CreateIcon(this.m_Modules[slotIndex])
             }
             this.addChild(slot)
         }
@@ -62,7 +62,7 @@ export class Modules extends PIXI.Container {
                 slot.content = undefined
             }
         } else {
-            slot.content = F.CreateIcon(module, false)
+            slot.content = F.CreateIcon(module)
         }
         this.emit('changed')
     }

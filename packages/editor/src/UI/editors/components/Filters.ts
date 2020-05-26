@@ -185,7 +185,7 @@ export class Filters extends PIXI.Container {
                             slotFilter.count
                         )
                     } else {
-                        slot.content = F.CreateIcon(slotFilter.name, false)
+                        slot.content = F.CreateIcon(slotFilter.name)
                     }
                     slot.name = slotFilter.name
                 }

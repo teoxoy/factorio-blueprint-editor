@@ -95,15 +95,9 @@ export class Button extends PIXI.Container {
         }
 
         if (content !== undefined) {
-            // Get size of content
-            const bounds: PIXI.Rectangle = content.getBounds()
-
             // Set content for button
             this.m_Content = content
-            this.m_Content.position.set(
-                (this.width - bounds.width) / 2,
-                (this.height - bounds.height) / 2
-            )
+            this.m_Content.position.set(this.width / 2, this.height / 2)
 
             // Add content to button
             this.addChild(this.m_Content)

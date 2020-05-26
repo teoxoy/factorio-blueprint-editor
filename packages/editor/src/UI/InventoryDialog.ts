@@ -116,7 +116,7 @@ export class InventoryDialog extends Dialog {
 
                     const button: Button = new Button(36, 36)
                     button.position.set(itemColIndex * 38, itemRowIndex * 38)
-                    button.content = F.CreateIcon(item.name, false)
+                    button.content = F.CreateIcon(item.name)
                     button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                         e.stopPropagation()
                         if (e.data.button === 0) {
@@ -156,7 +156,7 @@ export class InventoryDialog extends Dialog {
                 const button = new Button(68, 68, 3)
                 button.active = groupIndex === 0
                 button.position.set(groupIndex * 70, 0)
-                button.content = F.CreateIcon(group.name, false)
+                button.content = F.CreateIcon(group.name)
                 button.data = inventoryGroupItems
                 button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
                     if (e.data.button === 0) {
