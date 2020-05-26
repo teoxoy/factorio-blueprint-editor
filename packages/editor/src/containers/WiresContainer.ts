@@ -228,7 +228,7 @@ export class WiresContainer extends PIXI.Container {
             .map(lines => lines.map(lineHash))
 
         const finalLines: IPole[][] = []
-        const addedMap: Map<string, boolean> = new Map()
+        const addedMap: Set<string> = new Set()
 
         while (lines.length) {
             const line = lines.shift()
@@ -237,12 +237,12 @@ export class WiresContainer extends PIXI.Container {
             const formsATriangle = triangles
                 .filter(tri => tri.includes(hash))
                 .map(tri => tri.filter(h => h !== hash))
-                .map(oLines => oLines.every(h => addedMap.get(h)))
+                .map(oLines => oLines.every(h => addedMap.has(h)))
                 .reduce((acc, bool) => acc || bool, false)
 
             if (!formsATriangle) {
                 finalLines.push(line)
-                addedMap.set(hash, true)
+                addedMap.add(hash)
             }
         }
 

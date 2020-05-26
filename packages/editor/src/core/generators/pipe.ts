@@ -112,13 +112,11 @@ function generatePipes(
     const maxY = globalCoords.reduce((pV, cV) => Math.max(pV, cV.y), -Infinity) + 1
     const middle = { x: (maxX - minX) / 2, y: (maxY - minY) / 2 }
 
-    const isPumpjackAtPos = globalCoords
-        .map(globalToLocal)
-        .reduce((map, p) => map.set(U.hashPoint(p), true), new Map())
+    const isPumpjackAtPos = new Set(globalCoords.map(globalToLocal).map(U.hashPoint))
 
     const grid = U.range(0, maxY - minY + GRID_MARGIN * 2).map(y =>
         U.range(0, maxX - minX + GRID_MARGIN * 2).map(x =>
-            isPumpjackAtPos.get(`${x},${y}`) ? 1 : 0
+            isPumpjackAtPos.has(`${x},${y}`) ? 1 : 0
         )
     )
 
@@ -129,7 +127,7 @@ function generatePipes(
                 dir: i * 2,
                 x: pos.x + o.x,
                 y: pos.y + o.y,
-            })).filter(p => !isPumpjackAtPos.get(U.hashPoint(p)))
+            })).filter(p => !isPumpjackAtPos.has(U.hashPoint(p)))
 
             return { entity_number: e.entity_number, x: pos.x, y: pos.y, plugs }
         })

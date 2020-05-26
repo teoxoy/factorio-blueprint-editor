@@ -85,7 +85,7 @@ export function generateBeacons(
             .reduce((acc, val) => acc.concat(val), [])
     ).filter(p => !occupiedPositions.has(U.hashPoint(p)))
 
-    const grid = validBeaconPositions.reduce((map, p) => map.set(U.hashPoint(p), true), new Map())
+    const grid = new Set(validBeaconPositions.map(p => U.hashPoint(p)))
 
     // GENERATE POSSIBLE BEACON AREAS
     const possibleBeaconAreas = validBeaconPositions
@@ -95,7 +95,7 @@ export function generateBeacons(
                     x: coord.x + (i % BEACON_SIZE),
                     y: coord.y + Math.floor(i / BEACON_SIZE),
                 }))
-                .filter(p => grid.get(U.hashPoint(p)))
+                .filter(p => grid.has(U.hashPoint(p)))
         )
         .filter(arr => arr.length === BEACON_SIZE * BEACON_SIZE)
 
