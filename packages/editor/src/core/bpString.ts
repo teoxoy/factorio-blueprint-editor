@@ -159,10 +159,7 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                 reject(e)
             }
         }).then((url: URL) => {
-            // Other CORS Proxies:
-            // https://crossorigin.me/
-            // https://cors-anywhere.herokuapp.com/
-            const corsProxy = 'https://api.allorigins.win/raw?url='
+            const corsProxy = './api/proxy?url='
 
             console.log(`Loading data from: ${url}`)
             const pathParts = url.pathname.slice(1).split('/')
