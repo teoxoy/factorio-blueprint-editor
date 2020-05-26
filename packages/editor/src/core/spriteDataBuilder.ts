@@ -84,23 +84,19 @@ function generateConnection(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
         }
     }
     if (!hasWireConnectionFeature(e)) return []
-    if (data.generateConnector) {
-        if (e.circuit_connector_sprites) {
-            const ccs =
-                e.circuit_connector_sprites instanceof Array
-                    ? e.circuit_connector_sprites[
-                          e.circuit_connector_sprites.length === 8 ? data.dir : data.dir / 2
-                      ]
-                    : e.circuit_connector_sprites
-            return [ccs.connector_main, ccs.wire_pins, ccs.led_blue_off]
-        }
+    if (data.generateConnector && e.circuit_connector_sprites) {
+        const getIndex = (sprites: CircuitConnectorSprites[]): number =>
+            sprites.length === 8 ? data.dir : data.dir / 2
+        const ccs = Array.isArray(e.circuit_connector_sprites)
+            ? e.circuit_connector_sprites[getIndex(e.circuit_connector_sprites)]
+            : e.circuit_connector_sprites
+        return [ccs.connector_main, ccs.wire_pins, ccs.led_blue_off]
     }
     return []
 }
 // UTIL FUNCTIONS
 function addToShift(shift: IPoint | number[], tab: FD.SpriteData): FD.SpriteData {
-    const SHIFT: number[] =
-        shift instanceof Array ? shift : [(shift as IPoint).x, (shift as IPoint).y]
+    const SHIFT: number[] = Array.isArray(shift) ? shift : [shift.x, shift.y]
 
     tab.shift = tab.shift ? [SHIFT[0] + tab.shift[0], SHIFT[1] + tab.shift[1]] : SHIFT
     if (tab.hr_version) {

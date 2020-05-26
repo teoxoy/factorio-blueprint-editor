@@ -10,7 +10,7 @@ const getRandomItem = <T>(array: T[]): T => array[getRandomInt(0, array.length -
 
 const rotatePointBasedOnDir = (p: IPoint | number[], dir: number): IPoint => {
     const point: IPoint = { x: 0, y: 0 }
-    const nP = p instanceof Array ? { x: p[0], y: p[1] } : { ...p }
+    const nP = Array.isArray(p) ? { x: p[0], y: p[1] } : { ...p }
     switch (dir) {
         case 0:
             // x y
