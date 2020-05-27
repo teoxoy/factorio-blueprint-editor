@@ -134,20 +134,15 @@ export class EntityInfoPanel extends Panel {
             const newEnergyUsage =
                 parseInt(entity.entityData.energy_usage.slice(0, -2)) * (1 + consumption)
 
+            const fmt = (n: number): string =>
+                `(${Math.sign(n) === 1 ? '+' : '-'}${roundToTwo(Math.abs(n)) * 100}%)`
+
             // Show modules effect and some others informations
             this.m_entityInfo.text = entityInfoTemplate({
                 craftingSpeed: roundToTwo(newCraftingSpeed),
-                speedMultiplier: speed
-                    ? `(${Math.sign(speed) === 1 ? '+' : '-'}${String(
-                          roundToTwo(Math.abs(speed)) * 100
-                      )}%)`
-                    : '',
+                speedMultiplier: speed ? fmt(speed) : '',
                 energyUsage: roundToTwo(newEnergyUsage),
-                energyMultiplier: consumption
-                    ? `(${Math.sign(consumption) === 1 ? '+' : '-'}${String(
-                          roundToTwo(Math.abs(consumption)) * 100
-                      )}%)`
-                    : '',
+                energyMultiplier: consumption ? fmt(consumption) : '',
             })
 
             this.m_entityInfo.position.set(10, nextY)
