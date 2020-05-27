@@ -14,7 +14,7 @@ export class DebugContainer extends PIXI.Container {
         this.addChild(fpsGUIText)
 
         G.app.ticker.add(() => {
-            fpsGUIText.text = `${String(Math.round(G.app.ticker.FPS))} FPS`
+            fpsGUIText.text = `${Math.round(G.app.ticker.FPS)} FPS`
         })
 
         const gridposGUIText = new PIXI.Text('', styles.debug.text)
