@@ -1,4 +1,4 @@
-import Ajv from 'ajv'
+import Ajv, { KeywordDefinition } from 'ajv'
 import FD from 'factorio-data'
 import pako from 'pako'
 import blueprintSchema from './blueprintSchema.json'
@@ -19,43 +19,37 @@ class TrainBlueprintError {
     }
 }
 
-const customKeywords = ['entityName', 'itemName', 'objectWithItemNames', 'recipeName', 'tileName']
 const trainEntityNames = ['locomotive', 'cargo_wagon', 'fluid_wagon']
 
-const validate = new Ajv({ verbose: true })
-    .addKeyword('entityName', {
+const keywords: Record<string, KeywordDefinition> = {
+    entityName: {
         validate: (data: string) => !!FD.entities[data],
         errors: false,
         schema: false,
-    })
-    .addKeyword('itemName', {
+    },
+    itemName: {
         validate: (data: string) => !!FD.items[data],
         errors: false,
         schema: false,
-    })
-    .addKeyword('objectWithItemNames', {
-        validate: (data: object) => {
-            for (const k in data) {
-                if (!FD.items[k]) {
-                    return false
-                }
-            }
-            return true
-        },
-        errors: false,
-        schema: false,
-    })
-    .addKeyword('recipeName', {
+    },
+    recipeName: {
         validate: (data: string) => !!FD.recipes[data],
         errors: false,
         schema: false,
-    })
-    .addKeyword('tileName', {
+    },
+    tileName: {
         validate: (data: string) => !!FD.tiles[data] || data === 'landfill',
         errors: false,
         schema: false,
-    })
-    .compile(blueprintSchema)
+    },
+    objectWithItemNames: {
+        validate: (data: object) => Object.keys(data).every(key => !!FD.items[key]),
+        errors: false,
+        schema: false,
+    },
+}
+
+const validate = new Ajv({ keywords, verbose: true }).compile(blueprintSchema)
 
 const nameMigrations: Record<string, string> = {
     // if (blueprintVersion < getFactorioVersion(0, 17, 0))
@@ -89,9 +83,7 @@ function decode(str: string): Promise<Blueprint | Book> {
                 if (trainRelated) {
                     reject(new TrainBlueprintError(validate.errors))
                 } else {
-                    const moddedBlueprint = !!validate.errors.find(e =>
-                        customKeywords.includes(e.keyword)
-                    )
+                    const moddedBlueprint = !!validate.errors.find(e => keywords[e.keyword])
                     if (moddedBlueprint) {
                         reject(new ModdedBlueprintError(validate.errors))
                     } else {
