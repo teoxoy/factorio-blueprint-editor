@@ -33,10 +33,7 @@ export class EntityContainer {
         EntityContainer.mappings.set(this.m_Entity.entityNumber, this)
 
         this.visualizationArea = G.BPC.underlayContainer.create(this.m_Entity.name, this.position)
-        this.entityInfo = G.BPC.overlayContainer.createEntityInfo(
-            this.m_Entity.entityNumber,
-            this.position
-        )
+        this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity, this.position)
 
         this.redraw(false, sort)
         if (sort) {
@@ -244,10 +241,7 @@ export class EntityContainer {
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()
             }
-            this.entityInfo = G.BPC.overlayContainer.createEntityInfo(
-                this.m_Entity.entityNumber,
-                this.position
-            )
+            this.entityInfo = G.BPC.overlayContainer.createEntityInfo(this.m_Entity, this.position)
         }
 
         G.UI.updateEntityInfoPanel(this.m_Entity)

@@ -48,8 +48,7 @@ class OverlayContainer extends PIXI.Container {
         this.entityInfos.visible = !this.entityInfos.visible
     }
 
-    public createEntityInfo(entityNumber: number, position: IPoint): PIXI.Container {
-        const entity = G.bp.entities.get(entityNumber)
+    public static createEntityInfo(entity: Entity, position: IPoint): PIXI.Container {
         const entityInfo = new PIXI.Container()
 
         if (entity.recipe && entity.entityData.show_recipe_icon !== false) {
@@ -403,7 +402,6 @@ class OverlayContainer extends PIXI.Container {
 
         if (entityInfo.children.length !== 0) {
             entityInfo.position.set(position.x, position.y)
-            this.entityInfos.addChild(entityInfo)
             return entityInfo
         }
 
@@ -444,6 +442,14 @@ class OverlayContainer extends PIXI.Container {
             arrow.anchor.set(0.5, 0.5)
             arrow.position.set(position.x, position.y)
             return arrow
+        }
+    }
+
+    public createEntityInfo(entity: Entity, position: IPoint): PIXI.Container {
+        const entityInfo = OverlayContainer.createEntityInfo(entity, position)
+        if (entityInfo !== undefined) {
+            this.entityInfos.addChild(entityInfo)
+            return entityInfo
         }
     }
 

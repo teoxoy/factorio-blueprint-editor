@@ -82,8 +82,7 @@ export class Preview extends PIXI.Container {
             this.m_Size / 2 + offset.y * 32 * SCALE
         )
 
-        const oc: OverlayContainer = new OverlayContainer()
-        const o: PIXI.Container = oc.createEntityInfo(this.m_Entity.entityNumber, { x: 0, y: 0 })
+        const o = OverlayContainer.createEntityInfo(this.m_Entity, { x: 0, y: 0 })
         if (o !== undefined) {
             entityParts.addChild(o)
         }
