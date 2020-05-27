@@ -1,6 +1,5 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import { Entity } from '../../../core/Entity'
 import G from '../../../common/globals'
 import { Slot } from '../../controls/Slot'
 import F from '../../controls/functions'
