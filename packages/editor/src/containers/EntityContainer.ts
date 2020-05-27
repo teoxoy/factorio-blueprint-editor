@@ -250,14 +250,14 @@ export class EntityContainer {
             )
         }
 
-        G.UI.updateInfoEntityPanel(this.m_Entity)
+        G.UI.updateEntityInfoPanel(this.m_Entity)
     }
 
     public pointerOverEventHandler(): void {
         this.cursorBox = 'regular'
         this.createUndergroundLine()
 
-        G.UI.updateInfoEntityPanel(this.m_Entity)
+        G.UI.updateEntityInfoPanel(this.m_Entity)
         this.visualizationArea.show()
     }
 
@@ -265,7 +265,7 @@ export class EntityContainer {
         this.cursorBox = undefined
         this.destroyUndergroundLine()
 
-        G.UI.updateInfoEntityPanel(undefined)
+        G.UI.updateEntityInfoPanel(undefined)
         this.visualizationArea.hide()
     }
 

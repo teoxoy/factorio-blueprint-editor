@@ -9,7 +9,7 @@ import { createEditor } from './editors/factory'
 export class UIContainer extends PIXI.Container {
     private debugContainer: DebugContainer
     public quickbarContainer: QuickbarPanel
-    private infoEntityPanel: EntityInfoPanel
+    private entityInfoPanel: EntityInfoPanel
     private dialogsContainer: PIXI.Container
     private paintIconContainer: PIXI.Container
 
@@ -18,21 +18,21 @@ export class UIContainer extends PIXI.Container {
 
         this.debugContainer = new DebugContainer()
         this.quickbarContainer = new QuickbarPanel(2)
-        this.infoEntityPanel = new EntityInfoPanel()
+        this.entityInfoPanel = new EntityInfoPanel()
         this.dialogsContainer = new PIXI.Container()
         this.paintIconContainer = new PIXI.Container()
 
         this.addChild(
             this.debugContainer,
             this.quickbarContainer,
-            this.infoEntityPanel,
+            this.entityInfoPanel,
             this.dialogsContainer,
             this.paintIconContainer
         )
     }
 
-    public updateInfoEntityPanel(entity: Entity): void {
-        this.infoEntityPanel.updateVisualization(entity)
+    public updateEntityInfoPanel(entity: Entity): void {
+        this.entityInfoPanel.updateVisualization(entity)
     }
 
     public addPaintIcon(icon: PIXI.DisplayObject): void {
