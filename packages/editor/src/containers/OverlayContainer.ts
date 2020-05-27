@@ -65,7 +65,9 @@ class OverlayContainer extends PIXI.Container {
                 const inputPositions: IPoint[] = []
                 const outputPositions: IPoint[] = []
                 for (const fb of entity.entityData.fluid_boxes) {
-                    ;(fb.production_type === 'input' ? inputPositions : outputPositions).push({
+                    const positions =
+                        fb.production_type === 'input' ? inputPositions : outputPositions
+                    positions.push({
                         x: fb.pipe_connections[0].position[0],
                         y: fb.pipe_connections[0].position[1],
                     })
@@ -77,7 +79,8 @@ class OverlayContainer extends PIXI.Container {
                         .map(item => item.name)
 
                     if (iconNames.length !== 0) {
-                        ;(type === 'input' ? inputPositions : outputPositions)
+                        const positions = type === 'input' ? inputPositions : outputPositions
+                        positions
                             .map(p => util.transformConnectionPosition(p, entity.direction))
                             .forEach((p, i) => {
                                 createIconWithBackground(
