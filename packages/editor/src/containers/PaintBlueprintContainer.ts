@@ -135,6 +135,7 @@ export class PaintBlueprintContainer extends PaintContainer {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     protected redraw(): void {}
 
     public placeEntityContainer(): void {
