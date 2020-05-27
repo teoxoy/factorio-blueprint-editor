@@ -16,6 +16,7 @@ import { TileContainer } from './TileContainer'
 import { PaintTileContainer } from './PaintTileContainer'
 import { PaintContainer } from './PaintContainer'
 import { PaintBlueprintContainer } from './PaintBlueprintContainer'
+import { OptimizedContainer } from './OptimizedContainer'
 import { GridData } from './GridData'
 
 enum EditorMode {
@@ -31,14 +32,6 @@ enum EditorMode {
     COPY,
     /** Active when selecting multiple entities for deletion */
     DELETE,
-}
-
-class OptimizedContainer extends PIXI.ParticleContainer {
-    public children: EntitySprite[]
-
-    public constructor() {
-        super(undefined, undefined, undefined, true)
-    }
 }
 
 type GridPattern = 'checker' | 'grid'
