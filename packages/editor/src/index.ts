@@ -1,12 +1,10 @@
 import * as PIXI from 'pixi.js'
 import G from './common/globals'
-import U from './common/util'
 import { Book } from './core/Book'
 import { Entity } from './core/Entity'
 import { Blueprint, oilOutpostSettings, IOilOutpostSettings } from './core/Blueprint'
 import * as bpString from './core/bpString'
 import { ModdedBlueprintError, TrainBlueprintError } from './core/bpString'
-import { EntityContainer } from './containers/EntityContainer'
 import { PaintTileContainer } from './containers/PaintTileContainer'
 import { BlueprintContainer, EditorMode, GridPattern } from './containers/BlueprintContainer'
 import { UIContainer } from './UI/UIContainer'
@@ -266,64 +264,22 @@ function registerActions(): void {
         },
     })
 
-    let entityForCopyData: Entity | undefined
-    const copyEntitySettingsAction = registerAction('copyEntitySettings', 'shift+rclick')
-    copyEntitySettingsAction.bind({
+    registerAction('copyEntitySettings', 'shift+rclick').bind({
         press: () => {
-            if (G.BPC.mode === EditorMode.EDIT) {
-                // Store reference to source entity
-                entityForCopyData = G.BPC.hoverContainer.entity
-            }
+            G.BPC.copyEntitySettings()
+            G.BPC.overlayContainer.destroyCopyCursorBox()
         },
     })
+
     registerAction('pasteEntitySettings', 'shift+lclick').bind({
-        press: () => {
-            if (entityForCopyData && G.BPC.mode === EditorMode.EDIT) {
-                // Hand over reference of source entity to target entity for pasting data
-                G.BPC.hoverContainer.entity.pasteSettings(entityForCopyData)
-            }
-        },
+        press: () => G.BPC.pasteEntitySettings(),
         repeat: true,
     })
-    // TODO: Move this somewhere else - I don't think this is the right place for it
-    {
-        let copyCursorBox: PIXI.Container | undefined
-        const deferred = new U.Deferred()
-        const createCopyCursorBox = (): void => {
-            if (
-                copyCursorBox === undefined &&
-                G.BPC.mode === EditorMode.EDIT &&
-                entityForCopyData &&
-                EntityContainer.mappings.has(entityForCopyData.entityNumber) &&
-                G.BPC.hoverContainer.entity.canPasteSettings(entityForCopyData)
-            ) {
-                const srcEnt = EntityContainer.mappings.get(entityForCopyData.entityNumber)
-                copyCursorBox = G.BPC.overlayContainer.createCursorBox(
-                    srcEnt.position,
-                    entityForCopyData.size,
-                    'copy'
-                )
-                Promise.race([
-                    deferred.promise,
-                    new Promise(resolve =>
-                        copyEntitySettingsAction.bind({ press: resolve, once: true })
-                    ),
-                    new Promise(resolve => G.BPC.once('removeHoverContainer', resolve)),
-                ]).then(() => {
-                    deferred.reset()
-                    copyCursorBox.destroy()
-                    copyCursorBox = undefined
-                })
-            }
-        }
-        const action = registerAction('tryPasteEntitySettings', 'shift')
-        action.bind({ press: createCopyCursorBox, release: () => deferred.resolve() })
-        G.BPC.on('createHoverContainer', () => {
-            if (action.pressed) {
-                createCopyCursorBox()
-            }
-        })
-    }
+
+    registerAction('tryPasteEntitySettings', 'shift').bind({
+        press: () => G.BPC.overlayContainer.createCopyCursorBox(),
+        release: () => G.BPC.overlayContainer.destroyCopyCursorBox(),
+    })
 
     registerAction('quickbar1', '1').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(0) })
     registerAction('quickbar2', '2').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(1) })

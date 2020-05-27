@@ -59,6 +59,7 @@ export class BlueprintContainer extends PIXI.Container {
         x: 0.5,
         y: 0.5,
     }
+    private _entityForCopyData: Entity
     private copyModeEntities: Entity[] = []
     private deleteModeEntities: Entity[] = []
     private copyModeUpdateFn: (endX: number, endY: number) => void
@@ -183,6 +184,24 @@ export class BlueprintContainer extends PIXI.Container {
             },
             false
         )
+    }
+
+    public get entityForCopyData(): Entity {
+        return this._entityForCopyData
+    }
+
+    public copyEntitySettings(): void {
+        if (this.mode === EditorMode.EDIT) {
+            // Store reference to source entity
+            this._entityForCopyData = this.hoverContainer.entity
+        }
+    }
+
+    public pasteEntitySettings(): void {
+        if (this._entityForCopyData && this.mode === EditorMode.EDIT) {
+            // Hand over reference of source entity to target entity for pasting data
+            this.hoverContainer.entity.pasteSettings(this._entityForCopyData)
+        }
     }
 
     public getViewportScale(): number {

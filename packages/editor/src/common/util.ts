@@ -134,19 +134,6 @@ const timer = (
     }
 }
 
-class Deferred {
-    public resolve: () => void
-    public promise: Promise<void>
-    public constructor() {
-        this.reset()
-    }
-    public reset(): void {
-        this.promise = new Promise(r => {
-            this.resolve = r
-        })
-    }
-}
-
 const objectHasOwnProperty = (obj: Record<string, unknown>, key: string): boolean =>
     Object.prototype.hasOwnProperty.call(obj, key)
 
@@ -165,6 +152,5 @@ export default {
     areObjectsEquivalent,
     areArraysEquivalent,
     timer,
-    Deferred,
     objectHasOwnProperty,
 }

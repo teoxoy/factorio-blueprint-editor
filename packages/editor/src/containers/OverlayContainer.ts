@@ -36,12 +36,20 @@ class OverlayContainer extends PIXI.Container {
     private readonly cursorBoxes = new PIXI.Container()
     private readonly undergroundLines = new PIXI.Container()
     private readonly selectionArea = new PIXI.Graphics()
+    private copyCursorBox: PIXI.Container
     private selectionAreaUpdateFn: (endX: number, endY: number) => void
 
     public constructor() {
         super()
 
         this.addChild(this.entityInfos, this.cursorBoxes, this.undergroundLines, this.selectionArea)
+
+        this.bpc.on('removeHoverContainer', this.destroyCopyCursorBox, this)
+        this.bpc.on('createHoverContainer', () => {
+            if (isActionActive('tryPasteEntitySettings')) {
+                this.createCopyCursorBox()
+            }
+        })
     }
 
     public toggleEntityInfoVisibility(): void {
@@ -445,6 +453,31 @@ class OverlayContainer extends PIXI.Container {
             arrow.anchor.set(0.5, 0.5)
             arrow.position.set(position.x, position.y)
             return arrow
+        }
+    }
+
+    public createCopyCursorBox(): void {
+        if (
+            G.BPC.mode === EditorMode.EDIT &&
+            this.copyCursorBox === undefined &&
+            G.BPC.hoverContainer !== undefined &&
+            G.BPC.entityForCopyData !== undefined &&
+            EntityContainer.mappings.has(G.BPC.entityForCopyData.entityNumber) &&
+            G.BPC.hoverContainer.entity.canPasteSettings(G.BPC.entityForCopyData)
+        ) {
+            const srcEnt = EntityContainer.mappings.get(G.BPC.entityForCopyData.entityNumber)
+            this.copyCursorBox = this.createCursorBox(
+                srcEnt.position,
+                G.BPC.entityForCopyData.size,
+                'copy'
+            )
+        }
+    }
+
+    public destroyCopyCursorBox(): void {
+        if (this.copyCursorBox !== undefined) {
+            this.copyCursorBox.destroy()
+            this.copyCursorBox = undefined
         }
     }
 
