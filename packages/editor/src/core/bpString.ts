@@ -103,34 +103,19 @@ function decode(str: string): Promise<Blueprint | Book> {
 }
 
 function encode(bpOrBook: Blueprint | Book): Promise<string> {
-    return new Promise((resolve: (value: string) => void, reject) => {
-        const data = encodeSync(bpOrBook)
-        if (data.value) {
-            resolve(data.value)
-        } else {
-            reject(data.error)
+    return new Promise((resolve, reject) => {
+        try {
+            const keyName = bpOrBook instanceof Blueprint ? 'blueprint' : 'blueprint_book'
+            const data = { [keyName]: bpOrBook.serialize() }
+            const string = JSON.stringify(data).replace(
+                /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
+                (_: string, capture: string) => capture.replace(/_/g, '-')
+            )
+            resolve(`0${btoa(pako.deflate(string, { to: 'string' }))}`)
+        } catch (e) {
+            reject(e)
         }
     })
-}
-
-function encodeSync(bpOrBook: Blueprint | Book): { value?: string; error?: Error } {
-    try {
-        const keyName = bpOrBook instanceof Blueprint ? 'blueprint' : 'blueprint_book'
-        const string = JSON.stringify({ [keyName]: bpOrBook.serialize() })
-        return {
-            value: `0${btoa(
-                pako.deflate(
-                    string.replace(
-                        /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
-                        (_: string, capture: string) => capture.replace(/_/g, '-')
-                    ),
-                    { to: 'string' }
-                )
-            )}`,
-        }
-    } catch (e) {
-        return { error: e }
-    }
 }
 
 function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book> {
@@ -199,4 +184,4 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
 }
 
 export { ModdedBlueprintError, TrainBlueprintError }
-export { encode, encodeSync, getBlueprintOrBookFromSource }
+export { encode, getBlueprintOrBookFromSource }

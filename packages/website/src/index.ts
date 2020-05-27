@@ -124,22 +124,14 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
         createErrorMessage('Blueprint string could not be generated.', error)
     }
 
-    const bpOrBook = book ? book : bp
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        EDITOR.bpStringEncodeDecode
-            .encode(bpOrBook)
-            .then(s => navigator.clipboard.writeText(s))
-            .then(onSuccess)
-            .catch(onError)
-    } else {
-        const data = EDITOR.bpStringEncodeDecode.encodeSync(bpOrBook)
-        if (data.value) {
-            e.clipboardData.setData('text/plain', data.value)
-            onSuccess()
-        } else {
-            onError(data.error)
-        }
-    }
+    EDITOR.bpStringEncodeDecode(book || bp)
+        .then(s =>
+            navigator.clipboard && navigator.clipboard.writeText
+                ? navigator.clipboard.writeText(s)
+                : e.clipboardData.setData('text/plain', s)
+        )
+        .then(onSuccess)
+        .catch(onError)
 })
 
 document.addEventListener('paste', (e: ClipboardEvent) => {
