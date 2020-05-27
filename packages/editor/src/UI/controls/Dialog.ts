@@ -13,7 +13,7 @@ import { Panel } from './Panel'
  *  + has interactive children (this.interactiveChildren = true)
  *  + automatically executes 'setDialogPosition()' on Browser Resizing
  */
-export class Dialog extends Panel {
+export abstract class Dialog extends Panel {
     /** Stores all open dialogs */
     protected static s_openDialogs: Dialog[] = []
 
