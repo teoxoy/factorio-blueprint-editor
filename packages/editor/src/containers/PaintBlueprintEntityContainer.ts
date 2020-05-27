@@ -20,10 +20,7 @@ export class PaintBlueprintEntityContainer {
         this.bp = bp
         this.entity = entity
 
-        this.visualizationArea = G.BPC.visualizationAreaContainer.create(
-            this.entity.name,
-            this.position
-        )
+        this.visualizationArea = G.BPC.underlayContainer.create(this.entity.name, this.position)
 
         this.entitySprites = EntitySprite.getParts(this.entity, this.bp.entityPositionGrid)
     }

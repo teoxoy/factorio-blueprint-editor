@@ -20,9 +20,9 @@ export class PaintEntityContainer extends PaintContainer {
         this.direction = direction
         this.directionType = FD.entities[name].type === 'loader' ? 'output' : 'input'
 
-        this.visualizationArea = G.BPC.visualizationAreaContainer.create(this.name, this.position)
+        this.visualizationArea = G.BPC.underlayContainer.create(this.name, this.position)
         this.visualizationArea.highlight()
-        G.BPC.visualizationAreaContainer.activateRelatedAreas(this.name)
+        G.BPC.underlayContainer.activateRelatedAreas(this.name)
 
         this.moveAtCursor()
         this.redraw()
@@ -33,20 +33,20 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     public hide(): void {
-        G.BPC.visualizationAreaContainer.deactivateActiveAreas()
+        G.BPC.underlayContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
         super.hide()
     }
 
     public show(): void {
-        G.BPC.visualizationAreaContainer.activateRelatedAreas(this.name)
+        G.BPC.underlayContainer.activateRelatedAreas(this.name)
         this.updateUndergroundLine()
         super.show()
     }
 
     public destroy(): void {
         this.visualizationArea.destroy()
-        G.BPC.visualizationAreaContainer.deactivateActiveAreas()
+        G.BPC.underlayContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
         super.destroy()
     }

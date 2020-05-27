@@ -8,7 +8,7 @@ import G from '../common/globals'
 import { Viewport } from './Viewport'
 import { EntitySprite } from './EntitySprite'
 import { WiresContainer } from './WiresContainer'
-import { VisualizationAreaContainer } from './VisualizationArea'
+import { UnderlayContainer } from './UnderlayContainer'
 import { EntityContainer } from './EntityContainer'
 import { OverlayContainer } from './OverlayContainer'
 import { PaintEntityContainer } from './PaintEntityContainer'
@@ -51,7 +51,7 @@ class BlueprintContainer extends PIXI.Container {
     private chunkGrid: PIXI.TilingSprite
     public wiresContainer: WiresContainer
     public overlayContainer: OverlayContainer
-    public visualizationAreaContainer: VisualizationAreaContainer
+    public underlayContainer: UnderlayContainer
     private tilePaintSlot: PIXI.Container
     private entityPaintSlot: PIXI.Container
     private tileSprites: OptimizedContainer
@@ -106,7 +106,7 @@ class BlueprintContainer extends PIXI.Container {
         this.generateGrid()
         this.tileSprites = new OptimizedContainer()
         this.tilePaintSlot = new PIXI.Container()
-        this.visualizationAreaContainer = new VisualizationAreaContainer()
+        this.underlayContainer = new UnderlayContainer()
         this.entitySprites = new OptimizedContainer()
         this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer()
@@ -117,7 +117,7 @@ class BlueprintContainer extends PIXI.Container {
             this.chunkGrid,
             this.tileSprites,
             this.tilePaintSlot,
-            this.visualizationAreaContainer,
+            this.underlayContainer,
             this.entitySprites,
             this.wiresContainer,
             this.overlayContainer,

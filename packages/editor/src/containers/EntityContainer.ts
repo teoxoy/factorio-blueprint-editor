@@ -32,10 +32,7 @@ export class EntityContainer {
 
         EntityContainer.mappings.set(this.m_Entity.entityNumber, this)
 
-        this.visualizationArea = G.BPC.visualizationAreaContainer.create(
-            this.m_Entity.name,
-            this.position
-        )
+        this.visualizationArea = G.BPC.underlayContainer.create(this.m_Entity.name, this.position)
         this.entityInfo = G.BPC.overlayContainer.createEntityInfo(
             this.m_Entity.entityNumber,
             this.position

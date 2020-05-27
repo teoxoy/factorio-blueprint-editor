@@ -69,27 +69,27 @@ export class PaintBlueprintContainer extends PaintContainer {
 
         this.children.sort(EntitySprite.compareFn)
         for (const [e] of this.entities) {
-            G.BPC.visualizationAreaContainer.activateRelatedAreas(e.name)
+            G.BPC.underlayContainer.activateRelatedAreas(e.name)
         }
         this.moveAtCursor()
     }
 
     public hide(): void {
-        G.BPC.visualizationAreaContainer.deactivateActiveAreas()
+        G.BPC.underlayContainer.deactivateActiveAreas()
         super.hide()
     }
 
     public show(): void {
         if (this.entities) {
             for (const [e] of this.entities) {
-                G.BPC.visualizationAreaContainer.activateRelatedAreas(e.name)
+                G.BPC.underlayContainer.activateRelatedAreas(e.name)
             }
         }
         super.show()
     }
 
     public destroy(): void {
-        G.BPC.visualizationAreaContainer.deactivateActiveAreas()
+        G.BPC.underlayContainer.deactivateActiveAreas()
         for (const [, c] of this.entities) {
             c.destroy()
         }
