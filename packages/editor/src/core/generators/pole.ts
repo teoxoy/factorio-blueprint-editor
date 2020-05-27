@@ -120,10 +120,8 @@ export function generatePoles(
 
         const powerGiven = powerArea.reduce<IArea[][]>((acc, p) => {
             const area = pointToEntityArea.get(U.hashPoint(p))
-            if (!area || acc.includes(area)) {
-                return acc
-            }
-            return acc.concat([area])
+            if (area && !acc.includes(area)) acc.push(area)
+            return acc
         }, [])
 
         const midOfConsumers = powerGiven
