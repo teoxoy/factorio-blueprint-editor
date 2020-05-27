@@ -32,7 +32,7 @@ export abstract class Editor extends Dialog {
         this.addChild(this.m_Preview)
 
         // Close on entity destroy
-        this.m_Entity.on('destroy', () => this.close())
+        this.m_Entity.once('destroy', () => this.close())
     }
 
     /**
