@@ -37,7 +37,7 @@ export enum EditorMode {
 }
 
 export class BlueprintContainer extends PIXI.Container {
-    public moveSpeed = 10
+    private _moveSpeed = 10
     private _gridColor = 0x303030
     private _gridPattern: GridPattern = 'grid'
     private grid: PIXI.TilingSprite
@@ -395,6 +395,14 @@ export class BlueprintContainer extends PIXI.Container {
             eC.pointerOverEventHandler()
             this.emit('createHoverContainer')
         }
+    }
+
+    public get moveSpeed(): number {
+        return this._moveSpeed
+    }
+
+    public set moveSpeed(speed: number) {
+        this._moveSpeed = speed
     }
 
     public get gridColor(): number {
