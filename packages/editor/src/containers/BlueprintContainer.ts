@@ -212,7 +212,7 @@ class BlueprintContainer extends PIXI.Container {
 
         this.overlayContainer.showSelectionArea(0x00d400)
 
-        const startPos = { x: G.BPC.gridData.x32, y: G.BPC.gridData.y32 }
+        const startPos = { x: this.gridData.x32, y: this.gridData.y32 }
         this.copyModeUpdateFn = (endX: number, endY: number) => {
             const X = Math.min(startPos.x, endX)
             const Y = Math.min(startPos.y, endY)
@@ -264,7 +264,7 @@ class BlueprintContainer extends PIXI.Container {
 
         this.overlayContainer.showSelectionArea(0xff3200)
 
-        const startPos = { x: G.BPC.gridData.x32, y: G.BPC.gridData.y32 }
+        const startPos = { x: this.gridData.x32, y: this.gridData.y32 }
         this.deleteModeUpdateFn = (endX: number, endY: number) => {
             const X = Math.min(startPos.x, endX)
             const Y = Math.min(startPos.y, endY)
