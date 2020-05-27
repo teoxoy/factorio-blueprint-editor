@@ -19,7 +19,9 @@ import { PaintBlueprintContainer } from './PaintBlueprintContainer'
 import { OptimizedContainer } from './OptimizedContainer'
 import { GridData } from './GridData'
 
-enum EditorMode {
+export type GridPattern = 'checker' | 'grid'
+
+export enum EditorMode {
     /** Default */
     NONE,
     /** Active when an entity is being hovered */
@@ -34,9 +36,7 @@ enum EditorMode {
     DELETE,
 }
 
-type GridPattern = 'checker' | 'grid'
-
-class BlueprintContainer extends PIXI.Container {
+export class BlueprintContainer extends PIXI.Container {
     public moveSpeed = 10
     private _gridColor = 0x303030
     private _gridPattern: GridPattern = 'grid'
@@ -662,5 +662,3 @@ class BlueprintContainer extends PIXI.Container {
         })
     }
 }
-
-export { EditorMode, BlueprintContainer, GridPattern }
