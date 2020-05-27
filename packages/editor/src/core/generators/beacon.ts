@@ -13,6 +13,10 @@ interface IBeacon extends IPoint {
     nrOfOverlaps: number
 }
 
+interface IArea extends IPoint {
+    effect: boolean
+}
+
 /*
     How the algorithm works:
 

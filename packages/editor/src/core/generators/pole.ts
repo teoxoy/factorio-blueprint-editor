@@ -17,6 +17,10 @@ interface IGroup extends IPoint {
     lines: IPole[][]
 }
 
+interface IArea extends IPoint {
+    power: boolean
+}
+
 /*
     How the algorithm works:
 
