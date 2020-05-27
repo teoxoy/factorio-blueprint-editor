@@ -105,13 +105,10 @@ export function generateBeacons(
     const pointToBeaconCount = possibleBeaconAreas
         .flat()
         .map(U.hashPoint)
-        .reduce<Map<string, number>>((map, key) => {
-            const C = map.get(key)
-            if (!C) {
-                return map.set(key, 1)
-            }
-            return map.set(key, C + 1)
-        }, new Map())
+        .reduce<Map<string, number>>(
+            (map, key) => map.set(key, map.has(key) ? map.get(key) + 1 : 1),
+            new Map()
+        )
 
     const pointToEntityArea = entityAreas
         .filter(area => area.every(p => p.effect))
