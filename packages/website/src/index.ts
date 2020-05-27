@@ -2,7 +2,13 @@ import './index.styl'
 
 import { utils as pixiUtils } from 'pixi.js'
 import FileSaver from 'file-saver'
-import EDITOR, { Blueprint, Book, TrainBlueprintError, ModdedBlueprintError } from '@fbe/editor'
+import EDITOR, {
+    Blueprint,
+    Book,
+    TrainBlueprintError,
+    ModdedBlueprintError,
+    CorruptedBlueprintStringError,
+} from '@fbe/editor'
 import { initToasts } from './toasts'
 import { initFeedbackButton } from './feedbackButton'
 import { initSettingsPane } from './settingsPane'
@@ -233,7 +239,9 @@ function createErrorMessage(text: string, error: unknown, timeout = 10000): void
         timeout,
     })
 }
-function createBPImportError(error: Error | TrainBlueprintError | ModdedBlueprintError): void {
+function createBPImportError(
+    error: Error | TrainBlueprintError | ModdedBlueprintError | CorruptedBlueprintStringError
+): void {
     if (error instanceof TrainBlueprintError) {
         createErrorMessage(
             'Blueprint with train entities not supported yet. If you think this is a mistake:',
@@ -246,6 +254,14 @@ function createBPImportError(error: Error | TrainBlueprintError | ModdedBlueprin
         createErrorMessage(
             'Blueprint with modded items not supported yet. If you think this is a mistake:',
             error.errors
+        )
+        return
+    }
+
+    if (error instanceof CorruptedBlueprintStringError) {
+        createErrorMessage(
+            'Blueprint string might be corrupted. If you think this is a mistake:',
+            error.error
         )
         return
     }

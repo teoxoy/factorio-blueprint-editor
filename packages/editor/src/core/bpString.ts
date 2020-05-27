@@ -5,6 +5,13 @@ import blueprintSchema from './blueprintSchema.json'
 import { Blueprint } from './Blueprint'
 import { Book } from './Book'
 
+class CorruptedBlueprintStringError {
+    public error: unknown
+    public constructor(error: unknown) {
+        this.error = error
+    }
+}
+
 class ModdedBlueprintError {
     public errors: Ajv.ErrorObject[]
     public constructor(errors: Ajv.ErrorObject[]) {
@@ -18,8 +25,6 @@ class TrainBlueprintError {
         this.errors = errors
     }
 }
-
-const trainEntityNames = ['locomotive', 'cargo_wagon', 'fluid_wagon']
 
 const keywords: Record<string, KeywordDefinition> = {
     entityName: {
@@ -69,35 +74,32 @@ const nameMigrationsRegex = new RegExp(Object.keys(nameMigrations).join('|'), 'g
 function decode(str: string): Promise<Blueprint | Book> {
     return new Promise((resolve, reject) => {
         try {
-            const data = JSON.parse(
-                pako
-                    .inflate(atob(str.slice(1)), { to: 'string' })
-                    .replace(nameMigrationsRegex, match => nameMigrations[match])
-                    .replace(/("[^,]{3,}?")/g, (_: string, capture: string) =>
-                        capture.replace(/-/g, '_')
-                    )
-            )
-            console.log(data)
-            if (!validate(data)) {
-                const trainRelated = !!validate.errors.find(e => trainEntityNames.includes(e.data))
-                if (trainRelated) {
-                    reject(new TrainBlueprintError(validate.errors))
-                } else {
-                    const moddedBlueprint = !!validate.errors.find(e => keywords[e.keyword])
-                    if (moddedBlueprint) {
-                        reject(new ModdedBlueprintError(validate.errors))
-                    } else {
-                        reject(validate.errors)
-                    }
-                }
-            }
-            resolve(
-                data.blueprint_book === undefined
-                    ? new Blueprint(data.blueprint)
-                    : new Book(data.blueprint_book)
-            )
+            const decodedStr = atob(str.slice(1))
+            const data = pako
+                .inflate(decodedStr, { to: 'string' })
+                .replace(nameMigrationsRegex, match => nameMigrations[match])
+                .replace(/("[^,]{3,}?")/g, (_, capture: string) => capture.replace(/-/g, '_'))
+            const parsedData = JSON.parse(data)
+            resolve(parsedData)
         } catch (e) {
-            reject(e)
+            reject(new CorruptedBlueprintStringError(e))
+        }
+    }).then((data: { blueprint?: BPS.IBlueprint; blueprint_book?: BPS.IBlueprintBook }) => {
+        console.log(data)
+        if (validate(data)) {
+            return data.blueprint_book === undefined
+                ? new Blueprint(data.blueprint)
+                : new Book(data.blueprint_book)
+        } else {
+            const errors = validate.errors
+            const trainEntityNames = new Set(['locomotive', 'cargo_wagon', 'fluid_wagon'])
+            const hasTrain = (): boolean => errors.some(e => trainEntityNames.has(e.data))
+            const isModded = (): boolean => errors.some(e => !!keywords[e.keyword])
+            throw hasTrain()
+                ? new TrainBlueprintError(errors)
+                : isModded()
+                ? new ModdedBlueprintError(errors)
+                : errors
         }
     })
 }
@@ -183,5 +185,10 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
     return bpString.then(decode)
 }
 
-export { ModdedBlueprintError, TrainBlueprintError }
-export { encode, getBlueprintOrBookFromSource }
+export {
+    ModdedBlueprintError,
+    TrainBlueprintError,
+    CorruptedBlueprintStringError,
+    encode,
+    getBlueprintOrBookFromSource,
+}
