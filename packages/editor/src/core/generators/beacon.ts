@@ -63,7 +63,7 @@ export function generateBeacons(
         })
     }
 
-    const entityAreas = entities.map(e =>
+    const entityAreas: IArea[][] = entities.map(e =>
         U.range(0, e.size * e.size).map(i => ({
             x: Math.floor(e.position.x) + ((i % e.size) - Math.floor(e.size / 2)),
             y: Math.floor(e.position.y) + (Math.floor(i / e.size) - Math.floor(e.size / 2)),
