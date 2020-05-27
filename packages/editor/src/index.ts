@@ -325,28 +325,28 @@ function registerActions(): void {
         })
     }
 
-    registerAction('quickbar1', '1').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(0) })
-    registerAction('quickbar2', '2').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(1) })
-    registerAction('quickbar3', '3').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(2) })
-    registerAction('quickbar4', '4').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(3) })
-    registerAction('quickbar5', '5').bind({ press: () => G.UI.quickbarContainer.bindKeyToSlot(4) })
+    registerAction('quickbar1', '1').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(0) })
+    registerAction('quickbar2', '2').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(1) })
+    registerAction('quickbar3', '3').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(2) })
+    registerAction('quickbar4', '4').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(3) })
+    registerAction('quickbar5', '5').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(4) })
     registerAction('quickbar6', 'shift+1').bind({
-        press: () => G.UI.quickbarContainer.bindKeyToSlot(5),
+        press: () => G.UI.quickbarPanel.bindKeyToSlot(5),
     })
     registerAction('quickbar7', 'shift+2').bind({
-        press: () => G.UI.quickbarContainer.bindKeyToSlot(6),
+        press: () => G.UI.quickbarPanel.bindKeyToSlot(6),
     })
     registerAction('quickbar8', 'shift+3').bind({
-        press: () => G.UI.quickbarContainer.bindKeyToSlot(7),
+        press: () => G.UI.quickbarPanel.bindKeyToSlot(7),
     })
     registerAction('quickbar9', 'shift+4').bind({
-        press: () => G.UI.quickbarContainer.bindKeyToSlot(8),
+        press: () => G.UI.quickbarPanel.bindKeyToSlot(8),
     })
     registerAction('quickbar10', 'shift+5').bind({
-        press: () => G.UI.quickbarContainer.bindKeyToSlot(9),
+        press: () => G.UI.quickbarPanel.bindKeyToSlot(9),
     })
     registerAction('changeActiveQuickbar', 'x').bind({
-        press: () => G.UI.quickbarContainer.changeActiveQuickbar(),
+        press: () => G.UI.quickbarPanel.changeActiveQuickbar(),
     })
 }
 
@@ -365,9 +365,9 @@ const setGridPattern = (pattern: GridPattern): void => {
     G.BPC.gridPattern = pattern
 }
 
-const getQuickbarItems = (): string[] => G.UI.quickbarContainer.serialize()
+const getQuickbarItems = (): string[] => G.UI.quickbarPanel.serialize()
 const setQuickbarItems = (items: string[]): void => {
-    G.UI.quickbarContainer.generateSlots(items)
+    G.UI.quickbarPanel.generateSlots(items)
 }
 
 const getOilOutpostSettings = (): IOilOutpostSettings => oilOutpostSettings

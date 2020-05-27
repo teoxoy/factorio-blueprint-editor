@@ -8,7 +8,7 @@ import { createEditor } from './editors/factory'
 
 export class UIContainer extends PIXI.Container {
     private debugContainer: DebugContainer
-    public quickbarContainer: QuickbarPanel
+    public quickbarPanel: QuickbarPanel
     private entityInfoPanel: EntityInfoPanel
     private dialogsContainer: PIXI.Container
     private paintIconContainer: PIXI.Container
@@ -17,14 +17,14 @@ export class UIContainer extends PIXI.Container {
         super()
 
         this.debugContainer = new DebugContainer()
-        this.quickbarContainer = new QuickbarPanel(2)
+        this.quickbarPanel = new QuickbarPanel(2)
         this.entityInfoPanel = new EntityInfoPanel()
         this.dialogsContainer = new PIXI.Container()
         this.paintIconContainer = new PIXI.Container()
 
         this.addChild(
             this.debugContainer,
-            this.quickbarContainer,
+            this.quickbarPanel,
             this.entityInfoPanel,
             this.dialogsContainer,
             this.paintIconContainer
@@ -60,11 +60,11 @@ export class UIContainer extends PIXI.Container {
     }
 
     // public changeQuickbarRows(rows: number): void {
-    //     const itemNames = this.quickbarContainer.serialize()
-    //     this.quickbarContainer.destroy()
-    //     this.quickbarContainer = new QuickbarContainer(rows, itemNames)
+    //     const itemNames = this.quickbarPanel.serialize()
+    //     this.quickbarPanel.destroy()
+    //     this.quickbarPanel = new QuickbarContainer(rows, itemNames)
 
-    //     const index = this.getChildIndex(this.quickbarContainer)
-    //     this.addChildAt(this.quickbarContainer, index)
+    //     const index = this.getChildIndex(this.quickbarPanel)
+    //     this.addChildAt(this.quickbarPanel, index)
     // }
 }
