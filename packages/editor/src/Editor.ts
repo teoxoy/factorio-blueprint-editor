@@ -1,21 +1,12 @@
 import * as PIXI from 'pixi.js'
 import G from './common/globals'
-import { Book } from './core/Book'
 import { Entity } from './core/Entity'
 import { Blueprint, oilOutpostSettings, IOilOutpostSettings } from './core/Blueprint'
 import { PaintTileContainer } from './containers/PaintTileContainer'
 import { BlueprintContainer, EditorMode, GridPattern } from './containers/BlueprintContainer'
 import { UIContainer } from './UI/UIContainer'
 import { Dialog } from './UI/controls/Dialog'
-import {
-    initActions,
-    registerAction,
-    callAction,
-    forEachAction,
-    resetKeybinds,
-    importKeybinds,
-    exportKeybinds,
-} from './actions'
+import { initActions, registerAction } from './actions'
 import { spritesheetsLoader } from './spritesheetsLoader'
 
 export class Editor {
@@ -352,15 +343,4 @@ export class Editor {
             press: () => G.UI.quickbarPanel.changeActiveQuickbar(),
         })
     }
-}
-
-export * from './core/bpString'
-export { Book, Blueprint, GridPattern }
-export default {
-    registerAction,
-    callAction,
-    forEachAction,
-    resetKeybinds,
-    importKeybinds,
-    exportKeybinds,
 }
