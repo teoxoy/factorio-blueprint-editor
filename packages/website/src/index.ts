@@ -60,6 +60,18 @@ if (pixiUtils.isMobile.any) {
     throw new Error('MOBILE_DEVICE_NOT_SUPPORTED')
 }
 
+if (typeof WebAssembly !== 'object' && typeof WebAssembly.instantiate !== 'function') {
+    createToast({
+        text:
+            "Current browser doesn't support WebAssembly.<br>" +
+            'If you think this is a mistake, feel free to report this bug on github or using the feedback button.',
+        type: 'error',
+        timeout: Infinity,
+    })
+    loadingScreen.el.classList.add('error')
+    throw new Error('WEB_ASSEMBLY_NOT_SUPPORTED')
+}
+
 const params = window.location.search.slice(1).split('&')
 
 let bpSource: string
