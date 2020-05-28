@@ -18,6 +18,8 @@ import { initSettingsPane } from './settingsPane'
 
 const editor = new Editor()
 
+let t0 = performance.now()
+
 const CANVAS = document.getElementById('editor') as HTMLCanvasElement
 
 let bp: Blueprint
@@ -27,9 +29,14 @@ const loadingScreen = {
     el: document.getElementById('loadingScreen'),
     show() {
         this.el.classList.add('active')
+        t0 = performance.now()
     },
     hide() {
         this.el.classList.remove('active')
+        const t1 = performance.now()
+        if (editor.debug) {
+            console.log('Load time:', t1 - t0)
+        }
     },
 }
 
