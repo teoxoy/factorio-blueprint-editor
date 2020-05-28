@@ -3,15 +3,20 @@ import './index.styl'
 import { utils as pixiUtils } from 'pixi.js'
 import FileSaver from 'file-saver'
 import EDITOR, {
+    Editor,
     Blueprint,
     Book,
     TrainBlueprintError,
     ModdedBlueprintError,
     CorruptedBlueprintStringError,
+    encode,
+    getBlueprintOrBookFromSource,
 } from '@fbe/editor'
 import { initToasts } from './toasts'
 import { initFeedbackButton } from './feedbackButton'
 import { initSettingsPane } from './settingsPane'
+
+const editor = new Editor()
 
 const CANVAS = document.getElementById('editor') as HTMLCanvasElement
 
@@ -63,23 +68,23 @@ for (const p of params) {
 
 let changeBookForIndexSelector: (bpOrBook: Book | Blueprint) => void
 
-EDITOR.initEditor(CANVAS)
+editor
+    .init(CANVAS)
     .then(() => {
         if (localStorage.getItem('quickbarItemNames')) {
             const quickbarItems = JSON.parse(localStorage.getItem('quickbarItemNames'))
-            EDITOR.setQuickbarItems(quickbarItems)
+            editor.quickbarItems = quickbarItems
         }
 
         registerActions()
 
         const changeBookIndex = (index: number): void => {
             bp = book.getBlueprint(index)
-            EDITOR.loadBlueprint(bp)
+            editor.loadBlueprint(bp)
         }
-        changeBookForIndexSelector = initSettingsPane(changeBookIndex).changeBook
+        changeBookForIndexSelector = initSettingsPane(editor, changeBookIndex).changeBook
 
-        EDITOR.bpStringEncodeDecode
-            .getBlueprintOrBookFromSource(bpSource)
+        getBlueprintOrBookFromSource(bpSource)
             .catch(error => createBPImportError(error))
 
             .then(bpOrBook => loadBp(bpOrBook || new Blueprint()))
@@ -94,7 +99,7 @@ EDITOR.initEditor(CANVAS)
     })
 
 window.addEventListener('unload', () => {
-    localStorage.setItem('quickbarItemNames', JSON.stringify(EDITOR.getQuickbarItems()))
+    localStorage.setItem('quickbarItemNames', JSON.stringify(editor.quickbarItems))
 })
 
 function loadBp(bpOrBook: Blueprint | Book): void {
@@ -105,7 +110,7 @@ function loadBp(bpOrBook: Blueprint | Book): void {
         bp = bpOrBook
     }
 
-    EDITOR.loadBlueprint(bp)
+    editor.loadBlueprint(bp)
     changeBookForIndexSelector(bpOrBook)
 
     loadingScreen.hide()
@@ -130,7 +135,7 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
         createErrorMessage('Blueprint string could not be generated.', error)
     }
 
-    EDITOR.bpStringEncodeDecode(book || bp)
+    encode(book || bp)
         .then(s =>
             navigator.clipboard && navigator.clipboard.writeText
                 ? navigator.clipboard.writeText(s)
@@ -152,7 +157,7 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
             : Promise.resolve(e.clipboardData.getData('text'))
 
     promise
-        .then(EDITOR.bpStringEncodeDecode.getBlueprintOrBookFromSource)
+        .then(getBlueprintOrBookFromSource)
         .then(loadBp)
         .catch(error => {
             loadingScreen.hide()
@@ -162,9 +167,7 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
 
 function registerActions(): void {
     EDITOR.registerAction('clear', 'shift+n').bind({
-        press: () => {
-            loadBp(new Blueprint())
-        },
+        press: () => loadBp(new Blueprint()),
     })
 
     EDITOR.registerAction('generateOilOutpost', 'g').bind({
@@ -191,7 +194,7 @@ function registerActions(): void {
         press: () => {
             if (bp.isEmpty()) return
 
-            EDITOR.getPicture().then(blob => {
+            editor.getPicture().then(blob => {
                 FileSaver.saveAs(blob, `${bp.name}.png`)
                 createToast({ text: 'Blueprint image successfully generated', type: 'success' })
             })

@@ -1,6 +1,6 @@
 import FD from 'factorio-data'
 import { GUI } from 'dat.gui'
-import EDITOR, { Blueprint, Book, GridPattern } from '@fbe/editor'
+import EDITOR, { Blueprint, Book, GridPattern, Editor } from '@fbe/editor'
 
 GUI.TEXT_CLOSED = 'Close Settings'
 GUI.TEXT_OPEN = 'Open Settings'
@@ -10,6 +10,7 @@ const COLOR_LIGHT = 0xc9c9c9
 const isDarkColor = (color: number): boolean => color === COLOR_DARK
 
 export function initSettingsPane(
+    editor: Editor,
     changeBookIndex: (index: number) => void
 ): {
     changeBook: (bpOrBook: Book | Blueprint) => void
@@ -41,7 +42,6 @@ export function initSettingsPane(
         .onFinishChange(changeBookIndex)
 
     const changeBook = (bpOrBook: Book | Blueprint): void => {
-        console.log(bpOrBook)
         if (bpOrBook instanceof Book) {
             guiBPIndex.max(bpOrBook.lastBookIndex).setValue(bpOrBook.activeIndex)
             guiBPIndex.domElement.style.visibility = 'visible'
@@ -52,47 +52,42 @@ export function initSettingsPane(
 
     if (localStorage.getItem('moveSpeed')) {
         const moveSpeed = Number(localStorage.getItem('moveSpeed'))
-        EDITOR.setMoveSpeed(moveSpeed)
+        editor.moveSpeed = moveSpeed
     }
-    gui.add({ moveSpeed: EDITOR.getMoveSpeed() }, 'moveSpeed', 5, 20)
+    gui.add({ moveSpeed: editor.moveSpeed }, 'moveSpeed', 5, 20)
         .name('Move Speed')
-        .onChange((speed: number) => {
-            localStorage.setItem('moveSpeed', speed.toString())
-            EDITOR.setMoveSpeed(speed)
+        .onChange((moveSpeed: number) => {
+            localStorage.setItem('moveSpeed', moveSpeed.toString())
+            editor.moveSpeed = moveSpeed
         })
 
     if (localStorage.getItem('pattern')) {
         const pattern = localStorage.getItem('pattern') as GridPattern
-        EDITOR.setGridPattern(pattern)
+        editor.gridPattern = pattern
     }
-    gui.add({ pattern: EDITOR.getGridPattern() }, 'pattern', ['checker', 'grid'])
+    gui.add({ pattern: editor.gridPattern }, 'pattern', ['checker', 'grid'])
         .name('Grid Pattern')
         .onChange((pattern: GridPattern) => {
             localStorage.setItem('pattern', pattern)
-            EDITOR.setGridPattern(pattern)
+            editor.gridPattern = pattern
         })
 
     if (localStorage.getItem('darkTheme')) {
         const darkTheme = localStorage.getItem('darkTheme') === 'true'
-        EDITOR.setGridColor(darkTheme ? COLOR_DARK : COLOR_LIGHT)
+        editor.gridColor = darkTheme ? COLOR_DARK : COLOR_LIGHT
     }
-    gui.add({ darkTheme: isDarkColor(EDITOR.getGridColor()) }, 'darkTheme')
+    gui.add({ darkTheme: isDarkColor(editor.gridColor) }, 'darkTheme')
         .name('Dark Mode')
         .onChange((darkTheme: boolean) => {
             localStorage.setItem('darkTheme', darkTheme.toString())
-            EDITOR.setGridColor(darkTheme ? COLOR_DARK : COLOR_LIGHT)
+            editor.gridColor = darkTheme ? COLOR_DARK : COLOR_LIGHT
         })
 
     if (localStorage.getItem('debug')) {
         const debug = Boolean(localStorage.getItem('debug'))
-        EDITOR.setDebugging(debug)
+        editor.debug = debug
     }
-    gui.add(
-        {
-            debug: EDITOR.isDebuggingOn(),
-        },
-        'debug'
-    )
+    gui.add({ debug: editor.debug }, 'debug')
         .name('Debug')
         .onChange((debug: boolean) => {
             if (debug) {
@@ -100,21 +95,21 @@ export function initSettingsPane(
             } else {
                 localStorage.removeItem('debug')
             }
-            EDITOR.setDebugging(debug)
+            editor.debug = debug
         })
 
     if (localStorage.getItem('oilOutpostSettings')) {
         const settings = JSON.parse(localStorage.getItem('oilOutpostSettings'))
-        EDITOR.setOilOutpostSettings(settings)
+        editor.oilOutpostSettings = settings
     }
     window.addEventListener('unload', () =>
-        localStorage.setItem('oilOutpostSettings', JSON.stringify(EDITOR.getOilOutpostSettings()))
+        localStorage.setItem('oilOutpostSettings', JSON.stringify(editor.oilOutpostSettings))
     )
 
-    const oilOutpostSettings = new Proxy(EDITOR.getOilOutpostSettings(), {
+    const oilOutpostSettings = new Proxy(editor.oilOutpostSettings, {
         set: (settings, key, value) => {
             settings[key as string] = value
-            EDITOR.setOilOutpostSettings(settings)
+            editor.oilOutpostSettings = settings
             return true
         },
     })
@@ -135,12 +130,7 @@ export function initSettingsPane(
         .add(oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon'))
         .name('Beacon Modules')
     oilOutpostFolder
-        .add(
-            {
-                generate: () => EDITOR.callAction('generateOilOutpost'),
-            },
-            'generate'
-        )
+        .add({ generate: () => EDITOR.callAction('generateOilOutpost') }, 'generate')
         .name('Generate')
     function getModulesObjFor(entityName: string): Record<string, string> {
         return (
@@ -170,9 +160,7 @@ export function initSettingsPane(
 
     EDITOR.forEachAction(action => {
         const name = action.prettyName
-        if (name.includes('Quickbar')) {
-            return
-        }
+        if (name.includes('Quickbar')) return
         keybindsFolder.add(action, 'keyCombo').name(name).listen()
     })
 
@@ -180,22 +168,13 @@ export function initSettingsPane(
 
     EDITOR.forEachAction(action => {
         const name = action.prettyName
-        if (!name.includes('Quickbar')) {
-            return
-        }
+        if (!name.includes('Quickbar')) return
         quickbarFolder.add(action, 'keyCombo').name(name).listen()
     })
 
     keybindsFolder
-        .add(
-            {
-                resetDefaults: () => EDITOR.resetKeybinds(),
-            },
-            'resetDefaults'
-        )
+        .add({ resetDefaults: () => EDITOR.resetKeybinds() }, 'resetDefaults')
         .name('Reset Defaults')
 
-    return {
-        changeBook,
-    }
+    return { changeBook }
 }
