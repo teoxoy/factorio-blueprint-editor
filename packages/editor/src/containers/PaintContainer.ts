@@ -5,13 +5,19 @@ import F from '../UI/controls/functions'
 export abstract class PaintContainer extends PIXI.Container {
     private readonly icon: PIXI.DisplayObject
     private _blocked = false
+    private tint = {
+        r: 0.4,
+        g: 1,
+        b: 0.4,
+        a: 1,
+    }
 
     protected constructor(name: string) {
         super()
 
         this.name = name
 
-        this.on('added', this.applyTint.bind(this))
+        this.on('childAdded', (s: PIXI.Sprite) => F.applyTint(s, this.tint))
 
         this.icon = F.CreateIcon(this.getItemName())
         G.UI.addPaintIcon(this.icon)
@@ -25,17 +31,11 @@ export abstract class PaintContainer extends PIXI.Container {
 
     protected set blocked(value: boolean) {
         this._blocked = value
-        this.applyTint()
-    }
-
-    private applyTint(): void {
-        const t = {
-            r: this.blocked ? 1 : 0.4,
-            g: this.blocked ? 0.4 : 1,
-            b: 0.4,
-            a: 1,
+        this.tint.r = this.blocked ? 1 : 0.4
+        this.tint.g = this.blocked ? 0.4 : 1
+        for (const s of this.children) {
+            F.applyTint(s as PIXI.Sprite, this.tint)
         }
-        this.children.forEach((s: PIXI.Sprite) => F.applyTint(s, t))
     }
 
     public hide(): void {
