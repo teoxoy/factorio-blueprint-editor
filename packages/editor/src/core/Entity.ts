@@ -514,21 +514,18 @@ export class Entity extends EventEmitter {
     }
 
     private get canBeRotated(): boolean {
-        if (
-            ((this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3') &&
-                !this.assemblerCraftsWithFluid) ||
-            this.m_BP.entityPositionGrid.sharesCell({
+        if (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3') {
+            return this.assemblerCraftsWithFluid
+        }
+        return (
+            this.entityData.possible_rotations !== undefined &&
+            !this.m_BP.entityPositionGrid.sharesCell({
                 x: this.position.x,
                 y: this.position.y,
                 w: this.size.x,
                 h: this.size.y,
-            }) ||
-            !this.entityData.possible_rotations
-        ) {
-            return false
-        }
-
-        return true
+            })
+        )
     }
 
     public rotate(ccw = false, rotateOpposingUB = false): void {
