@@ -2,6 +2,7 @@ import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
 import { Tile } from '../core/Tile'
 import { Entity } from '../core/Entity'
+import { Blueprint } from '../core/Blueprint'
 import { IConnection } from '../core/WireConnections'
 import { isActionActive, callAction } from '../actions'
 import G from '../common/globals'
@@ -41,21 +42,22 @@ export class BlueprintContainer extends PIXI.Container {
     private _gridColor = 0x303030
     private _gridPattern: GridPattern = 'grid'
     private grid: PIXI.TilingSprite
-    private chunkGrid: PIXI.TilingSprite
-    public wiresContainer: WiresContainer
-    public overlayContainer: OverlayContainer
-    public underlayContainer: UnderlayContainer
-    private tilePaintSlot: PIXI.Container
-    private entityPaintSlot: PIXI.Container
-    private tileSprites: OptimizedContainer
-    private entitySprites: OptimizedContainer
-    private viewport: Viewport
+    private readonly chunkGrid: PIXI.TilingSprite
+    public readonly wiresContainer: WiresContainer
+    public readonly overlayContainer: OverlayContainer
+    public readonly underlayContainer: UnderlayContainer
+    private readonly tilePaintSlot: PIXI.Container
+    private readonly entityPaintSlot: PIXI.Container
+    private readonly tileSprites: OptimizedContainer
+    private readonly entitySprites: OptimizedContainer
+    private readonly viewport: Viewport
     public hoverContainer: EntityContainer
     public paintContainer: PaintContainer
-    public gridData: GridData
+    private readonly bp: Blueprint
+    public readonly gridData: GridData
     private _mode: EditorMode = EditorMode.NONE
-    private size: IPoint
-    private anchor: IPoint = {
+    private readonly size: IPoint
+    private readonly anchor: IPoint = {
         x: 0.5,
         y: 0.5,
     }
@@ -65,8 +67,10 @@ export class BlueprintContainer extends PIXI.Container {
     private copyModeUpdateFn: (endX: number, endY: number) => void
     private deleteModeUpdateFn: (endX: number, endY: number) => void
 
-    public constructor() {
+    public constructor(bp: Blueprint) {
         super()
+        this.bp = bp
+        this.gridData = new GridData(this)
 
         // Nr of cunks needs to be odd because the chunk grid is offset
         const chunks = 32 - 1
@@ -97,7 +101,8 @@ export class BlueprintContainer extends PIXI.Container {
             3
         )
 
-        this.generateGrid()
+        this.grid = this.generateGrid()
+        this.chunkGrid = this.generateChunkGrid(chunkOffset)
         this.tileSprites = new OptimizedContainer()
         this.tilePaintSlot = new PIXI.Container()
         this.underlayContainer = new UnderlayContainer()
@@ -105,9 +110,9 @@ export class BlueprintContainer extends PIXI.Container {
         this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer()
         this.overlayContainer = new OverlayContainer()
-        this.generateChunkGrid(chunkOffset)
 
         this.addChild(
+            this.grid,
             this.chunkGrid,
             this.tileSprites,
             this.tilePaintSlot,
@@ -118,9 +123,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.entityPaintSlot
         )
 
-        this.gridData = new GridData()
-
-        G.app.ticker.add(() => {
+        const panCb = (): void => {
             if (this.mode !== EditorMode.PAN) {
                 const WSXOR = isActionActive('moveUp') !== isActionActive('moveDown')
                 const ADXOR = isActionActive('moveLeft') !== isActionActive('moveRight')
@@ -133,15 +136,15 @@ export class BlueprintContainer extends PIXI.Container {
                     this.applyViewportTransform()
                 }
             }
-        })
+        }
 
-        this.gridData.on('update16', () => {
+        const onUpdate16 = (): void => {
             if (this.mode === EditorMode.PAINT) {
                 this.paintContainer.moveAtCursor()
             }
-        })
+        }
 
-        this.gridData.on('update32', () => {
+        const onUpdate32 = (): void => {
             // Instead of decreasing the global interactionFrequency, call the over and out entity events here
             this.updateHoverContainer()
 
@@ -154,7 +157,7 @@ export class BlueprintContainer extends PIXI.Container {
             if (isActionActive('pasteEntitySettings')) {
                 callAction('pasteEntitySettings')
             }
-        })
+        }
 
         this.addListener('pointerover', () => {
             if (this.mode === EditorMode.PAINT) {
@@ -169,21 +172,32 @@ export class BlueprintContainer extends PIXI.Container {
             this.updateHoverContainer()
         })
 
-        document.addEventListener('mousemove', e => {
+        const onMouseMove = (e: MouseEvent): void => {
             if (this.mode === EditorMode.PAN) {
                 this.viewport.translateBy(e.movementX, e.movementY)
                 this.applyViewportTransform()
             }
-        })
+        }
 
-        window.addEventListener(
-            'resize',
-            () => {
-                this.viewport.setSize(G.app.screen.width, G.app.screen.height)
-                this.applyViewportTransform()
-            },
-            false
-        )
+        const onResize = (): void => {
+            this.viewport.setSize(G.app.screen.width, G.app.screen.height)
+            this.applyViewportTransform()
+        }
+
+        G.app.ticker.add(panCb)
+        this.gridData.on('update16', onUpdate16)
+        this.gridData.on('update32', onUpdate32)
+        document.addEventListener('mousemove', onMouseMove)
+        window.addEventListener('resize', onResize, false)
+
+        this.on('destroy', () => {
+            G.app.ticker.remove(panCb)
+            this.gridData.off('update16', onUpdate16)
+            this.gridData.off('update32', onUpdate32)
+            this.gridData.destroy()
+            document.removeEventListener('mousemove', onMouseMove)
+            window.removeEventListener('resize', onResize, false)
+        })
     }
 
     public get entityForCopyData(): Entity {
@@ -242,7 +256,7 @@ export class BlueprintContainer extends PIXI.Container {
                 EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
             }
 
-            this.copyModeEntities = G.bp.entityPositionGrid.getEntitiesInArea({
+            this.copyModeEntities = this.bp.entityPositionGrid.getEntitiesInArea({
                 x: X + W / 2,
                 y: Y + H / 2,
                 w: W,
@@ -294,7 +308,7 @@ export class BlueprintContainer extends PIXI.Container {
                 EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
             }
 
-            this.deleteModeEntities = G.bp.entityPositionGrid.getEntitiesInArea({
+            this.deleteModeEntities = this.bp.entityPositionGrid.getEntitiesInArea({
                 x: X + W / 2,
                 y: Y + H / 2,
                 w: W,
@@ -323,7 +337,7 @@ export class BlueprintContainer extends PIXI.Container {
                 EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
             }
         } else {
-            G.bp.removeEntities(this.deleteModeEntities)
+            this.bp.removeEntities(this.deleteModeEntities)
         }
 
         this.deleteModeEntities = []
@@ -374,9 +388,9 @@ export class BlueprintContainer extends PIXI.Container {
             return
         }
 
-        if (!G.bp) return
+        if (!this.bp) return
 
-        const entity = G.bp.entityPositionGrid.getEntityAtPosition(
+        const entity = this.bp.entityPositionGrid.getEntityAtPosition(
             this.gridData.x32,
             this.gridData.y32
         )
@@ -420,10 +434,15 @@ export class BlueprintContainer extends PIXI.Container {
 
     public set gridPattern(pattern: GridPattern) {
         this._gridPattern = pattern
-        this.generateGrid()
+
+        const index = this.getChildIndex(this.grid)
+        const old = this.grid
+        this.grid = this.generateGrid()
+        this.addChildAt(this.grid, index)
+        old.destroy()
     }
 
-    private generateGrid(pattern = this.gridPattern): void {
+    private generateGrid(pattern = this.gridPattern): PIXI.TilingSprite {
         const gridGraphics =
             pattern === 'checker'
                 ? new PIXI.Graphics()
@@ -456,18 +475,10 @@ export class BlueprintContainer extends PIXI.Container {
 
         grid.tint = this.gridColor
 
-        if (this.grid) {
-            const index = this.getChildIndex(this.grid)
-            this.removeChild(this.grid)
-            this.addChildAt(grid, index)
-        } else {
-            this.addChild(grid)
-        }
-
-        this.grid = grid
+        return grid
     }
 
-    public generateChunkGrid(chunkOffset: number): void {
+    private generateChunkGrid(chunkOffset: number): PIXI.TilingSprite {
         const W = 32 * 32
         const H = 32 * 32
         const gridGraphics = new PIXI.Graphics()
@@ -492,80 +503,66 @@ export class BlueprintContainer extends PIXI.Container {
         grid.position.set(chunkOffset * 32, chunkOffset * 32)
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
-        this.chunkGrid = grid
+        return grid
     }
 
     public initBP(): void {
         // Render Bp
-        G.bp.entities.forEach(e => new EntityContainer(e, false))
-        G.bp.wireConnections.on('create', (hash, connection: IConnection) => {
+        for (const [, e] of this.bp.entities) {
+            new EntityContainer(e, false)
+        }
+        for (const [, t] of this.bp.tiles) {
+            new TileContainer(t)
+        }
+
+        const onCreateEntity = (entity: Entity): void => {
+            new EntityContainer(entity)
+            this.wiresContainer.updatePassiveWires()
+            this.updateHoverContainer()
+        }
+        const onRemoveEntity = (): void => {
+            this.wiresContainer.updatePassiveWires()
+            this.updateHoverContainer()
+        }
+        const onCreateTile = (tile: Tile): TileContainer => new TileContainer(tile)
+
+        this.bp.on('create-entity', onCreateEntity)
+        this.bp.on('remove-entity', onRemoveEntity)
+        this.bp.on('create-tile', onCreateTile)
+
+        const onConnectionCreated = (hash: string, connection: IConnection): void => {
             this.wiresContainer.add(hash, connection)
             EntityContainer.mappings.get(connection.entityNumber1).redraw()
             EntityContainer.mappings.get(connection.entityNumber2).redraw()
-        })
-        G.bp.wireConnections.on('remove', (hash, connection: IConnection) => {
+        }
+        const onConnectionRemoved = (hash: string, connection: IConnection): void => {
             this.wiresContainer.remove(hash)
             EntityContainer.mappings.get(connection.entityNumber1).redraw()
             EntityContainer.mappings.get(connection.entityNumber2).redraw()
-        })
-        G.bp.tiles.forEach(t => new TileContainer(t))
-
-        G.bp.on('create-entity', (entity: Entity) => new EntityContainer(entity))
-        G.bp.on('create-entity', () => this.wiresContainer.updatePassiveWires())
-        G.bp.on('remove-entity', () => this.wiresContainer.updatePassiveWires())
-
-        G.bp.on('create-tile', (tile: Tile) => new TileContainer(tile))
-
-        G.bp.on('create-entity', () => this.updateHoverContainer())
-        G.bp.on('remove-entity', () => this.updateHoverContainer())
-
-        G.bp.wireConnections.forEach((connection, hash) =>
+        }
+        this.bp.wireConnections.on('create', onConnectionCreated)
+        this.bp.wireConnections.on('remove', onConnectionRemoved)
+        this.bp.wireConnections.forEach((connection, hash) =>
             this.wiresContainer.add(hash, connection)
         )
+
+        this.on('destroy', () => {
+            this.bp.off('create-entity', onCreateEntity)
+            this.bp.off('remove-entity', onRemoveEntity)
+            this.bp.off('create-tile', onCreateTile)
+
+            this.bp.wireConnections.off('create', onConnectionCreated)
+            this.bp.wireConnections.off('remove', onConnectionRemoved)
+        })
 
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()
         this.centerViewport()
     }
 
-    public clearData(): void {
-        const opt = { children: true }
-        this.tileSprites.destroy(opt)
-        this.tilePaintSlot.destroy(opt)
-        this.visualizationAreaContainer.destroy(opt)
-        this.entitySprites.destroy(opt)
-        this.entityPaintSlot.destroy(opt)
-        this.wiresContainer.destroy(opt)
-        this.overlayContainer.destroy(opt)
-
-        this.removeChildren()
-
-        this.cursor = 'inherit'
-
-        this.hoverContainer = undefined
-        this.paintContainer = undefined
-
-        this.tileSprites = new OptimizedContainer()
-        this.tilePaintSlot = new PIXI.Container()
-        this.visualizationAreaContainer = new VisualizationAreaContainer()
-        this.entitySprites = new OptimizedContainer()
-        this.entityPaintSlot = new PIXI.Container()
-        this.wiresContainer = new WiresContainer()
-        this.overlayContainer = new OverlayContainer()
-
-        this.addChild(
-            this.grid,
-            this.chunkGrid,
-            this.tileSprites,
-            this.tilePaintSlot,
-            this.visualizationAreaContainer,
-            this.entitySprites,
-            this.wiresContainer,
-            this.overlayContainer,
-            this.entityPaintSlot
-        )
-
-        this.setMode(EditorMode.NONE)
+    public destroy(): void {
+        this.emit('destroy')
+        super.destroy({ children: true })
     }
 
     public addEntitySprites(entitySprites: EntitySprite[], sort = true): void {
@@ -591,7 +588,7 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     public centerViewport(): void {
-        const bounds = G.bp.isEmpty()
+        const bounds = this.bp.isEmpty()
             ? new PIXI.Rectangle(-16 * 32, -16 * 32, 32 * 32, 32 * 32)
             : this.getBlueprintBounds()
 

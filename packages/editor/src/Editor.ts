@@ -38,7 +38,8 @@ export class Editor {
             false
         )
 
-        G.BPC = new BlueprintContainer()
+        G.bp = new Blueprint()
+        G.BPC = new BlueprintContainer(G.bp)
         G.app.stage.addChild(G.BPC)
 
         G.UI = new UIContainer()
@@ -115,11 +116,16 @@ export class Editor {
     }
 
     public loadBlueprint(bp: Blueprint): void {
+        const last = G.BPC
+        const i = G.app.stage.getChildIndex(last)
+
         G.bp = bp
 
-        G.BPC.clearData()
+        G.BPC = new BlueprintContainer(bp)
         G.BPC.initBP()
         Dialog.closeAll()
+        G.app.stage.addChildAt(G.BPC, i)
+        last.destroy()
     }
 
     private registerActions(): void {

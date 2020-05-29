@@ -1,8 +1,9 @@
 import { EventEmitter } from 'eventemitter3'
-import G from '../common/globals'
-import { EditorMode } from './BlueprintContainer'
+import { EditorMode, BlueprintContainer } from './BlueprintContainer'
 
 export class GridData extends EventEmitter {
+    private readonly bpc: BlueprintContainer
+
     private _x = 0
     private _y = 0
     private _x16 = 0
@@ -13,9 +14,13 @@ export class GridData extends EventEmitter {
     private lastMousePosX = 0
     private lastMousePosY = 0
 
-    public constructor() {
+    public constructor(bpc: BlueprintContainer) {
         super()
-        document.addEventListener('mousemove', e => this.update(e.clientX, e.clientY))
+        this.bpc = bpc
+
+        const onMouseMove = (e: MouseEvent): void => this.update(e.clientX, e.clientY)
+        document.addEventListener('mousemove', onMouseMove)
+        this.on('destroy', () => document.removeEventListener('mousemove', onMouseMove))
     }
 
     /** mouse x */
@@ -43,18 +48,24 @@ export class GridData extends EventEmitter {
         return this._y32
     }
 
+    public destroy(): void {
+        this.emit('destroy')
+    }
+
     public recalculate(): void {
         this.update(this.lastMousePosX, this.lastMousePosY)
     }
 
     private update(mouseX: number, mouseY: number): void {
+        if (!this.bpc) return
+
         this.lastMousePosX = mouseX
         this.lastMousePosY = mouseY
 
         const oldX = this._x
         const oldY = this._y
-        this._x = Math.floor((mouseX - G.BPC.position.x) / G.BPC.getViewportScale())
-        this._y = Math.floor((mouseY - G.BPC.position.y) / G.BPC.getViewportScale())
+        this._x = Math.floor((mouseX - this.bpc.position.x) / this.bpc.getViewportScale())
+        this._y = Math.floor((mouseY - this.bpc.position.y) / this.bpc.getViewportScale())
 
         const oldX16 = this._x16
         const oldY16 = this._y16
@@ -66,7 +77,7 @@ export class GridData extends EventEmitter {
         this._x32 = Math.floor(this._x / 32)
         this._y32 = Math.floor(this._y / 32)
 
-        if (G.BPC.mode === EditorMode.PAN) return
+        if (this.bpc.mode === EditorMode.PAN) return
 
         // emit update when mouse changes tile whithin the 1 pixel size grid
         if (!(oldX === this._x && oldY === this._y)) {
