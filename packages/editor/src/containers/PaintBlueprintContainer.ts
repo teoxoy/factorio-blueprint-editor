@@ -1,18 +1,18 @@
 import { Entity } from '../core/Entity'
-import G from '../common/globals'
 import { Blueprint } from '../core/Blueprint'
 import { WireConnections } from '../core/WireConnections'
 import { EntitySprite } from './EntitySprite'
 import { PaintContainer } from './PaintContainer'
 import { PaintBlueprintEntityContainer } from './PaintBlueprintEntityContainer'
+import { BlueprintContainer } from './BlueprintContainer'
 
 export class PaintBlueprintContainer extends PaintContainer {
     private readonly bp: Blueprint
     private readonly entities = new Map<Entity, PaintBlueprintEntityContainer>()
     public children: EntitySprite[]
 
-    public constructor(entities: Entity[]) {
-        super('blueprint')
+    public constructor(bpc: BlueprintContainer, entities: Entity[]) {
+        super(bpc, 'blueprint')
 
         const minX = entities.reduce(
             (min, e) => Math.min(min, e.position.x - e.size.x / 2),
@@ -54,7 +54,7 @@ export class PaintBlueprintContainer extends PaintContainer {
         })
 
         for (const [, e] of this.bp.entities) {
-            const epc = new PaintBlueprintEntityContainer(this, this.bp, e)
+            const epc = new PaintBlueprintEntityContainer(this, this.bpc, this.bp, e)
 
             epc.entitySprites.forEach(sprite => {
                 sprite.setPosition({
@@ -69,27 +69,27 @@ export class PaintBlueprintContainer extends PaintContainer {
 
         this.children.sort(EntitySprite.compareFn)
         for (const [e] of this.entities) {
-            G.BPC.underlayContainer.activateRelatedAreas(e.name)
+            this.bpc.underlayContainer.activateRelatedAreas(e.name)
         }
         this.moveAtCursor()
     }
 
     public hide(): void {
-        G.BPC.underlayContainer.deactivateActiveAreas()
+        this.bpc.underlayContainer.deactivateActiveAreas()
         super.hide()
     }
 
     public show(): void {
         if (this.entities) {
             for (const [e] of this.entities) {
-                G.BPC.underlayContainer.activateRelatedAreas(e.name)
+                this.bpc.underlayContainer.activateRelatedAreas(e.name)
             }
         }
         super.show()
     }
 
     public destroy(): void {
-        G.BPC.underlayContainer.deactivateActiveAreas()
+        this.bpc.underlayContainer.deactivateActiveAreas()
         for (const [, c] of this.entities) {
             c.destroy()
         }
@@ -111,11 +111,11 @@ export class PaintBlueprintContainer extends PaintContainer {
         if (!this.visible) return
 
         const firstRailHere = this.bp.getFirstRailRelatedEntity()
-        const firstRailInBP = G.bp.getFirstRailRelatedEntity()
+        const firstRailInBP = this.bpc.bp.getFirstRailRelatedEntity()
 
         if (firstRailHere && firstRailInBP) {
-            const frX = G.BPC.gridData.x32 + firstRailHere.position.x
-            const frY = G.BPC.gridData.y32 + firstRailHere.position.y
+            const frX = this.bpc.gridData.x32 + firstRailHere.position.x
+            const frY = this.bpc.gridData.y32 + firstRailHere.position.y
 
             // grid offsets
             const oX =
@@ -123,11 +123,11 @@ export class PaintBlueprintContainer extends PaintContainer {
             const oY =
                 -Math.abs((Math.abs(frY) % 2) - (Math.abs(firstRailInBP.position.y - 1) % 2)) + 1
 
-            this.x = (G.BPC.gridData.x32 + oX) * 32
-            this.y = (G.BPC.gridData.y32 + oY) * 32
+            this.x = (this.bpc.gridData.x32 + oX) * 32
+            this.y = (this.bpc.gridData.y32 + oY) * 32
         } else {
-            this.x = G.BPC.gridData.x32 * 32
-            this.y = G.BPC.gridData.y32 * 32
+            this.x = this.bpc.gridData.x32 * 32
+            this.y = this.bpc.gridData.y32 * 32
         }
 
         for (const [, c] of this.entities) {
@@ -141,7 +141,7 @@ export class PaintBlueprintContainer extends PaintContainer {
     public placeEntityContainer(): void {
         if (!this.visible) return
 
-        G.bp.history.startTransaction('Create Entities')
+        this.bpc.bp.history.startTransaction('Create Entities')
 
         const oldEntIDToNewEntID = new Map<number, number>()
         for (const [entity, c] of this.entities) {
@@ -166,20 +166,20 @@ export class PaintBlueprintContainer extends PaintContainer {
                         entityNumber1: oldEntIDToNewEntID.get(connection.entityNumber1),
                         entityNumber2: oldEntIDToNewEntID.get(connection.entityNumber2),
                     }))
-                    .forEach(conn => G.bp.wireConnections.create(conn))
+                    .forEach(conn => this.bpc.bp.wireConnections.create(conn))
             }
         }
 
-        G.bp.history.commitTransaction()
+        this.bpc.bp.history.commitTransaction()
     }
 
     public removeContainerUnder(): void {
         if (!this.visible) return
 
-        G.bp.history.startTransaction('Remove Entities')
+        this.bpc.bp.history.startTransaction('Remove Entities')
         for (const [, c] of this.entities) {
             c.removeContainerUnder()
         }
-        G.bp.history.commitTransaction()
+        this.bpc.bp.history.commitTransaction()
     }
 }

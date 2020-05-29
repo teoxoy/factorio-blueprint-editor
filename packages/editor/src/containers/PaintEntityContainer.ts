@@ -1,11 +1,11 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
 import util from '../common/util'
 import { Entity } from '../core/Entity'
 import { EntitySprite } from './EntitySprite'
 import { VisualizationArea } from './VisualizationArea'
 import { PaintContainer } from './PaintContainer'
+import { BlueprintContainer } from './BlueprintContainer'
 
 export class PaintEntityContainer extends PaintContainer {
     private visualizationArea: VisualizationArea
@@ -14,15 +14,15 @@ export class PaintEntityContainer extends PaintContainer {
     /** This is only a reference */
     private undergroundLine: PIXI.Container
 
-    public constructor(name: string, direction: number) {
-        super(name)
+    public constructor(bpc: BlueprintContainer, name: string, direction: number) {
+        super(bpc, name)
 
         this.direction = direction
         this.directionType = FD.entities[name].type === 'loader' ? 'output' : 'input'
 
-        this.visualizationArea = G.BPC.underlayContainer.create(this.name, this.position)
+        this.visualizationArea = this.bpc.underlayContainer.create(this.name, this.position)
         this.visualizationArea.highlight()
-        G.BPC.underlayContainer.activateRelatedAreas(this.name)
+        this.bpc.underlayContainer.activateRelatedAreas(this.name)
 
         this.moveAtCursor()
         this.redraw()
@@ -33,20 +33,20 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     public hide(): void {
-        G.BPC.underlayContainer.deactivateActiveAreas()
+        this.bpc.underlayContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
         super.hide()
     }
 
     public show(): void {
-        G.BPC.underlayContainer.activateRelatedAreas(this.name)
+        this.bpc.underlayContainer.activateRelatedAreas(this.name)
         this.updateUndergroundLine()
         super.show()
     }
 
     public destroy(): void {
         this.visualizationArea.destroy()
-        G.BPC.underlayContainer.deactivateActiveAreas()
+        this.bpc.underlayContainer.deactivateActiveAreas()
         this.destroyUndergroundLine()
         super.destroy()
     }
@@ -60,13 +60,17 @@ export class PaintEntityContainer extends PaintContainer {
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
 
         if (
-            G.bp.entityPositionGrid.checkFastReplaceableGroup(this.name, direction, position) ||
-            G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
+            this.bpc.bp.entityPositionGrid.checkFastReplaceableGroup(
                 this.name,
                 direction,
                 position
             ) ||
-            G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)
+            this.bpc.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
+                this.name,
+                direction,
+                position
+            ) ||
+            this.bpc.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)
         ) {
             this.blocked = false
         } else {
@@ -77,7 +81,7 @@ export class PaintEntityContainer extends PaintContainer {
     private updateUndergroundBeltRotation(): void {
         const fd = FD.entities[this.name]
         if (fd.type === 'underground_belt') {
-            const otherEntity = G.bp.entityPositionGrid.getOpposingEntity(
+            const otherEntity = this.bpc.bp.entityPositionGrid.getOpposingEntity(
                 this.name,
                 (this.direction + 4) % 8,
                 {
@@ -88,7 +92,7 @@ export class PaintEntityContainer extends PaintContainer {
                 fd.max_distance
             )
             if (otherEntity) {
-                const oe = G.bp.entities.get(otherEntity)
+                const oe = this.bpc.bp.entities.get(otherEntity)
                 this.directionType = oe.directionType === 'input' ? 'output' : 'input'
             } else {
                 if (this.directionType === 'output') {
@@ -101,7 +105,7 @@ export class PaintEntityContainer extends PaintContainer {
 
     private updateUndergroundLine(): void {
         this.destroyUndergroundLine()
-        this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
+        this.undergroundLine = this.bpc.overlayContainer.createUndergroundLine(
             this.name,
             this.getGridPosition(),
             this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
@@ -142,21 +146,21 @@ export class PaintEntityContainer extends PaintContainer {
         if (!this.visible) return
 
         const railRelatedNames = ['straight_rail', 'curved_rail', 'train_stop']
-        const firstRail = G.bp.getFirstRailRelatedEntity()
+        const firstRail = this.bpc.bp.getFirstRailRelatedEntity()
 
         if (railRelatedNames.includes(this.name) && firstRail) {
             // grid offsets
             const oX =
                 -Math.abs(
-                    (Math.abs(G.BPC.gridData.x32) % 2) - (Math.abs(firstRail.position.x - 1) % 2)
+                    (Math.abs(this.bpc.gridData.x32) % 2) - (Math.abs(firstRail.position.x - 1) % 2)
                 ) + 1
             const oY =
                 -Math.abs(
-                    (Math.abs(G.BPC.gridData.y32) % 2) - (Math.abs(firstRail.position.y - 1) % 2)
+                    (Math.abs(this.bpc.gridData.y32) % 2) - (Math.abs(firstRail.position.y - 1) % 2)
                 ) + 1
 
-            this.x = (G.BPC.gridData.x32 + oX) * 32
-            this.y = (G.BPC.gridData.y32 + oY) * 32
+            this.x = (this.bpc.gridData.x32 + oX) * 32
+            this.y = (this.bpc.gridData.y32 + oY) * 32
         } else {
             this.setNewPosition(this.size)
         }
@@ -172,12 +176,12 @@ export class PaintEntityContainer extends PaintContainer {
     public removeContainerUnder(): void {
         if (!this.visible) return
 
-        const entities = G.bp.entityPositionGrid.getEntitiesInArea({
+        const entities = this.bpc.bp.entityPositionGrid.getEntitiesInArea({
             ...this.getGridPosition(),
             w: this.size.x,
             h: this.size.y,
         })
-        G.bp.removeEntities(entities)
+        this.bpc.bp.removeEntities(entities)
         this.checkBuildable()
     }
 
@@ -188,16 +192,16 @@ export class PaintEntityContainer extends PaintContainer {
         const position = this.getGridPosition()
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
 
-        const frgEnt = G.bp.entityPositionGrid.checkFastReplaceableGroup(
+        const frgEnt = this.bpc.bp.entityPositionGrid.checkFastReplaceableGroup(
             this.name,
             direction,
             position
         )
         if (frgEnt) {
-            G.bp.fastReplaceEntity(frgEnt, this.name, direction)
+            this.bpc.bp.fastReplaceEntity(frgEnt, this.name, direction)
             return
         }
-        const snEnt = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
+        const snEnt = this.bpc.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
             this.name,
             direction,
             position
@@ -207,8 +211,8 @@ export class PaintEntityContainer extends PaintContainer {
             return
         }
 
-        if (G.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)) {
-            G.bp.createEntity({
+        if (this.bpc.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)) {
+            this.bpc.bp.createEntity({
                 name: this.name,
                 position,
                 direction,

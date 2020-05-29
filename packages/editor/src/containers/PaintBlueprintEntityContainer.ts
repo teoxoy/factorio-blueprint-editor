@@ -1,13 +1,14 @@
-import { Entity } from '../core/Entity'
 import F from '../UI/controls/functions'
-import G from '../common/globals'
+import { Entity } from '../core/Entity'
 import { Blueprint } from '../core/Blueprint'
 import { EntitySprite } from './EntitySprite'
 import { VisualizationArea } from './VisualizationArea'
+import { BlueprintContainer } from './BlueprintContainer'
 import { PaintBlueprintContainer } from './PaintBlueprintContainer'
 
 export class PaintBlueprintEntityContainer {
-    private readonly bpc: PaintBlueprintContainer
+    private readonly pbpc: PaintBlueprintContainer
+    private readonly bpc: BlueprintContainer
     private readonly bp: Blueprint
     private readonly entity: Entity
     private readonly visualizationArea: VisualizationArea
@@ -15,27 +16,33 @@ export class PaintBlueprintEntityContainer {
     /** This is only a reference */
     private undergroundLine: PIXI.Container
 
-    public constructor(bpc: PaintBlueprintContainer, bp: Blueprint, entity: Entity) {
+    public constructor(
+        pbpc: PaintBlueprintContainer,
+        bpc: BlueprintContainer,
+        bp: Blueprint,
+        entity: Entity
+    ) {
+        this.pbpc = pbpc
         this.bpc = bpc
         this.bp = bp
         this.entity = entity
 
-        this.visualizationArea = G.BPC.underlayContainer.create(this.entity.name, this.position)
+        this.visualizationArea = this.bpc.underlayContainer.create(this.entity.name, this.position)
 
         this.entitySprites = EntitySprite.getParts(this.entity, this.bp.entityPositionGrid)
     }
 
     private get entityPosition(): IPoint {
         return {
-            x: this.bpc.x / 32 + this.entity.position.x,
-            y: this.bpc.y / 32 + this.entity.position.y,
+            x: this.pbpc.x / 32 + this.entity.position.x,
+            y: this.pbpc.y / 32 + this.entity.position.y,
         }
     }
 
     private get position(): IPoint {
         return {
-            x: this.bpc.x + this.entity.position.x,
-            y: this.bpc.y + this.entity.position.y,
+            x: this.pbpc.x + this.entity.position.x,
+            y: this.pbpc.y + this.entity.position.y,
         }
     }
 
@@ -49,17 +56,17 @@ export class PaintBlueprintEntityContainer {
         const direction = this.entity.direction
 
         const allow =
-            G.bp.entityPositionGrid.checkFastReplaceableGroup(
+            this.bpc.bp.entityPositionGrid.checkFastReplaceableGroup(
                 this.entity.name,
                 direction,
                 position
             ) ||
-            G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
+            this.bpc.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
                 this.entity.name,
                 direction,
                 position
             ) ||
-            G.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)
+            this.bpc.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)
 
         for (const s of this.entitySprites) {
             F.applyTint(s, {
@@ -73,7 +80,7 @@ export class PaintBlueprintEntityContainer {
 
     private updateUndergroundLine(): void {
         this.destroyUndergroundLine()
-        this.undergroundLine = G.BPC.overlayContainer.createUndergroundLine(
+        this.undergroundLine = this.bpc.overlayContainer.createUndergroundLine(
             this.entity.name,
             this.entityPosition,
             this.entity.directionType === 'input'
@@ -102,12 +109,12 @@ export class PaintBlueprintEntityContainer {
     public removeContainerUnder(): void {
         const size = this.entity.size
 
-        const entities = G.bp.entityPositionGrid.getEntitiesInArea({
+        const entities = this.bpc.bp.entityPositionGrid.getEntitiesInArea({
             ...this.entityPosition,
             w: size.x,
             h: size.y,
         })
-        G.bp.removeEntities(entities)
+        this.bpc.bp.removeEntities(entities)
         this.checkBuildable()
     }
 
@@ -115,16 +122,16 @@ export class PaintBlueprintEntityContainer {
         const position = this.entityPosition
         const direction = this.entity.direction
 
-        const frgEnt = G.bp.entityPositionGrid.checkFastReplaceableGroup(
+        const frgEnt = this.bpc.bp.entityPositionGrid.checkFastReplaceableGroup(
             this.entity.name,
             direction,
             position
         )
         if (frgEnt) {
-            G.bp.fastReplaceEntity(frgEnt, this.entity.name, direction)
+            this.bpc.bp.fastReplaceEntity(frgEnt, this.entity.name, direction)
             return
         }
-        const snEnt = G.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
+        const snEnt = this.bpc.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
             this.entity.name,
             direction,
             position
@@ -135,8 +142,8 @@ export class PaintBlueprintEntityContainer {
         }
 
         let ent: Entity
-        if (G.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)) {
-            ent = G.bp.createEntity({
+        if (this.bpc.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)) {
+            ent = this.bpc.bp.createEntity({
                 ...this.entity.serialize(),
                 entity_number: undefined,
                 connections: undefined,

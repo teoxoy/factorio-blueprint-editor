@@ -2,14 +2,15 @@ import G from '../common/globals'
 import { Tile } from '../core/Tile'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
+import { BlueprintContainer } from './BlueprintContainer'
 
 export class PaintTileContainer extends PaintContainer {
     private static size = 2
 
-    public constructor(name: string) {
-        super(name)
+    public constructor(bpc: BlueprintContainer, name: string) {
+        super(bpc, name)
 
-        G.BPC.transparentEntities()
+        this.bpc.transparentEntities()
 
         this.moveAtCursor()
         this.redraw()
@@ -26,17 +27,17 @@ export class PaintTileContainer extends PaintContainer {
     }
 
     public hide(): void {
-        G.BPC.transparentEntities(false)
+        this.bpc.transparentEntities(false)
         super.hide()
     }
 
     public show(): void {
-        G.BPC.transparentEntities()
+        this.bpc.transparentEntities()
         super.show()
     }
 
     public destroy(): void {
-        G.BPC.transparentEntities(false)
+        this.bpc.transparentEntities(false)
         super.destroy()
     }
 
@@ -96,7 +97,7 @@ export class PaintTileContainer extends PaintContainer {
 
         const position = this.getGridPosition()
 
-        G.bp.removeTiles(
+        this.bpc.bp.removeTiles(
             PaintTileContainer.getTilePositions().map(p => ({
                 x: p.x + position.x,
                 y: p.y + position.y,
@@ -109,7 +110,7 @@ export class PaintTileContainer extends PaintContainer {
 
         const position = this.getGridPosition()
 
-        G.bp.createTiles(
+        this.bpc.bp.createTiles(
             this.name,
             PaintTileContainer.getTilePositions().map(p => ({
                 x: p.x + position.x,

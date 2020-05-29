@@ -74,7 +74,7 @@ export class BlueprintContainer extends PIXI.Container {
     private readonly entitySprites: OptimizedContainer
     public hoverContainer: EntityContainer
     public paintContainer: PaintContainer
-    private readonly bp: Blueprint
+    public readonly bp: Blueprint
     public readonly gridData: GridData
     private _mode: EditorMode = EditorMode.NONE
     private _entityForCopyData: Entity
@@ -664,14 +664,14 @@ export class BlueprintContainer extends PIXI.Container {
             const placeResult = itemData.place_result || tileResult
 
             if (tileResult) {
-                this.paintContainer = new PaintTileContainer(placeResult)
+                this.paintContainer = new PaintTileContainer(this, placeResult)
                 this.tilePaintSlot.addChild(this.paintContainer)
             } else {
-                this.paintContainer = new PaintEntityContainer(placeResult, direction)
+                this.paintContainer = new PaintEntityContainer(this, placeResult, direction)
                 this.entityPaintSlot.addChild(this.paintContainer)
             }
         } else {
-            this.paintContainer = new PaintBlueprintContainer(itemNameOrEntities)
+            this.paintContainer = new PaintBlueprintContainer(this, itemNameOrEntities)
             this.entityPaintSlot.addChild(this.paintContainer)
         }
 
