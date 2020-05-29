@@ -3,6 +3,10 @@ import * as PIXI from 'pixi.js'
 import F from '../UI/controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
+import { isActionActive } from '../actions'
+import { Entity } from '../core/Entity'
+import { EditorMode } from './BlueprintContainer'
+import { EntityContainer } from './EntityContainer'
 
 type CursorBoxType =
     | 'regular'
