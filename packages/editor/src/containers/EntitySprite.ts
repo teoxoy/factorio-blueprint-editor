@@ -1,8 +1,7 @@
 import * as PIXI from 'pixi.js'
-import { spriteDataBuilder } from '../core/spriteDataBuilder'
-import { Entity } from '../core/Entity'
 import G from '../common/globals'
 import F from '../UI/controls/functions'
+import { Entity } from '../core/Entity'
 import { PositionGrid } from '../core/PositionGrid'
 import { getSpriteData, ISpriteData } from '../core/spriteDataBuilder'
 
@@ -110,7 +109,7 @@ export class EntitySprite extends PIXI.Sprite {
         entity: IEntityData | Entity,
         positionGrid?: PositionGrid
     ): EntitySprite[] {
-        const anims = spriteDataBuilder.getSpriteData({
+        const anims = getSpriteData({
             hr: G.hr,
             dir:
                 positionGrid && entity.type === 'electric_pole' && entity instanceof Entity
