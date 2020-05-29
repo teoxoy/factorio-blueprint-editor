@@ -23,38 +23,37 @@ const processArea = (area: IArea): IArea => ({
     y: Math.round(area.y - area.h / 2),
 })
 
-const tileDataAction = (
-    grid: Map<string, number | number[]>,
-    area: IArea,
-    fn: (key: string, cell: number | number[]) => boolean | void,
-    returnEmptyCells = false
-): void => {
-    const A = processArea(area)
-
-    let stop = false
-    for (let x = A.x, maxX = A.x + A.w; x < maxX; x++) {
-        for (let y = A.y, maxY = A.y + A.h; y < maxY; y++) {
-            const key = `${x},${y}`
-            const cell = grid.get(key)
-            if (cell || returnEmptyCells) {
-                stop = !!fn(key, cell)
-            }
-            if (stop) {
-                break
-            }
-        }
-        if (stop) {
-            break
-        }
-    }
-}
-
 export class PositionGrid {
     private bp: Blueprint
     private grid: Map<string, number | number[]> = new Map()
 
     public constructor(bp: Blueprint) {
         this.bp = bp
+    }
+
+    private tileDataAction(
+        area: IArea,
+        fn: (key: string, cell: number | number[]) => boolean | void,
+        returnEmptyCells = false
+    ): void {
+        const A = processArea(area)
+
+        let stop = false
+        for (let x = A.x, maxX = A.x + A.w; x < maxX; x++) {
+            for (let y = A.y, maxY = A.y + A.h; y < maxY; y++) {
+                const key = `${x},${y}`
+                const cell = this.grid.get(key)
+                if (cell || returnEmptyCells) {
+                    stop = !!fn(key, cell)
+                }
+                if (stop) {
+                    break
+                }
+            }
+            if (stop) {
+                break
+            }
+        }
     }
 
     public getEntityAtPosition(x: number, y: number): Entity {
@@ -73,8 +72,7 @@ export class PositionGrid {
         //     return
         // }
 
-        tileDataAction(
-            this.grid,
+        this.tileDataAction(
             {
                 x: position.x,
                 y: position.y,
@@ -104,8 +102,7 @@ export class PositionGrid {
     }
 
     public removeTileData(entity: Entity, position: IPoint = entity.position): void {
-        tileDataAction(
-            this.grid,
+        this.tileDataAction(
             {
                 x: position.x,
                 y: position.y,
@@ -293,7 +290,7 @@ export class PositionGrid {
     /** Returns true if any of the cells in the area are an array */
     public sharesCell(area: IArea): boolean {
         let hasArrayCell = false
-        tileDataAction(this.grid, area, (_, cell) => {
+        this.tileDataAction(area, (_, cell) => {
             if (typeof cell !== 'number') {
                 hasArrayCell = true
                 return true
@@ -304,7 +301,7 @@ export class PositionGrid {
 
     public isAreaEmpty(area: IArea): boolean {
         let empty = true
-        tileDataAction(this.grid, area, () => {
+        this.tileDataAction(area, () => {
             empty = false
             return true
         })
@@ -313,7 +310,7 @@ export class PositionGrid {
 
     public findInArea(area: IArea, fn: (entity: Entity) => boolean): Entity {
         let entity: Entity
-        tileDataAction(this.grid, area, (_, cell) => {
+        this.tileDataAction(area, (_, cell) => {
             if (typeof cell === 'number') {
                 const ent = this.bp.entities.get(cell)
                 if (fn(ent)) {
@@ -335,17 +332,17 @@ export class PositionGrid {
 
     /** Returns all entities in the area and optinally filters them via the function */
     public getEntitiesInArea(area: IArea): Entity[] {
-        const entities: Entity[] = []
-        tileDataAction(this.grid, area, (_, cell) => {
+        const entities = new Set<Entity>()
+        this.tileDataAction(area, (_, cell) => {
             if (typeof cell === 'number') {
-                entities.push(this.bp.entities.get(cell))
+                entities.add(this.bp.entities.get(cell))
             } else {
                 for (const v of cell) {
-                    entities.push(this.bp.entities.get(v))
+                    entities.add(this.bp.entities.get(v))
                 }
             }
         })
-        return [...new Set(entities)]
+        return [...entities]
     }
 
     public getSurroundingEntities(area: IArea): Entity[] {
