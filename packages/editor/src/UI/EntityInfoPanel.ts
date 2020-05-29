@@ -114,17 +114,18 @@ export class EntityInfoPanel extends Panel {
 
             if (entity.modules.length > 0) {
                 for (const module of entity.modules) {
-                    if (FD.items[module].effect.productivity) {
-                        productivity += FD.items[module].effect.productivity.bonus
+                    const moduleData = FD.items[module]
+                    if (moduleData.effect.productivity) {
+                        productivity += moduleData.effect.productivity.bonus
                     }
-                    if (FD.items[module].effect.consumption) {
-                        consumption += FD.items[module].effect.consumption.bonus
+                    if (moduleData.effect.consumption) {
+                        consumption += moduleData.effect.consumption.bonus
                     }
-                    // if (FD.items[module].effect.pollution) {
-                    //     pollution += FD.items[module].effect.pollution.bonus
+                    // if (moduleData.effect.pollution) {
+                    //     pollution += moduleData.effect.pollution.bonus
                     // }
-                    if (FD.items[module].effect.speed) {
-                        speed += FD.items[module].effect.speed.bonus
+                    if (moduleData.effect.speed) {
+                        speed += moduleData.effect.speed.bonus
                     }
                 }
             }
