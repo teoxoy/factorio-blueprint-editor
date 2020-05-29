@@ -29,7 +29,14 @@ export class PaintBlueprintEntityContainer {
 
         this.visualizationArea = this.bpc.underlayContainer.create(this.entity.name, this.position)
 
-        this.entitySprites = EntitySprite.getParts(this.entity, this.bp.entityPositionGrid)
+        this.entitySprites = EntitySprite.getParts(
+            this.entity,
+            {
+                x: this.entity.position.x * 32,
+                y: this.entity.position.y * 32,
+            },
+            this.bp.entityPositionGrid
+        )
     }
 
     private get entityPosition(): IPoint {

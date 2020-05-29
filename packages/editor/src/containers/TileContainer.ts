@@ -1,15 +1,13 @@
-import * as PIXI from 'pixi.js'
 import FD from '@fbe/factorio-data'
 import G from '../common/globals'
 import { Tile } from '../core/Tile'
 import { EntitySprite } from './EntitySprite'
 
 export class TileContainer {
-    private readonly tileSprites: PIXI.Sprite[] = []
+    private readonly tileSprites: EntitySprite[] = []
 
     public constructor(tile: Tile) {
         const sprite = TileContainer.generateSprite(tile.name, tile.x, tile.y)
-        sprite.position.set(tile.x * 32, tile.y * 32)
         this.tileSprites.push(sprite)
         G.BPC.addTileSprites([sprite])
 
@@ -17,6 +15,10 @@ export class TileContainer {
     }
 
     public static generateSprite(name: string, x: number, y: number): EntitySprite {
+        const width = G.hr ? 64 : 32
+        const height = G.hr ? 64 : 32
+        const scale = G.hr ? 0.5 : 1
+
         // TODO: maybe optimize this with PIXI.TilingSprite and masks
         // https://github.com/pixijs/pixi.js/wiki/v4-Gotchas#graphics--tilingsprite
 
@@ -31,13 +33,19 @@ export class TileContainer {
             }
         })()
 
-        return new EntitySprite({
-            filename,
-            x: (Math.abs(Math.floor(x)) % 8) * 64,
-            y: (Math.abs(Math.floor(y)) % 8) * 64,
-            width: 64,
-            height: 64,
-            scale: 0.5,
-        })
+        return new EntitySprite(
+            {
+                filename,
+                x: (Math.abs(Math.floor(x)) % 8) * width,
+                y: (Math.abs(Math.floor(y)) % 8) * height,
+                width,
+                height,
+                scale,
+            },
+            {
+                x: x * width * scale,
+                y: y * height * scale,
+            }
+        )
     }
 }

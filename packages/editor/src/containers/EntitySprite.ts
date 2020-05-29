@@ -28,15 +28,12 @@ export class EntitySprite extends PIXI.Sprite {
     private static nextID = 0
 
     private id: number
-    private shift: IPoint
     /** Should be private but TS complains */
     public zIndex: number
     private zOrder: number
+    private readonly entityPos: IPoint
 
-    public constructor(data: ISpriteData) {
-        if (!data.shift) {
-            data.shift = [0, 0]
-        }
+    public constructor(data: ISpriteData, position: IPoint = { x: 0, y: 0 }) {
         if (!data.x) {
             data.x = 0
         }
@@ -63,15 +60,16 @@ export class EntitySprite extends PIXI.Sprite {
 
         this.id = EntitySprite.getNextID()
 
-        this.shift = {
-            x: data.shift[0] * 32,
-            y: data.shift[1] * 32,
+        this.entityPos = position
+        this.position.set(position.x, position.y)
+
+        if (data.shift) {
+            this.position.x += data.shift[0] * 32
+            this.position.y += data.shift[1] * 32
         }
 
-        this.position.set(this.shift.x, this.shift.y)
-
         if (data.scale) {
-            this.scale.set(data.scale, data.scale)
+            this.scale.set(data.scale)
         }
 
         this.anchor.x = data.anchorX === undefined ? 0.5 : data.anchorX
@@ -99,6 +97,7 @@ export class EntitySprite extends PIXI.Sprite {
 
     public static getParts(
         entity: IEntityData | Entity,
+        position?: IPoint,
         positionGrid?: PositionGrid
     ): EntitySprite[] {
         const spriteData = getSpriteData({
@@ -127,7 +126,7 @@ export class EntitySprite extends PIXI.Sprite {
         let foundMainBelt = false
         for (let i = 0; i < spriteData.length; i++) {
             const data = spriteData[i]
-            const sprite = new EntitySprite(data)
+            const sprite = new EntitySprite(data, position)
 
             if (data.filename.includes('circuit-connector')) {
                 sprite.zIndex = 1
@@ -176,19 +175,15 @@ export class EntitySprite extends PIXI.Sprite {
         const dZ = a.zIndex - b.zIndex
         if (dZ !== 0) return dZ
 
-        const dY = a.y - a.shift.y - (b.y - b.shift.y)
+        const dY = a.entityPos.y - b.entityPos.y
         if (dY !== 0) return dY
 
         const dO = a.zOrder - b.zOrder
         if (dO !== 0) return dO
 
-        const dX = a.x - a.shift.x - (b.x - b.shift.x)
+        const dX = a.entityPos.x - b.entityPos.x
         if (dX !== 0) return dX
 
         return a.id - b.id
-    }
-
-    public setPosition(position: IPoint): void {
-        this.position.set(position.x + this.shift.x, position.y + this.shift.y)
     }
 }

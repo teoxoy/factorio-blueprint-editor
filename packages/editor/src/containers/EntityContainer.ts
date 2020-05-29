@@ -331,15 +331,11 @@ export class EntityContainer {
         for (const s of this.entitySprites) {
             s.destroy()
         }
-        this.entitySprites = []
-        for (const s of EntitySprite.getParts(
+        this.entitySprites = EntitySprite.getParts(
             this.m_Entity,
-
+            this.position,
             ignoreConnections ? undefined : G.bp.entityPositionGrid
-        )) {
-            s.setPosition(this.position)
-            this.entitySprites.push(s)
-        }
+        )
         G.BPC.addEntitySprites(this.entitySprites, sort)
     }
 }

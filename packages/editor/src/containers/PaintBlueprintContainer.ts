@@ -55,16 +55,8 @@ export class PaintBlueprintContainer extends PaintContainer {
 
         for (const [, e] of this.bp.entities) {
             const epc = new PaintBlueprintEntityContainer(this, this.bpc, this.bp, e)
-
-            epc.entitySprites.forEach(sprite => {
-                sprite.setPosition({
-                    x: e.position.x * 32,
-                    y: e.position.y * 32,
-                })
-            })
-
-            this.entities.set(e, epc)
             this.addChild(...epc.entitySprites)
+            this.entities.set(e, epc)
         }
 
         this.children.sort(EntitySprite.compareFn)
