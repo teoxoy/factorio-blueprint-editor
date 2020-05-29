@@ -52,7 +52,7 @@ export class QuickbarPanel extends Panel {
 
         const t = QuickbarPanel.createTriangleButton(15, 14)
         t.position.set((this.iWidth - t.width) / 2, (this.iHeight - t.height) / 2)
-        t.on('pointerdown', () => this.changeActiveQuickbar())
+        t.on('pointerdown', this.changeActiveQuickbar, this)
         this.addChild(t)
     }
 
