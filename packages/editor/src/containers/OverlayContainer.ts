@@ -27,6 +27,7 @@ const cursorBoxTypeToOffset = (type: CursorBoxType): number => {
 }
 
 export class OverlayContainer extends PIXI.Container {
+    private readonly bpc: BlueprintContainer
     private readonly entityInfos = new PIXI.Container()
     private readonly cursorBoxes = new PIXI.Container()
     private readonly undergroundLines = new PIXI.Container()
