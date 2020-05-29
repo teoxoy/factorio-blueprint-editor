@@ -172,11 +172,15 @@ export class BlueprintContainer extends PIXI.Container {
             this.updateHoverContainer()
         })
 
+        let lastX = 0
+        let lastY = 0
         const onMouseMove = (e: MouseEvent): void => {
             if (this.mode === EditorMode.PAN) {
-                this.viewport.translateBy(e.movementX, e.movementY)
+                this.viewport.translateBy(e.clientX - lastX, e.clientY - lastY)
                 this.applyViewportTransform()
             }
+            lastX = e.clientX
+            lastY = e.clientY
         }
 
         const onResize = (): void => {
