@@ -209,84 +209,85 @@ function generateCovers(e: FD_Entity, data: IDrawData): SpriteData[] {
     ) {
         return []
     }
-    const output = []
+
     const connections = getPipeConnectionPoints(e, data.dir, data.assemblerPipeDirection)
-    if (connections) {
-        for (const connection of connections) {
-            const dir = util.getRelativeDirection(connection)
+    if (!connections) return []
 
-            const needsCover = (): boolean => {
-                if (
-                    e.name === 'chemical_plant' &&
-                    data.chemicalPlantDontConnectOutput &&
-                    data.dir === (dir + 4) % 8
-                ) {
-                    return true
-                }
+    const output = []
+    for (const connection of connections) {
+        const dir = util.getRelativeDirection(connection)
 
-                const pos = {
-                    x: Math.floor(data.position.x + connection.x),
-                    y: Math.floor(data.position.y + connection.y),
-                }
-
-                const ent = data.positionGrid.getEntityAtPosition(pos.x, pos.y)
-                if (!ent) return true
-
-                if (
-                    ent.name === 'chemical_plant' &&
-                    ent.chemicalPlantDontConnectOutput &&
-                    ent.direction === dir
-                ) {
-                    return true
-                }
-
-                if (
-                    ent.name === 'pipe' ||
-                    ent.name === 'infinity_pipe' ||
-                    ent.name === 'pipe_to_ground' ||
-                    ent.entityData.fluid_box ||
-                    ent.entityData.output_fluid_box ||
-                    ent.entityData.fluid_boxes
-                ) {
-                    const connections2 = getPipeConnectionPoints(
-                        ent.entityData,
-                        ent.direction,
-                        ent.assemblerPipeDirection
-                    )
-                    for (const connection2 of connections2) {
-                        const p2 = { ...pos }
-                        switch (dir) {
-                            case 0:
-                                p2.y += 1
-                                break
-                            case 2:
-                                p2.x -= 1
-                                break
-                            case 4:
-                                p2.y -= 1
-                                break
-                            case 6:
-                                p2.x += 1
-                        }
-                        if (
-                            p2.x === Math.floor(ent.position.x + connection2.x) &&
-                            p2.y === Math.floor(ent.position.y + connection2.y)
-                        ) {
-                            return false
-                        }
-                    }
-                }
+        const needsCover = (): boolean => {
+            if (
+                e.name === 'chemical_plant' &&
+                data.chemicalPlantDontConnectOutput &&
+                data.dir === (dir + 4) % 8
+            ) {
                 return true
             }
 
-            if (!data.positionGrid || needsCover()) {
-                let temp = getPipeCovers(e)[util.intToDir(dir)].layers[0]
-                temp = addToShift(connection, util.duplicate(temp))
-                if (dir === 4) {
-                    output.push(temp)
-                } else {
-                    output.unshift(temp)
+            const pos = {
+                x: Math.floor(data.position.x + connection.x),
+                y: Math.floor(data.position.y + connection.y),
+            }
+
+            const ent = data.positionGrid.getEntityAtPosition(pos.x, pos.y)
+            if (!ent) return true
+
+            if (
+                ent.name === 'chemical_plant' &&
+                ent.chemicalPlantDontConnectOutput &&
+                ent.direction === dir
+            ) {
+                return true
+            }
+
+            if (
+                ent.name === 'pipe' ||
+                ent.name === 'infinity_pipe' ||
+                ent.name === 'pipe_to_ground' ||
+                ent.entityData.fluid_box ||
+                ent.entityData.output_fluid_box ||
+                ent.entityData.fluid_boxes
+            ) {
+                const connections2 = getPipeConnectionPoints(
+                    ent.entityData,
+                    ent.direction,
+                    ent.assemblerPipeDirection
+                )
+                for (const connection2 of connections2) {
+                    const p2 = { ...pos }
+                    switch (dir) {
+                        case 0:
+                            p2.y += 1
+                            break
+                        case 2:
+                            p2.x -= 1
+                            break
+                        case 4:
+                            p2.y -= 1
+                            break
+                        case 6:
+                            p2.x += 1
+                    }
+                    if (
+                        p2.x === Math.floor(ent.position.x + connection2.x) &&
+                        p2.y === Math.floor(ent.position.y + connection2.y)
+                    ) {
+                        return false
+                    }
                 }
+            }
+            return true
+        }
+
+        if (!data.positionGrid || needsCover()) {
+            let temp = getPipeCovers(e)[util.intToDir(dir)].layers[0]
+            temp = addToShift(connection, util.duplicate(temp))
+            if (dir === 4) {
+                output.push(temp)
+            } else {
+                output.unshift(temp)
             }
         }
     }
