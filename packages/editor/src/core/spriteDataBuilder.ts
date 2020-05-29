@@ -1763,4 +1763,4 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
     }
 }
 
-export { getSpriteData, getBeltWireConnectionIndex }
+export { ISpriteData, getSpriteData, getBeltWireConnectionIndex }
