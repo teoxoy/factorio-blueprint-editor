@@ -1,6 +1,6 @@
-import FD from 'factorio-data'
 import EventEmitter from 'eventemitter3'
 import * as PIXI from 'pixi.js'
+import FD from '@fbe/factorio-data'
 import G from '../common/globals'
 import util from '../common/util'
 import { Entity } from './Entity'

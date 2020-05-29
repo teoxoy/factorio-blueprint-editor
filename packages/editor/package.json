@@ -11,10 +11,10 @@
     "bugs": "https://github.com/Teoxoy/factorio-blueprint-editor/issues",
     "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
     "dependencies": {
+        "@fbe/factorio-data": "*",
         "ajv": "^6.12.2",
         "delaunator": "^4.0.1",
         "eventemitter3": "^4.0.4",
-        "factorio-data": "4.0.4",
         "keyboardjs": "^2.5.1",
         "pako": "^1.0.11",
         "pathfinding": "^0.4.18",

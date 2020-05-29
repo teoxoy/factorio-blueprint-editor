@@ -1,4 +1,21 @@
-import FD from 'factorio-data'
+import FD, {
+    Entity as FD_Entity,
+    SpriteData,
+    DirectionalSpriteLayers,
+    PipeConnection,
+    Connections,
+    BeltAnimationSet,
+    DirectionalSpriteData,
+    SpriteLayers,
+    StorageTankPictures,
+    SpriteSheets,
+    RailSpriteLayers,
+    RailPictures,
+    WallPictures,
+    PipePictures,
+    UndergroundBeltStructure,
+    CircuitConnectorSprites,
+} from '@fbe/factorio-data'
 import util from '../common/util'
 import { PositionGrid } from './PositionGrid'
 import { Entity } from './Entity'
@@ -77,7 +94,7 @@ for (const e in FD.entities) {
     if (util.objectHasOwnProperty(FD.entities, e)) {
         const entity = FD.entities[e]
 
-        const generator = (data: IDrawData): FD.SpriteData[] => {
+        const generator = (data: IDrawData): SpriteData[] => {
             const spriteData = [
                 ...generateGraphics(entity)(data),
                 ...generateCovers(entity, data),
@@ -102,7 +119,7 @@ for (const e in FD.entities) {
     }
 }
 
-function getPipeCovers(e: FD.Entity): FD.DirectionalSpriteLayers {
+function getPipeCovers(e: FD_Entity): DirectionalSpriteLayers {
     if (e.fluid_box && e.output_fluid_box) return e.fluid_box.pipe_covers
     if (e.fluid_box) return e.fluid_box.pipe_covers
     if (e.output_fluid_box) return e.output_fluid_box.pipe_covers
@@ -113,8 +130,8 @@ function getPipeCovers(e: FD.Entity): FD.DirectionalSpriteLayers {
     }
 }
 
-function generateConnection(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
-    const hasWireConnectionFeature = (e: FD.Entity): boolean => {
+function generateConnection(e: FD_Entity, data: IDrawData): SpriteData[] {
+    const hasWireConnectionFeature = (e: FD_Entity): boolean => {
         if (e.type === 'transport_belt') return false
         if (
             e.connection_points ||
@@ -137,7 +154,7 @@ function generateConnection(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
     return []
 }
 // UTIL FUNCTIONS
-function addToShift(shift: IPoint | number[], tab: FD.SpriteData): FD.SpriteData {
+function addToShift(shift: IPoint | number[], tab: SpriteData): SpriteData {
     const SHIFT: number[] = Array.isArray(shift) ? shift : [shift.x, shift.y]
 
     tab.shift = tab.shift ? [SHIFT[0] + tab.shift[0], SHIFT[1] + tab.shift[1]] : SHIFT
@@ -149,7 +166,7 @@ function addToShift(shift: IPoint | number[], tab: FD.SpriteData): FD.SpriteData
     return tab
 }
 
-function setProperty(img: FD.SpriteData, key: string, val: any): FD.SpriteData {
+function setProperty(img: SpriteData, key: string, val: any): SpriteData {
     // @ts-ignore
     img[key] = val
     if (img.hr_version) {
@@ -159,7 +176,7 @@ function setProperty(img: FD.SpriteData, key: string, val: any): FD.SpriteData {
     return img
 }
 
-function setPropertyUsing(img: FD.SpriteData, key: string, key2: string, mult = 1): FD.SpriteData {
+function setPropertyUsing(img: SpriteData, key: string, key2: string, mult = 1): SpriteData {
     if (key2) {
         // @ts-ignore
         img[key] = img[key2] * mult
@@ -172,15 +189,15 @@ function setPropertyUsing(img: FD.SpriteData, key: string, key2: string, mult = 
 }
 
 function duplicateAndSetPropertyUsing(
-    img: FD.SpriteData,
+    img: SpriteData,
     key: string,
     key2: string,
     mult: number
-): FD.SpriteData {
+): SpriteData {
     return setPropertyUsing(util.duplicate(img), key, key2, mult)
 }
 
-function generateCovers(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
+function generateCovers(e: FD_Entity, data: IDrawData): SpriteData[] {
     // entity doesn't have PipeCoverFeature
     if (!(e.fluid_box || e.fluid_boxes || e.output_fluid_box)) return []
 
@@ -277,11 +294,11 @@ function generateCovers(e: FD.Entity, data: IDrawData): FD.SpriteData[] {
 }
 
 function getPipeConnectionPoints(
-    e: FD.Entity,
+    e: FD_Entity,
     dir: number,
     assemblerPipeDirection: string
 ): IPoint[] {
-    function getConn(): FD.PipeConnection[] {
+    function getConn(): PipeConnection[] {
         if (e.fluid_box && e.output_fluid_box) {
             return [...e.fluid_box.pipe_connections, ...e.output_fluid_box.pipe_connections]
         }
@@ -324,7 +341,7 @@ function getPipeConnectionPoints(
     return positions
 }
 
-function getHeatConectionPoints(e: FD.Entity): FD.Connections[] {
+function getHeatConectionPoints(e: FD_Entity): Connections[] {
     // nuclear reactor
     if (e.heat_buffer) return e.heat_buffer.connections
     // heat exchanger
@@ -402,14 +419,14 @@ function getBeltWireConnectionIndex(
 }
 
 function getBeltSprites(
-    bas: FD.BeltAnimationSet,
+    bas: BeltAnimationSet,
     position: IPoint,
     direction: number,
     positionGrid?: PositionGrid,
     stratingEnding = true,
     endingEnding = true,
     forceStraight = false
-): FD.SpriteData[] {
+): SpriteData[] {
     const parts = []
 
     if (positionGrid) {
@@ -569,10 +586,10 @@ function getBeltSprites(
     }
 
     function getBeltSpriteFromData(
-        bas: FD.BeltAnimationSet,
+        bas: BeltAnimationSet,
         dir: number,
         type: 'straight' | 'rightCurve' | 'leftCurve' | 'stratingEnding' | 'endingEnding'
-    ): FD.SpriteData {
+    ): SpriteData {
         return duplicateAndSetPropertyUsing(bas.animation_set, 'y', 'height', getIndex() - 1)
 
         function getIndex(): number {
@@ -641,11 +658,11 @@ function getBeltSprites(
     }
 }
 
-function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
+function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
     if (e.name.search('combinator') !== -1) {
         return (data: IDrawData) => {
             if (e.name === 'decider_combinator' || e.name === 'arithmetic_combinator') {
-                const operatorToSpriteData = (operator: string): FD.DirectionalSpriteData => {
+                const operatorToSpriteData = (operator: string): DirectionalSpriteData => {
                     switch (operator) {
                         case '<':
                             return e.less_symbol_sprites
@@ -706,7 +723,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 const pipeDirection =
                     data.assemblerPipeDirection === 'input' ? data.dir : (data.dir + 4) % 8
                 const out = [
-                    (e.animation as FD.SpriteLayers).layers[0],
+                    (e.animation as SpriteLayers).layers[0],
                     addToShift(
                         getPipeConnectionPoints(e, data.dir, data.assemblerPipeDirection)[0],
                         util.duplicate(e.fluid_boxes[0].pipe_picture[util.intToDir(pipeDirection)])
@@ -715,7 +732,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 if (pipeDirection === 0) return [out[1], out[0]]
                 return out
             }
-            return [(e.animation as FD.SpriteLayers).layers[0]]
+            return [(e.animation as SpriteLayers).layers[0]]
         }
     }
 
@@ -723,11 +740,11 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
         case 'accumulator':
         case 'electric_energy_interface':
         case 'infinity_chest':
-            return () => [(e.picture as FD.SpriteLayers).layers[0]]
+            return () => [(e.picture as SpriteLayers).layers[0]]
         case 'solar_panel':
-            return () => [(e.picture as FD.SpriteLayers).layers[0]]
+            return () => [(e.picture as SpriteLayers).layers[0]]
         case 'radar':
-            return () => [(e.pictures as FD.SpriteLayers).layers[0]]
+            return () => [(e.pictures as SpriteLayers).layers[0]]
         case 'small_lamp':
             return () => [e.picture_off.layers[0]]
         case 'land_mine':
@@ -737,40 +754,40 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
         case 'power_switch':
             return () => [e.power_on_animation]
         case 'beacon':
-            return () => [e.base_picture as FD.SpriteData, e.animation as FD.SpriteData]
+            return () => [e.base_picture as SpriteData, e.animation as SpriteData]
         case 'lab':
             return () => [e.off_animation.layers[0]]
         case 'heat_interface':
-            return () => [e.picture as FD.SpriteData]
+            return () => [e.picture as SpriteData]
 
         case 'offshore_pump':
             return (data: IDrawData) => [
-                (e.picture as FD.DirectionalSpriteData)[util.intToDir(data.dir)],
+                (e.picture as DirectionalSpriteData)[util.intToDir(data.dir)],
             ]
         case 'pipe_to_ground':
             return (data: IDrawData) => [
-                (e.pictures as FD.DirectionalSpriteData)[util.intToDir(data.dir)],
+                (e.pictures as DirectionalSpriteData)[util.intToDir(data.dir)],
             ]
         case 'burner_mining_drill':
             return (data: IDrawData) => [
-                (e.animations as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
+                (e.animations as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
             ]
 
         case 'pumpjack':
             return (data: IDrawData) => [
                 duplicateAndSetPropertyUsing(
-                    (e.base_picture as FD.SpriteSheets).sheets[0],
+                    (e.base_picture as SpriteSheets).sheets[0],
                     'x',
                     'width',
                     data.dir / 2
                 ),
-                (e.animations as FD.DirectionalSpriteLayers).north.layers[0],
+                (e.animations as DirectionalSpriteLayers).north.layers[0],
             ]
         case 'storage_tank':
             return (data: IDrawData) => [
-                (e.pictures as FD.StorageTankPictures).window_background,
+                (e.pictures as StorageTankPictures).window_background,
                 setPropertyUsing(
-                    util.duplicate((e.pictures as FD.StorageTankPictures).picture.sheets[0]),
+                    util.duplicate((e.pictures as StorageTankPictures).picture.sheets[0]),
                     'x',
                     data.dir === 2 ? 'width' : undefined
                 ),
@@ -802,11 +819,11 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
         case 'electric_mining_drill':
         case 'pump':
             return (data: IDrawData) => [
-                (e.animations as FD.DirectionalSpriteData)[util.intToDir(data.dir)],
+                (e.animations as DirectionalSpriteData)[util.intToDir(data.dir)],
             ]
         case 'boiler':
             return (data: IDrawData) => [
-                (e.structure as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
+                (e.structure as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
             ]
         case 'heat_exchanger':
             return (data: IDrawData) => {
@@ -831,18 +848,15 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                                 e.energy_source.pipe_covers[util.intToDir((data.dir + 4) % 8)]
                             )
                         ),
-                        (e.structure as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)]
-                            .layers[0],
+                        (e.structure as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
                     ]
                 }
-                return [
-                    (e.structure as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-                ]
+                return [(e.structure as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0]]
             }
         case 'oil_refinery':
         case 'chemical_plant':
             return (data: IDrawData) => [
-                (e.animation as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
+                (e.animation as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
             ]
         case 'steam_engine':
         case 'steam_turbine':
@@ -851,16 +865,16 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             ]
         case 'gun_turret':
             return (data: IDrawData) => [
-                (e.base_picture as FD.SpriteLayers).layers[0],
-                (e.base_picture as FD.SpriteLayers).layers[1],
+                (e.base_picture as SpriteLayers).layers[0],
+                (e.base_picture as SpriteLayers).layers[1],
                 duplicateAndSetPropertyUsing(
-                    (e.folded_animation as FD.SpriteLayers).layers[0],
+                    (e.folded_animation as SpriteLayers).layers[0],
                     'y',
                     'height',
                     data.dir / 2
                 ),
                 duplicateAndSetPropertyUsing(
-                    (e.folded_animation as FD.SpriteLayers).layers[1],
+                    (e.folded_animation as SpriteLayers).layers[1],
                     'y',
                     'height',
                     data.dir / 2
@@ -868,15 +882,15 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             ]
         case 'laser_turret':
             return (data: IDrawData) => [
-                (e.base_picture as FD.SpriteLayers).layers[0],
+                (e.base_picture as SpriteLayers).layers[0],
                 duplicateAndSetPropertyUsing(
-                    (e.folded_animation as FD.SpriteLayers).layers[0],
+                    (e.folded_animation as SpriteLayers).layers[0],
                     'y',
                     'height',
                     data.dir / 2
                 ),
                 duplicateAndSetPropertyUsing(
-                    (e.folded_animation as FD.SpriteLayers).layers[2],
+                    (e.folded_animation as SpriteLayers).layers[2],
                     'y',
                     'height',
                     data.dir / 2
@@ -890,7 +904,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 ta = setProperty(ta, 'color', data.trainStopColor ? data.trainStopColor : e.color)
                 return [
                     e.rail_overlay_animations[util.intToDir(dir)],
-                    (e.animations as FD.DirectionalSpriteLayers)[util.intToDir(dir)].layers[0],
+                    (e.animations as DirectionalSpriteLayers)[util.intToDir(dir)].layers[0],
                     e.top_animations[util.intToDir(dir)].layers[0],
                     ta,
                     e.light1.picture[util.intToDir(dir)],
@@ -899,12 +913,10 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             }
         case 'flamethrower_turret':
             return (data: IDrawData) => [
-                (e.base_picture as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-                (e.base_picture as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[1],
-                (e.folded_animation as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)]
-                    .layers[0],
-                (e.folded_animation as FD.DirectionalSpriteLayers)[util.intToDir(data.dir)]
-                    .layers[1],
+                (e.base_picture as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
+                (e.base_picture as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[1],
+                (e.folded_animation as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
+                (e.folded_animation as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[1],
             ]
         case 'artillery_turret':
             return (data: IDrawData) => {
@@ -934,15 +946,15 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                             return [1, 0.31]
                     }
                 }
-                return [(e.base_picture as FD.SpriteLayers).layers[0], barrel, base]
+                return [(e.base_picture as SpriteLayers).layers[0], barrel, base]
             }
         case 'straight_rail':
         case 'curved_rail':
             return (data: IDrawData) => {
                 const dir = data.dir
-                function getBaseSprites(): FD.SpriteData[] {
-                    function getRailSpriteForDir(): FD.RailSpriteLayers {
-                        const pictures = e.pictures as FD.RailPictures
+                function getBaseSprites(): SpriteData[] {
+                    function getRailSpriteForDir(): RailSpriteLayers {
+                        const pictures = e.pictures as RailPictures
                         if (e.name === 'straight_rail') {
                             switch (dir) {
                                 case 0:
@@ -1036,12 +1048,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             return (data: IDrawData) => {
                 const dir = data.dir
                 let rp = duplicateAndSetPropertyUsing(e.rail_piece, 'x', 'width', dir)
-                let a = duplicateAndSetPropertyUsing(
-                    e.animation as FD.SpriteData,
-                    'y',
-                    'height',
-                    dir
-                )
+                let a = duplicateAndSetPropertyUsing(e.animation as SpriteData, 'y', 'height', dir)
                 if (e.name === 'rail_chain_signal') {
                     const getRightShift = (): number[] => {
                         switch (dir) {
@@ -1091,11 +1098,11 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     patchSheet = addToShift(conn[i].position, patchSheet)
                     patches.push(patchSheet)
                 }
-                return [...patches, e.lower_layer_picture, (e.picture as FD.SpriteLayers).layers[0]]
+                return [...patches, e.lower_layer_picture, (e.picture as SpriteLayers).layers[0]]
             }
         case 'stone_wall':
             return (data: IDrawData) => {
-                const pictures = e.pictures as FD.WallPictures
+                const pictures = e.pictures as WallPictures
 
                 if (data.positionGrid) {
                     const sprites = []
@@ -1203,7 +1210,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
             }
         case 'gate':
             return (data: IDrawData) => {
-                function getBaseSprites(): FD.SpriteData[] {
+                function getBaseSprites(): SpriteData[] {
                     if (data.positionGrid) {
                         const size = util.switchSizeBasedOnDirection(e.size, data.dir)
                         const rail = data.positionGrid.findInArea(
@@ -1249,7 +1256,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
         case 'pipe':
         case 'infinity_pipe':
             return (data: IDrawData) => {
-                const pictures = e.pictures as FD.PipePictures
+                const pictures = e.pictures as PipePictures
                 if (data.positionGrid) {
                     const conn = data.positionGrid
                         .getNeighbourData(data.position)
@@ -1369,14 +1376,14 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
     switch (e.type) {
         case 'furnace':
         case 'logistic_container':
-            return () => [(e.animation as FD.SpriteLayers).layers[0]]
+            return () => [(e.animation as SpriteLayers).layers[0]]
         case 'container':
-            return () => [(e.picture as FD.SpriteLayers).layers[0]]
+            return () => [(e.picture as SpriteLayers).layers[0]]
 
         case 'electric_pole':
             return (data: IDrawData) => [
                 duplicateAndSetPropertyUsing(
-                    (e.pictures as FD.SpriteLayers).layers[0],
+                    (e.pictures as SpriteLayers).layers[0],
                     'x',
                     'width',
                     data.dir / 2
@@ -1421,7 +1428,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                 return [
                     ...belt0Parts,
                     ...belt1Parts,
-                    (e.structure as FD.DirectionalSpriteData)[util.intToDir(data.dir)],
+                    (e.structure as DirectionalSpriteData)[util.intToDir(data.dir)],
                 ]
             }
         case 'underground_belt':
@@ -1481,7 +1488,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     sideloadingFront = C[2] !== undefined
                 }
 
-                const structure = e.structure as FD.UndergroundBeltStructure
+                const structure = e.structure as UndergroundBeltStructure
                 const sprites = []
 
                 if (!sideloadingBack) {
@@ -1732,7 +1739,7 @@ function generateGraphics(e: FD.Entity): (data: IDrawData) => FD.SpriteData[] {
                     mainBelt = setProperty(mainBelt, 'anchorY', 0.5)
                 }
 
-                const structure = e.structure as FD.UndergroundBeltStructure
+                const structure = e.structure as UndergroundBeltStructure
                 const sprites = []
 
                 sprites.push(mainBelt)

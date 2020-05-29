@@ -8,8 +8,8 @@
     },
     "dependencies": {
         "@fbe/editor": "*",
+        "@fbe/factorio-data": "*",
         "dat.gui": "^0.7.7",
-        "factorio-data": "^4.0.4",
         "file-saver": "^2.0.2",
         "pixi.js": "^5.2.4"
     },

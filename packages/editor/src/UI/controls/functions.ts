@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import FD from 'factorio-data'
+import FD, { IngredientOrResult, ColorWithAlpha } from '@fbe/factorio-data'
 import { styles } from '../style'
 
 /**
@@ -215,8 +215,8 @@ function CreateRecipe(
     host: PIXI.Container,
     x: number,
     y: number,
-    ingredients: FD.IngredientOrResult[],
-    results: FD.IngredientOrResult[],
+    ingredients: IngredientOrResult[],
+    results: IngredientOrResult[],
     time: number
 ): void {
     let nextX = x
@@ -240,7 +240,7 @@ function CreateRecipe(
     }
 }
 
-function applyTint(s: PIXI.Sprite, tint: FD.ColorWithAlpha): void {
+function applyTint(s: PIXI.Sprite, tint: ColorWithAlpha): void {
     s.tint = PIXI.utils.rgb2hex([tint.r || 0, tint.g || 0, tint.b || 0])
     s.alpha = tint.a || 1
 }

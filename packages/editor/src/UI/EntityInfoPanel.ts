@@ -1,10 +1,10 @@
-import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
+import FD from '@fbe/factorio-data'
 import G from '../common/globals'
-import { Entity } from '../core/Entity'
 import util from '../common/util'
-import { Panel } from './controls/Panel'
+import { Entity } from '../core/Entity'
 import F from './controls/functions'
+import { Panel } from './controls/Panel'
 import { styles } from './style'
 
 function template(strings: TemplateStringsArray, ...keys: (number | string)[]) {
@@ -100,7 +100,7 @@ export class EntityInfoPanel extends Panel {
         this.visible = true
         let nextY = this.title.position.y + this.title.height + 10
 
-        this.m_EntityName.text = `Name: ${FD.entities[entity.name].ui_name}`
+        this.m_EntityName.text = `Name: ${FD.entities[entity.name].localised_name}`
         this.m_EntityName.position.set(10, nextY)
         nextY = this.m_EntityName.position.y + this.m_EntityName.height + 10
 

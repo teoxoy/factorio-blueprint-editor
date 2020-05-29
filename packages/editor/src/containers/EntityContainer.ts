@@ -1,10 +1,9 @@
-import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
+import FD, { CursorBoxType } from '@fbe/factorio-data'
 import G from '../common/globals'
 import { Entity } from '../core/Entity'
 import { EntitySprite } from './EntitySprite'
 import { VisualizationArea } from './VisualizationArea'
-import { CursorBoxType } from './OverlayContainer'
 
 export class EntityContainer {
     public static readonly mappings: Map<number, EntityContainer> = new Map()

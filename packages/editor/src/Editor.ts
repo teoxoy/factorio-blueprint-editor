@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js'
+import FD from '@fbe/factorio-data'
 import G from './common/globals'
 import { Entity } from './core/Entity'
 import { Blueprint, oilOutpostSettings, IOilOutpostSettings } from './core/Blueprint'
@@ -11,6 +12,10 @@ import { spritesheetsLoader } from './spritesheetsLoader'
 
 export class Editor {
     public async init(canvas: HTMLCanvasElement): Promise<void[]> {
+        await fetch('./api/bundle')
+            .then(res => res.json())
+            .then(modules => FD.loadData(modules))
+
         PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
         PIXI.settings.ROUND_PIXELS = true
         PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR

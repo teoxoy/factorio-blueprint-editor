@@ -1,5 +1,5 @@
-import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
+import FD, { FluidBox, CursorBoxType } from '@fbe/factorio-data'
 import F from '../UI/controls/functions'
 import util from '../common/util'
 import { isActionActive } from '../actions'
@@ -7,14 +7,6 @@ import { Entity } from '../core/Entity'
 import { EditorMode, BlueprintContainer } from './BlueprintContainer'
 import { EntityContainer } from './EntityContainer'
 
-type CursorBoxType =
-    | 'regular'
-    | 'not_allowed'
-    | 'logistics'
-    | 'electricity'
-    | 'pair'
-    | 'copy'
-    | 'train_visualization'
 const cursorBoxTypeToOffset = (type: CursorBoxType): number => {
     switch (type) {
         case 'regular':
@@ -34,7 +26,7 @@ const cursorBoxTypeToOffset = (type: CursorBoxType): number => {
     }
 }
 
-class OverlayContainer extends PIXI.Container {
+export class OverlayContainer extends PIXI.Container {
     private readonly entityInfos = new PIXI.Container()
     private readonly cursorBoxes = new PIXI.Container()
     private readonly undergroundLines = new PIXI.Container()
@@ -218,7 +210,7 @@ class OverlayContainer extends PIXI.Container {
 
         if (entity.type === 'boiler' || entity.type === 'generator') {
             const filteredFluidInputs = new PIXI.Container()
-            const generateIconsForFluidBox = (fluidBox: FD.FluidBox): void => {
+            const generateIconsForFluidBox = (fluidBox: FluidBox): void => {
                 for (const c of fluidBox.pipe_connections) {
                     const position = util.transformConnectionPosition(
                         { x: c.position[0], y: c.position[1] },
@@ -658,5 +650,3 @@ class OverlayContainer extends PIXI.Container {
         this.bpc.gridData.off('update', this.selectionAreaUpdateFn)
     }
 }
-
-export { CursorBoxType, OverlayContainer }

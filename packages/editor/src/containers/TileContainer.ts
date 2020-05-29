@@ -1,5 +1,5 @@
-import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
+import FD from '@fbe/factorio-data'
 import G from '../common/globals'
 import { Tile } from '../core/Tile'
 import { EntitySprite } from './EntitySprite'

@@ -1,5 +1,5 @@
-import FD from 'factorio-data'
 import { GUI } from 'dat.gui'
+import { getModulesFor } from '@fbe/factorio-data'
 import EDITOR, { Blueprint, Book, GridPattern, Editor } from '@fbe/editor'
 
 GUI.TEXT_CLOSED = 'Close Settings'
@@ -114,6 +114,16 @@ export function initSettingsPane(
         },
     })
 
+    function getModulesObjFor(entityName: string): Record<string, string> {
+        return getModulesFor(entityName).reduce<Record<string, string>>(
+            (obj, item) => {
+                obj[item.localised_name] = item.name
+                return obj
+            },
+            { None: 'none' }
+        )
+    }
+
     const oilOutpostFolder = gui.addFolder('Oil Outpost Generator Settings')
     oilOutpostFolder.add(oilOutpostSettings, 'DEBUG').name('Debug')
     oilOutpostFolder
@@ -132,28 +142,6 @@ export function initSettingsPane(
     oilOutpostFolder
         .add({ generate: () => EDITOR.callAction('generateOilOutpost') }, 'generate')
         .name('Generate')
-    function getModulesObjFor(entityName: string): Record<string, string> {
-        return (
-            Object.keys(FD.items)
-                .map(k => FD.items[k])
-                .filter(item => item.type === 'module')
-                // filter modules based on entity allowed_effects (ex: beacons don't accept productivity effect)
-                .filter(
-                    item =>
-                        !FD.entities[entityName].allowed_effects ||
-                        Object.keys(item.effect).every(effect =>
-                            FD.entities[entityName].allowed_effects.includes(effect)
-                        )
-                )
-                .reduce(
-                    (obj, item) => {
-                        obj[item.ui_name] = item.name
-                        return obj
-                    },
-                    { None: 'none' } as Record<string, string>
-                )
-        )
-    }
 
     // Keybinds folder
     const keybindsFolder = gui.addFolder('Keybinds')

@@ -1,4 +1,4 @@
-import G from '../common/globals'
+import FD from '@fbe/factorio-data'
 import { Tile } from '../core/Tile'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
@@ -60,10 +60,9 @@ export class PaintTileContainer extends PaintContainer {
     }
 
     public rotate(): void {
-        if (this.name.includes('hazard')) {
-            this.name = this.name.includes('left')
-                ? this.name.replace('left', 'right')
-                : this.name.replace('right', 'left')
+        const nD = FD.tiles[this.name].next_direction
+        if (nD) {
+            this.name = nD
             this.redraw()
         }
     }

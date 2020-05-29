@@ -1,8 +1,8 @@
-import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
+import FD from '@fbe/factorio-data'
 import G from '../../../common/globals'
-import { Slot } from '../../controls/Slot'
 import F from '../../controls/functions'
+import { Slot } from '../../controls/Slot'
 import { Entity, IFilter } from '../../../core/Entity'
 
 /** Module Slots for Entity */

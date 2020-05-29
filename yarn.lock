@@ -1221,11 +1221,6 @@ external-editor@^3.0.3:
     iconv-lite "^0.4.24"
     tmp "^0.0.33"
 
-factorio-data@4.0.4:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/factorio-data/-/factorio-data-4.0.4.tgz#d52610be593d59851c1eec3423abee05eb686592"
-  integrity sha512-e5w5AzXIi3VNALhgEWNvjMjxchwZcjFNMt1TqVtedeml+ji2ru3y+iYm6t6px4Q0GR/GrT3+UESOU4OrKjNWTw==
-
 fast-deep-equal@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz#7b05218ddf9667bf7f370bf7fdb2cb15fdd0aa49"

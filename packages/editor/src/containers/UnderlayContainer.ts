@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import FD from 'factorio-data'
+import FD from '@fbe/factorio-data'
 import { VisualizationArea } from './VisualizationArea'
 
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'

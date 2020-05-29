@@ -64,7 +64,7 @@
             "properties": {
                 "name": {
                     "type": "string",
-                    "itemName": true
+                    "itemFluidSignalName": true
                 },
                 "type": {
                     "type": "string",
@@ -238,7 +238,7 @@
                             "items": {
                                 "type": "object",
                                 "objectWithItemNames": true,
-                                "$comment": "object, keys are item names and value nr of items, only present if entity is locomotive or has module_specification, for the locomotive it represents fuel and for an eintity with module_specification it represents modules"
+                                "$comment": "object, keys are item names and value nr of items, only present if entity is locomotive or has module_specification, for the locomotive it represents fuel and for an entity with module_specification it represents modules"
                             },
 
                             "input_priority": {
@@ -382,7 +382,7 @@
                                 "$comment": "only present if entity is infinity_chest or infinity_pipe",
                                 "additionalProperties": false,
                                 "properties": {
-                                    "name": { "type": "string", "itemName": true },
+                                    "name": { "type": "string", "fluidName": true },
                                     "mode": {
                                         "type": "string",
                                         "enum": ["at_least", "at_most", "exactly"]

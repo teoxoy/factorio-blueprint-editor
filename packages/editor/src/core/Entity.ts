@@ -1,5 +1,5 @@
-import FD from 'factorio-data'
 import EventEmitter from 'eventemitter3'
+import FD, { Entity as FD_Entity, getModulesFor } from '@fbe/factorio-data'
 import util from '../common/util'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
@@ -64,8 +64,8 @@ export class Entity extends EventEmitter {
         return FD.entities[this.name].type
     }
 
-    /** Direct access to entity meta data from factorio-data */
-    public get entityData(): FD.Entity {
+    /** Direct access to entity meta data from core */
+    public get entityData(): FD_Entity {
         return FD.entities[this.name]
     }
 
@@ -196,21 +196,11 @@ export class Entity extends EventEmitter {
         if (this.entityData.module_specification === undefined) return []
 
         return (
-            Object.keys(FD.items)
-                .map(k => FD.items[k])
-                .filter(item => item.type === 'module')
+            getModulesFor(this.name)
                 // filter modules based on module limitation
                 .filter(
                     item =>
                         !this.recipe || !(item.limitation && !item.limitation.includes(this.recipe))
-                )
-                // filter modules based on entity allowed_effects (ex: beacons don't accept productivity effect)
-                .filter(
-                    item =>
-                        !this.entityData.allowed_effects ||
-                        Object.keys(item.effect).every(effect =>
-                            this.entityData.allowed_effects.includes(effect)
-                        )
                 )
                 .map(item => item.name)
         )
@@ -222,7 +212,6 @@ export class Entity extends EventEmitter {
 
         return Object.keys(FD.items)
             .map(k => FD.items[k])
-            .filter(item => !['fluid', 'recipe', 'virtual_signal'].includes(item.type))
             .map(item => item.name)
     }
 

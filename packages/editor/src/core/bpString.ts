@@ -1,6 +1,6 @@
 import Ajv, { KeywordDefinition } from 'ajv'
-import FD from 'factorio-data'
 import pako from 'pako'
+import FD from '@fbe/factorio-data'
 import blueprintSchema from './blueprintSchema.json'
 import { Blueprint } from './Blueprint'
 import { Book } from './Book'
@@ -37,13 +37,23 @@ const keywords: Record<string, KeywordDefinition> = {
         errors: false,
         schema: false,
     },
+    fluidName: {
+        validate: (data: string) => !!FD.fluids[data],
+        errors: false,
+        schema: false,
+    },
     recipeName: {
         validate: (data: string) => !!FD.recipes[data],
         errors: false,
         schema: false,
     },
     tileName: {
-        validate: (data: string) => !!FD.tiles[data] || data === 'landfill',
+        validate: (data: string) => !!FD.tiles[data],
+        errors: false,
+        schema: false,
+    },
+    itemFluidSignalName: {
+        validate: (data: string) => !!FD.items[data] || !!FD.fluids[data] || !!FD.signals[data],
         errors: false,
         schema: false,
     },

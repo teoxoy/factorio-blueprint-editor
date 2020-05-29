@@ -1,5 +1,5 @@
-import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
+import FD from '@fbe/factorio-data'
 import G from '../common/globals'
 import F from './controls/functions'
 import { Dialog } from './controls/Dialog'
@@ -78,36 +78,15 @@ export class InventoryDialog extends Dialog {
                 let subgroupHasItems = false
 
                 for (const item of subgroup.items) {
-                    const itemData = FD.items[item.name]
                     if (itemsFilter === undefined) {
-                        const resultPlaceable = itemData.place_result !== undefined
-                        const entityFindable = resultPlaceable
-                            ? FD.entities[itemData.place_result] !== undefined
-                            : false
-                        if (!entityFindable) {
-                            const tilePlaceable =
-                                itemData.place_as_tile !== undefined &&
-                                itemData.place_as_tile.result !== undefined
-                            const tileFindable = tilePlaceable
-                                ? FD.tiles[itemData.place_as_tile.result] !== undefined ||
-                                  itemData.place_as_tile.result === 'landfill'
-                                : false
-                            if (!tileFindable) {
-                                continue
-                            }
-                        }
+                        const itemData = FD.items[item.name]
+                        if (!itemData) continue
+                        if (!itemData.place_result && !itemData.place_as_tile) continue
+                        // needed for robots/trains/cars
+                        if (itemData.place_result && !FD.entities[itemData.place_result]) continue
                     } else {
-                        if (!itemsFilter.includes(item.name)) {
-                            continue
-                        }
+                        if (!itemsFilter.includes(item.name)) continue
                     }
-
-                    // const tileResult = itemData.place_as_tile !== undefined && itemData.place_as_tile.result !== undefined
-                    // const placeResult = itemData.place_result !== undefined || tileResult
-
-                    // if ((itemsFilter === undefined && placeResult && (itemData.place_result !== undefined ||
-                    //        itemData.place_as_tile !== undefined)) ||
-                    //    (itemsFilter !== undefined && itemsFilter.includes(item.name))) {
 
                     if (itemColIndex === 10) {
                         itemColIndex = 0
@@ -223,16 +202,16 @@ export class InventoryDialog extends Dialog {
         // Update Recipe Container
         this.m_RecipeContainer.removeChildren()
 
-        const recipe = FD.recipes[recipeName]
-        if (recipe === undefined) {
-            // Creative entities don't have a recipe so we have to do it this way
-            if (recipeName) {
-                this.m_RecipeLabel.text = `[CREATIVE] - ${FD.items[recipeName].ui_name}`
-            }
-            return
+        if (recipeName === undefined) return
+
+        const item = FD.items[recipeName]
+        if (item && item.subgroup === 'creative') {
+            this.m_RecipeLabel.text = `[CREATIVE] - ${item.localised_name}`
         }
 
-        this.m_RecipeLabel.text = recipe.ui_name
+        const recipe = FD.recipes[recipeName]
+        if (recipe === undefined) return
+        this.m_RecipeLabel.text = recipe.localised_name
 
         F.CreateRecipe(
             this.m_RecipeContainer,
