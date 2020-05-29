@@ -38,6 +38,28 @@ export enum EditorMode {
 }
 
 export class BlueprintContainer extends PIXI.Container {
+    /** Nr of cunks needs to be odd because the chunk grid is offset */
+    private readonly chunks = 32 - 1
+    /** Chunk offset - from 0,0 - Measured in tiles */
+    private readonly chunkOffset = 16
+    private readonly size: IPoint = {
+        x: this.chunks * 32 * 32,
+        y: this.chunks * 32 * 32,
+    }
+    private readonly anchor: IPoint = {
+        x: 0.5,
+        y: 0.5,
+    }
+    private readonly viewport: Viewport = new Viewport(
+        this.size,
+        {
+            x: G.app.screen.width,
+            y: G.app.screen.height,
+        },
+        this.anchor,
+        3
+    )
+
     private _moveSpeed = 10
     private _gridColor = 0x303030
     private _gridPattern: GridPattern = 'grid'
@@ -50,17 +72,11 @@ export class BlueprintContainer extends PIXI.Container {
     private readonly entityPaintSlot: PIXI.Container
     private readonly tileSprites: OptimizedContainer
     private readonly entitySprites: OptimizedContainer
-    private readonly viewport: Viewport
     public hoverContainer: EntityContainer
     public paintContainer: PaintContainer
     private readonly bp: Blueprint
     public readonly gridData: GridData
     private _mode: EditorMode = EditorMode.NONE
-    private readonly size: IPoint
-    private readonly anchor: IPoint = {
-        x: 0.5,
-        y: 0.5,
-    }
     private _entityForCopyData: Entity
     private copyModeEntities: Entity[] = []
     private deleteModeEntities: Entity[] = []
@@ -72,16 +88,6 @@ export class BlueprintContainer extends PIXI.Container {
         this.bp = bp
         this.gridData = new GridData(this)
 
-        // Nr of cunks needs to be odd because the chunk grid is offset
-        const chunks = 32 - 1
-        // Chunk offset - Measured in tiles
-        const chunkOffset = 16
-
-        this.size = {
-            x: chunks * 32 * 32,
-            y: chunks * 32 * 32,
-        }
-
         this.interactive = true
         this.interactiveChildren = false
         this.hitArea = new PIXI.Rectangle(
@@ -91,18 +97,8 @@ export class BlueprintContainer extends PIXI.Container {
             this.size.y
         )
 
-        this.viewport = new Viewport(
-            this.size,
-            {
-                x: G.app.screen.width,
-                y: G.app.screen.height,
-            },
-            this.anchor,
-            3
-        )
-
         this.grid = this.generateGrid()
-        this.chunkGrid = this.generateChunkGrid(chunkOffset)
+        this.chunkGrid = this.generateChunkGrid(this.chunkOffset)
         this.tileSprites = new OptimizedContainer()
         this.tilePaintSlot = new PIXI.Container()
         this.underlayContainer = new UnderlayContainer()
