@@ -21,16 +21,31 @@ export class DebugContainer extends PIXI.Container {
         gridposGUIText.position.set(0, 32)
         this.addChild(gridposGUIText)
 
-        G.BPC.gridData.on('update32', (x: number, y: number) => {
-            gridposGUIText.text = `X ${x} Y ${y}`
-        })
-
         const modeText = new PIXI.Text('', styles.debug.text)
         modeText.position.set(0, 64)
         this.addChild(modeText)
 
-        G.BPC.on('mode', (mode: EditorMode) => {
+        const onUpdate32 = (x: number, y: number): void => {
+            gridposGUIText.text = `X ${x} Y ${y}`
+        }
+
+        const onModeChange = (mode: EditorMode): void => {
             modeText.text = EditorMode[mode]
-        })
+        }
+
+        // when the blueprint container changes, reattach the events on the new one
+        // for this to work the old container has to be destroyed after the new one has been created
+        let bpc = G.BPC
+        const attachBPCEvents = (): void => {
+            bpc.gridData.on('update32', onUpdate32)
+            bpc.on('mode', onModeChange)
+            bpc.on('destroy', () => {
+                bpc.gridData.off('update32', onUpdate32)
+                bpc.off('mode', onModeChange)
+                bpc = G.BPC
+                attachBPCEvents()
+            })
+        }
+        attachBPCEvents()
     }
 }
