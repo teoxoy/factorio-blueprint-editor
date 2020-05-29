@@ -52,10 +52,6 @@ class OverlayContainer extends PIXI.Container {
         })
     }
 
-    public toggleEntityInfoVisibility(): void {
-        this.entityInfos.visible = !this.entityInfos.visible
-    }
-
     public static createEntityInfo(entity: Entity, position: IPoint): PIXI.Container {
         const entityInfo = new PIXI.Container()
 
@@ -479,6 +475,10 @@ class OverlayContainer extends PIXI.Container {
             this.copyCursorBox.destroy()
             this.copyCursorBox = undefined
         }
+    }
+
+    public toggleEntityInfoVisibility(): void {
+        this.entityInfos.visible = !this.entityInfos.visible
     }
 
     public createEntityInfo(entity: Entity, position: IPoint): PIXI.Container {
