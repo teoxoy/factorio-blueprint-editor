@@ -658,7 +658,7 @@ function getBeltSprites(
 }
 
 function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
-    if (e.name.search('combinator') !== -1) {
+    if (e.name.includes('combinator')) {
         return (data: IDrawData) => {
             if (e.name === 'decider_combinator' || e.name === 'arithmetic_combinator') {
                 const operatorToSpriteData = (operator: string): DirectionalSpriteData => {
@@ -713,7 +713,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
         }
     }
 
-    if (e.name.search('assembling_machine') !== -1) {
+    if (e.name.includes('assembling_machine')) {
         return (data: IDrawData) => {
             if (
                 (e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') &&
