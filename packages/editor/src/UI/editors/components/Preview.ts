@@ -49,7 +49,7 @@ export class Preview extends PIXI.Container {
     private generatePreview(): PIXI.Container {
         // Add all entity parts to a separate container
         const entityParts: PIXI.Container = new PIXI.Container()
-        EntitySprite.getParts(this.m_Entity).forEach(s => entityParts.addChild(s))
+        entityParts.addChild(...EntitySprite.getParts(this.m_Entity))
         this.addChild(entityParts)
 
         const actualSpriteSize = { x: this.m_Entity.size.x, y: this.m_Entity.size.y }
