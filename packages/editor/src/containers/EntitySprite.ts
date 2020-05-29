@@ -101,7 +101,7 @@ export class EntitySprite extends PIXI.Sprite {
         entity: IEntityData | Entity,
         positionGrid?: PositionGrid
     ): EntitySprite[] {
-        const anims = getSpriteData({
+        const spriteData = getSpriteData({
             hr: G.hr,
             dir:
                 positionGrid && entity.type === 'electric_pole' && entity instanceof Entity
@@ -125,49 +125,48 @@ export class EntitySprite extends PIXI.Sprite {
         const parts: EntitySprite[] = []
 
         let foundMainBelt = false
-        for (let i = 0; i < anims.length; i++) {
-            const img = new EntitySprite(anims[i])
-            if (anims[i].filename.includes('circuit-connector')) {
-                img.zIndex = 1
+        for (let i = 0; i < spriteData.length; i++) {
+            const data = spriteData[i]
+            const sprite = new EntitySprite(data)
+
+            if (data.filename.includes('circuit-connector')) {
+                sprite.zIndex = 1
             } else if (entity.name === 'artillery_turret' && i > 0) {
-                img.zIndex = 2
+                sprite.zIndex = 2
             } else if (
                 (entity.name === 'rail_signal' || entity.name === 'rail_chain_signal') &&
                 i === 0
             ) {
-                img.zIndex = -8
+                sprite.zIndex = -8
             } else if (entity.name === 'straight_rail' || entity.name === 'curved_rail') {
                 if (i < 2) {
-                    img.zIndex = -10
+                    sprite.zIndex = -10
                 } else if (i < 4) {
-                    img.zIndex = -9
+                    sprite.zIndex = -9
                 } else {
-                    img.zIndex = -7
+                    sprite.zIndex = -7
                 }
             } else if (entity.type === 'transport_belt' || entity.name === 'heat_pipe') {
-                img.zIndex = i === 0 ? -6 : -5
+                sprite.zIndex = i === 0 ? -6 : -5
 
-                if (
-                    anims[i].filename.includes('connector') &&
-                    !anims[i].filename.includes('back-patch')
-                ) {
-                    img.zIndex = 0
+                if (data.filename.includes('connector') && !data.filename.includes('back-patch')) {
+                    sprite.zIndex = 0
                 }
             } else if (
                 entity.type === 'splitter' ||
                 entity.type === 'underground_belt' ||
                 entity.type === 'loader'
             ) {
-                if (!foundMainBelt && anims[i].filename.includes('transport-belt')) {
+                if (!foundMainBelt && data.filename.includes('transport-belt')) {
                     foundMainBelt = true
-                    img.zIndex = -6
+                    sprite.zIndex = -6
                 }
             } else {
-                img.zIndex = 0
+                sprite.zIndex = 0
             }
-            img.zOrder = i
+            sprite.zOrder = i
 
-            parts.push(img)
+            parts.push(sprite)
         }
 
         return parts
