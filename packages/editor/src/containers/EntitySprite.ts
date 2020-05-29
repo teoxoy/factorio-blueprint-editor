@@ -50,8 +50,8 @@ export class EntitySprite extends PIXI.Sprite {
                 new PIXI.Rectangle(
                     spriteData.frame.x + data.x,
                     spriteData.frame.y + data.y,
-                    data.width / data.divW,
-                    data.height / data.divH
+                    data.width,
+                    data.height
                 )
             )
             PIXI.Texture.addToCache(texture, textureKey)
