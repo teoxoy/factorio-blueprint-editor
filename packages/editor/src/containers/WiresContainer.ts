@@ -271,10 +271,7 @@ export class WiresContainer extends PIXI.Container {
             return map
         }, new Map())
 
-        const finalLinesHashes = finalLines.reduce(
-            (map, line) => map.set(lineHash(line), line),
-            new Map()
-        )
+        const finalLinesHashes = new Map(finalLines.map(line => [lineHash(line), line]))
         const toAdd = [...finalLinesHashes.keys()].filter(k => !this.passiveConnToSprite.get(k))
         const toDel = [...this.passiveConnToSprite.keys()].filter(k => !finalLinesHashes.get(k))
 
