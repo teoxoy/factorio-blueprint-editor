@@ -63,20 +63,24 @@ export class BlueprintContainer extends PIXI.Container {
     private _moveSpeed = 10
     private _gridColor = 0x303030
     private _gridPattern: GridPattern = 'grid'
-    private grid: PIXI.TilingSprite
-    private readonly chunkGrid: PIXI.TilingSprite
-    public readonly wiresContainer: WiresContainer
-    public readonly overlayContainer: OverlayContainer
-    public readonly underlayContainer: UnderlayContainer
-    private readonly tilePaintSlot: PIXI.Container
-    private readonly entityPaintSlot: PIXI.Container
-    private readonly tileSprites: OptimizedContainer
-    private readonly entitySprites: OptimizedContainer
-    public hoverContainer: EntityContainer
-    public paintContainer: PaintContainer
+    private _mode: EditorMode = EditorMode.NONE
     public readonly bp: Blueprint
     public readonly gridData: GridData
-    private _mode: EditorMode = EditorMode.NONE
+
+    // Children
+    private grid: PIXI.TilingSprite
+    private readonly chunkGrid: PIXI.TilingSprite
+    private readonly tileSprites: OptimizedContainer
+    private readonly tilePaintSlot: PIXI.Container
+    public readonly underlayContainer: UnderlayContainer
+    private readonly entitySprites: OptimizedContainer
+    public readonly wiresContainer: WiresContainer
+    public readonly overlayContainer: OverlayContainer
+    private readonly entityPaintSlot: PIXI.Container
+
+    public hoverContainer: EntityContainer
+    public paintContainer: PaintContainer
+
     private _entityForCopyData: Entity
     private copyModeEntities: Entity[] = []
     private deleteModeEntities: Entity[] = []
@@ -104,9 +108,9 @@ export class BlueprintContainer extends PIXI.Container {
         this.tilePaintSlot = new PIXI.Container()
         this.underlayContainer = new UnderlayContainer()
         this.entitySprites = new OptimizedContainer()
-        this.entityPaintSlot = new PIXI.Container()
         this.wiresContainer = new WiresContainer(this.bp)
         this.overlayContainer = new OverlayContainer(this)
+        this.entityPaintSlot = new PIXI.Container()
 
         this.addChild(
             this.grid,
