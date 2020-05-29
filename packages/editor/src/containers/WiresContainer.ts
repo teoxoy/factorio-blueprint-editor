@@ -1,15 +1,21 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
 import U from '../core/generators/util'
 import { Entity } from '../core/Entity'
+import { Blueprint } from '../core/Blueprint'
 import { IConnection } from '../core/WireConnections'
 import { EntityContainer } from './EntityContainer'
 
 export class WiresContainer extends PIXI.Container {
+    private readonly bp: Blueprint
     private connectionToSprite = new Map<string, PIXI.Graphics>()
     private passiveConnToSprite = new Map<string, PIXI.Graphics>()
     private entNrToConnectedEntNrs = new Map<number, number[]>()
+
+    public constructor(bp: Blueprint) {
+        super()
+        this.bp = bp
+    }
 
     private static createWire(p1: IPoint, p2: IPoint, color: string): PIXI.Graphics {
         const wire = new PIXI.Graphics()
@@ -80,9 +86,9 @@ export class WiresContainer extends PIXI.Container {
 
     /** This is done in cases where the connection doesn't change but the rotation does */
     private redrawEntityConnections(entityNumber: number): void {
-        const hashes = G.bp.wireConnections.getEntityConnectionHashes(entityNumber)
+        const hashes = this.bp.wireConnections.getEntityConnectionHashes(entityNumber)
         for (const hash of hashes) {
-            const connection = G.bp.wireConnections.get(hash)
+            const connection = this.bp.wireConnections.get(hash)
             this.remove(hash)
             this.add(hash, connection)
         }
@@ -106,7 +112,7 @@ export class WiresContainer extends PIXI.Container {
 
     private getWireSprite(connection: IConnection): PIXI.Graphics {
         const getWirePos = (entityNumber: number, color: string, side: number): IPoint => {
-            const entity = G.bp.entities.get(entityNumber)
+            const entity = this.bp.entities.get(entityNumber)
             const direction =
                 entity.type === 'electric_pole'
                     ? this.getPowerPoleDirection(entity)
@@ -130,7 +136,7 @@ export class WiresContainer extends PIXI.Container {
         if (!entNrArr) return 0
 
         const points = entNrArr
-            .map(entNr => G.bp.entities.get(entNr))
+            .map(entNr => this.bp.entities.get(entNr))
             .filter(e => !!e)
             .map(ent => ent.position)
 
@@ -169,7 +175,7 @@ export class WiresContainer extends PIXI.Container {
             name: string
         }
 
-        const poles: IPole[] = G.bp.entities
+        const poles: IPole[] = this.bp.entities
             .filter(e => e.type === 'electric_pole')
             .map(e => ({
                 entityNumber: e.entityNumber,
@@ -304,7 +310,7 @@ export class WiresContainer extends PIXI.Container {
 
         for (const entNr of toUpdate) {
             const ec = EntityContainer.mappings.get(entNr)
-            if (G.bp.entities.get(entNr) && ec) {
+            if (this.bp.entities.get(entNr) && ec) {
                 // redraw to update direction
                 ec.redraw()
 

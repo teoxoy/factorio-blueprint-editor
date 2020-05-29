@@ -105,7 +105,7 @@ export class BlueprintContainer extends PIXI.Container {
         this.underlayContainer = new UnderlayContainer()
         this.entitySprites = new OptimizedContainer()
         this.entityPaintSlot = new PIXI.Container()
-        this.wiresContainer = new WiresContainer()
+        this.wiresContainer = new WiresContainer(this.bp)
         this.overlayContainer = new OverlayContainer(this)
 
         this.addChild(
