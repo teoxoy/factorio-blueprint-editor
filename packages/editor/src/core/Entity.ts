@@ -2,7 +2,7 @@ import FD from 'factorio-data'
 import EventEmitter from 'eventemitter3'
 import util from '../common/util'
 import { Blueprint } from './Blueprint'
-import { spriteDataBuilder } from './spriteDataBuilder'
+import { getBeltWireConnectionIndex } from './spriteDataBuilder'
 import U from './generators/util'
 
 export interface IFilter {
@@ -735,7 +735,7 @@ export class Entity extends EventEmitter {
 
         if (this.type === 'transport_belt') {
             return e.circuit_wire_connection_points[
-                spriteDataBuilder.getBeltWireConnectionIndex(
+                getBeltWireConnectionIndex(
                     this.m_BP.entityPositionGrid,
                     this.position,
                     direction
