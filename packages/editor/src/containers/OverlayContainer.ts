@@ -1,11 +1,10 @@
 import FD from 'factorio-data'
 import * as PIXI from 'pixi.js'
 import F from '../UI/controls/functions'
-import G from '../common/globals'
 import util from '../common/util'
 import { isActionActive } from '../actions'
 import { Entity } from '../core/Entity'
-import { EditorMode } from './BlueprintContainer'
+import { EditorMode, BlueprintContainer } from './BlueprintContainer'
 import { EntityContainer } from './EntityContainer'
 
 type CursorBoxType =
@@ -43,8 +42,9 @@ class OverlayContainer extends PIXI.Container {
     private copyCursorBox: PIXI.Container
     private selectionAreaUpdateFn: (endX: number, endY: number) => void
 
-    public constructor() {
+    public constructor(bpc: BlueprintContainer) {
         super()
+        this.bpc = bpc
 
         this.addChild(this.entityInfos, this.cursorBoxes, this.undergroundLines, this.selectionArea)
 
@@ -458,17 +458,17 @@ class OverlayContainer extends PIXI.Container {
 
     public createCopyCursorBox(): void {
         if (
-            G.BPC.mode === EditorMode.EDIT &&
+            this.bpc.mode === EditorMode.EDIT &&
             this.copyCursorBox === undefined &&
-            G.BPC.hoverContainer !== undefined &&
-            G.BPC.entityForCopyData !== undefined &&
-            EntityContainer.mappings.has(G.BPC.entityForCopyData.entityNumber) &&
-            G.BPC.hoverContainer.entity.canPasteSettings(G.BPC.entityForCopyData)
+            this.bpc.hoverContainer !== undefined &&
+            this.bpc.entityForCopyData !== undefined &&
+            EntityContainer.mappings.has(this.bpc.entityForCopyData.entityNumber) &&
+            this.bpc.hoverContainer.entity.canPasteSettings(this.bpc.entityForCopyData)
         ) {
-            const srcEnt = EntityContainer.mappings.get(G.BPC.entityForCopyData.entityNumber)
+            const srcEnt = EntityContainer.mappings.get(this.bpc.entityForCopyData.entityNumber)
             this.copyCursorBox = this.createCursorBox(
                 srcEnt.position,
-                G.BPC.entityForCopyData.size,
+                this.bpc.entityForCopyData.size,
                 'copy'
             )
         }
@@ -569,8 +569,8 @@ class OverlayContainer extends PIXI.Container {
     ): PIXI.Container {
         const fd = FD.entities[name]
         if (fd.type === 'underground_belt' || name === 'pipe_to_ground') {
-            const otherEntity = G.bp.entities.get(
-                G.bp.entityPositionGrid.getOpposingEntity(
+            const otherEntity = this.bpc.bp.entities.get(
+                this.bpc.bp.entityPositionGrid.getOpposingEntity(
                     name,
                     name === 'pipe_to_ground' ? searchDirection : direction,
                     position,
@@ -616,7 +616,7 @@ class OverlayContainer extends PIXI.Container {
                     lineParts.addChild(s)
                 }
 
-                const otherEntityCursorBox = G.BPC.overlayContainer.createCursorBox(
+                const otherEntityCursorBox = this.createCursorBox(
                     {
                         x: searchingAlongY ? 0 : sign * distance * 32,
                         y: searchingAlongY ? sign * distance * 32 : 0,
@@ -632,7 +632,7 @@ class OverlayContainer extends PIXI.Container {
     }
 
     public showSelectionArea(color: number): void {
-        const startPos = { x: G.BPC.gridData.x, y: G.BPC.gridData.y }
+        const startPos = { x: this.bpc.gridData.x, y: this.bpc.gridData.y }
 
         this.selectionAreaUpdateFn = (endX: number, endY: number) => {
             const X = Math.min(startPos.x, endX)
@@ -642,7 +642,7 @@ class OverlayContainer extends PIXI.Container {
 
             this.selectionArea
                 .clear()
-                .lineStyle(2 / G.BPC.getViewportScale(), color)
+                .lineStyle(2 / this.bpc.getViewportScale(), color)
                 .moveTo(X, Y)
                 .lineTo(X + W, Y)
                 .lineTo(X + W, Y + H)
@@ -650,12 +650,12 @@ class OverlayContainer extends PIXI.Container {
                 .lineTo(X, Y)
         }
 
-        G.BPC.gridData.on('update', this.selectionAreaUpdateFn)
+        this.bpc.gridData.on('update', this.selectionAreaUpdateFn)
     }
 
     public hideSelectionArea(): void {
         this.selectionArea.clear()
-        G.BPC.gridData.off('update', this.selectionAreaUpdateFn)
+        this.bpc.gridData.off('update', this.selectionAreaUpdateFn)
     }
 }
 
