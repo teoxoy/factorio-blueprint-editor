@@ -82,39 +82,35 @@ interface ISpriteData {
     rotAngle?: number
 }
 
+const generatorCache = new Map<string, (data: IDrawData) => ISpriteData[]>()
+
 function getSpriteData(data: IDrawData): ISpriteData[] {
-    return entityToFunction.get(data.name)(data)
-}
+    if (generatorCache.has(data.name)) return generatorCache.get(data.name)(data)
 
-const entityToFunction = new Map()
-
-for (const e in FD.entities) {
-    if (util.objectHasOwnProperty(FD.entities, e)) {
-        const entity = FD.entities[e]
-
-        const generator = (data: IDrawData): SpriteData[] => {
-            const spriteData = [
-                ...generateGraphics(entity)(data),
-                ...generateCovers(entity, data),
-                ...generateConnection(entity, data),
-            ]
-            for (let i = 0; i < spriteData.length; i++) {
-                spriteData[i] =
-                    data.hr && spriteData[i].hr_version ? spriteData[i].hr_version : spriteData[i]
-                if (spriteData[i].apply_runtime_tint && !spriteData[i].tint) {
-                    spriteData[i].tint = {
-                        r: 233 / 255,
-                        g: 195 / 255,
-                        b: 153 / 255,
-                        a: 0.8,
-                    }
+    const entity = FD.entities[data.name]
+    const generator = (data: IDrawData): ISpriteData[] => {
+        const spriteData = [
+            ...generateGraphics(entity)(data),
+            ...generateCovers(entity, data),
+            ...generateConnection(entity, data),
+        ]
+        for (let i = 0; i < spriteData.length; i++) {
+            spriteData[i] =
+                data.hr && spriteData[i].hr_version ? spriteData[i].hr_version : spriteData[i]
+            if (spriteData[i].apply_runtime_tint && !spriteData[i].tint) {
+                spriteData[i].tint = {
+                    r: 233 / 255,
+                    g: 195 / 255,
+                    b: 153 / 255,
+                    a: 0.8,
                 }
             }
-            return spriteData
         }
-
-        entityToFunction.set(entity.name, generator)
+        return spriteData as ISpriteData[]
     }
+    generatorCache.set(data.name, generator)
+
+    return generator(data)
 }
 
 function getPipeCovers(e: FD_Entity): DirectionalSpriteLayers {
