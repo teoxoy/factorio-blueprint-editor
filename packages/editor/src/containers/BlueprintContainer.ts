@@ -123,6 +123,19 @@ export class BlueprintContainer extends PIXI.Container {
             this.entityPaintSlot
         )
 
+        this.on('pointerover', () => {
+            if (this.mode === EditorMode.PAINT) {
+                this.paintContainer.show()
+            }
+            this.updateHoverContainer()
+        })
+        this.on('pointerout', () => {
+            if (this.mode === EditorMode.PAINT) {
+                this.paintContainer.hide()
+            }
+            this.updateHoverContainer()
+        })
+
         const panCb = (): void => {
             if (this.mode !== EditorMode.PAN) {
                 const WSXOR = isActionActive('moveUp') !== isActionActive('moveDown')
@@ -158,19 +171,6 @@ export class BlueprintContainer extends PIXI.Container {
                 callAction('pasteEntitySettings')
             }
         }
-
-        this.addListener('pointerover', () => {
-            if (this.mode === EditorMode.PAINT) {
-                this.paintContainer.show()
-            }
-            this.updateHoverContainer()
-        })
-        this.addListener('pointerout', () => {
-            if (this.mode === EditorMode.PAINT) {
-                this.paintContainer.hide()
-            }
-            this.updateHoverContainer()
-        })
 
         let lastX = 0
         let lastY = 0
