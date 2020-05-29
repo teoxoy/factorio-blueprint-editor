@@ -733,22 +733,19 @@ export class Entity extends EventEmitter {
 
         if (e.circuit_wire_connection_point) return e.circuit_wire_connection_point.wire[color]
 
-        if (this.type === 'transport_belt') {
-            return e.circuit_wire_connection_points[
-                getBeltWireConnectionIndex(
+        const getIndex = (): number => {
+            if (this.type === 'transport_belt') {
+                const i = getBeltWireConnectionIndex(
                     this.m_BP.entityPositionGrid,
                     this.position,
                     direction
-                ) * 4
-            ].wire[color]
+                )
+                return i * 4
+            }
+            if (e.circuit_wire_connection_points.length === 8) return direction
+            return direction / 2
         }
-        if (e.circuit_wire_connection_points.length === 8) {
-            return e.circuit_wire_connection_points[direction].wire[color]
-        }
-        if (this.name === 'constant_combinator') {
-            return e.circuit_wire_connection_points[direction / 2].wire[color]
-        }
-        return e.circuit_wire_connection_points[direction / 2].wire[color]
+        return e.circuit_wire_connection_points[getIndex()].wire[color]
     }
 
     public serialize(): BPS.IEntity {
