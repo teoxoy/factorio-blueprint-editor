@@ -83,19 +83,20 @@ export class BlueprintContainer extends PIXI.Container {
     private copyModeUpdateFn: (endX: number, endY: number) => void
     private deleteModeUpdateFn: (endX: number, endY: number) => void
 
+    // PIXI properties
+    public readonly interactive = true
+    public readonly interactiveChildren = false
+    public readonly hitArea = new PIXI.Rectangle(
+        -this.size.x * this.anchor.x,
+        -this.size.y * this.anchor.y,
+        this.size.x,
+        this.size.y
+    )
+
     public constructor(bp: Blueprint) {
         super()
         this.bp = bp
         this.gridData = new GridData(this)
-
-        this.interactive = true
-        this.interactiveChildren = false
-        this.hitArea = new PIXI.Rectangle(
-            -this.size.x * this.anchor.x,
-            -this.size.y * this.anchor.y,
-            this.size.x,
-            this.size.y
-        )
 
         this.grid = this.generateGrid()
         this.chunkGrid = this.generateChunkGrid(this.chunkOffset)
