@@ -40,36 +40,31 @@ export class EntityContainer {
             this.redrawSurroundingEntities()
         }
 
-        this.m_Entity.on('recipe', () => {
+        const onRecipeChange = (): void => {
             this.redrawEntityInfo()
             if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.assemblerCraftsWithFluid) {
                 this.redraw()
                 this.redrawSurroundingEntities()
             }
-        })
+        }
 
-        this.m_Entity.on('direction', () => {
+        const onDirectionChange = (): void => {
             this.redraw()
             this.redrawSurroundingEntities()
 
             this.updateUndergroundLine()
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity)
-        })
+        }
 
-        this.m_Entity.on('directionType', () => {
+        const onDirectionTypeChange = (): void => {
             this.redraw()
             this.redrawSurroundingEntities()
 
             this.updateUndergroundLine()
-        })
+        }
 
-        this.m_Entity.on('modules', () => this.redrawEntityInfo())
-        this.m_Entity.on('filters', () => this.redrawEntityInfo())
-        this.m_Entity.on('splitterInputPriority', () => this.redrawEntityInfo())
-        this.m_Entity.on('splitterOutputPriority', () => this.redrawEntityInfo())
-
-        this.m_Entity.on('position', (newPos: IPoint, oldPos: IPoint) => {
+        const onPositionChange = (newPos: IPoint, oldPos: IPoint): void => {
             this.redraw()
             this.redrawSurroundingEntities(oldPos)
             this.redrawSurroundingEntities(newPos)
@@ -78,9 +73,9 @@ export class EntityContainer {
             this.redrawEntityInfo()
             G.BPC.wiresContainer.update(this.m_Entity)
             this.visualizationArea.moveTo(this.position)
-        })
+        }
 
-        this.m_Entity.on('destroy', () => {
+        const onEntityDestroy = (): void => {
             this.redrawSurroundingEntities()
 
             for (const s of this.entitySprites) {
@@ -96,6 +91,32 @@ export class EntityContainer {
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()
             }
+        }
+
+        this.m_Entity.on('recipe', onRecipeChange)
+        this.m_Entity.on('direction', onDirectionChange)
+        this.m_Entity.on('directionType', onDirectionTypeChange)
+        this.m_Entity.on('position', onPositionChange)
+
+        this.m_Entity.on('modules', this.redrawEntityInfo, this)
+        this.m_Entity.on('filters', this.redrawEntityInfo, this)
+        this.m_Entity.on('splitterInputPriority', this.redrawEntityInfo, this)
+        this.m_Entity.on('splitterOutputPriority', this.redrawEntityInfo, this)
+
+        this.m_Entity.on('destroy', onEntityDestroy)
+
+        G.BPC.on('destroy', () => {
+            this.m_Entity.off('recipe', onRecipeChange)
+            this.m_Entity.off('direction', onDirectionChange)
+            this.m_Entity.off('directionType', onDirectionTypeChange)
+            this.m_Entity.off('position', onPositionChange)
+
+            this.m_Entity.off('modules', this.redrawEntityInfo, this)
+            this.m_Entity.off('filters', this.redrawEntityInfo, this)
+            this.m_Entity.off('splitterInputPriority', this.redrawEntityInfo, this)
+            this.m_Entity.off('splitterOutputPriority', this.redrawEntityInfo, this)
+
+            this.m_Entity.off('destroy', onEntityDestroy)
         })
     }
 
