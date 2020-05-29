@@ -78,8 +78,6 @@ interface ISpriteData {
 
     anchorX?: number
     anchorY?: number
-    divW?: number
-    divH?: number
     squishY?: number
     rotAngle?: number
 }
@@ -1448,7 +1446,11 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 )
 
                 let mainBelt = beltParts[0]
-                mainBelt = setProperty(mainBelt, dir === 2 || dir === 6 ? 'divW' : 'divH', 2)
+                if (dir === 2 || dir === 6) {
+                    mainBelt = setPropertyUsing(mainBelt, 'width', 'width', 0.5)
+                } else {
+                    mainBelt = setPropertyUsing(mainBelt, 'height', 'height', 0.5)
+                }
 
                 if (dir === 2) {
                     mainBelt = setProperty(mainBelt, 'anchorX', 1)
@@ -1725,7 +1727,11 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 ).map(sprite => addToShift(util.rotatePointBasedOnDir([0, 0.5], dir), sprite))
 
                 let mainBelt = beltParts[0]
-                mainBelt = setProperty(mainBelt, dir === 2 || dir === 6 ? 'divW' : 'divH', 2)
+                if (dir === 2 || dir === 6) {
+                    mainBelt = setPropertyUsing(mainBelt, 'width', 'width', 0.5)
+                } else {
+                    mainBelt = setPropertyUsing(mainBelt, 'height', 'height', 0.5)
+                }
 
                 if (dir === 2) {
                     mainBelt = setProperty(mainBelt, 'anchorX', 1)

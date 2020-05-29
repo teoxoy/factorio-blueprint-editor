@@ -43,16 +43,8 @@ export class EntitySprite extends PIXI.Sprite {
         if (!data.y) {
             data.y = 0
         }
-        if (!data.divW) {
-            data.divW = 1
-        }
-        if (!data.divH) {
-            data.divH = 1
-        }
 
-        const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width / data.divW}-${
-            data.height / data.divH
-        }`
+        const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width}-${data.height}`
         let texture = PIXI.utils.TextureCache[textureKey]
         if (!texture) {
             const spriteData = PIXI.Texture.from(data.filename)
