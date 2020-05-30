@@ -376,7 +376,7 @@ do
                 -- add size
                 entity.size = {
                     width = math.ceil(math.abs(entity.selection_box[1][1]) + math.abs(entity.selection_box[2][1])),
-                    height =  math.ceil(math.abs(entity.selection_box[1][2]) + math.abs(entity.selection_box[2][2]))
+                    height = math.ceil(math.abs(entity.selection_box[1][2]) + math.abs(entity.selection_box[2][2]))
                 }
 
                 -- add possible_rotations
