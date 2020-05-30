@@ -1818,6 +1818,11 @@ make-error@^1.1.1:
   resolved "https://registry.yarnpkg.com/make-error/-/make-error-1.3.5.tgz#efe4e81f6db28cadd605c70f29c831b58ef776c8"
   integrity sha512-c3sIjNUow0+8swNwVpqoH4YCShKNFkMaw6oH1mNS2haDZQqkeZFlHS3dhoeEbKKmJB4vXpJucU6oH75aDYeE9g==
 
+maxrects-packer@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/maxrects-packer/-/maxrects-packer-2.6.0.tgz#4441c469fe0d27d9fba801f6bb66dff94bf74e40"
+  integrity sha512-xDcZ70uxOh5Ekdxp7aopirh5I+P57//MEXO9o7tdOzGoSyrs/eqPYhbdLls66k5pLPU2QAheT7MLlReMfP0D1g==
+
 media-typer@0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"

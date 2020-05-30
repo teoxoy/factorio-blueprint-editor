@@ -19,25 +19,55 @@ export class TileContainer {
         const height = G.hr ? 64 : 32
         const scale = G.hr ? 0.5 : 1
 
-        // TODO: maybe optimize this with PIXI.TilingSprite and masks
-        // https://github.com/pixijs/pixi.js/wiki/v4-Gotchas#graphics--tilingsprite
+        let filename: string
+        let countX: number
+        let countY: number
+        let X: number
+        let Y: number
 
-        const filename = (() => {
-            switch (name) {
-                case 'stone_path':
-                    return 'graphics/terrain/stone-path/stone-path.png'
-                case 'landfill':
-                    return 'graphics/terrain/grass-1/grass-1.png'
-                default:
-                    return FD.tiles[name].variants.material_background.hr_version.picture
+        const variants = FD.tiles[name].variants
+        if (variants.material_background === undefined) {
+            let variant = variants.main.find(v => (v.size || 1) === 1)
+            if (G.hr) {
+                variant = variant.hr_version
             }
-        })()
+            filename = variant.picture
+            countX = variant.count
+            countY = 1
+            X = Math.floor(Math.random() * countX)
+            Y = Math.floor(Math.random() * countY)
+        } else {
+            let variant = variants.material_background
+            if (G.hr) {
+                variant = variant.hr_version
+            }
+            filename = variant.picture
+            countX = 8
+            countY = 8
+            X = Math.abs(Math.floor(x)) % countX
+            Y = Math.abs(Math.floor(y)) % countY
+            if (Math.sign(x) === -1) {
+                X = countX - 1 - X
+            }
+            if (Math.sign(y) === -1) {
+                Y = countY - 1 - Y
+            }
+        }
+
+        const mainTexture = G.sheet2.get(filename, 0, 0, countX * width, countY * height)
+        const texture = G.sheet2.getSubtexture(
+            mainTexture,
+            filename,
+            X * width,
+            Y * height,
+            width,
+            height
+        )
 
         return new EntitySprite(
+            texture,
             {
                 filename,
-                x: (Math.abs(Math.floor(x)) % 8) * width,
-                y: (Math.abs(Math.floor(y)) % 8) * height,
                 width,
                 height,
                 scale,

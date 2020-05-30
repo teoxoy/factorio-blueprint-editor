@@ -1,6 +1,6 @@
-declare module '*.png' {
-    const path: string
-    export default path
+declare module '*.json' {
+    const content: object
+    export default content
 }
 
 interface IPoint {

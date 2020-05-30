@@ -97,9 +97,9 @@ editor
 
         registerActions()
 
-        const changeBookIndex = (index: number): void => {
+        const changeBookIndex = async (index: number): Promise<void> => {
             bp = book.getBlueprint(index)
-            editor.loadBlueprint(bp)
+            await editor.loadBlueprint(bp)
         }
         changeBookForIndexSelector = initSettingsPane(editor, changeBookIndex).changeBook
 
@@ -121,7 +121,7 @@ window.addEventListener('unload', () => {
     localStorage.setItem('quickbarItemNames', JSON.stringify(editor.quickbarItems))
 })
 
-function loadBp(bpOrBook: Blueprint | Book): void {
+async function loadBp(bpOrBook: Blueprint | Book): Promise<void> {
     if (bpOrBook instanceof Book) {
         book = bpOrBook
         bp = book.getBlueprint(bpIndex ? bpIndex : undefined)
@@ -129,7 +129,7 @@ function loadBp(bpOrBook: Blueprint | Book): void {
         bp = bpOrBook
     }
 
-    editor.loadBlueprint(bp)
+    await editor.loadBlueprint(bp)
     changeBookForIndexSelector(bpOrBook)
 
     loadingScreen.hide()

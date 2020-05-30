@@ -33,29 +33,11 @@ export class EntitySprite extends PIXI.Sprite {
     private zOrder: number
     private readonly entityPos: IPoint
 
-    public constructor(data: ISpriteData, position: IPoint = { x: 0, y: 0 }) {
-        if (!data.x) {
-            data.x = 0
-        }
-        if (!data.y) {
-            data.y = 0
-        }
-
-        const textureKey = `${data.filename}-${data.x}-${data.y}-${data.width}-${data.height}`
-        let texture = PIXI.utils.TextureCache[textureKey]
-        if (!texture) {
-            const spriteData = PIXI.Texture.from(data.filename)
-            texture = new PIXI.Texture(
-                spriteData.baseTexture,
-                new PIXI.Rectangle(
-                    spriteData.frame.x + data.x,
-                    spriteData.frame.y + data.y,
-                    data.width,
-                    data.height
-                )
-            )
-            PIXI.Texture.addToCache(texture, textureKey)
-        }
+    public constructor(
+        texture: PIXI.Texture,
+        data: ISpriteData,
+        position: IPoint = { x: 0, y: 0 }
+    ) {
         super(texture)
 
         this.id = EntitySprite.getNextID()
@@ -126,7 +108,9 @@ export class EntitySprite extends PIXI.Sprite {
         let foundMainBelt = false
         for (let i = 0; i < spriteData.length; i++) {
             const data = spriteData[i]
-            const sprite = new EntitySprite(data, position)
+
+            const texture = G.sheet.get(data.filename, data.x, data.y, data.width, data.height)
+            const sprite = new EntitySprite(texture, data, position)
 
             if (data.filename.includes('circuit-connector')) {
                 sprite.zIndex = 1
@@ -169,6 +153,15 @@ export class EntitySprite extends PIXI.Sprite {
         }
 
         return parts
+    }
+
+    public static getPartsAsync(
+        entity: IEntityData | Entity,
+        position?: IPoint,
+        positionGrid?: PositionGrid
+    ): Promise<EntitySprite[]> {
+        const parts = EntitySprite.getParts(entity, position, positionGrid)
+        return G.sheet.onAllLoaded(parts.map(s => s.texture)).then(() => parts)
     }
 
     public static compareFn(a: EntitySprite, b: EntitySprite): number {

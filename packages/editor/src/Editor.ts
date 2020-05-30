@@ -8,10 +8,9 @@ import { BlueprintContainer, EditorMode, GridPattern } from './containers/Bluepr
 import { UIContainer } from './UI/UIContainer'
 import { Dialog } from './UI/controls/Dialog'
 import { initActions, registerAction } from './actions'
-import { spritesheetsLoader } from './spritesheetsLoader'
 
 export class Editor {
-    public async init(canvas: HTMLCanvasElement): Promise<void[]> {
+    public async init(canvas: HTMLCanvasElement): Promise<void> {
         await fetch('./api/bundle')
             .then(res => res.json())
             .then(modules => FD.loadData(modules))
@@ -59,11 +58,6 @@ export class Editor {
             G.app.renderer.textureGC.unload(G.app.stage)
             G.app.destroy()
         })
-
-        return Promise.all(
-            // Load spritesheets
-            spritesheetsLoader.getAllPromises()
-        )
     }
 
     public get moveSpeed(): number {
@@ -120,14 +114,14 @@ export class Editor {
         return G.BPC.getPicture()
     }
 
-    public loadBlueprint(bp: Blueprint): void {
+    public async loadBlueprint(bp: Blueprint): Promise<void> {
         const last = G.BPC
         const i = G.app.stage.getChildIndex(last)
 
         G.bp = bp
 
         G.BPC = new BlueprintContainer(bp)
-        G.BPC.initBP()
+        await G.BPC.initBP()
         Dialog.closeAll()
         G.app.stage.addChildAt(G.BPC, i)
         last.destroy()

@@ -511,7 +511,7 @@ export class BlueprintContainer extends PIXI.Container {
         return grid
     }
 
-    public initBP(): void {
+    public async initBP(): Promise<void> {
         // Render Bp
         for (const [, e] of this.bp.entities) {
             new EntityContainer(e, false)
@@ -559,6 +559,8 @@ export class BlueprintContainer extends PIXI.Container {
             this.bp.wireConnections.off('create', onConnectionCreated)
             this.bp.wireConnections.off('remove', onConnectionRemoved)
         })
+
+        await Promise.all([G.sheet.awaitSprites(), G.sheet2.awaitSprites()])
 
         this.sortEntities()
         this.wiresContainer.updatePassiveWires()

@@ -1,30 +1,12 @@
 import * as PIXI from 'pixi.js'
-import FD, { FluidBox, CursorBoxType } from '@fbe/factorio-data'
+import FD, { FluidBox, CursorBoxType, SpriteData } from '@fbe/factorio-data'
 import F from '../UI/controls/functions'
+import G from '../common/globals'
 import util from '../common/util'
 import { isActionActive } from '../actions'
 import { Entity } from '../core/Entity'
 import { EditorMode, BlueprintContainer } from './BlueprintContainer'
 import { EntityContainer } from './EntityContainer'
-
-const cursorBoxTypeToOffset = (type: CursorBoxType): number => {
-    switch (type) {
-        case 'regular':
-            return 0
-        case 'not_allowed':
-            return 64
-        case 'logistics':
-            return 128
-        case 'electricity':
-            return 128
-        case 'pair':
-            return 192
-        case 'copy':
-            return 192
-        case 'train_visualization':
-            return 256
-    }
-}
 
 export class OverlayContainer extends PIXI.Container {
     private readonly bpc: BlueprintContainer
@@ -414,8 +396,9 @@ export class OverlayContainer extends PIXI.Container {
             itemName: string,
             position?: IPoint
         ): void {
-            const icon = F.CreateIcon(itemName)
-            const background = PIXI.Sprite.from('graphics/entity-info-dark-background.png')
+            const icon = F.CreateIcon(itemName, true, true)
+            const data = FD.utilitySprites.entity_info_dark_background
+            const background = new PIXI.Sprite(G.sheet.get(data.filename))
             background.anchor.set(0.5, 0.5)
             if (position) {
                 icon.position.set(position.x, position.y)
@@ -432,17 +415,17 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         function createArrow(position: IPoint, type = 0): PIXI.Sprite {
-            const typeToPath = (type = 0): string => {
+            const typeToPath = (type = 0): SpriteData => {
                 switch (type) {
                     case 0:
-                        return 'indication-arrow.png'
+                        return FD.utilitySprites.indication_arrow
                     case 1:
-                        return 'fluid-indication-arrow.png'
+                        return FD.utilitySprites.fluid_indication_arrow
                     case 2:
-                        return 'fluid-indication-arrow-both-ways.png'
+                        return FD.utilitySprites.fluid_indication_arrow_both_ways
                 }
             }
-            const arrow = PIXI.Sprite.from(`graphics/arrows/${typeToPath(type)}`)
+            const arrow = new PIXI.Sprite(G.sheet.get(typeToPath(type).filename))
             arrow.anchor.set(0.5, 0.5)
             arrow.position.set(position.x, position.y)
             return arrow
@@ -497,56 +480,34 @@ export class OverlayContainer extends PIXI.Container {
         this.cursorBoxes.addChild(cursorBox)
 
         if (size.x === 1 && size.y === 1) {
-            const spriteData = PIXI.Texture.from('graphics/cursor-boxes-32x32.png')
-            const frame = spriteData.frame.clone()
-            frame.x += cursorBoxTypeToOffset(type)
-            frame.width = 64
-            const s = new PIXI.Sprite(new PIXI.Texture(spriteData.baseTexture, frame))
+            const data = FD.utilitySprites.cursor_box[type][0].sprite
+            const texture = G.sheet.get(data.filename, data.x, data.y, data.width, data.height)
+            const s = new PIXI.Sprite(texture)
             s.anchor.set(0.5, 0.5)
             cursorBox.addChild(s)
         } else {
-            cursorBox.addChild(
-                ...createCorners(
-                    'graphics/cursor-boxes.png',
-                    mapMinLengthToSpriteIndex(Math.min(size.x, size.y))
-                )
-            )
+            cursorBox.addChild(...createCorners(Math.min(size.x, size.y)))
         }
 
         return cursorBox
 
-        function mapMinLengthToSpriteIndex(minLength: number): number {
-            if (minLength < 0.4) {
-                return 256
-            }
-            if (minLength < 0.7) {
-                return 192
-            }
-            if (minLength < 1.05) {
-                return 128
-            }
-            if (minLength < 3.5) {
-                return 64
-            }
-            return 0
-        }
+        function createCorners(minSideLength: number): PIXI.Sprite[] {
+            const boxes = FD.utilitySprites.cursor_box[type]
+            const data = (
+                boxes.find(t => t.max_side_length > minSideLength) || boxes[boxes.length - 1]
+            ).sprite
+            const texture = G.sheet.get(data.filename, data.x, data.y, data.width, data.height)
 
-        function createCorners(spriteName: string, offset: number): PIXI.Sprite[] {
-            const spriteData = PIXI.Texture.from(spriteName)
-            const frame = spriteData.frame.clone()
-            frame.x += offset
-            frame.y += cursorBoxTypeToOffset(type)
-            frame.width = 63
-            frame.height = 63
-            const texture = new PIXI.Texture(spriteData.baseTexture, frame)
             const c0 = new PIXI.Sprite(texture)
             const c1 = new PIXI.Sprite(texture)
             const c2 = new PIXI.Sprite(texture)
             const c3 = new PIXI.Sprite(texture)
-            c0.position.set(-size.x * 32, -size.y * 32)
-            c1.position.set(size.x * 32, -size.y * 32)
-            c2.position.set(-size.x * 32, size.y * 32)
-            c3.position.set(size.x * 32, size.y * 32)
+            const X = size.x * 32
+            const Y = size.y * 32
+            c0.position.set(-X, -Y)
+            c1.position.set(X, -Y)
+            c2.position.set(-X, Y)
+            c3.position.set(X, Y)
             c1.rotation = Math.PI * 0.5
             c2.rotation = Math.PI * 1.5
             c3.rotation = Math.PI
@@ -596,14 +557,18 @@ export class OverlayContainer extends PIXI.Container {
                 this.undergroundLines.addChild(lineParts)
 
                 for (let i = 1; i < distance; i++) {
-                    const spriteData = PIXI.Texture.from('graphics/arrows/underground-lines.png')
-                    const frame = spriteData.frame.clone()
-                    frame.x += name === 'pipe_to_ground' ? 0 : 64
-                    frame.width = 64
-                    const s = new PIXI.Sprite(new PIXI.Texture(spriteData.baseTexture, frame))
+                    const data =
+                        name === 'pipe_to_ground'
+                            ? FD.utilitySprites.underground_pipe_connection
+                            : fd.underground_sprite
+                    const s = new PIXI.Sprite(
+                        G.sheet.get(data.filename, data.x, data.y, data.width, data.height)
+                    )
                     s.rotation = direction * Math.PI * 0.25
-                    s.scale.set(0.5, 0.5)
-                    s.anchor.set(0.5, 0.5)
+                    if (data.scale) {
+                        s.scale.set(data.scale)
+                    }
+                    s.anchor.set(0.5)
                     s.x = searchingAlongY ? 0 : sign * i * 32
                     s.y = searchingAlongY ? sign * i * 32 : 0
                     lineParts.addChild(s)

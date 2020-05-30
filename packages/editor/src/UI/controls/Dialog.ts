@@ -56,6 +56,10 @@ export abstract class Dialog extends Panel {
         return Dialog.s_openDialogs.length > 0
     }
 
+    public static isOpen<T extends Dialog>(dialog: T): boolean {
+        return !!Dialog.s_openDialogs.find(d => d === dialog)
+    }
+
     /** Capitalize String */
     protected static capitalize(text: string): string {
         return text

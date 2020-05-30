@@ -26,6 +26,9 @@ export class EntityContainer {
 
     private readonly m_Entity: Entity
 
+    /** mechanism to make sure that the result of the promise is still needed */
+    private getPartsPromise: Promise<EntitySprite[]>
+
     public constructor(entity: Entity, sort = true) {
         this.m_Entity = entity
 
@@ -77,6 +80,7 @@ export class EntityContainer {
         const onEntityDestroy = (): void => {
             this.redrawSurroundingEntities()
 
+            this.getPartsPromise = null
             for (const s of this.entitySprites) {
                 s.destroy()
             }
@@ -328,14 +332,21 @@ export class EntityContainer {
     }
 
     public redraw(ignoreConnections?: boolean, sort?: boolean): void {
-        for (const s of this.entitySprites) {
-            s.destroy()
-        }
-        this.entitySprites = EntitySprite.getParts(
+        const promise = EntitySprite.getPartsAsync(
             this.m_Entity,
             this.position,
             ignoreConnections ? undefined : G.bp.entityPositionGrid
         )
-        G.BPC.addEntitySprites(this.entitySprites, sort)
+        this.getPartsPromise = promise
+
+        promise.then(sprites => {
+            if (this.getPartsPromise !== promise) return
+
+            for (const s of this.entitySprites) {
+                s.destroy()
+            }
+            this.entitySprites = sprites
+            G.BPC.addEntitySprites(this.entitySprites, sort)
+        })
     }
 }

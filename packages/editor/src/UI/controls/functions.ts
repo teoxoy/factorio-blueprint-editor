@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js'
-import FD, { IngredientOrResult, ColorWithAlpha } from '@fbe/factorio-data'
+import FD, { IngredientOrResult, ColorWithAlpha, Item, Icon } from '@fbe/factorio-data'
 import { styles } from '../style'
+import G from '../../common/globals'
 
 /**
  * Shade Color
@@ -137,30 +138,58 @@ function DrawControlFace(
     return face
 }
 
-/**
- * Create Icon from Sprite Item information
- * @param item - Item to create Sprite from
- * @param setAnchor - Temporar parameter to disable anchoring (this parameter may be removed again in the future)
- */
-function CreateIcon(itemName: string, setAnchor = true): PIXI.DisplayObject {
-    // inventory group icon is not present in FD.items
-    const iconName = FD.items[itemName]
-        ? FD.items[itemName].icon
-        : FD.inventoryLayout.find(g => g.name === itemName).icon
+/** Create Icon from Sprite Item information */
+function CreateIcon(
+    itemName: string,
+    setAnchor = true,
+    darkBackground = false
+): PIXI.DisplayObject {
+    const item =
+        FD.items[itemName] ||
+        FD.fluids[itemName] ||
+        FD.recipes[itemName] ||
+        FD.signals[itemName] ||
+        // inventory group icon is not present in FD.items
+        FD.inventoryLayout.find(g => g.name === itemName)
 
-    if (iconName !== undefined) {
-        const icon = PIXI.Sprite.from(iconName)
-        if (setAnchor) {
-            icon.anchor.set(0.5, 0.5)
-        }
-        return icon
+    if (item.icon || (item as Item).dark_background_icon) {
+        return generateIcon(item as Icon)
     }
 
-    const icons = FD.items[itemName].icons
-    if (icons !== undefined) {
+    if (item.icons) return generateIcons(item.icons, item.icon_size, item.icon_mipmaps)
+
+    function generateIcon(data: Icon): PIXI.Sprite {
+        const icon =
+            darkBackground && data.dark_background_icon ? data.dark_background_icon : data.icon
+
+        let texture: PIXI.Texture
+
+        if (data.icon_mipmaps) {
+            const targetSize = 32
+            let xOffset = 0
+            for (let i = Math.log2(data.icon_size); i > Math.log2(targetSize); i--) {
+                xOffset += Math.pow(2, i)
+            }
+            texture = G.sheet.get(icon, xOffset, 0, targetSize, targetSize)
+        } else {
+            texture = G.sheet.get(icon)
+        }
+
+        const sprite = new PIXI.Sprite(texture)
+        if (setAnchor) {
+            sprite.anchor.set(0.5)
+        }
+        return sprite
+    }
+
+    function generateIcons(
+        icons: Icon[],
+        icon_size?: number,
+        icon_mipmaps?: number
+    ): PIXI.Container {
         const img = new PIXI.Container()
         for (const icon of icons) {
-            const sprite = PIXI.Sprite.from(icon.icon)
+            const sprite = generateIcon({ icon_size, icon_mipmaps, ...icon })
             if (icon.scale) {
                 sprite.scale.set(icon.scale, icon.scale)
             }
@@ -169,9 +198,6 @@ function CreateIcon(itemName: string, setAnchor = true): PIXI.DisplayObject {
             }
             if (icon.tint) {
                 applyTint(sprite, icon.tint)
-            }
-            if (setAnchor) {
-                sprite.anchor.set(0.5, 0.5)
             }
 
             if (!setAnchor && icon.shift) {
