@@ -212,12 +212,13 @@ function generateCovers(e: FD_Entity, data: IDrawData): SpriteData[] {
         const dir = util.getRelativeDirection(connection)
 
         const needsCover = (): boolean => {
-            if (
-                e.name === 'chemical_plant' &&
-                data.chemicalPlantDontConnectOutput &&
-                data.dir === (dir + 4) % 8
-            ) {
-                return true
+            if (e.name === 'chemical_plant') {
+                // don't generate covers for northen side - the texture already contains those
+                if (dir === 0) return false
+
+                if (data.chemicalPlantDontConnectOutput && data.dir === (dir + 4) % 8) {
+                    return true
+                }
             }
 
             const pos = {
