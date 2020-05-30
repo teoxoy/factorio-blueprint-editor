@@ -758,7 +758,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
 
         case 'offshore_pump':
             return (data: IDrawData) => [
-                (e.picture as DirectionalSpriteData)[util.intToDir(data.dir)],
+                (e.picture as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
             ]
         case 'pipe_to_ground':
             return (data: IDrawData) => [
