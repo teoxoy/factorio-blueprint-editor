@@ -31,6 +31,7 @@ export class EntitySprite extends PIXI.Sprite {
     /** Should be private but TS complains */
     public zIndex: number
     private zOrder: number
+    public cachedBounds: [number, number, number, number]
     private readonly entityPos: IPoint
 
     public constructor(
@@ -68,6 +69,8 @@ export class EntitySprite extends PIXI.Sprite {
         if (data.tint) {
             F.applyTint(this, data.tint)
         }
+
+        this.cacheBounds(data.width, data.height)
 
         return this
     }
@@ -178,5 +181,42 @@ export class EntitySprite extends PIXI.Sprite {
         if (dX !== 0) return dX
 
         return a.id - b.id
+    }
+
+    private cacheBounds(width: number, height: number): void {
+        let minX = width * -this.anchor.x * this.scale.x
+        let minY = height * -this.anchor.y * this.scale.y
+        let maxX = width * (1 - this.anchor.x) * this.scale.x
+        let maxY = height * (1 - this.anchor.y) * this.scale.y
+
+        if (this.rotation !== 0) {
+            const sin = Math.sin(this.rotation)
+            const cos = Math.cos(this.rotation)
+            // 01
+            // 23
+            const x0 = minX * cos - minY * sin
+            const y0 = minX * sin + minY * cos
+
+            const x1 = maxX * cos - minY * sin
+            const y1 = maxX * sin + minY * cos
+
+            const x2 = minX * cos - maxY * sin
+            const y2 = minX * sin + maxY * cos
+
+            const x3 = maxX * cos - maxY * sin
+            const y3 = maxX * sin + maxY * cos
+
+            minX = Math.min(x0, x1, x2, x3)
+            minY = Math.min(y0, y1, y2, y3)
+            maxX = Math.max(x0, x1, x2, x3)
+            maxY = Math.max(y0, y1, y2, y3)
+        }
+
+        this.cachedBounds = [
+            this.position.x + minX,
+            this.position.y + minY,
+            this.position.x + maxX,
+            this.position.y + maxY,
+        ]
     }
 }

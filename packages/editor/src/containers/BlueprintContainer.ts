@@ -87,6 +87,8 @@ export class BlueprintContainer extends PIXI.Container {
     private copyModeUpdateFn: (endX: number, endY: number) => void
     private deleteModeUpdateFn: (endX: number, endY: number) => void
 
+    public viewportCulling = true
+
     // PIXI properties
     public readonly interactive = true
     public readonly interactiveChildren = false
@@ -104,10 +106,10 @@ export class BlueprintContainer extends PIXI.Container {
 
         this.grid = this.generateGrid()
         this.chunkGrid = this.generateChunkGrid(this.chunkOffset)
-        this.tileSprites = new OptimizedContainer()
+        this.tileSprites = new OptimizedContainer(this)
         this.tilePaintSlot = new PIXI.Container()
         this.underlayContainer = new UnderlayContainer()
-        this.entitySprites = new OptimizedContainer()
+        this.entitySprites = new OptimizedContainer(this)
         this.wiresContainer = new WiresContainer(this.bp)
         this.overlayContainer = new OverlayContainer(this)
         this.entityPaintSlot = new PIXI.Container()
@@ -618,12 +620,10 @@ export class BlueprintContainer extends PIXI.Container {
 
         const addBounds = (sprite: EntitySprite): void => {
             const sB = new PIXI.Bounds()
-            const W = sprite.width * sprite.anchor.x
-            const H = sprite.height * sprite.anchor.y
-            sB.minX = sprite.x - W
-            sB.minY = sprite.y - H
-            sB.maxX = sprite.x + W
-            sB.maxY = sprite.y + H
+            sB.minX = sprite.cachedBounds[0]
+            sB.minY = sprite.cachedBounds[1]
+            sB.maxX = sprite.cachedBounds[2]
+            sB.maxY = sprite.cachedBounds[3]
             bounds.addBounds(sB)
         }
 
@@ -644,7 +644,9 @@ export class BlueprintContainer extends PIXI.Container {
         // without it generateTexture returns an empty texture
         this.getLocalBounds()
         const region = this.getBlueprintBounds()
+        this.viewportCulling = false
         const texture = G.app.renderer.generateTexture(this, PIXI.SCALE_MODES.LINEAR, 1, region)
+        this.viewportCulling = true
         const canvas = G.app.renderer.plugins.extract.canvas(texture)
 
         return new Promise(resolve => {
