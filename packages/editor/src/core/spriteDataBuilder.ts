@@ -592,61 +592,61 @@ function getBeltSprites(
                 case 'straight':
                     switch (dir) {
                         case 0:
-                            return bas.north_index
+                            return bas.north_index || 3
                         case 2:
-                            return bas.east_index
+                            return bas.east_index || 1
                         case 4:
-                            return bas.south_index
+                            return bas.south_index || 4
                         case 6:
-                            return bas.west_index
+                            return bas.west_index || 2
                     }
                     break
                 case 'rightCurve':
                     switch (dir) {
                         case 0:
-                            return bas.east_to_north_index
+                            return bas.east_to_north_index || 5
                         case 2:
-                            return bas.south_to_east_index
+                            return bas.south_to_east_index || 9
                         case 4:
-                            return bas.west_to_south_index
+                            return bas.west_to_south_index || 12
                         case 6:
-                            return bas.north_to_west_index
+                            return bas.north_to_west_index || 8
                     }
                     break
                 case 'leftCurve':
                     switch (dir) {
                         case 0:
-                            return bas.west_to_north_index
+                            return bas.west_to_north_index || 7
                         case 2:
-                            return bas.north_to_east_index
+                            return bas.north_to_east_index || 6
                         case 4:
-                            return bas.east_to_south_index
+                            return bas.east_to_south_index || 10
                         case 6:
-                            return bas.south_to_west_index
+                            return bas.south_to_west_index || 11
                     }
                     break
                 case 'stratingEnding':
                     switch (dir) {
                         case 0:
-                            return bas.starting_south_index
+                            return bas.starting_south_index || 13
                         case 2:
-                            return bas.starting_west_index
+                            return bas.starting_west_index || 15
                         case 4:
-                            return bas.starting_north_index
+                            return bas.starting_north_index || 17
                         case 6:
-                            return bas.starting_east_index
+                            return bas.starting_east_index || 19
                     }
                     break
                 case 'endingEnding':
                     switch (dir) {
                         case 0:
-                            return bas.ending_north_index
+                            return bas.ending_north_index || 18
                         case 2:
-                            return bas.ending_east_index
+                            return bas.ending_east_index || 20
                         case 4:
-                            return bas.ending_south_index
+                            return bas.ending_south_index || 14
                         case 6:
-                            return bas.ending_west_index
+                            return bas.ending_west_index || 16
                     }
             }
         }
