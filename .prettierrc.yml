@@ -7,3 +7,8 @@ trailingComma: es5
 bracketSpacing: true
 arrowParens: avoid
 endOfLine: lf
+
+overrides:
+  - files: '*.yml'
+    options:
+      tabWidth: 2

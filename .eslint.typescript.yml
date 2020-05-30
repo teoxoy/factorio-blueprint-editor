@@ -1,34 +1,34 @@
 rules:
-    # TODO: turn on
-    '@typescript-eslint/camelcase': off
-    # TODO: maybe turn off
-    '@typescript-eslint/interface-name-prefix': [error, always]
-    # '@typescript-eslint/naming-conventions':
-    #     - error
-    #     - selector: default
-    #       format: [camelCase]
-    '@typescript-eslint/no-useless-constructor': warn
-    '@typescript-eslint/restrict-plus-operands': error
-    '@typescript-eslint/no-use-before-define': off
-    '@typescript-eslint/consistent-type-assertions':
-        - error
-        - assertionStyle: as
-          objectLiteralTypeAssertions: allow-as-parameter
-    '@typescript-eslint/explicit-member-accessibility': warn
-    '@typescript-eslint/explicit-function-return-type':
-        - warn
-        - allowExpressions: true
-          allowTypedFunctionExpressions: true
-          allowHigherOrderFunctions: true
-    '@typescript-eslint/ban-ts-ignore': off
-    '@typescript-eslint/member-ordering':
-        - warn
-        - default:
-              - signature
-              - static-field
-              - instance-field
-              - abstract-field
-              - constructor
-              - static-method
-              - instance-method
-              - abstract-method
+  # TODO: turn on
+  '@typescript-eslint/camelcase': off
+  # TODO: maybe turn off
+  '@typescript-eslint/interface-name-prefix': [error, always]
+  # '@typescript-eslint/naming-conventions':
+  #     - error
+  #     - selector: default
+  #       format: [camelCase]
+  '@typescript-eslint/no-useless-constructor': warn
+  '@typescript-eslint/restrict-plus-operands': error
+  '@typescript-eslint/no-use-before-define': off
+  '@typescript-eslint/consistent-type-assertions':
+    - error
+    - assertionStyle: as
+      objectLiteralTypeAssertions: allow-as-parameter
+  '@typescript-eslint/explicit-member-accessibility': warn
+  '@typescript-eslint/explicit-function-return-type':
+    - warn
+    - allowExpressions: true
+      allowTypedFunctionExpressions: true
+      allowHigherOrderFunctions: true
+  '@typescript-eslint/ban-ts-ignore': off
+  '@typescript-eslint/member-ordering':
+    - warn
+    - default:
+        - signature
+        - static-field
+        - instance-field
+        - abstract-field
+        - constructor
+        - static-method
+        - instance-method
+        - abstract-method
