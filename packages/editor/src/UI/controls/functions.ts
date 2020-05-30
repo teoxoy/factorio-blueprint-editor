@@ -205,9 +205,9 @@ function CreateIconWithAmount(
     host.addChild(icon)
 
     const amountString: string = amount < 1000 ? amount.toString() : `${Math.floor(amount / 1000)}k`
-    const size: PIXI.TextMetrics = PIXI.TextMetrics.measureText(amountString, styles.icon.amount)
     const text = new PIXI.Text(amountString, styles.icon.amount)
-    text.position.set(x + 33 - size.width, y + 33 - size.height)
+    text.anchor.set(1, 1)
+    text.position.set(x + 33, y + 33)
     host.addChild(text)
 }
 
