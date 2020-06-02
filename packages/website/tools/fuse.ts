@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { fusebox, sparky } from 'fuse-box'
+import { fusebox, sparky, pluginLink } from 'fuse-box'
 import { IDevServerProps } from 'fuse-box/devServer/devServerProps'
 import { Context as FuseBoxContext } from 'fuse-box/core/context'
 import { wrapContents } from 'fuse-box/plugins/pluginStrings'
@@ -35,7 +35,7 @@ class Context {
             resources: {
                 resourcePublicRoot: '/assets',
             },
-            plugins: [this.luaPlugin],
+            plugins: [this.luaPlugin, pluginLink(/\.wasm/, { useDefault: true })],
             cache: { root: this.paths.cache },
             hmr: { plugin: p('./hmr.ts') },
             // sourceMap: { sourceRoot: '' },
@@ -77,19 +77,10 @@ class Context {
     }
 }
 
-const { exec, rm, src, task } = sparky(Context)
-
-task('copy-wasm', async ctx => {
-    rm(join(ctx.paths.dist, 'main.wasm'))
-    // rm(join(ctx.paths.dist, 'main.wasm.map'))
-    await src(join(p('../../lua-runtime/dist'), 'main.wasm')) // 'main.wasm?(.map)'
-        .dest(ctx.paths.dist, 'dist')
-        .exec()
-})
+const { rm, task } = sparky(Context)
 
 task('dev', async ctx => {
     rm(ctx.paths.cache)
-    await exec('copy-wasm')
     await ctx.runDev({
         bundles: {
             distRoot: ctx.paths.dist,
@@ -100,7 +91,6 @@ task('dev', async ctx => {
 
 task('build', async ctx => {
     rm(ctx.paths.dist)
-    await exec('copy-wasm')
     await ctx.runProd({
         bundles: {
             distRoot: ctx.paths.dist,

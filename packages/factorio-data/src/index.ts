@@ -1,4 +1,5 @@
 import createLuaEnv from '@fbe/lua-runtime'
+import wasmFile from '@fbe/lua-runtime/dist/main.wasm'
 import script from './script.lua'
 import * as types from './types'
 
@@ -23,6 +24,7 @@ async function loadData(modules: Record<string, Record<string, string>>): Promis
         createLuaEnv({
             print: str => console.log('LUA', str),
             printErr: str => console.error('LUA', str),
+            locateFile: () => wasmFile,
             onAbort: reject,
         }).then(LUA => {
             try {
