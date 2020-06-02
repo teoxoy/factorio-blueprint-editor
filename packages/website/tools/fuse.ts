@@ -32,6 +32,9 @@ class Context {
             target: 'browser',
             webIndex: { template: p('../src/index.html') },
             devServer: runServer && this.getServerConfig(),
+            resources: {
+                resourcePublicRoot: '/assets',
+            },
             plugins: [this.luaPlugin],
             cache: { root: this.paths.cache },
             hmr: { plugin: p('./hmr.ts') },
