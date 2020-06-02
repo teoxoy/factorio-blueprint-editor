@@ -101,7 +101,9 @@ task('build', async ctx => {
     await ctx.runProd({
         bundles: {
             distRoot: ctx.paths.dist,
-            app: 'app.js',
+            app: 'app.$hash.js',
+            vendor: 'vendor.$hash.js',
+            styles: 'styles.$hash.css',
         },
     })
 })
