@@ -116,6 +116,12 @@ impl std::io::Write for MyBufimp {
     }
 }
 
+fn not_found() -> web::HttpResponse {
+    HttpResponse::NotFound()
+        .content_type("text/plain")
+        .body("404 Not Found")
+}
+
 #[get("/api/graphics/{src:.*}")]
 async fn graphics(
     req: HttpRequest,
@@ -126,7 +132,7 @@ async fn graphics(
     let img_path = FACTORIO_DATA.join(img_src);
 
     let metadata = match tokio::fs::metadata(&img_path).await {
-        Err(_e) => return HttpResponse::NotFound().finish(),
+        Err(_e) => return not_found(),
         Ok(meta) => meta,
     };
 
@@ -164,25 +170,25 @@ async fn graphics(
 
     let img_reader = match image::io::Reader::open(&img_path) {
         Ok(reader) => reader,
-        Err(_e) => return HttpResponse::NotFound().finish(),
+        Err(_e) => return not_found(),
     };
 
     let format = match img_reader.format() {
         Some(format) => format,
-        None => return HttpResponse::NotFound().finish(),
+        None => return not_found(),
     };
 
     let ct = match format {
         image::ImageFormat::Png => header::ContentType::png(),
         image::ImageFormat::Jpeg => header::ContentType::jpeg(),
-        _ => return HttpResponse::NotFound().finish(),
+        _ => return not_found(),
     };
 
     response.set(ct);
 
     let mut img = match img_reader.decode() {
         Ok(img) => img,
-        Err(_e) => return HttpResponse::NotFound().finish(),
+        Err(_e) => return not_found(),
     };
 
     use image::GenericImageView;
@@ -196,10 +202,9 @@ async fn graphics(
 
     let mut buf = MyBufimp::with_capacity(metadata.len() as usize);
 
-    match img.write_to(&mut buf, format) {
-        Ok(_ok) => {}
-        Err(_e) => return HttpResponse::NotFound().finish(),
-    };
+    if let Err(_e) = img.write_to(&mut buf, format) {
+        return not_found();
+    }
 
     response.body(buf.buf)
 }
@@ -588,6 +593,7 @@ async fn main() -> std::io::Result<()> {
             .service(bundle)
             .service(proxy)
             .service(graphics)
+            .default_service(web::to(|| not_found()))
     });
 
     #[cfg(feature = "dev")]
