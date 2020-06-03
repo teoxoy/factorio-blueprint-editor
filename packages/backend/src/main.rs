@@ -23,6 +23,8 @@ use tokio::process::Command;
 #[macro_use]
 extern crate lazy_static;
 
+static FACTORIO_VERSION: &str = "0.18.24";
+
 lazy_static! {
     static ref DATA_DIR: PathBuf = PathBuf::from("./data");
     static ref FACTORIO_DATA: PathBuf = DATA_DIR.join("factorio/data");
@@ -471,18 +473,17 @@ end)";
 async fn setup() -> Result<(), Box<dyn Error>> {
     let username = get_env_var!("FACTORIO_USERNAME")?;
     let token = get_env_var!("FACTORIO_TOKEN")?;
-    let version = get_env_var!("FACTORIO_VERSION")?;
 
     let info_path = FACTORIO_DATA.join("base/info.json");
 
     let same_version = get_info(info_path)
-        .map(|info| info.version == version)
+        .map(|info| info.version == FACTORIO_VERSION)
         .unwrap_or(false);
 
     if same_version {
         println!("Downloaded Factorio version matches required version");
     } else {
-        println!("Downloading Factorio v{}", version);
+        println!("Downloading Factorio v{}", FACTORIO_VERSION);
         if DATA_DIR.is_dir() {
             tokio::fs::remove_dir_all(&*DATA_DIR).await?;
         }
@@ -492,13 +493,13 @@ async fn setup() -> Result<(), Box<dyn Error>> {
         // let mpb = MultiProgress::new();
 
         let d0 = download(
-            get_download_url("alpha", &version, &username, &token),
+            get_download_url("alpha", FACTORIO_VERSION, &username, &token),
             &*DATA_DIR,
             &["factorio/data/*"],
             /* mpb.add( */ ProgressBar::new(0),
         );
         let d1 = download(
-            get_download_url("headless", &version, &username, &token),
+            get_download_url("headless", FACTORIO_VERSION, &username, &token),
             &*DATA_DIR,
             &["factorio/bin/*", "factorio/config-path.cfg"],
             /* mpb.add( */ ProgressBar::new(0),
