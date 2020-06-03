@@ -45,6 +45,11 @@ pub struct ProxyQueryParams {
     url: String,
 }
 
+#[get("/healthz")]
+async fn healthz() -> impl Responder {
+    HttpResponse::NoContent().finish()
+}
+
 #[get("/api/bundle")]
 async fn bundle(req: HttpRequest, data: web::Data<AppState>) -> impl Responder {
     let mut response = HttpResponse::Ok();
@@ -620,6 +625,7 @@ async fn main() -> std::io::Result<()> {
     let mut server = HttpServer::new(move || {
         App::new()
             .data(data.clone())
+            .service(healthz)
             .service(bundle)
             .service(proxy)
             .service(graphics)
