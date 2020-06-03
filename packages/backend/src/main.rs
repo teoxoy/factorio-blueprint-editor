@@ -46,10 +46,22 @@ pub struct ProxyQueryParams {
 }
 
 #[get("/api/bundle")]
-async fn bundle(data: web::Data<AppState>) -> impl Responder {
-    HttpResponse::Ok()
-        .content_type("application/json")
-        .body(&data.bundle)
+async fn bundle(req: HttpRequest, data: web::Data<AppState>) -> impl Responder {
+    let mut response = HttpResponse::Ok();
+
+    let cache_control = header::CacheControl(vec![
+        header::CacheDirective::Public,
+        header::CacheDirective::NoCache,
+    ]);
+    response.set(cache_control);
+
+    let hash = seahash::hash(data.bundle.as_bytes());
+
+    if etag(&req, &mut response, format!("{:X}", hash)) {
+        response.finish()
+    } else {
+        response.content_type("application/json").body(&data.bundle)
+    }
 }
 
 #[get("/api/proxy")]
