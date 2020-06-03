@@ -1,5 +1,6 @@
 use actix_web::{
-    get, http, http::header, web, App, HttpRequest, HttpResponse, HttpServer, Responder,
+    dev::HttpResponseBuilder, get, http, http::header, web, App, HttpRequest, HttpResponse,
+    HttpServer, Responder,
 };
 use async_compression::stream::LzmaDecoder;
 use async_recursion::async_recursion;
@@ -122,6 +123,32 @@ fn not_found() -> web::HttpResponse {
         .body("404 Not Found")
 }
 
+/// Attaches the given ETAG to the response
+///
+/// Returns `true` if request ETAG is the same as current ETAG
+fn etag(req: &HttpRequest, res: &mut HttpResponseBuilder, etag: String) -> bool {
+    let etag = header::EntityTag::weak(etag);
+
+    let existing_etag = req
+        .headers()
+        .get(header::IF_NONE_MATCH)
+        .and_then(|val| val.to_str().ok())
+        .unwrap_or("");
+
+    use std::str::FromStr;
+    let etags_match = header::EntityTag::from_str(existing_etag)
+        .map(|existing_etag| existing_etag.weak_eq(&etag))
+        .unwrap_or(false);
+
+    res.set(header::ETag(etag));
+
+    if etags_match {
+        res.status(http::StatusCode::NOT_MODIFIED);
+    }
+
+    etags_match
+}
+
 #[get("/api/graphics/{src:.*}")]
 async fn graphics(
     req: HttpRequest,
@@ -137,6 +164,13 @@ async fn graphics(
     };
 
     let mut response = HttpResponse::Ok();
+
+    let cache_control = header::CacheControl(vec![
+        header::CacheDirective::Public,
+        header::CacheDirective::MaxAge(600), // 10 min
+    ]);
+    response.set(cache_control);
+
     let mtime = metadata
         .modified()
         .ok()
@@ -144,28 +178,12 @@ async fn graphics(
         .map(|dur| dur.as_secs())
         .unwrap_or(0);
 
-    let cache_control = header::CacheControl(vec![
-        header::CacheDirective::Public,
-        header::CacheDirective::MaxAge(600),
-    ]);
-    response.set(cache_control);
-
-    let etag = header::EntityTag::weak(format!("{:X}-{:X}", mtime, metadata.len()));
-    response.set(header::ETag(etag));
-
-    let existing_etag = req
-        .headers()
-        .get(header::IF_NONE_MATCH)
-        .and_then(|val| val.to_str().ok())
-        .unwrap_or("");
-
-    use std::str::FromStr;
-    let etags_match = header::EntityTag::from_str(existing_etag)
-        .map(|etag| etag.weak_eq(&etag))
-        .unwrap_or(false);
-
-    if etags_match {
-        return response.status(http::StatusCode::NOT_MODIFIED).finish();
+    if etag(
+        &req,
+        &mut response,
+        format!("{:X}-{:X}", mtime, metadata.len()),
+    ) {
+        return response.finish();
     }
 
     let img_reader = match image::io::Reader::open(&img_path) {
