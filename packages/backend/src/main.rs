@@ -641,7 +641,7 @@ async fn main() -> std::io::Result<()> {
     server = if let Some(l) = listener {
         server.listen(l)?
     } else {
-        server.bind("0.0.0.0:80")?
+        server.bind("0.0.0.0:85")?
     };
 
     server.run().await
