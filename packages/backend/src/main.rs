@@ -178,7 +178,7 @@ async fn graphics(
     let img_path = FACTORIO_DATA.join(img_src);
 
     let metadata = match tokio::fs::metadata(&img_path).await {
-        Err(_e) => return not_found(),
+        Err(_) => return not_found(),
         Ok(meta) => meta,
     };
 
@@ -205,45 +205,39 @@ async fn graphics(
         return response.finish();
     }
 
-    let img_reader = match image::io::Reader::open(&img_path) {
-        Ok(reader) => reader,
-        Err(_e) => return not_found(),
+    let get_img = move || {
+        let img_reader = image::io::Reader::open(&img_path).map_err(|_| ())?;
+
+        let format = img_reader.format().ok_or(())?;
+
+        let content_type = match format {
+            image::ImageFormat::Png => header::ContentType::png(),
+            image::ImageFormat::Jpeg => header::ContentType::jpeg(),
+            _ => return Err(()),
+        };
+
+        let mut img = img_reader.decode().map_err(|_| ())?;
+
+        use image::GenericImageView;
+
+        if query.w != 0
+            && query.h != 0
+            && (query.x != 0 || query.y != 0 || img.width() != query.w || img.height() != query.h)
+        {
+            img = img.crop(query.x, query.y, query.w, query.h);
+        }
+
+        let mut buf = MyBufimp::with_capacity(metadata.len() as usize);
+
+        img.write_to(&mut buf, format).map_err(|_| ())?;
+
+        Ok((content_type, buf.buf))
     };
 
-    let format = match img_reader.format() {
-        Some(format) => format,
-        None => return not_found(),
-    };
-
-    let ct = match format {
-        image::ImageFormat::Png => header::ContentType::png(),
-        image::ImageFormat::Jpeg => header::ContentType::jpeg(),
-        _ => return not_found(),
-    };
-
-    response.set(ct);
-
-    let mut img = match img_reader.decode() {
-        Ok(img) => img,
-        Err(_e) => return not_found(),
-    };
-
-    use image::GenericImageView;
-
-    if query.w != 0
-        && query.h != 0
-        && (query.x != 0 || query.y != 0 || img.width() != query.w || img.height() != query.h)
-    {
-        img = img.crop(query.x, query.y, query.w, query.h);
+    match web::block(get_img).await {
+        Ok((content_type, body)) => response.set(content_type).body(body),
+        Err(_) => not_found(),
     }
-
-    let mut buf = MyBufimp::with_capacity(metadata.len() as usize);
-
-    if let Err(_e) = img.write_to(&mut buf, format) {
-        return not_found();
-    }
-
-    response.body(buf.buf)
 }
 
 #[async_recursion]
