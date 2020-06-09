@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: factorio-blueprint-editor
+  labels:
+    app: factorio-blueprint-editor
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: factorio-blueprint-editor
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: factorio-blueprint-editor
+    spec:
+      imagePullSecrets:
+        - name: docker-github-packages
+      containers:
+        - name: frontend
+          image: <FRONTEND_IMAGE>
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 125m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+        - name: backend
+          image: <BACKEND_IMAGE>
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 85
+          envFrom:
+            - secretRef:
+                name: factorio-blueprint-editor-backend
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1024Mi
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 85
+            failureThreshold: 50
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 85
+            initialDelaySeconds: 5
+            failureThreshold: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 85
+            initialDelaySeconds: 5
+            periodSeconds: 5
