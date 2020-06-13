@@ -1,5 +1,5 @@
 use async_compression::stream::LzmaDecoder;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use std::env;
 use std::error::Error;
@@ -90,25 +90,28 @@ pub async fn setup(
         }
         tokio::fs::create_dir_all(data_dir).await?;
 
-        // https://github.com/mitsuhiko/indicatif/issues/125
-        // let mpb = MultiProgress::new();
+        let mpb = MultiProgress::new();
 
         let d0 = download(
             get_download_url("alpha", factorio_version, &username, &token),
             data_dir,
             &["factorio/data/*"],
-            /* mpb.add( */ ProgressBar::new(0),
+            mpb.add(ProgressBar::new(0)),
         );
         let d1 = download(
             get_download_url("headless", factorio_version, &username, &token),
             data_dir,
             &["factorio/bin/*", "factorio/config-path.cfg"],
-            /* mpb.add( */ ProgressBar::new(0),
+            mpb.add(ProgressBar::new(0)),
         );
 
-        // mpb.join()?;
+        async fn wait_for_progress_bar(mpb: MultiProgress) -> Result<(), Box<dyn Error>> {
+            tokio::task::spawn_blocking(move || mpb.join())
+                .await?
+                .map_err(|e| Box::from(e))
+        }
 
-        tokio::try_join!(d0, d1)?;
+        tokio::try_join!(d0, d1, wait_for_progress_bar(mpb))?;
     }
 
     Ok(())
