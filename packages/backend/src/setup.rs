@@ -4,8 +4,6 @@ use serde::Deserialize;
 use std::env;
 use std::error::Error;
 use std::ffi::OsStr;
-use std::fs::File;
-use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use tokio::process::Command;
@@ -27,10 +25,9 @@ struct Info {
     // dependencies: Vec<String>,
 }
 
-fn get_info<P: AsRef<Path>>(path: P) -> Result<Info, Box<dyn Error>> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    let p: Info = serde_json::from_reader(reader)?;
+async fn get_info<P: AsRef<Path>>(path: P) -> Result<Info, Box<dyn Error>> {
+    let contents = tokio::fs::read_to_string(path).await?;
+    let p: Info = serde_json::from_str(&contents)?;
     Ok(p)
 }
 
@@ -80,6 +77,7 @@ pub async fn setup(
     let info_path = factorio_data.join("base/info.json");
 
     let same_version = get_info(info_path)
+        .await
         .map(|info| info.version == factorio_version)
         .unwrap_or(false);
 
