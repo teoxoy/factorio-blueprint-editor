@@ -30,5 +30,6 @@ indicatif = "0.14.0"
 listenfd = { version = "0.3", optional = true }
 dotenv = { version = "0.15.0", optional = true }
 seahash = "4.0.0"
+cached = "0.13.1"
 # async-tar = "0.1.1"
 # tokio-tar = "0.2.0"

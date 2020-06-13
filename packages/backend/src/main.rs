@@ -4,7 +4,8 @@ use actix_web::{
 };
 use async_compression::stream::LzmaDecoder;
 use async_recursion::async_recursion;
-use bytes::BytesMut;
+use bytes::{Bytes, BytesMut};
+use cached::proc_macro::cached;
 use globset::{GlobBuilder, GlobMatcher};
 use indicatif::{ProgressBar, ProgressStyle};
 use regex::Regex;
@@ -33,6 +34,16 @@ lazy_static! {
 macro_rules! get_env_var {
     ($name:expr) => {
         env::var($name).map_err(|_| format!("{} env variable is missing", $name))
+    };
+}
+
+macro_rules! either {
+    ($test:expr, $true_expr:expr, $false_expr:expr) => {
+        if $test {
+            $true_expr
+        } else {
+            $false_expr
+        }
     };
 }
 
@@ -114,28 +125,6 @@ pub struct GraphicsQueryParams {
     h: u32,
 }
 
-struct MyBufimp {
-    buf: BytesMut,
-}
-
-impl MyBufimp {
-    pub fn with_capacity(capacity: usize) -> MyBufimp {
-        MyBufimp {
-            buf: BytesMut::with_capacity(capacity),
-        }
-    }
-}
-
-impl std::io::Write for MyBufimp {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.buf.extend(buf);
-        Ok(buf.len())
-    }
-    fn flush(&mut self) -> std::io::Result<()> {
-        Ok(())
-    }
-}
-
 fn not_found() -> web::HttpResponse {
     HttpResponse::NotFound()
         .content_type("text/plain")
@@ -168,6 +157,34 @@ fn etag(req: &HttpRequest, res: &mut HttpResponseBuilder, etag: String) -> bool 
     etags_match
 }
 
+#[cached]
+async fn get_len_and_mtime(img_path: PathBuf) -> Option<(u64, u64)> {
+    let file = tokio::fs::File::open(img_path).await.ok()?;
+    let metadata = file.metadata().await.ok()?;
+    let mtime = metadata
+        .modified()
+        .ok()
+        .and_then(|time| time.duration_since(UNIX_EPOCH).ok())
+        .map(|dur| dur.as_secs())
+        .unwrap_or(0);
+    Some((metadata.len(), mtime))
+}
+
+#[cached]
+async fn get_image_data(img_path: PathBuf) -> Option<(Bytes, image::ImageFormat, (u32, u32))> {
+    let mut file = tokio::fs::File::open(img_path.clone()).await.ok()?;
+    let (len, _) = get_len_and_mtime(img_path).await?;
+    let mut buffer = Vec::with_capacity(len as usize);
+    use tokio::io::AsyncReadExt;
+    file.read_to_end(&mut buffer).await.ok()?;
+    let buffer = Bytes::from(buffer);
+    let format = image::guess_format(&buffer).ok()?;
+    let dimensions = image::io::Reader::with_format(std::io::Cursor::new(buffer.clone()), format)
+        .into_dimensions()
+        .ok()?;
+    Some((buffer, format, dimensions))
+}
+
 #[get("/api/graphics/{src:.*}")]
 async fn graphics(
     req: HttpRequest,
@@ -177,11 +194,6 @@ async fn graphics(
     let img_src = path.src.replacen("__", "", 2);
     let img_path = FACTORIO_DATA.join(img_src);
 
-    let metadata = match tokio::fs::metadata(&img_path).await {
-        Err(_) => return not_found(),
-        Ok(meta) => meta,
-    };
-
     let mut response = HttpResponse::Ok();
 
     let cache_control = header::CacheControl(vec![
@@ -190,52 +202,43 @@ async fn graphics(
     ]);
     response.set(cache_control);
 
-    let mtime = metadata
-        .modified()
-        .ok()
-        .and_then(|time| time.duration_since(UNIX_EPOCH).ok())
-        .map(|dur| dur.as_secs())
-        .unwrap_or(0);
+    let (len, mtime) = match get_len_and_mtime(img_path.clone()).await {
+        None => return not_found(),
+        Some(data) => data,
+    };
 
-    if etag(
-        &req,
-        &mut response,
-        format!("{:X}-{:X}", mtime, metadata.len()),
-    ) {
+    if etag(&req, &mut response, format!("{:X}-{:X}", mtime, len)) {
         return response.finish();
     }
 
-    let get_img = move || {
-        let img_reader = image::io::Reader::open(&img_path).map_err(|_| ())?;
-
-        let format = img_reader.format().ok_or(())?;
-
-        let content_type = match format {
-            image::ImageFormat::Png => header::ContentType::png(),
-            image::ImageFormat::Jpeg => header::ContentType::jpeg(),
-            _ => return Err(()),
-        };
-
-        let mut img = img_reader.decode().map_err(|_| ())?;
-
-        use image::GenericImageView;
-
-        if query.w != 0
-            && query.h != 0
-            && (query.x != 0 || query.y != 0 || img.width() != query.w || img.height() != query.h)
-        {
-            img = img.crop(query.x, query.y, query.w, query.h);
-        }
-
-        let mut buf = MyBufimp::with_capacity(metadata.len() as usize);
-
-        img.write_to(&mut buf, format).map_err(|_| ())?;
-
-        Ok((content_type, buf.buf))
+    let (buffer, format, (width, height)) = match get_image_data(img_path).await {
+        None => return not_found(),
+        Some(data) => data,
     };
 
-    match web::block(get_img).await {
-        Ok((content_type, body)) => response.set(content_type).body(body),
+    let content_type = match format {
+        image::ImageFormat::Png => header::ContentType::png(),
+        image::ImageFormat::Jpeg => header::ContentType::jpeg(),
+        _ => return not_found(),
+    };
+    response.set(content_type);
+
+    let x = query.x.min(width);
+    let y = query.y.min(height);
+    let w = either!(query.w == 0, width, query.w.min(width));
+    let h = either!(query.h == 0, height, query.h.min(height));
+
+    if x == 0 && y == 0 && w == width && h == height {
+        return response.body(buffer);
+    }
+
+    use bytes::buf::BufMutExt;
+    let mut writer = BytesMut::new().writer();
+    let data = image::load_from_memory_with_format(&buffer, format)
+        .map(|mut img| img.crop(x, y, w, h).write_to(&mut writer, format));
+
+    match data {
+        Ok(_) => response.body(writer.into_inner()),
         Err(_) => not_found(),
     }
 }
