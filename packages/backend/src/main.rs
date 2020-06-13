@@ -30,6 +30,23 @@ pub struct ProxyQueryParams {
     url: String,
 }
 
+#[derive(Deserialize)]
+pub struct GraphicsPathParams {
+    src: String,
+}
+
+#[derive(Deserialize)]
+pub struct GraphicsQueryParams {
+    #[serde(default)]
+    x: u32,
+    #[serde(default)]
+    y: u32,
+    #[serde(default)]
+    w: Option<u32>,
+    #[serde(default)]
+    h: Option<u32>,
+}
+
 #[get("/healthz")]
 async fn _healthz() -> impl Responder {
     HttpResponse::NoContent().finish()
@@ -76,23 +93,6 @@ async fn _proxy(query: web::Query<ProxyQueryParams>, data: web::Data<AppState>) 
         Ok(bytes) => response.body(bytes),
         Err(_) => util::not_found(),
     }
-}
-
-#[derive(Deserialize)]
-pub struct GraphicsPathParams {
-    src: String,
-}
-
-#[derive(Deserialize)]
-pub struct GraphicsQueryParams {
-    #[serde(default)]
-    x: u32,
-    #[serde(default)]
-    y: u32,
-    #[serde(default)]
-    w: Option<u32>,
-    #[serde(default)]
-    h: Option<u32>,
 }
 
 #[cached]
