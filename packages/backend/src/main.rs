@@ -19,16 +19,6 @@ lazy_static! {
     static ref FACTORIO_DATA: PathBuf = DATA_DIR.join("factorio/data");
 }
 
-macro_rules! either {
-    ($test:expr, $true_expr:expr, $false_expr:expr) => {
-        if $test {
-            $true_expr
-        } else {
-            $false_expr
-        }
-    };
-}
-
 #[derive(Clone)]
 struct AppState {
     client: reqwest::Client,
@@ -100,9 +90,9 @@ pub struct GraphicsQueryParams {
     #[serde(default)]
     y: u32,
     #[serde(default)]
-    w: u32,
+    w: Option<u32>,
     #[serde(default)]
-    h: u32,
+    h: Option<u32>,
 }
 
 #[cached]
@@ -173,8 +163,8 @@ async fn _graphics(
 
     let x = query.x.min(width);
     let y = query.y.min(height);
-    let w = either!(query.w == 0, width, query.w.min(width));
-    let h = either!(query.h == 0, height, query.h.min(height));
+    let w = query.w.unwrap_or(width).min(width - x);
+    let h = query.h.unwrap_or(height).min(height - y);
 
     if x == 0 && y == 0 && w == width && h == height {
         return response.body(buffer);
