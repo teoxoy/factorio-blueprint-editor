@@ -1443,10 +1443,12 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                     true
                 ).map(sd => addToShift(b1Offset, sd))
 
+                const dir = util.intToDir(data.dir)
                 return [
                     ...belt0Parts,
                     ...belt1Parts,
-                    (e.structure as DirectionalSpriteData)[util.intToDir(data.dir)],
+                    e.structure_patch[dir],
+                    (e.structure as DirectionalSpriteData)[dir],
                 ]
             }
         case 'underground_belt':

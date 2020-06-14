@@ -324,6 +324,7 @@ export interface Entity {
         | DirectionalSpriteData
         | SpriteSheets
         | DirectionalSpriteLayers
+    structure_patch?: DirectionalSpriteData
     structure?: DirectionalSpriteData | DirectionalSpriteLayers | UndergroundBeltStructure
 
     /** https://forums.factorio.com/65627 */
