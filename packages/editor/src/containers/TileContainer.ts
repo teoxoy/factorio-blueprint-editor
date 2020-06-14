@@ -78,4 +78,18 @@ export class TileContainer {
             }
         )
     }
+
+    public static generateSprites(
+        name: string,
+        position: IPoint,
+        positions: IPoint[]
+    ): Promise<EntitySprite[]> {
+        const parts = positions.map(p => {
+            const s = TileContainer.generateSprite(name, p.x + position.x, p.y + position.y)
+            s.position.set(p.x * 32, p.y * 32)
+            s.alpha = 0.5
+            return s
+        })
+        return G.sheet2.onAllLoaded(parts.map(s => s.texture)).then(() => parts)
+    }
 }

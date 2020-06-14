@@ -170,7 +170,7 @@ export class DynamicSpritesheet extends EventEmitter {
             }
         })
         this.subtextures.set(key, texture)
-
+        this.textureToEntry.set(texture, this.textureToEntry.get(mainTexture))
         return texture
     }
 
