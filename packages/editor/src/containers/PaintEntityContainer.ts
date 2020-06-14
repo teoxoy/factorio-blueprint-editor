@@ -14,6 +14,9 @@ export class PaintEntityContainer extends PaintContainer {
     /** This is only a reference */
     private undergroundLine: PIXI.Container
 
+    /** mechanism to make sure that the result of the promise is still needed */
+    private getPartsPromise: Promise<EntitySprite[]>
+
     public constructor(bpc: BlueprintContainer, name: string, direction: number) {
         super(bpc, name)
 
@@ -131,13 +134,21 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     protected redraw(): void {
-        EntitySprite.getPartsAsync({
+        this.bpc.cursor = 'wait'
+        this.removeChildren()
+
+        const promise = EntitySprite.getPartsAsync({
             name: this.name,
             direction: this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
             directionType: this.directionType,
-        }).then(sprites => {
-            this.removeChildren()
+        })
+        this.getPartsPromise = promise
+
+        promise.then(sprites => {
+            if (this.getPartsPromise !== promise) return
+
             this.addChild(...sprites)
+            this.bpc.cursor = 'pointer'
         })
     }
 
