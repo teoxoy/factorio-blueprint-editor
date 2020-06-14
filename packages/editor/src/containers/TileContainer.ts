@@ -34,8 +34,8 @@ export class TileContainer {
             filename = variant.picture
             countX = variant.count
             countY = 1
-            X = Math.floor(Math.random() * countX)
-            Y = Math.floor(Math.random() * countY)
+            X = Math.floor(Math.random() * (countX - 1))
+            Y = Math.floor(Math.random() * (countY - 1))
         } else {
             let variant = variants.material_background
             if (G.hr) {
@@ -46,12 +46,8 @@ export class TileContainer {
             countY = 8
             X = Math.abs(Math.floor(x)) % countX
             Y = Math.abs(Math.floor(y)) % countY
-            if (Math.sign(x) === -1) {
-                X = countX - 1 - X
-            }
-            if (Math.sign(y) === -1) {
-                Y = countY - 1 - Y
-            }
+            if (Math.sign(x) === -1) X = (countX - X) % countX
+            if (Math.sign(y) === -1) Y = (countY - Y) % countY
         }
 
         const mainTexture = G.sheet2.get(filename, 0, 0, countX * width, countY * height)
