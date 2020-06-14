@@ -89,9 +89,7 @@ export class DynamicSpritesheet extends EventEmitter {
     private add(id: string, src: string): IEntry {
         this.loading += 1
         const image = new Image()
-        image.onload = () => {
-            entry.width = entry.image.width
-            entry.height = entry.image.height
+        const finish = (): void => {
             this.loading -= 1
             if (this.loading === 0) {
                 if (this.rendering) {
@@ -100,6 +98,16 @@ export class DynamicSpritesheet extends EventEmitter {
                     this.render()
                 }
             }
+        }
+        image.onload = () => {
+            entry.width = entry.image.width
+            entry.height = entry.image.height
+            finish()
+        }
+        image.onerror = () => {
+            console.error('Could not load image:', id)
+            entry.ready = true
+            finish()
         }
         image.src = src
         const texture = new PIXI.Texture(PIXI.Texture.EMPTY.baseTexture)
