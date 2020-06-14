@@ -813,6 +813,28 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
             ]
 
         case 'electric_mining_drill':
+            return (data: IDrawData) => {
+                const dir = util.intToDir(data.dir)
+                const layers0 = e.graphics_set.animation[dir].layers
+
+                const animDir = `${dir}_animation` as
+                    | 'north_animation'
+                    | 'east_animation'
+                    | 'south_animation'
+                    | 'west_animation'
+
+                const layers1 = e.graphics_set.working_visualisations
+                    .filter(vis => vis.always_draw)
+                    .map(vis => vis[animDir])
+                    .filter(vis => !!vis)
+                    .flatMap(vis =>
+                        (vis as SpriteLayers).layers
+                            ? (vis as SpriteLayers).layers
+                            : [vis as SpriteData]
+                    )
+
+                return [...layers0, ...layers1].filter(layer => !layer.draw_as_shadow)
+            }
         case 'pump':
             return (data: IDrawData) => [
                 (e.animations as DirectionalSpriteData)[util.intToDir(data.dir)],

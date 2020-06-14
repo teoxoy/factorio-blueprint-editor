@@ -12,7 +12,7 @@ mod util;
 #[macro_use]
 extern crate lazy_static;
 
-static FACTORIO_VERSION: &str = "0.18.24";
+static FACTORIO_VERSION: &str = "0.18.31";
 
 lazy_static! {
     static ref DATA_DIR: PathBuf = PathBuf::from("./data");

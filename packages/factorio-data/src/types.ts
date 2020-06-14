@@ -298,6 +298,16 @@ export interface Entity {
     drawing_box?: number[][]
     drawing_boxes?: DrawingBoxes
 
+    graphics_set?: {
+        animation?: DirectionalSpriteLayers
+        working_visualisations?: Array<{
+            always_draw?: boolean
+            north_animation?: SpriteData | SpriteLayers
+            east_animation?: SpriteData | SpriteLayers
+            south_animation?: SpriteData | SpriteLayers
+            west_animation?: SpriteData | SpriteLayers
+        }>
+    }
     animation?: SpriteData | SpriteLayers | DirectionalSpriteData | DirectionalSpriteLayers
     animations?: SpriteData | DirectionalSpriteData | DirectionalSpriteLayers
     picture?: SpriteData | SpriteLayers | DirectionalSpriteData | DirectionalSpriteLayers
