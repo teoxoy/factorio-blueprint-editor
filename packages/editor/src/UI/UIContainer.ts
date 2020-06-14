@@ -58,7 +58,9 @@ export class UIContainer extends PIXI.Container {
         selectedCallBack?: (selectedItem: string) => void
     ): Promise<void> {
         const inv = new InventoryDialog(title, itemsFilter, selectedCallBack)
+        G.BPC.cursor = 'wait'
         await G.sheet.awaitSprites()
+        G.BPC.cursor = 'inherit'
         if (Dialog.isOpen(inv)) this.dialogsContainer.addChild(inv)
     }
 
