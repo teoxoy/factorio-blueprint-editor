@@ -7,7 +7,8 @@
     "scripts": {
         "setup": "ts-node -T tools/build.ts setup",
         "compile": "ts-node -T tools/build.ts compile",
-        "compile:deps": "ts-node -T tools/build.ts compile-deps"
+        "compile:deps": "ts-node -T tools/build.ts compile-deps",
+        "update:deps": "tools/update.sh"
     },
     "devDependencies": {
         "@types/emscripten": "^1.39.4",
