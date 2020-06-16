@@ -9,7 +9,7 @@ const emcc = join(emsdkPath, 'upstream/emscripten/emcc')
 const emsdk = join(emsdkPath, 'emsdk')
 
 const srcPath = join(__dirname, '../src')
-const libsPath = join(__dirname, '../libs')
+const depsPath = join(__dirname, '../deps')
 const distPath = join(__dirname, '../dist')
 const cachePath = join(__dirname, './cache')
 
@@ -62,7 +62,7 @@ async function compileDeps(): Promise<void> {
     async function compileLua(): Promise<void> {
         const LUA_FILES = await glob('*.c', {
             ignore: ['lua.c', 'luac.c'],
-            cwd: join(libsPath, 'lua'),
+            cwd: join(depsPath, 'lua'),
             absolute: true,
         })
         // prettier-ignore
@@ -85,14 +85,14 @@ async function compileDeps(): Promise<void> {
 
     async function compileRapidJSON(): Promise<void> {
         const RAPIDJSON_FILES = await glob('*.cpp', {
-            cwd: join(libsPath, 'lua-rapidjson'),
+            cwd: join(depsPath, 'lua-rapidjson'),
             absolute: true,
         })
         // prettier-ignore
         const rapidjson = [
             ...emccConfigArgs,
             '-s', 'WASM=1',
-            `-I${libsPath}`,
+            `-I${depsPath}`,
             '-g',
             '-x', 'c++',
             '-std=c++11',
@@ -141,7 +141,7 @@ async function compile(): Promise<void> {
         '-s', 'STRICT=1',
         '-s', 'ENVIRONMENT="web"',
         '-s', 'EXIT_RUNTIME=1',
-        `-I${libsPath}`,
+        `-I${depsPath}`,
         '-x', 'c++',
         '-std=c++11',
         '-o', join(distPath, 'main.js'),

@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "packages/lua-runtime/libs/**",
+                "packages/lua-runtime/deps/**",
                 "packages/lua-runtime/tools/emsdk/upstream/emscripten/system/include/**"
             ],
             "defines": [],
