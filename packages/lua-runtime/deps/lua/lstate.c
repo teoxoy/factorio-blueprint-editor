@@ -137,11 +137,11 @@ static void stack_init (lua_State *L1, lua_State *L) {
   int i; CallInfo *ci;
   /* initialize stack array */
   L1->stack = luaM_newvector(L, BASIC_STACK_SIZE, TValue);
-  L1->stack_size = BASIC_STACK_SIZE;
+  L1->stacksize = BASIC_STACK_SIZE;
   for (i = 0; i < BASIC_STACK_SIZE; i++)
     setnilvalue(L1->stack + i);  /* erase new stack */
   L1->top = L1->stack;
-  L1->stack_last = L1->stack + L1->stack_size - EXTRA_STACK;
+  L1->stack_last = L1->stack + L1->stacksize - EXTRA_STACK;
   /* initialize first ci */
   ci = &L1->base_ci;
   ci->next = ci->previous = NULL;
@@ -158,7 +158,7 @@ static void freestack (lua_State *L) {
     return;  /* stack not completely built yet */
   L->ci = &L->base_ci;  /* free the entire 'ci' list */
   luaE_freeCI(L);
-  luaM_freearray(L, L->stack, L->stack_size);  /* free stack array */
+  luaM_freearray(L, L->stack, L->stacksize);  /* free stack array */
 }
 
 
@@ -206,7 +206,7 @@ static void preinit_state (lua_State *L, global_State *g) {
   G(L) = g;
   L->stack = NULL;
   L->ci = NULL;
-  L->stack_size = 0;
+  L->stacksize = 0;
   L->errorJmp = NULL;
   L->nCcalls = 0;
   L->hook = NULL;
@@ -341,5 +341,3 @@ LUA_API void lua_close (lua_State *L) {
   luai_userstateclose(L);
   close_state(L);
 }
-
-

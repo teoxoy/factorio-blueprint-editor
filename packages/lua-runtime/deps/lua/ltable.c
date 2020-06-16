@@ -45,7 +45,7 @@
 #define MAXBITS		(LUAI_BITSINT-2)
 #endif
 
-#define MAXABITS	10
+#define MAXABITS	LUA_MAX_SEQUENTIAL_ARRAY_SIZE_BITS
 #define MAXASIZE	(1 << MAXABITS)
 
 
@@ -323,7 +323,7 @@ static void rehash (lua_State *L, Table *t, int numkey) {
   int nhsize;
   Node* n;
 
-  nasize = twoto(luaO_ceillog2(numkey > t->sizearray ? numkey : t->sizearray));
+  nasize = numkey==0 ? t->sizearray : twoto(luaO_ceillog2(numkey > t->sizearray ? numkey : t->sizearray));
 
   nhsize = 0;
   n = t->firstadded;
@@ -583,6 +583,109 @@ void luaH_setint (lua_State *L, Table *t, int key, TValue *value) {
   setobj2t(L, cell, value);
 }
 
+
+// insert a list of values from stack to the table, 
+// with sequential integer keys in the table starting at `firstkey`,
+// and values from the stack starting at `firstval`
+void luaH_setlist(lua_State *L, Table *t, unsigned int firstkey, StkId firstval, unsigned int count)
+{
+  if (firstkey < 1)
+    luaG_runerror(L, "invalid firstkey to " LUA_QL("setlist"));
+  // if SETLIST follows an open CALL (or similar) that ends up returning zero results
+  // count will still be zero. There is nothing to do in this case.
+  if (count == 0)
+    return;
+  if (count < 1)
+    luaG_runerror(L, "invalid count to " LUA_QL("setlist"));
+
+
+  int i = 0;
+  int last = firstkey + count - 1;
+
+  // if any part of this list can be array part, resize the array to fit it
+  int newasize = t->sizearray;
+  if (firstkey <= (1 << LUA_MAX_SEQUENTIAL_ARRAY_SIZE_BITS) && last > t->sizearray)
+    newasize = last <= (1 << LUA_MAX_SEQUENTIAL_ARRAY_SIZE_BITS) ? last : (1 << LUA_MAX_SEQUENTIAL_ARRAY_SIZE_BITS);
+
+  // how much overflows into hash part?
+  int hgrow = 0;
+  if (firstkey > newasize)
+  {
+    hgrow = count;
+  }
+  else if (firstkey < newasize && last > newasize)
+  {
+    hgrow = last - newasize;
+  }
+
+  // does the overflow require rehashing?
+  int newhsize = sizenode(t);
+  if (hgrow > 0)
+  {
+    // if lastfree is too tight, just assume it's full and go to the next bigger size...
+    if ((t->lastfree - t->node) < hgrow*2)
+    {
+      newhsize += hgrow;
+    }
+    else // otherwise count the freespace to see if there's enough
+    {
+      int neededspace = hgrow;
+      Node* lastfree = t->lastfree;
+      while (lastfree > t->node) {
+        lastfree--;
+        if (ttisnil(gkey(lastfree)))
+        {
+          neededspace--;
+          if (neededspace == 0)
+            break;
+        }
+      }
+      if (neededspace > 0)
+      {
+        newhsize += neededspace;
+      }
+    }
+  }
+  
+  // resize will always rehash anyway, so do it all at once, and only if really needed
+  if (newasize > t->sizearray || newhsize > sizenode(t))
+    luaH_resize(L, t, newasize, newhsize);
+  
+  // if any fits in array part, just copy them in
+  while (i < count && firstkey+i <= t->sizearray)
+  {
+    setobj2t(L, &t->array[firstkey + i - 1], firstval + i);
+    luaC_barrierback(L, obj2gco(t), firstval + i);
+    i++;
+  }
+
+  // any left for hash part?
+  while (i < count)
+  {
+    lua_Number nk = cast_num(firstkey + i);
+    Node *n = hashnum(t, nk);
+    TValue *p = NULL;
+    do {  /* check whether `key' is somewhere in the chain */
+      if (ttisnumber(gkey(n)) && luai_numeq(nvalue(gkey(n)), nk))
+      {
+        checknilnode(t, n);
+        p = gval(n);  /* that's it */
+        break;
+      }
+      else n = gnext(n);
+    } while (n);
+
+    if (!p)
+    {
+      TValue k;
+      setnvalue(&k, nk);
+      p = luaH_newkey(L, t, &k);
+    }
+    setobj2t(L, p, firstval + i);
+    luaC_barrierback(L, obj2gco(t), firstval + i);
+    i++;
+  }
+}
 
 static int unbound_search (Table *t, unsigned int j) {
   unsigned int i = j;  /* i is zero or a present index */

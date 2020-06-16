@@ -377,7 +377,7 @@ typedef struct Proto {
   GCObject *gclist;
   lu_byte numparams;  /* number of fixed parameters */
   lu_byte is_vararg;
-  lu_byte maxstack_size;  /* maximum stack used by this function */
+  lu_byte maxstacksize;  /* maximum stack used by this function */
 } Proto;
 
 
@@ -503,4 +503,3 @@ LUAI_FUNC void lua_linkgcobject(GCObject** list, GCObject* item);
 
 
 #endif
-

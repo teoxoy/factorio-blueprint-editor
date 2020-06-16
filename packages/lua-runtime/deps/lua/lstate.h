@@ -160,7 +160,7 @@ struct lua_State {
   const Instruction *oldpc;  /* last pc traced */
   StkId stack_last;  /* last free slot in the stack */
   StkId stack;  /* stack base */
-  int stack_size;
+  int stacksize;
   unsigned short nny;  /* number of non-yieldable calls in stack */
   unsigned short nCcalls;  /* number of nested C calls */
   lu_byte hookmask;
@@ -226,4 +226,3 @@ LUAI_FUNC void luaE_freeCI (lua_State *L);
 
 
 #endif
-

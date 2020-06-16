@@ -142,7 +142,7 @@ static void DumpFunction(const Proto* f, DumpState* D)
  DumpInt(f->lastlinedefined,D);
  DumpChar(f->numparams,D);
  DumpChar(f->is_vararg,D);
- DumpChar(f->maxstack_size,D);
+ DumpChar(f->maxstacksize,D);
  DumpCode(f,D);
  DumpConstants(f,D);
  DumpUpvalues(f,D);

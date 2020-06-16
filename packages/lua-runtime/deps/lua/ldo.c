@@ -191,20 +191,20 @@ static void correctstack (lua_State *L, TValue *oldstack) {
 
 void luaD_reallocstack (lua_State *L, int newsize) {
   TValue *oldstack = L->stack;
-  int lim = L->stack_size;
+  int lim = L->stacksize;
   lua_assert(newsize <= LUAI_MAXSTACK || newsize == ERRORSTACKSIZE);
-  lua_assert(L->stack_last - L->stack == L->stack_size - EXTRA_STACK);
-  luaM_reallocvector(L, L->stack, L->stack_size, newsize, TValue);
+  lua_assert(L->stack_last - L->stack == L->stacksize - EXTRA_STACK);
+  luaM_reallocvector(L, L->stack, L->stacksize, newsize, TValue);
   for (; lim < newsize; lim++)
     setnilvalue(L->stack + lim); /* erase new segment */
-  L->stack_size = newsize;
+  L->stacksize = newsize;
   L->stack_last = L->stack + newsize - EXTRA_STACK;
   correctstack(L, oldstack);
 }
 
 
 void luaD_growstack (lua_State *L, int n) {
-  int size = L->stack_size;
+  int size = L->stacksize;
   if (size > LUAI_MAXSTACK)  /* error after extra size? */
     luaD_throw(L, LUA_ERRERR);
   else {
@@ -238,7 +238,7 @@ void luaD_shrinkstack (lua_State *L) {
   int goodsize = inuse + (inuse / 8) + 2*EXTRA_STACK;
   if (goodsize > LUAI_MAXSTACK) goodsize = LUAI_MAXSTACK;
   if (inuse > LUAI_MAXSTACK ||  /* handling stack overflow? */
-      goodsize >= L->stack_size)  /* would grow instead of shrink? */
+      goodsize >= L->stacksize)  /* would grow instead of shrink? */
     condmovestack(L);  /* don't change stack (change only for debugging) */
   else
     luaD_reallocstack(L, goodsize);  /* shrink it */
@@ -354,7 +354,7 @@ int luaD_precall (lua_State *L, StkId func, int nresults) {
     case LUA_TLCL: {  /* Lua function: prepare its call */
       StkId base;
       Proto *p = clLvalue(func)->p;
-      luaD_checkstack(L, p->maxstack_size);
+      luaD_checkstack(L, p->maxstacksize);
       func = restorestack(L, funcr);
       n = cast_int(L->top - func) - 1;  /* number of real arguments */
       for (; n < p->numparams; n++)
@@ -364,7 +364,7 @@ int luaD_precall (lua_State *L, StkId func, int nresults) {
       ci->nresults = nresults;
       ci->func = func;
       ci->u.l.base = base;
-      ci->top = base + p->maxstack_size;
+      ci->top = base + p->maxstacksize;
       lua_assert(ci->top <= L->stack_last);
       ci->u.l.savedpc = p->code;  /* starting point */
       ci->callstatus = CIST_LUA;
@@ -697,5 +697,3 @@ int luaD_protectedparser (lua_State *L, ZIO *z, const char *name,
   L->nny--;
   return status;
 }
-
-

@@ -20,7 +20,7 @@ namespace values {
 			int t = lua_type(L, idx);
 			switch (t) {
 			case LUA_TBOOLEAN:
-				return Value();
+				return Value(lua_toboolean(L, idx) != 0);
 			case LUA_TNUMBER:
 				return NumberValue(L, idx);
 			case LUA_TSTRING:

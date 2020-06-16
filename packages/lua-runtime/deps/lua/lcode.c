@@ -260,10 +260,10 @@ int luaK_codek (FuncState *fs, int reg, int k) {
 
 void luaK_checkstack (FuncState *fs, int n) {
   int newstack = fs->freereg + n;
-  if (newstack > fs->f->maxstack_size) {
+  if (newstack > fs->f->maxstacksize) {
     if (newstack >= MAXSTACK)
       luaX_syntaxerror(fs->ls, "function or expression too complex");
-    fs->f->maxstack_size = cast_byte(newstack);
+    fs->f->maxstacksize = cast_byte(newstack);
   }
 }
 
@@ -879,4 +879,3 @@ void luaK_setlist (FuncState *fs, int base, int nelems, int tostore) {
     luaX_syntaxerror(fs->ls, "constructor too long");
   fs->freereg = base + 1;  /* free registers with list values */
 }
-

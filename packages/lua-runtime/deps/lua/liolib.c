@@ -109,7 +109,7 @@ typedef luaL_Stream LStream;
 
 #define tolstream(L)	((LStream *)luaL_checkudata(L, 1, LUA_FILEHANDLE))
 
-#define is_closed(p)	((p)->closef == NULL)
+#define isclosed(p)	((p)->closef == NULL)
 
 
 static int io_type (lua_State *L) {
@@ -118,7 +118,7 @@ static int io_type (lua_State *L) {
   p = (LStream *)luaL_testudata(L, 1, LUA_FILEHANDLE);
   if (p == NULL)
     lua_pushnil(L);  /* not a file */
-  else if (is_closed(p))
+  else if (isclosed(p))
     lua_pushliteral(L, "closed file");
   else
     lua_pushliteral(L, "file");
@@ -128,7 +128,7 @@ static int io_type (lua_State *L) {
 
 static int f_tostring (lua_State *L) {
   LStream *p = tolstream(L);
-  if (is_closed(p))
+  if (isclosed(p))
     lua_pushliteral(L, "file (closed)");
   else
     lua_pushfstring(L, "file (%p)", p->f);
@@ -138,7 +138,7 @@ static int f_tostring (lua_State *L) {
 
 static FILE *tofile (lua_State *L) {
   LStream *p = tolstream(L);
-  if (is_closed(p))
+  if (isclosed(p))
     luaL_error(L, "attempt to use a closed file");
   lua_assert(p->f);
   return p->f;
@@ -176,7 +176,7 @@ static int io_close (lua_State *L) {
 
 static int f_gc (lua_State *L) {
   LStream *p = tolstream(L);
-  if (!is_closed(p) && p->f != NULL)
+  if (!isclosed(p) && p->f != NULL)
     aux_close(L);  /* ignore closed and incompletely open files */
   return 0;
 }
@@ -255,7 +255,7 @@ static FILE *getiofile (lua_State *L, const char *findex) {
   LStream *p;
   lua_getfield(L, LUA_REGISTRYINDEX, findex);
   p = (LStream *)lua_touserdata(L, -1);
-  if (is_closed(p))
+  if (isclosed(p))
     luaL_error(L, "standard %s file is closed", findex + strlen(IO_PREFIX));
   return p->f;
 }
@@ -476,7 +476,7 @@ static int io_readline (lua_State *L) {
   LStream *p = (LStream *)lua_touserdata(L, lua_upvalueindex(1));
   int i;
   int n = (int)lua_tointeger(L, lua_upvalueindex(2));
-  if (is_closed(p))  /* file is already closed? */
+  if (isclosed(p))  /* file is already closed? */
     return luaL_error(L, "file is already closed");
   lua_settop(L , 1);
   for (i = 1; i <= n; i++)  /* push arguments to 'g_read' */

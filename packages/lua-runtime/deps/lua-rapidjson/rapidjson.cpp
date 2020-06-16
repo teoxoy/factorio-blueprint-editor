@@ -1,6 +1,5 @@
 #include <limits>
 #include <cstdio>
-#include <cmath>
 #include <vector>
 #include <algorithm>
 
@@ -161,7 +160,7 @@ public:
 	}
 
 private:
-	template<typename Writer, unsigned writeFlags = kWriteNanAndInfFlag>
+	template<typename Writer>
 	void encodeValue(lua_State* L, Writer* writer, int idx, int depth = 0)
 	{
 		size_t len;
@@ -176,16 +175,8 @@ private:
 			if (luax::isinteger(L, idx, &integer))
 				writer->Int64(integer);
 			else {
-				double d = lua_tonumber(L, idx);
-				if (isinf(d) || isnan(d)) {
-					writer->Null();
-				} else {
-					if (!writer->Double(d)) {
-						char buffer [80];
-						sprintf(buffer, "error while encode double value (%f).", d);
-						luaL_error(L, buffer);
-					}
-				}
+				if (!writer->Double(lua_tonumber(L, idx)))
+					luaL_error(L, "error while encode double value.");
 			}
 			return;
 		case LUA_TSTRING:
@@ -351,8 +342,8 @@ static int json_encode(lua_State* L)
 		lua_pushlstring(L, s.GetString(), s.GetSize());
 		return 1;
 	}
-	catch (const char* ex) {
-		luaL_error(L, ex);
+	catch (...) {
+		luaL_error(L, "error while encoding");
 	}
 	return 0;
 }

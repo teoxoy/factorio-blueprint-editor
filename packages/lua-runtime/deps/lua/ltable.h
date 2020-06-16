@@ -9,6 +9,7 @@
 
 #include "lobject.h"
 
+#define LUA_MAX_SEQUENTIAL_ARRAY_SIZE_BITS 10
 
 #define gnode(t,i)	(&(t)->node[i])
 #define gkey(n)		(&(n)->i_key.tvk)
@@ -20,6 +21,7 @@
 
 LUAI_FUNC const TValue *luaH_getint (lua_State* L, Table *t, int key);
 LUAI_FUNC void luaH_setint (lua_State *L, Table *t, int key, TValue *value);
+LUAI_FUNC void luaH_setlist(lua_State *L, Table *t, unsigned int firstkey, StkId firstval, unsigned int count);
 LUAI_FUNC const TValue *luaH_getstr (Table *t, TString *key);
 LUAI_FUNC const TValue *luaH_get (lua_State *L, Table *t, const TValue *key);
 LUAI_FUNC TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key);

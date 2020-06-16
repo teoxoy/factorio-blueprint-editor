@@ -540,7 +540,7 @@ static void open_func (LexState *ls, FuncState *fs, BlockCnt *bl) {
   fs->bl = NULL;
   f = fs->f;
   f->source = ls->source;
-  f->maxstack_size = 2;  /* registers 0/1 are always valid */
+  f->maxstacksize = 2;  /* registers 0/1 are always valid */
   fs->h = luaH_new(L);
   /* anchor table of constants (to avoid being collected) */
   sethvalue2s(L, L->top, fs->h);
@@ -745,6 +745,12 @@ static void constructor (LexState *ls, expdesc *t) {
   } while (testnext(ls, ',') || testnext(ls, ';'));
   check_match(ls, '}', '{', line);
   lastlistfield(fs, &cc);
+  // array part size is limited, so transfer pre-allocation size to hash part
+  if (cc.na > (1 << LUA_MAX_SEQUENTIAL_ARRAY_SIZE_BITS))
+  {
+    cc.nh += cc.na - (1 << LUA_MAX_SEQUENTIAL_ARRAY_SIZE_BITS);
+    cc.na = (1 << LUA_MAX_SEQUENTIAL_ARRAY_SIZE_BITS);
+  }
   SETARG_B(fs->f->code[pc], luaO_int2fb(cc.na)); /* set initial array size */
   SETARG_C(fs->f->code[pc], luaO_int2fb(cc.nh));  /* set initial table size */
 }
@@ -1585,7 +1591,7 @@ static void statement (LexState *ls) {
       break;
     }
   }
-  lua_assert(ls->fs->f->maxstack_size >= ls->fs->freereg &&
+  lua_assert(ls->fs->f->maxstacksize >= ls->fs->freereg &&
              ls->fs->freereg >= ls->fs->nactvar);
   ls->fs->freereg = ls->fs->nactvar;  /* free registers */
   leavelevel(ls);
@@ -1632,4 +1638,3 @@ Closure *luaY_parser (lua_State *L, ZIO *z, Mbuffer *buff,
   lua_assert(dyd->actvar.n == 0 && dyd->gt.n == 0 && dyd->label.n == 0);
   return cl;  /* it's on the stack too */
 }
-

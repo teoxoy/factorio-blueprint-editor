@@ -509,11 +509,11 @@ static lu_mem traversestack (global_State *g, lua_State *th) {
   for (; o < th->top; o++)
     markvalue(g, o);
   if (g->gcstate == GCSatomic) {  /* final traversal? */
-    StkId lim = th->stack + th->stack_size;  /* real end of stack */
+    StkId lim = th->stack + th->stacksize;  /* real end of stack */
     for (; o < lim; o++)  /* clear not-marked stack slice */
       setnilvalue(o);
   }
-  return sizeof(lua_State) + sizeof(TValue) * th->stack_size;
+  return sizeof(lua_State) + sizeof(TValue) * th->stacksize;
 }
 
 
@@ -1080,7 +1080,7 @@ static lu_mem singlestep (lua_State *L) {
         g->gcstate = GCSatomic;  /* finish mark phase */
         g->GCestimate = g->GCmemtrav;  /* save what was counted */;
         work = atomic(L);  /* add what was traversed by 'atomic' */
-        g->GCestimate += work;  /* estimate of total memory traversed */ 
+        g->GCestimate += work;  /* estimate of total memory traversed */
         sw = entersweep(L);
         return work + sw * GCSWEEPCOST;
       }
@@ -1233,5 +1233,3 @@ void luaC_fullgc (lua_State *L, int isemergency) {
 }
 
 /* }====================================================== */
-
-

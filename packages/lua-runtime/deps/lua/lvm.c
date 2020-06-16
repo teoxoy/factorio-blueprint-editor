@@ -292,7 +292,10 @@ int luaV_equalobj_ (lua_State *L, const TValue *t1, const TValue *t2) {
 
 
 void luaV_concat (lua_State *L, int total) {
-  lua_assert(total >= 2);
+  if (total < 2)
+  {
+    luaG_runerror(L, "attempted to CONCAT less than 2 values (%d)", total);
+  }
   do {
     StkId top = L->top;
     int n = 2;  /* number of elements handled in this pass (at least 2) */
@@ -553,7 +556,7 @@ void luaV_execute (lua_State *L) {
     /* WARNING: several calls may realloc the stack and invalidate `ra' */
     ra = RA(i);
     lua_assert(base == ci->u.l.base);
-    lua_assert(base <= L->top && L->top < L->stack + L->stack_size);
+    lua_assert(base <= L->top && L->top < L->stack + L->stacksize);
     vmdispatch (GET_OPCODE(i)) {
       vmcase(OP_MOVE,
         setobjs2s(L, ra, RB(i));
@@ -746,7 +749,7 @@ void luaV_execute (lua_State *L) {
           oci->u.l.savedpc = nci->u.l.savedpc;
           oci->callstatus |= CIST_TAIL;  /* function was tail called */
           ci = L->ci = oci;  /* remove new frame */
-          lua_assert(L->top == oci->u.l.base + getproto(ofunc)->maxstack_size);
+          lua_assert(L->top == oci->u.l.base + getproto(ofunc)->maxstacksize);
           goto newframe;  /* restart luaV_execute over new Lua function */
         }
       )
@@ -766,6 +769,8 @@ void luaV_execute (lua_State *L) {
         }
       )
       vmcase(OP_FORLOOP,
+        if (!ttisnumber(ra+1) | !ttisnumber(ra)) /* not checking ra+2, because I don't see way how to exploit it not being number */
+          luaG_runerror(L, LUA_QL("for") " bytecode error, control variables need to be numbers");
         lua_Number step = nvalue(ra+2);
         lua_Number idx = luai_numadd(L, nvalue(ra), step); /* increment index */
         lua_Number limit = nvalue(ra+1);
@@ -799,10 +804,15 @@ void luaV_execute (lua_State *L) {
         L->top = ci->top;
         i = *(ci->u.l.savedpc++);  /* go to next instruction */
         ra = RA(i);
-        lua_assert(GET_OPCODE(i) == OP_TFORLOOP);
+        if (GET_OPCODE(i) != OP_TFORLOOP)
+        {
+          luaG_runerror(L, LUA_QL("TFORCALL") " must be followed by " LUA_QL("TFORLOOP"));
+        }
         goto l_tforloop;
       )
       vmcase(OP_TFORLOOP,
+        // this will only run if a TFORLOOP occurs without its paired TFORCALL
+        luaG_runerror(L, LUA_QL("TFORLOOP") " must be preceeded by " LUA_QL("TFORCALL"));
         l_tforloop:
         if (!ttisnil(ra + 1)) {  /* continue loop? */
           setobjs2s(L, ra, ra + 1);  /* save control variable */
@@ -819,17 +829,15 @@ void luaV_execute (lua_State *L) {
           lua_assert(GET_OPCODE(*ci->u.l.savedpc) == OP_EXTRAARG);
           c = GETARG_Ax(*ci->u.l.savedpc++);
         }
-        luai_runtimecheck(L, ttistable(ra));
-        h = hvalue(ra);
-        int first = (c - 1) * LFIELDS_PER_FLUSH;
-        last = ((c-1)*LFIELDS_PER_FLUSH) + n;
-        if (last > h->sizearray)  /* needs more space? */
-          luaH_resizearray(L, h, last);  /* pre-allocate it at once */
-        for (int ii = 0; ii < n; ++ii) {
-          TValue* val = ra + ii + 1;
-          luaH_setint(L, h, first + ii + 1, val);
-          luaC_barrierback(L, obj2gco(h), val);
+        if (!ttistable(ra))
+        {
+          luaG_runerror(L, LUA_QL("SETLIST") " arg " LUA_QL("A") " must be a table");
         }
+        h = hvalue(ra);
+        int first = (c - 1) * LFIELDS_PER_FLUSH + 1;
+
+        luaH_setlist(L, h, first, ra + 1, n);
+
         L->top = ci->top;  /* correct top (in case of previous open call) */
       )
       vmcase(OP_CLOSURE,
@@ -861,9 +869,10 @@ void luaV_execute (lua_State *L) {
         }
       )
       vmcase(OP_EXTRAARG,
-        lua_assert(0);
+        // this will only occur if EXTRAARG appears on its own, rather than correctly paired with
+        // an instruction using C=0 to use an EXTRAARG, which would skip it
+        luaG_runerror(L, "attempted to execute " LUA_QL("EXTRAARG"));
       )
     }
   }
 }
-

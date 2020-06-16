@@ -440,6 +440,27 @@ LUA_API const char *lua_tolstring (lua_State *L, int idx, size_t *len) {
   return svalue(o);
 }
 
+LUA_API const char *lua_uncheckedtolstring (lua_State *L, int idx, size_t *len) {
+  lua_lock(L);  /* `luaV_tostring' may create a new string */
+  checkstack_locked(L, 1);
+  StkId o = index2addr(L, idx); // checkstack may re-allocate the stack
+  if (!luaV_tostring(L, o)) {  /* conversion failed? */
+    if (len != NULL) *len = 0;
+    lua_unlock(L);
+    return NULL;
+  }
+  luaC_checkGC(L);
+  o = index2addr(L, idx);  /* previous call may reallocate the stack */
+  lua_unlock(L);
+  if (len != NULL) *len = tsvalue(o)->len;
+  return svalue(o);
+}
+
+LUA_API const char *lua_uncheckedaslstring (lua_State *L, int idx, size_t *len) {
+  StkId o = index2addr(L, idx);
+  if (len != NULL) *len = tsvalue(o)->len;
+  return svalue(o);
+}
 
 LUA_API size_t lua_rawlen (lua_State *L, int idx) {
   StkId o = index2addr(L, idx);
@@ -682,12 +703,17 @@ LUA_API void lua_gettable (lua_State *L, int idx) {
 
 
 LUA_API void lua_getfield (lua_State *L, int idx, const char *k) {
+  lua_getlfield(L, idx, k, strlen(k));
+}
+
+
+LUA_API void  (lua_getlfield) (lua_State *L, int idx, const char *k, size_t l) {
   StkId t;
   lua_lock(L);
   checkstack_locked(L, 2);
   t = index2addr(L, idx);
   api_checkvalidindex(L, t);
-  setsvalue2s(L, L->top, luaS_new(L, k));
+  setsvalue2s(L, L->top, luaS_newlstr(L, k, l));
   api_incr_top(L);
   luaV_gettable(L, t, L->top - 1, L->top - 1);
   lua_unlock(L);
@@ -856,13 +882,17 @@ LUA_API void lua_settable (lua_State *L, int idx) {
 
 
 LUA_API void lua_setfield (lua_State *L, int idx, const char *k) {
+  lua_setlfield(L, idx, k, strlen(k));
+}
+
+LUA_API void lua_setlfield (lua_State *L, int idx, const char *k, size_t l) {
   StkId t;
   lua_lock(L);
   api_checknelems(L, 1);
   checkstack_locked(L, 1);
   t = index2addr(L, idx);
   api_checkvalidindex(L, t);
-  setsvalue2s(L, L->top++, luaS_new(L, k));
+  setsvalue2s(L, L->top++, luaS_newlstr(L, k, l));
   luaV_settable(L, t, L->top - 1, L->top - 2);
   L->top -= 2;  /* pop value and key */
   lua_unlock(L);
