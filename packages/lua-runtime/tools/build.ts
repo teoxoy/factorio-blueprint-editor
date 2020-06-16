@@ -76,7 +76,7 @@ async function compileDeps(): Promise<void> {
             '-DLUA_USE_LONGLONG',
             '-g',
             '-x', 'c++',
-            '-std=c++11',
+            '-std=c++17',
             '-o', luaBC,
             '-r', ...LUA_FILES
         ]
@@ -95,7 +95,7 @@ async function compileDeps(): Promise<void> {
             `-I${depsPath}`,
             '-g',
             '-x', 'c++',
-            '-std=c++11',
+            '-std=c++17',
             '-o', rapidjsonBC,
             '-r', ...RAPIDJSON_FILES
         ]
@@ -143,7 +143,7 @@ async function compile(): Promise<void> {
         '-s', 'EXIT_RUNTIME=1',
         `-I${depsPath}`,
         '-x', 'c++',
-        '-std=c++11',
+        '-std=c++17',
         '-o', join(distPath, 'main.js'),
         luaBC, rapidjsonBC, join(srcPath, 'main.cpp')
     ]
