@@ -4,5 +4,8 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
-    "Lua.diagnostics.globals": ["data", "rapidjson", "optrequire"]
+    "Lua.diagnostics.globals": ["data", "rapidjson", "optrequire"],
+    "search.exclude": {
+        "packages/lua-runtime/dist": true
+    }
 }
