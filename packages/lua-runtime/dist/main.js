@@ -1183,11 +1183,11 @@ function updateGlobalBufferAndViews(buf) {
 }
 
 var STATIC_BASE = 1024,
-    STACK_BASE = 5305104,
+    STACK_BASE = 5305200,
     STACKTOP = STACK_BASE,
-    STACK_MAX = 62224,
-    DYNAMIC_BASE = 5305104,
-    DYNAMICTOP_PTR = 62048;
+    STACK_MAX = 62320,
+    DYNAMIC_BASE = 5305200,
+    DYNAMICTOP_PTR = 62144;
 
 assert(STACK_BASE % 16 === 0, 'stack must start aligned');
 assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
@@ -1735,7 +1735,7 @@ var ASM_CONSTS = {
 
 
 
-// STATICTOP = STATIC_BASE + 61200;
+// STATICTOP = STATIC_BASE + 61296;
 /* global initializers */  __ATINIT__.push({ func: function() { ___wasm_call_ctors() } });
 
 
@@ -1892,7 +1892,7 @@ var ASM_CONSTS = {
   
       var pointer = ___cxa_is_pointer_type(throwntype);
       // can_catch receives a **, add indirection
-      var buffer = 62208;
+      var buffer = 62304;
       HEAP32[((buffer)>>2)]=thrown;
       thrown = buffer;
       // The different catch blocks are denoted by different types.
@@ -1929,7 +1929,7 @@ var ASM_CONSTS = {
   
       var pointer = ___cxa_is_pointer_type(throwntype);
       // can_catch receives a **, add indirection
-      var buffer = 62208;
+      var buffer = 62304;
       HEAP32[((buffer)>>2)]=thrown;
       thrown = buffer;
       // The different catch blocks are denoted by different types.
@@ -2135,7 +2135,7 @@ var ASM_CONSTS = {
   var _abs=Math_abs;
 
   function _emscripten_get_sbrk_ptr() {
-      return 62048;
+      return 62144;
     }
 
   function _emscripten_memcpy_big(dest, src, num) {

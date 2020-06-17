@@ -18,7 +18,7 @@ rm README
 rm override_printf.h
 sed -i 's|<Lua/LuaCPPUtilities.hpp>|"LuaCPPUtilities.hpp"|g' lua.hpp
 cd ../../..
-cp -r Factorio/libraries/Lua/. ../deps/lua
+cp -r Factorio/libraries/Lua/. ../vendor/lua
 
 # Update rapidjson
 git clone \
@@ -30,7 +30,7 @@ git clone \
 cd rapidjson
 git checkout ac0fc79c76fc92783d2a5267082a1f8f9c28df22 -- include/rapidjson
 cd ..
-cp -r rapidjson/include/rapidjson/. ../deps/rapidjson
+cp -r rapidjson/include/rapidjson/. ../vendor/rapidjson
 
 # Update lua-rapidjson
 git clone \
@@ -43,7 +43,7 @@ cd lua-rapidjson
 git checkout e969cd739ac01499957e2f80794c8697c7f18a4b -- src
 find src -type f | xargs sed -i 's|[<"]lua.hpp[">]|<lua/lua.hpp>|g'
 cd ..
-cp -r lua-rapidjson/src/. ../deps/lua-rapidjson
+cp -r lua-rapidjson/src/. ../vendor/lua-rapidjson
 
 cd ..
 rm -rf tmp

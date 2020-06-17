@@ -7,6 +7,6 @@
     "Lua.diagnostics.globals": ["data", "rapidjson", "optrequire"],
     "search.exclude": {
         "packages/lua-runtime/dist": true,
-        "packages/lua-runtime/deps": true
+        "packages/lua-runtime/vendor": true
     }
 }
