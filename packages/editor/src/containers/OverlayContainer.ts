@@ -103,7 +103,7 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         const modules = entity.modules
-        if (modules.length !== 0) {
+        if (modules.length !== 0 && entity.name !== 'beacon') {
             const moduleInfo = new PIXI.Container()
             const shift = entity.entityData.module_specification.module_info_icon_shift
             for (let index = 0; index < modules.length; index++) {

@@ -12,10 +12,10 @@ export interface ColorWithAlpha extends Color {
 }
 
 export interface CraftingMachineTint {
-    primary: ColorWithAlpha
+    primary: ColorWithAlpha | number[]
     secondary: ColorWithAlpha
-    tertiary: ColorWithAlpha
-    quaternary: ColorWithAlpha
+    tertiary?: ColorWithAlpha
+    quaternary?: ColorWithAlpha
 }
 
 export interface IngredientOrResult {
@@ -141,6 +141,8 @@ export interface Item {
     equipment_grid?: string
     /** Armor only property */
     inventory_size_bonus?: number
+    /** Module only property */
+    beacon_tint?: CraftingMachineTint
 
     /** Modules only property (type: 'module') */
     category?: 'speed' | 'productivity' | 'effectivity'
@@ -306,6 +308,19 @@ export interface Entity {
             east_animation?: SpriteData | SpriteLayers
             south_animation?: SpriteData | SpriteLayers
             west_animation?: SpriteData | SpriteLayers
+        }>
+        animation_list?: Array<{
+            always_draw?: boolean
+            animation: SpriteData | SpriteLayers
+        }>
+        module_visualisations?: Array<{
+            slots: Array<
+                Array<{
+                    has_empty_slot?: boolean
+                    apply_module_tint?: 'primary' | 'secondary'
+                    pictures: SpriteData
+                }>
+            >
         }>
     }
     animation?: SpriteData | SpriteLayers | DirectionalSpriteData | DirectionalSpriteLayers

@@ -40,6 +40,7 @@ interface IDrawData {
         a: number
     }
     chemicalPlantDontConnectOutput: boolean
+    modules: string[]
 }
 
 interface ISpriteData {
@@ -749,8 +750,6 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
             return () => [e.sprite.layers[0]]
         case 'power_switch':
             return () => [e.power_on_animation]
-        case 'beacon':
-            return () => [e.base_picture as SpriteData, e.animation as SpriteData]
         case 'lab':
             return () => [e.off_animation.layers[0]]
         case 'heat_interface':
@@ -811,6 +810,50 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 e.arm_03_front_animation,
                 e.satellite_animation,
             ]
+
+        case 'beacon':
+            return (data: IDrawData) => {
+                const layers = e.graphics_set.animation_list
+                    .filter(vis => vis.always_draw)
+                    .map(vis => vis.animation)
+                    .flatMap(vis =>
+                        (vis as SpriteLayers).layers
+                            ? (vis as SpriteLayers).layers
+                            : [vis as SpriteData]
+                    )
+                    .filter(layer => !layer.draw_as_shadow)
+
+                const modules = (data.modules || []).map(name => FD.items[name])
+                const moduleLayers = e.graphics_set.module_visualisations
+                    .flatMap(vis => vis.slots)
+                    .flatMap((arr, i) => {
+                        const module = modules[i]
+                        if (module) {
+                            return arr.map(slot => {
+                                const img = util.duplicate(slot.pictures)
+
+                                let variationIndex = module.tier - 1
+                                if (slot.has_empty_slot) variationIndex += 1
+                                setPropertyUsing(img, 'x', 'width', variationIndex)
+
+                                if (slot.apply_module_tint) {
+                                    let tint = module.beacon_tint[slot.apply_module_tint]
+                                    if (Array.isArray(tint)) {
+                                        tint = { r: tint[0], g: tint[1], b: tint[2], a: 1 }
+                                    }
+                                    setProperty(img, 'tint', tint)
+                                }
+                                return img
+                            })
+                        } else {
+                            return arr
+                                .filter(slot => slot.has_empty_slot)
+                                .map(slot => slot.pictures)
+                        }
+                    })
+
+                return [...layers, ...moduleLayers]
+            }
 
         case 'electric_mining_drill':
             return (data: IDrawData) => {

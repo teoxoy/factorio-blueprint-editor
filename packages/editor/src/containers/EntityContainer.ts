@@ -77,6 +77,13 @@ export class EntityContainer {
             this.visualizationArea.moveTo(this.position)
         }
 
+        const onModulesChange = (): void => {
+            this.redrawEntityInfo()
+            if (this.m_Entity.name === 'beacon') {
+                this.redraw()
+            }
+        }
+
         const onEntityDestroy = (): void => {
             this.redrawSurroundingEntities()
 
@@ -100,8 +107,8 @@ export class EntityContainer {
         this.m_Entity.on('direction', onDirectionChange)
         this.m_Entity.on('directionType', onDirectionTypeChange)
         this.m_Entity.on('position', onPositionChange)
+        this.m_Entity.on('modules', onModulesChange)
 
-        this.m_Entity.on('modules', this.redrawEntityInfo, this)
         this.m_Entity.on('filters', this.redrawEntityInfo, this)
         this.m_Entity.on('splitterInputPriority', this.redrawEntityInfo, this)
         this.m_Entity.on('splitterOutputPriority', this.redrawEntityInfo, this)
@@ -113,8 +120,8 @@ export class EntityContainer {
             this.m_Entity.off('direction', onDirectionChange)
             this.m_Entity.off('directionType', onDirectionTypeChange)
             this.m_Entity.off('position', onPositionChange)
+            this.m_Entity.off('modules', onModulesChange)
 
-            this.m_Entity.off('modules', this.redrawEntityInfo, this)
             this.m_Entity.off('filters', this.redrawEntityInfo, this)
             this.m_Entity.off('splitterInputPriority', this.redrawEntityInfo, this)
             this.m_Entity.off('splitterOutputPriority', this.redrawEntityInfo, this)

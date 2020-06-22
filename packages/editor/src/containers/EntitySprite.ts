@@ -22,6 +22,7 @@ interface IEntityData {
         a: number
     }
     chemicalPlantDontConnectOutput?: boolean
+    modules?: string[]
 }
 
 export class EntitySprite extends PIXI.Sprite {
@@ -103,6 +104,7 @@ export class EntitySprite extends PIXI.Sprite {
             assemblerPipeDirection: entity.assemblerPipeDirection,
             trainStopColor: entity.trainStopColor,
             chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput,
+            modules: entity.modules,
         })
 
         // TODO: maybe move the zIndex logic to spriteDataBuilder
