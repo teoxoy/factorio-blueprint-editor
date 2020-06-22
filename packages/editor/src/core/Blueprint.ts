@@ -389,7 +389,7 @@ export class Blueprint extends EventEmitter {
             name: string
             position: IPoint
         }[] = []
-        if (BEACONS && BEACON_MODULE !== 'none') {
+        if (BEACONS) {
             const GBT = util.timer('Beacon generation')
 
             const entitiesForBeaconGen = [
