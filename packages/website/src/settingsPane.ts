@@ -115,13 +115,15 @@ export function initSettingsPane(
     })
 
     function getModulesObjFor(entityName: string): Record<string, string> {
-        return getModulesFor(entityName).reduce<Record<string, string>>(
-            (obj, item) => {
-                obj[item.localised_name] = item.name
-                return obj
-            },
-            { None: 'none' }
-        )
+        return getModulesFor(entityName)
+            .sort((a, b) => a.order.localeCompare(b.order))
+            .reduce<Record<string, string>>(
+                (obj, item) => {
+                    obj[item.localised_name] = item.name
+                    return obj
+                },
+                { None: 'none' }
+            )
     }
 
     const oilOutpostFolder = gui.addFolder('Oil Outpost Generator Settings')
