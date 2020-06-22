@@ -39,6 +39,8 @@ export class DynamicSpritesheet extends EventEmitter {
     private padding = 2
     private show = false
     private extrude = false
+    /** Max number of images loading at the same time */
+    private maxLoading = 200
     private baseTextures: Map<number, PIXI.BaseTexture> = new Map()
     private entries: Map<string, IEntry> = new Map()
     private canvasesDiv: HTMLDivElement
@@ -53,6 +55,8 @@ export class DynamicSpritesheet extends EventEmitter {
     private firstRender = true
     private alpha = true
     private subtextures: Map<string, PIXI.Texture> = new Map()
+    /** Mechanism to limit the number of images loading at the same time */
+    private loadingQueue: (() => void)[] = []
 
     public constructor(options: Partial<IOptions> = {}) {
         super()
@@ -87,11 +91,12 @@ export class DynamicSpritesheet extends EventEmitter {
     }
 
     private add(id: string, src: string): IEntry {
-        this.loading += 1
         const image = new Image()
         const finish = (): void => {
             this.loading -= 1
-            if (this.loading === 0) {
+            if (this.loadingQueue.length > 0) {
+                this.loadingQueue.pop()()
+            } else if (this.loading === 0) {
                 if (this.rendering) {
                     this.rerender = true
                 } else {
@@ -109,7 +114,15 @@ export class DynamicSpritesheet extends EventEmitter {
             entry.ready = true
             finish()
         }
-        image.src = src
+        const load = (): void => {
+            this.loading += 1
+            image.src = src
+        }
+        if (this.maxLoading > 200) {
+            this.loadingQueue.push(load)
+        } else {
+            load()
+        }
         const texture = new PIXI.Texture(PIXI.Texture.EMPTY.baseTexture)
         const entry: IEntry = {
             x: 0,
