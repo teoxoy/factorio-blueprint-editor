@@ -56,7 +56,7 @@ export class DynamicSpritesheet extends EventEmitter {
     private alpha = true
     private subtextures: Map<string, PIXI.Texture> = new Map()
     /** Mechanism to limit the number of images loading at the same time */
-    private loadingQueue: (() => void)[] = []
+    private waitingQueue: (() => void)[] = []
 
     public constructor(options: Partial<IOptions> = {}) {
         super()
@@ -94,8 +94,8 @@ export class DynamicSpritesheet extends EventEmitter {
         const image = new Image()
         const finish = (): void => {
             this.loading -= 1
-            if (this.loadingQueue.length > 0) {
-                this.loadingQueue.pop()()
+            if (this.waitingQueue.length > 0) {
+                this.waitingQueue.pop()()
             } else if (this.loading === 0) {
                 if (this.rendering) {
                     this.rerender = true
@@ -119,7 +119,7 @@ export class DynamicSpritesheet extends EventEmitter {
             image.src = src
         }
         if (this.maxLoading > 200) {
-            this.loadingQueue.push(load)
+            this.waitingQueue.push(load)
         } else {
             load()
         }
