@@ -1,11 +1,10 @@
 use async_compression::stream::LzmaDecoder;
+use globset::{Glob, GlobSetBuilder};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use serde::Deserialize;
 use std::env;
 use std::error::Error;
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-use std::process::Stdio;
 use tokio::process::Command;
 
 macro_rules! get_env_var {
@@ -117,16 +116,15 @@ pub async fn setup(
     Ok(())
 }
 
-async fn download<I, S, O>(
+async fn download<I, S>(
     url: String,
-    out_dir: &O,
+    out_dir: &PathBuf,
     filter: I,
     pb: ProgressBar,
 ) -> Result<(), Box<dyn Error>>
 where
     I: IntoIterator<Item = S>,
-    S: AsRef<OsStr>,
-    O: AsRef<OsStr>,
+    S: AsRef<str>,
 {
     let client = reqwest::Client::new();
     let res = client.get(&url).send().await?;
@@ -156,59 +154,24 @@ where
     });
 
     let decompressor = LzmaDecoder::new(stream);
-    let mut stream_reader = tokio::io::stream_reader(decompressor);
 
-    let mut tar_cmd = Command::new("tar")
-        .arg("--extract")
-        .arg("--totals")
-        .arg("-C")
-        .arg(out_dir)
-        .args(&["--wildcards-match-slash", "--wildcards"])
-        .args(filter)
-        .stdin(Stdio::piped())
-        .spawn()?;
-
-    {
-        let mut stdin = tar_cmd.stdin.take().ok_or("Failed to open stdin")?;
-        tokio::io::copy(&mut stream_reader, &mut stdin).await?;
+    let mut builder = GlobSetBuilder::new();
+    for pattern in filter.into_iter() {
+        builder.add(Glob::new(pattern.as_ref())?);
     }
+    let matcher = builder.build()?;
 
-    if !tar_cmd.await?.success() {
-        return Err("tar failed".into());
+    let stream_reader = decompressor.into_async_read();
+    let ar = async_tar::Archive::new(stream_reader);
+    let mut entries = ar.entries()?;
+    use futures::stream::StreamExt;
+    while let Some(Ok(mut file)) = entries.next().await {
+        if matcher.is_match(file.path()?.to_path_buf()) {
+            file.unpack_in(out_dir).await?;
+        }
     }
 
     pb.finish();
 
     Ok(())
-
-    // https://github.com/dignifiedquire/async-tar/issues/5
-
-    // let stream_reader = decompressor.into_async_read();
-    // let mut ar = async_tar::Archive::new(stream_reader);
-    // let mut entries = ar.entries()?;
-    // use futures::stream::StreamExt;
-    // while let Some(Ok(mut file)) = entries.next().await {
-    //     if file
-    //         .path()?
-    //         .to_str()
-    //         .map(|path| path.starts_with("factorio/bin/") || path == "factorio/config-path.cfg")
-    //         .unwrap_or(false)
-    //     {
-    //         file.unpack_in(Path::new(out_dir)).await?;
-    //     }
-    // }
-
-    // let mut ar = tokio_tar::Archive::new(stream_reader);
-    // let mut entries = ar.entries()?;
-    // use futures::stream::StreamExt;
-    // while let Some(Ok(mut file)) = entries.next().await {
-    //     if file
-    //         .path()?
-    //         .to_str()
-    //         .map(|path| path.starts_with("factorio/bin/") || path == "factorio/config-path.cfg")
-    //         .unwrap_or(false)
-    //     {
-    //         file.unpack_in(Path::new(out_dir)).await?;
-    //     }
-    // }
 }
