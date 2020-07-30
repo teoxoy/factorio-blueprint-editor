@@ -649,7 +649,7 @@ export interface Entity {
     input_connection_points?: CircuitWireConnectionPoints[]
     output_connection_points?: CircuitWireConnectionPoints[]
     item_slot_count?: number
-    power_on_animation?: SpriteData
+    power_on_animation?: SpriteLayers
     overlay_start_delay?: number
     overlay_start?: SpriteData
     overlay_loop?: SpriteData

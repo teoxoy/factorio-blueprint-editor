@@ -749,7 +749,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
         case 'programmable_speaker':
             return () => [e.sprite.layers[0]]
         case 'power_switch':
-            return () => [e.power_on_animation]
+            return () => [e.power_on_animation.layers[0], e.led_off]
         case 'lab':
             return () => [e.off_animation.layers[0]]
         case 'heat_interface':
