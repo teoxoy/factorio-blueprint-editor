@@ -107,11 +107,17 @@ export class Viewport {
         this.dirty = true
     }
 
-    public getTransform(): PIXI.Matrix {
+    /** @returns true if it was dirty */
+    public update(): boolean {
         if (this.dirty) {
             this._updateMatrix()
             this.dirty = false
+            return true
         }
+        return false
+    }
+
+    public getTransform(): PIXI.Matrix {
         return this.transform
     }
 

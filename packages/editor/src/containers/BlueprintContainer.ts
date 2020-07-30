@@ -149,7 +149,6 @@ export class BlueprintContainer extends PIXI.Container {
                         (ADXOR ? (isActionActive('moveLeft') ? 1 : -1) : 0) * finalSpeed,
                         (WSXOR ? (isActionActive('moveUp') ? 1 : -1) : 0) * finalSpeed
                     )
-                    this.applyViewportTransform()
                 }
             }
         }
@@ -180,7 +179,6 @@ export class BlueprintContainer extends PIXI.Container {
         const onMouseMove = (e: MouseEvent): void => {
             if (this.mode === EditorMode.PAN) {
                 this.viewport.translateBy(e.clientX - lastX, e.clientY - lastY)
-                this.applyViewportTransform()
             }
             lastX = e.clientX
             lastY = e.clientY
@@ -188,7 +186,6 @@ export class BlueprintContainer extends PIXI.Container {
 
         const onResize = (): void => {
             this.viewport.setSize(G.app.screen.width, G.app.screen.height)
-            this.applyViewportTransform()
         }
 
         G.app.ticker.add(panCb)
@@ -229,10 +226,32 @@ export class BlueprintContainer extends PIXI.Container {
         return this.viewport.getCurrentScale()
     }
 
-    private applyViewportTransform(): void {
+    /** screen to world */
+    public toWorld(x: number, y: number): [number, number] {
         const t = this.viewport.getTransform()
-        this.setTransform(t.tx, t.ty, t.a, t.d)
-        this.gridData.recalculate()
+        return [(x - t.tx) / t.a, (y - t.ty) / t.d]
+    }
+
+    public render(renderer: PIXI.Renderer): void {
+        if (this.viewport.update()) {
+            this.gridData.recalculate()
+        }
+
+        const destinationFrame = renderer.screen
+        const sourceFrame = destinationFrame.clone()
+        const t = this.viewport.getTransform()
+        sourceFrame.x -= t.tx / t.a
+        sourceFrame.y -= t.ty / t.d
+        sourceFrame.width /= t.a
+        sourceFrame.height /= t.d
+
+        const previous = renderer.renderTexture.current
+        for (const child of this.children) {
+            renderer.renderTexture.bind(null, sourceFrame, destinationFrame)
+            child.render(renderer)
+        }
+        renderer.batch.flush()
+        renderer.renderTexture.bind(previous)
     }
 
     public get mode(): EditorMode {
@@ -368,7 +387,6 @@ export class BlueprintContainer extends PIXI.Container {
         const zoomFactor = 0.1
         this.viewport.setScaleCenter(this.gridData.x, this.gridData.y)
         this.viewport.zoomBy(zoomFactor * (zoomIn ? 1 : -1))
-        this.applyViewportTransform()
     }
 
     private get isPointerInside(): boolean {
@@ -611,8 +629,6 @@ export class BlueprintContainer extends PIXI.Container {
                 y: (this.size.y - bounds.height) / 2 - bounds.y,
             }
         )
-
-        this.applyViewportTransform()
     }
 
     public getBlueprintBounds(): PIXI.Rectangle {
@@ -640,12 +656,15 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     public getPicture(): Promise<Blob> {
-        // getLocalBounds is needed because it seems that it has sideeffects
-        // without it generateTexture returns an empty texture
-        this.getLocalBounds()
+        if (this.bp.isEmpty()) return
+
         const region = this.getBlueprintBounds()
         this.viewportCulling = false
+        // swap our custom render method with the original one
+        const _render = this.render
+        this.render = super.render
         const texture = G.app.renderer.generateTexture(this, PIXI.SCALE_MODES.LINEAR, 1, region)
+        this.render = _render
         this.viewportCulling = true
         const canvas = G.app.renderer.plugins.extract.canvas(texture)
 

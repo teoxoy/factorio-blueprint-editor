@@ -64,8 +64,9 @@ export class GridData extends EventEmitter {
 
         const oldX = this._x
         const oldY = this._y
-        this._x = Math.floor((mouseX - this.bpc.position.x) / this.bpc.getViewportScale())
-        this._y = Math.floor((mouseY - this.bpc.position.y) / this.bpc.getViewportScale())
+        const [X, Y] = this.bpc.toWorld(mouseX, mouseY)
+        this._x = Math.floor(X)
+        this._y = Math.floor(Y)
 
         const oldX16 = this._x16
         const oldY16 = this._y16

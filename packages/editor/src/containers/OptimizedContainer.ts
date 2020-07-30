@@ -29,12 +29,8 @@ export class OptimizedContainer extends PIXI.Container {
         const batchRenderer = renderer.plugins.batch as PIXI.AbstractBatchRenderer
         renderer.batch.setObjectRenderer(batchRenderer)
 
-        const { x: minX, y: minY } = this.bpc.toLocal(
-            new PIXI.Point(G.app.screen.x, G.app.screen.y)
-        )
-        const { x: maxX, y: maxY } = this.bpc.toLocal(
-            new PIXI.Point(G.app.screen.width, G.app.screen.height)
-        )
+        const [minX, minY] = this.bpc.toWorld(G.app.screen.x, G.app.screen.y)
+        const [maxX, maxY] = this.bpc.toWorld(G.app.screen.width, G.app.screen.height)
 
         for (const c of this.children) {
             if (this.bpc.viewportCulling) {
