@@ -8,5 +8,6 @@
     "search.exclude": {
         "packages/lua-runtime/dist": true,
         "packages/lua-runtime/vendor": true
-    }
+    },
+    "rust-analyzer.linkedProjects": ["./packages/backend/Cargo.toml"]
 }

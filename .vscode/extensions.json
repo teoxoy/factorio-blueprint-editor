@@ -5,6 +5,6 @@
         "eamodio.gitlens",
         "ms-vscode.cpptools",
         "sumneko.lua",
-        "rust-lang.rust"
+        "matklad.rust-analyzer"
     ]
 }
