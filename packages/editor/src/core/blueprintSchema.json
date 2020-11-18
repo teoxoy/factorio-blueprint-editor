@@ -129,6 +129,7 @@
                     "const": "blueprint"
                 },
                 "label": { "type": "string" },
+                "description": { "type": "string" },
                 "icons": {
                     "type": "array",
                     "minItems": 1,
