@@ -52,12 +52,6 @@ export class Editor {
 
         initActions(canvas)
         this.registerActions()
-
-        window.addEventListener('unload', () => {
-            G.app.stop()
-            G.app.renderer.textureGC.unload(G.app.stage)
-            G.app.destroy()
-        })
     }
 
     public get moveSpeed(): number {

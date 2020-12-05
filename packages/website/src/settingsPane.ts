@@ -30,7 +30,7 @@ export function initSettingsPane(
         gui.domElement.style.maxHeight = `${window.innerHeight}px`
     })
 
-    window.addEventListener('unload', () =>
+    window.addEventListener('visibilitychange', () =>
         localStorage.setItem('dat.gui.closed', String(gui.closed))
     )
 
@@ -102,7 +102,7 @@ export function initSettingsPane(
         const settings = JSON.parse(localStorage.getItem('oilOutpostSettings'))
         editor.oilOutpostSettings = settings
     }
-    window.addEventListener('unload', () =>
+    window.addEventListener('visibilitychange', () =>
         localStorage.setItem('oilOutpostSettings', JSON.stringify(editor.oilOutpostSettings))
     )
 

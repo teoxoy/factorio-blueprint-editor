@@ -117,7 +117,7 @@ editor
         throw new Error('UNRECOVERABLE_ERROR')
     })
 
-window.addEventListener('unload', () => {
+window.addEventListener('visibilitychange', () => {
     localStorage.setItem('quickbarItemNames', JSON.stringify(editor.quickbarItems))
 })
 
@@ -222,7 +222,7 @@ function registerActions(): void {
 
     EDITOR.importKeybinds(JSON.parse(localStorage.getItem('keybinds')))
 
-    window.addEventListener('unload', () => {
+    window.addEventListener('visibilitychange', () => {
         const keybinds = EDITOR.exportKeybinds()
         if (Object.keys(keybinds).length) {
             localStorage.setItem('keybinds', JSON.stringify(keybinds))
