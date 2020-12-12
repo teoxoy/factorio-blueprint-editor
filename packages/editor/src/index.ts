@@ -10,9 +10,10 @@ import {
     exportKeybinds,
 } from './actions'
 import { Editor } from './Editor'
+import FD from './core/factorioData'
 
 export * from './core/bpString'
-export { Editor, Book, Blueprint, GridPattern }
+export { Editor, Book, Blueprint, GridPattern, FD }
 export default {
     registerAction,
     callAction,

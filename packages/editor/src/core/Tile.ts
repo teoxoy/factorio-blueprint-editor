@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import FD from '@fbe/factorio-data'
+import FD from './factorioData'
 
 export class Tile extends EventEmitter {
     private readonly _name: string

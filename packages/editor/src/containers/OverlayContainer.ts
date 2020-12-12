@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import FD, { FluidBox, CursorBoxType, SpriteData } from '@fbe/factorio-data'
+import FD, { FluidBox, CursorBoxType, SpriteData } from '../core/factorioData'
 import F from '../UI/controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
@@ -396,9 +396,11 @@ export class OverlayContainer extends PIXI.Container {
             itemName: string,
             position?: IPoint
         ): void {
-            const icon = F.CreateIcon(itemName, true, true)
+            const icon = F.CreateIcon(itemName, undefined, true, true)
             const data = FD.utilitySprites.entity_info_dark_background
-            const background = new PIXI.Sprite(G.sheet.get(data.filename))
+            const background = new PIXI.Sprite(
+                G.getTexture(data.filename, data.x, data.y, data.width, data.height)
+            )
             background.anchor.set(0.5, 0.5)
             if (position) {
                 icon.position.set(position.x, position.y)
@@ -425,7 +427,10 @@ export class OverlayContainer extends PIXI.Container {
                         return FD.utilitySprites.fluid_indication_arrow_both_ways
                 }
             }
-            const arrow = new PIXI.Sprite(G.sheet.get(typeToPath(type).filename))
+            const data = typeToPath(type)
+            const arrow = new PIXI.Sprite(
+                G.getTexture(data.filename, data.x, data.y, data.width, data.height)
+            )
             arrow.anchor.set(0.5, 0.5)
             arrow.position.set(position.x, position.y)
             return arrow
@@ -481,7 +486,7 @@ export class OverlayContainer extends PIXI.Container {
 
         if (size.x === 1 && size.y === 1) {
             const data = FD.utilitySprites.cursor_box[type][0].sprite
-            const texture = G.sheet.get(data.filename, data.x, data.y, data.width, data.height)
+            const texture = G.getTexture(data.filename, data.x, data.y, data.width, data.height)
             const s = new PIXI.Sprite(texture)
             s.anchor.set(0.5, 0.5)
             cursorBox.addChild(s)
@@ -496,7 +501,7 @@ export class OverlayContainer extends PIXI.Container {
             const data = (
                 boxes.find(t => t.max_side_length > minSideLength) || boxes[boxes.length - 1]
             ).sprite
-            const texture = G.sheet.get(data.filename, data.x, data.y, data.width, data.height)
+            const texture = G.getTexture(data.filename, data.x, data.y, data.width, data.height)
 
             const c0 = new PIXI.Sprite(texture)
             const c1 = new PIXI.Sprite(texture)
@@ -562,7 +567,7 @@ export class OverlayContainer extends PIXI.Container {
                             ? FD.utilitySprites.underground_pipe_connection
                             : fd.underground_sprite
                     const s = new PIXI.Sprite(
-                        G.sheet.get(data.filename, data.x, data.y, data.width, data.height)
+                        G.getTexture(data.filename, data.x, data.y, data.width, data.height)
                     )
                     s.rotation = direction * Math.PI * 0.25
                     if (data.scale) {

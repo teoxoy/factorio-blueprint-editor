@@ -1,15 +1,11 @@
-import FD from '@fbe/factorio-data'
+import FD from '../core/factorioData'
 import { Tile } from '../core/Tile'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
 import { BlueprintContainer } from './BlueprintContainer'
-import { EntitySprite } from './EntitySprite'
 
 export class PaintTileContainer extends PaintContainer {
     private static size = 2
-
-    /** mechanism to make sure that the result of the promise is still needed */
-    private getPartsPromise: Promise<EntitySprite[]>
 
     public constructor(bpc: BlueprintContainer, name: string) {
         super(bpc, name)
@@ -72,22 +68,13 @@ export class PaintTileContainer extends PaintContainer {
     }
 
     protected redraw(): void {
-        this.bpc.cursor = 'wait'
         this.removeChildren()
-
-        const promise = TileContainer.generateSprites(
+        const sprites = TileContainer.generateSprites(
             this.name,
             this.position,
             PaintTileContainer.getTilePositions()
         )
-        this.getPartsPromise = promise
-
-        promise.then(sprites => {
-            if (this.getPartsPromise !== promise) return
-
-            this.addChild(...sprites)
-            this.bpc.cursor = 'pointer'
-        })
+        this.addChild(...sprites)
     }
 
     public moveAtCursor(): void {

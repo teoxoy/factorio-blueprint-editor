@@ -35,9 +35,7 @@ export class Modules extends PIXI.Container {
             const slot: Slot = new Slot()
             slot.position.set(slotIndex * 38, 0)
             slot.data = slotIndex
-            slot.on('pointerdown', (e: PIXI.interaction.InteractionEvent) =>
-                this.onSlotPointerDown(e)
-            )
+            slot.on('pointerdown', (e: PIXI.InteractionEvent) => this.onSlotPointerDown(e))
             if (this.m_Modules[slotIndex] !== undefined) {
                 slot.content = F.CreateIcon(this.m_Modules[slotIndex])
             }
@@ -68,7 +66,7 @@ export class Modules extends PIXI.Container {
     }
 
     /** Event handler for click on slot */
-    private onSlotPointerDown(e: PIXI.interaction.InteractionEvent): void {
+    private onSlotPointerDown(e: PIXI.InteractionEvent): void {
         e.stopPropagation()
         const slot: Slot = e.target as Slot
         const index: number = slot.data as number

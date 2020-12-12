@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3'
-import FD, { Entity as FD_Entity, getModulesFor } from '@fbe/factorio-data'
 import util from '../common/util'
+import FD, { Entity as FD_Entity } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
 import U from './generators/util'
@@ -196,7 +196,7 @@ export class Entity extends EventEmitter {
         if (this.entityData.module_specification === undefined) return []
 
         return (
-            getModulesFor(this.name)
+            FD.getModulesFor(this.name)
                 // filter modules based on module limitation
                 .filter(
                     item =>

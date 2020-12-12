@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import FD from '@fbe/factorio-data'
+import FD from '../core/factorioData'
 import G from '../common/globals'
 import F from './controls/functions'
 import { Dialog } from './controls/Dialog'
@@ -96,7 +96,7 @@ export class InventoryDialog extends Dialog {
                     const button: Button = new Button(36, 36)
                     button.position.set(itemColIndex * 38, itemRowIndex * 38)
                     button.content = F.CreateIcon(item.name)
-                    button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+                    button.on('pointerdown', (e: PIXI.InteractionEvent) => {
                         e.stopPropagation()
                         if (e.data.button === 0) {
                             selectedCallBack(item.name)
@@ -135,9 +135,9 @@ export class InventoryDialog extends Dialog {
                 const button = new Button(68, 68, 3)
                 button.active = groupIndex === 0
                 button.position.set(groupIndex * 70, 0)
-                button.content = F.CreateIcon(group.name)
+                button.content = F.CreateIcon(group.name, group.name === 'creative' ? 32 : 64)
                 button.data = inventoryGroupItems
-                button.on('pointerdown', (e: PIXI.interaction.InteractionEvent) => {
+                button.on('pointerdown', (e: PIXI.InteractionEvent) => {
                     if (e.data.button === 0) {
                         if (!button.active) {
                             for (const inventoryGroup of this.m_InventoryGroups

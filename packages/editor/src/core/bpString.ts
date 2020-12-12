@@ -1,6 +1,6 @@
 import Ajv, { KeywordDefinition } from 'ajv'
 import pako from 'pako'
-import FD from '@fbe/factorio-data'
+import FD from './factorioData'
 import blueprintSchema from './blueprintSchema.json'
 import { Blueprint } from './Blueprint'
 import { Book } from './Book'
@@ -148,7 +148,7 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                 reject(e)
             }
         }).then((url: URL) => {
-            const corsProxy = './api/proxy?url='
+            const corsProxy = 'https://api.allorigins.win/raw?url='
 
             console.log(`Loading data from: ${url}`)
             const pathParts = url.pathname.slice(1).split('/')

@@ -1,5 +1,8 @@
 import * as PIXI from 'pixi.js'
-import FD from '@fbe/factorio-data'
+import { BasisLoader } from '@pixi/basis'
+import basisTranscoderJS from '@pixi/basis/assets/basis_transcoder.js'
+import basisTranscoderWASM from '@pixi/basis/assets/basis_transcoder.wasm'
+import { loadData } from './core/factorioData'
 import G from './common/globals'
 import { Entity } from './core/Entity'
 import { Blueprint, oilOutpostSettings, IOilOutpostSettings } from './core/Blueprint'
@@ -11,9 +14,14 @@ import { initActions, registerAction } from './actions'
 
 export class Editor {
     public async init(canvas: HTMLCanvasElement): Promise<void> {
-        await fetch('./api/bundle')
-            .then(res => res.json())
-            .then(modules => FD.loadData(modules))
+        await Promise.all([
+            fetch(`${G.STATIC_URL}data.json`)
+                .then(res => res.text())
+                .then(modules => loadData(modules)),
+            BasisLoader.loadTranscoder(basisTranscoderJS, basisTranscoderWASM),
+        ])
+
+        BasisLoader.TRANSCODER_WORKER_POOL_LIMIT = 2
 
         PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
         PIXI.settings.ROUND_PIXELS = true
@@ -115,7 +123,7 @@ export class Editor {
         G.bp = bp
 
         G.BPC = new BlueprintContainer(bp)
-        await G.BPC.initBP()
+        G.BPC.initBP()
         Dialog.closeAll()
         G.app.stage.addChildAt(G.BPC, i)
         last.destroy()

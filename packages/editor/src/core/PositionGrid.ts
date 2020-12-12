@@ -1,5 +1,5 @@
-import FD from '@fbe/factorio-data'
 import util from '../common/util'
+import FD from './factorioData'
 import { Blueprint } from './Blueprint'
 import { Entity } from './Entity'
 

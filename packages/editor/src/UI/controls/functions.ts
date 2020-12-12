@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import FD, { IngredientOrResult, ColorWithAlpha, Item, Icon } from '@fbe/factorio-data'
+import FD, { IngredientOrResult, ColorWithAlpha, Item, Icon } from '../../core/factorioData'
 import { styles } from '../style'
 import G from '../../common/globals'
 
@@ -141,6 +141,7 @@ function DrawControlFace(
 /** Create Icon from Sprite Item information */
 function CreateIcon(
     itemName: string,
+    maxSize = 32,
     setAnchor = true,
     darkBackground = false
 ): PIXI.DisplayObject {
@@ -162,20 +163,9 @@ function CreateIcon(
         const icon =
             darkBackground && data.dark_background_icon ? data.dark_background_icon : data.icon
 
-        let texture: PIXI.Texture
-
-        if (data.icon_mipmaps) {
-            const targetSize = 32
-            let xOffset = 0
-            for (let i = Math.log2(data.icon_size); i > Math.log2(targetSize); i--) {
-                xOffset += Math.pow(2, i)
-            }
-            texture = G.sheet.get(icon, xOffset, 0, targetSize, targetSize)
-        } else {
-            texture = G.sheet.get(icon)
-        }
-
+        const texture = G.getTexture(icon, 0, 0, data.icon_size, data.icon_size)
         const sprite = new PIXI.Sprite(texture)
+        sprite.scale.set(maxSize / data.icon_size)
         if (setAnchor) {
             sprite.anchor.set(0.5)
         }
@@ -226,7 +216,7 @@ function CreateIconWithAmount(
     name: string,
     amount: number
 ): void {
-    const icon: PIXI.DisplayObject = CreateIcon(name, false)
+    const icon: PIXI.DisplayObject = CreateIcon(name, undefined, false)
     icon.position.set(x, y)
     host.addChild(icon)
 

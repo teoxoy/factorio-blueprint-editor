@@ -35,17 +35,15 @@ class Context {
             resources: {
                 resourcePublicRoot: '/assets',
             },
-            plugins: [this.luaPlugin, pluginLink(/\.wasm/, { useDefault: true })],
+            plugins: [
+                this.luaPlugin,
+                pluginLink(/(\.wasm|basis_transcoder\.js)$/, { useDefault: true }),
+            ],
             cache: { root: this.paths.cache },
             hmr: { plugin: p('./hmr.ts') },
             // sourceMap: { sourceRoot: '' },
             watcher: {
-                root: [
-                    p('../src'),
-                    p('../../editor/src'),
-                    p('../../factorio-data/src'),
-                    p('../../lua-runtime/dist'),
-                ],
+                root: [p('../src'), p('../../editor/src')],
             },
         }
     }
@@ -55,7 +53,7 @@ class Context {
             hmrServer: { port },
             proxy: [
                 {
-                    path: '/api',
+                    path: '/data',
                     options: {
                         target: `http://localhost:8888`,
                         // pathRewrite: { '^/api': '' },

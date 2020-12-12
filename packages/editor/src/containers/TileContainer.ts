@@ -1,4 +1,4 @@
-import FD from '@fbe/factorio-data'
+import FD from '../core/factorioData'
 import G from '../common/globals'
 import { Tile } from '../core/Tile'
 import { EntitySprite } from './EntitySprite'
@@ -50,15 +50,7 @@ export class TileContainer {
             if (Math.sign(y) === -1) Y = (countY - Y) % countY
         }
 
-        const mainTexture = G.sheet2.get(filename, 0, 0, countX * width, countY * height)
-        const texture = G.sheet2.getSubtexture(
-            mainTexture,
-            filename,
-            X * width,
-            Y * height,
-            width,
-            height
-        )
+        const texture = G.getTexture(filename, X * width, Y * height, width, height)
 
         return new EntitySprite(
             texture,
@@ -79,13 +71,12 @@ export class TileContainer {
         name: string,
         position: IPoint,
         positions: IPoint[]
-    ): Promise<EntitySprite[]> {
-        const parts = positions.map(p => {
+    ): EntitySprite[] {
+        return positions.map(p => {
             const s = TileContainer.generateSprite(name, p.x + position.x, p.y + position.y)
             s.position.set(p.x * 32, p.y * 32)
             s.alpha = 0.5
             return s
         })
-        return G.sheet2.onAllLoaded(parts.map(s => s.texture)).then(() => parts)
     }
 }

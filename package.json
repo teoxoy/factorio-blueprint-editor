@@ -6,6 +6,7 @@
     "scripts": {
         "start:website": "yarn workspace @fbe/website run start",
         "start:backend": "cd ./packages/backend && systemfd --no-pid -s http::8888 -- cargo watch -w ./src -x \"run --features dev\"",
+        "start:exporter": "cd ./packages/exporter && systemfd --no-pid -s http::8888 -- cargo watch -w ./src -x \"run --features dev\"",
         "build:website": "yarn workspace @fbe/website run build",
         "build:backend": "cd ./packages/backend && cargo build --release",
         "start": "concurrently \"yarn:start:backend\" \"yarn:start:website\"",

@@ -1,3 +1,4 @@
+import util from '../common/util'
 import FD, {
     Entity as FD_Entity,
     SpriteData,
@@ -15,8 +16,7 @@ import FD, {
     PipePictures,
     UndergroundBeltStructure,
     CircuitConnectorSprites,
-} from '@fbe/factorio-data'
-import util from '../common/util'
+} from './factorioData'
 import { PositionGrid } from './PositionGrid'
 import { Entity } from './Entity'
 

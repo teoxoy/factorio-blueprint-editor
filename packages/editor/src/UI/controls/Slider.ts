@@ -166,7 +166,7 @@ export class Slider extends PIXI.Container {
     }
 
     /** Drag start event responder */
-    private readonly onButtonDragStart = (event: PIXI.interaction.InteractionEvent): void => {
+    private readonly onButtonDragStart = (event: PIXI.InteractionEvent): void => {
         if (!this.m_Dragging) {
             this.m_Dragging = true
             this.m_Dragpoint =
@@ -176,7 +176,7 @@ export class Slider extends PIXI.Container {
     }
 
     /** Drag move event callback  */
-    private readonly onButtonDragMove = (event: PIXI.interaction.InteractionEvent): void => {
+    private readonly onButtonDragMove = (event: PIXI.InteractionEvent): void => {
         if (this.m_Dragging) {
             const position: PIXI.Point = event.data.getLocalPosition(this.m_SliderButton.parent)
 

@@ -1,6 +1,6 @@
 import './index.styl'
 
-import { utils as pixiUtils } from 'pixi.js'
+import { isMobile } from '@pixi/settings'
 import FileSaver from 'file-saver'
 import EDITOR, {
     Editor,
@@ -48,7 +48,7 @@ console.log(
 initFeedbackButton()
 const createToast = initToasts()
 
-if (pixiUtils.isMobile.any) {
+if (isMobile.any) {
     createToast({
         text:
             'Application is not compatible with mobile devices.<br>' +

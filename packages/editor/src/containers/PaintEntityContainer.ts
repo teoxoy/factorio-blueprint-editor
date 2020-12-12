@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import FD from '@fbe/factorio-data'
+import FD from '../core/factorioData'
 import util from '../common/util'
 import { Entity } from '../core/Entity'
 import { EntitySprite } from './EntitySprite'
@@ -13,9 +13,6 @@ export class PaintEntityContainer extends PaintContainer {
     private direction: number
     /** This is only a reference */
     private undergroundLine: PIXI.Container
-
-    /** mechanism to make sure that the result of the promise is still needed */
-    private getPartsPromise: Promise<EntitySprite[]>
 
     public constructor(bpc: BlueprintContainer, name: string, direction: number) {
         super(bpc, name)
@@ -134,22 +131,13 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     protected redraw(): void {
-        this.bpc.cursor = 'wait'
         this.removeChildren()
-
-        const promise = EntitySprite.getPartsAsync({
+        const sprites = EntitySprite.getParts({
             name: this.name,
             direction: this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
             directionType: this.directionType,
         })
-        this.getPartsPromise = promise
-
-        promise.then(sprites => {
-            if (this.getPartsPromise !== promise) return
-
-            this.addChild(...sprites)
-            this.bpc.cursor = 'pointer'
-        })
+        this.addChild(...sprites)
     }
 
     public moveAtCursor(): void {

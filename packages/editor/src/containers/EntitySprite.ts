@@ -114,7 +114,7 @@ export class EntitySprite extends PIXI.Sprite {
         for (let i = 0; i < spriteData.length; i++) {
             const data = spriteData[i]
 
-            const texture = G.sheet.get(data.filename, data.x, data.y, data.width, data.height)
+            const texture = G.getTexture(data.filename, data.x, data.y, data.width, data.height)
             const sprite = new EntitySprite(texture, data, position)
 
             if (data.filename.includes('circuit-connector')) {
@@ -158,15 +158,6 @@ export class EntitySprite extends PIXI.Sprite {
         }
 
         return parts
-    }
-
-    public static getPartsAsync(
-        entity: IEntityData | Entity,
-        position?: IPoint,
-        positionGrid?: PositionGrid
-    ): Promise<EntitySprite[]> {
-        const parts = EntitySprite.getParts(entity, position, positionGrid)
-        return G.sheet.onAllLoaded(parts.map(s => s.texture)).then(() => parts)
     }
 
     public static compareFn(a: EntitySprite, b: EntitySprite): number {

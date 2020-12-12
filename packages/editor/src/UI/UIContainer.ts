@@ -52,16 +52,13 @@ export class UIContainer extends PIXI.Container {
         }
     }
 
-    public async createInventory(
+    public createInventory(
         title?: string,
         itemsFilter?: string[],
         selectedCallBack?: (selectedItem: string) => void
-    ): Promise<void> {
+    ): void {
         const inv = new InventoryDialog(title, itemsFilter, selectedCallBack)
-        G.BPC.cursor = 'wait'
-        await G.sheet.awaitSprites()
-        G.BPC.cursor = 'inherit'
-        if (Dialog.isOpen(inv)) this.dialogsContainer.addChild(inv)
+        this.dialogsContainer.addChild(inv)
     }
 
     // public changeQuickbarRows(rows: number): void {

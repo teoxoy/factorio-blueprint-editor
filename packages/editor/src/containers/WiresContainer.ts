@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import FD from '@fbe/factorio-data'
+import FD from '../core/factorioData'
 import U from '../core/generators/util'
 import { Entity } from '../core/Entity'
 import { Blueprint } from '../core/Blueprint'
