@@ -32,7 +32,7 @@ export class Editor {
         PIXI.settings.RENDER_OPTIONS.autoDensity = true
         PIXI.GRAPHICS_CURVES.adaptive = true
         PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false
-        PIXI.settings.ANISOTROPIC_LEVEL = 16
+        // PIXI.settings.ANISOTROPIC_LEVEL = 16
         // PIXI.settings.PREFER_ENV = 1
         // PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
         // PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
