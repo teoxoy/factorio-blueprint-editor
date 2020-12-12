@@ -174,7 +174,7 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                 case 'gitlab':
                     // https://gitlab.com/gitlab-org/gitlab-ce/issues/24596
                     return fetchData(
-                        `${corsProxy}https://gitlab.com/snippets/${pathParts[1]}/raw`
+                        `${corsProxy}https://gitlab.com/${pathParts.join('/')}/raw`
                     ).then(r => r.text())
                 case 'factorioprints':
                     return fetchData(
