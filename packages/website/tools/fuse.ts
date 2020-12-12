@@ -14,7 +14,6 @@ const p = (p: string): string => join(__dirname, p)
 
 class Context {
     public readonly paths = {
-        cache: p('.fusebox'),
         dist: p('../dist'),
     }
     public runDev(runProps?: IRunProps): Promise<IRunResponse> {
@@ -37,11 +36,15 @@ class Context {
             },
             plugins: [
                 this.luaPlugin,
-                pluginLink(/(\.wasm|basis_transcoder\.js)$/, { useDefault: true }),
+                pluginLink(/basis_transcoder\.(js|wasm)$/, { useDefault: true }),
             ],
-            cache: { root: this.paths.cache },
+            cache: { enabled: runServer, strategy: 'memory' },
             hmr: { plugin: p('./hmr.ts') },
-            // sourceMap: { sourceRoot: '' },
+            sourceMap: {
+                css: !runServer,
+                project: true,
+                vendor: false,
+            },
             watcher: {
                 root: [p('../src'), p('../../editor/src')],
             },
@@ -78,12 +81,9 @@ class Context {
 const { rm, task } = sparky(Context)
 
 task('dev', async ctx => {
-    rm(ctx.paths.cache)
+    rm(ctx.paths.dist)
     await ctx.runDev({
-        bundles: {
-            distRoot: ctx.paths.dist,
-            app: 'app.js',
-        },
+        bundles: { distRoot: ctx.paths.dist },
     })
 })
 
@@ -92,9 +92,9 @@ task('build', async ctx => {
     await ctx.runProd({
         bundles: {
             distRoot: ctx.paths.dist,
-            app: 'app.$hash.js',
-            vendor: 'vendor.$hash.js',
-            styles: 'styles.$hash.css',
+            app: 'js/app.$hash.js',
+            vendor: 'js/vendor.$hash.js',
+            styles: 'css/styles.$hash.css',
         },
     })
 })
