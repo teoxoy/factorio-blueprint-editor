@@ -1,5 +1,5 @@
 declare module '*.json' {
-    const content: object
+    const content: Record<string, unknown>
     export default content
 }
 

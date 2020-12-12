@@ -1,12 +1,11 @@
 rules:
+  # TODO: maybe turn on
+  # '@typescript-eslint/naming-convention':
+  #   - error
+  #   - selector: default
+  #     format: [camelCase]
   # TODO: turn on
-  '@typescript-eslint/camelcase': off
-  # TODO: maybe turn off
-  '@typescript-eslint/interface-name-prefix': [error, always]
-  # '@typescript-eslint/naming-conventions':
-  #     - error
-  #     - selector: default
-  #       format: [camelCase]
+  '@typescript-eslint/ban-ts-comment': off
   '@typescript-eslint/no-useless-constructor': warn
   '@typescript-eslint/restrict-plus-operands': error
   '@typescript-eslint/no-use-before-define': off
@@ -20,7 +19,6 @@ rules:
     - allowExpressions: true
       allowTypedFunctionExpressions: true
       allowHigherOrderFunctions: true
-  '@typescript-eslint/ban-ts-ignore': off
   '@typescript-eslint/member-ordering':
     - warn
     - default:

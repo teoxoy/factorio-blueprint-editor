@@ -58,7 +58,7 @@ const keywords: Record<string, KeywordDefinition> = {
         schema: false,
     },
     objectWithItemNames: {
-        validate: (data: object) => Object.keys(data).every(key => !!FD.items[key]),
+        validate: (data: Record<string, number>) => Object.keys(data).every(key => !!FD.items[key]),
         errors: false,
         schema: false,
     },

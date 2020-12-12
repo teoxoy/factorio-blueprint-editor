@@ -1,5 +1,4 @@
 /* eslint-disable import/group-exports */
-/* eslint-disable @typescript-eslint/interface-name-prefix */
 
 export interface Color {
     r: number

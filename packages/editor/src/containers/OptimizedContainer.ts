@@ -13,19 +13,16 @@ export class OptimizedContainer extends PIXI.Container {
     }
 
     public updateTransform(): void {
-        // @ts-ignore
         this.worldAlpha = this.alpha * this.parent.worldAlpha
         this.transform.updateTransform(this.parent.transform)
 
         for (const c of this.children) {
-            // @ts-ignore
             c.worldAlpha = c.alpha * c.parent.worldAlpha
             c.transform.updateTransform(c.parent.transform)
         }
     }
 
     public render(renderer: PIXI.Renderer): void {
-        // @ts-ignore
         const batchRenderer = renderer.plugins.batch as PIXI.AbstractBatchRenderer
         renderer.batch.setObjectRenderer(batchRenderer)
 

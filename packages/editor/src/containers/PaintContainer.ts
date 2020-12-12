@@ -82,7 +82,8 @@ export abstract class PaintContainer extends PIXI.Container {
     }
 
     private readonly updateIconPos = (): void => {
-        const position = G.app.renderer.plugins.interaction.mouse.global
+        const im = G.app.renderer.plugins.interaction as PIXI.InteractionManager
+        const position = im.mouse.global
         this.icon.position.set(position.x + 16, position.y + 16)
     }
 

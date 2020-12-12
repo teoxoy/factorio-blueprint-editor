@@ -21,7 +21,7 @@ settings:
     '@typescript-eslint/parser': [.ts]
   import/resolver:
     typescript:
-      directory:
+      project:
         - packages/*/tsconfig.json
         - packages/*/tools/tsconfig.json
   import/internal-regex: ^@fbe/
@@ -30,7 +30,6 @@ extends:
   - eslint:recommended
   - .eslint.base.yml
   # Turn off eslint rules that conflict with typescript-eslint
-  - plugin:@typescript-eslint/eslint-recommended
   - plugin:@typescript-eslint/recommended
   - .eslint.typescript.yml
   # Turn off eslint rules that conflict with prettier
