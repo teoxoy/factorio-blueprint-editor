@@ -194,7 +194,7 @@ export class Textbox extends PIXI.Container {
 
         this.m_CaretGraphic = new PIXI.Graphics()
         this.m_CaretGraphic
-            .lineStyle(1, colors.controls.textbox.foreground.color)
+            .lineStyle({ width: 1, color: colors.controls.textbox.foreground.color })
             .moveTo(0, 0)
             .lineTo(0, height)
         this.m_CaretGraphic.y = 3

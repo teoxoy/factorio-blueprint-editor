@@ -605,7 +605,7 @@ export class OverlayContainer extends PIXI.Container {
 
             this.selectionArea
                 .clear()
-                .lineStyle(2 / this.bpc.getViewportScale(), color)
+                .lineStyle({ width: 2 / this.bpc.getViewportScale(), color })
                 .moveTo(X, Y)
                 .lineTo(X + W, Y)
                 .lineTo(X + W, Y + H)

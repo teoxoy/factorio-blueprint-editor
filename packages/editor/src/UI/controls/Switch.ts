@@ -34,28 +34,40 @@ export class Switch extends PIXI.Container {
         // Draw line
         const buttonLine: PIXI.Graphics = new PIXI.Graphics()
         buttonLine
-            .lineStyle(
-                2,
-                F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p0)
-            )
+            .lineStyle({
+                width: 2,
+                color: F.ShadeColor(
+                    colors.controls.switch.line.color,
+                    colors.controls.switch.line.p0
+                ),
+            })
             .moveTo(1, 0)
             .lineTo(72, 0)
-            .lineStyle(
-                2,
-                F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p1)
-            )
+            .lineStyle({
+                width: 2,
+                color: F.ShadeColor(
+                    colors.controls.switch.line.color,
+                    colors.controls.switch.line.p1
+                ),
+            })
             .moveTo(1, 2)
             .lineTo(72, 2)
-            .lineStyle(
-                2,
-                F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p2)
-            )
+            .lineStyle({
+                width: 2,
+                color: F.ShadeColor(
+                    colors.controls.switch.line.color,
+                    colors.controls.switch.line.p2
+                ),
+            })
             .moveTo(1, 4)
             .lineTo(72, 4)
-            .lineStyle(
-                2,
-                F.ShadeColor(colors.controls.switch.line.color, colors.controls.switch.line.p3)
-            )
+            .lineStyle({
+                width: 2,
+                color: F.ShadeColor(
+                    colors.controls.switch.line.color,
+                    colors.controls.switch.line.p3
+                ),
+            })
             .moveTo(1, 6)
             .lineTo(72, 6)
         buttonLine.cacheAsBitmap = true

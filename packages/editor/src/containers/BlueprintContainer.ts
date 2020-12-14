@@ -507,7 +507,7 @@ export class BlueprintContainer extends PIXI.Container {
         const W = 32 * 32
         const H = 32 * 32
         const gridGraphics = new PIXI.Graphics()
-            .lineStyle(2, 0x000000)
+            .lineStyle({ width: 2, color: 0x000000 })
             .moveTo(0, 0)
             .lineTo(W, 0)
             .lineTo(W, H)

@@ -69,12 +69,11 @@ export class Checkbox extends PIXI.Container {
                     : colors.controls.checkbox.background.alpha
             )
             .drawRoundedRect(0, 0, 36, 36, 10)
-            .lineStyle(
-                2,
-                colors.controls.checkbox.checkmark.color,
-                colors.controls.checkbox.checkmark.alpha,
-                0.5
-            )
+            .lineStyle({
+                width: 2,
+                color: colors.controls.checkbox.checkmark.color,
+                alpha: colors.controls.checkbox.checkmark.alpha,
+            })
         if (checked) {
             graphic
                 .beginFill(

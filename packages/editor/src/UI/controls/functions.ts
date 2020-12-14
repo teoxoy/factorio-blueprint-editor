@@ -48,31 +48,55 @@ function DrawRectangle(
     } else {
         if (border > 0) {
             rectangle
-                .lineStyle(1, ShadeColor(background, pressed ? -12.5 : 22.5), 1, 0)
+                .lineStyle({
+                    width: 1,
+                    color: ShadeColor(background, pressed ? -12.5 : 22.5),
+                    alignment: 0,
+                })
                 .moveTo(0, height)
                 .lineTo(0, 0)
                 .lineTo(width, 0)
-                .lineStyle(1, ShadeColor(background, pressed ? 10 : -7.5), 1, 0)
+                .lineStyle({
+                    width: 1,
+                    color: ShadeColor(background, pressed ? 10 : -7.5),
+                    alignment: 0,
+                })
                 .lineTo(width, height)
                 .lineTo(0, height)
         }
         if (border > 1) {
             rectangle
-                .lineStyle(1, ShadeColor(background, pressed ? -10 : 20), 1, 0)
+                .lineStyle({
+                    width: 1,
+                    color: ShadeColor(background, pressed ? -10 : 20),
+                    alignment: 0,
+                })
                 .moveTo(1, height - 1)
                 .lineTo(1, 1)
                 .lineTo(width - 1, 1)
-                .lineStyle(1, ShadeColor(background, pressed ? 7.5 : -5), 1, 0)
+                .lineStyle({
+                    width: 1,
+                    color: ShadeColor(background, pressed ? 7.5 : -5),
+                    alignment: 0,
+                })
                 .lineTo(width - 1, height - 1)
                 .lineTo(1, height - 1)
         }
         if (border > 2) {
             rectangle
-                .lineStyle(1, ShadeColor(background, pressed ? -7.5 : 17.5), 1, 0)
+                .lineStyle({
+                    width: 1,
+                    color: ShadeColor(background, pressed ? -7.5 : 17.5),
+                    alignment: 0,
+                })
                 .moveTo(2, height - 2)
                 .lineTo(2, 2)
                 .lineTo(width - 2, 2)
-                .lineStyle(1, ShadeColor(background, pressed ? 5 : -2.5), 1, 0)
+                .lineStyle({
+                    width: 1,
+                    color: ShadeColor(background, pressed ? 5 : -2.5),
+                    alignment: 0,
+                })
                 .lineTo(width - 2, height - 2)
                 .lineTo(2, height - 2)
         }
@@ -88,7 +112,7 @@ function DrawRectangle(
  * @param h - Height
  * @param f - Factor
  * @param c - Background Color
- * @param c - Background Alpha
+ * @param a - Background Alpha
  * @param p0 - Percent shade for brightest border
  * @param p1 - Percent shade for bright border
  * @param p2 - Percent shade for dark border
@@ -115,19 +139,19 @@ function DrawControlFace(
     face.beginFill(c, a)
         .drawRect(0, 0, wf, hf)
         .endFill()
-        .lineStyle(f, ShadeColor(c, p3), a, 0)
+        .lineStyle({ width: f, color: ShadeColor(c, p3), alpha: a, alignment: 0 })
         .moveTo(wf, 0)
         .lineTo(wf, hf)
         .lineTo(0, hf)
-        .lineStyle(f, ShadeColor(c, p2), a, 0)
+        .lineStyle({ width: f, color: ShadeColor(c, p2), alpha: a, alignment: 0 })
         .moveTo(wf - f, f)
         .lineTo(wf - f, hf - f)
         .lineTo(f, hf - f)
-        .lineStyle(f, ShadeColor(c, p1), a, 0)
+        .lineStyle({ width: f, color: ShadeColor(c, p1), alpha: a, alignment: 0 })
         .moveTo(wf - f, f)
         .lineTo(f, f)
         .lineTo(f, hf - f)
-        .lineStyle(f, ShadeColor(c, p0), a, 0)
+        .lineStyle({ width: f, color: ShadeColor(c, p0), alpha: a, alignment: 0 })
         .moveTo(wf, 0)
         .lineTo(0, 0)
         .lineTo(0, hf)

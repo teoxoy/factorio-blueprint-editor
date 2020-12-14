@@ -33,7 +33,7 @@ export class WiresContainer extends PIXI.Container {
             green: 0x588c38,
         }
 
-        wire.lineStyle(1.5, colorMap[color])
+        wire.lineStyle({ width: 1.5, color: colorMap[color] })
         wire.moveTo(0, 0)
 
         if (p1.x === p2.x) {
