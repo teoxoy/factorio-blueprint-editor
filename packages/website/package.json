@@ -10,7 +10,7 @@
         "@fbe/editor": "*",
         "dat.gui": "^0.7.7",
         "file-saver": "^2.0.2",
-        "@pixi/settings": "^5.4.0-rc.3"
+        "@pixi/settings": "^6.0.0-rc"
     },
     "devDependencies": {
         "@types/dat.gui": "^0.7.5",
