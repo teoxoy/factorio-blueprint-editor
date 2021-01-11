@@ -318,7 +318,7 @@
                                 "$comment": "only present if entity is logistic-chest-storage, logistic-chest-buffer or logistic-chest-requester",
                                 "items": {
                                     "type": "object",
-                                    "required": ["index", "name", "count"],
+                                    "required": ["index", "name"],
                                     "additionalProperties": false,
                                     "properties": {
                                         "index": { "type": "integer" },

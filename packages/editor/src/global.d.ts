@@ -133,7 +133,7 @@ declare namespace BPS {
         request_filters?: {
             index: number
             name: string
-            count: number
+            count?: number
         }[]
 
         /** only present if entity is programmable-speaker */
