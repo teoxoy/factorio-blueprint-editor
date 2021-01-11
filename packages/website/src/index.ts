@@ -198,15 +198,17 @@ function registerActions(): void {
         },
     })
 
-    EDITOR.registerAction('info', 'i').bind({
-        press: () => {
-            const infoPanel = document.getElementById('info-panel')
+    window.addEventListener('keydown', e => {
+        const infoPanel = document.getElementById('info-panel')
+        if (e.key === 'i') {
             if (infoPanel.classList.contains('active')) {
                 infoPanel.classList.remove('active')
             } else {
                 infoPanel.classList.add('active')
             }
-        },
+        } else if (e.key === 'Escape') {
+            infoPanel.classList.remove('active')
+        }
     })
 
     EDITOR.registerAction('takePicture', 'modifier+s').bind({
