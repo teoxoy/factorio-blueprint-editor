@@ -86,6 +86,12 @@ export class Blueprint extends EventEmitter {
     public readonly tiles = new OurMap<string, Tile>()
     public readonly history = new History()
 
+    // unused blueprint properties
+    public readonly schedules: BPS.ISchedule[]
+    public readonly absolute_snapping: boolean
+    public readonly snap_to_grid: IPoint
+    public readonly position_relative_to_grid: IPoint
+
     private m_nextEntityNumber = 1
 
     public constructor(data?: Partial<BPS.IBlueprint>) {
@@ -184,6 +190,11 @@ export class Blueprint extends EventEmitter {
 
                 this.history.commitTransaction()
             }
+
+            this.schedules = data.schedules
+            this.absolute_snapping = data.absolute_snapping
+            this.snap_to_grid = data.snap_to_grid
+            this.position_relative_to_grid = data.position_relative_to_grid
         }
 
         // makes initial entities non undoable and resets the history if the user cleared the editor
@@ -601,6 +612,10 @@ export class Blueprint extends EventEmitter {
             item: 'blueprint',
             version: getFactorioVersion(),
             label: this.name,
+            schedules: this.schedules,
+            absolute_snapping: this.absolute_snapping,
+            snap_to_grid: this.snap_to_grid,
+            position_relative_to_grid: this.position_relative_to_grid,
         }
     }
 }

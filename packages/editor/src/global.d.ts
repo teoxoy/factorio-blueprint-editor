@@ -318,6 +318,9 @@ declare namespace BPS {
         entities?: IEntity[]
         tiles?: ITile[]
         schedules?: ISchedule[]
+        absolute_snapping?: boolean
+        snap_to_grid?: IPoint
+        position_relative_to_grid?: IPoint
     }
 
     interface IBlueprintBook {

@@ -130,6 +130,13 @@
                 },
                 "label": { "type": "string" },
                 "description": { "type": "string" },
+                "absolute_snapping": { "type": "boolean" },
+                "snap_to_grid": {
+                    "$ref": "blueprintSchema.json#/definitions/position"
+                },
+                "position_relative_to_grid": {
+                    "$ref": "blueprintSchema.json#/definitions/position"
+                },
                 "icons": {
                     "type": "array",
                     "minItems": 1,
