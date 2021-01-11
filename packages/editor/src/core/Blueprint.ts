@@ -79,7 +79,7 @@ interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
 /** Blueprint base class */
 export class Blueprint extends EventEmitter {
     public name = 'Blueprint'
-    private readonly icons: string[] = []
+    private readonly icons = new Map<1 | 2 | 3 | 4, string>()
     public readonly wireConnections = new WireConnections(this)
     public readonly entityPositionGrid = new PositionGrid(this)
     public readonly entities = new OurMap<number, Entity>()
@@ -98,7 +98,7 @@ export class Blueprint extends EventEmitter {
 
             if (data.icons) {
                 for (const icon of data.icons) {
-                    this.icons[icon.index - 1] = icon.signal.name
+                    this.icons.set(icon.index, icon.signal.name)
                 }
             }
 
@@ -508,20 +508,20 @@ export class Blueprint extends EventEmitter {
                 (a, b) => getItemScore(b) - getItemScore(a)
             )
 
-            this.icons[0] = iconPairs[0][0]
+            this.icons.set(1, iconPairs[0][0])
             if (
                 iconPairs[1] &&
                 getSize(iconPairs[1][0]) > 1 &&
                 getItemScore(iconPairs[1]) * 2.5 > getItemScore(iconPairs[0])
             ) {
-                this.icons[1] = iconPairs[1][0]
+                this.icons.set(2, iconPairs[1][0])
             }
         } else if (!this.tiles.isEmpty()) {
             const iconPairs = getIconPairs(this.tiles.valuesArray(), Tile.getItemName).sort(
                 (a, b) => b[1] - a[1]
             )
 
-            this.icons[0] = iconPairs[0][0]
+            this.icons.set(1, iconPairs[0][0])
         }
     }
 
@@ -559,7 +559,7 @@ export class Blueprint extends EventEmitter {
     }
 
     public serialize(): BPS.IBlueprint {
-        if (!this.icons.length) {
+        if (!this.icons.size) {
             this.generateIcons()
         }
         const entityInfo = this.processRawEntities(
@@ -582,7 +582,7 @@ export class Blueprint extends EventEmitter {
             },
             name: tile.name,
         }))
-        const iconData = this.icons.map((icon, i) => {
+        const iconData = [...this.icons.entries()].map(([index, icon]) => {
             const getItemTypeForBp = (name: string): BPS.SignalType => {
                 if (FD.signals[name]) return 'virtual'
                 if (FD.fluids[name]) return 'fluid'
@@ -591,7 +591,7 @@ export class Blueprint extends EventEmitter {
 
             return {
                 signal: { type: getItemTypeForBp(icon), name: icon },
-                index: (i + 1) as 1 | 2 | 3 | 4,
+                index,
             }
         })
         return {
