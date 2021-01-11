@@ -27,7 +27,6 @@ Crafting speed: ${'craftingSpeed'} ${'speedMultiplier'}
 Power consumption: ${'energyUsage'} kW ${'energyMultiplier'}`
 
 const SIZE_OF_ITEM_ON_BELT = 0.25
-const BEACON_EFFECT_PADDING = 3 // entity.entityData.supply_area_distance shows the weather
 
 const getBeltSpeed = (beltSpeed: number): number => beltSpeed * 60 * (1 / SIZE_OF_ITEM_ON_BELT) * 2
 
@@ -280,8 +279,7 @@ export class EntityInfoPanel extends Panel {
             }
 
             const beaconAura = new PIXI.Rectangle(beacon.position.x, beacon.position.y, 1, 1)
-            beaconAura.pad(beacon.size.x / 2, beacon.size.y / 2)
-            beaconAura.pad(BEACON_EFFECT_PADDING, BEACON_EFFECT_PADDING)
+            beaconAura.pad(FD.entities.beacon.supply_area_distance)
 
             return (
                 beaconAura.contains(entityRect.left, entityRect.top) ||
