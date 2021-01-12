@@ -98,7 +98,7 @@ editor
         registerActions()
 
         const changeBookIndex = async (index: number): Promise<void> => {
-            bp = book.getBlueprint(index)
+            bp = book.selectBlueprint(index)
             await editor.loadBlueprint(bp)
         }
         changeBookForIndexSelector = initSettingsPane(editor, changeBookIndex).changeBook
@@ -124,7 +124,7 @@ window.addEventListener('visibilitychange', () => {
 async function loadBp(bpOrBook: Blueprint | Book): Promise<void> {
     if (bpOrBook instanceof Book) {
         book = bpOrBook
-        bp = book.getBlueprint(bpIndex ? bpIndex : undefined)
+        bp = book.selectBlueprint(bpIndex ? bpIndex : undefined)
     } else {
         bp = bpOrBook
     }

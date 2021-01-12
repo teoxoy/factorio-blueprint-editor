@@ -2,51 +2,12 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "blueprintSchema.json",
     "type": "object",
-    "oneOf": [
-        {
-            "required": ["blueprint"],
-            "additionalProperties": false,
-            "properties": {
-                "blueprint": { "$ref": "blueprintSchema.json#/definitions/blueprint" }
-            }
-        },
-        {
-            "required": ["blueprint_book"],
-            "additionalProperties": false,
-            "properties": {
-                "blueprint_book": {
-                    "type": "object",
-                    "required": ["version", "item", "active_index", "blueprints"],
-                    "additionalProperties": false,
-                    "properties": {
-                        "version": { "type": "integer" },
-                        "item": {
-                            "type": "string",
-                            "const": "blueprint_book"
-                        },
-                        "label": { "type": "string" },
-                        "active_index": { "type": "integer" },
-                        "blueprints": {
-                            "type": "array",
-                            "minItems": 1,
-                            "maxITems": 1000,
-                            "items": {
-                                "type": "object",
-                                "required": ["index", "blueprint"],
-                                "additionalProperties": false,
-                                "properties": {
-                                    "index": { "type": "integer" },
-                                    "blueprint": {
-                                        "$ref": "blueprintSchema.json#/definitions/blueprint"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    "properties": {
+        "oneOf": {
+            "blueprint": { "$ref": "blueprintSchema.json#/definitions/blueprint" },
+            "blueprint_book": { "$ref": "blueprintSchema.json#/definitions/blueprint_book" }
         }
-    ],
+    },
     "definitions": {
         "position": {
             "type": "object",
@@ -670,6 +631,41 @@
                                 "tileName": false
                             },
                             "position": { "$ref": "blueprintSchema.json#/definitions/position" }
+                        }
+                    }
+                }
+            }
+        },
+        "blueprint_book": {
+            "type": "object",
+            "required": ["version", "item", "active_index", "blueprints"],
+            "additionalProperties": false,
+            "properties": {
+                "version": { "type": "integer" },
+                "item": {
+                    "type": "string",
+                    "const": "blueprint_book"
+                },
+                "label": { "type": "string" },
+                "active_index": { "type": "integer" },
+                "blueprints": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxITems": 1000,
+                    "items": {
+                        "type": "object",
+                        "required": ["index"],
+                        "additionalProperties": false,
+                        "properties": {
+                            "index": { "type": "integer" },
+                            "oneOf": {
+                                "blueprint": {
+                                    "$ref": "blueprintSchema.json#/definitions/blueprint"
+                                },
+                                "blueprint_book": {
+                                    "$ref": "blueprintSchema.json#/definitions/blueprint_book"
+                                }
+                            }
                         }
                     }
                 }

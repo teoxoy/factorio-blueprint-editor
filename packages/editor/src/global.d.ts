@@ -328,8 +328,9 @@ declare namespace BPS {
         item: 'blueprint_book'
         active_index: number
         blueprints: {
-            blueprint: IBlueprint
             index: number
+            blueprint?: IBlueprint
+            blueprint_book?: IBlueprintBook
         }[]
 
         label?: string
