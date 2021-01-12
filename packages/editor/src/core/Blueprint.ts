@@ -109,15 +109,19 @@ export class Blueprint extends EventEmitter {
             }
 
             const positionData = [
-                ...(data.entities || [])
-                    .filter(e => !FD.entities[e.name].flags.includes('placeable_off_grid'))
-                    .map(entity => {
-                        const size = util.switchSizeBasedOnDirection(
-                            FD.entities[entity.name].size,
-                            entity.direction
-                        )
-                        return { x: entity.position.x, y: entity.position.y, w: size.x, h: size.y }
-                    }),
+                ...(data.entities || []).map(entity => {
+                    const POG = FD.entities[entity.name].flags.includes('placeable_off_grid')
+                    const size = util.switchSizeBasedOnDirection(
+                        FD.entities[entity.name].size,
+                        entity.direction
+                    )
+                    return {
+                        x: POG ? Math.floor(entity.position.x) : entity.position.x,
+                        y: POG ? Math.floor(entity.position.y) : entity.position.y,
+                        w: size.x,
+                        h: size.y,
+                    }
+                }),
                 ...(data.tiles || []).map(tile => ({
                     x: tile.position.x + 0.5,
                     y: tile.position.y + 0.5,
