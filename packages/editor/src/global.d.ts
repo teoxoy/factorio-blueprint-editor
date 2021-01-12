@@ -315,6 +315,7 @@ declare namespace BPS {
         }[]
 
         label?: string
+        description?: string
         entities?: IEntity[]
         tiles?: ITile[]
         schedules?: ISchedule[]

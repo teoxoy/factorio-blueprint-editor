@@ -87,10 +87,11 @@ export class Blueprint extends EventEmitter {
     public readonly history = new History()
 
     // unused blueprint properties
-    public readonly schedules: BPS.ISchedule[]
-    public readonly absolute_snapping: boolean
-    public readonly snap_to_grid: IPoint
-    public readonly position_relative_to_grid: IPoint
+    private readonly description?: string
+    private readonly schedules?: BPS.ISchedule[]
+    private readonly absolute_snapping?: boolean
+    private readonly snap_to_grid?: IPoint
+    private readonly position_relative_to_grid?: IPoint
 
     private m_nextEntityNumber = 1
 
@@ -195,6 +196,7 @@ export class Blueprint extends EventEmitter {
                 this.history.commitTransaction()
             }
 
+            this.description = data.description
             this.schedules = data.schedules
             this.absolute_snapping = data.absolute_snapping
             this.snap_to_grid = data.snap_to_grid
@@ -616,6 +618,7 @@ export class Blueprint extends EventEmitter {
             item: 'blueprint',
             version: getFactorioVersion(),
             label: this.name,
+            description: this.description,
             schedules: this.schedules,
             absolute_snapping: this.absolute_snapping,
             snap_to_grid: this.snap_to_grid,
