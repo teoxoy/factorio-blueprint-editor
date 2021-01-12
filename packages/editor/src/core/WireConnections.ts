@@ -168,12 +168,8 @@ export class WireConnections extends EventEmitter {
 
     public serializeConnectionData(entityNumber: number): BPS.IConnection {
         const connections = this.getEntityConnections(entityNumber)
-        if (
-            connections.length === 0 ||
-            this.bp.entities.get(entityNumber).type === 'electric_pole'
-        ) {
-            return
-        }
+        if (connections.length === 0) return
+
         return WireConnections.serialize(entityNumber, connections)
     }
 }
