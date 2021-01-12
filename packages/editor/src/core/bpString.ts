@@ -57,14 +57,13 @@ const keywords: Record<string, KeywordDefinition> = {
         errors: false,
         schema: false,
     },
-    objectWithItemNames: {
-        validate: (data: Record<string, number>) => Object.keys(data).every(key => !!FD.items[key]),
-        errors: false,
-        schema: false,
-    },
 }
 
-const validate = new Ajv({ keywords, verbose: true }).compile(blueprintSchema)
+const validate = new Ajv({
+    keywords,
+    verbose: true,
+    strictKeywords: 'log',
+}).compile(blueprintSchema)
 
 const nameMigrations: Record<string, string> = {
     // if (blueprintVersion < getFactorioVersion(0, 17, 0))
