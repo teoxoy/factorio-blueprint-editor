@@ -13,10 +13,17 @@ class Book {
         blueprint_book?: BPS.IBlueprintBook
     }[]
 
+    private readonly label?: string
+    private readonly description?: string
+    private readonly icons?: BPS.IIcon[]
+
     public constructor(data: BPS.IBlueprintBook) {
         if (data) {
             this._activeIndex = getFlattenedActiveIndex(data.blueprints, data.active_index)
             this.blueprints = data.blueprints
+            this.label = data.label
+            this.description = data.description
+            this.icons = data.icons
         } else {
             this._activeIndex = 0
             this.blueprints = []
@@ -64,6 +71,9 @@ class Book {
             item: 'blueprint_book',
             active_index: activeIndex,
             version: getFactorioVersion(),
+            label: this.label,
+            description: this.description,
+            icons: this.icons,
         }
     }
 }

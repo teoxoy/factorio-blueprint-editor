@@ -306,13 +306,15 @@ declare namespace BPS {
         }[]
     }
 
+    interface IIcon {
+        index: 1 | 2 | 3 | 4
+        signal: ISignal
+    }
+
     interface IBlueprint {
         version: number
         item: 'blueprint'
-        icons: {
-            index: 1 | 2 | 3 | 4
-            signal: ISignal
-        }[]
+        icons: IIcon[]
 
         label?: string
         description?: string
@@ -335,5 +337,7 @@ declare namespace BPS {
         }[]
 
         label?: string
+        description?: string
+        icons?: IIcon[]
     }
 }

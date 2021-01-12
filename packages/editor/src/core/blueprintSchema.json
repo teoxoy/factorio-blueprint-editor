@@ -78,6 +78,23 @@
                 }
             }
         },
+        "icons": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+                "type": "object",
+                "required": ["index", "signal"],
+                "additionalProperties": false,
+                "properties": {
+                    "index": {
+                        "type": "integer",
+                        "enum": [1, 2, 3, 4]
+                    },
+                    "signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
+                }
+            }
+        },
         "blueprint": {
             "type": "object",
             "required": ["version", "item", "icons"],
@@ -97,23 +114,7 @@
                 "position_relative_to_grid": {
                     "$ref": "blueprintSchema.json#/definitions/position"
                 },
-                "icons": {
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": 4,
-                    "items": {
-                        "type": "object",
-                        "required": ["index", "signal"],
-                        "additionalProperties": false,
-                        "properties": {
-                            "index": {
-                                "type": "integer",
-                                "enum": [1, 2, 3, 4]
-                            },
-                            "signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
-                        }
-                    }
-                },
+                "icons": { "$ref": "blueprintSchema.json#/definitions/icons" },
                 "schedules": {
                     "type": "array",
                     "items": {
@@ -651,6 +652,8 @@
                     "const": "blueprint_book"
                 },
                 "label": { "type": "string" },
+                "description": { "type": "string" },
+                "icons": { "$ref": "blueprintSchema.json#/definitions/icons" },
                 "active_index": { "type": "integer" },
                 "blueprints": {
                     "type": "array",
