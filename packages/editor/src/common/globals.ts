@@ -22,10 +22,14 @@ function getBT(path: string): Promise<PIXI.BaseTexture> {
         T = performance.now()
     }
     count += 1
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         const l = new PIXI.Loader()
-        l.add(path, path).load(() => {
-            resolve(PIXI.utils.BaseTextureCache[path])
+        l.add(path, path).load((_, res) => {
+            if (res[path].error) {
+                reject(res[path].error)
+            } else {
+                resolve(PIXI.utils.BaseTextureCache[path])
+            }
             count -= 1
             if (count <= 0) {
                 console.log('done', performance.now() - T)
@@ -46,10 +50,13 @@ function getTexture(path: string, x = 0, y = 0, w = 0, h = 0): PIXI.Texture {
         prom = getBT(key)
         started.set(key, prom)
     }
-    prom.then(bt => {
-        t.baseTexture = bt
-        t.frame = new PIXI.Rectangle(x, y, w || bt.width, h || bt.height)
-    })
+    prom.then(
+        bt => {
+            t.baseTexture = bt
+            t.frame = new PIXI.Rectangle(x, y, w || bt.width, h || bt.height)
+        },
+        err => console.error(err)
+    )
     return t
 }
 
