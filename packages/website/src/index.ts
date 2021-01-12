@@ -126,6 +126,7 @@ async function loadBp(bpOrBook: Blueprint | Book): Promise<void> {
         book = bpOrBook
         bp = book.selectBlueprint(bpIndex ? bpIndex : undefined)
     } else {
+        book = undefined
         bp = bpOrBook
     }
 
