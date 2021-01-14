@@ -11,7 +11,7 @@
     "bugs": "https://github.com/Teoxoy/factorio-blueprint-editor/issues",
     "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
     "dependencies": {
-        "@pixi/basis": "^6.0.0-rc",
+        "@pixi/basis": "^6.0.0-rc.2",
         "ajv": "^6.12.2",
         "delaunator": "^4.0.1",
         "eventemitter3": "^4.0.4",
@@ -19,7 +19,7 @@
         "maxrects-packer": "^2.6.0",
         "pako": "^1.0.11",
         "pathfinding": "^0.4.18",
-        "pixi.js": "^6.0.0-rc"
+        "pixi.js": "^6.0.0-rc.2"
     },
     "devDependencies": {
         "@types/delaunator": "^3.0.0",
