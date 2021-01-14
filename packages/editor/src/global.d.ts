@@ -39,8 +39,9 @@ declare namespace BPS {
     interface IWireColor {
         /** Entity number */
         entity_id: number
-        /** Entity side */
+        /** Entity side (1 or 2) for red or green wires */
         circuit_id?: number
+        /** Entity side (0 or 1) for copper wires */
         wire_id?: number
     }
 

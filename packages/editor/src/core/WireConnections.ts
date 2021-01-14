@@ -73,7 +73,11 @@ export class WireConnections extends EventEmitter {
         return parsedConnections
     }
 
-    public static serialize(entityNumber: number, connections: IConnection[]): BPS.IConnection {
+    public static serialize(
+        entityNumber: number,
+        connections: IConnection[],
+        supportsCopperConnection: boolean
+    ): BPS.IConnection {
         const serialized: BPS.IConnection = {}
 
         for (const connection of connections) {
@@ -81,8 +85,9 @@ export class WireConnections extends EventEmitter {
             const side = isEntity1 ? connection.entitySide1 : connection.entitySide2
             const color = connection.color
             const otherEntNr = isEntity1 ? connection.entityNumber2 : connection.entityNumber1
+            const otherEntSide = isEntity1 ? connection.entitySide2 : connection.entitySide1
 
-            if (color === 'copper') {
+            if (color === 'copper' && supportsCopperConnection) {
                 const SIDE = `Cu${side - 1}`
                 if (serialized[SIDE] === undefined) {
                     serialized[SIDE] = []
@@ -90,8 +95,9 @@ export class WireConnections extends EventEmitter {
                 const c = serialized[SIDE] as BPS.IWireColor[]
                 c.push({
                     entity_id: otherEntNr,
+                    wire_id: 0,
                 })
-            } else {
+            } else if (color === 'red' || color === 'green') {
                 if (serialized[side] === undefined) {
                     serialized[side] = {}
                 }
@@ -101,6 +107,7 @@ export class WireConnections extends EventEmitter {
                 }
                 SIDE[color].push({
                     entity_id: otherEntNr,
+                    circuit_id: otherEntSide,
                 })
             }
         }
@@ -170,6 +177,7 @@ export class WireConnections extends EventEmitter {
         const connections = this.getEntityConnections(entityNumber)
         if (connections.length === 0) return
 
-        return WireConnections.serialize(entityNumber, connections)
+        const supportsCopperConnection = this.bp.entities.get(entityNumber).name === 'power_switch'
+        return WireConnections.serialize(entityNumber, connections, supportsCopperConnection)
     }
 }
