@@ -90,17 +90,23 @@ export class QuickbarPanel extends Panel {
                 }
 
                 quickbarSlot.on('pointerdown', (e: PIXI.InteractionEvent) => {
-                    // Use Case 1: Left Click  & Slot=Empty & Mouse=Painting >> Assign Mouse Item to Slot
-                    // Use Case 2: Left Click  & Slot=Item  & Mouse=Painting >> Assign Slot Item to Mouse
-                    // Use Case 3: Left Click  & Slot=Empty & Mouse=Empty    >> Assign Slot Item to Selected Inv item
-                    // Use Case 4: Left Click  & Slot=Item  & Mouse=Empty    >> Assign Slot Item to Mouse
-                    // Use Case 5: Right Click & Slot=*     & Mouse=*        >> Unassign Slot
+                    // Use Case 1:   Left Click  & Slot=Empty & Mouse=Painting                      >> Assign Mouse Item to Slot
+                    // Use Case 2:   Left Click  & Slot=Item  & Mouse=Painting                      >> Assign Slot Item to Mouse
+                    // Use Case 2.5: Left Click  & Slot=Item  & Mouse=Painting & Item=PaintingItem  >> Destroy Painting Item
+                    // Use Case 3:   Left Click  & Slot=Empty & Mouse=Empty                         >> Assign Slot Item to Selected Inv item
+                    // Use Case 4:   Left Click  & Slot=Item  & Mouse=Empty                         >> Assign Slot Item to Mouse
+                    // Use Case 5:   Right Click & Slot=*     & Mouse=*                             >> Unassign Slot
 
                     if (e.data.button === 0) {
                         if (G.BPC.mode === EditorMode.PAINT) {
                             if (quickbarSlot.itemName) {
-                                // UC2
-                                G.BPC.spawnPaintContainer(quickbarSlot.itemName)
+                                if (quickbarSlot.itemName === G.BPC.paintContainer.getItemName()) {
+                                    // UC2.5
+                                    G.BPC.paintContainer.destroy()
+                                } else {
+                                    // UC2
+                                    G.BPC.spawnPaintContainer(quickbarSlot.itemName)
+                                }
                             } else {
                                 // UC1
                                 quickbarSlot.assignItem(G.BPC.paintContainer.getItemName())
