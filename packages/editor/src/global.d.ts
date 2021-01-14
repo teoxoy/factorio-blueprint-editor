@@ -111,6 +111,8 @@ declare namespace BPS {
 
         /** train stop station name, only present if entity is train-stop */
         station?: string
+        /** trains limit, only present if entity is train-stop */
+        manual_trains_limit?: number
         /** only present if entity is locomotive or train-stop */
         color?: IColor
         /** only present if entity is locomotive, cargo_wagon or fluid_wagon */

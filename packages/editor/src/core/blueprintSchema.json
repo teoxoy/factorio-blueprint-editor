@@ -235,6 +235,10 @@
                                 "type": "string",
                                 "$comment": "train stop station name, only present if entity is train-stop"
                             },
+                            "manual_trains_limit": {
+                                "type": "integer",
+                                "$comment": "trains limit, only present if entity is train-stop"
+                            },
                             "color": {
                                 "type": "object",
                                 "required": ["r", "g", "b", "a"],
