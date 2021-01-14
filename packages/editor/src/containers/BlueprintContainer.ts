@@ -265,6 +265,7 @@ export class BlueprintContainer extends PIXI.Container {
 
     public enterCopyMode(): void {
         if (this.mode === EditorMode.COPY) return
+        if (this.mode === EditorMode.PAINT) this.paintContainer.destroy()
 
         this.updateHoverContainer(true)
         this.setMode(EditorMode.COPY)
@@ -317,6 +318,7 @@ export class BlueprintContainer extends PIXI.Container {
 
     public enterDeleteMode(): void {
         if (this.mode === EditorMode.DELETE) return
+        if (this.mode === EditorMode.PAINT) this.paintContainer.destroy()
 
         this.updateHoverContainer(true)
         this.setMode(EditorMode.DELETE)
