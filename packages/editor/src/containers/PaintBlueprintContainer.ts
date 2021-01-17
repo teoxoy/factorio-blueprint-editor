@@ -46,7 +46,8 @@ export class PaintBlueprintContainer extends PaintContainer {
                 e.entity_number,
                 WireConnections.deserialize(e.entity_number, e.connections).filter(
                     c => entMap.has(c.entityNumber1) && entMap.has(c.entityNumber2)
-                )
+                ),
+                e.name === 'power_switch'
             )
         }
         this.bp = new Blueprint({
