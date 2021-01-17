@@ -241,8 +241,14 @@ export class Entity extends EventEmitter {
     public get filterSlots(): number {
         if (this.name.includes('splitter')) return 1
         if (this.entityData.filter_count !== undefined) return this.entityData.filter_count
-        if (this.entityData.logistic_slots_count !== undefined) {
-            return this.entityData.logistic_slots_count
+        if (this.entityData.max_logistic_slots !== undefined) {
+            return this.entityData.max_logistic_slots
+        }
+        if (this.name === 'logistic_chest_buffer' || this.name === 'logistic_chest_requester') {
+            return this.logisticChestFilters.reduce(
+                (max, filter) => Math.max(max, filter.index),
+                30 // TODO: find a way to fix this properly
+            )
         }
         return 0
     }
@@ -393,7 +399,7 @@ export class Entity extends EventEmitter {
 
     /** Logistic chest filters */
     private get logisticChestFilters(): IFilter[] {
-        return this.m_rawEntity.request_filters
+        return this.m_rawEntity.request_filters || []
     }
     private set logisticChestFilters(filters: IFilter[]) {
         if (filters === undefined && this.m_rawEntity.request_filters === undefined) return

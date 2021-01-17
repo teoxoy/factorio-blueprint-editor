@@ -636,7 +636,7 @@ export interface Entity {
     researching_speed?: number
     inputs?: string[]
     logistic_mode?: string
-    logistic_slots_count?: number
+    max_logistic_slots?: number
     rocket_parts_required?: number
     rocket_result_inventory_size?: number
     fixed_recipe?: string

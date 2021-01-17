@@ -1109,7 +1109,12 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
             return (data: IDrawData) => {
                 const dir = data.dir
                 let rp = duplicateAndSetPropertyUsing(e.rail_piece, 'x', 'width', dir)
-                let a = duplicateAndSetPropertyUsing(e.animation as SpriteData, 'y', 'height', dir)
+                let a = duplicateAndSetPropertyUsing(
+                    (e.animation as SpriteLayers).layers[0],
+                    'y',
+                    'height',
+                    dir
+                )
                 if (e.name === 'rail_chain_signal') {
                     const getRightShift = (): number[] => {
                         switch (dir) {
