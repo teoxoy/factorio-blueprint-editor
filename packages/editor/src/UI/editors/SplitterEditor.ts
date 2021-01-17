@@ -87,14 +87,14 @@ export class SplitterEditor extends Editor {
             this.m_Entity.splitterOutputPriority = outputRight.active ? 'right' : 'left'
         })
 
-        this.m_Entity.on('splitterInputPriority', priority => {
+        this.onEntityChange('splitterInputPriority', priority => {
             inputCheckbox.checked = priority !== undefined
             inputSwitch.value = priority
             inputLeft.active = priority === 'left'
             inputRight.active = priority === 'right'
         })
 
-        this.m_Entity.on('splitterOutputPriority', priority => {
+        this.onEntityChange('splitterOutputPriority', priority => {
             outputCheckbox.checked = priority !== undefined
             outputSwitch.value = priority
             outputLeft.active = priority === 'left'

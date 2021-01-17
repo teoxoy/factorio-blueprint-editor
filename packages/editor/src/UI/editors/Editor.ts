@@ -80,4 +80,14 @@ export abstract class Editor extends Dialog {
         // Return component in case extension wants to use it
         return filters
     }
+
+    protected onEntityChange(event: string, fn: (...args: any[]) => void): void {
+        this.m_Entity.on(event, fn)
+        this.once('destroy', () => this.m_Entity.off(event, fn))
+    }
+
+    public destroy(): void {
+        this.emit('destroy')
+        super.destroy()
+    }
 }

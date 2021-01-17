@@ -101,10 +101,20 @@ export class Filters extends PIXI.Container {
         this.m_UpdateSlots()
 
         // Listen to filter changes on entity
-        this.m_Entity.on('filters', () => {
+        this.onEntityChange('filters', () => {
             this.m_UpdateFilters()
             this.m_UpdateSlots()
         })
+    }
+
+    private onEntityChange(event: string, fn: (...args: any[]) => void): void {
+        this.m_Entity.on(event, fn)
+        this.once('destroy', () => this.m_Entity.off(event, fn))
+    }
+
+    public destroy(opts?: boolean | PIXI.IDestroyOptions): void {
+        this.emit('destroy')
+        super.destroy(opts)
     }
 
     /**

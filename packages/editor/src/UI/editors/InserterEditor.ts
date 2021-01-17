@@ -40,7 +40,7 @@ export class InserterEditor extends Editor {
                 this.m_Entity.filterMode = filterModeBlacklist.active ? 'blacklist' : 'whitelist'
             })
 
-            this.m_Entity.on('filterMode', filterMode => {
+            this.onEntityChange('filterMode', filterMode => {
                 filterModeSwitch.value = filterMode
                 filterModeWhitelist.active = filterMode === 'whitelist'
                 filterModeBlacklist.active = filterMode === 'blacklist'

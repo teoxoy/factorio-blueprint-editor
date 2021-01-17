@@ -83,7 +83,7 @@ export class ChestEditor extends Editor {
             slider.value = value
             filters.updateFilter(this.m_Filter, value)
         })
-        this.m_Entity.on('filters', () => {
+        this.onEntityChange('filters', () => {
             if (this.m_Filter > -1) {
                 slider.value = filters.getFilterCount(this.m_Filter)
             }
@@ -104,7 +104,7 @@ export class ChestEditor extends Editor {
             checkbox.on('changed', () => {
                 this.m_Entity.requestFromBufferChest = checkbox.checked
             })
-            this.m_Entity.on('requestFromBufferChest', () => {
+            this.onEntityChange('requestFromBufferChest', () => {
                 checkbox.checked = this.m_Entity.requestFromBufferChest
             })
             this.addChild(checkbox)

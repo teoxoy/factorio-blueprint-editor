@@ -38,11 +38,21 @@ export class Preview extends PIXI.Container {
         this.m_Preview = this.generatePreview()
 
         // Attach events
-        this.m_Entity.on('recipe', this.onEntityChanged)
-        this.m_Entity.on('modules', this.onEntityChanged)
-        this.m_Entity.on('filters', this.onEntityChanged)
-        this.m_Entity.on('splitterInputPriority', this.onEntityChanged)
-        this.m_Entity.on('splitterOutputPriority', this.onEntityChanged)
+        this.onEntityChange('recipe', this.onEntityChanged)
+        this.onEntityChange('modules', this.onEntityChanged)
+        this.onEntityChange('filters', this.onEntityChanged)
+        this.onEntityChange('splitterInputPriority', this.onEntityChanged)
+        this.onEntityChange('splitterOutputPriority', this.onEntityChanged)
+    }
+
+    private onEntityChange(event: string, fn: (...args: any[]) => void): void {
+        this.m_Entity.on(event, fn)
+        this.once('destroy', () => this.m_Entity.off(event, fn))
+    }
+
+    public destroy(opts?: boolean | PIXI.IDestroyOptions): void {
+        this.emit('destroy')
+        super.destroy(opts)
     }
 
     /** Create the perview */

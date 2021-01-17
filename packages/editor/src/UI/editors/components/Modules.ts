@@ -42,7 +42,7 @@ export class Modules extends PIXI.Container {
             this.addChild(slot)
         }
 
-        this.m_Entity.on('modules', modules =>
+        this.onEntityChange('modules', modules =>
             [
                 ...modules,
                 ...Array(this.m_Entity.moduleSlots - modules.length).fill(undefined),
@@ -51,6 +51,16 @@ export class Modules extends PIXI.Container {
                 this.updateContent(this.getChildAt(i) as Slot, m)
             })
         )
+    }
+
+    private onEntityChange(event: string, fn: (...args: any[]) => void): void {
+        this.m_Entity.on(event, fn)
+        this.once('destroy', () => this.m_Entity.off(event, fn))
+    }
+
+    public destroy(opts?: boolean | PIXI.IDestroyOptions): void {
+        this.emit('destroy')
+        super.destroy(opts)
     }
 
     /** Update Content Icon */
