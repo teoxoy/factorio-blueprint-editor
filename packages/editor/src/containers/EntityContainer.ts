@@ -41,7 +41,7 @@ export class EntityContainer {
 
         const onRecipeChange = (): void => {
             this.redrawEntityInfo()
-            if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.assemblerCraftsWithFluid) {
+            if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.mayCraftWithFluid) {
                 this.redraw()
                 this.redrawSurroundingEntities()
             }

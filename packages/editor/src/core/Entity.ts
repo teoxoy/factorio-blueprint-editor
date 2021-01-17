@@ -693,6 +693,12 @@ export class Entity extends EventEmitter {
         return (
             this.recipe &&
             FD.recipes[this.recipe].category === 'crafting_with_fluid' &&
+            this.mayCraftWithFluid
+        )
+    }
+
+    public get mayCraftWithFluid(): boolean {
+        return (
             this.entityData.crafting_categories &&
             this.entityData.crafting_categories.includes('crafting_with_fluid')
         )
