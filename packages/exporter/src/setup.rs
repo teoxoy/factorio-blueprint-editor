@@ -5,10 +5,10 @@ use globset::{GlobBuilder, GlobMatcher};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use regex::Regex;
 use serde::Deserialize;
-use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::{collections::HashSet, env};
+use std::{error::Error, time::UNIX_EPOCH};
 use tokio::process::Command;
 
 macro_rules! get_env_var {
@@ -139,6 +139,7 @@ async fn generate_locale(factorio_data: &PathBuf) -> Result<String, Box<dyn Erro
 }
 
 pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), Box<dyn Error>> {
+    let output_dir = data_dir.join("output");
     let mod_dir = data_dir.join("factorio/mods/export-data");
     let scenario_dir = mod_dir.join("scenarios/export-data");
     let extracted_data_path = data_dir.join("factorio/script-output/data.json");
@@ -164,6 +165,25 @@ pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), 
         .await?;
 
     let content = tokio::fs::read_to_string(&extracted_data_path).await?;
+    tokio::fs::create_dir_all(&output_dir).await?;
+    tokio::fs::write(output_dir.join("data.json"), &content).await?;
+
+    let metadata_path = output_dir.join("metadata.yaml");
+    let mut metadata_file = tokio::fs::OpenOptions::new()
+        .read(true)
+        .append(true)
+        .create(true)
+        .open(&metadata_path)
+        .await?;
+    use tokio::io::AsyncReadExt;
+    let mut buffer = String::new();
+    metadata_file.read_to_string(&mut buffer).await?;
+    let obj: serde_yaml::Value = if buffer.len() == 0 {
+        serde_yaml::Value::Mapping(serde_yaml::mapping::Mapping::new())
+    } else {
+        serde_yaml::from_str(&buffer)?
+    };
+    let obj = Arc::new(Mutex::new(obj));
 
     lazy_static! {
         static ref IMG_REGEX: Regex = Regex::new(r#""([^"]+?\.png)""#).unwrap();
@@ -173,18 +193,17 @@ pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), 
         .map(|cap| cap[1].to_string())
         .collect();
 
-    let file_paths = iter
+    let mut file_paths = iter
         .into_iter()
         .map(|s| {
-            let out_path = data_dir
-                .join("output")
-                .join(s.replace(".png", ".basis").as_str());
             let in_path =
                 factorio_data.join(s.replace("__core__", "core").replace("__base__", "base"));
-
+            let out_path = output_dir.join(s.replace(".png", ".basis").as_str());
             (in_path, out_path)
         })
         .collect::<Vec<(PathBuf, PathBuf)>>();
+
+    file_paths.sort_unstable();
 
     let progress = ProgressBar::new(file_paths.len() as u64);
     progress.set_style(ProgressStyle::default_bar().template("{wide_bar} {pos}/{len} ({elapsed})"));
@@ -194,9 +213,16 @@ pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), 
     let tmp_dir = std::env::temp_dir().join("__FBE__");
     tokio::fs::create_dir_all(&tmp_dir).await?;
 
-    futures::future::try_join_all(
-        (0..20).map(|_| compress_next_img(file_paths.clone(), tmp_dir.clone(), progress.clone())),
-    )
+    let metadata_file = Arc::new(tokio::sync::Mutex::new(metadata_file));
+    futures::future::try_join_all((0..20).map(|_| {
+        compress_next_img(
+            file_paths.clone(),
+            tmp_dir.clone(),
+            progress.clone(),
+            obj.clone(),
+            metadata_file.clone(),
+        )
+    }))
     .await?;
 
     progress.finish();
@@ -204,8 +230,19 @@ pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), 
     tokio::fs::remove_dir_all(&tmp_dir).await?;
     println!("DONE!");
 
-    tokio::fs::write(data_dir.join("output").join("data.json"), &content).await?;
     Ok(())
+}
+
+async fn get_len_and_mtime(path: &PathBuf) -> Result<(u64, u64), Box<dyn Error>> {
+    let file = tokio::fs::File::open(path).await?;
+    let metadata = file.metadata().await?;
+    let mtime = metadata
+        .modified()
+        .ok()
+        .and_then(|time| time.duration_since(UNIX_EPOCH).ok())
+        .map(|dur| dur.as_secs())
+        .unwrap_or(0);
+    Ok((metadata.len(), mtime))
 }
 
 #[async_recursion]
@@ -213,28 +250,42 @@ async fn compress_next_img(
     file_paths: Arc<Mutex<Vec<(PathBuf, PathBuf)>>>,
     tmp_dir: PathBuf,
     progress: ProgressBar,
+    obj: Arc<Mutex<serde_yaml::Value>>,
+    metadata_file: Arc<tokio::sync::Mutex<tokio::fs::File>>,
 ) -> Result<(), Box<dyn Error>> {
     let file_path = { file_paths.lock().unwrap().pop() };
     if let Some((in_path, out_path)) = file_path {
-        let path = make_img_pow2(&in_path, &tmp_dir).await?;
+        let (len, mtime) = get_len_and_mtime(&in_path).await?;
+        let key = in_path.to_str().ok_or("PathBuf to &str failed")?;
+        let new_val = serde_yaml::to_value([len, mtime])?;
 
-        tokio::fs::create_dir_all(out_path.parent().unwrap()).await?;
+        let same = { obj.lock().unwrap()[key] == new_val };
+        if !same {
+            let path = make_img_pow2(&in_path, &tmp_dir).await?;
 
-        let basisu_executable = "./basisu";
-        let status = Command::new(basisu_executable)
-            // .args(&["-comp_level", "2"])
-            .args(&["-mipmap"])
-            .args(&["-file", path.to_str().ok_or("PathBuf to &str failed")?])
-            .args(&[
-                "-output_file",
-                out_path.to_str().ok_or("PathBuf to &str failed")?,
-            ])
-            .stdout(std::process::Stdio::null())
-            .spawn()?
-            .await?;
+            tokio::fs::create_dir_all(out_path.parent().unwrap()).await?;
 
-        if !status.success() {
-            println!("FAILED: {:?}", path);
+            let basisu_executable = "./basisu";
+            let status = Command::new(basisu_executable)
+                // .args(&["-comp_level", "2"])
+                .args(&["-mipmap"])
+                .args(&["-file", path.to_str().ok_or("PathBuf to &str failed")?])
+                .args(&[
+                    "-output_file",
+                    out_path.to_str().ok_or("PathBuf to &str failed")?,
+                ])
+                .stdout(std::process::Stdio::null())
+                .spawn()?
+                .await?;
+
+            if status.success() {
+                let content = format!("\"{}\": [{}, {}]\n", key, len, mtime);
+                use tokio::io::AsyncWriteExt;
+                let mut file = metadata_file.lock().await;
+                file.write_all(content.as_bytes()).await?;
+            } else {
+                println!("FAILED: {:?}", path);
+            }
         }
 
         progress.inc(1);
@@ -242,7 +293,7 @@ async fn compress_next_img(
         return Ok(());
     }
 
-    compress_next_img(file_paths, tmp_dir, progress).await
+    compress_next_img(file_paths, tmp_dir, progress, obj, metadata_file).await
 }
 
 // TODO: look into using https://wiki.factorio.com/Download_API
