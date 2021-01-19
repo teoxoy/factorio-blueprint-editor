@@ -15,7 +15,7 @@ import { initActions, registerAction } from './actions'
 export class Editor {
     public async init(canvas: HTMLCanvasElement): Promise<void> {
         await Promise.all([
-            fetch(`${G.STATIC_URL}data.json`)
+            fetch('__STATIC_URL__/data.json')
                 .then(res => res.text())
                 .then(modules => loadData(modules)),
             BasisLoader.loadTranscoder(basisTranscoderJS, basisTranscoderWASM),

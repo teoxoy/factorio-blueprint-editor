@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { fusebox, sparky, pluginLink } from 'fuse-box'
+import { fusebox, sparky, pluginLink, pluginReplace } from 'fuse-box'
 import { IDevServerProps } from 'fuse-box/devServer/devServerProps'
 import { Context as FuseBoxContext } from 'fuse-box/core/context'
 import { wrapContents } from 'fuse-box/plugins/pluginStrings'
@@ -37,6 +37,14 @@ class Context {
             plugins: [
                 this.luaPlugin,
                 pluginLink(/basis_transcoder\.(js|wasm)$/, { useDefault: true }),
+                pluginReplace({
+                    __CORS_PROXY_URL__: runServer
+                        ? 'https://api.allorigins.win/raw?url='
+                        : '/corsproxy?url=',
+                    __STATIC_URL__: runServer
+                        ? '/data'
+                        : 'https://static-fbe.teoxoy.com/file/factorio-blueprint-editor',
+                }),
             ],
             cache: { enabled: runServer, strategy: 'memory' },
             hmr: { plugin: p('./hmr.ts') },

@@ -147,7 +147,7 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                 reject(e)
             }
         }).then((url: URL) => {
-            const corsProxy = 'https://api.allorigins.win/raw?url='
+            const corsProxy = '__CORS_PROXY_URL__'
 
             console.log(`Loading data from: ${url}`)
             const pathParts = url.pathname.slice(1).split('/')
