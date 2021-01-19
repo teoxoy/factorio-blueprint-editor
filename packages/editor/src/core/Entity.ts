@@ -107,7 +107,7 @@ export class Entity extends EventEmitter {
             .commit()
     }
 
-    private get maxWireDistance(): number {
+    public get maxWireDistance(): number {
         return (
             this.entityData.circuit_wire_max_distance ||
             this.entityData.wire_max_distance ||
@@ -124,6 +124,9 @@ export class Entity extends EventEmitter {
 
     /** Entity direction */
     public get direction(): number {
+        if (this.type === 'electric_pole') {
+            return this.m_BP.wireConnections.getPowerPoleDirection(this.entityNumber)
+        }
         return this.m_rawEntity.direction === undefined ? 0 : this.m_rawEntity.direction
     }
     public set direction(direction: number) {
@@ -749,10 +752,10 @@ export class Entity extends EventEmitter {
         return e.circuit_wire_connection_points[getIndex()].wire[color]
     }
 
-    public serialize(): BPS.IEntity {
+    public serialize(entNrWhitelist?: Set<number>): BPS.IEntity {
         return util.duplicate({
             ...this.m_rawEntity,
-            connections: this.m_BP.wireConnections.serializeConnectionData(this.entityNumber),
+            ...this.m_BP.wireConnections.serializeConnectionData(this.entityNumber, entNrWhitelist),
         })
     }
 }

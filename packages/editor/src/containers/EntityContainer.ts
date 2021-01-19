@@ -53,7 +53,7 @@ export class EntityContainer {
 
             this.updateUndergroundLine()
             this.redrawEntityInfo()
-            G.BPC.wiresContainer.update(this.m_Entity)
+            G.BPC.wiresContainer.update(this.m_Entity.entityNumber)
         }
 
         const onDirectionTypeChange = (): void => {
@@ -70,7 +70,7 @@ export class EntityContainer {
 
             this.updateUndergroundLine()
             this.redrawEntityInfo()
-            G.BPC.wiresContainer.update(this.m_Entity)
+            G.BPC.wiresContainer.update(this.m_Entity.entityNumber)
             this.visualizationArea.moveTo(this.position)
         }
 
@@ -328,7 +328,7 @@ export class EntityContainer {
                 .forEach(entity => {
                     EntityContainer.mappings.get(entity.entityNumber).redraw()
                     if (entity.type === 'transport_belt') {
-                        G.BPC.wiresContainer.update(entity)
+                        G.BPC.wiresContainer.update(entity.entityNumber)
                     }
                 })
         }

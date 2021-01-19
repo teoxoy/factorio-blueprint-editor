@@ -190,15 +190,8 @@ export class PaintEntityContainer extends PaintContainer {
         const position = this.getGridPosition()
         const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
 
-        const frgEnt = this.bpc.bp.entityPositionGrid.checkFastReplaceableGroup(
-            this.name,
-            direction,
-            position
-        )
-        if (frgEnt) {
-            this.bpc.bp.fastReplaceEntity(frgEnt, this.name, direction)
-            return
-        }
+        if (this.bpc.bp.fastReplaceEntity(this.name, direction, position)) return
+
         const snEnt = this.bpc.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
             this.name,
             direction,
@@ -210,15 +203,18 @@ export class PaintEntityContainer extends PaintContainer {
         }
 
         if (this.bpc.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)) {
-            this.bpc.bp.createEntity({
-                name: this.name,
-                position,
-                direction,
-                type:
-                    fd.type === 'underground_belt' || fd.type === 'loader'
-                        ? this.directionType
-                        : undefined,
-            })
+            this.bpc.bp.createEntity(
+                {
+                    name: this.name,
+                    position,
+                    direction,
+                    type:
+                        fd.type === 'underground_belt' || fd.type === 'loader'
+                            ? this.directionType
+                            : undefined,
+                },
+                true
+            )
 
             if (fd.type === 'underground_belt' || this.name === 'pipe_to_ground') {
                 this.direction = (direction + 4) % 8

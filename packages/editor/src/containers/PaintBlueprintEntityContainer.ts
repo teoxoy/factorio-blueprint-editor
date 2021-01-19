@@ -129,15 +129,8 @@ export class PaintBlueprintEntityContainer {
         const position = this.entityPosition
         const direction = this.entity.direction
 
-        const frgEnt = this.bpc.bp.entityPositionGrid.checkFastReplaceableGroup(
-            this.entity.name,
-            direction,
-            position
-        )
-        if (frgEnt) {
-            this.bpc.bp.fastReplaceEntity(frgEnt, this.entity.name, direction)
-            return
-        }
+        if (this.bpc.bp.fastReplaceEntity(this.entity.name, direction, position)) return
+
         const snEnt = this.bpc.bp.entityPositionGrid.checkSameEntityAndDifferentDirection(
             this.entity.name,
             direction,
@@ -154,6 +147,7 @@ export class PaintBlueprintEntityContainer {
                 ...this.entity.serialize(),
                 entity_number: undefined,
                 connections: undefined,
+                neighbours: undefined,
                 position,
             })
         }

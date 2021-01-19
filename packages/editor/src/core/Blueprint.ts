@@ -34,7 +34,7 @@ const oilOutpostSettings: IOilOutpostSettings = {
 // (uint64_t(minorVersion) << 16) |
 // (uint64_t(majorVersion) << 32) |
 // (uint64_t(mainVersion) << 48)
-const getFactorioVersion = (main = 0, major = 17, minor = 14): number =>
+const getFactorioVersion = (main = 1, major = 1, minor = 11): number =>
     (minor << 16) + (major | (main << 16)) * 0xffffffff
 
 class OurMap<K, V> extends Map<K, V> {
@@ -175,13 +175,18 @@ export class Blueprint extends EventEmitter {
                 this.history.startTransaction()
 
                 for (const e of ENTITIES) {
-                    this.wireConnections.createEntityConnections(e.entity_number, e.connections)
+                    this.wireConnections.createEntityConnections(
+                        e.entity_number,
+                        e.connections,
+                        e.neighbours
+                    )
                 }
 
                 this.entities = new OurMap(
                     ENTITIES.map(e => {
                         // remove connections from obj - connections are handled by wireConnections
                         delete e.connections
+                        delete e.neighbours
                         return this.createEntity({
                             ...e,
                             position: {
@@ -192,6 +197,10 @@ export class Blueprint extends EventEmitter {
                     }),
                     e => e.entityNumber
                 )
+
+                if (data.version < getFactorioVersion(1, 1, 11)) {
+                    this.wireConnections.generatePowerPoleWires()
+                }
 
                 this.history.commitTransaction()
             }
@@ -210,7 +219,7 @@ export class Blueprint extends EventEmitter {
         return this
     }
 
-    public createEntity(rawData: IEntityData): Entity {
+    public createEntity(rawData: IEntityData, connectPowerPole = false): Entity {
         const rawEntity = new Entity(
             {
                 ...rawData,
@@ -225,6 +234,8 @@ export class Blueprint extends EventEmitter {
             .updateMap(this.entities, rawEntity.entityNumber, rawEntity, 'Create entity')
             .onDone(this.onCreateOrRemoveEntity.bind(this))
             .commit()
+
+        if (connectPowerPole) this.wireConnections.connectPowerPole(rawEntity.entityNumber)
 
         return rawEntity
     }
@@ -250,19 +261,31 @@ export class Blueprint extends EventEmitter {
         this.history.commitTransaction()
     }
 
-    public fastReplaceEntity(entity: Entity, name: string, direction: number): void {
+    public fastReplaceEntity(name: string, direction: number, position: IPoint): boolean {
+        const entity = this.entityPositionGrid.checkFastReplaceableGroup(name, direction, position)
+
+        if (!entity) return false
+
         this.history.startTransaction('Fast replace entity')
+
+        const connections = this.wireConnections.getEntityConnections(entity.entityNumber)
 
         this.removeEntity(entity)
 
-        // TODO: keep wire connections
         this.createEntity({
             name,
             direction,
             position: entity.position,
+            entity_number: entity.entityNumber,
         }).pasteSettings(entity)
 
+        for (const conn of connections) {
+            this.wireConnections.create(conn)
+        }
+
         this.history.commitTransaction()
+
+        return true
     }
 
     private onCreateOrRemoveEntity(newValue: Entity, oldValue: Entity): void {
@@ -460,6 +483,8 @@ export class Blueprint extends EventEmitter {
             this.createEntity(pole)
         }
 
+        this.wireConnections.generatePowerPoleWires()
+
         for (const p of GP.pumpjacksToRotate) {
             const entity = this.entities.get(p.entity_number)
             entity.direction = p.direction
@@ -571,6 +596,13 @@ export class Blueprint extends EventEmitter {
                     }
                 }
             }
+
+            if (e.neighbours) {
+                for (let i = 0; i < e.neighbours.length; i++) {
+                    e.neighbours[i] = oldToNewID.get(e.neighbours[i])
+                }
+            }
+
             return e
         })
     }

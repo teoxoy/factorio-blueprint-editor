@@ -391,6 +391,11 @@
                                 }
                             },
 
+                            "neighbours": {
+                                "type": "array",
+                                "$comment": "power pole wire connections",
+                                "items": { "type": "integer" }
+                            },
                             "connections": {
                                 "type": "object",
                                 "$comment": "wire connections",

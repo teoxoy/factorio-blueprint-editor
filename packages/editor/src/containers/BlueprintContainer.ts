@@ -544,11 +544,9 @@ export class BlueprintContainer extends PIXI.Container {
 
         const onCreateEntity = (entity: Entity): void => {
             new EntityContainer(entity)
-            this.wiresContainer.updatePassiveWires()
             this.updateHoverContainer()
         }
         const onRemoveEntity = (): void => {
-            this.wiresContainer.updatePassiveWires()
             this.updateHoverContainer()
         }
         const onCreateTile = (tile: Tile): TileContainer => new TileContainer(tile)
@@ -558,14 +556,10 @@ export class BlueprintContainer extends PIXI.Container {
         this.bp.on('create-tile', onCreateTile)
 
         const onConnectionCreated = (hash: string, connection: IConnection): void => {
-            this.wiresContainer.add(hash, connection)
-            EntityContainer.mappings.get(connection.entityNumber1).redraw()
-            EntityContainer.mappings.get(connection.entityNumber2).redraw()
+            this.wiresContainer.connect(hash, connection)
         }
         const onConnectionRemoved = (hash: string, connection: IConnection): void => {
-            this.wiresContainer.remove(hash)
-            EntityContainer.mappings.get(connection.entityNumber1).redraw()
-            EntityContainer.mappings.get(connection.entityNumber2).redraw()
+            this.wiresContainer.disconnect(hash, connection)
         }
         this.bp.wireConnections.on('create', onConnectionCreated)
         this.bp.wireConnections.on('remove', onConnectionRemoved)
@@ -583,7 +577,6 @@ export class BlueprintContainer extends PIXI.Container {
         })
 
         this.sortEntities()
-        this.wiresContainer.updatePassiveWires()
         this.centerViewport()
     }
 

@@ -36,22 +36,14 @@ export class PaintBlueprintContainer extends PaintContainer {
             y: Math.floor((minY + maxY) / 2),
         }
 
-        const entMap = new Map(entities.map(e => [e.entityNumber, e]))
-        const rawEntities = entities.map(e => e.serialize())
-        for (const e of rawEntities) {
-            e.position.x -= center.x
-            e.position.y -= center.y
-            // Filter out connections outside selection
-            e.connections = WireConnections.serialize(
-                e.entity_number,
-                WireConnections.deserialize(e.entity_number, e.connections).filter(
-                    c => entMap.has(c.entityNumber1) && entMap.has(c.entityNumber2)
-                ),
-                e.name === 'power_switch'
-            )
-        }
+        const entNrWhitelist = new Set(entities.map(e => e.entityNumber))
         this.bp = new Blueprint({
-            entities: rawEntities,
+            entities: entities.map(e => {
+                const ent = e.serialize(entNrWhitelist)
+                ent.position.x -= center.x
+                ent.position.y -= center.y
+                return ent
+            }),
         })
 
         for (const [, e] of this.bp.entities) {

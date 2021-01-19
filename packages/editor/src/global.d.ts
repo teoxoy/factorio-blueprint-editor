@@ -189,6 +189,9 @@ declare namespace BPS {
             remove_unfiltered_items?: boolean
         }
 
+        /** power pole wire connections */
+        neighbours?: number[]
+
         /** wire connections */
         connections?: IConnection
 
