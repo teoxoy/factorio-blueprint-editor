@@ -161,7 +161,7 @@ export class Blueprint extends EventEmitter {
 
                 // Approximate position of placeable_off_grid entities (i.e. landmines)
                 for (const e of ENTITIES) {
-                    if (FD.entities[e.name].flags.includes('placeable_off_grid')) continue
+                    if (!FD.entities[e.name].flags.includes('placeable_off_grid')) continue
 
                     const size = util.rotatePointBasedOnDir(
                         [FD.entities[e.name].size.width / 2, FD.entities[e.name].size.height / 2],
