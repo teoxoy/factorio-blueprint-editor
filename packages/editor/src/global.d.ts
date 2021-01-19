@@ -122,6 +122,8 @@ declare namespace BPS {
             filters: IFilter[]
         }
 
+        /** only present if entity is power-switch */
+        switch_state?: boolean
         /** auto launch, only present if entity is rocket-silo */
         auto_launch?: boolean
         /** override stack size, only present if entity is of type inserter */

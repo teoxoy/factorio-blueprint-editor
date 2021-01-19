@@ -268,6 +268,10 @@
                                 }
                             },
 
+                            "switch_state": {
+                                "type": "boolean",
+                                "$comment": "only present if entity is power-switch"
+                            },
                             "auto_launch": {
                                 "type": "boolean",
                                 "$comment": "auto launch, only present if entity is rocket-silo"
