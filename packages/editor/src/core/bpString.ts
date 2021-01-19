@@ -161,7 +161,9 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
             // TODO: add dropbox support https://www.dropbox.com/s/ID?raw=1
             switch (url.hostname.split('.')[0]) {
                 case 'pastebin':
-                    return fetchData(`https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
+                    return fetchData(
+                        `${corsProxy}https://pastebin.com/raw/${pathParts[0]}`
+                    ).then(r => r.text())
                 case 'hastebin':
                     return fetchData(
                         `${corsProxy}https://hastebin.com/raw/${pathParts[0]}`
