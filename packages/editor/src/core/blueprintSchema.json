@@ -526,6 +526,14 @@
                                     "train_stopped_signal": {
                                         "$ref": "blueprintSchema.json#/definitions/signal"
                                     },
+                                    "set_trains_limit": {
+                                        "type": "boolean",
+                                        "enum": [true],
+                                        "$comment": "only present if entity is train-stop"
+                                    },
+                                    "trains_limit_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
 
                                     "circuit_close_signal": {
                                         "type": "boolean",
