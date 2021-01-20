@@ -72,8 +72,9 @@ const nameMigrations: Record<string, string> = {
     '"science-pack-2"': '"logistic-science-pack"',
     '"science-pack-3"': '"chemical-science-pack"',
     '"high-tech-science-pack"': '"utility-science-pack"',
-    // ',"recipe":"steel-axe"': ''
-    // ',"recipe":"iron-axe"': ''
+    ',"recipe":"wood"': '',
+    ',"recipe":"steel-axe"': '',
+    ',"recipe":"iron-axe"': '',
 
     // if (blueprintVersion < getFactorioVersion(0, 17, 10))
     '"grass-1"': '"landfill"',
