@@ -25,33 +25,63 @@ export class ChestEditor extends Editor {
     private m_Filter: number
 
     public constructor(entity: Entity) {
-        super(446, entity.name === 'logistic_chest_requester' ? 190 : 171, entity)
+        const rows = Math.ceil(entity.filterSlots / 6)
+        const filterAreaHeight = rows * 38 + Math.min(0, rows - 1) * 2
+        const requesterCheckboxHeight = entity.name === 'logistic_chest_requester' ? 23 + 6 : 0
+        const countAreaHeight = entity.name === 'logistic_chest_storage' ? 0 : 23 + 6
+
+        super(
+            446,
+            Math.max(171, 45 + filterAreaHeight + requesterCheckboxHeight + countAreaHeight + 12),
+            entity
+        )
 
         this.m_Amount = entity.name !== 'logistic_chest_storage'
         this.m_Filter = -1
 
+        let yOffset = 45
+
         // Add Filters
         this.addLabel(140, 56, `Filter${this.m_Entity.filterSlots === 1 ? '' : 's'}:`)
-        const filters: Filters = this.addFilters(208, 45, this.m_Amount)
+        const filters: Filters = this.addFilters(208, yOffset, this.m_Amount)
+        yOffset += filterAreaHeight
 
         /** Remaining controls are not needed if amount shall not be shown */
         if (!this.m_Amount) return
 
+        // For Requester Chest: Add Request from Buffer Chest for
+        if (entity.name === 'logistic_chest_requester') {
+            const checkbox: Checkbox = new Checkbox(
+                this.m_Entity.requestFromBufferChest,
+                'Request from buffer chests'
+            )
+            yOffset += 6
+            checkbox.position.set(208, yOffset)
+            yOffset += 22
+            checkbox.on('changed', () => {
+                this.m_Entity.requestFromBufferChest = checkbox.checked
+            })
+            this.onEntityChange('requestFromBufferChest', () => {
+                checkbox.checked = this.m_Entity.requestFromBufferChest
+            })
+            this.addChild(checkbox)
+        }
+
         // Add Label
         const label: PIXI.Text = new PIXI.Text('Count:', styles.dialog.label)
-        label.position.set(140, entity.name === 'logistic_chest_requester' ? 154 : 131)
+        label.position.set(140, yOffset + 8)
         label.visible = false
         this.addChild(label)
 
         // Add Slider
         const slider: Slider = new Slider(10)
-        slider.position.set(194, entity.name === 'logistic_chest_requester' ? 155 : 132)
+        slider.position.set(194, yOffset + 9)
         slider.visible = false
         this.addChild(slider)
 
         // Add Textbox
         const textbox: Textbox = new Textbox(60, '10', 6, '1234567890')
-        textbox.position.set(374, entity.name === 'logistic_chest_requester' ? 153 : 129)
+        textbox.position.set(374, yOffset + 6)
         textbox.visible = false
         this.addChild(textbox)
 
@@ -93,21 +123,5 @@ export class ChestEditor extends Editor {
                 textbox.visible = false
             }
         })
-
-        // For Requester Chest: Add Request from Buffer Chest for
-        if (entity.name === 'logistic_chest_requester') {
-            const checkbox: Checkbox = new Checkbox(
-                this.m_Entity.requestFromBufferChest,
-                'Request from buffer chests'
-            )
-            checkbox.position.set(208, 128)
-            checkbox.on('changed', () => {
-                this.m_Entity.requestFromBufferChest = checkbox.checked
-            })
-            this.onEntityChange('requestFromBufferChest', () => {
-                checkbox.checked = this.m_Entity.requestFromBufferChest
-            })
-            this.addChild(checkbox)
-        }
     }
 }
