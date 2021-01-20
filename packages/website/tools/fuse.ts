@@ -1,3 +1,4 @@
+import fs from 'fs'
 import { join } from 'path'
 import { fusebox, sparky, pluginLink, pluginReplace } from 'fuse-box'
 import { IDevServerProps } from 'fuse-box/devServer/devServerProps'
@@ -11,6 +12,8 @@ import { IRunProps } from 'fuse-box/config/IRunProps'
 const port = Number(process.env.PORT) || 8080
 
 const p = (p: string): string => join(__dirname, p)
+
+const TEMPLATE_PATH = p('../src/index.html')
 
 class Context {
     public readonly paths = {
@@ -29,7 +32,7 @@ class Context {
             },
             entry: p('../src/index.ts'),
             target: 'browser',
-            webIndex: { template: p('../src/index.html') },
+            webIndex: { template: TEMPLATE_PATH },
             devServer: runServer && this.getServerConfig(),
             resources: {
                 resourcePublicRoot: '/assets',
@@ -96,6 +99,13 @@ task('dev', async ctx => {
 })
 
 task('build', async ctx => {
+    const original = fs.readFileSync(TEMPLATE_PATH, { encoding: 'utf8' })
+    const mod = original.replace(
+        '__ANALYTICS_SCRIPT__',
+        `<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "5698d7914edb4ab1bb0c61acbe3dab3d"}'></script><!-- End Cloudflare Web Analytics -->`
+    )
+    fs.writeFileSync(TEMPLATE_PATH, mod)
+
     rm(ctx.paths.dist)
     await ctx.runProd({
         bundles: {
@@ -105,4 +115,6 @@ task('build', async ctx => {
             styles: 'css/styles.$hash.css',
         },
     })
+
+    fs.writeFileSync(TEMPLATE_PATH, original)
 })
