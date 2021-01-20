@@ -1,4 +1,4 @@
-import EventEmitter from 'eventemitter3'
+import { EventEmitter } from 'eventemitter3'
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
 import util from '../common/util'

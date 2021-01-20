@@ -1,4 +1,4 @@
-import EventEmitter from 'eventemitter3'
+import { EventEmitter } from 'eventemitter3'
 import util from '../common/util'
 import FD, { Entity as FD_Entity } from './factorioData'
 import { Blueprint } from './Blueprint'

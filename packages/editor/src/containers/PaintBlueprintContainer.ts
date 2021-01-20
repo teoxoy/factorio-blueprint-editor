@@ -1,6 +1,5 @@
 import { Entity } from '../core/Entity'
 import { Blueprint } from '../core/Blueprint'
-import { WireConnections } from '../core/WireConnections'
 import { EntitySprite } from './EntitySprite'
 import { PaintContainer } from './PaintContainer'
 import { PaintBlueprintEntityContainer } from './PaintBlueprintEntityContainer'

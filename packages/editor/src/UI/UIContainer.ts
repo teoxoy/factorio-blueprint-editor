@@ -1,12 +1,10 @@
 import * as PIXI from 'pixi.js'
-import G from '../common/globals'
 import { Entity } from '../core/Entity'
 import { DebugContainer } from './DebugContainer'
 import { QuickbarPanel } from './QuickbarPanel'
 import { EntityInfoPanel } from './EntityInfoPanel'
 import { InventoryDialog } from './InventoryDialog'
 import { createEditor } from './editors/factory'
-import { Dialog } from './controls/Dialog'
 
 export class UIContainer extends PIXI.Container {
     private debugContainer: DebugContainer
