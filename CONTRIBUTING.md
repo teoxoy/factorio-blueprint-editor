@@ -18,6 +18,9 @@ You can file new issues by selecting from our [new issue templates](https://gith
 -   [yarn](https://yarnpkg.com)
 -   [node](https://nodejs.org/en/)
 -   [vscode](https://code.visualstudio.com/)
+-   [rust](https://rust-lang.org)
+-   [systemfd](https://github.com/mitsuhiko/systemfd)
+-   [cargo-watch](https://github.com/passcod/cargo-watch)
 
 ### Note
 
@@ -28,9 +31,10 @@ This project uses `eslint` and `prettier` to lint and format code. I would recom
 1. Fork the repo
 1. Clone your fork
 1. Download the recommended workspace extensions in vscode
-1. Make your changes in a new git branch (`git checkout -b my-fix-branch master`)
+1. Create a new git branch (`git checkout -b my-fix-branch master`)
+1. Create a new file at the path `packages/exporter/.env` and add your `FACTORIO_USERNAME` and `FACTORIO_TOKEN` (you can get those [here](https://factorio.com/profile))
 1. Run `yarn`
-1. Run `yarn start`
+1. Run `yarn start:website` and `yarn start:exporter`
 1. Open the link in a browser or use the vscode debugger
 1. Make changes
 1. Commit your changes using a descriptive commit message
