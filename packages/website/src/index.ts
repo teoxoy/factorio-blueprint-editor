@@ -16,6 +16,8 @@ import { initToasts } from './toasts'
 import { initFeedbackButton } from './feedbackButton'
 import { initSettingsPane } from './settingsPane'
 
+document.addEventListener('contextmenu', e => e.preventDefault())
+
 const editor = new Editor()
 
 let t0 = performance.now()
