@@ -152,7 +152,7 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
             const pathParts = url.pathname.slice(1).split('/')
 
             const fetchData = (url: string): Promise<Response> =>
-                fetch(`__CORS_PROXY_URL__${url}`).then(response => {
+                fetch(`__CORS_PROXY_URL__${encodeURIComponent(url)}`).then(response => {
                     if (response.ok) return response
                     throw new Error('Network response was not ok.')
                 })
