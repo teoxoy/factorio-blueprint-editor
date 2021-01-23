@@ -227,6 +227,8 @@ export class WireConnections extends EventEmitter {
 
     public connectPowerPole(entityNumber: number): void {
         const entity = this.bp.entities.get(entityNumber)
+        if (entity.type !== 'electric_pole') return
+
         const areaSize = (entity.maxWireDistance + 1) * 2
 
         const poles = this.bp.entityPositionGrid
