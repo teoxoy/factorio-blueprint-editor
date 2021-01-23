@@ -148,13 +148,11 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                 reject(e)
             }
         }).then((url: URL) => {
-            const corsProxy = '__CORS_PROXY_URL__'
-
             console.log(`Loading data from: ${url}`)
             const pathParts = url.pathname.slice(1).split('/')
 
             const fetchData = (url: string): Promise<Response> =>
-                fetch(url).then(response => {
+                fetch(`__CORS_PROXY_URL__${url}`).then(response => {
                     if (response.ok) return response
                     throw new Error('Network response was not ok.')
                 })
@@ -162,22 +160,17 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
             // TODO: add dropbox support https://www.dropbox.com/s/ID?raw=1
             switch (url.hostname.split('.')[0]) {
                 case 'pastebin':
-                    return fetchData(
-                        `${corsProxy}https://pastebin.com/raw/${pathParts[0]}`
-                    ).then(r => r.text())
+                    return fetchData(`https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
                 case 'hastebin':
-                    return fetchData(
-                        `${corsProxy}https://hastebin.com/raw/${pathParts[0]}`
-                    ).then(r => r.text())
+                    return fetchData(`https://hastebin.com/raw/${pathParts[0]}`).then(r => r.text())
                 case 'gist':
                     return fetchData(`https://api.github.com/gists/${pathParts[1]}`).then(r =>
                         r.json().then(data => data.files[Object.keys(data.files)[0]].content)
                     )
                 case 'gitlab':
-                    // https://gitlab.com/gitlab-org/gitlab-ce/issues/24596
-                    return fetchData(
-                        `${corsProxy}https://gitlab.com/${pathParts.join('/')}/raw`
-                    ).then(r => r.text())
+                    return fetchData(`https://gitlab.com/${pathParts.join('/')}/raw`).then(r =>
+                        r.text()
+                    )
                 case 'factorioprints':
                     return fetchData(
                         `https://facorio-blueprints.firebaseio.com/blueprints/${pathParts[1]}.json`
