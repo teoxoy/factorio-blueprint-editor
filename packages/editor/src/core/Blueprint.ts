@@ -109,27 +109,26 @@ export class Blueprint extends EventEmitter {
                 }
             }
 
-            const positionData = [
-                ...(data.entities || []).map(entity => {
-                    const POG = FD.entities[entity.name].flags.includes('placeable_off_grid')
-                    const size = util.switchSizeBasedOnDirection(
-                        FD.entities[entity.name].size,
-                        entity.direction
-                    )
-                    return {
-                        x: POG ? Math.floor(entity.position.x) : entity.position.x,
-                        y: POG ? Math.floor(entity.position.y) : entity.position.y,
-                        w: size.x,
-                        h: size.y,
-                    }
-                }),
-                ...(data.tiles || []).map(tile => ({
-                    x: tile.position.x + 0.5,
-                    y: tile.position.y + 0.5,
-                    w: 1,
-                    h: 1,
-                })),
-            ]
+            const positionData = data.entities
+                ? data.entities.map(entity => {
+                      const POG = FD.entities[entity.name].flags.includes('placeable_off_grid')
+                      const size = util.switchSizeBasedOnDirection(
+                          FD.entities[entity.name].size,
+                          entity.direction
+                      )
+                      return {
+                          x: POG ? Math.floor(entity.position.x) : entity.position.x,
+                          y: POG ? Math.floor(entity.position.y) : entity.position.y,
+                          w: size.x,
+                          h: size.y,
+                      }
+                  })
+                : data.tiles.map(tile => ({
+                      x: tile.position.x + 0.5,
+                      y: tile.position.y + 0.5,
+                      w: 1,
+                      h: 1,
+                  }))
             const minX = positionData.reduce((min, d) => Math.min(min, d.x - d.w / 2), Infinity)
             const minY = positionData.reduce((min, d) => Math.min(min, d.y - d.h / 2), Infinity)
             const maxX = positionData.reduce((max, d) => Math.max(max, d.x + d.w / 2), -Infinity)
