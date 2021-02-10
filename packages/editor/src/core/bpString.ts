@@ -158,15 +158,15 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                 })
 
             // TODO: add dropbox support https://www.dropbox.com/s/ID?raw=1
-            switch (url.hostname.split('.')[0]) {
+            switch (url.hostname.replace(/^www\./, '').split('.')[0]) {
                 case 'pastebin':
                     return fetchData(`https://pastebin.com/raw/${pathParts[0]}`).then(r => r.text())
                 case 'hastebin':
                     return fetchData(`https://hastebin.com/raw/${pathParts[0]}`).then(r => r.text())
                 case 'gist':
-                    return fetchData(`https://api.github.com/gists/${pathParts[1]}`).then(r =>
-                        r.json().then(data => data.files[Object.keys(data.files)[0]].content)
-                    )
+                    return fetchData(`https://api.github.com/gists/${pathParts[1]}`)
+                        .then(r => r.json())
+                        .then(data => data.files[Object.keys(data.files)[0]].content)
                 case 'gitlab':
                     return fetchData(`https://gitlab.com/${pathParts.join('/')}/raw`).then(r =>
                         r.text()
@@ -174,7 +174,13 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                 case 'factorioprints':
                     return fetchData(
                         `https://facorio-blueprints.firebaseio.com/blueprints/${pathParts[1]}.json`
-                    ).then(r => r.json().then(data => data.blueprintString))
+                    )
+                        .then(r => r.json())
+                        .then(data => data.blueprintString)
+                case 'factorio': // factorio.school
+                    return fetchData(`https://www.factorio.school/api/blueprint/${pathParts[1]}`)
+                        .then(r => r.json())
+                        .then(data => data.blueprintString.blueprintString)
                 case 'docs':
                     return fetchData(
                         `https://docs.google.com/document/d/${pathParts[2]}/export?format=txt`

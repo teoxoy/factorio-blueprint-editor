@@ -20,7 +20,7 @@ Example blueprint book: https://fbe.teoxoy.com/?source=https://pastebin.com/Xp9u
 -   rendering and editing blueprints
 -   history (undo/redo)
 -   copy and delete selections
--   import blueprints and books from multiple sources (direct bp string, pastebin, hastebin, gist, gitlab, factorioprints, google docs)
+-   import blueprints and books from multiple sources (direct bp string, pastebin, hastebin, gist, gitlab, factorioprints, factorio.school, google docs)
 -   generating blueprint images
 -   oil outpost generator
 -   customizable keybinds
