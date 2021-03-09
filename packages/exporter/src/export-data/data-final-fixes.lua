@@ -130,7 +130,8 @@ do
         'rail-planner',
         'tool',
         'armor',
-        'repair-tool'
+        'repair-tool',
+        'spidertron-remote'
     }
 
     local itemKeyBlacklist = {
