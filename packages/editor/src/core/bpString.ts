@@ -12,6 +12,10 @@ class CorruptedBlueprintStringError {
     }
 }
 
+class BookWithNoBlueprintsError {
+    public error = 'Blueprint book contains no blueprints!'
+}
+
 class ModdedBlueprintError {
     public errors: Ajv.ErrorObject[]
     public constructor(errors: Ajv.ErrorObject[]) {
@@ -97,9 +101,23 @@ function decode(str: string): Promise<Blueprint | Book> {
     }).then((data: { blueprint?: BPS.IBlueprint; blueprint_book?: BPS.IBlueprintBook }) => {
         console.log(data)
         if (validate(data)) {
-            return data.blueprint_book === undefined
-                ? new Blueprint(data.blueprint)
-                : new Book(data.blueprint_book)
+            if (data.blueprint_book === undefined) {
+                return new Blueprint(data.blueprint)
+            } else {
+                const hasBlueprint = (entries: BPS.IBlueprintBookEntry[] = []): boolean => {
+                    for (const entry of entries) {
+                        if (entry.blueprint) return true
+                        if (entry.blueprint_book && hasBlueprint(entry.blueprint_book.blueprints))
+                            return true
+                    }
+                    return false
+                }
+                if (hasBlueprint(data.blueprint_book.blueprints)) {
+                    return new Book(data.blueprint_book)
+                } else {
+                    throw new BookWithNoBlueprintsError()
+                }
+            }
         } else {
             const errors = validate.errors
             const trainEntityNames = new Set(['locomotive', 'cargo_wagon', 'fluid_wagon'])
@@ -198,6 +216,7 @@ export {
     ModdedBlueprintError,
     TrainBlueprintError,
     CorruptedBlueprintStringError,
+    BookWithNoBlueprintsError,
     encode,
     getBlueprintOrBookFromSource,
 }

@@ -338,15 +338,19 @@ declare namespace BPS {
         position_relative_to_grid?: IPoint
     }
 
+    interface IBlueprintBookEntry {
+        index: number
+        blueprint?: IBlueprint
+        blueprint_book?: IBlueprintBook
+        upgrade_planner?: Record<string, unknown>
+        deconstruction_planner?: Record<string, unknown>
+    }
+
     interface IBlueprintBook {
         version: number
         item: 'blueprint_book'
         active_index: number
-        blueprints: {
-            index: number
-            blueprint?: IBlueprint
-            blueprint_book?: IBlueprintBook
-        }[]
+        blueprints?: IBlueprintBookEntry[]
 
         label?: string
         description?: string

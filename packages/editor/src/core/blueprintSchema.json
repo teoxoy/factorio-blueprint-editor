@@ -664,7 +664,7 @@
         },
         "blueprint_book": {
             "type": "object",
-            "required": ["version", "item", "active_index", "blueprints"],
+            "required": ["version", "item", "active_index"],
             "additionalProperties": false,
             "properties": {
                 "version": { "type": "integer" },
@@ -691,11 +691,23 @@
                             },
                             "blueprint_book": {
                                 "$ref": "blueprintSchema.json#/definitions/blueprint_book"
+                            },
+                            "upgrade_planner": {
+                                "$ref": "blueprintSchema.json#/definitions/upgrade_planner"
+                            },
+                            "deconstruction_planner": {
+                                "$ref": "blueprintSchema.json#/definitions/deconstruction_planner"
                             }
                         }
                     }
                 }
             }
+        },
+        "upgrade_planner": {
+            "type": "object"
+        },
+        "deconstruction_planner": {
+            "type": "object"
         }
     }
 }

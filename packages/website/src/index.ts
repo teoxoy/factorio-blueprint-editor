@@ -9,6 +9,7 @@ import EDITOR, {
     TrainBlueprintError,
     ModdedBlueprintError,
     CorruptedBlueprintStringError,
+    BookWithNoBlueprintsError,
     encode,
     getBlueprintOrBookFromSource,
 } from '@fbe/editor'
@@ -267,7 +268,12 @@ function createErrorMessage(text: string, error: unknown, timeout = 10000): void
     })
 }
 function createBPImportError(
-    error: Error | TrainBlueprintError | ModdedBlueprintError | CorruptedBlueprintStringError
+    error:
+        | Error
+        | TrainBlueprintError
+        | ModdedBlueprintError
+        | CorruptedBlueprintStringError
+        | BookWithNoBlueprintsError
 ): void {
     if (error instanceof TrainBlueprintError) {
         createErrorMessage(
@@ -290,6 +296,11 @@ function createBPImportError(
             'Blueprint string might be corrupted. If you think this is a mistake:',
             error.error
         )
+        return
+    }
+
+    if (error instanceof BookWithNoBlueprintsError) {
+        createErrorMessage(`${error.error} If you think this is a mistake:`, error.error)
         return
     }
 
