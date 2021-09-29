@@ -34,7 +34,7 @@ const oilOutpostSettings: IOilOutpostSettings = {
 // (uint64_t(minorVersion) << 16) |
 // (uint64_t(majorVersion) << 32) |
 // (uint64_t(mainVersion) << 48)
-const getFactorioVersion = (main = 1, major = 1, minor = 11): number =>
+const getFactorioVersion = (main = 1, major = 1, minor = 41): number =>
     (minor << 16) + (major | (main << 16)) * 0xffffffff
 
 class OurMap<K, V> extends Map<K, V> {
