@@ -77,7 +77,7 @@ interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
 }
 
 /** Blueprint base class */
-export class Blueprint extends EventEmitter {
+class Blueprint extends EventEmitter {
     public name = 'Blueprint'
     private readonly icons = new Map<1 | 2 | 3 | 4, string>()
     public readonly wireConnections = new WireConnections(this)
@@ -109,35 +109,7 @@ export class Blueprint extends EventEmitter {
                 }
             }
 
-            const positionData = data.entities
-                ? data.entities.map(entity => {
-                      const POG = FD.entities[entity.name].flags.includes('placeable_off_grid')
-                      const size = util.switchSizeBasedOnDirection(
-                          FD.entities[entity.name].size,
-                          entity.direction
-                      )
-                      return {
-                          x: POG ? Math.floor(entity.position.x) : entity.position.x,
-                          y: POG ? Math.floor(entity.position.y) : entity.position.y,
-                          w: size.x,
-                          h: size.y,
-                      }
-                  })
-                : data.tiles.map(tile => ({
-                      x: tile.position.x + 0.5,
-                      y: tile.position.y + 0.5,
-                      w: 1,
-                      h: 1,
-                  }))
-            const minX = positionData.reduce((min, d) => Math.min(min, d.x - d.w / 2), Infinity)
-            const minY = positionData.reduce((min, d) => Math.min(min, d.y - d.h / 2), Infinity)
-            const maxX = positionData.reduce((max, d) => Math.max(max, d.x + d.w / 2), -Infinity)
-            const maxY = positionData.reduce((max, d) => Math.max(max, d.y + d.h / 2), -Infinity)
-            // The offset takes into account that the center of the blueprint might be shifted
-            const offset = {
-                x: -Math.floor((minX + maxX) / 2) + (minX % 1),
-                y: -Math.floor((minY + maxY) / 2) + (minY % 1),
-            }
+            const offset = getOffset(data)
 
             if (data.tiles) {
                 this.tiles = new OurMap(
@@ -665,4 +637,44 @@ export class Blueprint extends EventEmitter {
     }
 }
 
-export { oilOutpostSettings, getFactorioVersion, IOilOutpostSettings }
+function getOffset(data?: Partial<BPS.IBlueprint>): IPoint {
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+
+    const comp = (x: number, y: number, w: number, h: number): void => {
+        minX = Math.min(minX, x - w / 2)
+        minY = Math.min(minY, y - h / 2)
+        maxX = Math.max(maxX, x + w / 2)
+        maxY = Math.max(maxY, y + h / 2)
+    }
+
+    if (data.entities) {
+        for (const entity of data.entities) {
+            if (FD.entities[entity.name].flags.includes('placeable_off_grid')) continue
+
+            const size = util.switchSizeBasedOnDirection(
+                FD.entities[entity.name].size,
+                entity.direction
+            )
+            comp(entity.position.x, entity.position.y, size.x, size.y)
+        }
+    } else if (data.tiles) {
+        for (const tile of data.tiles) {
+            comp(tile.position.x + 0.5, tile.position.y + 0.5, 1, 1)
+        }
+    }
+
+    if (minX === Infinity) {
+        return { x: 0, y: 0 }
+    }
+
+    // The offset takes into account that the center of the blueprint might be shifted
+    return {
+        x: -Math.floor((minX + maxX) / 2) + (minX % 1),
+        y: -Math.floor((minY + maxY) / 2) + (minY % 1),
+    }
+}
+
+export { Blueprint, oilOutpostSettings, getFactorioVersion, IOilOutpostSettings }
