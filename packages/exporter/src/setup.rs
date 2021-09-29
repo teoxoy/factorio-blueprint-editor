@@ -214,7 +214,7 @@ pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), 
     tokio::fs::create_dir_all(&tmp_dir).await?;
 
     let metadata_file = Arc::new(tokio::sync::Mutex::new(metadata_file));
-    futures::future::try_join_all((0..20).map(|_| {
+    futures::future::try_join_all((0..num_cpus::get()).map(|_| {
         compress_next_img(
             file_paths.clone(),
             tmp_dir.clone(),
@@ -268,6 +268,8 @@ async fn compress_next_img(
             let basisu_executable = "./basisu";
             let status = Command::new(basisu_executable)
                 // .args(&["-comp_level", "2"])
+                .args(&["-no_multithreading"])
+                // .args(&["-ktx2"])
                 .args(&["-mipmap"])
                 .args(&["-file", path.to_str().ok_or("PathBuf to &str failed")?])
                 .args(&[

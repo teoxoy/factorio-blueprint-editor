@@ -31,3 +31,4 @@ indicatif = "0.15.0"
 listenfd = { version = "0.3", optional = true }
 dotenv = { version = "0.15.0", optional = true }
 async-tar = "0.2.0"
+num_cpus = "1.13.0"

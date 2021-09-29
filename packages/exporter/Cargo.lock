@@ -873,6 +873,7 @@ dependencies = [
  "indicatif",
  "lazy_static",
  "listenfd",
+ "num_cpus",
  "regex",
  "reqwest",
  "serde",

@@ -39,7 +39,7 @@ class Context {
             },
             plugins: [
                 this.luaPlugin,
-                pluginLink(/basis_transcoder\.(js|wasm)$/, { useDefault: true }),
+                pluginLink(/transcoder\.(.+?)\.(js|wasm)$/, { useDefault: true }),
                 pluginReplace({
                     __CORS_PROXY_URL__: runServer
                         ? 'https://api.allorigins.win/raw?url='
