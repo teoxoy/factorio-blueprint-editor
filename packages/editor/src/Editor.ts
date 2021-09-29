@@ -27,9 +27,6 @@ export class Editor {
         PIXI.settings.ROUND_PIXELS = true
         PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
         PIXI.settings.WRAP_MODE = PIXI.WRAP_MODES.REPEAT
-        PIXI.settings.RENDER_OPTIONS.antialias = true // for wires
-        PIXI.settings.RENDER_OPTIONS.resolution = window.devicePixelRatio
-        PIXI.settings.RENDER_OPTIONS.autoDensity = true
         PIXI.GRAPHICS_CURVES.adaptive = true
         PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false
         // PIXI.settings.ANISOTROPIC_LEVEL = 16
@@ -37,7 +34,12 @@ export class Editor {
         // PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
         // PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
 
-        G.app = new PIXI.Application({ view: canvas })
+        G.app = new PIXI.Application({
+            view: canvas,
+            resolution: window.devicePixelRatio,
+            autoDensity: true,
+            antialias: true, // for wires
+        })
 
         // https://github.com/pixijs/pixi.js/issues/3928
         // G.app.renderer.plugins.interaction.moveWhenInside = true

@@ -12,7 +12,8 @@
         "rootDir": ".",
         "baseUrl": ".",
         "paths": {
-            "@fbe/*": ["packages/*/src/index.ts"]
+            "@fbe/*": ["packages/*/src/index.ts"],
+            "mini-signals": ["node_modules/resource-loader/typings/mini-signals.d.ts"]
         },
 
         "typeRoots": ["./node_modules/@types", "./typings"]

@@ -495,7 +495,7 @@ export class BlueprintContainer extends PIXI.Container {
         })
 
         renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
-        G.app.renderer.render(gridGraphics, renderTexture)
+        G.app.renderer.render(gridGraphics, { renderTexture })
 
         const grid = new PIXI.TilingSprite(renderTexture, this.size.x, this.size.y)
         grid.anchor.set(this.anchor.x, this.anchor.y)
@@ -522,7 +522,7 @@ export class BlueprintContainer extends PIXI.Container {
         })
 
         renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
-        G.app.renderer.render(gridGraphics, renderTexture)
+        G.app.renderer.render(gridGraphics, { renderTexture })
 
         // Add one more chunk to the size because of the offset
         const grid = new PIXI.TilingSprite(renderTexture, this.size.x + W, this.size.y + H)
@@ -656,7 +656,11 @@ export class BlueprintContainer extends PIXI.Container {
         // swap our custom render method with the original one
         const _render = this.render
         this.render = super.render
-        const texture = G.app.renderer.generateTexture(this, PIXI.SCALE_MODES.LINEAR, 1, region)
+        const texture = G.app.renderer.generateTexture(this, {
+            scaleMode: PIXI.SCALE_MODES.LINEAR,
+            resolution: 1,
+            region,
+        })
         this.render = _render
         this.viewportCulling = true
         const canvas = G.app.renderer.plugins.extract.canvas(texture)
