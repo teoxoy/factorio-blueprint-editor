@@ -26,7 +26,7 @@ async fn main() -> std::io::Result<()> {
     let mut server = HttpServer::new(move || {
         App::new()
             .service(actix_files::Files::new("/data", "./data/output").show_files_listing())
-            .default_service(web::to(|| not_found()))
+            .default_service(web::to(not_found))
     });
 
     #[cfg(feature = "dev")]

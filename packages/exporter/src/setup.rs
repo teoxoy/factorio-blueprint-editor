@@ -5,6 +5,7 @@ use globset::{GlobBuilder, GlobMatcher};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use regex::Regex;
 use serde::Deserialize;
+use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::{collections::HashSet, env};
@@ -28,7 +29,7 @@ struct Info {
     // dependencies: Vec<String>,
 }
 
-async fn get_info<P: AsRef<Path>>(path: P) -> Result<Info, Box<dyn Error>> {
+async fn get_info(path: &Path) -> Result<Info, Box<dyn Error>> {
     let contents = tokio::fs::read_to_string(path).await?;
     let p: Info = serde_json::from_str(&contents)?;
     Ok(p)
@@ -41,7 +42,11 @@ fn get_download_url(buid_type: &str, version: &str, username: &str, token: &str)
     )
 }
 
-async fn make_img_pow2(path: &PathBuf, tmp_dir: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
+#[allow(clippy::needless_lifetimes)]
+async fn make_img_pow2<'a>(
+    path: &'a Path,
+    tmp_dir: &Path,
+) -> Result<Cow<'a, Path>, Box<dyn Error>> {
     let (w, h) = image::image_dimensions(path)?;
     let w_log = f32::log2(w as f32);
     let h_log = f32::log2(h as f32);
@@ -65,9 +70,9 @@ async fn make_img_pow2(path: &PathBuf, tmp_dir: &PathBuf) -> Result<PathBuf, Box
         let tmp_path = tmp_dir.join(path);
         tokio::fs::create_dir_all(tmp_path.parent().unwrap()).await?;
         tokio::fs::write(&tmp_path, &buffer).await?;
-        Ok(tmp_path)
+        Ok(Cow::Owned(tmp_path))
     } else {
-        Ok(path.clone())
+        Ok(Cow::Borrowed(path))
     }
 }
 
@@ -125,7 +130,7 @@ async fn glob(
     Ok(paths)
 }
 
-async fn generate_locale(factorio_data: &PathBuf) -> Result<String, Box<dyn Error>> {
+async fn generate_locale(factorio_data: &Path) -> Result<String, Box<dyn Error>> {
     let matcher = GlobBuilder::new("**/*/locale/en/*.cfg")
         .literal_separator(true)
         .build()?
@@ -138,7 +143,7 @@ async fn generate_locale(factorio_data: &PathBuf) -> Result<String, Box<dyn Erro
     Ok(format!("return {{{}}}", content))
 }
 
-pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), Box<dyn Error>> {
+pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dyn Error>> {
     let output_dir = data_dir.join("output");
     let mod_dir = data_dir.join("factorio/mods/export-data");
     let scenario_dir = mod_dir.join("scenarios/export-data");
@@ -178,7 +183,7 @@ pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), 
     use tokio::io::AsyncReadExt;
     let mut buffer = String::new();
     metadata_file.read_to_string(&mut buffer).await?;
-    let obj: serde_yaml::Value = if buffer.len() == 0 {
+    let obj: serde_yaml::Value = if buffer.is_empty() {
         serde_yaml::Value::Mapping(serde_yaml::mapping::Mapping::new())
     } else {
         serde_yaml::from_str(&buffer)?
@@ -217,7 +222,7 @@ pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), 
     futures::future::try_join_all((0..num_cpus::get()).map(|_| {
         compress_next_img(
             file_paths.clone(),
-            tmp_dir.clone(),
+            &tmp_dir,
             progress.clone(),
             obj.clone(),
             metadata_file.clone(),
@@ -233,7 +238,7 @@ pub async fn extract(data_dir: &PathBuf, factorio_data: &PathBuf) -> Result<(), 
     Ok(())
 }
 
-async fn get_len_and_mtime(path: &PathBuf) -> Result<(u64, u64), Box<dyn Error>> {
+async fn get_len_and_mtime(path: &Path) -> Result<(u64, u64), Box<dyn Error>> {
     let file = tokio::fs::File::open(path).await?;
     let metadata = file.metadata().await?;
     let mtime = metadata
@@ -248,7 +253,7 @@ async fn get_len_and_mtime(path: &PathBuf) -> Result<(u64, u64), Box<dyn Error>>
 #[async_recursion]
 async fn compress_next_img(
     file_paths: Arc<Mutex<Vec<(PathBuf, PathBuf)>>>,
-    tmp_dir: PathBuf,
+    tmp_dir: &Path,
     progress: ProgressBar,
     obj: Arc<Mutex<serde_yaml::Value>>,
     metadata_file: Arc<tokio::sync::Mutex<tokio::fs::File>>,
@@ -261,7 +266,7 @@ async fn compress_next_img(
 
         let same = { obj.lock().unwrap()[key] == new_val };
         if !same {
-            let path = make_img_pow2(&in_path, &tmp_dir).await?;
+            let path = make_img_pow2(&in_path, tmp_dir).await?;
 
             tokio::fs::create_dir_all(out_path.parent().unwrap()).await?;
 
@@ -300,8 +305,8 @@ async fn compress_next_img(
 
 // TODO: look into using https://wiki.factorio.com/Download_API
 pub async fn download_factorio(
-    data_dir: &PathBuf,
-    factorio_data: &PathBuf,
+    data_dir: &Path,
+    factorio_data: &Path,
     factorio_version: &str,
 ) -> Result<(), Box<dyn Error>> {
     let username = get_env_var!("FACTORIO_USERNAME")?;
@@ -309,7 +314,7 @@ pub async fn download_factorio(
 
     let info_path = factorio_data.join("base/info.json");
 
-    let same_version = get_info(info_path)
+    let same_version = get_info(&info_path)
         .await
         .map(|info| info.version == factorio_version)
         .unwrap_or(false);
@@ -341,7 +346,7 @@ pub async fn download_factorio(
         async fn wait_for_progress_bar(mpb: MultiProgress) -> Result<(), Box<dyn Error>> {
             tokio::task::spawn_blocking(move || mpb.join())
                 .await?
-                .map_err(|e| Box::from(e))
+                .map_err(Box::from)
         }
 
         tokio::try_join!(d0, d1, wait_for_progress_bar(mpb))?;
@@ -352,7 +357,7 @@ pub async fn download_factorio(
 
 async fn download<I, S>(
     url: String,
-    out_dir: &PathBuf,
+    out_dir: &Path,
     filter: I,
     pb: ProgressBar,
 ) -> Result<(), Box<dyn Error>>
