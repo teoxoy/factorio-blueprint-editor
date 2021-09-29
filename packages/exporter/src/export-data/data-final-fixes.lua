@@ -435,6 +435,7 @@ do
     end
 
     entities['offshore-pump'].size = { width = 1, height = 1 }
+    entities['curved-rail'].size = { width = 4, height = 8 }
 
     entities['centrifuge'].possible_directions = nil
     entities['assembling-machine-1'].possible_directions = nil

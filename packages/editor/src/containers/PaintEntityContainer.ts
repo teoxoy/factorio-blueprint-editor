@@ -144,17 +144,17 @@ export class PaintEntityContainer extends PaintContainer {
         if (!this.visible) return
 
         const railRelatedNames = ['straight_rail', 'curved_rail', 'train_stop']
-        const firstRail = this.bpc.bp.getFirstRailRelatedEntity()
+        const firstRailPos = this.bpc.bp.getFirstRailRelatedEntityPos()
 
-        if (railRelatedNames.includes(this.name) && firstRail) {
+        if (railRelatedNames.includes(this.name) && firstRailPos) {
             // grid offsets
             const oX =
                 -Math.abs(
-                    (Math.abs(this.bpc.gridData.x32) % 2) - (Math.abs(firstRail.position.x - 1) % 2)
+                    (Math.abs(this.bpc.gridData.x32) % 2) - (Math.abs(firstRailPos.x - 1) % 2)
                 ) + 1
             const oY =
                 -Math.abs(
-                    (Math.abs(this.bpc.gridData.y32) % 2) - (Math.abs(firstRail.position.y - 1) % 2)
+                    (Math.abs(this.bpc.gridData.y32) % 2) - (Math.abs(firstRailPos.y - 1) % 2)
                 ) + 1
 
             this.x = (this.bpc.gridData.x32 + oX) * 32

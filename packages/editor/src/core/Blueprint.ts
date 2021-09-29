@@ -344,12 +344,13 @@ export class Blueprint extends EventEmitter {
         return nr
     }
 
-    public getFirstRailRelatedEntity(): Entity {
-        return this.entities.find(
-            e =>
-                e.name === 'straight_rail' /* || e.name === 'curved_rail' */ ||
-                e.name === 'train_stop'
-        )
+    public getFirstRailRelatedEntityPos(): IPoint {
+        for (const [, e] of this.entities) {
+            if (e.name === 'straight_rail') return e.position
+            if (e.name === 'train_stop') return e.position
+            if (e.name === 'curved_rail') return { x: e.position.x - 1, y: e.position.y - 1 }
+        }
+        return null
     }
 
     public isEmpty(): boolean {
@@ -372,8 +373,8 @@ export class Blueprint extends EventEmitter {
         const maxY = data.reduce((max, d) => Math.max(max, d.y + d.h / 2), -Infinity)
 
         return {
-            x: Math.floor((minX + maxX) / 2) + 0.5,
-            y: Math.floor((minY + maxY) / 2) + 0.5,
+            x: Math.round((minX + maxX) / 2),
+            y: Math.round((minY + maxY) / 2),
         }
     }
 
@@ -614,11 +615,17 @@ export class Blueprint extends EventEmitter {
             this.entities.valuesArray().map(e => e.serialize())
         )
         const center = this.getCenter()
-        const fR = this.getFirstRailRelatedEntity()
-        if (fR) {
-            center.x += (fR.position.x - center.x) % 2
-            center.y += (fR.position.y - center.y) % 2
+        const firstRailPos = this.getFirstRailRelatedEntityPos()
+
+        if (firstRailPos) {
+            if ((firstRailPos.x - center.x) % 2 === 0) {
+                center.x += 1
+            }
+            if ((firstRailPos.y - center.y) % 2 === 0) {
+                center.y += 1
+            }
         }
+
         for (const e of entityInfo) {
             e.position.x -= center.x
             e.position.y -= center.y

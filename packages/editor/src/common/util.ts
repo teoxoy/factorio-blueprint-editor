@@ -71,7 +71,10 @@ const switchSizeBasedOnDirection = (
     },
     direction: number
 ): IPoint => {
-    if (size.width !== size.height && (direction === 2 || direction === 6)) {
+    if (
+        size.width !== size.height &&
+        (direction === 2 || direction === 3 || direction === 6 || direction === 7)
+    ) {
         return { x: size.height, y: size.width }
     }
     return { x: size.width, y: size.height }

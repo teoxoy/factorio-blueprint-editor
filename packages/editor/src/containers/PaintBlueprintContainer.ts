@@ -94,18 +94,16 @@ export class PaintBlueprintContainer extends PaintContainer {
     public moveAtCursor(): void {
         if (!this.visible) return
 
-        const firstRailHere = this.bp.getFirstRailRelatedEntity()
-        const firstRailInBP = this.bpc.bp.getFirstRailRelatedEntity()
+        const firstRailPosHere = this.bp.getFirstRailRelatedEntityPos()
+        const firstRailPosInBP = this.bpc.bp.getFirstRailRelatedEntityPos()
 
-        if (firstRailHere && firstRailInBP) {
-            const frX = this.bpc.gridData.x32 + firstRailHere.position.x
-            const frY = this.bpc.gridData.y32 + firstRailHere.position.y
+        if (firstRailPosHere && firstRailPosInBP) {
+            const frX = this.bpc.gridData.x32 + firstRailPosHere.x
+            const frY = this.bpc.gridData.y32 + firstRailPosHere.y
 
             // grid offsets
-            const oX =
-                -Math.abs((Math.abs(frX) % 2) - (Math.abs(firstRailInBP.position.x - 1) % 2)) + 1
-            const oY =
-                -Math.abs((Math.abs(frY) % 2) - (Math.abs(firstRailInBP.position.y - 1) % 2)) + 1
+            const oX = -Math.abs((Math.abs(frX) % 2) - (Math.abs(firstRailPosInBP.x - 1) % 2)) + 1
+            const oY = -Math.abs((Math.abs(frY) % 2) - (Math.abs(firstRailPosInBP.y - 1) % 2)) + 1
 
             this.x = (this.bpc.gridData.x32 + oX) * 32
             this.y = (this.bpc.gridData.y32 + oY) * 32
