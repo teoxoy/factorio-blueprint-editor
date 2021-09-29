@@ -246,6 +246,10 @@ declare namespace BPS {
             set_trains_limit?: boolean
             /** only present if entity is train-stop */
             trains_limit_signal?: ISignal
+            /** only present if entity is train-stop */
+            read_trains_count?: boolean
+            /** only present if entity is train-stop */
+            trains_count_signal?: ISignal
 
             /** only present if entity is rail-signal */
             circuit_close_signal?: boolean
