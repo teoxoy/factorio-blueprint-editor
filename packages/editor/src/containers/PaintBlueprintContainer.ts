@@ -153,6 +153,7 @@ export class PaintBlueprintContainer extends PaintContainer {
         }
 
         this.bpc.bp.history.commitTransaction()
+        this.bpc.bp.wireConnections.generatePowerPoleWires()
     }
 
     public removeContainerUnder(): void {
