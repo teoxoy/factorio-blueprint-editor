@@ -7,6 +7,7 @@ import { MiningEditor } from './MiningEditor'
 import { SplitterEditor } from './SplitterEditor'
 import { ChestEditor } from './ChestEditor'
 import { TempEditor } from './TempEditor'
+import { TrainStopEditor } from './TrainStopEditor'
 
 /**
  * Factory Function for creating Editor based on Entity Number
@@ -71,6 +72,10 @@ export function createEditor(entity: Entity): Editor {
         case 'centrifuge':
         case 'rocket_silo':
             editor = new TempEditor(entity)
+            break
+        // Train stop
+        case 'train_stop':
+            editor = new TrainStopEditor(entity)
             break
         default: {
             return undefined

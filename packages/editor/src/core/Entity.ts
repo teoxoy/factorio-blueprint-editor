@@ -491,6 +491,24 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.color
     }
 
+    /** Entity Train Stop Station name */
+    public get station(): string {
+        return this.m_rawEntity.station
+    }
+
+    public set station(station: string) {
+        this.m_rawEntity.station = station
+    }
+
+    /** Entity Train Stop Trains Limit */
+    public get manualTrainsLimit(): number | undefined {
+        return this.m_rawEntity.manual_trains_limit
+    }
+
+    public set manualTrainsLimit(limit: number | undefined) {
+        this.m_rawEntity.manual_trains_limit = limit
+    }
+
     public get operator(): string {
         if (this.name === 'decider_combinator') {
             const cb = this.m_rawEntity.control_behavior
