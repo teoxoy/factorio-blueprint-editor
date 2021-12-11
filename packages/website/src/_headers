@@ -7,3 +7,11 @@
 
 https://:project.pages.dev/*
     X-Robots-Tag: noindex
+
+/js/*
+/css/*
+/assets/*
+    Cache-Control: max-age=604800
+
+/data/*
+    Cache-Control: max-age=86400
