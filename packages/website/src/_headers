@@ -1,0 +1,9 @@
+/*
+    X-Frame-Options: DENY
+    X-Content-Type-Options: nosniff
+    X-XSS-Protection: 1; mode=block
+    Referrer-Policy: strict-origin
+    Content-Security-Policy: default-src 'self' blob:; script-src 'self' 'unsafe-eval' https://static.cloudflareinsights.com https://embed.doorbell.io; style-src 'self' 'unsafe-inline' https://embed.doorbell.io; img-src 'self' data:; connect-src 'self' https://static-fbe.teoxoy.com https://cloudflareinsights.com https://doorbell.io; worker-src blob:;
+
+https://:project.pages.dev/*
+    X-Robots-Tag: noindex

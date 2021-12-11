@@ -14,6 +14,8 @@ const port = Number(process.env.PORT) || 8080
 const p = (p: string): string => join(__dirname, p)
 
 const TEMPLATE_PATH = p('../src/index.html')
+const HEADERS_FILE = p('../src/_headers')
+const EXPORTER_DATA = p('../../exporter/data/output')
 
 class Context {
     public readonly paths = {
@@ -44,9 +46,7 @@ class Context {
                     __CORS_PROXY_URL__: runServer
                         ? 'https://api.allorigins.win/raw?url='
                         : '/corsproxy?url=',
-                    __STATIC_URL__: runServer
-                        ? '/data'
-                        : 'https://static-fbe.teoxoy.com/file/factorio-blueprint-editor',
+                    __STATIC_URL__: runServer ? '/data' : '/data',
                 }),
             ],
             cache: { enabled: runServer, strategy: 'memory' },
@@ -89,7 +89,7 @@ class Context {
     }
 }
 
-const { rm, task } = sparky(Context)
+const { src, rm, task } = sparky(Context)
 
 task('dev', async ctx => {
     rm(ctx.paths.dist)
@@ -117,4 +117,8 @@ task('build', async ctx => {
     })
 
     fs.writeFileSync(TEMPLATE_PATH, original)
+
+    await src(HEADERS_FILE).dest(ctx.paths.dist, 'src').exec()
+
+    await src(`${EXPORTER_DATA}/**/**.*`).dest(`${ctx.paths.dist}/data`, 'output').exec()
 })
