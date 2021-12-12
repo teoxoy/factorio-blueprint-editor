@@ -9,7 +9,9 @@ https://:project.pages.dev/*
     X-Robots-Tag: noindex
 
 /js/*
+    Cache-Control: max-age=604800
 /css/*
+    Cache-Control: max-age=604800
 /assets/*
     Cache-Control: max-age=604800
 
