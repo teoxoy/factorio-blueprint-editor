@@ -1,9 +1,0 @@
-{
-    "name": "@fbe/factorio-data",
-    "version": "1.0.0",
-    "license": "MIT",
-    "main": "src/index.ts",
-    "dependencies": {
-        "@fbe/lua-runtime": "*"
-    }
-}

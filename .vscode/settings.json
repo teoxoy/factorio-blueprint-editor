@@ -4,13 +4,6 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
-    "Lua.diagnostics.globals": ["data", "rapidjson", "optrequire"],
-    "search.exclude": {
-        "packages/lua-runtime/dist": true,
-        "packages/lua-runtime/vendor": true
-    },
-    "rust-analyzer.linkedProjects": [
-        "./packages/backend/Cargo.toml",
-        "./packages/exporter/Cargo.toml"
-    ]
+    "Lua.diagnostics.globals": ["data", "script", "game"],
+    "rust-analyzer.linkedProjects": ["./packages/exporter/Cargo.toml"]
 }

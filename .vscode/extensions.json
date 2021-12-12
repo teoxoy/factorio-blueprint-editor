@@ -2,8 +2,6 @@
     "recommendations": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "eamodio.gitlens",
-        "ms-vscode.cpptools",
         "sumneko.lua",
         "matklad.rust-analyzer"
     ]

@@ -16,6 +16,6 @@
             "mini-signals": ["node_modules/resource-loader/typings/mini-signals.d.ts"]
         },
 
-        "typeRoots": ["./node_modules/@types", "./typings"]
+        "typeRoots": ["./node_modules/@types"]
     }
 }

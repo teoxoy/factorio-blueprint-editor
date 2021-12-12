@@ -1,9 +1,6 @@
 import { join } from 'path'
 import { fusebox, sparky, pluginLink, pluginReplace } from 'fuse-box'
 import { IDevServerProps } from 'fuse-box/devServer/devServerProps'
-import { Context as FuseBoxContext } from 'fuse-box/core/context'
-import { wrapContents } from 'fuse-box/plugins/pluginStrings'
-import { minify as luamin } from 'luamin'
 import { IPublicConfig } from 'fuse-box/config/IConfig'
 import { IRunResponse } from 'fuse-box/core/IRunResponse'
 import { IRunProps } from 'fuse-box/config/IRunProps'
@@ -38,13 +35,12 @@ class Context {
                 resourcePublicRoot: '/assets',
             },
             plugins: [
-                this.luaPlugin,
                 pluginLink(/transcoder\.(.+?)\.(js|wasm)$/, { useDefault: true }),
                 pluginReplace({
                     __CORS_PROXY_URL__: runServer
                         ? 'https://api.allorigins.win/raw?url='
                         : '/corsproxy?url=',
-                    __STATIC_URL__: runServer ? '/data' : '/data',
+                    __STATIC_URL__: '/data',
                 }),
             ],
             cache: { enabled: runServer, strategy: 'memory' },
@@ -73,17 +69,6 @@ class Context {
                 },
             ],
         }
-    }
-    private readonly luaPlugin = (ctx: FuseBoxContext): void => {
-        ctx.ict.on('bundle_resolve_module', props => {
-            const m = props.module
-            if (!m.captured && m.extension === '.lua') {
-                m.captured = true
-                m.read()
-                m.contents = wrapContents(`\`${luamin(m.contents)}\``, true)
-            }
-            return props
-        })
     }
 }
 

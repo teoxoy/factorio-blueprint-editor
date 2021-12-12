@@ -1,12 +1,7 @@
 node_modules
 dist
 packages/website/tools/.fusebox
-packages/backend/data
-packages/backend/target
 packages/exporter/data/*
 !packages/exporter/data/output
 packages/exporter/target
-packages/lua-runtime/tools/emsdk
-packages/lua-runtime/tools/cache
-!packages/lua-runtime/dist
 .env
