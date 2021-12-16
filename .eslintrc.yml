@@ -34,6 +34,4 @@ extends:
   - .eslint.typescript.yml
   # Turn off eslint rules that conflict with prettier
   - prettier
-  # Turn off typescript-eslint rules that conflict with prettier
-  - prettier/@typescript-eslint
   - .eslint.import.yml

@@ -4,7 +4,10 @@ import Delaunator from 'delaunator'
 
 const hashPoint = (p: IPoint): string => `${p.x},${p.y}`
 
-const equalPoints = <T extends IPoint>(a: T) => (b: T): boolean => a.x === b.x && a.y === b.y
+const equalPoints =
+    <T extends IPoint>(a: T) =>
+    (b: T): boolean =>
+        a.x === b.x && a.y === b.y
 
 /** Returns unique points from points array */
 const uniqPoints = <T extends IPoint>(list: T[]): T[] =>

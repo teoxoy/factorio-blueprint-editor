@@ -50,9 +50,7 @@ interface IArea extends IPoint {
 
     DT = using delaunay triangulation to form lines between x (for optimization)
 */
-export function generatePoles(
-    entities: { position: IPoint; size: number; power: boolean }[]
-): {
+export function generatePoles(entities: { position: IPoint; size: number; power: boolean }[]): {
     poles: {
         name: string
         position: IPoint

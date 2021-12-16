@@ -474,9 +474,7 @@ function generatePipes(
     }
 }
 
-function generatePathFromLine(
-    l: IPoint[]
-): {
+function generatePathFromLine(l: IPoint[]): {
     path: IPoint[]
     distance: number
 } {
