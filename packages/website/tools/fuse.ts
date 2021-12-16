@@ -92,7 +92,7 @@ task('build', async ctx => {
         },
     })
 
-    await src(HEADERS_FILE).dest(ctx.paths.dist, 'src').exec()
+    await src(HEADERS_FILE).dest(ctx.paths.dist, 'src/').exec()
 
-    await src(`${EXPORTER_DATA}/**/**.*`).dest(`${ctx.paths.dist}/data`, 'output').exec()
+    await src(`${EXPORTER_DATA}/**/**.*`).dest(`${ctx.paths.dist}/data`, 'output/').exec()
 })
