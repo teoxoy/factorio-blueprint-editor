@@ -130,6 +130,10 @@ export class PaintEntityContainer extends PaintContainer {
         this.moveAtCursor()
     }
 
+    public rotatedEntities(): Entity[] {
+        return undefined
+    }
+
     protected redraw(): void {
         this.removeChildren()
         const sprites = EntitySprite.getParts({

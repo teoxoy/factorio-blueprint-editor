@@ -526,17 +526,27 @@ export class Entity extends EventEmitter {
         )
     }
 
-    public rotate(ccw = false, rotateOpposingUB = false): void {
-        if (!this.canBeRotated) return
+    public getRotatedCopy(ccw = false): Entity {
+        const position = ccw
+            ? {x: this.m_rawEntity.position.y, y: -this.m_rawEntity.position.x}
+            : {x: -this.m_rawEntity.position.y, y: this.m_rawEntity.position.x}
+        const direction = this.rotateDir(ccw)
+        return new Entity({...this.m_rawEntity, position, direction}, this.m_BP);
+    }
 
+    private rotateDir(ccw: boolean): number {
+        if (!this.canBeRotated) return this.direction
         const pr = this.entityData.possible_rotations
-        const newDir =
-            pr[
+        return pr[
                 (pr.indexOf(this.direction) +
                     (this.size.x !== this.size.y || this.type === 'underground_belt' ? 2 : 1) *
                         (ccw ? 3 : 1)) %
                     pr.length
             ]
+    }
+
+    public rotate(ccw = false, rotateOpposingUB = false): void {
+        const newDir = this.rotateDir(ccw)
 
         if (newDir === this.direction) return
 

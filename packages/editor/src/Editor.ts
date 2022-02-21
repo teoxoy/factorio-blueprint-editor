@@ -162,24 +162,26 @@ export class Editor {
 
         registerAction('focus', 'f').bind({ press: () => G.BPC.centerViewport() })
 
-        registerAction('rotate', 'r').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    G.BPC.hoverContainer.entity.rotate(false, true)
-                } else if (G.BPC.mode === EditorMode.PAINT) {
-                    G.BPC.paintContainer.rotate()
+        function doRotate(ccw: boolean): void  {
+            if (G.BPC.mode === EditorMode.EDIT) {
+                G.BPC.hoverContainer.entity.rotate(false, true)
+            } else if (G.BPC.mode === EditorMode.PAINT) {
+                const copies = G.BPC.paintContainer.rotatedEntities(ccw)
+                if (copies === undefined) {
+                    G.BPC.paintContainer.rotate(ccw)
+                } else {
+                    G.BPC.paintContainer.destroy()
+                    G.BPC.spawnPaintContainer(copies, 0)
                 }
-            },
+            }
+        }
+
+        registerAction('rotate', 'r').bind({
+            press: () => doRotate(false)
         })
 
         registerAction('reverseRotate', 'shift+r').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    G.BPC.hoverContainer.entity.rotate(true, true)
-                } else if (G.BPC.mode === EditorMode.PAINT) {
-                    G.BPC.paintContainer.rotate(true)
-                }
-            },
+            press: () => doRotate(true)
         })
 
         registerAction('pipette', 'q').bind({

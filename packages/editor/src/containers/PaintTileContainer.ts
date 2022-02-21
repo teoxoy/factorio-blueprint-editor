@@ -3,6 +3,7 @@ import { Tile } from '../core/Tile'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
 import { BlueprintContainer } from './BlueprintContainer'
+import { Entity } from '../core/Entity'
 
 export class PaintTileContainer extends PaintContainer {
     private static size = 2
@@ -65,6 +66,10 @@ export class PaintTileContainer extends PaintContainer {
             this.name = nD
             this.redraw()
         }
+    }
+
+    public rotatedEntities(): Entity[] {
+        return undefined
     }
 
     protected redraw(): void {
