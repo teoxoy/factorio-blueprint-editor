@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js'
 import G from '../common/globals'
+import { Entity } from '../core/Entity'
 import F from '../UI/controls/functions'
 import { BlueprintContainer } from './BlueprintContainer'
 
@@ -90,8 +91,11 @@ export abstract class PaintContainer extends PIXI.Container {
     // override
     public abstract getItemName(): string
 
-    // override
+    // override 
     public abstract rotate(ccw?: boolean): void
+
+    // override 
+    public abstract rotatedEntities(ccw?: boolean): Entity[]
 
     // override
     protected abstract redraw(): void

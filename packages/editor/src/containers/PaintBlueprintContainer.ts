@@ -85,11 +85,18 @@ export class PaintBlueprintContainer extends PaintContainer {
     }
 
     public rotate(): void {
-        if (!this.visible) return
-
-        // TODO: implement
         return undefined
     }
+
+    public rotatedEntities(ccw?: boolean): Entity[] {
+        if (!this.visible) return undefined
+        const result = []
+        for (const [e] of this.entities) {
+            result.push(e.getRotatedCopy(ccw))
+        }
+        return result
+    }
+
 
     public moveAtCursor(): void {
         if (!this.visible) return
