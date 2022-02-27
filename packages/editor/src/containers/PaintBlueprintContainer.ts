@@ -88,11 +88,29 @@ export class PaintBlueprintContainer extends PaintContainer {
         return undefined
     }
 
+    public logDataForComparison(): void {
+        const withOutNums = [...this.entities.keys()].map(e => ({...e.rawEntity, entity_number: undefined}))
+        withOutNums.sort((a, b) => Math.sign(b.position.y - a.position.y) || Math.sign(b.position.x - a.position.x))
+        console.log(withOutNums)
+    }
+    
+    public canFlipOrRotateByCopying(): boolean {
+        return true
+    }
+
     public rotatedEntities(ccw?: boolean): Entity[] {
         if (!this.visible) return undefined
         const result = []
         for (const [e] of this.entities) {
             result.push(e.getRotatedCopy(ccw))
+        }
+        return result
+    }
+
+    public flippedEntities(vertical: boolean): Entity[] {
+        const result = []
+        for (const [e] of this.entities) {
+            result.push(e.getFlippedCopy(vertical))
         }
         return result
     }
