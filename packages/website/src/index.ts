@@ -91,7 +91,7 @@ for (const p of params) {
 let changeBookForIndexSelector: (bpOrBook: Book | Blueprint) => void
 
 editor
-    .init(CANVAS)
+    .init(CANVAS, (text: string) => createToast({text, type: 'error', timeout: 3000}))
     .then(() => {
         if (localStorage.getItem('quickbarItemNames')) {
             const quickbarItems = JSON.parse(localStorage.getItem('quickbarItemNames'))
@@ -191,6 +191,17 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
 function registerActions(): void {
     EDITOR.registerAction('clear', 'shift+n').bind({
         press: () => loadBp(new Blueprint()),
+    })
+
+    EDITOR.registerAction('appendBlueprint', 'shift+modifier+v').bind({
+        press: () => {
+             navigator.clipboard.readText()
+                .then(getBlueprintOrBookFromSource)
+                .then(bp => editor.appendBlueprint(bp instanceof Book ? bp.selectBlueprint(0) : bp))
+                .catch(error => {
+                    createBPImportError(error)
+                })
+            },
     })
 
     EDITOR.registerAction('generateOilOutpost', 'g').bind({

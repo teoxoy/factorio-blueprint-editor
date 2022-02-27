@@ -1,5 +1,6 @@
 import { EventEmitter } from 'eventemitter3'
 import util from '../common/util'
+import { IllegalFlipError } from '../containers/PaintContainer'
 import FD, { Entity as FD_Entity } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
@@ -78,6 +79,11 @@ export class Entity extends EventEmitter {
     public get position(): IPoint {
         return this.m_rawEntity.position
     }
+
+    public get rawEntity(): BPS.IEntity {
+        return this.m_rawEntity;
+    }
+
     public set position(position: IPoint) {
         if (util.areObjectsEquivalent(this.m_rawEntity.position, position)) return
 
@@ -530,8 +536,82 @@ export class Entity extends EventEmitter {
         const position = ccw
             ? {x: this.m_rawEntity.position.y, y: -this.m_rawEntity.position.x}
             : {x: -this.m_rawEntity.position.y, y: this.m_rawEntity.position.x}
-        const direction = this.rotateDir(ccw)
-        return new Entity({...this.m_rawEntity, position, direction}, this.m_BP);
+        const direction = this.constrainDirection((this.direction + (ccw ? 6 : 2)) % 8)
+        const updatedRawEntity = {...this.m_rawEntity, position, direction}
+        if (direction === 0) delete updatedRawEntity.direction
+
+        return new Entity(updatedRawEntity, this.m_BP);
+    }
+
+    private constrainDirection(direction: number): number {
+        const pr = this.entityData.possible_rotations
+        let canRotate = pr !== undefined
+
+        if (this.type === 'assembling_machine')
+            canRotate = this.assemblerCraftsWithFluid
+        if (canRotate) {
+            if (!pr.includes(direction)) {
+                if (direction === 4 && pr.includes(0)) {
+                    return 0
+                } else if (direction === 6 && pr.includes(2)) {
+                    return 2
+                } else {
+                    return this.direction
+                }
+            }
+        } else {
+            return 0
+        }
+        return direction
+    }
+
+    private changePriority(priority?: 'left' | 'right'): 'left' | 'right' | undefined {
+        if (priority === 'left')
+            return 'right'
+        else if (priority === 'right')
+            return 'left'
+        return priority
+    }
+
+    public getFlippedCopy(vertical: boolean): Entity {
+        // Curved Rail thing is (2, 4, 6, 0) down left, (7, 1, 3, 5)
+        // Vert: 2-7, 6-3, 4-5, 0-1  Normal: 0-4
+        // Horz: 2-3, 4-1, 6-7, 0-5  Normal: 2-6
+        // Straight rail: 1, 2, 7, 0, 5, 2, 3, 0
+        // Vert: 1-3, 2-2, 7-5, 0-0
+        // Horz: 1-7, 3-5
+        const translation_map: {[key: string]: {[vert: string]: number[]}} = {
+            'curved_rail': {true: [5, 4, 3, 2, 1, 0, 7, 6], false: [1, 0, 7, 6, 5, 4, 3, 2] },
+            'straight_rail': {true: [0, 3, 2, 1, 4, 7, 6, 5], false: [0, 7, 2, 5, 4, 3, 6, 1]},
+            'default': {true: [4, 1, 2, 3, 0, 5, 6, 7], false: [0, 1, 6, 3, 4, 5, 2, 7]}
+        }
+
+        const non_flip_entities = ['chemical_plant', 'oil_refinery', 'train_stop', 'rail_chain_signal', 'rail_signal']
+
+        if (non_flip_entities.includes(this.name))
+            throw new IllegalFlipError(`${this.name  } cannot be flipped`);
+
+        const translation = this.name in translation_map ? translation_map[this.name] : translation_map.default
+        const direction = this.name === 'storage_tank'
+            ? (2 - this.direction)
+            : this.constrainDirection(translation[String(vertical)][this.direction])
+
+        let input_priority = this.m_rawEntity.input_priority
+        let output_priority = this.m_rawEntity.output_priority
+
+        if ((vertical && (direction === 2 || direction === 4))
+            || (!vertical && (direction === 0 || direction === 6))) {
+            input_priority = this.changePriority(input_priority)
+            output_priority = this.changePriority(output_priority)
+        }
+
+        const position = vertical
+            ? {x: this.m_rawEntity.position.x, y: -this.m_rawEntity.position.y}
+            : {x: -this.m_rawEntity.position.x, y: this.m_rawEntity.position.y}
+            const updatedRawEntity = {...this.m_rawEntity, direction, position, input_priority, output_priority}
+            if (direction === 0) delete updatedRawEntity.direction
+
+        return new Entity(updatedRawEntity, this.m_BP);
     }
 
     private rotateDir(ccw: boolean): number {

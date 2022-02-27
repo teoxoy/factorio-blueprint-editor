@@ -377,9 +377,7 @@ do
                     'arithmetic-combinator',
                     'decider-combinator',
                     'constant-combinator',
-                    'gun-turret',
                     'artillery-turret',
-                    'laser-turret',
                     'flamethrower-turret',
                     'offshore-pump',
                     'pump'
@@ -399,7 +397,6 @@ do
                 elseif list_includes({
                     'storage-tank',
                     'gate',
-                    'straight-rail'
                 }, entity.name) or list_includes({
                     'generator'
                 }, entity.type) then
@@ -407,11 +404,18 @@ do
                     entity.possible_rotations = { 0, 2 }
 
                 elseif list_includes({
+                    'curved-rail',
                     'rail-signal',
                     'rail-chain-signal'
                 }, entity.name) then
 
                     entity.possible_rotations = { 0, 1, 2, 3, 4, 5, 6, 7 }
+
+                elseif list_includes({
+                    'straight-rail'
+                }, entity.name) then
+
+                    entity.possible_rotations = { 0, 1, 2, 3, 5, 7 }
                 end
 
                 -- modify fast_replaceable_group

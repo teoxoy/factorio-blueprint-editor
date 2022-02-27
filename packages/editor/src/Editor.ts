@@ -11,9 +11,10 @@ import { BlueprintContainer, EditorMode, GridPattern } from './containers/Bluepr
 import { UIContainer } from './UI/UIContainer'
 import { Dialog } from './UI/controls/Dialog'
 import { initActions, registerAction } from './actions'
+import { IllegalFlipError } from './containers/PaintContainer'
 
 export class Editor {
-    public async init(canvas: HTMLCanvasElement): Promise<void> {
+    public async init(canvas: HTMLCanvasElement, showError: (msg: string) => void): Promise<void> {
         await Promise.all([
             fetch('__STATIC_URL__/data.json')
                 .then(res => res.text())
@@ -61,7 +62,7 @@ export class Editor {
         G.UI.showDebuggingLayer = G.debug
 
         initActions(canvas)
-        this.registerActions()
+        this.registerActions(showError)
     }
 
     public get moveSpeed(): number {
@@ -118,6 +119,16 @@ export class Editor {
         return G.BPC.getPicture()
     }
 
+    public haveBlueprint(): boolean {
+        return !G.bp.isEmpty();
+    }
+
+    public async appendBlueprint(bp: Blueprint): Promise<void> {
+        const result = bp.entities.valuesArray().map(e => new Entity(e.rawEntity, G.BPC.bp));
+
+        G.BPC.spawnPaintContainer(result, 0)
+    }
+
     public async loadBlueprint(bp: Blueprint): Promise<void> {
         const last = G.BPC
         const i = G.app.stage.getChildIndex(last)
@@ -131,7 +142,7 @@ export class Editor {
         last.destroy()
     }
 
-    private registerActions(): void {
+    private registerActions(showError: (msg: string) => void): void {
         registerAction('moveUp', 'w')
         registerAction('moveLeft', 'a')
         registerAction('moveDown', 's')
@@ -166,12 +177,29 @@ export class Editor {
             if (G.BPC.mode === EditorMode.EDIT) {
                 G.BPC.hoverContainer.entity.rotate(false, true)
             } else if (G.BPC.mode === EditorMode.PAINT) {
-                const copies = G.BPC.paintContainer.rotatedEntities(ccw)
-                if (copies === undefined) {
-                    G.BPC.paintContainer.rotate(ccw)
-                } else {
+                if (G.BPC.paintContainer.canFlipOrRotateByCopying()) {
+                    const copies = G.BPC.paintContainer.rotatedEntities(ccw)
                     G.BPC.paintContainer.destroy()
                     G.BPC.spawnPaintContainer(copies, 0)
+                } else {
+                    G.BPC.paintContainer.rotate(ccw)
+                }
+            }
+        }
+
+        function doFlip(vertical: boolean): void  {
+                if (G.BPC.mode === EditorMode.PAINT
+                    && G.BPC.paintContainer.canFlipOrRotateByCopying()) {
+                try {
+                    const copies = G.BPC.paintContainer.flippedEntities(vertical)
+                    G.BPC.paintContainer.destroy()
+                    G.BPC.spawnPaintContainer(copies, 0)
+                } catch (e) {
+                    if (e instanceof IllegalFlipError) {
+                        showError(e.message)
+                    } else {
+                        throw e
+                    }
                 }
             }
         }
@@ -182,6 +210,14 @@ export class Editor {
 
         registerAction('reverseRotate', 'shift+r').bind({
             press: () => doRotate(true)
+        })
+
+        registerAction('flipHorizontal', 'shift+f').bind({
+            press: () => doFlip(false)
+        })
+
+        registerAction('flipVertical', 'shift+g').bind({
+            press: () => doFlip(true)
         })
 
         registerAction('pipette', 'q').bind({

@@ -4,6 +4,13 @@ import { Entity } from '../core/Entity'
 import F from '../UI/controls/functions'
 import { BlueprintContainer } from './BlueprintContainer'
 
+export class IllegalFlipError {
+    public message: string
+    public constructor(message: string) {
+        this.message = message
+    }
+}
+
 export abstract class PaintContainer extends PIXI.Container {
     protected readonly bpc: BlueprintContainer
     private readonly icon: PIXI.DisplayObject
@@ -91,11 +98,20 @@ export abstract class PaintContainer extends PIXI.Container {
     // override
     public abstract getItemName(): string
 
-    // override 
+    // override
     public abstract rotate(ccw?: boolean): void
 
-    // override 
+    // override
+    public abstract flip(vertical: boolean): void
+
+    // override
+    public abstract canFlipOrRotateByCopying(): boolean
+
+    // override
     public abstract rotatedEntities(ccw?: boolean): Entity[]
+
+    // override
+    public abstract flippedEntities(vertical: boolean): Entity[]
 
     // override
     protected abstract redraw(): void

@@ -130,8 +130,8 @@ export class PaintEntityContainer extends PaintContainer {
         this.moveAtCursor()
     }
 
-    public rotatedEntities(): Entity[] {
-        return undefined
+    public canFlipOrRotateByCopying(): boolean {
+        return false;
     }
 
     protected redraw(): void {
