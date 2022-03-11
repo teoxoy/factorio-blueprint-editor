@@ -175,7 +175,7 @@ export class Editor {
 
         function doRotate(ccw: boolean): void  {
             if (G.BPC.mode === EditorMode.EDIT) {
-                G.BPC.hoverContainer.entity.rotate(false, true)
+                G.BPC.hoverContainer.entity.rotate(ccw, true)
             } else if (G.BPC.mode === EditorMode.PAINT) {
                 if (G.BPC.paintContainer.canFlipOrRotateByCopying()) {
                     const copies = G.BPC.paintContainer.rotatedEntities(ccw)
