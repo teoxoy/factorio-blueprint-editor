@@ -35,6 +35,8 @@ export enum EditorMode {
     COPY,
     /** Active when selecting multiple entities for deletion */
     DELETE,
+    /** Active while LButton or Rbutton down, to place / delete entities in constrained line */
+    ACTING,
 }
 
 export class BlueprintContainer extends PIXI.Container {
@@ -86,6 +88,7 @@ export class BlueprintContainer extends PIXI.Container {
     private deleteModeEntities: Entity[] = []
     private copyModeUpdateFn: (endX: number, endY: number) => void
     private deleteModeUpdateFn: (endX: number, endY: number) => void
+    private draggingCreateUpdateFn: () => void
 
     public viewportCulling = true
 
@@ -314,6 +317,26 @@ export class BlueprintContainer extends PIXI.Container {
             EntityContainer.mappings.get(e.entityNumber).cursorBox = undefined
         }
         this.copyModeEntities = []
+    }
+
+    public enterDraggingCreateMode(): void {
+        if (this.mode !== EditorMode.PAINT) return
+        if (this.draggingCreateUpdateFn !== undefined) return
+
+        this.paintContainer.placeEntityContainer()
+        this.gridData.constrained = true
+
+        this.draggingCreateUpdateFn = () => {
+            this.paintContainer.placeEntityContainer()
+        }
+
+        this.gridData.on('update32', this.draggingCreateUpdateFn)
+    }
+
+    public exitDraggingCreateMode(): void {
+        this.gridData.constrained = false
+        this.gridData.off('update32', this.draggingCreateUpdateFn)
+        this.draggingCreateUpdateFn = undefined
     }
 
     public enterDeleteMode(): void {

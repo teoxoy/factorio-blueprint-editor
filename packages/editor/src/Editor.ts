@@ -287,12 +287,8 @@ export class Editor {
         })
 
         registerAction('build', 'lclick').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.PAINT) {
-                    G.BPC.paintContainer.placeEntityContainer()
-                }
-            },
-            repeat: true,
+            press: () => G.BPC.enterDraggingCreateMode(),
+            release: () => G.BPC.exitDraggingCreateMode(),
         })
 
         registerAction('mine', 'rclick').bind({
