@@ -84,6 +84,15 @@ export class GridData extends EventEmitter {
         }
     }
 
+    private updateValuesWithConstraints(x16: number, y16: number, x32: number, y32: number): boolean {
+        let anythingChanged = false
+        if (this.constrainMove('_x16', x16)) anythingChanged = true
+        if (this.constrainMove('_y16', y16)) anythingChanged = true
+        if (this.constrainMove('_x32', x32)) anythingChanged = true
+        if (this.constrainMove('_y32', y32)) anythingChanged = true
+        return anythingChanged
+    }
+
     private update(mouseX: number, mouseY: number): void {
         if (!this.bpc) return
 
@@ -118,17 +127,17 @@ export class GridData extends EventEmitter {
             }
         }
 
+        // emit update when mouse changes tile whithin the 1 pixel size grid
+        if (!(oldX === this._x && oldY === this._y)) {
+            this.emit('update', this._x, this._y)
+        }
+
         let more = true
         while (more) {
-            more = this.constrainMove('_x16',  x16) || this.constrainMove('_y16',  y16) ||
-                   this.constrainMove('_x32',  x32) || this.constrainMove('_y32',  y32)
+            more = this.updateValuesWithConstraints(x16, y16, x32, y32)
 
             if (this.bpc.mode === EditorMode.PAN) return
 
-            // emit update when mouse changes tile whithin the 1 pixel size grid
-            if (!(oldX === this._x && oldY === this._y)) {
-                this.emit('update', this._x, this._y)
-            }
             // emit update16 when mouse changes tile whithin the 16 pixel size grid
             if (!(oldX16 === this._x16 && oldY16 === this._y16)) {
                 this.emit('update16', this._x16, this._y16)
