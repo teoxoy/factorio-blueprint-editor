@@ -497,6 +497,34 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.color
     }
 
+    /** Entity Train Stop Station name */
+    public get station(): string {
+        return this.m_rawEntity.station
+    }
+
+    public set station(station: string) {
+        if (this.m_rawEntity.station === station) return
+
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['station'], station, 'Change station name')
+            .onDone(() => this.emit('station'))
+            .commit()
+    }
+
+    /** Entity Train Stop Trains Limit */
+    public get manualTrainsLimit(): number | undefined {
+        return this.m_rawEntity.manual_trains_limit
+    }
+
+    public set manualTrainsLimit(limit: number | undefined) {
+        if (this.m_rawEntity.manual_trains_limit === limit) return
+
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['manual_trains_limit'], limit, 'Change trains limit')
+            .onDone(() => this.emit('manualTrainsLimit'))
+            .commit()
+    }
+
     public get operator(): string {
         if (this.name === 'decider_combinator') {
             const cb = this.m_rawEntity.control_behavior
