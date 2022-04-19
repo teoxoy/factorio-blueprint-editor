@@ -96,6 +96,8 @@ export class GridData extends EventEmitter {
     private update(mouseX: number, mouseY: number): void {
         if (!this.bpc) return
 
+        if (this.bpc.mode === EditorMode.PAN) return
+
         this.lastMousePosX = mouseX
         this.lastMousePosY = mouseY
 
@@ -131,8 +133,6 @@ export class GridData extends EventEmitter {
         if (!(oldX === this._x && oldY === this._y)) {
             this.emit('update', this._x, this._y)
         }
-
-        if (this.bpc.mode === EditorMode.PAN) return
 
         let more = true
         while (more) {
