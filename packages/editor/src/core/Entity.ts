@@ -503,7 +503,12 @@ export class Entity extends EventEmitter {
     }
 
     public set station(station: string) {
-        this.m_rawEntity.station = station
+        if (this.m_rawEntity.station === station) return
+
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['station'], station, 'Change station name')
+            .onDone(() => this.emit('station'))
+            .commit()
     }
 
     /** Entity Train Stop Trains Limit */
@@ -512,7 +517,12 @@ export class Entity extends EventEmitter {
     }
 
     public set manualTrainsLimit(limit: number | undefined) {
-        this.m_rawEntity.manual_trains_limit = limit
+        if (this.m_rawEntity.manual_trains_limit === limit) return
+
+        this.m_BP.history
+            .updateValue(this.m_rawEntity, ['manual_trains_limit'], limit, 'Change trains limit')
+            .onDone(() => this.emit('manualTrainsLimit'))
+            .commit()
     }
 
     public get operator(): string {

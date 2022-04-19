@@ -30,11 +30,10 @@ export class TrainStopEditor extends Editor {
 
         limitCheckBox.on('changed', () => {
             if (limitCheckBox.checked) {
-                if (!limitTextbox.text) {
-                    limitTextbox.text = '0'
-                }
+                this.m_Entity.manualTrainsLimit = 0
+                limitTextbox.text = '0'
             } else {
-                // this.m_Entity.manualTrainsLimit = undefined
+                this.m_Entity.manualTrainsLimit = undefined
                 limitTextbox.text = ''
             }
         })
@@ -46,8 +45,17 @@ export class TrainStopEditor extends Editor {
             }
 
             this.m_Entity.manualTrainsLimit = limit
+            limitCheckBox.checked = limit !== undefined && limit >= 0
+        })
 
-            limitCheckBox.checked = limit >= 0
+        this.onEntityChange('station', () => {
+            stationTextBox.text = this.m_Entity.station
+        })
+
+        this.onEntityChange('manualTrainsLimit', () => {
+            const limit = this.m_Entity.manualTrainsLimit
+            limitTextbox.text = limit === undefined ? '' : `${limit}`
+            limitCheckBox.checked = limit !== undefined && limit >= 0
         })
     }
 }
