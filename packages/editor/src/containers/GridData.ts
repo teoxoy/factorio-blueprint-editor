@@ -77,7 +77,7 @@ export class GridData extends EventEmitter {
             return false
         }
 
-        if (element.startsWith('_' + this._constrainTo)) {
+        if (element.startsWith(`_${  this._constrainTo}`)) {
             const sign = Math.sign(target - this[element])
             this[element] += sign
             return this[element] != target
@@ -132,11 +132,11 @@ export class GridData extends EventEmitter {
             this.emit('update', this._x, this._y)
         }
 
+        if (this.bpc.mode === EditorMode.PAN) return
+
         let more = true
         while (more) {
             more = this.updateValuesWithConstraints(x16, y16, x32, y32)
-
-            if (this.bpc.mode === EditorMode.PAN) return
 
             // emit update16 when mouse changes tile whithin the 16 pixel size grid
             if (!(oldX16 === this._x16 && oldY16 === this._y16)) {
