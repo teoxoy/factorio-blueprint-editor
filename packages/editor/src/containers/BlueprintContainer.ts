@@ -63,6 +63,7 @@ export class BlueprintContainer extends PIXI.Container {
     private _moveSpeed = 10
     private _gridColor = 0x303030
     private _gridPattern: GridPattern = 'grid'
+    private _limitWireReach = true
     private _mode: EditorMode = EditorMode.NONE
     public readonly bp: Blueprint
     public readonly gridData: GridData
@@ -553,6 +554,14 @@ export class BlueprintContainer extends PIXI.Container {
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
         return grid
+    }
+
+    public get limitWireReach(): boolean {
+        return this._limitWireReach
+    }
+
+    public set limitWireReach(limit: boolean) {
+        this._limitWireReach = limit
     }
 
     public initBP(): void {

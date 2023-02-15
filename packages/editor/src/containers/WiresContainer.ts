@@ -1,6 +1,8 @@
 import * as PIXI from 'pixi.js'
 import { Blueprint } from '../core/Blueprint'
 import { IConnection } from '../core/WireConnections'
+import U from '../core/generators/util'
+import { Entity } from '../core/Entity'
 import { EntityContainer } from './EntityContainer'
 
 export class WiresContainer extends PIXI.Container {
@@ -12,7 +14,7 @@ export class WiresContainer extends PIXI.Container {
         this.bp = bp
     }
 
-    private static createWire(p1: IPoint, p2: IPoint, color: string): PIXI.Graphics {
+    private static createWire(p1: IPoint, p2: IPoint, color: string, connectionsReach = true): PIXI.Graphics {
         const wire = new PIXI.Graphics()
 
         const minX = Math.min(p1.x, p2.x)
@@ -28,7 +30,11 @@ export class WiresContainer extends PIXI.Container {
             green: 0x588c38,
         }
 
-        wire.lineStyle({ width: 1.5, color: colorMap[color] })
+        wire.lineStyle({
+            width: 1.5,
+            color: colorMap[color],
+            alpha: (connectionsReach ? 1 : 0.3),
+        })
         wire.moveTo(0, 0)
 
         if (p1.x === p2.x) {
@@ -125,19 +131,26 @@ export class WiresContainer extends PIXI.Container {
     }
 
     private getWireSprite(connection: IConnection): PIXI.Graphics {
-        const getWirePos = (entityNumber: number, color: string, side: number): IPoint => {
-            const entity = this.bp.entities.get(entityNumber)
+        const entity1 = this.bp.entities.get(connection.entityNumber1)
+        const entity2 = this.bp.entities.get(connection.entityNumber2)
+        const getWirePos = (entity: Entity, color: string, side: number): IPoint => {
             const point = entity.getWireConnectionPoint(color, side, entity.direction)
             return {
                 x: (entity.position.x + point[0]) * 32,
                 y: (entity.position.y + point[1]) * 32,
             }
         }
+        const connectionsReach = U.pointInCircle(
+            entity1.position,
+            entity2.position,
+            Math.min(entity1.maxWireDistance, entity2.maxWireDistance)
+        )
 
         return WiresContainer.createWire(
-            getWirePos(connection.entityNumber1, connection.color, connection.entitySide1),
-            getWirePos(connection.entityNumber2, connection.color, connection.entitySide2),
-            connection.color
+            getWirePos(entity1, connection.color, connection.entitySide1),
+            getWirePos(entity2, connection.color, connection.entitySide2),
+            connection.color,
+            connectionsReach
         )
     }
 }

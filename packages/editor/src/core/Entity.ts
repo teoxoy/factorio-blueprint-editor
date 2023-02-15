@@ -1,6 +1,7 @@
 import { EventEmitter } from 'eventemitter3'
 import util from '../common/util'
 import { IllegalFlipError } from '../containers/PaintContainer'
+import G from '../common/globals'
 import FD, { Entity as FD_Entity } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
@@ -89,19 +90,25 @@ export class Entity extends EventEmitter {
 
         if (!this.m_BP.entityPositionGrid.canMoveTo(this, position)) return
 
-        // Make sure all entity connections reach the new position
-        const connectionsReach = this.m_BP.wireConnections
+        // Check if the new position breaks any valid entity connections
+        const connectionsBreak = this.m_BP.wireConnections
             .getEntityConnections(this.entityNumber)
             .map(c => (c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1))
             .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
-            .every(e =>
+            .some(e =>
+                // Make sure that a reaching connection is not broken
                 U.pointInCircle(
+                    e.position,
+                    this.position,
+                    Math.min(e.maxWireDistance, this.maxWireDistance)
+                ) &&
+                !U.pointInCircle(
                     e.position,
                     position,
                     Math.min(e.maxWireDistance, this.maxWireDistance)
                 )
             )
-        if (!connectionsReach) return
+        if (G.BPC.limitWireReach && connectionsBreak) return
 
         this.m_BP.history
             .updateValue(this.m_rawEntity, ['position'], position, 'Change position')
@@ -118,6 +125,20 @@ export class Entity extends EventEmitter {
             this.entityData.circuit_wire_max_distance ||
             this.entityData.wire_max_distance ||
             this.entityData.maximum_wire_distance
+        )
+    }
+
+    public connectionsReach(position?: IPoint): boolean {
+        return this.m_BP.wireConnections
+        .getEntityConnections(this.entityNumber)
+        .map(c => (c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1))
+        .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
+        .every(e =>
+            U.pointInCircle(
+                e.position,
+                position ?? this.position,
+                Math.min(e.maxWireDistance, this.maxWireDistance)
+            )
         )
     }
 
