@@ -56,8 +56,8 @@ export class PositionGrid {
         }
     }
 
-    public getEntityAtPosition(x: number, y: number): Entity {
-        const cell = this.grid.get(`${Math.floor(x)},${Math.floor(y)}`)
+    public getEntityAtPosition(position: IPoint): Entity {
+        const cell = this.grid.get(`${Math.floor(position.x)},${Math.floor(position.y)}`)
         if (cell) {
             if (typeof cell === 'number') {
                 return this.bp.entities.get(cell)

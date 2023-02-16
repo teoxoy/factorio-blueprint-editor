@@ -237,10 +237,10 @@ export class EntityInfoPanel extends Panel {
             //         y: entity.position.y + fromP.y
             //     })
             // )
-            const to = G.bp.entityPositionGrid.getEntityAtPosition(
-                entity.position.x + toP.x,
-                entity.position.y + toP.y
-            )
+            const to = G.bp.entityPositionGrid.getEntityAtPosition({
+                x: entity.position.x + toP.x,
+                y: entity.position.y + toP.y
+            })
             if (to && isBelt(to)) {
                 speed = containerToBelt(
                     entity.entityData.rotation_speed,

@@ -227,7 +227,7 @@ function generateCovers(e: FD_Entity, data: IDrawData): SpriteData[] {
                 y: Math.floor(data.position.y + connection.y),
             }
 
-            const ent = data.positionGrid.getEntityAtPosition(pos.x, pos.y)
+            const ent = data.positionGrid.getEntityAtPosition(pos)
             if (!ent) return true
 
             if (
@@ -547,7 +547,7 @@ function getBeltSprites(
             if (d.entity.direction === (d.relDir + 4) % 8) return d
         })
 
-        const entAtPos = positionGrid.getEntityAtPosition(pos.x, pos.y)
+        const entAtPos = positionGrid.getEntityAtPosition(pos)
         if (
             forceStraight ||
             entAtPos.type === 'splitter' ||
@@ -1239,10 +1239,10 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                         [0, 1],
                     ]
                         .map(o => {
-                            const ent = data.positionGrid.getEntityAtPosition(
-                                data.position.x + o[0],
-                                data.position.y + o[1]
-                            )
+                            const ent = data.positionGrid.getEntityAtPosition({
+                                x: data.position.x + o[0],
+                                y: data.position.y + o[1]
+                            })
                             return !!ent && ent.name === 'stone_wall'
                         })
                         .every(e => e)
@@ -1308,10 +1308,10 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 }
 
                 if (data.dir === 0 && data.positionGrid) {
-                    const wall = data.positionGrid.getEntityAtPosition(
-                        data.position.x,
-                        data.position.y + 1
-                    )
+                    const wall = data.positionGrid.getEntityAtPosition({
+                        x: data.position.x,
+                        y: data.position.y + 1
+                    })
                     if (wall && wall.name === 'stone_wall') {
                         return [...getBaseSprites(), e.wall_patch.layers[0]]
                     }

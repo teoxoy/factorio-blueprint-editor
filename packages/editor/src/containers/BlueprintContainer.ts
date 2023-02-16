@@ -440,10 +440,10 @@ export class BlueprintContainer extends PIXI.Container {
 
         if (!this.bp) return
 
-        const entity = this.bp.entityPositionGrid.getEntityAtPosition(
-            this.gridData.x32,
-            this.gridData.y32
-        )
+        const entity = this.bp.entityPositionGrid.getEntityAtPosition({
+            x: this.gridData.x32,
+            y: this.gridData.y32
+        })
         const eC = entity ? EntityContainer.mappings.get(entity.entityNumber) : undefined
 
         if (eC && this.hoverContainer === eC) return
