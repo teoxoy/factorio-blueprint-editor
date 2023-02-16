@@ -143,10 +143,7 @@ export class Entity extends EventEmitter {
     }
 
     public moveBy(offset: IPoint): void {
-        this.position = {
-            x: this.position.x + offset.x,
-            y: this.position.y + offset.y,
-        }
+        this.position = util.sumprod(this.position, offset)
     }
 
     /** Entity direction */

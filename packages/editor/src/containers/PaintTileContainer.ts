@@ -1,5 +1,6 @@
 import FD from '../core/factorioData'
 import { Tile } from '../core/Tile'
+import util from '../common/util'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
 import { BlueprintContainer } from './BlueprintContainer'
@@ -95,10 +96,9 @@ export class PaintTileContainer extends PaintContainer {
         const position = this.getGridPosition()
 
         this.bpc.bp.removeTiles(
-            PaintTileContainer.getTilePositions().map(p => ({
-                x: p.x + position.x,
-                y: p.y + position.y,
-            }))
+            PaintTileContainer.getTilePositions().map(p =>
+                util.sumprod(p, position)
+            )
         )
     }
 
@@ -109,10 +109,9 @@ export class PaintTileContainer extends PaintContainer {
 
         this.bpc.bp.createTiles(
             this.name,
-            PaintTileContainer.getTilePositions().map(p => ({
-                x: p.x + position.x,
-                y: p.y + position.y,
-            }))
+            PaintTileContainer.getTilePositions().map(p =>
+                util.sumprod(p, position)
+            )
         )
     }
 }

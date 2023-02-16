@@ -232,15 +232,13 @@ export class EntityInfoPanel extends Panel {
             // const fromP = util.rotatePointBasedOnDir([0, -tiles], entity.direction)
             const toP = util.rotatePointBasedOnDir([0, tiles], entity.direction)
             // const from = G.bp.entities.get(
-            //     G.bp.entityPositionGrid.getCellAtPosition({
-            //         x: entity.position.x + fromP.x,
-            //         y: entity.position.y + fromP.y
-            //     })
+            //     G.bp.entityPositionGrid.getCellAtPosition(
+            //         util.sumprod(entity.position, fromP)
+            //     )
             // )
-            const to = G.bp.entityPositionGrid.getEntityAtPosition({
-                x: entity.position.x + toP.x,
-                y: entity.position.y + toP.y
-            })
+            const to = G.bp.entityPositionGrid.getEntityAtPosition(
+                util.sumprod(entity.position, toP)
+            )
             if (to && isBelt(to)) {
                 speed = containerToBelt(
                     entity.entityData.rotation_speed,

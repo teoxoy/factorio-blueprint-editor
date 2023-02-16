@@ -1077,10 +1077,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                             h: size.y,
                         })
                         .filter(e => e.name === 'gate')
-                        .map(e => ({
-                            x: e.position.x - data.position.x,
-                            y: e.position.y - data.position.y,
-                        }))
+                        .map(e => util.sumprod(e.position, -1,data.position))
                         // Rotate relative to mid point
                         .map(p => util.rotatePointBasedOnDir(p, dir).y)
                         // Remove duplicates
@@ -1239,10 +1236,9 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                         [0, 1],
                     ]
                         .map(o => {
-                            const ent = data.positionGrid.getEntityAtPosition({
-                                x: data.position.x + o[0],
-                                y: data.position.y + o[1]
-                            })
+                            const ent = data.positionGrid.getEntityAtPosition(
+                                util.sumprod(data.position, o)
+                            )
                             return !!ent && ent.name === 'stone_wall'
                         })
                         .every(e => e)
@@ -1464,10 +1460,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 const belt0Parts = getBeltSprites(
                     e.belt_animation_set,
                     data.positionGrid
-                        ? {
-                              x: data.position.x + b0Offset.x,
-                              y: data.position.y + b0Offset.y,
-                          }
+                        ? util.sumprod(data.position, b0Offset)
                         : b0Offset,
                     data.dir,
                     data.positionGrid,
@@ -1479,10 +1472,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 const belt1Parts = getBeltSprites(
                     e.belt_animation_set,
                     data.positionGrid
-                        ? {
-                              x: data.position.x + b1Offset.x,
-                              y: data.position.y + b1Offset.y,
-                          }
+                        ? util.sumprod(data.position, b1Offset)
                         : b1Offset,
                     data.dir,
                     data.positionGrid,
