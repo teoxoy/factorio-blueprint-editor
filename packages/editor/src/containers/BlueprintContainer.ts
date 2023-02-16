@@ -15,6 +15,7 @@ import { OverlayContainer } from './OverlayContainer'
 import { PaintEntityContainer } from './PaintEntityContainer'
 import { TileContainer } from './TileContainer'
 import { PaintTileContainer } from './PaintTileContainer'
+import { PaintWireContainer } from './PaintWireContainer'
 import { PaintContainer } from './PaintContainer'
 import { PaintBlueprintContainer } from './PaintBlueprintContainer'
 import { OptimizedContainer } from './OptimizedContainer'
@@ -78,6 +79,7 @@ export class BlueprintContainer extends PIXI.Container {
     public readonly wiresContainer: WiresContainer
     public readonly overlayContainer: OverlayContainer
     private readonly entityPaintSlot: PIXI.Container
+    private readonly wirePaintSlot: PIXI.Container
 
     public hoverContainer: EntityContainer
     public paintContainer: PaintContainer
@@ -115,6 +117,7 @@ export class BlueprintContainer extends PIXI.Container {
         this.wiresContainer = new WiresContainer(this.bp)
         this.overlayContainer = new OverlayContainer(this)
         this.entityPaintSlot = new PIXI.Container()
+        this.wirePaintSlot = new PIXI.Container()
 
         this.addChild(
             this.grid,
@@ -125,7 +128,8 @@ export class BlueprintContainer extends PIXI.Container {
             this.entitySprites,
             this.wiresContainer,
             this.overlayContainer,
-            this.entityPaintSlot
+            this.entityPaintSlot,
+            this.wirePaintSlot
         )
 
         this.on('pointerover', () => {
@@ -715,10 +719,14 @@ export class BlueprintContainer extends PIXI.Container {
 
         if (typeof itemNameOrEntities === 'string') {
             const itemData = FD.items[itemNameOrEntities]
+            const wireResult = itemData.wire_count && itemNameOrEntities
             const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
-            const placeResult = itemData.place_result || tileResult
+            const placeResult = itemData.place_result || tileResult || wireResult
 
-            if (tileResult) {
+            if (wireResult) {
+                this.paintContainer = new PaintWireContainer(this, placeResult)
+                this.wirePaintSlot.addChild(this.paintContainer)
+            } else if (tileResult) {
                 this.paintContainer = new PaintTileContainer(this, placeResult)
                 this.tilePaintSlot.addChild(this.paintContainer)
             } else {

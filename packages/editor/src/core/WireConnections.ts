@@ -169,6 +169,11 @@ export class WireConnections extends EventEmitter {
         }
     }
 
+    public has(connection: IConnection): boolean {
+        const hash = WireConnections.hash(connection)
+        return this.connections.has(hash)
+    }
+
     public create(connection: IConnection): void {
         const hash = WireConnections.hash(connection)
         if (this.connections.has(hash)) return
@@ -179,7 +184,7 @@ export class WireConnections extends EventEmitter {
             .commit()
     }
 
-    private remove(connection: IConnection): void {
+    public remove(connection: IConnection): void {
         const hash = WireConnections.hash(connection)
         if (!this.connections.has(hash)) return
 
