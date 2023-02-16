@@ -888,6 +888,45 @@ export class Entity extends EventEmitter {
         return e.circuit_wire_connection_points[getIndex()].wire[color]
     }
 
+    private getWire_connection_box(
+        color: string,
+        side: number,
+        direction = this.direction
+    ): number[][] {
+        const e = this.entityData
+        if (side===1 && e.connection_points?.[direction/2].wire[color]) return e.selection_box
+        if (side===1 && e.circuit_wire_connection_point?.wire[color]) return e.selection_box
+        if (side===1 && e.circuit_wire_connection_points?.[direction/2].wire[color]) return e.selection_box
+        if (side===1 && e.input_connection_points?.[direction/2].wire[color]) return e.input_connection_bounding_box
+        if (side===2 && e.output_connection_points?.[direction/2].wire[color]) return e.output_connection_bounding_box
+        if (side===1 && e.left_wire_connection_point?.wire[color]) {
+            const box = util.duplicate(e.selection_box)
+            box[1][0] = (box[0][0]+box[1][0])/2
+            return box
+        }
+        if (side===2 && e.right_wire_connection_point?.wire[color]) {
+            const box = util.duplicate(e.selection_box)
+            box[0][0] = (box[0][0]+box[1][0])/2
+            return box
+        }
+    }
+
+    public getWireConnectionBoundingBox(
+        color: string,
+        side: number,
+        direction = this.direction
+    ): IPoint[] {
+        const box = this.getWire_connection_box(color, side, direction)
+        if (box === undefined) return undefined
+        let bbox : IPoint[] = box.map(util.Point)
+        bbox = bbox.map(p => util.rotatePointBasedOnDir(p, direction))
+        bbox = [
+            {x: Math.min(...bbox.map(p => p.x)), y: Math.min(...bbox.map(p => p.y))},
+            {x: Math.max(...bbox.map(p => p.x)), y: Math.max(...bbox.map(p => p.y))},
+        ]
+        return bbox
+    }
+
     public serialize(entNrWhitelist?: Set<number>): BPS.IEntity {
         return util.duplicate({
             ...this.m_rawEntity,
