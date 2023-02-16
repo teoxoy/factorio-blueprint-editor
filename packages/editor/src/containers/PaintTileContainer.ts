@@ -4,7 +4,6 @@ import util from '../common/util'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
 import { BlueprintContainer } from './BlueprintContainer'
-import { Entity } from '../core/Entity'
 
 export class PaintTileContainer extends PaintContainer {
     private static size = 2
@@ -61,7 +60,7 @@ export class PaintTileContainer extends PaintContainer {
         this.redraw()
     }
 
-    public rotate(): void {
+    public rotate(ccw = false): void {
         const nD = FD.tiles[this.name].next_direction
         if (nD) {
             this.name = nD
@@ -69,8 +68,8 @@ export class PaintTileContainer extends PaintContainer {
         }
     }
 
-    public rotatedEntities(): Entity[] {
-        return undefined
+    public canFlipOrRotateByCopying(): boolean {
+        return false;
     }
 
     protected redraw(): void {
