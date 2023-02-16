@@ -1,8 +1,7 @@
 import * as PIXI from 'pixi.js'
 import { Blueprint } from '../core/Blueprint'
-import { IConnection } from '../core/WireConnections'
+import { IConnection, IConnectionPoint } from '../core/WireConnections'
 import U from '../core/generators/util'
-import { Entity } from '../core/Entity'
 import { EntityContainer } from './EntityContainer'
 
 export class WiresContainer extends PIXI.Container {
@@ -100,7 +99,7 @@ export class WiresContainer extends PIXI.Container {
 
         for (const conn of connections) {
             const entNr =
-                entityNumber === conn.entityNumber1 ? conn.entityNumber2 : conn.entityNumber1
+                entityNumber === conn.cps[0].entityNumber ? conn.cps[1].entityNumber : conn.cps[0].entityNumber
             const ec = EntityContainer.mappings.get(entNr)
             if (ec.entity.type === 'electric_pole') {
                 ec.redraw()
@@ -112,12 +111,11 @@ export class WiresContainer extends PIXI.Container {
     }
 
     private updateConnectedEntities(connection: IConnection): void {
-        const ent0 = EntityContainer.mappings.get(connection.entityNumber1)
-        const ent1 = EntityContainer.mappings.get(connection.entityNumber2)
-        ent0.redraw()
-        ent1.redraw()
-        this.update(connection.entityNumber1)
-        this.update(connection.entityNumber2)
+        for (const cp of connection.cps) {
+            const ec = EntityContainer.mappings.get(cp.entityNumber)
+            ec.redraw()
+            this.update(cp.entityNumber)
+        }
     }
 
     /** This is done in cases where the connection doesn't change but the rotation does */
@@ -131,24 +129,44 @@ export class WiresContainer extends PIXI.Container {
     }
 
     private getWireSprite(connection: IConnection): PIXI.Graphics {
-        const entity1 = this.bp.entities.get(connection.entityNumber1)
-        const entity2 = this.bp.entities.get(connection.entityNumber2)
-        const getWirePos = (entity: Entity, color: string, side: number): IPoint => {
-            const point = entity.getWireConnectionPoint(color, side, entity.direction)
-            return {
-                x: (entity.position.x + point[0]) * 32,
-                y: (entity.position.y + point[1]) * 32,
+        const getWirePos = (cp: IConnectionPoint, color: string): IPoint => {
+            if (cp.entityNumber) {
+                const entity = this.bp.entities.get(cp.entityNumber)
+                const point = entity.getWireConnectionPoint(color, cp.entitySide)
+                return {
+                    x: (entity.position.x + point[0]) * 32,
+                    y: (entity.position.y + point[1]) * 32,
+                }
+            } else if (cp.position) {
+                return {
+                    x: cp.position.x * 32,
+                    y: cp.position.y * 32,
+                }
+            }
+        }
+        const getPos = (cp: IConnectionPoint): IPoint => {
+            if (cp.entityNumber) {
+                const entity = this.bp.entities.get(cp.entityNumber)
+                return entity.position
+            } else if (cp.position) {
+                return cp.position
+            }
+        }
+        const getMaxWireDistance = (cp: IConnectionPoint): number => {
+            if (cp.entityNumber) {
+                const entity = this.bp.entities.get(cp.entityNumber)
+                return entity.maxWireDistance
             }
         }
         const connectionsReach = U.pointInCircle(
-            entity1.position,
-            entity2.position,
-            Math.min(entity1.maxWireDistance, entity2.maxWireDistance)
+            getPos(connection.cps[0]),
+            getPos(connection.cps[1]),
+            Math.min(Infinity, ...connection.cps.map(getMaxWireDistance).filter(d => d !== undefined))
         )
 
         return WiresContainer.createWire(
-            getWirePos(entity1, connection.color, connection.entitySide1),
-            getWirePos(entity2, connection.color, connection.entitySide2),
+            getWirePos(connection.cps[0], connection.color),
+            getWirePos(connection.cps[1], connection.color),
             connection.color,
             connectionsReach
         )

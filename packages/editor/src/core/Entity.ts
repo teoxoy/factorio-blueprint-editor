@@ -93,7 +93,7 @@ export class Entity extends EventEmitter {
         // Check if the new position breaks any valid entity connections
         const connectionsBreak = this.m_BP.wireConnections
             .getEntityConnections(this.entityNumber)
-            .map(c => (c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1))
+            .map(c => (c.cps[0].entityNumber === this.entityNumber ? c.cps[1].entityNumber : c.cps[0].entityNumber))
             .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
             .some(e =>
                 // Make sure that a reaching connection is not broken
@@ -131,7 +131,7 @@ export class Entity extends EventEmitter {
     public connectionsReach(position?: IPoint): boolean {
         return this.m_BP.wireConnections
         .getEntityConnections(this.entityNumber)
-        .map(c => (c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1))
+        .map(c => (c.cps[0].entityNumber === this.entityNumber ? c.cps[1].entityNumber : c.cps[0].entityNumber))
         .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
         .every(e =>
             U.pointInCircle(
