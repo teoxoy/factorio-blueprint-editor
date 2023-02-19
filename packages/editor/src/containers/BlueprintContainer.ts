@@ -61,10 +61,10 @@ export class BlueprintContainer extends PIXI.Container {
         3
     )
 
-    private _moveSpeed = 10
-    private _gridColor = 0x303030
-    private _gridPattern: GridPattern = 'grid'
-    private _limitWireReach = true
+    private _moveSpeed = Number(localStorage.getItem('moveSpeed') ?? 10)
+    private _gridColor = (localStorage.getItem('darkTheme') ?? 'true') === 'true' ? 0x303030 : 0xc9c9c9
+    private _gridPattern: GridPattern = (localStorage.getItem('pattern') ?? 'grid') as GridPattern
+    private _limitWireReach = (localStorage.getItem('limitWireReach') ?? 'true') === 'true'
     private _mode: EditorMode = EditorMode.NONE
     public readonly bp: Blueprint
     public readonly gridData: GridData
