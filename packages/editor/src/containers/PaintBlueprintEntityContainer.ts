@@ -65,7 +65,7 @@ export class PaintBlueprintEntityContainer {
                 direction,
                 position
             ) ||
-            this.bpc.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)
+            this.bpc.bp.entityPositionGrid.isAreaAvailable(this.entity.name, position, direction)
 
         for (const s of this.entitySprites) {
             F.applyTint(s, {
@@ -134,7 +134,7 @@ export class PaintBlueprintEntityContainer {
         }
 
         let ent: Entity
-        if (this.bpc.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)) {
+        if (this.bpc.bp.entityPositionGrid.isAreaAvailable(this.entity.name, position, direction)) {
             ent = this.bpc.bp.createEntity({
                 ...this.entity.serialize(),
                 entity_number: undefined,

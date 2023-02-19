@@ -70,7 +70,7 @@ export class PaintEntityContainer extends PaintContainer {
                 direction,
                 position
             ) ||
-            this.bpc.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)
+            this.bpc.bp.entityPositionGrid.isAreaAvailable(this.name, position, direction)
         ) {
             this.blocked = false
         } else {
@@ -206,7 +206,7 @@ export class PaintEntityContainer extends PaintContainer {
             return
         }
 
-        if (this.bpc.bp.entityPositionGrid.isAreaAvalible(this.name, position, direction)) {
+        if (this.bpc.bp.entityPositionGrid.isAreaAvailable(this.name, position, direction)) {
             this.bpc.bp.createEntity(
                 {
                     name: this.name,

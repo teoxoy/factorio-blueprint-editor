@@ -65,7 +65,7 @@ export class InventoryDialog extends Dialog {
 
         let groupIndex = 0
         for (const group of FD.inventoryLayout) {
-            // Make creative entities avalible only in the main inventory
+            // Make creative entities available only in the main inventory
             if (group.name === 'creative' && itemsFilter !== undefined) {
                 continue
             }
@@ -194,7 +194,7 @@ export class InventoryDialog extends Dialog {
         )
     }
 
-    /** Update recipe visulaization */
+    /** Update recipe visualization */
     private updateRecipeVisualization(recipeName?: string): void {
         // Update Recipe Label
         this.m_RecipeLabel.text = undefined

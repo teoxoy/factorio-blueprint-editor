@@ -71,6 +71,10 @@ export class Entity extends EventEmitter {
         return FD.entities[this.name]
     }
 
+    public get rawEntity(): BPS.IEntity {
+        return this.m_rawEntity;
+    }
+
     /** Entity size */
     public get size(): IPoint {
         return util.switchSizeBasedOnDirection(this.entityData.size, this.direction)
@@ -79,10 +83,6 @@ export class Entity extends EventEmitter {
     /** Entity position */
     public get position(): IPoint {
         return this.m_rawEntity.position
-    }
-
-    public get rawEntity(): BPS.IEntity {
-        return this.m_rawEntity;
     }
 
     public set position(position: IPoint) {

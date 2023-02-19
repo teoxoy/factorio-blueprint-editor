@@ -156,12 +156,12 @@ export class PositionGrid {
 
     public canMoveTo(entity: Entity, newPosition: IPoint): boolean {
         this.removeTileData(entity)
-        const spaceAvalible = this.isAreaAvalible(entity.name, newPosition, entity.direction)
+        const spaceAvalible = this.isAreaAvailable(entity.name, newPosition, entity.direction)
         this.setTileData(entity)
         return spaceAvalible
     }
 
-    public isAreaAvalible(name: string, pos: IPoint, direction = 0): boolean {
+    public isAreaAvailable(name: string, pos: IPoint, direction = 0): boolean {
         const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
 
         const straightRails: Entity[] = []

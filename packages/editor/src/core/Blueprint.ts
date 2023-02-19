@@ -160,10 +160,7 @@ class Blueprint extends EventEmitter {
                         delete e.neighbours
                         return this.createEntity({
                             ...e,
-                            position: {
-                                x: e.position.x + offset.x,
-                                y: e.position.y + offset.y,
-                            },
+                            position: util.sumprod(e.position, offset),
                         })
                     }),
                     e => e.entityNumber
