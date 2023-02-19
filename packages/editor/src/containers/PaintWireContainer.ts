@@ -82,6 +82,18 @@ export class PaintWireContainer extends PaintContainer {
     }
 
     public rotate(ccw = false): void {
+        if (!this.visible) return
+
+        // const cursor_position = this.getGridPosition()
+        // const entity = this.bpc.bp.entityPositionGrid.getEntityAtPosition(cursor_position)
+        // entity?.rotate(ccw, true)
+
+        /** Non-standard behavior: cycle between colors */
+        if (this.name === "red_wire") this.name = "green_wire"
+        else if (this.name === "green_wire") this.name = "red_wire"
+        this.color = this.name.split("_",1)[0]
+
+        this.redraw()
     }
 
     public canFlipOrRotateByCopying(): boolean {
@@ -89,10 +101,6 @@ export class PaintWireContainer extends PaintContainer {
     }
 
     protected redraw(): void {
-    }
-
-    public moveAtCursor(): void {
-        this.setNewPosition()
         this.updatecursorBox()
         this.bpc.wiresContainer.remove('paint-wire')
         if (this.cp) {
@@ -102,6 +110,11 @@ export class PaintWireContainer extends PaintContainer {
             }
             this.bpc.wiresContainer.add('paint-wire', connection)
         }
+    }
+
+    public moveAtCursor(): void {
+        this.setNewPosition()
+        this.redraw()
     }
 
     public placeEntityContainer(): void {
