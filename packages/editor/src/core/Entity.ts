@@ -894,18 +894,23 @@ export class Entity extends EventEmitter {
         direction = this.direction
     ): number[][] {
         const e = this.entityData
-        if (side===1 && e.connection_points?.[direction/2].wire[color]) return e.selection_box
-        if (side===1 && e.circuit_wire_connection_point?.wire[color]) return e.selection_box
-        if (side===1 && e.circuit_wire_connection_points?.[direction/2].wire[color]) return e.selection_box
+        const size_box = [
+            [-e.size.width/2, -e.size.height/2],
+            [+e.size.width/2, +e.size.height/2],
+        ]
+        // use size_box for cell-wise selection, use e.selection_box for "true" selection
+        if (side===1 && e.connection_points?.[direction/2].wire[color]) return size_box
+        if (side===1 && e.circuit_wire_connection_point?.wire[color]) return size_box
+        if (side===1 && e.circuit_wire_connection_points?.[direction/2].wire[color]) return size_box
         if (side===1 && e.input_connection_points?.[direction/2].wire[color]) return e.input_connection_bounding_box
         if (side===2 && e.output_connection_points?.[direction/2].wire[color]) return e.output_connection_bounding_box
         if (side===1 && e.left_wire_connection_point?.wire[color]) {
-            const box = util.duplicate(e.selection_box)
+            const box = util.duplicate(size_box)
             box[1][0] = (box[0][0]+box[1][0])/2
             return box
         }
         if (side===2 && e.right_wire_connection_point?.wire[color]) {
-            const box = util.duplicate(e.selection_box)
+            const box = util.duplicate(size_box)
             box[0][0] = (box[0][0]+box[1][0])/2
             return box
         }
