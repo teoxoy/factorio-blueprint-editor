@@ -37,7 +37,12 @@ export class PaintWireContainer extends PaintContainer {
         this.visible = true
     }
 
-    public destroy(): void {
+    public destroy(pipette = false): void {
+        if (pipette && this.cp) {
+            this.cp = undefined
+            this.redraw()
+            return
+        }
         this.bpc.wiresContainer.remove('paint-wire')
         this.destroycursorBox()
         super.destroy()

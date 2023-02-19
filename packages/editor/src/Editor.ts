@@ -238,7 +238,7 @@ export class Editor {
                             : entity.direction
                     G.BPC.spawnPaintContainer(itemName, direction)
                 } else if (G.BPC.mode === EditorMode.PAINT) {
-                    G.BPC.paintContainer.destroy()
+                    G.BPC.paintContainer.destroy(true)
                 }
                 G.BPC.exitCopyMode(true)
                 G.BPC.exitDeleteMode(true)
