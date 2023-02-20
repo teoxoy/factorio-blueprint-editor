@@ -93,6 +93,13 @@ export class Editor {
         G.UI.quickbarPanel.generateSlots(items)
     }
 
+    public get limitWireReach(): boolean {
+        return G.BPC.limitWireReach
+    }
+    public set limitWireReach(limit: boolean) {
+        G.BPC.limitWireReach = limit
+    }
+
     public get oilOutpostSettings(): IOilOutpostSettings {
         return oilOutpostSettings
     }
@@ -231,7 +238,7 @@ export class Editor {
                             : entity.direction
                     G.BPC.spawnPaintContainer(itemName, direction)
                 } else if (G.BPC.mode === EditorMode.PAINT) {
-                    G.BPC.paintContainer.destroy()
+                    G.BPC.paintContainer.destroy(true)
                 }
                 G.BPC.exitCopyMode(true)
                 G.BPC.exitDeleteMode(true)

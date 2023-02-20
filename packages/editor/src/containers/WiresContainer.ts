@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js'
 import { Blueprint } from '../core/Blueprint'
-import { IConnection } from '../core/WireConnections'
+import { IConnection, IConnectionPoint } from '../core/WireConnections'
+import U from '../core/generators/util'
 import { EntityContainer } from './EntityContainer'
 
 export class WiresContainer extends PIXI.Container {
@@ -12,7 +13,7 @@ export class WiresContainer extends PIXI.Container {
         this.bp = bp
     }
 
-    private static createWire(p1: IPoint, p2: IPoint, color: string): PIXI.Graphics {
+    private static createWire(p1: IPoint, p2: IPoint, color: string, connectionsReach = true): PIXI.Graphics {
         const wire = new PIXI.Graphics()
 
         const minX = Math.min(p1.x, p2.x)
@@ -28,7 +29,11 @@ export class WiresContainer extends PIXI.Container {
             green: 0x588c38,
         }
 
-        wire.lineStyle({ width: 1.5, color: colorMap[color] })
+        wire.lineStyle({
+            width: 1.5,
+            color: colorMap[color],
+            alpha: (connectionsReach ? 1 : 0.3),
+        })
         wire.moveTo(0, 0)
 
         if (p1.x === p2.x) {
@@ -94,7 +99,7 @@ export class WiresContainer extends PIXI.Container {
 
         for (const conn of connections) {
             const entNr =
-                entityNumber === conn.entityNumber1 ? conn.entityNumber2 : conn.entityNumber1
+                entityNumber === conn.cps[0].entityNumber ? conn.cps[1].entityNumber : conn.cps[0].entityNumber
             const ec = EntityContainer.mappings.get(entNr)
             if (ec.entity.type === 'electric_pole') {
                 ec.redraw()
@@ -106,12 +111,11 @@ export class WiresContainer extends PIXI.Container {
     }
 
     private updateConnectedEntities(connection: IConnection): void {
-        const ent0 = EntityContainer.mappings.get(connection.entityNumber1)
-        const ent1 = EntityContainer.mappings.get(connection.entityNumber2)
-        ent0.redraw()
-        ent1.redraw()
-        this.update(connection.entityNumber1)
-        this.update(connection.entityNumber2)
+        for (const cp of connection.cps) {
+            const ec = EntityContainer.mappings.get(cp.entityNumber)
+            ec.redraw()
+            this.update(cp.entityNumber)
+        }
     }
 
     /** This is done in cases where the connection doesn't change but the rotation does */
@@ -125,19 +129,46 @@ export class WiresContainer extends PIXI.Container {
     }
 
     private getWireSprite(connection: IConnection): PIXI.Graphics {
-        const getWirePos = (entityNumber: number, color: string, side: number): IPoint => {
-            const entity = this.bp.entities.get(entityNumber)
-            const point = entity.getWireConnectionPoint(color, side, entity.direction)
-            return {
-                x: (entity.position.x + point[0]) * 32,
-                y: (entity.position.y + point[1]) * 32,
+        const getWirePos = (cp: IConnectionPoint, color: string): IPoint => {
+            if (cp.entityNumber) {
+                const entity = this.bp.entities.get(cp.entityNumber)
+                const point = entity.getWireConnectionPoint(color, cp.entitySide)
+                return {
+                    x: (entity.position.x + point[0]) * 32,
+                    y: (entity.position.y + point[1]) * 32,
+                }
+            } else if (cp.position) {
+                return {
+                    x: cp.position.x * 32,
+                    y: cp.position.y * 32,
+                }
             }
         }
+        const getPos = (cp: IConnectionPoint): IPoint => {
+            if (cp.entityNumber) {
+                const entity = this.bp.entities.get(cp.entityNumber)
+                return entity.position
+            } else if (cp.position) {
+                return cp.position
+            }
+        }
+        const getMaxWireDistance = (cp: IConnectionPoint): number => {
+            if (cp.entityNumber) {
+                const entity = this.bp.entities.get(cp.entityNumber)
+                return entity.maxWireDistance
+            }
+        }
+        const connectionsReach = U.pointInCircle(
+            getPos(connection.cps[0]),
+            getPos(connection.cps[1]),
+            Math.min(Infinity, ...connection.cps.map(getMaxWireDistance).filter(d => d !== undefined))
+        )
 
         return WiresContainer.createWire(
-            getWirePos(connection.entityNumber1, connection.color, connection.entitySide1),
-            getWirePos(connection.entityNumber2, connection.color, connection.entitySide2),
-            connection.color
+            getWirePos(connection.cps[0], connection.color),
+            getWirePos(connection.cps[1], connection.color),
+            connection.color,
+            connectionsReach
         )
     }
 }

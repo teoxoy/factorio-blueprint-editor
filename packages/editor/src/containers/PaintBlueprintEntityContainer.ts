@@ -1,6 +1,7 @@
 import F from '../UI/controls/functions'
 import { Entity } from '../core/Entity'
 import { Blueprint } from '../core/Blueprint'
+import util from '../common/util'
 import { EntitySprite } from './EntitySprite'
 import { VisualizationArea } from './VisualizationArea'
 import { BlueprintContainer } from './BlueprintContainer'
@@ -31,26 +32,17 @@ export class PaintBlueprintEntityContainer {
 
         this.entitySprites = EntitySprite.getParts(
             this.entity,
-            {
-                x: this.entity.position.x * 32,
-                y: this.entity.position.y * 32,
-            },
+            util.sumprod(32,this.entity.position),
             this.bp.entityPositionGrid
         )
     }
 
     private get entityPosition(): IPoint {
-        return {
-            x: this.pbpc.x / 32 + this.entity.position.x,
-            y: this.pbpc.y / 32 + this.entity.position.y,
-        }
+        return util.sumprod(1/32,this.pbpc, this.entity.position)
     }
 
     private get position(): IPoint {
-        return {
-            x: this.pbpc.x + this.entity.position.x,
-            y: this.pbpc.y + this.entity.position.y,
-        }
+        return util.sumprod(this.pbpc, this.entity.position)
     }
 
     public destroy(): void {
@@ -73,7 +65,7 @@ export class PaintBlueprintEntityContainer {
                 direction,
                 position
             ) ||
-            this.bpc.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)
+            this.bpc.bp.entityPositionGrid.isAreaAvailable(this.entity.name, position, direction)
 
         for (const s of this.entitySprites) {
             F.applyTint(s, {
@@ -142,7 +134,7 @@ export class PaintBlueprintEntityContainer {
         }
 
         let ent: Entity
-        if (this.bpc.bp.entityPositionGrid.isAreaAvalible(this.entity.name, position, direction)) {
+        if (this.bpc.bp.entityPositionGrid.isAreaAvailable(this.entity.name, position, direction)) {
             ent = this.bpc.bp.createEntity({
                 ...this.entity.serialize(),
                 entity_number: undefined,

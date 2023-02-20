@@ -8,9 +8,32 @@ const getRandomInt = (min: number, max: number): number => {
 
 const getRandomItem = <T>(array: T[]): T => array[getRandomInt(0, array.length - 1)]
 
+const Point = (p: IPoint | number[]): IPoint => {
+    if (Array.isArray(p)) return { x: p[0], y: p[1] }
+    return { ...p }
+}
+
+/** Computes a weighted sum of vectors. Weights are preceding their corresponding vector, and equal to 1 if not specified */
+const sumprod = (...args: (number | (number[]|IPoint))[]): IPoint => {
+    const ans: IPoint = {x:0, y:0}
+    let coef: number = undefined
+    for (let arg of args) {
+        if (typeof arg === 'number') {
+            coef = (coef ?? 1) * arg
+            continue
+        }
+        if (Array.isArray(arg)) arg = { x: arg[0], y: arg[1] }
+        ans.x += (coef ?? 1) * arg.x
+        ans.y += (coef ?? 1) * arg.y
+        coef = undefined
+    }
+    if (coef !== undefined) throw new TypeError("weights should be followed by a vector")
+    return ans
+}
+
 const rotatePointBasedOnDir = (p: IPoint | number[], dir: number): IPoint => {
     const point: IPoint = { x: 0, y: 0 }
-    const nP = Array.isArray(p) ? { x: p[0], y: p[1] } : { ...p }
+    const nP = Point(p)
     switch (dir) {
         case 0:
             // x y
@@ -144,6 +167,8 @@ export default {
     duplicate,
     getRandomInt,
     getRandomItem,
+    Point,
+    sumprod,
     getRelativeDirection,
     rotatePointBasedOnDir,
     transformConnectionPosition,

@@ -65,7 +65,7 @@ export class InventoryDialog extends Dialog {
 
         let groupIndex = 0
         for (const group of FD.inventoryLayout) {
-            // Make creative entities avalible only in the main inventory
+            // Make creative entities available only in the main inventory
             if (group.name === 'creative' && itemsFilter !== undefined) {
                 continue
             }
@@ -81,7 +81,7 @@ export class InventoryDialog extends Dialog {
                     if (itemsFilter === undefined) {
                         const itemData = FD.items[item.name]
                         if (!itemData) continue
-                        if (!itemData.place_result && !itemData.place_as_tile) continue
+                        if (!itemData.place_result && !itemData.place_as_tile && !itemData.wire_count) continue
                         // needed for robots/trains/cars
                         if (itemData.place_result && !FD.entities[itemData.place_result]) continue
                     } else {
@@ -194,7 +194,7 @@ export class InventoryDialog extends Dialog {
         )
     }
 
-    /** Update recipe visulaization */
+    /** Update recipe visualization */
     private updateRecipeVisualization(recipeName?: string): void {
         // Update Recipe Label
         this.m_RecipeLabel.text = undefined

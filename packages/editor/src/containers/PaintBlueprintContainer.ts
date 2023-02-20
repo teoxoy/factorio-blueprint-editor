@@ -163,15 +163,17 @@ export class PaintBlueprintContainer extends PaintContainer {
             for (const [oldID] of oldEntIDToNewEntID) {
                 this.bp.wireConnections
                     .getEntityConnections(oldID)
-                    .filter(
-                        connection =>
-                            oldEntIDToNewEntID.has(connection.entityNumber1) &&
-                            oldEntIDToNewEntID.has(connection.entityNumber2)
+                    .filter(connection =>
+                        connection.cps.every(cp =>
+                            oldEntIDToNewEntID.has(cp.entityNumber)
+                        )
                     )
                     .map(connection => ({
                         ...connection,
-                        entityNumber1: oldEntIDToNewEntID.get(connection.entityNumber1),
-                        entityNumber2: oldEntIDToNewEntID.get(connection.entityNumber2),
+                        cps: connection.cps.map(cp => ({
+                            ...cp,
+                            entityNumber: oldEntIDToNewEntID.get(cp.entityNumber),
+                        }))
                     }))
                     .forEach(conn => this.bpc.bp.wireConnections.create(conn))
             }

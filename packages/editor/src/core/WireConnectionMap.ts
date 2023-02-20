@@ -16,9 +16,9 @@ export class WireConnectionMap extends Map<string, IConnection> {
             const conn = this.entNrToConnHash.get(entityNumber) || []
             this.entNrToConnHash.set(entityNumber, [...conn, hash])
         }
-        add(connection.entityNumber1)
-        if (connection.entityNumber1 !== connection.entityNumber2) {
-            add(connection.entityNumber2)
+        add(connection.cps[0].entityNumber)
+        if (connection.cps[0].entityNumber !== connection.cps[1].entityNumber) {
+            add(connection.cps[1].entityNumber)
         }
 
         return super.set(hash, connection)
@@ -34,9 +34,9 @@ export class WireConnectionMap extends Map<string, IConnection> {
                 this.entNrToConnHash.delete(entityNumber)
             }
         }
-        rem(connection.entityNumber1)
-        if (connection.entityNumber1 !== connection.entityNumber2) {
-            rem(connection.entityNumber2)
+        rem(connection.cps[0].entityNumber)
+        if (connection.cps[0].entityNumber !== connection.cps[1].entityNumber) {
+            rem(connection.cps[1].entityNumber)
         }
 
         return super.delete(hash)

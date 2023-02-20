@@ -301,13 +301,7 @@ export class OverlayContainer extends PIXI.Container {
                     case 6:
                         position.x += offset
                 }
-                const arrow = createArrow(
-                    {
-                        x: position.x * 64,
-                        y: position.y * 64,
-                    },
-                    type
-                )
+                const arrow = createArrow(util.sumprod(64,position), type)
                 if (entity.type === 'boiler' && type === 2) {
                     arrow.rotation = 0.5 * Math.PI
                 }

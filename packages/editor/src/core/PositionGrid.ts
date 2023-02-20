@@ -2,6 +2,7 @@ import util from '../common/util'
 import FD from './factorioData'
 import { Blueprint } from './Blueprint'
 import { Entity } from './Entity'
+import { IConnectionPoint } from './WireConnections'
 
 /** Anchor is in the middle */
 interface IArea {
@@ -56,13 +57,30 @@ export class PositionGrid {
         }
     }
 
-    public getEntityAtPosition(x: number, y: number): Entity {
-        const cell = this.grid.get(`${Math.floor(x)},${Math.floor(y)}`)
+    public getEntityAtPosition(position: IPoint): Entity {
+        const cell = this.grid.get(`${Math.floor(position.x)},${Math.floor(position.y)}`)
         if (cell) {
             if (typeof cell === 'number') {
                 return this.bp.entities.get(cell)
             } else {
                 return this.bp.entities.get(cell[cell.length - 1])
+            }
+        }
+    }
+
+    public getConnectionPointAtPosition(position: IPoint, color: string): IConnectionPoint {
+        const entity = this.getEntityAtPosition(position)
+        if (entity === undefined) return undefined
+        const rel_position = util.sumprod(position, -1,entity.position)
+        for (let side = 1; side <= 10; side++) {
+            const bbox = entity.getWireConnectionBoundingBox(color, side)
+            if (bbox === undefined) break  // no more sides expected for that color
+            const rel_bbox = bbox.map(b => util.sumprod(rel_position, -1,b))
+            if (Object.values(rel_bbox[0]).some(v => v < 0)) continue
+            if (Object.values(rel_bbox[1]).some(v => v > 0)) continue
+            return {
+                entityNumber: entity.entityNumber,
+                entitySide: side,
             }
         }
     }
@@ -138,12 +156,12 @@ export class PositionGrid {
 
     public canMoveTo(entity: Entity, newPosition: IPoint): boolean {
         this.removeTileData(entity)
-        const spaceAvalible = this.isAreaAvalible(entity.name, newPosition, entity.direction)
+        const spaceAvalible = this.isAreaAvailable(entity.name, newPosition, entity.direction)
         this.setTileData(entity)
         return spaceAvalible
     }
 
-    public isAreaAvalible(name: string, pos: IPoint, direction = 0): boolean {
+    public isAreaAvailable(name: string, pos: IPoint, direction = 0): boolean {
         const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
 
         const straightRails: Entity[] = []

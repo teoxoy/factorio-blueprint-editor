@@ -8,10 +8,13 @@ const MAX_POLE_CONNECTION_COUNT = 5
 
 export interface IConnection {
     color: string
-    entityNumber1: number
-    entityNumber2: number
-    entitySide1: number
-    entitySide2: number
+    cps: IConnectionPoint[]
+}
+
+export interface IConnectionPoint {
+    entityNumber?: number
+    entitySide?: number
+    position?: IPoint
 }
 
 export class WireConnections extends EventEmitter {
@@ -24,10 +27,9 @@ export class WireConnections extends EventEmitter {
     }
 
     private static hash(conn: IConnection): string {
-        const firstE = Math.min(conn.entityNumber1, conn.entityNumber2)
-        const secondE = Math.max(conn.entityNumber1, conn.entityNumber2)
-        const firstS = firstE === conn.entityNumber1 ? conn.entitySide1 : conn.entitySide2
-        const secondS = secondE === conn.entityNumber2 ? conn.entitySide2 : conn.entitySide1
+        const cps = conn.cps.sort((cp1,cp2) => cp1.entityNumber - cp2.entityNumber)
+        const [firstE, secondE] = cps.map(cp => cp.entityNumber)
+        const [firstS, secondS] = cps.map(cp => cp.entitySide)
         return `${conn.color}-${firstE}-${secondE}-${firstS}-${secondS}`
     }
 
@@ -46,10 +48,16 @@ export class WireConnections extends EventEmitter {
                     for (const data of conn[color]) {
                         parsedConnections.push({
                             color,
-                            entityNumber1: entityNumber,
-                            entityNumber2: data.entity_id,
-                            entitySide1: Number(side),
-                            entitySide2: data.circuit_id || 1,
+                            cps: [
+                                {
+                                    entityNumber: entityNumber,
+                                    entitySide: Number(side)
+                                },
+                                {
+                                    entityNumber: data.entity_id,
+                                    entitySide: data.circuit_id || 1
+                                }
+                            ]
                         })
                     }
                 }
@@ -62,10 +70,16 @@ export class WireConnections extends EventEmitter {
                 const data = (connections[side] as BPS.IWireColor[])[0]
                 parsedConnections.push({
                     color,
-                    entityNumber1: entityNumber,
-                    entityNumber2: data.entity_id,
-                    entitySide1: Number(side.slice(2, 3)) + 1,
-                    entitySide2: 1,
+                    cps: [
+                        {
+                            entityNumber: entityNumber,
+                            entitySide: Number(side.slice(2, 3)) + 1
+                        },
+                        {
+                            entityNumber: data.entity_id,
+                            entitySide: 1
+                        }
+                    ]
                 })
             }
         }
@@ -97,39 +111,38 @@ export class WireConnections extends EventEmitter {
         const neighbours: number[] = []
 
         for (const connection of connections) {
-            const isEntity1 = connection.entityNumber1 === entityNumber
-            const side = isEntity1 ? connection.entitySide1 : connection.entitySide2
+            const isEntity0 = connection.cps[0].entityNumber === entityNumber
+            const [thisE, otherE] = isEntity0 ? connection.cps : connection.cps.reverse()
+            const entitySide = thisE.entitySide
             const color = connection.color
-            const otherEntNr = isEntity1 ? connection.entityNumber2 : connection.entityNumber1
-            const otherEntSide = isEntity1 ? connection.entitySide2 : connection.entitySide1
 
-            if (entNrWhitelist && !entNrWhitelist.has(otherEntNr)) continue
+            if (entNrWhitelist && !entNrWhitelist.has(otherE.entityNumber)) continue
 
-            if (color === 'copper' && getType(otherEntNr) === 'electric_pole') {
+            if (color === 'copper' && getType(otherE.entityNumber) === 'electric_pole') {
                 if (getType(entityNumber) === 'electric_pole') {
-                    neighbours.push(otherEntNr)
+                    neighbours.push(otherE.entityNumber)
                 } else if (getType(entityNumber) === 'power_switch') {
-                    const SIDE = `Cu${side - 1}`
+                    const SIDE = `Cu${entitySide - 1}`
                     if (serialized[SIDE] === undefined) {
                         serialized[SIDE] = []
                     }
                     const c = serialized[SIDE] as BPS.IWireColor[]
                     c.push({
-                        entity_id: otherEntNr,
+                        entity_id: otherE.entityNumber,
                         wire_id: 0,
                     })
                 }
             } else if (color === 'red' || color === 'green') {
-                if (serialized[side] === undefined) {
-                    serialized[side] = {}
+                if (serialized[entitySide] === undefined) {
+                    serialized[entitySide] = {}
                 }
-                const SIDE = serialized[side] as BPS.IConnSide
+                const SIDE = serialized[entitySide] as BPS.IConnSide
                 if (SIDE[color] === undefined) {
                     SIDE[color] = []
                 }
                 SIDE[color].push({
-                    entity_id: otherEntNr,
-                    circuit_id: otherEntSide,
+                    entity_id: otherE.entityNumber,
+                    circuit_id: otherE.entitySide,
                 })
             }
         }
@@ -143,11 +156,22 @@ export class WireConnections extends EventEmitter {
     private static toPoleConnection(entityNumber1: number, entityNumber2: number): IConnection {
         return {
             color: 'copper',
-            entityNumber1,
-            entityNumber2,
-            entitySide1: 1,
-            entitySide2: 1,
+            cps: [
+                {
+                    entityNumber: entityNumber1,
+                    entitySide: 1
+                },
+                {
+                    entityNumber: entityNumber2,
+                    entitySide: 1
+                }
+            ]
         }
+    }
+
+    public has(connection: IConnection): boolean {
+        const hash = WireConnections.hash(connection)
+        return this.connections.has(hash)
     }
 
     public create(connection: IConnection): void {
@@ -160,7 +184,7 @@ export class WireConnections extends EventEmitter {
             .commit()
     }
 
-    private remove(connection: IConnection): void {
+    public remove(connection: IConnection): void {
         const hash = WireConnections.hash(connection)
         if (!this.connections.has(hash)) return
 
@@ -267,9 +291,9 @@ export class WireConnections extends EventEmitter {
             for (const connection of this.getEntityConnections(pole.entityNumber)) {
                 if (connection.color === 'copper') {
                     const otherEntNr =
-                        pole.entityNumber === connection.entityNumber1
-                            ? connection.entityNumber2
-                            : connection.entityNumber1
+                        pole.entityNumber === connection.cps[0].entityNumber
+                            ? connection.cps[1].entityNumber
+                            : connection.cps[0].entityNumber
                     blacklist.add(otherEntNr)
                 }
             }
@@ -360,7 +384,7 @@ export class WireConnections extends EventEmitter {
 
     public getPowerPoleDirection(entityNumber: number): number {
         const connections = this.getEntityConnections(entityNumber).map(conn =>
-            entityNumber === conn.entityNumber1 ? conn.entityNumber2 : conn.entityNumber1
+            entityNumber === conn.cps[0].entityNumber ? conn.cps[1].entityNumber : conn.cps[0].entityNumber
         )
         if (connections.length === 0) return 0
 

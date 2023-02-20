@@ -15,6 +15,7 @@ import { OverlayContainer } from './OverlayContainer'
 import { PaintEntityContainer } from './PaintEntityContainer'
 import { TileContainer } from './TileContainer'
 import { PaintTileContainer } from './PaintTileContainer'
+import { PaintWireContainer } from './PaintWireContainer'
 import { PaintContainer } from './PaintContainer'
 import { PaintBlueprintContainer } from './PaintBlueprintContainer'
 import { OptimizedContainer } from './OptimizedContainer'
@@ -60,9 +61,10 @@ export class BlueprintContainer extends PIXI.Container {
         3
     )
 
-    private _moveSpeed = 10
-    private _gridColor = 0x303030
-    private _gridPattern: GridPattern = 'grid'
+    private _moveSpeed = Number(localStorage.getItem('moveSpeed') ?? 10)
+    private _gridColor = (localStorage.getItem('darkTheme') ?? 'true') === 'true' ? 0x303030 : 0xc9c9c9
+    private _gridPattern: GridPattern = (localStorage.getItem('pattern') ?? 'grid') as GridPattern
+    private _limitWireReach = (localStorage.getItem('limitWireReach') ?? 'true') === 'true'
     private _mode: EditorMode = EditorMode.NONE
     public readonly bp: Blueprint
     public readonly gridData: GridData
@@ -77,6 +79,7 @@ export class BlueprintContainer extends PIXI.Container {
     public readonly wiresContainer: WiresContainer
     public readonly overlayContainer: OverlayContainer
     private readonly entityPaintSlot: PIXI.Container
+    private readonly wirePaintSlot: PIXI.Container
 
     public hoverContainer: EntityContainer
     public paintContainer: PaintContainer
@@ -114,6 +117,7 @@ export class BlueprintContainer extends PIXI.Container {
         this.wiresContainer = new WiresContainer(this.bp)
         this.overlayContainer = new OverlayContainer(this)
         this.entityPaintSlot = new PIXI.Container()
+        this.wirePaintSlot = new PIXI.Container()
 
         this.addChild(
             this.grid,
@@ -124,7 +128,8 @@ export class BlueprintContainer extends PIXI.Container {
             this.entitySprites,
             this.wiresContainer,
             this.overlayContainer,
-            this.entityPaintSlot
+            this.entityPaintSlot,
+            this.wirePaintSlot
         )
 
         this.on('pointerover', () => {
@@ -439,10 +444,10 @@ export class BlueprintContainer extends PIXI.Container {
 
         if (!this.bp) return
 
-        const entity = this.bp.entityPositionGrid.getEntityAtPosition(
-            this.gridData.x32,
-            this.gridData.y32
-        )
+        const entity = this.bp.entityPositionGrid.getEntityAtPosition({
+            x: this.gridData.x32,
+            y: this.gridData.y32
+        })
         const eC = entity ? EntityContainer.mappings.get(entity.entityNumber) : undefined
 
         if (eC && this.hoverContainer === eC) return
@@ -553,6 +558,14 @@ export class BlueprintContainer extends PIXI.Container {
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
         return grid
+    }
+
+    public get limitWireReach(): boolean {
+        return this._limitWireReach
+    }
+
+    public set limitWireReach(limit: boolean) {
+        this._limitWireReach = limit
     }
 
     public initBP(): void {
@@ -706,10 +719,14 @@ export class BlueprintContainer extends PIXI.Container {
 
         if (typeof itemNameOrEntities === 'string') {
             const itemData = FD.items[itemNameOrEntities]
+            const wireResult = itemData.wire_count && itemNameOrEntities
             const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
-            const placeResult = itemData.place_result || tileResult
+            const placeResult = itemData.place_result || tileResult || wireResult
 
-            if (tileResult) {
+            if (wireResult) {
+                this.paintContainer = new PaintWireContainer(this, placeResult)
+                this.wirePaintSlot.addChild(this.paintContainer)
+            } else if (tileResult) {
                 this.paintContainer = new PaintTileContainer(this, placeResult)
                 this.tilePaintSlot.addChild(this.paintContainer)
             } else {

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'eventemitter3'
 import util from '../common/util'
 import { IllegalFlipError } from '../containers/PaintContainer'
+import G from '../common/globals'
 import FD, { Entity as FD_Entity } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
@@ -70,6 +71,10 @@ export class Entity extends EventEmitter {
         return FD.entities[this.name]
     }
 
+    public get rawEntity(): BPS.IEntity {
+        return this.m_rawEntity;
+    }
+
     /** Entity size */
     public get size(): IPoint {
         return util.switchSizeBasedOnDirection(this.entityData.size, this.direction)
@@ -80,28 +85,30 @@ export class Entity extends EventEmitter {
         return this.m_rawEntity.position
     }
 
-    public get rawEntity(): BPS.IEntity {
-        return this.m_rawEntity;
-    }
-
     public set position(position: IPoint) {
         if (util.areObjectsEquivalent(this.m_rawEntity.position, position)) return
 
         if (!this.m_BP.entityPositionGrid.canMoveTo(this, position)) return
 
-        // Make sure all entity connections reach the new position
-        const connectionsReach = this.m_BP.wireConnections
+        // Check if the new position breaks any valid entity connections
+        const connectionsBreak = this.m_BP.wireConnections
             .getEntityConnections(this.entityNumber)
-            .map(c => (c.entityNumber1 === this.entityNumber ? c.entityNumber2 : c.entityNumber1))
+            .map(c => (c.cps[0].entityNumber === this.entityNumber ? c.cps[1].entityNumber : c.cps[0].entityNumber))
             .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
-            .every(e =>
+            .some(e =>
+                // Make sure that a reaching connection is not broken
                 U.pointInCircle(
+                    e.position,
+                    this.position,
+                    Math.min(e.maxWireDistance, this.maxWireDistance)
+                ) &&
+                !U.pointInCircle(
                     e.position,
                     position,
                     Math.min(e.maxWireDistance, this.maxWireDistance)
                 )
             )
-        if (!connectionsReach) return
+        if (G.BPC.limitWireReach && connectionsBreak) return
 
         this.m_BP.history
             .updateValue(this.m_rawEntity, ['position'], position, 'Change position')
@@ -121,11 +128,22 @@ export class Entity extends EventEmitter {
         )
     }
 
+    public connectionsReach(position?: IPoint): boolean {
+        return this.m_BP.wireConnections
+        .getEntityConnections(this.entityNumber)
+        .map(c => (c.cps[0].entityNumber === this.entityNumber ? c.cps[1].entityNumber : c.cps[0].entityNumber))
+        .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
+        .every(e =>
+            U.pointInCircle(
+                e.position,
+                position ?? this.position,
+                Math.min(e.maxWireDistance, this.maxWireDistance)
+            )
+        )
+    }
+
     public moveBy(offset: IPoint): void {
-        this.position = {
-            x: this.position.x + offset.x,
-            y: this.position.y + offset.y,
-        }
+        this.position = util.sumprod(this.position, offset)
     }
 
     /** Entity direction */
@@ -868,6 +886,50 @@ export class Entity extends EventEmitter {
             return direction / 2
         }
         return e.circuit_wire_connection_points[getIndex()].wire[color]
+    }
+
+    private getWire_connection_box(
+        color: string,
+        side: number,
+        direction = this.direction
+    ): number[][] {
+        const e = this.entityData
+        const size_box = [
+            [-e.size.width/2, -e.size.height/2],
+            [+e.size.width/2, +e.size.height/2],
+        ]
+        // use size_box for cell-wise selection, use e.selection_box for "true" selection
+        if (side===1 && e.connection_points?.[direction/2].wire[color]) return size_box
+        if (side===1 && e.circuit_wire_connection_point?.wire[color]) return size_box
+        if (side===1 && e.circuit_wire_connection_points?.[direction/2].wire[color]) return size_box
+        if (side===1 && e.input_connection_points?.[direction/2].wire[color]) return e.input_connection_bounding_box
+        if (side===2 && e.output_connection_points?.[direction/2].wire[color]) return e.output_connection_bounding_box
+        if (side===1 && e.left_wire_connection_point?.wire[color]) {
+            const box = util.duplicate(size_box)
+            box[1][0] = (box[0][0]+box[1][0])/2
+            return box
+        }
+        if (side===2 && e.right_wire_connection_point?.wire[color]) {
+            const box = util.duplicate(size_box)
+            box[0][0] = (box[0][0]+box[1][0])/2
+            return box
+        }
+    }
+
+    public getWireConnectionBoundingBox(
+        color: string,
+        side: number,
+        direction = this.direction
+    ): IPoint[] {
+        const box = this.getWire_connection_box(color, side, direction)
+        if (box === undefined) return undefined
+        let bbox : IPoint[] = box.map(util.Point)
+        bbox = bbox.map(p => util.rotatePointBasedOnDir(p, direction))
+        bbox = [
+            {x: Math.min(...bbox.map(p => p.x)), y: Math.min(...bbox.map(p => p.y))},
+            {x: Math.max(...bbox.map(p => p.x)), y: Math.max(...bbox.map(p => p.y))},
+        ]
+        return bbox
     }
 
     public serialize(entNrWhitelist?: Set<number>): BPS.IEntity {

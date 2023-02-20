@@ -13,7 +13,8 @@ export class IllegalFlipError {
 
 export abstract class PaintContainer extends PIXI.Container {
     protected readonly bpc: BlueprintContainer
-    private readonly icon: PIXI.DisplayObject
+    private _name: string
+    private icon: PIXI.DisplayObject
     private _blocked = false
     private tint = {
         r: 0.4,
@@ -29,10 +30,20 @@ export abstract class PaintContainer extends PIXI.Container {
 
         this.on('childAdded', (s: PIXI.Sprite) => F.applyTint(s, this.tint))
 
-        this.icon = F.CreateIcon(this.getItemName())
-        G.UI.addPaintIcon(this.icon)
         window.addEventListener('mousemove', this.updateIconPos)
         this.show()
+    }
+
+    public get name(): string {
+        return this._name
+    }
+
+    protected set name(name: string) {
+        this._name = name
+        this.icon?.destroy()
+        this.icon = F.CreateIcon(this.getItemName())
+        G.UI.addPaintIcon(this.icon)
+        this.updateIconPos()
     }
 
     protected get blocked(): boolean {
@@ -73,15 +84,19 @@ export abstract class PaintContainer extends PIXI.Container {
         }
     }
 
-    protected setNewPosition(size: IPoint): void {
-        if (size.x % 2 === 0) {
+    protected setNewPosition(size?: IPoint): void {
+        if (size === undefined) {
+            this.x = this.bpc.gridData.x
+        } else if (size.x % 2 === 0) {
             const npx = this.bpc.gridData.x16 * 16
             this.x = npx + (npx % 32 === 0 ? 0 : 16)
         } else {
             this.x = this.bpc.gridData.x32 * 32 + 16
         }
 
-        if (size.y % 2 === 0) {
+        if (size === undefined) {
+            this.y = this.bpc.gridData.y
+        } else if (size.y % 2 === 0) {
             const npy = this.bpc.gridData.y16 * 16
             this.y = npy + (npy % 32 === 0 ? 0 : 16)
         } else {

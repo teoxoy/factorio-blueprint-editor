@@ -227,7 +227,7 @@ function generateCovers(e: FD_Entity, data: IDrawData): SpriteData[] {
                 y: Math.floor(data.position.y + connection.y),
             }
 
-            const ent = data.positionGrid.getEntityAtPosition(pos.x, pos.y)
+            const ent = data.positionGrid.getEntityAtPosition(pos)
             if (!ent) return true
 
             if (
@@ -547,7 +547,7 @@ function getBeltSprites(
             if (d.entity.direction === (d.relDir + 4) % 8) return d
         })
 
-        const entAtPos = positionGrid.getEntityAtPosition(pos.x, pos.y)
+        const entAtPos = positionGrid.getEntityAtPosition(pos)
         if (
             forceStraight ||
             entAtPos.type === 'splitter' ||
@@ -1077,10 +1077,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                             h: size.y,
                         })
                         .filter(e => e.name === 'gate')
-                        .map(e => ({
-                            x: e.position.x - data.position.x,
-                            y: e.position.y - data.position.y,
-                        }))
+                        .map(e => util.sumprod(e.position, -1,data.position))
                         // Rotate relative to mid point
                         .map(p => util.rotatePointBasedOnDir(p, dir).y)
                         // Remove duplicates
@@ -1240,8 +1237,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                     ]
                         .map(o => {
                             const ent = data.positionGrid.getEntityAtPosition(
-                                data.position.x + o[0],
-                                data.position.y + o[1]
+                                util.sumprod(data.position, o)
                             )
                             return !!ent && ent.name === 'stone_wall'
                         })
@@ -1308,10 +1304,10 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 }
 
                 if (data.dir === 0 && data.positionGrid) {
-                    const wall = data.positionGrid.getEntityAtPosition(
-                        data.position.x,
-                        data.position.y + 1
-                    )
+                    const wall = data.positionGrid.getEntityAtPosition({
+                        x: data.position.x,
+                        y: data.position.y + 1
+                    })
                     if (wall && wall.name === 'stone_wall') {
                         return [...getBaseSprites(), e.wall_patch.layers[0]]
                     }
@@ -1464,10 +1460,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 const belt0Parts = getBeltSprites(
                     e.belt_animation_set,
                     data.positionGrid
-                        ? {
-                              x: data.position.x + b0Offset.x,
-                              y: data.position.y + b0Offset.y,
-                          }
+                        ? util.sumprod(data.position, b0Offset)
                         : b0Offset,
                     data.dir,
                     data.positionGrid,
@@ -1479,10 +1472,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 const belt1Parts = getBeltSprites(
                     e.belt_animation_set,
                     data.positionGrid
-                        ? {
-                              x: data.position.x + b1Offset.x,
-                              y: data.position.y + b1Offset.y,
-                          }
+                        ? util.sumprod(data.position, b1Offset)
                         : b1Offset,
                     data.dir,
                     data.positionGrid,

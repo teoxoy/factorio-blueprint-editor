@@ -96,6 +96,17 @@ export function initSettingsPane(
             }
             editor.debug = debug
         })
+    
+    if (localStorage.getItem('limitWireReach')) {
+        const limitWireReach = localStorage.getItem('limitWireReach') === 'true'
+        editor.limitWireReach = limitWireReach
+    }
+    gui.add({ limitWireReach: editor.limitWireReach }, 'limitWireReach')
+        .name('Limit Wires Length')
+        .onChange((limitWireReach: boolean) => {
+            localStorage.setItem('limitWireReach', limitWireReach.toString())
+            editor.limitWireReach = limitWireReach
+        })
 
     if (localStorage.getItem('oilOutpostSettings')) {
         const settings = JSON.parse(localStorage.getItem('oilOutpostSettings'))

@@ -1,9 +1,9 @@
 import FD from '../core/factorioData'
 import { Tile } from '../core/Tile'
+import util from '../common/util'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
 import { BlueprintContainer } from './BlueprintContainer'
-import { Entity } from '../core/Entity'
 
 export class PaintTileContainer extends PaintContainer {
     private static size = 2
@@ -60,7 +60,7 @@ export class PaintTileContainer extends PaintContainer {
         this.redraw()
     }
 
-    public rotate(): void {
+    public rotate(ccw = false): void {
         const nD = FD.tiles[this.name].next_direction
         if (nD) {
             this.name = nD
@@ -68,8 +68,8 @@ export class PaintTileContainer extends PaintContainer {
         }
     }
 
-    public rotatedEntities(): Entity[] {
-        return undefined
+    public canFlipOrRotateByCopying(): boolean {
+        return false;
     }
 
     protected redraw(): void {
@@ -95,10 +95,9 @@ export class PaintTileContainer extends PaintContainer {
         const position = this.getGridPosition()
 
         this.bpc.bp.removeTiles(
-            PaintTileContainer.getTilePositions().map(p => ({
-                x: p.x + position.x,
-                y: p.y + position.y,
-            }))
+            PaintTileContainer.getTilePositions().map(p =>
+                util.sumprod(p, position)
+            )
         )
     }
 
@@ -109,10 +108,9 @@ export class PaintTileContainer extends PaintContainer {
 
         this.bpc.bp.createTiles(
             this.name,
-            PaintTileContainer.getTilePositions().map(p => ({
-                x: p.x + position.x,
-                y: p.y + position.y,
-            }))
+            PaintTileContainer.getTilePositions().map(p =>
+                util.sumprod(p, position)
+            )
         )
     }
 }
