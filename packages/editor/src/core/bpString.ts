@@ -196,6 +196,10 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
                         .then(r => r.json())
                         .then(data => data.blueprintString)
                 case 'factorio': // factorio.school
+                    if (pathParts[0] === 'api') {
+                        return fetchData(url.href).then(r => r.text())
+                    }
+
                     return fetchData(`https://www.factorio.school/api/blueprint/${pathParts[1]}`)
                         .then(r => r.json())
                         .then(data => data.blueprintString.blueprintString)
