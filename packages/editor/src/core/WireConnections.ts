@@ -27,7 +27,7 @@ export class WireConnections extends EventEmitter {
     }
 
     private static hash(conn: IConnection): string {
-        const cps = conn.cps.sort((cp1,cp2) => cp1.entityNumber - cp2.entityNumber)
+        const cps = conn.cps.sort((cp1,cp2) => cp1.entityNumber-cp2.entityNumber || cp1.entitySide-cp2.entitySide)
         const [firstE, secondE] = cps.map(cp => cp.entityNumber)
         const [firstS, secondS] = cps.map(cp => cp.entitySide)
         return `${conn.color}-${firstE}-${secondE}-${firstS}-${secondS}`
