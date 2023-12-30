@@ -6,7 +6,7 @@ mod setup;
 #[macro_use]
 extern crate lazy_static;
 
-static FACTORIO_VERSION: &str = "1.1.41";
+static FACTORIO_VERSION: &str = "1.1.100";
 
 lazy_static! {
     static ref DATA_DIR: PathBuf = PathBuf::from("./data");

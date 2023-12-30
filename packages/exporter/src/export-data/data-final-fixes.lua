@@ -372,48 +372,48 @@ do
 
                 -- add possible_rotations
                 if list_includes({
-                    'pipe-to-ground',
-                    'train-stop',
-                    'arithmetic-combinator',
-                    'decider-combinator',
-                    'constant-combinator',
-                    'artillery-turret',
-                    'flamethrower-turret',
-                    'offshore-pump',
-                    'pump'
-                }, entity.name) or list_includes({
-                    'underground-belt',
-                    'transport-belt',
-                    'splitter',
-                    'inserter',
-                    'boiler',
-                    'mining-drill',
-                    'assembling-machine',
-                    'loader'
-                }, entity.type) then
+                        'pipe-to-ground',
+                        'train-stop',
+                        'arithmetic-combinator',
+                        'decider-combinator',
+                        'constant-combinator',
+                        'artillery-turret',
+                        'flamethrower-turret',
+                        'offshore-pump',
+                        'pump'
+                    }, entity.name) or list_includes({
+                        'underground-belt',
+                        'transport-belt',
+                        'splitter',
+                        'inserter',
+                        'boiler',
+                        'mining-drill',
+                        'assembling-machine',
+                        'loader'
+                    }, entity.type) then
 
                     entity.possible_rotations = { 0, 2, 4, 6 }
 
                 elseif list_includes({
-                    'storage-tank',
-                    'gate',
-                }, entity.name) or list_includes({
-                    'generator'
-                }, entity.type) then
+                        'storage-tank',
+                        'gate',
+                    }, entity.name) or list_includes({
+                        'generator'
+                    }, entity.type) then
 
                     entity.possible_rotations = { 0, 2 }
 
                 elseif list_includes({
-                    'curved-rail',
-                    'rail-signal',
-                    'rail-chain-signal'
-                }, entity.name) then
+                        'curved-rail',
+                        'rail-signal',
+                        'rail-chain-signal'
+                    }, entity.name) then
 
                     entity.possible_rotations = { 0, 1, 2, 3, 4, 5, 6, 7 }
 
                 elseif list_includes({
-                    'straight-rail'
-                }, entity.name) then
+                        'straight-rail'
+                    }, entity.name) then
 
                     entity.possible_rotations = { 0, 1, 2, 3, 5, 7 }
                 end
@@ -616,9 +616,9 @@ do
             icon = "-",
             icon_size = 1,
             picture = {
-            filename = "-",
-            width = 1,
-            height = 1
+                filename = "-",
+                width = 1,
+                height = 1
             },
             localised_name = value
         }})
@@ -628,8 +628,8 @@ do
     local total_parts = 0
     for i = 1, l, 200 do
         total_parts = total_parts + 1
-        embed_data(total_parts, string.sub(serialized, i, i + 199))
+        embed_data('FBE-DATA-' .. tostring(total_parts), string.sub(serialized, i, i + 199))
     end
 
-    embed_data('DATA', total_parts)
+    embed_data('FBE-DATA-COUNT', total_parts)
 end
