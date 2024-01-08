@@ -628,8 +628,8 @@ do
     local total_parts = 0
     for i = 1, l, 200 do
         total_parts = total_parts + 1
-        embed_data(total_parts, string.sub(serialized, i, i + 199))
+        embed_data('FBE-DATA-' .. tostring(total_parts), string.sub(serialized, i, i + 199))
     end
 
-    embed_data('DATA', total_parts)
+    embed_data('FBE-DATA-COUNT', total_parts)
 end
