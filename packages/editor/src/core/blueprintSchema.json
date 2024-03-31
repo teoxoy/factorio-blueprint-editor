@@ -32,6 +32,21 @@
                 }
             }
         },
+        "optional_signal": {
+            "type": "object",
+            "required": ["type"],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "itemFluidSignalName": true
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["item", "virtual", "fluid"]
+                }
+            }
+        },
         "wireColor": {
             "type": "array",
             "items": {
@@ -482,16 +497,16 @@
                                     },
 
                                     "available_logistic_output_signal": {
-                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                        "$ref": "blueprintSchema.json#/definitions/optional_signal"
                                     },
                                     "total_logistic_output_signal": {
-                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                        "$ref": "blueprintSchema.json#/definitions/optional_signal"
                                     },
                                     "available_construction_output_signal": {
-                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                        "$ref": "blueprintSchema.json#/definitions/optional_signal"
                                     },
                                     "total_construction_output_signal": {
-                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                        "$ref": "blueprintSchema.json#/definitions/optional_signal"
                                     },
 
                                     "circuit_read_resources": {
