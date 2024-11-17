@@ -66,12 +66,13 @@ export function initSettingsPane(
         bpIndex: 0,
     }
 
-    const bpIndex = pane.addInput(PARAMS, 'bpIndex', {
+    pane.addInput(PARAMS, 'bpIndex', {
         label: 'BP Book Index',
         min: 0,
         max: 0,
         step: 1,
     } as NumberInputParams)
+    .on('change')
 
     const gui = new GUI({
         autoPlace: false,
