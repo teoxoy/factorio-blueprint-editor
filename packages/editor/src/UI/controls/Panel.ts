@@ -1,4 +1,5 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
 import { colors } from '../style'
 import F from './functions'
 
@@ -13,9 +14,9 @@ import F from './functions'
  *  + automatically calls 'setPosition()' on Browser Resizing
  *  + does not automatically set its position (hint: override setPosition())
  */
-export abstract class Panel extends PIXI.Container {
+export abstract class Panel extends Container {
     /** Background Graphic */
-    private readonly m_Background: PIXI.Graphics
+    private readonly m_Background: Graphics
 
     private _setPosition: () => void
 
@@ -50,7 +51,6 @@ export abstract class Panel extends PIXI.Container {
     }
 
     public destroy(): void {
-        this.emit('destroy')
         window.removeEventListener('resize', this._setPosition)
         super.destroy({ children: true })
     }

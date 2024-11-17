@@ -1,12 +1,15 @@
-import * as PIXI from 'pixi.js'
+import { Text } from '@pixi/text'
+import { Container } from '@pixi/display'
+import { FederatedPointerEvent } from '@pixi/events'
+import { EventNames, EventListener } from 'eventemitter3'
 import FD from '../../../core/factorioData'
 import G from '../../../common/globals'
 import F from '../../controls/functions'
 import { Slot } from '../../controls/Slot'
-import { Entity, IFilter } from '../../../core/Entity'
+import { Entity, EntityEvents, IFilter } from '../../../core/Entity'
 
 /** Module Slots for Entity */
-export class Filters extends PIXI.Container {
+export class Filters extends Container<Slot<number>> {
     /* Blueprint Splitters
     ########################
     entity_number: 1
@@ -92,7 +95,7 @@ export class Filters extends PIXI.Container {
 
         // Create slots for entity
         for (let slotIndex = 0; slotIndex < this.m_Filters.length; slotIndex++) {
-            const slot: Slot = new Slot()
+            const slot = new Slot<number>()
             slot.position.set((slotIndex % 6) * 38, Math.floor(slotIndex / 6) * 38)
             slot.data = slotIndex
             slot.on('pointerdown', this.onSlotPointerDown)
@@ -107,14 +110,12 @@ export class Filters extends PIXI.Container {
         })
     }
 
-    private onEntityChange(event: string, fn: (...args: any[]) => void): void {
+    private onEntityChange<T extends EventNames<EntityEvents>>(
+        event: T,
+        fn: EventListener<EntityEvents, T>
+    ): void {
         this.m_Entity.on(event, fn)
-        this.once('destroy', () => this.m_Entity.off(event, fn))
-    }
-
-    public destroy(opts?: boolean | PIXI.IDestroyOptions): void {
-        this.emit('destroy')
-        super.destroy(opts)
+        this.once('destroyed', () => this.m_Entity.off(event, fn))
     }
 
     /**
@@ -139,7 +140,7 @@ export class Filters extends PIXI.Container {
 
     /** Update local filters array */
     private m_UpdateFilters(): void {
-        const slots: number = this.m_Entity.filterSlots
+        const slots = this.m_Entity.filterSlots
         if (slots > 0) {
             this.m_Filters = new Array(slots)
             const filters = this.m_Entity.filters
@@ -164,12 +165,8 @@ export class Filters extends PIXI.Container {
     /** Update slot icons */
     private m_UpdateSlots(): void {
         for (const slot of this.children) {
-            if (!(slot instanceof Slot)) {
-                continue
-            }
-
-            const slotIndex: number = slot.data as number
-            const slotFilter: IFilter = this.m_Filters[slotIndex]
+            const slotIndex = slot.data
+            const slotFilter = this.m_Filters[slotIndex]
 
             if (slotFilter.name === undefined) {
                 if (slot.content !== undefined) {
@@ -179,19 +176,20 @@ export class Filters extends PIXI.Container {
                 if (slot.content === undefined || slot.name !== slotFilter.name || this.m_Amount) {
                     if (this.m_Amount) {
                         if (slot.content !== undefined) {
-                            const text = slot.children[1] as PIXI.Text
+                            const text = slot.children[1] as Text
                             if (text.text !== slotFilter.count.toString()) {
                                 slot.content = undefined
                             }
                         }
-                        slot.content = new PIXI.Container()
+                        const container = new Container()
                         F.CreateIconWithAmount(
-                            slot.content as PIXI.Container,
+                            container,
                             -16,
                             -16,
                             slotFilter.name,
                             slotFilter.count
                         )
+                        slot.content = container
                     } else {
                         slot.content = F.CreateIcon(slotFilter.name)
                     }
@@ -204,11 +202,11 @@ export class Filters extends PIXI.Container {
     }
 
     /** Slot pointer down event handler */
-    private readonly onSlotPointerDown = (e: PIXI.InteractionEvent): void => {
+    private readonly onSlotPointerDown = (e: FederatedPointerEvent): void => {
         e.stopPropagation()
-        const slot: Slot = e.target as Slot
-        const index: number = slot.data as number
-        if (e.data.button === 0) {
+        const slot = e.target as Slot<number>
+        const index = slot.data
+        if (e.button === 0) {
             if (!this.m_Amount || this.m_Filters[index].name === undefined) {
                 G.UI.createInventory('Select Filter', this.m_Entity.acceptedFilters, name => {
                     this.m_Filters[index].name = name
@@ -226,7 +224,7 @@ export class Filters extends PIXI.Container {
                     this.emit('selected', index, this.m_Filters[index].count)
                 }
             }
-        } else if (e.data.button === 2) {
+        } else if (e.button === 2) {
             this.m_Filters[index].name = undefined
             this.m_Entity.filters = this.m_Filters
             if (this.m_Amount) {

@@ -1,4 +1,5 @@
-import * as PIXI from 'pixi.js'
+import { Graphics } from '@pixi/graphics'
+import { Text } from '@pixi/text'
 import G from '../../common/globals'
 import { colors, styles } from '../style'
 import F from './functions'
@@ -69,7 +70,7 @@ export abstract class Dialog extends Panel {
     }
 
     /** Automatically sets position of dialog to center screen */
-    protected setPosition(): void {
+    protected override setPosition(): void {
         this.position.set(
             G.app.screen.width / 2 - this.width / 2,
             G.app.screen.height / 2 - this.height / 2
@@ -91,10 +92,10 @@ export abstract class Dialog extends Panel {
      * @param y - Vertical position of label from top left corner
      * @param text - Text for label
      * @param style - Style of label
-     * @returns Reference to PIXI.Text for further usage
+     * @returns Reference to Text for further usage
      */
-    protected addLabel(x = 140, y = 56, text = 'Recipe:', style = styles.dialog.label): PIXI.Text {
-        const label: PIXI.Text = new PIXI.Text(text, style)
+    protected addLabel(x = 140, y = 56, text = 'Recipe:', style = styles.dialog.label): Text {
+        const label = new Text(text, style)
         label.position.set(x, y)
         this.addChild(label)
 
@@ -109,7 +110,7 @@ export abstract class Dialog extends Panel {
      * @param y - Vertical position of line from top left corner
      * @param width - Width from left to right of line
      * @param style - Height from top to bottom of line
-     * @returns Reference to PIXI.Graphics for further usage
+     * @returns Reference to Graphics for further usage
      */
     protected addLine(
         x: number,
@@ -117,8 +118,8 @@ export abstract class Dialog extends Panel {
         width: number,
         height: number,
         border: number = colors.dialog.line.background.border
-    ): PIXI.Graphics {
-        const line: PIXI.Graphics = F.DrawRectangle(
+    ): Graphics {
+        const line = F.DrawRectangle(
             width,
             height,
             colors.dialog.line.background.color,

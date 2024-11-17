@@ -31,7 +31,6 @@ rules:
       peerDependencies: false
       optionalDependencies: false
 
-  import/exports-last: warn
   # import/group-exports: warn
   # import/no-default-export: error
   import/no-mutable-exports: error

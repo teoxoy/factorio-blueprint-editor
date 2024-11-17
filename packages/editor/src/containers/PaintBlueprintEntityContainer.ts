@@ -1,4 +1,6 @@
+import { Container } from '@pixi/display'
 import F from '../UI/controls/functions'
+import { IPoint } from '../types'
 import { Entity } from '../core/Entity'
 import { Blueprint } from '../core/Blueprint'
 import util from '../common/util'
@@ -15,7 +17,7 @@ export class PaintBlueprintEntityContainer {
     private readonly visualizationArea: VisualizationArea
     public readonly entitySprites: EntitySprite[]
     /** This is only a reference */
-    private undergroundLine: PIXI.Container
+    private undergroundLine: Container
 
     public constructor(
         pbpc: PaintBlueprintContainer,
@@ -32,17 +34,17 @@ export class PaintBlueprintEntityContainer {
 
         this.entitySprites = EntitySprite.getParts(
             this.entity,
-            util.sumprod(32,this.entity.position),
+            util.sumprod(32, this.entity.position),
             this.bp.entityPositionGrid
         )
     }
 
     private get entityPosition(): IPoint {
-        return util.sumprod(1/32,this.pbpc, this.entity.position)
+        return util.sumprod(1 / 32, this.pbpc.position, this.entity.position)
     }
 
     private get position(): IPoint {
-        return util.sumprod(this.pbpc, this.entity.position)
+        return util.sumprod(this.pbpc.position, this.entity.position)
     }
 
     public destroy(): void {

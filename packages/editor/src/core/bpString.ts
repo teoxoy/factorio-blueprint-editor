@@ -1,5 +1,7 @@
-import Ajv, { KeywordDefinition } from 'ajv'
+import { Buffer } from 'buffer'
+import Ajv, { ErrorObject, KeywordDefinition } from 'ajv'
 import pako from 'pako'
+import { IBlueprint, IBlueprintBook, IBlueprintBookEntry } from '../types'
 import FD from './factorioData'
 import blueprintSchema from './blueprintSchema.json'
 import { Blueprint } from './Blueprint'
@@ -17,57 +19,65 @@ class BookWithNoBlueprintsError {
 }
 
 class ModdedBlueprintError {
-    public errors: Ajv.ErrorObject[]
-    public constructor(errors: Ajv.ErrorObject[]) {
+    public errors: ErrorObject[]
+    public constructor(errors: ErrorObject[]) {
         this.errors = errors
     }
 }
 
 class TrainBlueprintError {
-    public errors: Ajv.ErrorObject[]
-    public constructor(errors: Ajv.ErrorObject[]) {
+    public errors: ErrorObject[]
+    public constructor(errors: ErrorObject[]) {
         this.errors = errors
     }
 }
 
-const keywords: Record<string, KeywordDefinition> = {
-    entityName: {
+const keywords: KeywordDefinition[] = [
+    {
+        keyword: 'entityName',
         validate: (data: string) => !!FD.entities[data],
         errors: false,
         schema: false,
     },
-    itemName: {
+    {
+        keyword: 'itemName',
         validate: (data: string) => !!FD.items[data],
         errors: false,
         schema: false,
     },
-    fluidName: {
+    {
+        keyword: 'fluidName',
         validate: (data: string) => !!FD.fluids[data],
         errors: false,
         schema: false,
     },
-    recipeName: {
+    {
+        keyword: 'recipeName',
         validate: (data: string) => !!FD.recipes[data],
         errors: false,
         schema: false,
     },
-    tileName: {
+    {
+        keyword: 'tileName',
         validate: (data: string) => !!FD.tiles[data],
         errors: false,
         schema: false,
     },
-    itemFluidSignalName: {
+    {
+        keyword: 'itemFluidSignalName',
         validate: (data: string) => !!FD.items[data] || !!FD.fluids[data] || !!FD.signals[data],
         errors: false,
         schema: false,
     },
-}
+]
+
+type StringData = { blueprint?: IBlueprint; blueprint_book?: IBlueprintBook }
 
 const validate = new Ajv({
     keywords,
     verbose: true,
-    strictKeywords: 'log',
-}).compile(blueprintSchema)
+    strict: true,
+}).compile<StringData>(blueprintSchema)
 
 const nameMigrations: Record<string, string> = {
     // if (blueprintVersion < getFactorioVersion(0, 17, 0))
@@ -88,7 +98,7 @@ const nameMigrationsRegex = new RegExp(Object.keys(nameMigrations).join('|'), 'g
 function decode(str: string): Promise<Blueprint | Book> {
     return new Promise((resolve, reject) => {
         try {
-            const decodedStr = atob(str.slice(1))
+            const decodedStr = Buffer.from(str.slice(1), 'base64')
             const data = pako
                 .inflate(decodedStr, { to: 'string' })
                 .replace(nameMigrationsRegex, match => nameMigrations[match])
@@ -98,13 +108,13 @@ function decode(str: string): Promise<Blueprint | Book> {
         } catch (e) {
             reject(new CorruptedBlueprintStringError(e))
         }
-    }).then((data: { blueprint?: BPS.IBlueprint; blueprint_book?: BPS.IBlueprintBook }) => {
+    }).then(data => {
         console.log(data)
         if (validate(data)) {
             if (data.blueprint_book === undefined) {
                 return new Blueprint(data.blueprint)
             } else {
-                const hasBlueprint = (entries: BPS.IBlueprintBookEntry[] = []): boolean => {
+                const hasBlueprint = (entries: IBlueprintBookEntry[] = []): boolean => {
                     for (const entry of entries) {
                         if (entry.blueprint) return true
                         if (entry.blueprint_book && hasBlueprint(entry.blueprint_book.blueprints))
@@ -121,8 +131,9 @@ function decode(str: string): Promise<Blueprint | Book> {
         } else {
             const errors = validate.errors
             const trainEntityNames = new Set(['locomotive', 'cargo_wagon', 'fluid_wagon'])
-            const hasTrain = (): boolean => errors.some(e => trainEntityNames.has(e.data))
-            const isModded = (): boolean => errors.some(e => !!keywords[e.keyword])
+            const hasTrain = (): boolean => errors.some(e => trainEntityNames.has(e.data as string))
+            const isModded = (): boolean =>
+                errors.some(e => !!keywords.find(k => k.keyword === e.keyword))
             throw hasTrain()
                 ? new TrainBlueprintError(errors)
                 : isModded()
@@ -141,7 +152,7 @@ function encode(bpOrBook: Blueprint | Book): Promise<string> {
                 /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
                 (_: string, capture: string) => capture.replace(/_/g, '-')
             )
-            resolve(`0${btoa(pako.deflate(string, { to: 'string' }))}`)
+            resolve(`0${Buffer.from(pako.deflate(string)).toString('base64')}`)
         } catch (e) {
             reject(e)
         }
@@ -170,10 +181,12 @@ function getBlueprintOrBookFromSource(source: string): Promise<Blueprint | Book>
             const pathParts = url.pathname.slice(1).split('/')
 
             const fetchData = (url: string): Promise<Response> =>
-                fetch(`__CORS_PROXY_URL__${encodeURIComponent(url)}`).then(response => {
-                    if (response.ok) return response
-                    throw new Error('Network response was not ok.')
-                })
+                fetch(`${import.meta.env.VITE_PROXY_URL}${encodeURIComponent(url)}`).then(
+                    response => {
+                        if (response.ok) return response
+                        throw new Error('Network response was not ok.')
+                    }
+                )
 
             // TODO: add dropbox support https://www.dropbox.com/s/ID?raw=1
             switch (url.hostname.replace(/^www\./, '').split('.')[0]) {

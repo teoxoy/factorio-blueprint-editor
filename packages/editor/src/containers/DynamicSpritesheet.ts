@@ -1,4 +1,8 @@
-import * as PIXI from 'pixi.js'
+// NO LONGER IN USE
+
+import { Rectangle } from '@pixi/math'
+import { BaseTexture, Texture, CanvasResource } from '@pixi/core'
+import { SCALE_MODES } from '@pixi/constants'
 import { EventEmitter } from 'eventemitter3'
 import { MaxRectsPacker, PACKING_LOGIC } from 'maxrects-packer'
 import G from '../common/globals'
@@ -6,7 +10,7 @@ import G from '../common/globals'
 interface IOptions {
     maxSize: number
     alpha: boolean
-    scaleMode: PIXI.SCALE_MODES
+    scaleMode: SCALE_MODES
     /** padding around each texture */
     padding: number
     /** extrude the edges of textures - useful for removing gaps in sprites when tiling */
@@ -25,11 +29,11 @@ interface IEntry {
     id: string
     image: HTMLImageElement
     ready: boolean
-    texture: PIXI.Texture
+    texture: Texture
 }
 
-const getCanvas = (baseTexture: PIXI.BaseTexture): HTMLCanvasElement => {
-    const resource = baseTexture.resource as PIXI.CanvasResource
+const getCanvas = (baseTexture: BaseTexture): HTMLCanvasElement => {
+    const resource = baseTexture.resource as CanvasResource
     return resource.source as HTMLCanvasElement
 }
 
@@ -41,20 +45,20 @@ export class DynamicSpritesheet extends EventEmitter {
     private extrude = false
     /** Max number of images loading at the same time */
     private maxLoading = 200
-    private baseTextures: Map<number, PIXI.BaseTexture> = new Map()
+    private baseTextures: Map<number, BaseTexture> = new Map()
     private entries: Map<string, IEntry> = new Map()
     private canvasesDiv: HTMLDivElement
     private packer: MaxRectsPacker<IEntry>
     /** Number of images loading */
     private loading = 0
     private nrOfBinsOnLastRepack = 0
-    private textureToEntry: WeakMap<PIXI.Texture, IEntry> = new WeakMap()
+    private textureToEntry: WeakMap<Texture, IEntry> = new WeakMap()
     private rendering = false
     /** Mechanism to rerender in case `render` was called but it was already rendering */
     private rerender = false
     private firstRender = true
     private alpha = true
-    private subtextures: Map<string, PIXI.Texture> = new Map()
+    private subtextures: Map<string, Texture> = new Map()
     /** Mechanism to limit the number of images loading at the same time */
     private waitingQueue: (() => void)[] = []
 
@@ -146,7 +150,7 @@ export class DynamicSpritesheet extends EventEmitter {
         } else {
             load()
         }
-        const texture = new PIXI.Texture(PIXI.Texture.EMPTY.baseTexture)
+        const texture = new Texture(Texture.EMPTY.baseTexture)
         const entry: IEntry = {
             x: 0,
             y: 0,
@@ -162,7 +166,7 @@ export class DynamicSpritesheet extends EventEmitter {
         return entry
     }
 
-    public get(filename: string, x = 0, y = 0, width = 0, height = 0): PIXI.Texture {
+    public get(filename: string, x = 0, y = 0, width = 0, height = 0): Texture {
         const key = `${filename}-${x}-${y}-${width}-${height}`
 
         let entry = this.entries.get(key)
@@ -183,22 +187,22 @@ export class DynamicSpritesheet extends EventEmitter {
     }
 
     public getSubtexture(
-        mainTexture: PIXI.Texture,
+        mainTexture: Texture,
         filename: string,
         x: number,
         y: number,
         width: number,
         height: number
-    ): PIXI.Texture {
+    ): Texture {
         const key = `${filename}-${x}-${y}-${width}-${height}`
 
         let texture = this.subtextures.get(key)
         if (texture) return texture
 
-        const getFrame = (): PIXI.Rectangle =>
-            new PIXI.Rectangle(mainTexture.frame.x + x, mainTexture.frame.y + y, width, height)
+        const getFrame = (): Rectangle =>
+            new Rectangle(mainTexture.frame.x + x, mainTexture.frame.y + y, width, height)
 
-        texture = new PIXI.Texture(mainTexture.baseTexture, getFrame())
+        texture = new Texture(mainTexture.baseTexture, getFrame())
         this.on('render', () => {
             if (texture.baseTexture !== mainTexture.baseTexture) {
                 texture.baseTexture = mainTexture.baseTexture
@@ -210,7 +214,7 @@ export class DynamicSpritesheet extends EventEmitter {
         return texture
     }
 
-    public onAllLoaded(textures: PIXI.Texture[]): Promise<void> {
+    public onAllLoaded(textures: Texture[]): Promise<void> {
         const notReady = textures
             .map(texture => this.textureToEntry.get(texture))
             .filter(entry => !entry.ready)
@@ -247,7 +251,7 @@ export class DynamicSpritesheet extends EventEmitter {
             this.packer.repack(false)
         }
 
-        const oldBaseTextures: Map<number, PIXI.BaseTexture> = new Map()
+        const oldBaseTextures: Map<number, BaseTexture> = new Map()
 
         this.packer.bins.forEach((bin, i) => {
             if (!bin.dirty) return
@@ -284,27 +288,22 @@ export class DynamicSpritesheet extends EventEmitter {
                 baseTexture.resource.update()
             } else {
                 oldBaseTextures.set(i, baseTexture)
-                baseTexture = new PIXI.BaseTexture(new PIXI.CanvasResource(canvas))
+                baseTexture = new BaseTexture(new CanvasResource(canvas))
                 this.baseTextures.set(i, baseTexture)
             }
-            G.app.renderer.plugins.prepare.add(baseTexture)
+            G.app.renderer.prepare.add(baseTexture)
 
             for (const entry of bin.rects) {
                 if (reuseCanvas && entry.ready) continue
 
                 entry.texture.baseTexture = baseTexture
-                entry.texture.frame = new PIXI.Rectangle(
-                    entry.x,
-                    entry.y,
-                    entry.width,
-                    entry.height
-                )
+                entry.texture.frame = new Rectangle(entry.x, entry.y, entry.width, entry.height)
                 entry.ready = false
             }
         })
 
         // Wait for base textures to be uploaded to the GPU
-        await new Promise(resolve => G.app.renderer.plugins.prepare.upload(resolve))
+        await G.app.renderer.prepare.upload()
 
         for (const bin of this.packer.bins) {
             if (!bin.dirty) continue

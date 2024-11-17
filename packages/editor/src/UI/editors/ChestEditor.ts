@@ -1,10 +1,9 @@
-import * as PIXI from 'pixi.js'
+import { Text } from '@pixi/text'
 import { Entity } from '../../core/Entity'
 import { styles } from '../style'
 import { Slider } from '../controls/Slider'
-import { Textbox } from '../controls/Textbox'
+import { TextInput } from '../controls/TextInput'
 import { Checkbox } from '../controls/Checkbox'
-import { Filters } from './components/Filters'
 import { Editor } from './Editor'
 
 /** Assembly Machines Editor */
@@ -43,7 +42,7 @@ export class ChestEditor extends Editor {
 
         // Add Filters
         this.addLabel(140, 56, `Filter${this.m_Entity.filterSlots === 1 ? '' : 's'}:`)
-        const filters: Filters = this.addFilters(208, yOffset, this.m_Amount)
+        const filters = this.addFilters(208, yOffset, this.m_Amount)
         yOffset += filterAreaHeight
 
         /** Remaining controls are not needed if amount shall not be shown */
@@ -51,7 +50,7 @@ export class ChestEditor extends Editor {
 
         // For Requester Chest: Add Request from Buffer Chest for
         if (entity.name === 'logistic_chest_requester') {
-            const checkbox: Checkbox = new Checkbox(
+            const checkbox = new Checkbox(
                 this.m_Entity.requestFromBufferChest,
                 'Request from buffer chests'
             )
@@ -68,19 +67,19 @@ export class ChestEditor extends Editor {
         }
 
         // Add Label
-        const label: PIXI.Text = new PIXI.Text('Count:', styles.dialog.label)
+        const label = new Text('Count:', styles.dialog.label)
         label.position.set(140, yOffset + 8)
         label.visible = false
         this.addChild(label)
 
         // Add Slider
-        const slider: Slider = new Slider(10)
+        const slider = new Slider(10)
         slider.position.set(194, yOffset + 9)
         slider.visible = false
         this.addChild(slider)
 
         // Add Textbox
-        const textbox: Textbox = new Textbox(60, '10', 6, '1234567890')
+        const textbox = new TextInput(60, '10', 6, true)
         textbox.position.set(374, yOffset + 6)
         textbox.visible = false
         this.addChild(textbox)
@@ -109,7 +108,7 @@ export class ChestEditor extends Editor {
             }
         })
         textbox.on('changed', () => {
-            const value: number = textbox.text === '' ? 0 : +textbox.text
+            const value = textbox.text === '' ? 0 : +textbox.text
             slider.value = value
             filters.updateFilter(this.m_Filter, value)
         })

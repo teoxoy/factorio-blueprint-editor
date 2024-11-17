@@ -1,7 +1,11 @@
 import { EventEmitter } from 'eventemitter3'
 import FD from './factorioData'
 
-export class Tile extends EventEmitter {
+export interface TileEvents {
+    destroy: []
+}
+
+export class Tile extends EventEmitter<TileEvents> {
     private readonly _name: string
     private readonly _x: number
     private readonly _y: number

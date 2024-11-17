@@ -1,4 +1,8 @@
-import * as PIXI from 'pixi.js'
+import { Container, DisplayObject } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
+import { Sprite } from '@pixi/sprite'
+import { Text, TextMetrics } from '@pixi/text'
+import { rgb2hex } from '@pixi/utils'
 import FD, { IngredientOrResult, ColorWithAlpha, Item, Icon } from '../../core/factorioData'
 import { styles } from '../style'
 import G from '../../common/globals'
@@ -39,8 +43,8 @@ function DrawRectangle(
     alpha = 1,
     border = 0,
     pressed = false
-): PIXI.Graphics {
-    const rectangle = new PIXI.Graphics()
+): Graphics {
+    const rectangle = new Graphics()
     rectangle.alpha = alpha
     rectangle.beginFill(background)
     if (border === 0) {
@@ -128,14 +132,14 @@ function DrawControlFace(
     p1: number,
     p2: number,
     p3: number
-): PIXI.Graphics {
+): Graphics {
     const wf = w * f
     const hf = h * f
 
-    const mask: PIXI.Graphics = new PIXI.Graphics()
+    const mask = new Graphics()
     mask.beginFill(0x000000).drawRoundedRect(0, 0, wf, hf, 6).endFill()
 
-    const face: PIXI.Graphics = new PIXI.Graphics()
+    const face = new Graphics()
     face.beginFill(c, a)
         .drawRect(0, 0, wf, hf)
         .endFill()
@@ -168,7 +172,7 @@ function CreateIcon(
     maxSize = 32,
     setAnchor = true,
     darkBackground = false
-): PIXI.DisplayObject {
+): DisplayObject {
     const item =
         FD.items[itemName] ||
         FD.fluids[itemName] ||
@@ -183,12 +187,12 @@ function CreateIcon(
 
     if (item.icons) return generateIcons(item.icons, item.icon_size, item.icon_mipmaps)
 
-    function generateIcon(data: Icon): PIXI.Sprite {
+    function generateIcon(data: Icon): Sprite {
         const icon =
             darkBackground && data.dark_background_icon ? data.dark_background_icon : data.icon
 
         const texture = G.getTexture(icon, 0, 0, data.icon_size, data.icon_size)
-        const sprite = new PIXI.Sprite(texture)
+        const sprite = new Sprite(texture)
         sprite.scale.set(maxSize / data.icon_size)
         if (setAnchor) {
             sprite.anchor.set(0.5)
@@ -196,12 +200,8 @@ function CreateIcon(
         return sprite
     }
 
-    function generateIcons(
-        icons: Icon[],
-        icon_size?: number,
-        icon_mipmaps?: number
-    ): PIXI.Container {
-        const img = new PIXI.Container()
+    function generateIcons(icons: Icon[], icon_size?: number, icon_mipmaps?: number): Container {
+        const img = new Container()
         for (const icon of icons) {
             const sprite = generateIcon({ icon_size, icon_mipmaps, ...icon })
             if (icon.scale) {
@@ -227,32 +227,32 @@ function CreateIcon(
 
 /**
  * Creates an icon with amount on host at coordinates
- * @param host - PIXI.Container on top of which the icon shall be created
+ * @param host - Container on top of which the icon shall be created
  * @param x - Horizontal position of icon from top left corner
  * @param y - Vertical position of icon from top left corner
  * @param name - Name if item
  * @param amount - Amount to show
  */
 function CreateIconWithAmount(
-    host: PIXI.Container,
+    host: Container,
     x: number,
     y: number,
     name: string,
     amount: number
 ): void {
-    const icon: PIXI.DisplayObject = CreateIcon(name, undefined, false)
+    const icon = CreateIcon(name, undefined, false)
     icon.position.set(x, y)
     host.addChild(icon)
 
-    const amountString: string = amount < 1000 ? amount.toString() : `${Math.floor(amount / 1000)}k`
-    const text = new PIXI.Text(amountString, styles.icon.amount)
+    const amountString = amount < 1000 ? amount.toString() : `${Math.floor(amount / 1000)}k`
+    const text = new Text(amountString, styles.icon.amount)
     text.anchor.set(1, 1)
     text.position.set(x + 33, y + 33)
     host.addChild(text)
 }
 
 function CreateRecipe(
-    host: PIXI.Container,
+    host: Container,
     x: number,
     y: number,
     ingredients: IngredientOrResult[],
@@ -268,8 +268,8 @@ function CreateRecipe(
 
     nextX += 2
     const timeText = `=${time}s>`
-    const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, styles.dialog.label)
-    const timeObject: PIXI.Text = new PIXI.Text(timeText, styles.dialog.label)
+    const timeSize = TextMetrics.measureText(timeText, styles.dialog.label)
+    const timeObject = new Text(timeText, styles.dialog.label)
     timeObject.position.set(nextX, 6 + y)
     host.addChild(timeObject)
     nextX += timeSize.width + 6
@@ -280,8 +280,8 @@ function CreateRecipe(
     }
 }
 
-function applyTint(s: PIXI.Sprite, tint: ColorWithAlpha): void {
-    s.tint = PIXI.utils.rgb2hex([tint.r || 0, tint.g || 0, tint.b || 0])
+function applyTint(s: { tint: number; alpha: number }, tint: ColorWithAlpha): void {
+    s.tint = rgb2hex([tint.r || 0, tint.g || 0, tint.b || 0])
     s.alpha = tint.a || 1
 }
 

@@ -7,6 +7,7 @@ enum HistoryValue {
 }
 
 /** Private interface hack to access properties of objects via `any` */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type IIndexedObject = Record<string, any>
 
 /** Private class for historical actions */

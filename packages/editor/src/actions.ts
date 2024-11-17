@@ -3,7 +3,7 @@ import keyboardJS from 'keyboardjs'
 function initActions(canvas: HTMLCanvasElement): void {
     // Set the general application keyboard context
     // Needed to have seperate context's for input controls (i.e. Textbox)
-    keyboardJS.setContext('editor')
+    // keyboardJS.setContext('editor')
 
     // Bind the events on the canvas
     // @ts-ignore
@@ -11,51 +11,37 @@ function initActions(canvas: HTMLCanvasElement): void {
 
     // keyboardJS.watch will bind keydown and keyup events on the canvas but
     // keydown and keyup will only fire if the canvas is focused
-    canvas.addEventListener('mouseover', () => canvas.focus())
-    canvas.addEventListener('blur', () => {
+    // canvas.addEventListener('mouseover', () => canvas.focus())
+    window.addEventListener('blur', () => {
         keyboardJS.releaseAllKeys()
     })
 
     // Hack for plugging the mouse into keyboardJS
     // @ts-ignore
-    keyboardJS._locale.bindKeyCode(300, ['lclick'])
-    // @ts-ignore
-    keyboardJS._locale.bindKeyCode(301, ['mclick'])
-    // @ts-ignore
-    keyboardJS._locale.bindKeyCode(302, ['rclick'])
-    // @ts-ignore
-    keyboardJS._locale.bindKeyCode(303, ['wheelNeg'])
-    // @ts-ignore
-    keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
-    // @ts-ignore
-    canvas.addEventListener('mousedown', e => keyboardJS.pressKey(e.button + 300, e))
-    // attach mouseup to window so that releaseKey will be called even when mouseup is fired from outside the window
-    // @ts-ignore
-    window.addEventListener('mouseup', e => keyboardJS.releaseKey(e.button + 300, e))
+    // keyboardJS._locale.bindKeyCode(300, ['lclick'])
+    // // @ts-ignore
+    // keyboardJS._locale.bindKeyCode(301, ['mclick'])
+    // // @ts-ignore
+    // keyboardJS._locale.bindKeyCode(302, ['rclick'])
+    // // @ts-ignore
+    // keyboardJS._locale.bindKeyCode(303, ['wheelNeg'])
+    // // @ts-ignore
+    // keyboardJS._locale.bindKeyCode(304, ['wheelPos'])
+    // canvas.addEventListener('pointerdown', e => {
+    //     // @ts-ignore
+    //     keyboardJS.pressKey(e.button + 300, e)
+    // })
+    // // attach mouseup to window so that releaseKey will be called even when mouseup is fired from outside the window
+    // // @ts-ignore
+    // window.addEventListener('pointerup', e => keyboardJS.releaseKey(e.button + 300, e))
 
-    canvas.addEventListener('wheel', e => {
-        e.preventDefault()
-        // @ts-ignore
-        keyboardJS.pressKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
-        // @ts-ignore
-        keyboardJS.releaseKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
-    })
-}
-
-/**
- * Passes trough all events to the callback
- * @param cb Callback - return true if you want to stop the passtrough
- */
-function passtroughAllEvents(cb: (e: keyboardJS.KeyEvent) => boolean): void {
-    keyboardJS.setContext('passtrough')
-    const callback = (e: keyboardJS.KeyEvent): void => {
-        const stop = cb(e)
-        if (stop) {
-            keyboardJS.unbind(undefined, callback)
-            keyboardJS.setContext('editor')
-        }
-    }
-    keyboardJS.bind(undefined, callback)
+    // canvas.addEventListener('wheel', e => {
+    //     e.preventDefault()
+    //     // @ts-ignore
+    //     keyboardJS.pressKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
+    //     // @ts-ignore
+    //     keyboardJS.releaseKey(Math.sign(-e.deltaY) === 1 ? 303 : 304, e)
+    // })
 }
 
 class Action {
@@ -206,19 +192,6 @@ function registerAction(name: string, keyCombo: string): Action {
     return action
 }
 
-function callAction(name: string): void {
-    const action = actions.get(name)
-    if (action) {
-        action.call()
-    }
-}
-
-function isActionActive(name: string): boolean {
-    const action = actions.get(name)
-    if (action) return action.pressed
-    return false
-}
-
 function forEachAction(cb: (action: Action, actionName: string) => void): void {
     for (const [name, action] of actions) {
         cb(action, name)
@@ -250,14 +223,4 @@ function exportKeybinds(changedOnly = true): Record<string, string> {
     return changedKeybinds
 }
 
-export {
-    initActions,
-    passtroughAllEvents,
-    registerAction,
-    callAction,
-    isActionActive,
-    forEachAction,
-    resetKeybinds,
-    importKeybinds,
-    exportKeybinds,
-}
+export { initActions, registerAction, forEachAction, resetKeybinds, importKeybinds, exportKeybinds }

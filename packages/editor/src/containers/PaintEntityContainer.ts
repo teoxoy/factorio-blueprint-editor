@@ -1,4 +1,5 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { DirectionType, IPoint } from '../types'
 import FD from '../core/factorioData'
 import util from '../common/util'
 import { Entity } from '../core/Entity'
@@ -9,10 +10,10 @@ import { BlueprintContainer } from './BlueprintContainer'
 
 export class PaintEntityContainer extends PaintContainer {
     private visualizationArea: VisualizationArea
-    private directionType: 'input' | 'output'
+    private directionType: DirectionType
     private direction: number
     /** This is only a reference */
-    private undergroundLine: PIXI.Container
+    private undergroundLine: Container
 
     public constructor(bpc: BlueprintContainer, name: string, direction: number) {
         super(bpc, name)
@@ -24,6 +25,7 @@ export class PaintEntityContainer extends PaintContainer {
         this.visualizationArea.highlight()
         this.bpc.underlayContainer.activateRelatedAreas(this.name)
 
+        this.attachUpdateOn16()
         this.moveAtCursor()
         this.redraw()
     }
@@ -51,7 +53,7 @@ export class PaintEntityContainer extends PaintContainer {
         super.destroy()
     }
 
-    public getItemName(): string {
+    public override getItemName(): string {
         return Entity.getItemName(this.name)
     }
 
@@ -119,7 +121,7 @@ export class PaintEntityContainer extends PaintContainer {
         }
     }
 
-    public rotate(ccw = false): void {
+    public override rotate(ccw = false): void {
         if (!this.visible) return
 
         const pr = FD.entities[this.name].possible_rotations
@@ -130,11 +132,19 @@ export class PaintEntityContainer extends PaintContainer {
         this.moveAtCursor()
     }
 
-    public canFlipOrRotateByCopying(): boolean {
-        return false;
+    public override canFlipOrRotateByCopying(): boolean {
+        return false
     }
 
-    protected redraw(): void {
+    public override rotatedEntities(_ccw?: boolean): Entity[] {
+        return undefined
+    }
+
+    public override flippedEntities(_vertical: boolean): Entity[] {
+        return undefined
+    }
+
+    protected override redraw(): void {
         this.removeChildren()
         const sprites = EntitySprite.getParts({
             name: this.name,
@@ -144,7 +154,7 @@ export class PaintEntityContainer extends PaintContainer {
         this.addChild(...sprites)
     }
 
-    public moveAtCursor(): void {
+    public override moveAtCursor(): void {
         if (!this.visible) return
 
         const railRelatedNames = ['straight_rail', 'curved_rail', 'train_stop']
@@ -161,8 +171,10 @@ export class PaintEntityContainer extends PaintContainer {
                     (Math.abs(this.bpc.gridData.y32) % 2) - (Math.abs(firstRailPos.y - 1) % 2)
                 ) + 1
 
-            this.x = (this.bpc.gridData.x32 + oX) * 32
-            this.y = (this.bpc.gridData.y32 + oY) * 32
+            this.setPosition({
+                x: (this.bpc.gridData.x32 + oX) * 32,
+                y: (this.bpc.gridData.y32 + oY) * 32,
+            })
         } else {
             this.setNewPosition(this.size)
         }
@@ -175,7 +187,7 @@ export class PaintEntityContainer extends PaintContainer {
         this.checkBuildable()
     }
 
-    public removeContainerUnder(): void {
+    public override removeContainerUnder(): void {
         if (!this.visible) return
 
         const entities = this.bpc.bp.entityPositionGrid.getEntitiesInArea({
@@ -187,7 +199,7 @@ export class PaintEntityContainer extends PaintContainer {
         this.checkBuildable()
     }
 
-    public placeEntityContainer(): void {
+    public override placeEntityContainer(): void {
         if (!this.visible) return
 
         const fd = FD.entities[this.name]

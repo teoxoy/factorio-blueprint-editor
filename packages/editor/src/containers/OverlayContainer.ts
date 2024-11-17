@@ -1,20 +1,22 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
+import { Sprite } from '@pixi/sprite'
+import { IPoint } from '../types'
 import FD, { FluidBox, CursorBoxType, SpriteData } from '../core/factorioData'
 import F from '../UI/controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
-import { isActionActive } from '../actions'
 import { Entity } from '../core/Entity'
 import { EditorMode, BlueprintContainer } from './BlueprintContainer'
 import { EntityContainer } from './EntityContainer'
 
-export class OverlayContainer extends PIXI.Container {
+export class OverlayContainer extends Container {
     private readonly bpc: BlueprintContainer
-    private readonly entityInfos = new PIXI.Container()
-    private readonly cursorBoxes = new PIXI.Container()
-    private readonly undergroundLines = new PIXI.Container()
-    private readonly selectionArea = new PIXI.Graphics()
-    private copyCursorBox: PIXI.Container
+    private readonly entityInfos = new Container()
+    private readonly cursorBoxes = new Container()
+    private readonly undergroundLines = new Container()
+    private readonly selectionArea = new Graphics()
+    private copyCursorBox: Container
     private selectionAreaUpdateFn: (endX: number, endY: number) => void
 
     public constructor(bpc: BlueprintContainer) {
@@ -22,27 +24,20 @@ export class OverlayContainer extends PIXI.Container {
         this.bpc = bpc
 
         this.addChild(this.entityInfos, this.cursorBoxes, this.undergroundLines, this.selectionArea)
-
-        this.bpc.on('removeHoverContainer', this.destroyCopyCursorBox, this)
-        this.bpc.on('createHoverContainer', () => {
-            if (isActionActive('tryPasteEntitySettings')) {
-                this.createCopyCursorBox()
-            }
-        })
     }
 
-    public static createEntityInfo(entity: Entity, position: IPoint): PIXI.Container {
-        const entityInfo = new PIXI.Container()
+    public static createEntityInfo(entity: Entity, position: IPoint): Container {
+        const entityInfo = new Container()
 
         if (entity.recipe && entity.entityData.show_recipe_icon !== false) {
-            const recipeInfo = new PIXI.Container()
+            const recipeInfo = new Container()
             createIconWithBackground(recipeInfo, entity.recipe)
             const S = entity.name === 'oil_refinery' ? 1.5 : 0.9
             recipeInfo.scale.set(S, S)
             recipeInfo.position.set(0, -10)
             entityInfo.addChild(recipeInfo)
 
-            const fluidIcons = new PIXI.Container()
+            const fluidIcons = new Container()
             const recipe = FD.recipes[entity.recipe]
             if (recipe.category === 'oil_processing' || recipe.category === 'chemistry') {
                 const inputPositions: IPoint[] = []
@@ -104,7 +99,7 @@ export class OverlayContainer extends PIXI.Container {
 
         const modules = entity.modules
         if (modules.length !== 0 && entity.name !== 'beacon') {
-            const moduleInfo = new PIXI.Container()
+            const moduleInfo = new Container()
             const shift = entity.entityData.module_specification.module_info_icon_shift
             for (let index = 0; index < modules.length; index++) {
                 createIconWithBackground(moduleInfo, modules[index], { x: index * 32, y: 0 })
@@ -128,7 +123,7 @@ export class OverlayContainer extends PIXI.Container {
                 entity.name === 'infinity_chest' ||
                 entity.name === 'infinity_pipe')
         ) {
-            const filterInfo = new PIXI.Container()
+            const filterInfo = new Container()
             for (let i = 0; i < filters.length; i++) {
                 if (i === 4) {
                     break
@@ -155,7 +150,7 @@ export class OverlayContainer extends PIXI.Container {
 
         if (entity.constantCombinatorFilters !== undefined) {
             const filters = entity.constantCombinatorFilters
-            const filterInfo = new PIXI.Container()
+            const filterInfo = new Container()
             for (let i = 0; i < filters.length; i++) {
                 if (i === 4) {
                     break
@@ -172,7 +167,7 @@ export class OverlayContainer extends PIXI.Container {
         const combinatorConditions =
             entity.deciderCombinatorConditions || entity.arithmeticCombinatorConditions
         if (combinatorConditions) {
-            const filterInfo = new PIXI.Container()
+            const filterInfo = new Container()
             const cFS = combinatorConditions.first_signal
             const cSS = combinatorConditions.second_signal
             const cOS = combinatorConditions.output_signal
@@ -192,7 +187,7 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         if (entity.type === 'boiler' || entity.type === 'generator') {
-            const filteredFluidInputs = new PIXI.Container()
+            const filteredFluidInputs = new Container()
             const generateIconsForFluidBox = (fluidBox: FluidBox): void => {
                 for (const c of fluidBox.pipe_connections) {
                     const position = util.transformConnectionPosition(
@@ -214,7 +209,7 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         if (entity.splitterInputPriority || entity.splitterOutputPriority) {
-            const filterInfo = new PIXI.Container()
+            const filterInfo = new Container()
 
             const createArrowForDirection = (direction: string, offsetY: number): void => {
                 const arrow = createArrow(
@@ -248,7 +243,7 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         if (entity.name === 'arithmetic_combinator' || entity.name === 'decider_combinator') {
-            const arrows = new PIXI.Container()
+            const arrows = new Container()
             arrows.addChild(createArrow({ x: 0, y: -48 }), createArrow({ x: 0, y: 48 }))
             arrows.rotation = entity.direction * Math.PI * 0.25
             arrows.scale.set(0.5, 0.5)
@@ -256,7 +251,7 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         if (entity.type === 'mining_drill' && entity.name !== 'pumpjack') {
-            const arrows = new PIXI.Container()
+            const arrows = new Container()
             arrows.addChild(
                 createArrow({
                     x: entity.entityData.vector_to_place_result[0] * 64,
@@ -301,7 +296,7 @@ export class OverlayContainer extends PIXI.Container {
                     case 6:
                         position.x += offset
                 }
-                const arrow = createArrow(util.sumprod(64,position), type)
+                const arrow = createArrow(util.sumprod(64, position), type)
                 if (entity.type === 'boiler' && type === 2) {
                     arrow.rotation = 0.5 * Math.PI
                 }
@@ -314,7 +309,7 @@ export class OverlayContainer extends PIXI.Container {
                 arrows.addChild(arrow)
             }
 
-            const arrows = new PIXI.Container()
+            const arrows = new Container()
             if (entity.entityData.fluid_boxes) {
                 if (entity.assemblerCraftsWithFluid) {
                     const c =
@@ -386,13 +381,13 @@ export class OverlayContainer extends PIXI.Container {
         }
 
         function createIconWithBackground(
-            container: PIXI.Container,
+            container: Container,
             itemName: string,
             position?: IPoint
         ): void {
             const icon = F.CreateIcon(itemName, undefined, true, true)
             const data = FD.utilitySprites.entity_info_dark_background
-            const background = new PIXI.Sprite(
+            const background = new Sprite(
                 G.getTexture(data.filename, data.x, data.y, data.width, data.height)
             )
             background.anchor.set(0.5, 0.5)
@@ -410,7 +405,7 @@ export class OverlayContainer extends PIXI.Container {
             }
         }
 
-        function createArrow(position: IPoint, type = 0): PIXI.Sprite {
+        function createArrow(position: IPoint, type = 0): Sprite {
             const typeToPath = (type = 0): SpriteData => {
                 switch (type) {
                     case 0:
@@ -422,7 +417,7 @@ export class OverlayContainer extends PIXI.Container {
                 }
             }
             const data = typeToPath(type)
-            const arrow = new PIXI.Sprite(
+            const arrow = new Sprite(
                 G.getTexture(data.filename, data.x, data.y, data.width, data.height)
             )
             arrow.anchor.set(0.5, 0.5)
@@ -431,8 +426,9 @@ export class OverlayContainer extends PIXI.Container {
         }
     }
 
-    public createCopyCursorBox(): void {
+    public updateCopyCursorBox(forceDisable = false): void {
         if (
+            !forceDisable &&
             this.bpc.mode === EditorMode.EDIT &&
             this.copyCursorBox === undefined &&
             this.bpc.hoverContainer !== undefined &&
@@ -446,11 +442,7 @@ export class OverlayContainer extends PIXI.Container {
                 this.bpc.entityForCopyData.size,
                 'copy'
             )
-        }
-    }
-
-    public destroyCopyCursorBox(): void {
-        if (this.copyCursorBox !== undefined) {
+        } else if (this.copyCursorBox !== undefined) {
             this.copyCursorBox.destroy()
             this.copyCursorBox = undefined
         }
@@ -460,7 +452,7 @@ export class OverlayContainer extends PIXI.Container {
         this.entityInfos.visible = !this.entityInfos.visible
     }
 
-    public createEntityInfo(entity: Entity, position: IPoint): PIXI.Container {
+    public createEntityInfo(entity: Entity, position: IPoint): Container {
         const entityInfo = OverlayContainer.createEntityInfo(entity, position)
         if (entityInfo !== undefined) {
             this.entityInfos.addChild(entityInfo)
@@ -472,8 +464,8 @@ export class OverlayContainer extends PIXI.Container {
         position: IPoint,
         size: IPoint,
         type: CursorBoxType = 'regular'
-    ): PIXI.Container {
-        const cursorBox = new PIXI.Container()
+    ): Container {
+        const cursorBox = new Container()
         cursorBox.scale.set(0.5, 0.5)
         cursorBox.position.set(position.x, position.y)
         this.cursorBoxes.addChild(cursorBox)
@@ -481,7 +473,7 @@ export class OverlayContainer extends PIXI.Container {
         if (size.x === 1 && size.y === 1) {
             const data = FD.utilitySprites.cursor_box[type][0].sprite
             const texture = G.getTexture(data.filename, data.x, data.y, data.width, data.height)
-            const s = new PIXI.Sprite(texture)
+            const s = new Sprite(texture)
             s.anchor.set(0.5, 0.5)
             cursorBox.addChild(s)
         } else {
@@ -490,17 +482,17 @@ export class OverlayContainer extends PIXI.Container {
 
         return cursorBox
 
-        function createCorners(minSideLength: number): PIXI.Sprite[] {
+        function createCorners(minSideLength: number): Sprite[] {
             const boxes = FD.utilitySprites.cursor_box[type]
             const data = (
                 boxes.find(t => t.max_side_length > minSideLength) || boxes[boxes.length - 1]
             ).sprite
             const texture = G.getTexture(data.filename, data.x, data.y, data.width, data.height)
 
-            const c0 = new PIXI.Sprite(texture)
-            const c1 = new PIXI.Sprite(texture)
-            const c2 = new PIXI.Sprite(texture)
-            const c3 = new PIXI.Sprite(texture)
+            const c0 = new Sprite(texture)
+            const c1 = new Sprite(texture)
+            const c2 = new Sprite(texture)
+            const c3 = new Sprite(texture)
             const X = size.x * 32
             const Y = size.y * 32
             c0.position.set(-X, -Y)
@@ -519,7 +511,7 @@ export class OverlayContainer extends PIXI.Container {
         position: IPoint,
         direction: number,
         searchDirection: number
-    ): PIXI.Container {
+    ): Container {
         const fd = FD.entities[name]
         if (fd.type === 'underground_belt' || name === 'pipe_to_ground') {
             const otherEntity = this.bpc.bp.entities.get(
@@ -550,7 +542,7 @@ export class OverlayContainer extends PIXI.Container {
 
                 const sign = searchDirection === 0 || searchDirection === 6 ? -1 : 1
 
-                const lineParts = new PIXI.Container()
+                const lineParts = new Container()
                 lineParts.x = position.x * 32
                 lineParts.y = position.y * 32
                 this.undergroundLines.addChild(lineParts)
@@ -560,7 +552,7 @@ export class OverlayContainer extends PIXI.Container {
                         name === 'pipe_to_ground'
                             ? FD.utilitySprites.underground_pipe_connection
                             : fd.underground_sprite
-                    const s = new PIXI.Sprite(
+                    const s = new Sprite(
                         G.getTexture(data.filename, data.x, data.y, data.width, data.height)
                     )
                     s.rotation = direction * Math.PI * 0.25

@@ -1,6 +1,8 @@
 import FD from '../core/factorioData'
+import { IPoint } from '../types'
 import { Tile } from '../core/Tile'
 import util from '../common/util'
+import { Entity } from '../core/Entity'
 import { TileContainer } from './TileContainer'
 import { PaintContainer } from './PaintContainer'
 import { BlueprintContainer } from './BlueprintContainer'
@@ -13,6 +15,7 @@ export class PaintTileContainer extends PaintContainer {
 
         this.bpc.transparentEntities()
 
+        this.attachUpdateOn16()
         this.moveAtCursor()
         this.redraw()
     }
@@ -42,7 +45,7 @@ export class PaintTileContainer extends PaintContainer {
         super.destroy()
     }
 
-    public getItemName(): string {
+    public override getItemName(): string {
         return Tile.getItemName(this.name)
     }
 
@@ -60,7 +63,7 @@ export class PaintTileContainer extends PaintContainer {
         this.redraw()
     }
 
-    public rotate(ccw = false): void {
+    public override rotate(_ccw?: boolean): void {
         const nD = FD.tiles[this.name].next_direction
         if (nD) {
             this.name = nD
@@ -68,11 +71,19 @@ export class PaintTileContainer extends PaintContainer {
         }
     }
 
-    public canFlipOrRotateByCopying(): boolean {
-        return false;
+    public override canFlipOrRotateByCopying(): boolean {
+        return false
     }
 
-    protected redraw(): void {
+    public override rotatedEntities(_ccw?: boolean): Entity[] {
+        return undefined
+    }
+
+    public override flippedEntities(_vertical: boolean): Entity[] {
+        return undefined
+    }
+
+    protected override redraw(): void {
         this.removeChildren()
         const sprites = TileContainer.generateSprites(
             this.name,
@@ -82,35 +93,31 @@ export class PaintTileContainer extends PaintContainer {
         this.addChild(...sprites)
     }
 
-    public moveAtCursor(): void {
+    public override moveAtCursor(): void {
         this.setNewPosition({
             x: PaintTileContainer.size,
             y: PaintTileContainer.size,
         })
     }
 
-    public removeContainerUnder(): void {
+    public override removeContainerUnder(): void {
         if (!this.visible) return
 
         const position = this.getGridPosition()
 
         this.bpc.bp.removeTiles(
-            PaintTileContainer.getTilePositions().map(p =>
-                util.sumprod(p, position)
-            )
+            PaintTileContainer.getTilePositions().map(p => util.sumprod(p, position))
         )
     }
 
-    public placeEntityContainer(): void {
+    public override placeEntityContainer(): void {
         if (!this.visible) return
 
         const position = this.getGridPosition()
 
         this.bpc.bp.createTiles(
             this.name,
-            PaintTileContainer.getTilePositions().map(p =>
-                util.sumprod(p, position)
-            )
+            PaintTileContainer.getTilePositions().map(p => util.sumprod(p, position))
         )
     }
 }

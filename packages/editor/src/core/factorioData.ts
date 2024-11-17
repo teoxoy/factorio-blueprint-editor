@@ -147,6 +147,8 @@ export interface Effect {
     pollution: Bonus
 }
 
+export type ModuleCatrgory = 'speed' | 'productivity' | 'effectivity'
+
 export interface Item {
     type: string
     name: string
@@ -196,7 +198,7 @@ export interface Item {
     beacon_tint?: CraftingMachineTint
 
     /** Modules only property (type: 'module') */
-    category?: 'speed' | 'productivity' | 'effectivity'
+    category?: ModuleCatrgory
     /** Modules only property (type: 'module') */
     effect?: Effect
     /** Modules only property (type: 'module') */
@@ -847,7 +849,10 @@ export interface Signal {
 export interface SignalToColorMapping extends Signal {
     color: Color
 }
-export interface SpriteData {
+export interface SpriteData extends SpriteDataPart {
+    hr_version?: SpriteDataPart
+}
+export interface SpriteDataPart {
     filename?: string
     filenames?: string[]
     stripes?: Stripes[]
@@ -876,7 +881,6 @@ export interface SpriteData {
     counterclockwise?: boolean
     tint?: ColorWithAlpha
     lines_per_file?: number
-    hr_version?: SpriteData
 }
 export interface Stripes {
     filename: string

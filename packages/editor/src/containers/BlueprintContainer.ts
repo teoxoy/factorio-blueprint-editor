@@ -1,11 +1,18 @@
-import * as PIXI from 'pixi.js'
+import { TilingSprite } from '@pixi/sprite-tiling'
+import { Rectangle } from '@pixi/math'
+import { Container, Bounds } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
+import { MIPMAP_MODES, SCALE_MODES } from '@pixi/constants'
+import { Renderer, RenderTexture } from '@pixi/core'
+import { EventBoundary, FederatedPointerEvent } from '@pixi/events'
 import FD from '../core/factorioData'
 import G from '../common/globals'
 import { Tile } from '../core/Tile'
 import { Entity } from '../core/Entity'
 import { Blueprint } from '../core/Blueprint'
 import { IConnection } from '../core/WireConnections'
-import { isActionActive, callAction } from '../actions'
+import { IPoint } from '../types'
+import { Dialog } from '../UI/controls/Dialog'
 import { Viewport } from './Viewport'
 import { EntitySprite } from './EntitySprite'
 import { WiresContainer } from './WiresContainer'
@@ -16,12 +23,15 @@ import { PaintEntityContainer } from './PaintEntityContainer'
 import { TileContainer } from './TileContainer'
 import { PaintTileContainer } from './PaintTileContainer'
 import { PaintWireContainer } from './PaintWireContainer'
-import { PaintContainer } from './PaintContainer'
+import { Axis, IllegalFlipError, PaintContainer } from './PaintContainer'
 import { PaintBlueprintContainer } from './PaintBlueprintContainer'
 import { OptimizedContainer } from './OptimizedContainer'
 import { GridData } from './GridData'
 
-export type GridPattern = 'checker' | 'grid'
+export enum GridPattern {
+    CHECKER = 'checker',
+    GRID = 'grid',
+}
 
 export enum EditorMode {
     /** Default */
@@ -38,7 +48,12 @@ export enum EditorMode {
     DELETE,
 }
 
-export class BlueprintContainer extends PIXI.Container {
+export class BlueprintContainer extends Container {
+    private static _moveSpeed = 10
+    private static _gridColor = 0x303030
+    private static _gridPattern = GridPattern.GRID
+    private static _limitWireReach = true
+
     /** Nr of cunks needs to be odd because the chunk grid is offset */
     private readonly chunks = 32 - 1
     /** Chunk offset - from 0,0 - Measured in tiles */
@@ -61,25 +76,21 @@ export class BlueprintContainer extends PIXI.Container {
         3
     )
 
-    private _moveSpeed = Number(localStorage.getItem('moveSpeed') ?? 10)
-    private _gridColor = (localStorage.getItem('darkTheme') ?? 'true') === 'true' ? 0x303030 : 0xc9c9c9
-    private _gridPattern: GridPattern = (localStorage.getItem('pattern') ?? 'grid') as GridPattern
-    private _limitWireReach = (localStorage.getItem('limitWireReach') ?? 'true') === 'true'
     private _mode: EditorMode = EditorMode.NONE
     public readonly bp: Blueprint
     public readonly gridData: GridData
 
     // Children
-    private grid: PIXI.TilingSprite
-    private readonly chunkGrid: PIXI.TilingSprite
+    private grid: TilingSprite
+    private readonly chunkGrid: TilingSprite
     private readonly tileSprites: OptimizedContainer
-    private readonly tilePaintSlot: PIXI.Container
+    private readonly tilePaintSlot: Container
     public readonly underlayContainer: UnderlayContainer
     private readonly entitySprites: OptimizedContainer
     public readonly wiresContainer: WiresContainer
     public readonly overlayContainer: OverlayContainer
-    private readonly entityPaintSlot: PIXI.Container
-    private readonly wirePaintSlot: PIXI.Container
+    private readonly entityPaintSlot: Container
+    private readonly wirePaintSlot: Container
 
     public hoverContainer: EntityContainer
     public paintContainer: PaintContainer
@@ -89,14 +100,14 @@ export class BlueprintContainer extends PIXI.Container {
     private deleteModeEntities: Entity[] = []
     private copyModeUpdateFn: (endX: number, endY: number) => void
     private deleteModeUpdateFn: (endX: number, endY: number) => void
-    private draggingCreateUpdateFn: () => void
+    private copySettingsActive = false
 
     public viewportCulling = true
 
     // PIXI properties
     public readonly interactive = true
     public readonly interactiveChildren = false
-    public readonly hitArea = new PIXI.Rectangle(
+    public readonly hitArea = new Rectangle(
         -this.size.x * this.anchor.x,
         -this.size.y * this.anchor.y,
         this.size.x,
@@ -111,13 +122,13 @@ export class BlueprintContainer extends PIXI.Container {
         this.grid = this.generateGrid()
         this.chunkGrid = this.generateChunkGrid(this.chunkOffset)
         this.tileSprites = new OptimizedContainer(this)
-        this.tilePaintSlot = new PIXI.Container()
+        this.tilePaintSlot = new Container()
         this.underlayContainer = new UnderlayContainer()
         this.entitySprites = new OptimizedContainer(this)
         this.wiresContainer = new WiresContainer(this.bp)
         this.overlayContainer = new OverlayContainer(this)
-        this.entityPaintSlot = new PIXI.Container()
-        this.wirePaintSlot = new PIXI.Container()
+        this.entityPaintSlot = new Container()
+        this.wirePaintSlot = new Container()
 
         this.addChild(
             this.grid,
@@ -145,68 +156,1156 @@ export class BlueprintContainer extends PIXI.Container {
             this.updateHoverContainer()
         })
 
-        const panCb = (): void => {
-            if (this.mode !== EditorMode.PAN) {
-                const WSXOR = isActionActive('moveUp') !== isActionActive('moveDown')
-                const ADXOR = isActionActive('moveLeft') !== isActionActive('moveRight')
-                if (WSXOR || ADXOR) {
-                    const finalSpeed = this.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
-                    this.viewport.translateBy(
-                        (ADXOR ? (isActionActive('moveLeft') ? 1 : -1) : 0) * finalSpeed,
-                        (WSXOR ? (isActionActive('moveUp') ? 1 : -1) : 0) * finalSpeed
-                    )
+        const onUpdate32 = (): void => {
+            // Instead of decreasing the global interactionFrequency, call the over and out entity events here
+            this.updateHoverContainer()
+        }
+
+        this.gridData.on('update32', onUpdate32)
+
+        this.on('destroyed', () => {
+            this.gridData.off('update32', onUpdate32)
+            this.gridData.destroy()
+        })
+
+        {
+            const onResize = (): void => {
+                this.viewport.setSize(G.app.screen.width, G.app.screen.height)
+            }
+
+            window.addEventListener('resize', onResize, false)
+            this.on('destroyed', () => {
+                window.removeEventListener('resize', onResize, false)
+            })
+        }
+
+        const panModule = {
+            _onPan: (e: FederatedPointerEvent): void => {
+                this.viewport.translateBy(e.movement.x, e.movement.y)
+            },
+            panStart: (): boolean => {
+                if (this.mode === EditorMode.NONE) {
+                    this.cursor = 'move'
+                    this.setMode(EditorMode.PAN)
+                    G.app.stage.on('pointermove', panModule._onPan)
+                    return true
+                }
+            },
+            panEnd: (): void => {
+                if (this.mode === EditorMode.PAN) {
+                    G.app.stage.off('pointermove', panModule._onPan)
+                    this.setMode(EditorMode.NONE)
+                    this.cursor = null
+                }
+            },
+        }
+
+        type Directions = {
+            up: boolean
+            left: boolean
+            down: boolean
+            right: boolean
+        }
+
+        const moveTracker = {
+            directions: {
+                up: false,
+                left: false,
+                down: false,
+                right: false,
+            },
+            start: (dir: keyof Directions): boolean => {
+                moveTracker.directions[dir] = true
+                return true
+            },
+            end: (dir: keyof Directions): void => {
+                moveTracker.directions[dir] = false
+            },
+        }
+
+        {
+            const panCb = (): void => {
+                if (this.mode !== EditorMode.PAN) {
+                    const WSXOR = moveTracker.directions.up !== moveTracker.directions.down
+                    const ADXOR = moveTracker.directions.left !== moveTracker.directions.right
+                    if (WSXOR || ADXOR) {
+                        const finalSpeed = this.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
+                        this.viewport.translateBy(
+                            (ADXOR ? (moveTracker.directions.left ? 1 : -1) : 0) * finalSpeed,
+                            (WSXOR ? (moveTracker.directions.up ? 1 : -1) : 0) * finalSpeed
+                        )
+                    }
+                }
+            }
+
+            G.app.ticker.add(panCb)
+            this.on('destroyed', () => {
+                G.app.ticker.remove(panCb)
+            })
+        }
+
+        let constraint: boolean
+        const build = (_x: number, _y: number, dx: number, dy: number): void => {
+            if (constraint === undefined) {
+                const cX = Math.abs(Math.sign(dx))
+                const cY = Math.abs(Math.sign(dy))
+                if (cX !== cY) {
+                    constraint = true
+                    if (cX === 1) {
+                        this.paintContainer.setPosConstraint(Axis.X)
+                    } else {
+                        this.paintContainer.setPosConstraint(Axis.Y)
+                    }
+                }
+            }
+            this.paintContainer.placeEntityContainer()
+        }
+
+        let draggingCreateMode = false
+        const buildStart = (): boolean => {
+            if (this.mode !== EditorMode.PAINT) return false
+
+            draggingCreateMode = true
+
+            this.paintContainer.placeEntityContainer()
+
+            this.gridData.on('update32', build)
+
+            return true
+        }
+
+        const buildEnd = (): void => {
+            if (!draggingCreateMode) return
+
+            draggingCreateMode = false
+
+            constraint = undefined
+            this.paintContainer.setPosConstraint(undefined)
+
+            this.gridData.off('update32', build)
+        }
+
+        const openEditor = (): boolean => {
+            if (this.mode === EditorMode.EDIT) {
+                if (G.debug) {
+                    console.log(this.hoverContainer.entity.serialize())
+                }
+
+                Dialog.closeAll()
+                G.UI.createEditor(this.hoverContainer.entity)
+                return true
+            }
+            return false
+        }
+
+        let remove = false
+        const mineStart = (): boolean => {
+            remove = true
+            this.gridData.on('update32', mine)
+            mine()
+            return true
+        }
+        const mine = (): void => {
+            if (remove) {
+                if (this.mode === EditorMode.EDIT) {
+                    this.bp.removeEntity(this.hoverContainer.entity)
+                }
+                if (this.mode === EditorMode.PAINT) {
+                    this.paintContainer.removeContainerUnder()
+                }
+            }
+        }
+        const mineEnd = (): void => {
+            remove = false
+            this.gridData.off('update32', mine)
+        }
+
+        const copyEntitySettings = (): boolean => {
+            const copied = this.copyEntitySettings()
+            if (copied) this.updateCopyCursorBox()
+            return copied
+        }
+
+        const pasteEntitySettingsStart = (): boolean => {
+            const isValid = this.pasteEntitySettings()
+            if (isValid) this.gridData.on('update32', this.pasteEntitySettings, this)
+            return isValid
+        }
+        const pasteEntitySettingsEnd = (): void => {
+            this.gridData.off('update32', this.pasteEntitySettings, this)
+        }
+        const pasteEntitySettingsModifiersStart = (): boolean => {
+            this.copySettingsActive = true
+            this.updateCopyCursorBox()
+            return true
+        }
+        const pasteEntitySettingsModifiersEnd = (): void => {
+            this.copySettingsActive = false
+            this.updateCopyCursorBox()
+        }
+
+        enum MouseButton {
+            Left = 0,
+            Middle = 1,
+            Right = 2,
+            Fourth = 3,
+            Fifth = 4,
+        }
+
+        // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
+        type ModifierKey = 'Control' | 'Shift' | 'Alt'
+        // type WhitespaceKey = 'Enter' | 'Tab' | ' '
+        // type NavigationKey =
+        //     | 'ArrowDown'
+        //     | 'ArrowLeft'
+        //     | 'ArrowRight'
+        //     | 'ArrowUp'
+        //     | 'End'
+        //     | 'Home'
+        //     | 'PageDown'
+        //     | 'PageUp'
+        // type EditingKey = 'Backspace' | 'Clear' | 'Delete' | 'Insert'
+        // type UIKey = 'Escape'
+        // type FunctionKey =
+        //     | 'F1'
+        //     | 'F2'
+        //     | 'F3'
+        //     | 'F4'
+        //     | 'F5'
+        //     | 'F6'
+        //     | 'F7'
+        //     | 'F8'
+        //     | 'F9'
+        //     | 'F10'
+        //     | 'F11'
+        //     | 'F12'
+        // type SpecialKey =
+        //     | ModifierKey
+        //     | WhitespaceKey
+        //     | NavigationKey
+        //     | EditingKey
+        //     | UIKey
+        //     | FunctionKey
+
+        /**
+         * Intersection of codes emitted by Firefox and Chrome on all platforms listed on
+         * https://github.com/mdn/content/blob/16ab3138acadc039e018361916a8264a359be774/files/en-us/web/api/ui_events/keyboard_event_code_values/index.md
+         */
+        type KeyCode =
+            | 'AltLeft'
+            | 'AltRight'
+            | 'ArrowDown'
+            | 'ArrowLeft'
+            | 'ArrowRight'
+            | 'ArrowUp'
+            | 'Backquote'
+            | 'Backslash'
+            | 'Backspace'
+            | 'BracketLeft'
+            | 'BracketRight'
+            | 'CapsLock'
+            | 'Comma'
+            | 'ContextMenu'
+            | 'ControlLeft'
+            | 'ControlRight'
+            | 'Delete'
+            | 'Digit0'
+            | 'Digit1'
+            | 'Digit2'
+            | 'Digit3'
+            | 'Digit4'
+            | 'Digit5'
+            | 'Digit6'
+            | 'Digit7'
+            | 'Digit8'
+            | 'Digit9'
+            | 'End'
+            | 'Enter'
+            | 'Equal'
+            | 'Escape'
+            | 'F1'
+            | 'F10'
+            | 'F11'
+            | 'F12'
+            | 'F13'
+            | 'F14'
+            | 'F15'
+            | 'F16'
+            | 'F17'
+            | 'F18'
+            | 'F19'
+            | 'F2'
+            | 'F20'
+            | 'F3'
+            | 'F4'
+            | 'F5'
+            | 'F6'
+            | 'F7'
+            | 'F8'
+            | 'F9'
+            | 'Home'
+            | 'IntlBackslash'
+            | 'IntlRo'
+            | 'IntlYen'
+            | 'KeyA'
+            | 'KeyB'
+            | 'KeyC'
+            | 'KeyD'
+            | 'KeyE'
+            | 'KeyF'
+            | 'KeyG'
+            | 'KeyH'
+            | 'KeyI'
+            | 'KeyJ'
+            | 'KeyK'
+            | 'KeyL'
+            | 'KeyM'
+            | 'KeyN'
+            | 'KeyO'
+            | 'KeyP'
+            | 'KeyQ'
+            | 'KeyR'
+            | 'KeyS'
+            | 'KeyT'
+            | 'KeyU'
+            | 'KeyV'
+            | 'KeyW'
+            | 'KeyX'
+            | 'KeyY'
+            | 'KeyZ'
+            | 'Minus'
+            | 'NumLock'
+            | 'Numpad0'
+            | 'Numpad1'
+            | 'Numpad2'
+            | 'Numpad3'
+            | 'Numpad4'
+            | 'Numpad5'
+            | 'Numpad6'
+            | 'Numpad7'
+            | 'Numpad8'
+            | 'Numpad9'
+            | 'NumpadAdd'
+            | 'NumpadComma'
+            | 'NumpadDecimal'
+            | 'NumpadDivide'
+            | 'NumpadEnter'
+            | 'NumpadEqual'
+            | 'NumpadMultiply'
+            | 'NumpadSubtract'
+            | 'PageDown'
+            | 'PageUp'
+            | 'Period'
+            | 'Quote'
+            | 'Semicolon'
+            | 'ShiftLeft'
+            | 'ShiftRight'
+            | 'Slash'
+            | 'Space'
+            | 'Tab'
+
+        interface Modifiers {
+            control?: boolean
+            shift?: boolean
+            alt?: boolean
+        }
+
+        interface Callbacks {
+            /**
+             * Return `true` to indicate that the action succeeded.
+             *
+             * Note that `onRelease` won't be called if this callback hasn't succeeded.
+             */
+            onPress: () => boolean
+            onRelease?: () => void
+        }
+
+        interface IMouseTrigger {
+            button: MouseButton // | number
+        }
+
+        interface IKeyboardTrigger {
+            code: KeyCode // | string
+        }
+
+        type ITrigger = IMouseTrigger | IKeyboardTrigger
+
+        type TriggerEvent = PointerEvent | KeyboardEvent
+
+        interface IAction<T extends ITrigger> {
+            // name: MouseActionName
+            trigger: T
+            modifiers?: Modifiers
+            pressCb: Callbacks
+            modifiersCb?: Callbacks
+        }
+
+        const objectMap = <InValue, OutValue>(
+            obj: Record<string, InValue>,
+            fn: (value: InValue, key: string, index: number) => OutValue
+        ): Record<string, OutValue> =>
+            Object.fromEntries(Object.entries(obj).map(([k, v], i) => [k, fn(v, k, i)]))
+
+        class ActionRegistry {
+            private registry: Action<ITrigger>[]
+            private modifiers = {
+                control: false,
+                shift: false,
+                alt: false,
+            }
+
+            public constructor(actions: Record<ActionName, IAction<ITrigger>>) {
+                this.registry = Object.values(objectMap(actions, v => new Action(v)))
+                this.registry.sort((a, b) => b.nrOfModifiers() - a.nrOfModifiers())
+            }
+
+            public pressButton(e: PointerEvent): void {
+                this.press(e)
+            }
+            public releaseButton(e: PointerEvent): void {
+                this.release(e)
+            }
+
+            public pressKey(e: KeyboardEvent): void {
+                if (this.isModifier(e.key)) {
+                    this.setModifiers(e.key, true)
+
+                    for (const action of this.registry) {
+                        if (action.pressMod(this.modifiers, e.key)) return
+                    }
+                }
+                // else {
+                this.press(e)
+                // }
+            }
+            public releaseKey(e: KeyboardEvent): void {
+                if (this.isModifier(e.key)) {
+                    for (const action of this.registry) {
+                        action.releaseMod(e.key)
+                    }
+
+                    this.setModifiers(e.key, false)
+                }
+                // else {
+                this.release(e)
+                // }
+            }
+
+            private press(e: TriggerEvent): void {
+                for (const action of this.registry) {
+                    if (action.press(this.modifiers, e)) {
+                        if (e instanceof KeyboardEvent) {
+                            e.preventDefault()
+                        }
+                        return
+                    }
+                }
+            }
+            private release(e: TriggerEvent): void {
+                // e.preventDefault()
+
+                for (const action of this.registry) {
+                    action.release(e)
+                }
+            }
+
+            private isModifier(key: string): key is ModifierKey {
+                return key === 'Control' || key === 'Shift' || key === 'Alt'
+            }
+            private setModifiers(key: ModifierKey, value: boolean): void {
+                switch (key) {
+                    case 'Control':
+                        this.modifiers.control = value
+                        break
+                    case 'Shift':
+                        this.modifiers.shift = value
+                        break
+                    case 'Alt':
+                        this.modifiers.alt = value
+                        break
+                }
+            }
+
+            public releaseAll(): void {
+                this.modifiers.control = false
+                this.modifiers.shift = false
+                this.modifiers.alt = false
+
+                for (const action of this.registry) {
+                    action.forceRelease()
                 }
             }
         }
 
-        const onUpdate16 = (): void => {
-            if (this.mode === EditorMode.PAINT) {
-                this.paintContainer.moveAtCursor()
+        class Action<T extends ITrigger> {
+            // public readonly name: MouseActionName
+            private trigger: T
+            private modifiers?: Modifiers
+            private pressCb: Callbacks
+            private modifiersCb?: Callbacks
+            private isActive = false
+            private isActiveModifiers = false
+
+            public constructor(data: IAction<T>) {
+                // this.name = data.name
+                this.trigger = data.trigger
+                this.modifiers = data.modifiers
+                this.pressCb = data.pressCb
+                this.modifiersCb = data.modifiersCb
+            }
+
+            private hasModifier(modifier: ModifierKey): boolean {
+                if (!this.modifiers) return false
+                switch (modifier) {
+                    case 'Control':
+                        return this.modifiers.control
+                    case 'Shift':
+                        return this.modifiers.shift
+                    case 'Alt':
+                        return this.modifiers.alt
+                }
+            }
+
+            private hasModifiers(modifiers: Modifiers): boolean {
+                if (!this.modifiers) return true
+                if (this.modifiers.control && !modifiers.control) return false
+                if (this.modifiers.shift && !modifiers.shift) return false
+                if (this.modifiers.alt && !modifiers.alt) return false
+                return true
+            }
+
+            public nrOfModifiers(): number {
+                if (!this.modifiers) return 0
+                let count = 0
+                if (this.modifiers.control) count += 1
+                if (this.modifiers.shift) count += 1
+                if (this.modifiers.alt) count += 1
+                return count
+            }
+
+            public press(modifiers: Modifiers, e: TriggerEvent): boolean {
+                if (!this.triggerMatches(e)) return false
+                if (!this.hasModifiers(modifiers)) return false
+
+                // assert(!this.isActive)
+
+                const succeeded = this.pressCb.onPress()
+                this.isActive = succeeded && !!this.pressCb.onRelease
+                return succeeded
+            }
+            public release(e: TriggerEvent): void {
+                if (this.triggerMatches(e)) this.forceReleaseB()
+            }
+            private triggerMatches(e: TriggerEvent): boolean {
+                function isMouseEvent(e: TriggerEvent): e is PointerEvent {
+                    return 'button' in e
+                }
+
+                function isMouse(trigger: ITrigger): trigger is IMouseTrigger {
+                    return 'button' in trigger
+                }
+
+                if (isMouseEvent(e)) {
+                    return isMouse(this.trigger) && e.button === this.trigger.button
+                } else {
+                    return !isMouse(this.trigger) && e.code === this.trigger.code
+                }
+            }
+            private forceReleaseB(): void {
+                if (this.isActive) {
+                    this.pressCb.onRelease()
+                    this.isActive = false
+                }
+            }
+
+            public pressMod(modifiers: Modifiers, modifier: ModifierKey): boolean {
+                if (!this.modifiersCb) return false
+                if (!this.hasModifier(modifier)) return false
+                if (!this.hasModifiers(modifiers)) return false
+
+                // assert(!this.isActiveModifiers)
+
+                const succeeded = this.modifiersCb.onPress()
+                this.isActiveModifiers = succeeded && !!this.modifiersCb.onRelease
+                return succeeded
+            }
+            public releaseMod(modifier: ModifierKey): void {
+                if (this.hasModifier(modifier)) this.forceReleaseM()
+            }
+            private forceReleaseM(): void {
+                if (this.isActiveModifiers) {
+                    this.modifiersCb.onRelease()
+                    this.isActiveModifiers = false
+                }
+            }
+
+            public forceRelease(): void {
+                this.forceReleaseB()
+                this.forceReleaseM()
             }
         }
 
-        const onUpdate32 = (): void => {
-            // Instead of decreasing the global interactionFrequency, call the over and out entity events here
-            this.updateHoverContainer()
+        type ActionName =
+            | 'pan'
+            | 'build'
+            | 'mine'
+            | 'openEntityGUI'
+            | 'copyEntitySettings'
+            | 'pasteEntitySettings'
+            | 'copySelection'
+            | 'deleteSelection'
+            | 'moveUp'
+            | 'moveLeft'
+            | 'moveDown'
+            | 'moveRight'
+            | 'showInfo'
+            | 'closeWindow'
+            | 'inventory'
+            | 'focus'
+            | 'rotate'
+            | 'reverseRotate'
+            | 'flipHorizontal'
+            | 'flipVertical'
+            | 'pipette'
+            | 'increaseTileBuildingArea'
+            | 'decreaseTileBuildingArea'
+            | 'undo'
+            | 'redo'
+            | 'moveEntityUp'
+            | 'moveEntityLeft'
+            | 'moveEntityDown'
+            | 'moveEntityRight'
+            | 'quickbar1'
+            | 'quickbar2'
+            | 'quickbar3'
+            | 'quickbar4'
+            | 'quickbar5'
+            | 'quickbar6'
+            | 'quickbar7'
+            | 'quickbar8'
+            | 'quickbar9'
+            | 'quickbar10'
+            | 'changeActiveQuickbar'
 
-            if (isActionActive('build')) {
-                callAction('build')
-            }
-            if (isActionActive('mine')) {
-                callAction('mine')
-            }
-            if (isActionActive('pasteEntitySettings')) {
-                callAction('pasteEntitySettings')
+        const reg = new ActionRegistry({
+            // NONE -> PAN
+            pan: {
+                trigger: {
+                    button: MouseButton.Left,
+                },
+                pressCb: {
+                    onPress: panModule.panStart,
+                    onRelease: panModule.panEnd,
+                },
+            },
+            // PAINT
+            build: {
+                trigger: {
+                    button: MouseButton.Left,
+                },
+                pressCb: {
+                    onPress: buildStart,
+                    onRelease: buildEnd,
+                },
+            },
+            // PAINT | EDIT
+            mine: {
+                trigger: {
+                    button: MouseButton.Right,
+                },
+                pressCb: {
+                    onPress: mineStart,
+                    onRelease: mineEnd,
+                },
+            },
+            // EDIT
+            openEntityGUI: {
+                trigger: {
+                    button: MouseButton.Left,
+                },
+                pressCb: {
+                    onPress: openEditor,
+                },
+            },
+            // EDIT
+            copyEntitySettings: {
+                trigger: {
+                    button: MouseButton.Right,
+                },
+                modifiers: {
+                    shift: true,
+                },
+                pressCb: {
+                    onPress: copyEntitySettings,
+                },
+            },
+            // EDIT
+            pasteEntitySettings: {
+                trigger: {
+                    button: MouseButton.Left,
+                },
+                modifiers: {
+                    shift: true,
+                },
+                pressCb: {
+                    onPress: pasteEntitySettingsStart,
+                    onRelease: pasteEntitySettingsEnd,
+                },
+                modifiersCb: {
+                    onPress: pasteEntitySettingsModifiersStart,
+                    onRelease: pasteEntitySettingsModifiersEnd,
+                },
+            },
+            // any -> COPY
+            copySelection: {
+                trigger: {
+                    button: MouseButton.Left,
+                },
+                modifiers: {
+                    control: true,
+                },
+                pressCb: {
+                    onPress: this.enterCopyMode.bind(this),
+                    onRelease: this.exitCopyMode.bind(this),
+                },
+            },
+            // any -> DELETE
+            deleteSelection: {
+                trigger: {
+                    button: MouseButton.Right,
+                },
+                modifiers: {
+                    control: true,
+                },
+                pressCb: {
+                    onPress: this.enterDeleteMode.bind(this),
+                    onRelease: this.exitDeleteMode.bind(this),
+                },
+            },
+
+            moveUp: {
+                trigger: {
+                    code: 'KeyW',
+                },
+                pressCb: {
+                    onPress: () => moveTracker.start('up'),
+                    onRelease: () => moveTracker.end('up'),
+                },
+            },
+            moveLeft: {
+                trigger: {
+                    code: 'KeyA',
+                },
+                pressCb: {
+                    onPress: () => moveTracker.start('left'),
+                    onRelease: () => moveTracker.end('left'),
+                },
+            },
+            moveDown: {
+                trigger: {
+                    code: 'KeyS',
+                },
+                pressCb: {
+                    onPress: () => moveTracker.start('down'),
+                    onRelease: () => moveTracker.end('down'),
+                },
+            },
+            moveRight: {
+                trigger: {
+                    code: 'KeyD',
+                },
+                pressCb: {
+                    onPress: () => moveTracker.start('right'),
+                    onRelease: () => moveTracker.end('right'),
+                },
+            },
+            showInfo: {
+                trigger: {
+                    code: 'AltLeft',
+                },
+                pressCb: {
+                    onPress: () => {
+                        this.overlayContainer.toggleEntityInfoVisibility()
+                        return true
+                    },
+                },
+            },
+            closeWindow: {
+                trigger: {
+                    code: 'Escape',
+                },
+                pressCb: {
+                    onPress: () => {
+                        Dialog.closeLast()
+                        return true
+                    },
+                },
+            },
+            inventory: {
+                trigger: {
+                    code: 'KeyE',
+                },
+                pressCb: {
+                    onPress: () => {
+                        // If there is a dialog open, assume user wants to close it
+                        if (Dialog.anyOpen()) {
+                            Dialog.closeLast()
+                        } else {
+                            G.UI.createInventory(
+                                'Inventory',
+                                undefined,
+                                this.spawnPaintContainer.bind(this)
+                            )
+                        }
+                        return true
+                    },
+                },
+            },
+            focus: {
+                trigger: {
+                    code: 'KeyF',
+                },
+                pressCb: {
+                    onPress: () => {
+                        this.centerViewport()
+                        return true
+                    },
+                },
+            },
+            rotate: {
+                trigger: {
+                    code: 'KeyR',
+                },
+                pressCb: {
+                    onPress: () => {
+                        this.rotate(false)
+                        return true
+                    },
+                },
+            },
+            reverseRotate: {
+                trigger: {
+                    code: 'KeyR',
+                },
+                modifiers: { shift: true },
+                pressCb: {
+                    onPress: () => {
+                        this.rotate(true)
+                        return true
+                    },
+                },
+            },
+            flipHorizontal: {
+                trigger: {
+                    code: 'KeyF',
+                },
+                modifiers: { shift: true },
+                pressCb: {
+                    onPress: () => {
+                        this.flip(false)
+                        return true
+                    },
+                },
+            },
+            flipVertical: {
+                trigger: {
+                    code: 'KeyG',
+                },
+                modifiers: { shift: true },
+                pressCb: {
+                    onPress: () => {
+                        this.flip(true)
+                        return true
+                    },
+                },
+            },
+            pipette: {
+                trigger: {
+                    code: 'KeyQ',
+                },
+                pressCb: {
+                    onPress: () => {
+                        if (this.mode === EditorMode.EDIT) {
+                            const entity = this.hoverContainer.entity
+                            const itemName = Entity.getItemName(entity.name)
+                            const direction =
+                                entity.directionType === 'output'
+                                    ? (entity.direction + 4) % 8
+                                    : entity.direction
+                            this.spawnPaintContainer(itemName, direction)
+                        } else if (this.mode === EditorMode.PAINT) {
+                            this.paintContainer.destroy()
+                        }
+                        this.exitCopyMode(true)
+                        this.exitDeleteMode(true)
+                        return true
+                    },
+                },
+            },
+            increaseTileBuildingArea: {
+                trigger: {
+                    code: 'BracketRight',
+                },
+                pressCb: {
+                    onPress: () => {
+                        if (G.BPC.paintContainer instanceof PaintTileContainer) {
+                            G.BPC.paintContainer.increaseSize()
+                        }
+                        return true
+                    },
+                },
+            },
+            decreaseTileBuildingArea: {
+                trigger: {
+                    code: 'BracketLeft',
+                },
+                pressCb: {
+                    onPress: () => {
+                        if (G.BPC.paintContainer instanceof PaintTileContainer) {
+                            G.BPC.paintContainer.decreaseSize()
+                        }
+                        return true
+                    },
+                },
+            },
+            undo: {
+                trigger: {
+                    code: 'KeyZ',
+                },
+                modifiers: { control: true },
+                pressCb: {
+                    onPress: () => {
+                        this.bp.history.undo()
+                        return true
+                    },
+                },
+            },
+            redo: {
+                trigger: {
+                    code: 'KeyY',
+                },
+                modifiers: { control: true },
+                pressCb: {
+                    onPress: () => {
+                        this.bp.history.redo()
+                        return true
+                    },
+                },
+            },
+            moveEntityUp: {
+                trigger: {
+                    code: 'ArrowUp',
+                },
+                pressCb: {
+                    onPress: () => {
+                        if (this.mode === EditorMode.EDIT) {
+                            this.hoverContainer.entity.moveBy({ x: 0, y: -1 })
+                        }
+                        return true
+                    },
+                },
+            },
+            moveEntityLeft: {
+                trigger: {
+                    code: 'ArrowLeft',
+                },
+                pressCb: {
+                    onPress: () => {
+                        if (this.mode === EditorMode.EDIT) {
+                            this.hoverContainer.entity.moveBy({ x: -1, y: 0 })
+                        }
+                        return true
+                    },
+                },
+            },
+            moveEntityDown: {
+                trigger: {
+                    code: 'ArrowDown',
+                },
+                pressCb: {
+                    onPress: () => {
+                        if (this.mode === EditorMode.EDIT) {
+                            this.hoverContainer.entity.moveBy({ x: 0, y: 1 })
+                        }
+                        return true
+                    },
+                },
+            },
+            moveEntityRight: {
+                trigger: {
+                    code: 'ArrowRight',
+                },
+                pressCb: {
+                    onPress: () => {
+                        if (this.mode === EditorMode.EDIT) {
+                            this.hoverContainer.entity.moveBy({ x: 1, y: 0 })
+                        }
+                        return true
+                    },
+                },
+            },
+            quickbar1: {
+                trigger: { code: 'Digit1' },
+                pressCb: { onPress: () => bindKeyToSlot(0) },
+            },
+            quickbar2: {
+                trigger: { code: 'Digit2' },
+                pressCb: { onPress: () => bindKeyToSlot(1) },
+            },
+            quickbar3: {
+                trigger: { code: 'Digit3' },
+                pressCb: { onPress: () => bindKeyToSlot(2) },
+            },
+            quickbar4: {
+                trigger: { code: 'Digit4' },
+                pressCb: { onPress: () => bindKeyToSlot(3) },
+            },
+            quickbar5: {
+                trigger: { code: 'Digit5' },
+                pressCb: { onPress: () => bindKeyToSlot(4) },
+            },
+            quickbar6: {
+                trigger: { code: 'Digit1' },
+                modifiers: { shift: true },
+                pressCb: { onPress: () => bindKeyToSlot(5) },
+            },
+            quickbar7: {
+                trigger: { code: 'Digit2' },
+                modifiers: { shift: true },
+                pressCb: { onPress: () => bindKeyToSlot(6) },
+            },
+            quickbar8: {
+                trigger: { code: 'Digit3' },
+                modifiers: { shift: true },
+                pressCb: { onPress: () => bindKeyToSlot(7) },
+            },
+            quickbar9: {
+                trigger: { code: 'Digit4' },
+                modifiers: { shift: true },
+                pressCb: { onPress: () => bindKeyToSlot(8) },
+            },
+            quickbar10: {
+                trigger: { code: 'Digit5' },
+                modifiers: { shift: true },
+                pressCb: { onPress: () => bindKeyToSlot(9) },
+            },
+            changeActiveQuickbar: {
+                trigger: { code: 'KeyX' },
+                pressCb: {
+                    onPress: () => {
+                        G.UI.quickbarPanel.changeActiveQuickbar()
+                        return true
+                    },
+                },
+            },
+        })
+
+        const bindKeyToSlot = (slot: number): boolean => {
+            G.UI.quickbarPanel.bindKeyToSlot(slot)
+            return true
+        }
+
+        // copySelection mousebutton 'modifier+lclick'
+        // deleteSelection mousebutton 'modifier+rclick'
+        // pan mousebutton 'lclick'
+        // build mousebutton 'lclick'
+        // mine mousebutton 'rclick'
+        // openEntityGUI mousebutton 'lclick'
+        // copyEntitySettings mousebutton 'shift+rclick'
+        // pasteEntitySettings modifier+mousebutton 'shift+lclick'
+
+        // 'moveUp', 'w'
+        // 'moveLeft', 'a'
+        // 'moveDown', 's'
+        // 'moveRight', 'd'
+        // 'showInfo', 'alt'
+        // 'closeWindow', 'esc'
+        // 'inventory', 'e'
+        // 'focus', 'f'
+        // 'rotate', 'r'
+        // 'reverseRotate', 'shift+r'
+        // 'flipHorizontal', 'shift+f'
+        // 'flipVertical', 'shift+g'
+        // 'pipette', 'q'
+        // 'increaseTileBuildingArea', ']'
+        // 'decreaseTileBuildingArea', '['
+        // 'undo', 'modifier+z'
+        // 'redo', 'modifier+y'
+        // 'moveEntityUp', 'up'
+        // 'moveEntityLeft', 'left'
+        // 'moveEntityDown', 'down'
+        // 'moveEntityRight', 'right'
+        // 'quickbar1', '1'
+        // 'quickbar2', '2'
+        // 'quickbar3', '3'
+        // 'quickbar4', '4'
+        // 'quickbar5', '5'
+        // 'quickbar6', 'shift+1'
+        // 'quickbar7', 'shift+2'
+        // 'quickbar8', 'shift+3'
+        // 'quickbar9', 'shift+4'
+        // 'quickbar10', 'shift+5'
+        // 'changeActiveQuickbar', 'x'
+
+        const onWheel = (e: WheelEvent): void => {
+            e.preventDefault()
+            e.stopPropagation()
+
+            if (Math.sign(e.deltaY) === 1) {
+                this.zoom(false)
+            } else {
+                this.zoom(true)
             }
         }
 
-        let lastX = 0
-        let lastY = 0
-        const onMouseMove = (e: MouseEvent): void => {
-            if (this.mode === EditorMode.PAN) {
-                this.viewport.translateBy(e.clientX - lastX, e.clientY - lastY)
-            }
-            lastX = e.clientX
-            lastY = e.clientY
+        this.addEventListener('wheel', onWheel, { passive: false })
+        this.on('destroyed', () => {
+            this.removeEventListener('wheel', onWheel)
+        })
+
+        const pointerdown = (e: PointerEvent): void => {
+            reg.pressButton(e)
         }
 
-        const onResize = (): void => {
-            this.viewport.setSize(G.app.screen.width, G.app.screen.height)
+        const pointerup = (e: PointerEvent): void => {
+            reg.releaseButton(e)
         }
 
-        G.app.ticker.add(panCb)
-        this.gridData.on('update16', onUpdate16)
-        this.gridData.on('update32', onUpdate32)
-        document.addEventListener('mousemove', onMouseMove)
-        window.addEventListener('resize', onResize, false)
+        this.addEventListener('pointerdown', pointerdown)
+        this.on('destroyed', () => {
+            this.removeEventListener('pointerdown', pointerdown)
+        })
 
-        this.on('destroy', () => {
-            G.app.ticker.remove(panCb)
-            this.gridData.off('update16', onUpdate16)
-            this.gridData.off('update32', onUpdate32)
-            this.gridData.destroy()
-            document.removeEventListener('mousemove', onMouseMove)
-            window.removeEventListener('resize', onResize, false)
+        window.addEventListener('pointerup', pointerup)
+        this.on('destroyed', () => {
+            window.removeEventListener('pointerup', pointerup)
+        })
+
+        const keydown = (e: KeyboardEvent): void => {
+            if (e.repeat) return
+            if (e.target instanceof HTMLInputElement) return
+            console.log('down', e.code)
+            reg.pressKey(e)
+        }
+
+        const keyup = (e: KeyboardEvent): void => {
+            if (e.target instanceof HTMLInputElement) return
+            console.log('up', e.code)
+            reg.releaseKey(e)
+        }
+
+        const releaseAll = (): void => {
+            console.log('releaseAll')
+            reg.releaseAll()
+        }
+
+        window.addEventListener('keydown', keydown)
+        window.addEventListener('keyup', keyup)
+        window.addEventListener('blur', releaseAll)
+        this.on('destroyed', () => {
+            window.removeEventListener('keydown', keydown)
+            window.removeEventListener('keyup', keyup)
+            window.removeEventListener('blur', releaseAll)
         })
     }
 
@@ -214,18 +1313,22 @@ export class BlueprintContainer extends PIXI.Container {
         return this._entityForCopyData
     }
 
-    public copyEntitySettings(): void {
+    public copyEntitySettings(): boolean {
         if (this.mode === EditorMode.EDIT) {
             // Store reference to source entity
             this._entityForCopyData = this.hoverContainer.entity
+            return true
         }
+        return false
     }
 
-    public pasteEntitySettings(): void {
+    public pasteEntitySettings(): boolean {
         if (this._entityForCopyData && this.mode === EditorMode.EDIT) {
             // Hand over reference of source entity to target entity for pasting data
             this.hoverContainer.entity.pasteSettings(this._entityForCopyData)
+            return true
         }
+        return false
     }
 
     public getViewportScale(): number {
@@ -238,7 +1341,7 @@ export class BlueprintContainer extends PIXI.Container {
         return [(x - t.tx) / t.a, (y - t.ty) / t.d]
     }
 
-    public render(renderer: PIXI.Renderer): void {
+    public override render(renderer: Renderer): void {
         if (this.viewport.update()) {
             this.gridData.recalculate()
         }
@@ -269,8 +1372,38 @@ export class BlueprintContainer extends PIXI.Container {
         this.emit('mode', mode)
     }
 
-    public enterCopyMode(): void {
-        if (this.mode === EditorMode.COPY) return
+    public rotate(ccw: boolean): void {
+        if (this.mode === EditorMode.EDIT) {
+            this.hoverContainer.entity.rotate(ccw, true)
+        } else if (this.mode === EditorMode.PAINT) {
+            if (this.paintContainer.canFlipOrRotateByCopying()) {
+                const copies = this.paintContainer.rotatedEntities(ccw)
+                this.paintContainer.destroy()
+                this.spawnPaintContainer(copies, 0)
+            } else {
+                this.paintContainer.rotate(ccw)
+            }
+        }
+    }
+
+    public flip(vertical: boolean): void {
+        if (this.mode === EditorMode.PAINT && this.paintContainer.canFlipOrRotateByCopying()) {
+            try {
+                const copies = this.paintContainer.flippedEntities(vertical)
+                this.paintContainer.destroy()
+                this.spawnPaintContainer(copies, 0)
+            } catch (e) {
+                if (e instanceof IllegalFlipError) {
+                    G.logger({ text: e.message, type: 'warning' })
+                } else {
+                    throw e
+                }
+            }
+        }
+    }
+
+    public enterCopyMode(): boolean {
+        if (this.mode === EditorMode.COPY) return false
         if (this.mode === EditorMode.PAINT) this.paintContainer.destroy()
 
         this.updateHoverContainer(true)
@@ -302,6 +1435,8 @@ export class BlueprintContainer extends PIXI.Container {
         }
         this.copyModeUpdateFn(startPos.x, startPos.y)
         this.gridData.on('update32', this.copyModeUpdateFn)
+
+        return true
     }
 
     public exitCopyMode(cancel = false): void {
@@ -322,29 +1457,8 @@ export class BlueprintContainer extends PIXI.Container {
         this.copyModeEntities = []
     }
 
-    public enterDraggingCreateMode(): void {
-        if (this.mode !== EditorMode.PAINT) return
-        if (this.draggingCreateUpdateFn !== undefined) return
-
-        this.paintContainer.placeEntityContainer()
-        this.gridData.constrained = true
-
-        this.draggingCreateUpdateFn = () => {
-            this.paintContainer.placeEntityContainer()
-        }
-
-        this.gridData.on('update32', this.draggingCreateUpdateFn)
-    }
-
-    public exitDraggingCreateMode(): void {
-        if (this.draggingCreateUpdateFn === undefined) return
-        this.gridData.constrained = false
-        this.gridData.off('update32', this.draggingCreateUpdateFn)
-        this.draggingCreateUpdateFn = undefined
-    }
-
-    public enterDeleteMode(): void {
-        if (this.mode === EditorMode.DELETE) return
+    public enterDeleteMode(): boolean {
+        if (this.mode === EditorMode.DELETE) return false
         if (this.mode === EditorMode.PAINT) this.paintContainer.destroy()
 
         this.updateHoverContainer(true)
@@ -376,6 +1490,8 @@ export class BlueprintContainer extends PIXI.Container {
         }
         this.deleteModeUpdateFn(startPos.x, startPos.y)
         this.gridData.on('update32', this.deleteModeUpdateFn)
+
+        return true
     }
 
     public exitDeleteMode(cancel = false): void {
@@ -398,20 +1514,6 @@ export class BlueprintContainer extends PIXI.Container {
         this.deleteModeEntities = []
     }
 
-    public enterPanMode(): void {
-        if (this.mode === EditorMode.NONE && this.isPointerInside) {
-            this.setMode(EditorMode.PAN)
-            this.cursor = 'move'
-        }
-    }
-
-    public exitPanMode(): void {
-        if (this.mode === EditorMode.PAN) {
-            this.setMode(EditorMode.NONE)
-            this.cursor = 'inherit'
-        }
-    }
-
     public zoom(zoomIn = true): void {
         const zoomFactor = 0.1
         this.viewport.setScaleCenter(this.gridData.x, this.gridData.y)
@@ -419,10 +1521,8 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     private get isPointerInside(): boolean {
-        const container = G.app.renderer.plugins.interaction.hitTest(
-            G.app.renderer.plugins.interaction.mouse.global,
-            G.app.stage
-        )
+        const boundary = new EventBoundary(G.app.stage)
+        const container = boundary.hitTest(this.gridData.x, this.gridData.y)
         return container === this
     }
 
@@ -432,7 +1532,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.hoverContainer = undefined
             this.setMode(EditorMode.NONE)
             this.cursor = 'inherit'
-            this.emit('removeHoverContainer')
+            this.updateCopyCursorBox()
         }
 
         if (forceRemove || !this.isPointerInside) {
@@ -446,7 +1546,7 @@ export class BlueprintContainer extends PIXI.Container {
 
         const entity = this.bp.entityPositionGrid.getEntityAtPosition({
             x: this.gridData.x32,
-            y: this.gridData.y32
+            y: this.gridData.y32,
         })
         const eC = entity ? EntityContainer.mappings.get(entity.entityNumber) : undefined
 
@@ -461,33 +1561,37 @@ export class BlueprintContainer extends PIXI.Container {
             this.setMode(EditorMode.EDIT)
             this.cursor = 'pointer'
             eC.pointerOverEventHandler()
-            this.emit('createHoverContainer')
+            this.updateCopyCursorBox()
         }
     }
 
+    private updateCopyCursorBox(): void {
+        this.overlayContainer.updateCopyCursorBox(!this.copySettingsActive)
+    }
+
     public get moveSpeed(): number {
-        return this._moveSpeed
+        return BlueprintContainer._moveSpeed
     }
 
     public set moveSpeed(speed: number) {
-        this._moveSpeed = speed
+        BlueprintContainer._moveSpeed = speed
     }
 
     public get gridColor(): number {
-        return this._gridColor
+        return BlueprintContainer._gridColor
     }
 
     public set gridColor(color: number) {
-        this._gridColor = color
+        BlueprintContainer._gridColor = color
         this.grid.tint = color
     }
 
     public get gridPattern(): GridPattern {
-        return this._gridPattern
+        return BlueprintContainer._gridPattern
     }
 
     public set gridPattern(pattern: GridPattern) {
-        this._gridPattern = pattern
+        BlueprintContainer._gridPattern = pattern
 
         const index = this.getChildIndex(this.grid)
         const old = this.grid
@@ -496,10 +1600,18 @@ export class BlueprintContainer extends PIXI.Container {
         old.destroy()
     }
 
-    private generateGrid(pattern = this.gridPattern): PIXI.TilingSprite {
+    public get limitWireReach(): boolean {
+        return BlueprintContainer._limitWireReach
+    }
+
+    public set limitWireReach(limit: boolean) {
+        BlueprintContainer._limitWireReach = limit
+    }
+
+    private generateGrid(pattern = this.gridPattern): TilingSprite {
         const gridGraphics =
             pattern === 'checker'
-                ? new PIXI.Graphics()
+                ? new Graphics()
                       .beginFill(0x808080)
                       .drawRect(0, 0, 32, 32)
                       .drawRect(32, 32, 32, 32)
@@ -508,7 +1620,7 @@ export class BlueprintContainer extends PIXI.Container {
                       .drawRect(0, 32, 32, 32)
                       .drawRect(32, 0, 32, 32)
                       .endFill()
-                : new PIXI.Graphics()
+                : new Graphics()
                       .beginFill(0x808080)
                       .drawRect(0, 0, 32, 32)
                       .endFill()
@@ -516,15 +1628,15 @@ export class BlueprintContainer extends PIXI.Container {
                       .drawRect(1, 1, 31, 31)
                       .endFill()
 
-        const renderTexture = PIXI.RenderTexture.create({
+        const renderTexture = RenderTexture.create({
             width: gridGraphics.width,
             height: gridGraphics.height,
         })
 
-        renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
+        renderTexture.baseTexture.mipmap = MIPMAP_MODES.POW2
         G.app.renderer.render(gridGraphics, { renderTexture })
 
-        const grid = new PIXI.TilingSprite(renderTexture, this.size.x, this.size.y)
+        const grid = new TilingSprite(renderTexture, this.size.x, this.size.y)
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
         grid.tint = this.gridColor
@@ -532,10 +1644,10 @@ export class BlueprintContainer extends PIXI.Container {
         return grid
     }
 
-    private generateChunkGrid(chunkOffset: number): PIXI.TilingSprite {
+    private generateChunkGrid(chunkOffset: number): TilingSprite {
         const W = 32 * 32
         const H = 32 * 32
-        const gridGraphics = new PIXI.Graphics()
+        const gridGraphics = new Graphics()
             .lineStyle({ width: 2, color: 0x000000 })
             .moveTo(0, 0)
             .lineTo(W, 0)
@@ -543,29 +1655,21 @@ export class BlueprintContainer extends PIXI.Container {
             .lineTo(0, H)
             .lineTo(0, 0)
 
-        const renderTexture = PIXI.RenderTexture.create({
+        const renderTexture = RenderTexture.create({
             width: W,
             height: H,
         })
 
-        renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
+        renderTexture.baseTexture.mipmap = MIPMAP_MODES.POW2
         G.app.renderer.render(gridGraphics, { renderTexture })
 
         // Add one more chunk to the size because of the offset
-        const grid = new PIXI.TilingSprite(renderTexture, this.size.x + W, this.size.y + H)
+        const grid = new TilingSprite(renderTexture, this.size.x + W, this.size.y + H)
         // Offset chunk grid
         grid.position.set(chunkOffset * 32, chunkOffset * 32)
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
         return grid
-    }
-
-    public get limitWireReach(): boolean {
-        return this._limitWireReach
-    }
-
-    public set limitWireReach(limit: boolean) {
-        this._limitWireReach = limit
     }
 
     public initBP(): void {
@@ -602,7 +1706,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.wiresContainer.add(hash, connection)
         )
 
-        this.on('destroy', () => {
+        this.on('destroyed', () => {
             this.bp.off('create-entity', onCreateEntity)
             this.bp.off('remove-entity', onRemoveEntity)
             this.bp.off('create-tile', onCreateTile)
@@ -616,7 +1720,6 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     public destroy(): void {
-        this.emit('destroy')
         super.destroy({ children: true })
     }
 
@@ -644,7 +1747,7 @@ export class BlueprintContainer extends PIXI.Container {
 
     public centerViewport(): void {
         const bounds = this.bp.isEmpty()
-            ? new PIXI.Rectangle(-16 * 32, -16 * 32, 32 * 32, 32 * 32)
+            ? new Rectangle(-16 * 32, -16 * 32, 32 * 32, 32 * 32)
             : this.getBlueprintBounds()
 
         this.viewport.centerViewPort(
@@ -659,11 +1762,11 @@ export class BlueprintContainer extends PIXI.Container {
         )
     }
 
-    public getBlueprintBounds(): PIXI.Rectangle {
-        const bounds = new PIXI.Bounds()
+    public getBlueprintBounds(): Rectangle {
+        const bounds = new Bounds()
 
         const addBounds = (sprite: EntitySprite): void => {
-            const sB = new PIXI.Bounds()
+            const sB = new Bounds()
             sB.minX = sprite.cachedBounds[0]
             sB.minY = sprite.cachedBounds[1]
             sB.maxX = sprite.cachedBounds[2]
@@ -674,13 +1777,13 @@ export class BlueprintContainer extends PIXI.Container {
         this.entitySprites.children.forEach(addBounds)
         this.tileSprites.children.forEach(addBounds)
 
-        const rect = bounds.getRectangle(new PIXI.Rectangle())
+        const rect = bounds.getRectangle(new Rectangle())
 
         const X = Math.floor(rect.x / 32) * 32
         const Y = Math.floor(rect.y / 32) * 32
         const W = Math.ceil((rect.width + rect.x - X) / 32) * 32
         const H = Math.ceil((rect.height + rect.y - Y) / 32) * 32
-        return new PIXI.Rectangle(X, Y, W, H)
+        return new Rectangle(X, Y, W, H)
     }
 
     public getPicture(): Promise<Blob> {
@@ -692,13 +1795,16 @@ export class BlueprintContainer extends PIXI.Container {
         const _render = this.render
         this.render = super.render
         const texture = G.app.renderer.generateTexture(this, {
-            scaleMode: PIXI.SCALE_MODES.LINEAR,
+            scaleMode: SCALE_MODES.LINEAR,
             resolution: 1,
             region,
         })
         this.render = _render
         this.viewportCulling = true
-        const canvas = G.app.renderer.plugins.extract.canvas(texture)
+
+        const extract = G.app.renderer.extract
+        // @ts-ignore - This is in fact an HTMLCanvasElement
+        const canvas: HTMLCanvasElement = extract.canvas(texture)
 
         return new Promise(resolve => {
             canvas.toBlob(blob => {
@@ -742,7 +1848,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.paintContainer.hide()
         }
 
-        this.paintContainer.on('destroy', () => {
+        this.paintContainer.on('destroyed', () => {
             this.paintContainer = undefined
             this.setMode(EditorMode.NONE)
             this.updateHoverContainer()

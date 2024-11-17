@@ -1,6 +1,6 @@
 rules:
   # Best Practices (https://eslint.org/docs/rules/#best-practices)
-  curly: [warn, all]
+  # curly: [warn, all] - conflicts with prettier
   dot-notation: [error, allowPattern: '^[a-z]+(_[a-z]+)+$']
   eqeqeq: [warn, always]
   guard-for-in: error
@@ -46,7 +46,7 @@ rules:
 
   # ECMAScript 6 (https://eslint.org/docs/rules/#ecmascript-6)
   arrow-body-style: [error, as-needed]
-  no-confusing-arrow: [error, allowParens: true]
+  # no-confusing-arrow: [error, allowParens: true] - conflicts with prettier
   no-var: error
   prefer-const: error
   prefer-rest-params: error

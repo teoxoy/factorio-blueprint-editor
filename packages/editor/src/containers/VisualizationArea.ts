@@ -1,10 +1,11 @@
-import * as PIXI from 'pixi.js'
+import { Sprite } from '@pixi/sprite'
+import { IPoint } from '../types'
 
 export class VisualizationArea {
     public static ALPHA = 0.25
-    private readonly sprites: PIXI.Sprite[]
+    private readonly sprites: Sprite[]
 
-    public constructor(sprites: PIXI.Sprite[]) {
+    public constructor(sprites: Sprite[]) {
         this.sprites = sprites
     }
 

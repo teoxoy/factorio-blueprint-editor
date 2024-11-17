@@ -1,1 +1,4 @@
-basis/
+node_modules
+dist
+packages/editor/src/basis
+packages/exporter

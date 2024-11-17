@@ -1,4 +1,5 @@
 import PF from 'pathfinding'
+import { IPoint } from '../../types'
 import U from './util'
 import { IVisualization } from './index'
 
@@ -119,8 +120,8 @@ function generatePipes(
         )
     )
 
-    const dataset: IPumpjack[] = pumpjacks
-        .map(e => {
+    const dataset = pumpjacks
+        .map<IPumpjack>(e => {
             const pos = globalToLocal(e.position)
             const plugs = PUMPJACK_PLUGS.map((o, i) => ({
                 dir: i * 2,
@@ -482,9 +483,9 @@ function generatePathFromLine(l: IPoint[]): {
     const dY = Math.abs(l[0].y - l[1].y)
     const minX = Math.min(l[0].x, l[1].x)
     const minY = Math.min(l[0].y, l[1].y)
-    const path: IPoint[] = dX
-        ? U.range(0, dX + 1).map(i => ({ x: i + minX, y: l[0].y }))
-        : U.range(0, dY + 1).map(i => ({ x: l[0].x, y: i + minY }))
+    const path = dX
+        ? U.range(0, dX + 1).map<IPoint>(i => ({ x: i + minX, y: l[0].y }))
+        : U.range(0, dY + 1).map<IPoint>(i => ({ x: l[0].x, y: i + minY }))
 
     return {
         path,

@@ -1,19 +1,29 @@
 {
     "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+
         "pretty": true,
         "sourceMap": true,
+        // "strict": true,
         "alwaysStrict": true,
-        "removeComments": true,
         "noImplicitAny": true,
+        // "noImplicitReturns": true,
         "noUnusedLocals": true,
+        // "strictNullChecks": true,
         "noUnusedParameters": true,
-        "preserveConstEnums": true,
+        "useDefineForClassFields": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+        "moduleResolution": "nodenext",
+        "isolatedModules": true,
+        "esModuleInterop": true,
 
         "rootDir": ".",
         "baseUrl": ".",
         "paths": {
-            "@fbe/*": ["packages/*/src/index.ts"],
-            "mini-signals": ["node_modules/resource-loader/typings/mini-signals.d.ts"]
+            "@fbe/*": ["packages/*/src/index.ts"]
         },
 
         "typeRoots": ["./node_modules/@types"]

@@ -1,20 +1,27 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
 import { Blueprint } from '../core/Blueprint'
 import { IConnection, IConnectionPoint } from '../core/WireConnections'
 import U from '../core/generators/util'
+import { IPoint } from '../types'
 import { EntityContainer } from './EntityContainer'
 
-export class WiresContainer extends PIXI.Container {
+export class WiresContainer extends Container {
     private readonly bp: Blueprint
-    private connectionToSprite = new Map<string, PIXI.Graphics>()
+    private connectionToSprite = new Map<string, Graphics>()
 
     public constructor(bp: Blueprint) {
         super()
         this.bp = bp
     }
 
-    private static createWire(p1: IPoint, p2: IPoint, color: string, connectionsReach = true): PIXI.Graphics {
-        const wire = new PIXI.Graphics()
+    private static createWire(
+        p1: IPoint,
+        p2: IPoint,
+        color: string,
+        connectionsReach = true
+    ): Graphics {
+        const wire = new Graphics()
 
         const minX = Math.min(p1.x, p2.x)
         const minY = Math.min(p1.y, p2.y)
@@ -32,7 +39,7 @@ export class WiresContainer extends PIXI.Container {
         wire.lineStyle({
             width: 1.5,
             color: colorMap[color],
-            alpha: (connectionsReach ? 1 : 0.3),
+            alpha: connectionsReach ? 1 : 0.3,
         })
         wire.moveTo(0, 0)
 
@@ -99,7 +106,9 @@ export class WiresContainer extends PIXI.Container {
 
         for (const conn of connections) {
             const entNr =
-                entityNumber === conn.cps[0].entityNumber ? conn.cps[1].entityNumber : conn.cps[0].entityNumber
+                entityNumber === conn.cps[0].entityNumber
+                    ? conn.cps[1].entityNumber
+                    : conn.cps[0].entityNumber
             const ec = EntityContainer.mappings.get(entNr)
             if (ec.entity.type === 'electric_pole') {
                 ec.redraw()
@@ -128,7 +137,7 @@ export class WiresContainer extends PIXI.Container {
         }
     }
 
-    private getWireSprite(connection: IConnection): PIXI.Graphics {
+    private getWireSprite(connection: IConnection): Graphics {
         const getWirePos = (cp: IConnectionPoint, color: string): IPoint => {
             if (cp.entityNumber) {
                 const entity = this.bp.entities.get(cp.entityNumber)
@@ -161,7 +170,10 @@ export class WiresContainer extends PIXI.Container {
         const connectionsReach = U.pointInCircle(
             getPos(connection.cps[0]),
             getPos(connection.cps[1]),
-            Math.min(Infinity, ...connection.cps.map(getMaxWireDistance).filter(d => d !== undefined))
+            Math.min(
+                Infinity,
+                ...connection.cps.map(getMaxWireDistance).filter(d => d !== undefined)
+            )
         )
 
         return WiresContainer.createWire(

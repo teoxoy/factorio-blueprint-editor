@@ -1,24 +1,25 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
 import { colors } from '../style'
 import F from './functions'
 
 /** Base Checkbox */
-export class Switch extends PIXI.Container {
+export class Switch<T extends string> extends Container {
     /** Container to hold switch button */
-    private readonly m_Button: PIXI.Container
+    private readonly m_Button: Container
 
     /** Options for switch */
-    private readonly m_Values: string[]
+    private readonly m_Values: T[]
 
     /** Data of switch */
-    private m_Value: string
+    private m_Value: T
 
     /**
      * Create switch control
      * @param values - Possible values
      * @param value - Default value (If value is set to undefined - tri-state switch)
      */
-    public constructor(values: string[], value?: string) {
+    public constructor(values: T[], value?: T) {
         super()
 
         this.interactive = true
@@ -26,13 +27,13 @@ export class Switch extends PIXI.Container {
         this.m_Value = value
 
         // Draw bounds (needed so mouse click will react at the entire switch area)
-        const boundaryGraphic: PIXI.Graphics = new PIXI.Graphics()
+        const boundaryGraphic = new Graphics()
         boundaryGraphic.beginFill(0x000000, 0).drawRect(0, 0, 36, 16).endFill()
         boundaryGraphic.position.set(0, 0)
         this.addChild(boundaryGraphic)
 
         // Draw line
-        const buttonLine: PIXI.Graphics = new PIXI.Graphics()
+        const buttonLine = new Graphics()
         buttonLine
             .lineStyle({
                 width: 2,
@@ -76,7 +77,7 @@ export class Switch extends PIXI.Container {
         this.addChild(buttonLine)
 
         // Draw button
-        const buttonMask: PIXI.Graphics = new PIXI.Graphics()
+        const buttonMask = new Graphics()
         buttonMask.beginFill(0x000000).drawRoundedRect(0, 0, 32, 32, 6).endFill()
 
         // Draw button
@@ -107,7 +108,7 @@ export class Switch extends PIXI.Container {
         buttonHover.position.set(0, 0)
         buttonHover.visible = false
 
-        this.m_Button = new PIXI.Container()
+        this.m_Button = new Container()
         this.m_Button.addChild(buttonFace)
         this.m_Button.addChild(buttonHover)
         this.addChild(this.m_Button)
@@ -129,10 +130,10 @@ export class Switch extends PIXI.Container {
     }
 
     /** Is checkbox checked */
-    public get value(): string {
+    public get value(): T {
         return this.m_Value
     }
-    public set value(value: string) {
+    public set value(value: T) {
         if (this.m_Value !== value) {
             this.m_Value = value
             this.updateButtonPosition()
@@ -141,7 +142,7 @@ export class Switch extends PIXI.Container {
 
     /** Update Button Position based on value */
     private updateButtonPosition(): void {
-        const index: number = this.m_Value === undefined ? -1 : this.m_Values.indexOf(this.m_Value)
+        const index = this.m_Value === undefined ? -1 : this.m_Values.indexOf(this.m_Value)
         if (index === -1) {
             this.m_Button.position.set(10, 0)
         } else {

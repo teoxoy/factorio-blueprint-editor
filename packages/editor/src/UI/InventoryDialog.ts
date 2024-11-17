@@ -1,4 +1,5 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { Text } from '@pixi/text'
 import FD from '../core/factorioData'
 import G from '../common/globals'
 import F from './controls/functions'
@@ -31,19 +32,21 @@ import { colors, styles } from './style'
     Height : 10 + 16 + 10 + 36 + 8 = 78
 */
 
+type InventoryItems = Container<Button<Container>>
+
 /** Inventory Dialog - Displayed to the user if there is a need to select an item */
 export class InventoryDialog extends Dialog {
     /** Container for Inventory Group Buttons */
-    private readonly m_InventoryGroups: PIXI.Container
+    private readonly m_InventoryGroups: Container<Button<InventoryItems>>
 
     /** Container for Inventory Group Items */
-    private readonly m_InventoryItems: PIXI.Container
+    private readonly m_InventoryItems: Container<InventoryItems>
 
     /** Text for Recipe Tooltip */
-    private readonly m_RecipeLabel: PIXI.Text
+    private readonly m_RecipeLabel: Text
 
     /** Container for Recipe Tooltip */
-    private readonly m_RecipeContainer: PIXI.Container
+    private readonly m_RecipeContainer: Container
 
     /** Hovered item for item pointerout check */
     private m_hoveredItem: string
@@ -55,11 +58,11 @@ export class InventoryDialog extends Dialog {
     ) {
         super(404, 442, title)
 
-        this.m_InventoryGroups = new PIXI.Container()
+        this.m_InventoryGroups = new Container()
         this.m_InventoryGroups.position.set(12, 46)
         this.addChild(this.m_InventoryGroups)
 
-        this.m_InventoryItems = new PIXI.Container()
+        this.m_InventoryItems = new Container()
         this.m_InventoryItems.position.set(12, 126)
         this.addChild(this.m_InventoryItems)
 
@@ -70,7 +73,7 @@ export class InventoryDialog extends Dialog {
                 continue
             }
 
-            const inventoryGroupItems = new PIXI.Container()
+            const inventoryGroupItems = new Container<Button<Container>>()
             let itemColIndex = 0
             let itemRowIndex = 0
 
@@ -81,7 +84,12 @@ export class InventoryDialog extends Dialog {
                     if (itemsFilter === undefined) {
                         const itemData = FD.items[item.name]
                         if (!itemData) continue
-                        if (!itemData.place_result && !itemData.place_as_tile && !itemData.wire_count) continue
+                        if (
+                            !itemData.place_result &&
+                            !itemData.place_as_tile &&
+                            !itemData.wire_count
+                        )
+                            continue
                         // needed for robots/trains/cars
                         if (itemData.place_result && !FD.entities[itemData.place_result]) continue
                     } else {
@@ -93,12 +101,12 @@ export class InventoryDialog extends Dialog {
                         itemRowIndex += 1
                     }
 
-                    const button: Button = new Button(36, 36)
+                    const button = new Button<Container>(36, 36)
                     button.position.set(itemColIndex * 38, itemRowIndex * 38)
                     button.content = F.CreateIcon(item.name)
-                    button.on('pointerdown', (e: PIXI.InteractionEvent) => {
+                    button.on('pointerdown', e => {
                         e.stopPropagation()
-                        if (e.data.button === 0) {
+                        if (e.button === 0) {
                             selectedCallBack(item.name)
                             this.close()
                         }
@@ -132,23 +140,22 @@ export class InventoryDialog extends Dialog {
                 inventoryGroupItems.visible = groupIndex === 0
                 this.m_InventoryItems.addChild(inventoryGroupItems)
 
-                const button = new Button(68, 68, 3)
+                const button = new Button<Container<Button<Container>>>(68, 68, 3)
                 button.active = groupIndex === 0
                 button.position.set(groupIndex * 70, 0)
                 button.content = F.CreateIcon(group.name, group.name === 'creative' ? 32 : 64)
                 button.data = inventoryGroupItems
-                button.on('pointerdown', (e: PIXI.InteractionEvent) => {
-                    if (e.data.button === 0) {
+                button.on('pointerdown', e => {
+                    e.stopPropagation()
+                    if (e.button === 0) {
                         if (!button.active) {
-                            for (const inventoryGroup of this.m_InventoryGroups
-                                .children as Button[]) {
+                            for (const inventoryGroup of this.m_InventoryGroups.children) {
                                 inventoryGroup.active = inventoryGroup === button
                             }
                         }
-                        const buttonData: PIXI.Container = button.data as PIXI.Container
+                        const buttonData = button.data
                         if (!buttonData.visible) {
-                            for (const inventoryGroupItems of this.m_InventoryItems
-                                .children as PIXI.Container[]) {
+                            for (const inventoryGroupItems of this.m_InventoryItems.children) {
                                 inventoryGroupItems.visible = inventoryGroupItems === buttonData
                                 inventoryGroupItems.interactiveChildren =
                                     inventoryGroupItems === buttonData
@@ -163,11 +170,11 @@ export class InventoryDialog extends Dialog {
             }
         }
 
-        const recipePanel: PIXI.Container = new PIXI.Container()
+        const recipePanel = new Container()
         recipePanel.position.set(0, 442)
         this.addChild(recipePanel)
 
-        const recipeBackground: PIXI.Graphics = F.DrawRectangle(
+        const recipeBackground = F.DrawRectangle(
             404,
             78,
             colors.dialog.background.color,
@@ -177,17 +184,17 @@ export class InventoryDialog extends Dialog {
         recipeBackground.position.set(0, 0)
         recipePanel.addChild(recipeBackground)
 
-        this.m_RecipeLabel = new PIXI.Text('', styles.dialog.label)
+        this.m_RecipeLabel = new Text('', styles.dialog.label)
         this.m_RecipeLabel.position.set(12, 10)
         recipePanel.addChild(this.m_RecipeLabel)
 
-        this.m_RecipeContainer = new PIXI.Container()
+        this.m_RecipeContainer = new Container()
         this.m_RecipeContainer.position.set(12, 36)
         recipePanel.addChild(this.m_RecipeContainer)
     }
 
     /** Override automatically set position of dialog due to additional area for recipe */
-    protected setPosition(): void {
+    protected override setPosition(): void {
         this.position.set(
             G.app.screen.width / 2 - this.width / 2,
             G.app.screen.height / 2 - 520 / 2

@@ -1,21 +1,26 @@
-import * as PIXI from 'pixi.js'
-import { passtroughAllEvents } from '../../actions'
+// NO LONGER IN USE
+
+import { Container } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
+import { Text, TextMetrics, TextStyle } from '@pixi/text'
 import { colors, styles } from '../style'
 import F from './functions'
 
 // TODO: Evaluate enhancement: Posibility to set caret with mouse (prototype commented ou with 'PT')
 // TODO: Evaluate enhancement: Text marking / copy / paste
 
+const STYLE = new TextStyle(styles.controls.textbox)
+
 /** Class representing single character in textbox */
-class TextChar extends PIXI.Text {
+class TextChar extends Text {
     /** Text metrics for character */
-    private readonly m_Metrics: PIXI.TextMetrics
+    private readonly m_Metrics: TextMetrics
 
     public constructor(char: string, left = 0) {
-        super(char, styles.controls.textbox)
+        super(char, STYLE)
         // (PT) this.interactive = true
         this.position.set(left, 0)
-        this.m_Metrics = PIXI.TextMetrics.measureText(this.text, styles.controls.textbox)
+        this.m_Metrics = TextMetrics.measureText(this.text, STYLE)
     }
 
     /** Width in pixel of char */
@@ -30,7 +35,7 @@ class TextChar extends PIXI.Text {
 }
 
 /** Class representing all text in textbox */
-class TextContainer extends PIXI.Container {
+class TextContainer extends Container<TextChar> {
     /**
      * Construct text container
      * @param text Initial text
@@ -43,12 +48,12 @@ class TextContainer extends PIXI.Container {
 
     /** Text value */
     public get text(): string {
-        return this.children.reduce((text: string, current: TextChar) => text + current.text, '')
+        return this.children.reduce((text, current) => text + current.text, '')
     }
     public set text(text: string) {
         this.removeChildren()
         for (let i = 0; i < text.length; i++) {
-            // (PT) const char: TextChar = new TextChar(text.charAt(i), this.width)
+            // (PT) const char = new TextChar(text.charAt(i), this.width)
             // (PT) char.on('pointerdown', () => this.onTextCharDown(char))
             // (PT) this.addChild(char)
             this.addChild(new TextChar(text.charAt(i), this.width))
@@ -72,7 +77,7 @@ class TextContainer extends PIXI.Container {
         if (position < 1 || position > this.children.length) {
             throw new RangeError('Argument position out of range')
         }
-        return super.getChildAt(position - 1) as TextChar
+        return super.getChildAt(position - 1)
     }
 
     /** Add char at specific position (position is base 1 indexed) */
@@ -109,7 +114,7 @@ class TextContainer extends PIXI.Container {
         let x = 0
         for (const textChar of this.children) {
             textChar.x = x
-            x += (textChar as TextChar).width
+            x += textChar.width
         }
     }
 
@@ -123,12 +128,12 @@ class TextContainer extends PIXI.Container {
 }
 
 /** Base Textbox Control */
-export class Textbox extends PIXI.Container {
+export class Textbox extends Container {
     /** Textbox regular background graphic */
-    private readonly m_Background: PIXI.Graphics
+    private readonly m_Background: Graphics
 
     /** Textbox active background graphic */
-    private readonly m_Active: PIXI.Graphics
+    private readonly m_Active: Graphics
 
     /** Container to hold text chars */
     private readonly m_Text: TextContainer
@@ -140,7 +145,7 @@ export class Textbox extends PIXI.Container {
     private readonly m_Filter: string
 
     /** Caret Graphic */
-    private readonly m_CaretGraphic: PIXI.Graphics
+    private readonly m_CaretGraphic: Graphics
 
     /** Caret Position */
     private p_CaretPosition: number
@@ -164,7 +169,7 @@ export class Textbox extends PIXI.Container {
         this.m_Filter = filter
 
         // 1 (Border) + 2 (Space) + Text Height + 2 (Space) + 1 Border = Text Height + 6
-        const height: number = PIXI.TextMetrics.measureText(text, styles.controls.textbox).height
+        const height = TextMetrics.measureText(text, STYLE).height
 
         this.m_Background = F.DrawRectangle(
             width,
@@ -192,7 +197,7 @@ export class Textbox extends PIXI.Container {
         // (PT) this.m_Text.on('textchardown', (position: number) => this.caretPosition = position)
         this.addChild(this.m_Text)
 
-        this.m_CaretGraphic = new PIXI.Graphics()
+        this.m_CaretGraphic = new Graphics()
         this.m_CaretGraphic
             .lineStyle({ width: 1, color: colors.controls.textbox.foreground.color })
             .moveTo(0, 0)
@@ -235,7 +240,7 @@ export class Textbox extends PIXI.Container {
         if (this.p_CaretPosition === 0) {
             this.m_CaretGraphic.x = 3
         } else {
-            const textChar = this.m_Text.getChildAt(position - 1) as TextChar
+            const textChar = this.m_Text.getChildAt(position - 1)
             this.m_CaretGraphic.x = textChar.x + textChar.width + 3
         }
     }
@@ -273,7 +278,7 @@ export class Textbox extends PIXI.Container {
     /** Pointer up event callback */
     private readonly onPointerUp = (): void => {
         if (!this.m_Active.visible) {
-            passtroughAllEvents(this.keyPressedCallback.bind(this))
+            // passtroughAllEvents(this.keyPressedCallback.bind(this))
             this.m_CaretGraphic.visible = true
             // (PT) this.m_Text.activate()
             this.m_Active.visible = true

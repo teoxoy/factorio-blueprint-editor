@@ -1,9 +1,12 @@
-import * as PIXI from 'pixi.js'
+import { Sprite } from '@pixi/sprite'
+import { Texture } from '@pixi/core'
+import { IPoint } from '../types'
 import G from '../common/globals'
 import F from '../UI/controls/functions'
 import { Entity } from '../core/Entity'
 import { PositionGrid } from '../core/PositionGrid'
-import { getSpriteData, ISpriteData } from '../core/spriteDataBuilder'
+import { getSpriteData, ExtendedSpriteData } from '../core/spriteDataBuilder'
+import { ColorWithAlpha } from '../core/factorioData'
 
 interface IEntityData {
     name: string
@@ -15,29 +18,23 @@ interface IEntityData {
     operator?: string
     assemblerCraftsWithFluid?: boolean
     assemblerPipeDirection?: string
-    trainStopColor?: {
-        r: number
-        g: number
-        b: number
-        a: number
-    }
+    trainStopColor?: ColorWithAlpha
     chemicalPlantDontConnectOutput?: boolean
     modules?: string[]
 }
 
-export class EntitySprite extends PIXI.Sprite {
+export class EntitySprite extends Sprite {
     private static nextID = 0
 
     private id: number
-    /** Should be private but TS complains */
-    public zIndex: number
+    private __zIndex: number
     private zOrder: number
     public cachedBounds: [number, number, number, number]
     private readonly entityPos: IPoint
 
     public constructor(
-        texture: PIXI.Texture,
-        data: ISpriteData,
+        texture: Texture,
+        data: ExtendedSpriteData,
         position: IPoint = { x: 0, y: 0 }
     ) {
         super(texture)
@@ -104,7 +101,7 @@ export class EntitySprite extends PIXI.Sprite {
             modules: entity.modules,
         })
 
-        // TODO: maybe move the zIndex logic to spriteDataBuilder
+        // TODO: maybe move the __zIndex logic to spriteDataBuilder
         const parts: EntitySprite[] = []
 
         let foundMainBelt = false
@@ -115,27 +112,27 @@ export class EntitySprite extends PIXI.Sprite {
             const sprite = new EntitySprite(texture, data, position)
 
             if (data.filename.includes('circuit-connector')) {
-                sprite.zIndex = 1
+                sprite.__zIndex = 1
             } else if (entity.name === 'artillery_turret' && i > 0) {
-                sprite.zIndex = 2
+                sprite.__zIndex = 2
             } else if (
                 (entity.name === 'rail_signal' || entity.name === 'rail_chain_signal') &&
                 i === 0
             ) {
-                sprite.zIndex = -8
+                sprite.__zIndex = -8
             } else if (entity.name === 'straight_rail' || entity.name === 'curved_rail') {
                 if (i < 2) {
-                    sprite.zIndex = -10
+                    sprite.__zIndex = -10
                 } else if (i < 4) {
-                    sprite.zIndex = -9
+                    sprite.__zIndex = -9
                 } else {
-                    sprite.zIndex = -7
+                    sprite.__zIndex = -7
                 }
             } else if (entity.type === 'transport_belt' || entity.name === 'heat_pipe') {
-                sprite.zIndex = i === 0 ? -6 : -5
+                sprite.__zIndex = i === 0 ? -6 : -5
 
                 if (data.filename.includes('connector') && !data.filename.includes('back-patch')) {
-                    sprite.zIndex = 0
+                    sprite.__zIndex = 0
                 }
             } else if (
                 entity.type === 'splitter' ||
@@ -144,10 +141,10 @@ export class EntitySprite extends PIXI.Sprite {
             ) {
                 if (!foundMainBelt && data.filename.includes('transport-belt')) {
                     foundMainBelt = true
-                    sprite.zIndex = -6
+                    sprite.__zIndex = -6
                 }
             } else {
-                sprite.zIndex = 0
+                sprite.__zIndex = 0
             }
             sprite.zOrder = i
 
@@ -158,7 +155,7 @@ export class EntitySprite extends PIXI.Sprite {
     }
 
     public static compareFn(a: EntitySprite, b: EntitySprite): number {
-        const dZ = a.zIndex - b.zIndex
+        const dZ = a.__zIndex - b.__zIndex
         if (dZ !== 0) return dZ
 
         const dY = a.entityPos.y - b.entityPos.y

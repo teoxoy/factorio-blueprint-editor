@@ -1,25 +1,26 @@
 {
     "private": true,
     "workspaces": [
-        "packages/*"
+        "packages/editor",
+        "packages/website"
     ],
     "scripts": {
-        "start:website": "yarn workspace @fbe/website run start",
+        "start:website": "npm --workspace=@fbe/website run start",
+        "preview:website": "npm --workspace=@fbe/website run preview",
         "start:exporter": "cd ./packages/exporter && systemfd --no-pid -s http::8888 -- cargo watch -w ./src -x \"run --features dev\"",
-        "build:website": "yarn workspace @fbe/website run build",
-        "lint": "eslint **/*.ts --config .eslintrc.yml --ignore-path .gitignore",
-        "lint:fix": "eslint **/*.ts --fix --config .eslintrc.yml --ignore-path .gitignore",
-        "format": "prettier **/*.{js,ts,html,json,yml,md} --check --config .prettierrc.yml --ignore-path .gitignore",
-        "format:fix": "prettier **/*.{js,ts,html,json,yml,md} --write --config .prettierrc.yml --ignore-path .gitignore"
+        "build:website": "npm --workspace=@fbe/website run build",
+        "lint": "eslint **/*.ts --config .eslintrc.yml",
+        "lint:fix": "eslint **/*.ts --fix --config .eslintrc.yml",
+        "format": "prettier **/*.{js,ts,html,json,yml,md} --check --config .prettierrc.yml",
+        "format:fix": "prettier **/*.{js,ts,html,json,yml,md} --write --config .prettierrc.yml"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.7.0",
-        "@typescript-eslint/parser": "^5.7.0",
-        "eslint": "^8.4.1",
-        "eslint-config-prettier": "^8.3.0",
-        "eslint-import-resolver-typescript": "^2.5.0",
-        "eslint-plugin-import": "^2.25.3",
-        "prettier": "^2.5.1",
-        "typescript": "^4.5.4"
+        "@typescript-eslint/eslint-plugin": "^5.54.0",
+        "@typescript-eslint/parser": "^5.54.0",
+        "eslint": "^8.35.0",
+        "eslint-import-resolver-typescript": "^3.5.3",
+        "eslint-plugin-import": "^2.27.5",
+        "prettier": "^2.8.4",
+        "typescript": "^4.9.5"
     }
 }

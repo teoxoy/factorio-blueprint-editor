@@ -30,3 +30,9 @@ rules:
         - static-method
         - instance-method
         - abstract-method
+  '@typescript-eslint/no-empty-function':
+    - warn
+    - allow: ['overrideMethods']
+  '@typescript-eslint/no-unused-vars':
+    - warn
+    - argsIgnorePattern: '^_'

@@ -1,4 +1,5 @@
-import { Entity } from '../../core/Entity'
+import { EventNames, EventListener } from 'eventemitter3'
+import { Entity, EntityEvents } from '../../core/Entity'
 import { Dialog } from '../controls/Dialog'
 import { Preview } from './components/Preview'
 import { Recipe } from './components/Recipe'
@@ -42,7 +43,7 @@ export abstract class Editor extends Dialog {
      * @param y - Vertical position of Recipe Slot from top left corner
      */
     protected addRecipe(x = 208, y = 45): Recipe {
-        const recipe: Recipe = new Recipe(this.m_Entity)
+        const recipe = new Recipe(this.m_Entity)
         recipe.position.set(x, y)
         this.addChild(recipe)
 
@@ -57,7 +58,7 @@ export abstract class Editor extends Dialog {
      * @param y - Vertical position of Module Slots from top left corner
      */
     protected addModules(x = 208, y = 83): Modules {
-        const modules: Modules = new Modules(this.m_Entity)
+        const modules = new Modules(this.m_Entity)
         modules.position.set(x, y)
         this.addChild(modules)
 
@@ -73,7 +74,7 @@ export abstract class Editor extends Dialog {
      * @param counts - Shall filter counts be shown
      */
     protected addFilters(x = 208, y = 83, amount = false): Filters {
-        const filters: Filters = new Filters(this.m_Entity, amount)
+        const filters = new Filters(this.m_Entity, amount)
         filters.position.set(x, y)
         this.addChild(filters)
 
@@ -81,13 +82,11 @@ export abstract class Editor extends Dialog {
         return filters
     }
 
-    protected onEntityChange(event: string, fn: (...args: any[]) => void): void {
+    protected onEntityChange<T extends EventNames<EntityEvents>>(
+        event: T,
+        fn: EventListener<EntityEvents, T>
+    ): void {
         this.m_Entity.on(event, fn)
-        this.once('destroy', () => this.m_Entity.off(event, fn))
-    }
-
-    public destroy(): void {
-        this.emit('destroy')
-        super.destroy()
+        this.once('destroyed', () => this.m_Entity.off(event, fn))
     }
 }

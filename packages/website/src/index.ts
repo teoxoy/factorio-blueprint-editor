@@ -91,7 +91,7 @@ for (const p of params) {
 let changeBookForIndexSelector: (bpOrBook: Book | Blueprint) => void
 
 editor
-    .init(CANVAS, (text: string) => createToast({text, type: 'error', timeout: 3000}))
+    .init(CANVAS, createToast)
     .then(() => {
         if (localStorage.getItem('quickbarItemNames')) {
             const quickbarItems = JSON.parse(localStorage.getItem('quickbarItemNames'))
@@ -159,11 +159,7 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
     }
 
     encode(book || bp)
-        .then(s =>
-            navigator.clipboard && navigator.clipboard.writeText
-                ? navigator.clipboard.writeText(s)
-                : e.clipboardData.setData('text/plain', s)
-        )
+        .then(s => navigator.clipboard.writeText(s))
         .then(onSuccess)
         .catch(onError)
 })
@@ -174,12 +170,8 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
 
     loadingScreen.show()
 
-    const promise =
-        navigator.clipboard && navigator.clipboard.readText
-            ? navigator.clipboard.readText()
-            : Promise.resolve(e.clipboardData.getData('text'))
-
-    promise
+    navigator.clipboard
+        .readText()
         .then(getBlueprintOrBookFromSource)
         .then(loadBp)
         .catch(error => {
@@ -195,13 +187,14 @@ function registerActions(): void {
 
     EDITOR.registerAction('appendBlueprint', 'shift+modifier+v').bind({
         press: () => {
-             navigator.clipboard.readText()
+            navigator.clipboard
+                .readText()
                 .then(getBlueprintOrBookFromSource)
                 .then(bp => editor.appendBlueprint(bp instanceof Book ? bp.selectBlueprint(0) : bp))
                 .catch(error => {
                     createBPImportError(error)
                 })
-            },
+        },
     })
 
     EDITOR.registerAction('generateOilOutpost', 'g').bind({
@@ -214,6 +207,7 @@ function registerActions(): void {
     })
 
     window.addEventListener('keydown', e => {
+        if (e.target instanceof HTMLInputElement) return
         const infoPanel = document.getElementById('info-panel')
         if (e.key === 'i') {
             if (infoPanel.classList.contains('active')) {

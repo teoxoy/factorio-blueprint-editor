@@ -1,0 +1,5 @@
+node_modules
+dist
+packages/editor/src/basis
+packages/exporter
+packages/website/vite.config.ts

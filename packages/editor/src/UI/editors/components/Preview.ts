@@ -1,12 +1,14 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
+import { EventNames, EventListener } from 'eventemitter3'
 import util from '../../../common/util'
 import { EntitySprite } from '../../../containers/EntitySprite'
 import { OverlayContainer } from '../../../containers/OverlayContainer'
-import { Entity } from '../../../core/Entity'
+import { Entity, EntityEvents } from '../../../core/Entity'
 import { colors } from '../../style'
 
 /** Preview of Entity */
-export class Preview extends PIXI.Container {
+export class Preview extends Container {
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 
@@ -14,7 +16,7 @@ export class Preview extends PIXI.Container {
     private readonly m_Size: number
 
     /** Container to host preview */
-    private m_Preview: PIXI.Container
+    private m_Preview: Container
 
     public constructor(entity: Entity, size: number) {
         super()
@@ -23,14 +25,14 @@ export class Preview extends PIXI.Container {
         this.m_Size = size
 
         // Background of entity preview
-        const background = new PIXI.Graphics()
+        const background = new Graphics()
             .beginFill(colors.editor.sprite.background.color, colors.editor.sprite.background.alpha)
             .drawRect(0, 0, size, size)
             .endFill()
         this.addChild(background)
 
         // Mask for the entity parts
-        const mask = new PIXI.Graphics().beginFill(0xffffff).drawRect(0, 0, size, size).endFill()
+        const mask = new Graphics().beginFill(0xffffff).drawRect(0, 0, size, size).endFill()
         this.addChild(mask)
         this.mask = mask
 
@@ -45,20 +47,18 @@ export class Preview extends PIXI.Container {
         this.onEntityChange('splitterOutputPriority', this.onEntityChanged)
     }
 
-    private onEntityChange(event: string, fn: (...args: any[]) => void): void {
+    private onEntityChange<T extends EventNames<EntityEvents>>(
+        event: T,
+        fn: EventListener<EntityEvents, T>
+    ): void {
         this.m_Entity.on(event, fn)
-        this.once('destroy', () => this.m_Entity.off(event, fn))
-    }
-
-    public destroy(opts?: boolean | PIXI.IDestroyOptions): void {
-        this.emit('destroy')
-        super.destroy(opts)
+        this.once('destroyed', () => this.m_Entity.off(event, fn))
     }
 
     /** Create the perview */
-    private generatePreview(): PIXI.Container {
+    private generatePreview(): Container {
         // Add all entity parts to a separate container
-        const entityParts: PIXI.Container = new PIXI.Container()
+        const entityParts = new Container()
         entityParts.addChild(...EntitySprite.getParts(this.m_Entity))
         this.addChild(entityParts)
 

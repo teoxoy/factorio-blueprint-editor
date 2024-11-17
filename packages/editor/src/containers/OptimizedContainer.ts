@@ -1,11 +1,11 @@
-import * as PIXI from 'pixi.js'
+import { Renderer } from '@pixi/core'
+import { Container } from '@pixi/display'
 import G from '../common/globals'
 import { EntitySprite } from './EntitySprite'
 import { BlueprintContainer } from './BlueprintContainer'
 
-export class OptimizedContainer extends PIXI.Container {
+export class OptimizedContainer extends Container<EntitySprite> {
     private bpc: BlueprintContainer
-    public children: EntitySprite[]
 
     public constructor(bpc: BlueprintContainer) {
         super()
@@ -22,10 +22,7 @@ export class OptimizedContainer extends PIXI.Container {
         }
     }
 
-    public render(renderer: PIXI.Renderer): void {
-        const batchRenderer = renderer.plugins.batch as PIXI.AbstractBatchRenderer
-        renderer.batch.setObjectRenderer(batchRenderer)
-
+    public override render(renderer: Renderer): void {
         const [minX, minY] = this.bpc.toWorld(G.app.screen.x, G.app.screen.y)
         const [maxX, maxY] = this.bpc.toWorld(G.app.screen.width, G.app.screen.height)
 
@@ -41,8 +38,7 @@ export class OptimizedContainer extends PIXI.Container {
                 }
             }
 
-            c.calculateVertices()
-            batchRenderer.render(c)
+            c.render(renderer)
         }
     }
 }

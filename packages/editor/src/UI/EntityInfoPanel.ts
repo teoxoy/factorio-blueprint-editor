@@ -1,4 +1,6 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { Rectangle } from '@pixi/math'
+import { Text } from '@pixi/text'
 import FD from '../core/factorioData'
 import G from '../common/globals'
 import util from '../common/util'
@@ -53,15 +55,15 @@ const roundToFour = (n: number): number => Math.round(n * 10000) / 10000
  * This class creates a panel to show detailed informations about each entity (as the original game and maybe more).
  * @function updateVisualization (Update informations and show/hide panel)
  * @function setPosition (top right corner of the screen)
- * @extends /controls/panel (extends PIXI.Container)
+ * @extends /controls/panel (extends Container)
  * @see instantiation in /index.ts - event in /containers/entity.ts
  */
 export class EntityInfoPanel extends Panel {
-    private title: PIXI.Text
-    private m_EntityName: PIXI.Text
-    private m_entityInfo: PIXI.Text
-    private m_RecipeContainer: PIXI.Container
-    private m_RecipeIOContainer: PIXI.Container
+    private title: Text
+    private m_EntityName: Text
+    private m_entityInfo: Text
+    private m_RecipeContainer: Container
+    private m_RecipeIOContainer: Container
 
     public constructor() {
         super(270, 270)
@@ -69,15 +71,15 @@ export class EntityInfoPanel extends Panel {
         this.interactive = false
         this.visible = false
 
-        this.title = new PIXI.Text('Information', styles.dialog.title)
+        this.title = new Text('Information', styles.dialog.title)
         this.title.anchor.set(0.5, 0)
         this.title.position.set(super.width / 2, 2)
         this.addChild(this.title)
 
-        this.m_EntityName = new PIXI.Text('', styles.dialog.label)
-        this.m_entityInfo = new PIXI.Text('', styles.dialog.label)
-        this.m_RecipeContainer = new PIXI.Container()
-        this.m_RecipeIOContainer = new PIXI.Container()
+        this.m_EntityName = new Text('', styles.dialog.label)
+        this.m_entityInfo = new Text('', styles.dialog.label)
+        this.m_RecipeContainer = new Container()
+        this.m_RecipeIOContainer = new Container()
 
         this.addChild(
             this.m_EntityName,
@@ -180,7 +182,7 @@ export class EntityInfoPanel extends Panel {
             if (recipe === undefined) return
 
             // Show the original recipe
-            this.m_RecipeContainer.addChild(new PIXI.Text('Recipe:', styles.dialog.label))
+            this.m_RecipeContainer.addChild(new Text('Recipe:', styles.dialog.label))
             F.CreateRecipe(
                 this.m_RecipeContainer,
                 0,
@@ -194,7 +196,7 @@ export class EntityInfoPanel extends Panel {
 
             // Show recipe that takes entity effects into account
             this.m_RecipeIOContainer.addChild(
-                new PIXI.Text('Recipe (takes entity effects into account):', styles.dialog.label)
+                new Text('Recipe (takes entity effects into account):', styles.dialog.label)
             )
             F.CreateRecipe(
                 this.m_RecipeIOContainer,
@@ -263,12 +265,12 @@ export class EntityInfoPanel extends Panel {
         }
     }
 
-    protected setPosition(): void {
+    protected override setPosition(): void {
         this.position.set(G.app.screen.width - this.width + 1, 0)
     }
 
     private findNearbyBeacons(entity: Entity): Entity[] {
-        const entityRect = new PIXI.Rectangle(entity.position.x, entity.position.y)
+        const entityRect = new Rectangle(entity.position.x, entity.position.y)
         entityRect.pad(entity.size.x / 2, entity.size.y / 2)
 
         return entity.Blueprint.entities.filter((beacon: Entity): boolean => {
@@ -276,7 +278,7 @@ export class EntityInfoPanel extends Panel {
                 return false
             }
 
-            const beaconAura = new PIXI.Rectangle(beacon.position.x, beacon.position.y, 1, 1)
+            const beaconAura = new Rectangle(beacon.position.x, beacon.position.y, 1, 1)
             beaconAura.pad(FD.entities.beacon.supply_area_distance)
 
             return (

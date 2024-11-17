@@ -1,4 +1,5 @@
 import Delaunator from 'delaunator'
+import { IPoint } from '../../types'
 
 // TODO: maybe merge this file with the main util file
 

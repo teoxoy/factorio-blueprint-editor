@@ -1,11 +1,14 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { Graphics } from '@pixi/graphics'
+import { Text } from '@pixi/text'
+import { Polygon } from '@pixi/math'
 import { colors, styles } from '../style'
 
 /** Base Checkbox */
-export class Checkbox extends PIXI.Container {
+export class Checkbox extends Container {
     /** Checkmark Polygon */
     // prettier-ignore
-    private static readonly CHECK_POLYGON: PIXI.Polygon = new PIXI.Polygon([
+    private static readonly CHECK_POLYGON: Polygon = new Polygon([
         8,  8, 12,  8, 16, 12, 20, 12, 24,  8,
        28,  8, 28, 12, 24, 16, 24, 20, 28, 24,
        28, 28, 24, 28, 20, 24, 16, 24, 12, 28,
@@ -13,10 +16,10 @@ export class Checkbox extends PIXI.Container {
         8,  8])
 
     /** Checkbox Graphic */
-    private m_Checkbox: PIXI.Graphics
+    private m_Checkbox: Graphics
 
     /** Checkbox Hover */
-    private m_Hover: PIXI.Graphics
+    private m_Hover: Graphics
 
     /** Data of Checkbox */
     private m_Checked: boolean
@@ -29,7 +32,7 @@ export class Checkbox extends PIXI.Container {
 
         // Draw text
         if (text !== undefined) {
-            const label: PIXI.Text = new PIXI.Text(text, styles.controls.checkbox)
+            const label = new Text(text, styles.controls.checkbox)
             label.position.set(24, 0)
             this.addChild(label)
         }
@@ -52,8 +55,8 @@ export class Checkbox extends PIXI.Container {
      * @param checked - Whether the checkbox graphic shall be checked
      * @param hover - Whether the checkbox graphic shall be shown hovered
      */
-    private static drawGraphic(checked: boolean, hover: boolean, visible: boolean): PIXI.Graphics {
-        const graphic: PIXI.Graphics = new PIXI.Graphics()
+    private static drawGraphic(checked: boolean, hover: boolean, visible: boolean): Graphics {
+        const graphic = new Graphics()
         graphic
             .beginFill(
                 colors.controls.checkbox.background.color,

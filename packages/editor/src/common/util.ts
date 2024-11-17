@@ -1,3 +1,5 @@
+import { IPoint, NamedDirection } from '../types'
+
 const duplicate = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
 const getRandomInt = (min: number, max: number): number => {
@@ -14,8 +16,8 @@ const Point = (p: IPoint | number[]): IPoint => {
 }
 
 /** Computes a weighted sum of vectors. Weights are preceding their corresponding vector, and equal to 1 if not specified */
-const sumprod = (...args: (number | (number[]|IPoint))[]): IPoint => {
-    const ans: IPoint = {x:0, y:0}
+const sumprod = (...args: (number | (number[] | IPoint))[]): IPoint => {
+    const ans: IPoint = { x: 0, y: 0 }
     let coef: number = undefined
     for (let arg of args) {
         if (typeof arg === 'number') {
@@ -27,7 +29,7 @@ const sumprod = (...args: (number | (number[]|IPoint))[]): IPoint => {
         ans.y += (coef ?? 1) * arg.y
         coef = undefined
     }
-    if (coef !== undefined) throw new TypeError("weights should be followed by a vector")
+    if (coef !== undefined) throw new TypeError('weights should be followed by a vector')
     return ans
 }
 
@@ -103,7 +105,7 @@ const switchSizeBasedOnDirection = (
     return { x: size.width, y: size.height }
 }
 
-const intToDir = (i: number): 'north' | 'east' | 'south' | 'west' => {
+const intToDir = (i: number): NamedDirection => {
     switch (i) {
         case 0:
             return 'north'
@@ -126,6 +128,7 @@ const equalArrays = <T>(array1: T[], array2: T[]): boolean =>
     array1.length === array2.length &&
     array1.sort().every((value, index) => value === array2.sort()[index])
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const areObjectsEquivalent = <T extends Record<string, any>>(a: T, b: T): boolean => {
     const aProps = Object.getOwnPropertyNames(a)
     const bProps = Object.getOwnPropertyNames(b)

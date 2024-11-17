@@ -1,8 +1,11 @@
-import * as PIXI from 'pixi.js'
+import { Container, DisplayObject } from '@pixi/display'
+import { FederatedPointerEvent } from '@pixi/events'
+import { IPoint } from '../types'
 import G from '../common/globals'
 import { Entity } from '../core/Entity'
 import F from '../UI/controls/functions'
 import { BlueprintContainer } from './BlueprintContainer'
+import { EntitySprite } from './EntitySprite'
 
 export class IllegalFlipError {
     public message: string
@@ -11,10 +14,15 @@ export class IllegalFlipError {
     }
 }
 
-export abstract class PaintContainer extends PIXI.Container {
+export enum Axis {
+    X,
+    Y,
+}
+
+export abstract class PaintContainer extends Container<EntitySprite> {
     protected readonly bpc: BlueprintContainer
     private _name: string
-    private icon: PIXI.DisplayObject
+    private icon: DisplayObject
     private _blocked = false
     private tint = {
         r: 0.4,
@@ -22,16 +30,38 @@ export abstract class PaintContainer extends PIXI.Container {
         b: 0.4,
         a: 1,
     }
+    private _posConstraint?: Axis
 
     protected constructor(bpc: BlueprintContainer, name: string) {
         super()
         this.bpc = bpc
         this.name = name
 
-        this.on('childAdded', (s: PIXI.Sprite) => F.applyTint(s, this.tint))
+        this.on('childAdded', (s: EntitySprite) => F.applyTint(s, this.tint))
 
-        window.addEventListener('mousemove', this.updateIconPos)
+        // window.addEventListener('mousemove', this.updateIconPos)
+        G.app.stage.on('pointermove', this.updateIconPos)
         this.show()
+    }
+
+    protected attachUpdateOn1(): void {
+        const onUpdate1 = (): void => {
+            this.moveAtCursor()
+        }
+        this.bpc.gridData.on('update', onUpdate1)
+        this.on('destroyed', () => {
+            this.bpc.gridData.off('update', onUpdate1)
+        })
+    }
+
+    protected attachUpdateOn16(): void {
+        const onUpdate16 = (): void => {
+            this.moveAtCursor()
+        }
+        this.bpc.gridData.on('update16', onUpdate16)
+        this.on('destroyed', () => {
+            this.bpc.gridData.off('update16', onUpdate16)
+        })
     }
 
     public get name(): string {
@@ -43,7 +73,7 @@ export abstract class PaintContainer extends PIXI.Container {
         this.icon?.destroy()
         this.icon = F.CreateIcon(this.getItemName())
         G.UI.addPaintIcon(this.icon)
-        this.updateIconPos()
+        // this.updateIconPos()
     }
 
     protected get blocked(): boolean {
@@ -55,13 +85,12 @@ export abstract class PaintContainer extends PIXI.Container {
         this.tint.r = this.blocked ? 1 : 0.4
         this.tint.g = this.blocked ? 0.4 : 1
         for (const s of this.children) {
-            F.applyTint(s as PIXI.Sprite, this.tint)
+            F.applyTint(s, this.tint)
         }
     }
 
     public hide(): void {
         this.visible = false
-        this.updateIconPos()
         this.icon.visible = true
     }
 
@@ -71,8 +100,7 @@ export abstract class PaintContainer extends PIXI.Container {
     }
 
     public destroy(): void {
-        this.emit('destroy')
-        window.removeEventListener('mousemove', this.updateIconPos)
+        G.app.stage.off('pointermove', this.updateIconPos)
         this.icon.destroy()
         super.destroy()
     }
@@ -84,30 +112,49 @@ export abstract class PaintContainer extends PIXI.Container {
         }
     }
 
-    protected setNewPosition(size?: IPoint): void {
-        if (size === undefined) {
-            this.x = this.bpc.gridData.x
-        } else if (size.x % 2 === 0) {
-            const npx = this.bpc.gridData.x16 * 16
-            this.x = npx + (npx % 32 === 0 ? 0 : 16)
-        } else {
-            this.x = this.bpc.gridData.x32 * 32 + 16
-        }
+    public setPosConstraint(axis?: Axis): void {
+        this._posConstraint = axis
+        this.moveAtCursor()
+    }
 
-        if (size === undefined) {
-            this.y = this.bpc.gridData.y
-        } else if (size.y % 2 === 0) {
-            const npy = this.bpc.gridData.y16 * 16
-            this.y = npy + (npy % 32 === 0 ? 0 : 16)
+    protected setPosition(position?: IPoint): void {
+        if (this._posConstraint === undefined) {
+            this.position = position
         } else {
-            this.y = this.bpc.gridData.y32 * 32 + 16
+            if (this._posConstraint === Axis.X) {
+                this.position.x = position.x
+            } else {
+                this.position.y = position.y
+            }
         }
     }
 
-    private readonly updateIconPos = (): void => {
-        const im = G.app.renderer.plugins.interaction as PIXI.InteractionManager
-        const position = im.mouse.global
-        this.icon.position.set(position.x + 16, position.y + 16)
+    protected setNewPosition(size?: IPoint): void {
+        const position = { x: 0, y: 0 }
+
+        if (size === undefined) {
+            position.x = this.bpc.gridData.x
+        } else if (size.x % 2 === 0) {
+            const npx = this.bpc.gridData.x16 * 16
+            position.x = npx + (npx % 32 === 0 ? 0 : 16)
+        } else {
+            position.x = this.bpc.gridData.x32 * 32 + 16
+        }
+
+        if (size === undefined) {
+            position.y = this.bpc.gridData.y
+        } else if (size.y % 2 === 0) {
+            const npy = this.bpc.gridData.y16 * 16
+            position.y = npy + (npy % 32 === 0 ? 0 : 16)
+        } else {
+            position.y = this.bpc.gridData.y32 * 32 + 16
+        }
+
+        this.setPosition(position)
+    }
+
+    private readonly updateIconPos = (e: FederatedPointerEvent): void => {
+        this.icon.position.set(e.globalX + 16, e.globalY + 16)
     }
 
     // override
@@ -117,7 +164,7 @@ export abstract class PaintContainer extends PIXI.Container {
     public abstract rotate(ccw?: boolean): void
 
     // override
-    public abstract flip(vertical: boolean): void
+    // public abstract flip(vertical: boolean): void
 
     // override
     public abstract canFlipOrRotateByCopying(): boolean

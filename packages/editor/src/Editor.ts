@@ -1,41 +1,47 @@
-import * as PIXI from 'pixi.js'
-import { BasisLoader } from '@pixi/basis'
-import basisTranscoderJS from './basis/transcoder.7f0a00a.js'
-import basisTranscoderWASM from './basis/transcoder.7f0a00a.wasm'
+import './pixi'
+import { Application } from '@pixi/app'
+import { BaseTexture } from '@pixi/core'
+import { settings } from '@pixi/settings'
+import { Graphics } from '@pixi/graphics'
+import { MIPMAP_MODES, SCALE_MODES, WRAP_MODES } from '@pixi/constants'
+import { BasisParser } from '@pixi/basis'
+import basisTranscoderJS from './basis/transcoder.7f0a00a.js?url'
+import basisTranscoderWASM from './basis/transcoder.7f0a00a.wasm?url'
 import { loadData } from './core/factorioData'
-import G from './common/globals'
+import G, { Logger } from './common/globals'
 import { Entity } from './core/Entity'
 import { Blueprint, oilOutpostSettings, IOilOutpostSettings } from './core/Blueprint'
-import { PaintTileContainer } from './containers/PaintTileContainer'
-import { BlueprintContainer, EditorMode, GridPattern } from './containers/BlueprintContainer'
+import { BlueprintContainer, GridPattern } from './containers/BlueprintContainer'
 import { UIContainer } from './UI/UIContainer'
 import { Dialog } from './UI/controls/Dialog'
-import { initActions, registerAction } from './actions'
-import { IllegalFlipError } from './containers/PaintContainer'
+import { initActions } from './actions'
 
 export class Editor {
-    public async init(canvas: HTMLCanvasElement, showError: (msg: string) => void): Promise<void> {
+    public async init(canvas: HTMLCanvasElement, logger?: Logger): Promise<void> {
         await Promise.all([
-            fetch('__STATIC_URL__/data.json')
+            fetch(`${import.meta.env.VITE_DATA_PATH}/data.json`)
                 .then(res => res.text())
                 .then(modules => loadData(modules)),
-            BasisLoader.loadTranscoder(basisTranscoderJS, basisTranscoderWASM),
+            BasisParser.loadTranscoder(basisTranscoderJS, basisTranscoderWASM),
         ])
 
-        BasisLoader.TRANSCODER_WORKER_POOL_LIMIT = 2
+        BasisParser.TRANSCODER_WORKER_POOL_LIMIT = 2
 
-        PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.ON
-        PIXI.settings.ROUND_PIXELS = true
-        PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR
-        PIXI.settings.WRAP_MODE = PIXI.WRAP_MODES.REPEAT
-        PIXI.GRAPHICS_CURVES.adaptive = true
-        PIXI.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = false
-        // PIXI.settings.ANISOTROPIC_LEVEL = 16
-        // PIXI.settings.PREFER_ENV = 1
-        // PIXI.settings.PRECISION_VERTEX = PIXI.PRECISION.HIGH
-        // PIXI.settings.PRECISION_FRAGMENT = PIXI.PRECISION.HIGH
+        BaseTexture.defaultOptions.mipmap = MIPMAP_MODES.ON
+        BaseTexture.defaultOptions.scaleMode = SCALE_MODES.LINEAR
+        BaseTexture.defaultOptions.wrapMode = WRAP_MODES.REPEAT
+        Graphics.curves.adaptive = true
+        settings.ROUND_PIXELS = true
+        // settings.ANISOTROPIC_LEVEL = 16
+        // settings.PREFER_ENV = 1
+        // settings.PRECISION_VERTEX = PRECISION.HIGH
+        // settings.PRECISION_FRAGMENT = PRECISION.HIGH
 
-        G.app = new PIXI.Application({
+        if (logger) {
+            G.logger = logger
+        }
+
+        G.app = new Application({
             view: canvas,
             resolution: window.devicePixelRatio,
             autoDensity: true,
@@ -62,7 +68,6 @@ export class Editor {
         G.UI.showDebuggingLayer = G.debug
 
         initActions(canvas)
-        this.registerActions(showError)
     }
 
     public get moveSpeed(): number {
@@ -127,11 +132,11 @@ export class Editor {
     }
 
     public haveBlueprint(): boolean {
-        return !G.bp.isEmpty();
+        return !G.bp.isEmpty()
     }
 
     public async appendBlueprint(bp: Blueprint): Promise<void> {
-        const result = bp.entities.valuesArray().map(e => new Entity(e.rawEntity, G.BPC.bp));
+        const result = bp.entities.valuesArray().map(e => new Entity(e.rawEntity, G.BPC.bp))
 
         G.BPC.spawnPaintContainer(result, 0)
     }
@@ -147,250 +152,5 @@ export class Editor {
         Dialog.closeAll()
         G.app.stage.addChildAt(G.BPC, i)
         last.destroy()
-    }
-
-    private registerActions(showError: (msg: string) => void): void {
-        registerAction('moveUp', 'w')
-        registerAction('moveLeft', 'a')
-        registerAction('moveDown', 's')
-        registerAction('moveRight', 'd')
-
-        registerAction('showInfo', 'alt').bind({
-            press: () => G.BPC.overlayContainer.toggleEntityInfoVisibility(),
-        })
-
-        registerAction('closeWindow', 'esc').bind({
-            press: () => Dialog.closeLast(),
-        })
-
-        registerAction('inventory', 'e').bind({
-            press: () => {
-                // If there is a dialog open, assume user wants to close it
-                if (Dialog.anyOpen()) {
-                    Dialog.closeLast()
-                } else {
-                    G.UI.createInventory(
-                        'Inventory',
-                        undefined,
-                        G.BPC.spawnPaintContainer.bind(G.BPC)
-                    )
-                }
-            },
-        })
-
-        registerAction('focus', 'f').bind({ press: () => G.BPC.centerViewport() })
-
-        function doRotate(ccw: boolean): void  {
-            if (G.BPC.mode === EditorMode.EDIT) {
-                G.BPC.hoverContainer.entity.rotate(ccw, true)
-            } else if (G.BPC.mode === EditorMode.PAINT) {
-                if (G.BPC.paintContainer.canFlipOrRotateByCopying()) {
-                    const copies = G.BPC.paintContainer.rotatedEntities(ccw)
-                    G.BPC.paintContainer.destroy()
-                    G.BPC.spawnPaintContainer(copies, 0)
-                } else {
-                    G.BPC.paintContainer.rotate(ccw)
-                }
-            }
-        }
-
-        function doFlip(vertical: boolean): void  {
-                if (G.BPC.mode === EditorMode.PAINT
-                    && G.BPC.paintContainer.canFlipOrRotateByCopying()) {
-                try {
-                    const copies = G.BPC.paintContainer.flippedEntities(vertical)
-                    G.BPC.paintContainer.destroy()
-                    G.BPC.spawnPaintContainer(copies, 0)
-                } catch (e) {
-                    if (e instanceof IllegalFlipError) {
-                        showError(e.message)
-                    } else {
-                        throw e
-                    }
-                }
-            }
-        }
-
-        registerAction('rotate', 'r').bind({
-            press: () => doRotate(false)
-        })
-
-        registerAction('reverseRotate', 'shift+r').bind({
-            press: () => doRotate(true)
-        })
-
-        registerAction('flipHorizontal', 'shift+f').bind({
-            press: () => doFlip(false)
-        })
-
-        registerAction('flipVertical', 'shift+g').bind({
-            press: () => doFlip(true)
-        })
-
-        registerAction('pipette', 'q').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    const entity = G.BPC.hoverContainer.entity
-                    const itemName = Entity.getItemName(entity.name)
-                    const direction =
-                        entity.directionType === 'output'
-                            ? (entity.direction + 4) % 8
-                            : entity.direction
-                    G.BPC.spawnPaintContainer(itemName, direction)
-                } else if (G.BPC.mode === EditorMode.PAINT) {
-                    G.BPC.paintContainer.destroy(true)
-                }
-                G.BPC.exitCopyMode(true)
-                G.BPC.exitDeleteMode(true)
-            },
-        })
-
-        registerAction('increaseTileBuildingArea', ']').bind({
-            press: () => {
-                if (G.BPC.paintContainer instanceof PaintTileContainer) {
-                    G.BPC.paintContainer.increaseSize()
-                }
-            },
-        })
-
-        registerAction('decreaseTileBuildingArea', '[').bind({
-            press: () => {
-                if (G.BPC.paintContainer instanceof PaintTileContainer) {
-                    G.BPC.paintContainer.decreaseSize()
-                }
-            },
-        })
-
-        registerAction('undo', 'modifier+z').bind({
-            press: () => G.bp.history.undo(),
-            repeat: true,
-        })
-
-        registerAction('redo', 'modifier+y').bind({
-            press: () => G.bp.history.redo(),
-            repeat: true,
-        })
-
-        registerAction('copySelection', 'modifier+lclick').bind({
-            press: () => G.BPC.enterCopyMode(),
-            release: () => G.BPC.exitCopyMode(),
-        })
-        registerAction('deleteSelection', 'modifier+rclick').bind({
-            press: () => G.BPC.enterDeleteMode(),
-            release: () => G.BPC.exitDeleteMode(),
-        })
-
-        registerAction('pan', 'lclick').bind({
-            press: () => G.BPC.enterPanMode(),
-            release: () => G.BPC.exitPanMode(),
-        })
-
-        registerAction('zoomIn', 'wheelNeg').bind({
-            press: () => G.BPC.zoom(true),
-        })
-
-        registerAction('zoomOut', 'wheelPos').bind({
-            press: () => G.BPC.zoom(false),
-        })
-
-        registerAction('build', 'lclick').bind({
-            press: () => G.BPC.enterDraggingCreateMode(),
-            release: () => G.BPC.exitDraggingCreateMode(),
-        })
-
-        registerAction('mine', 'rclick').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    G.bp.removeEntity(G.BPC.hoverContainer.entity)
-                }
-                if (G.BPC.mode === EditorMode.PAINT) {
-                    G.BPC.paintContainer.removeContainerUnder()
-                }
-            },
-            repeat: true,
-        })
-
-        registerAction('moveEntityUp', 'up').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    G.BPC.hoverContainer.entity.moveBy({ x: 0, y: -1 })
-                }
-            },
-        })
-        registerAction('moveEntityLeft', 'left').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    G.BPC.hoverContainer.entity.moveBy({ x: -1, y: 0 })
-                }
-            },
-        })
-        registerAction('moveEntityDown', 'down').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    G.BPC.hoverContainer.entity.moveBy({ x: 0, y: 1 })
-                }
-            },
-        })
-        registerAction('moveEntityRight', 'right').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    G.BPC.hoverContainer.entity.moveBy({ x: 1, y: 0 })
-                }
-            },
-        })
-
-        registerAction('openEntityGUI', 'lclick').bind({
-            press: () => {
-                if (G.BPC.mode === EditorMode.EDIT) {
-                    if (G.debug) {
-                        console.log(G.BPC.hoverContainer.entity.serialize())
-                    }
-
-                    Dialog.closeAll()
-                    G.UI.createEditor(G.BPC.hoverContainer.entity)
-                }
-            },
-        })
-
-        registerAction('copyEntitySettings', 'shift+rclick').bind({
-            press: () => {
-                G.BPC.copyEntitySettings()
-                G.BPC.overlayContainer.destroyCopyCursorBox()
-            },
-        })
-
-        registerAction('pasteEntitySettings', 'shift+lclick').bind({
-            press: () => G.BPC.pasteEntitySettings(),
-            repeat: true,
-        })
-
-        registerAction('tryPasteEntitySettings', 'shift').bind({
-            press: () => G.BPC.overlayContainer.createCopyCursorBox(),
-            release: () => G.BPC.overlayContainer.destroyCopyCursorBox(),
-        })
-
-        registerAction('quickbar1', '1').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(0) })
-        registerAction('quickbar2', '2').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(1) })
-        registerAction('quickbar3', '3').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(2) })
-        registerAction('quickbar4', '4').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(3) })
-        registerAction('quickbar5', '5').bind({ press: () => G.UI.quickbarPanel.bindKeyToSlot(4) })
-        registerAction('quickbar6', 'shift+1').bind({
-            press: () => G.UI.quickbarPanel.bindKeyToSlot(5),
-        })
-        registerAction('quickbar7', 'shift+2').bind({
-            press: () => G.UI.quickbarPanel.bindKeyToSlot(6),
-        })
-        registerAction('quickbar8', 'shift+3').bind({
-            press: () => G.UI.quickbarPanel.bindKeyToSlot(7),
-        })
-        registerAction('quickbar9', 'shift+4').bind({
-            press: () => G.UI.quickbarPanel.bindKeyToSlot(8),
-        })
-        registerAction('quickbar10', 'shift+5').bind({
-            press: () => G.UI.quickbarPanel.bindKeyToSlot(9),
-        })
-        registerAction('changeActiveQuickbar', 'x').bind({
-            press: () => G.UI.quickbarPanel.changeActiveQuickbar(),
-        })
     }
 }

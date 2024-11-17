@@ -1,15 +1,9 @@
 root: true
-env:
-  es6: true
-  node: true
-  browser: true
 
 parser: '@typescript-eslint/parser'
 parserOptions:
-  sourceType: module
   project:
     - packages/*/tsconfig.json
-    - packages/*/tools/tsconfig.json
 
 plugins:
   - '@typescript-eslint'
@@ -23,7 +17,6 @@ settings:
     typescript:
       project:
         - packages/*/tsconfig.json
-        - packages/*/tools/tsconfig.json
   import/internal-regex: ^@fbe/
 
 extends:
@@ -31,7 +24,7 @@ extends:
   - .eslint.base.yml
   # Turn off eslint rules that conflict with typescript-eslint
   - plugin:@typescript-eslint/recommended
+  # - plugin:@typescript-eslint/recommended-requiring-type-checking
+  # - plugin:@typescript-eslint/strict
   - .eslint.typescript.yml
-  # Turn off eslint rules that conflict with prettier
-  - prettier
   - .eslint.import.yml

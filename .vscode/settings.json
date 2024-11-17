@@ -2,7 +2,7 @@
     "editor.formatOnSave": true,
     "eslint.validate": ["typescript"],
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+        "source.fixAll.eslint": "explicit"
     },
     "Lua.diagnostics.globals": ["data", "script", "game"],
     "rust-analyzer.linkedProjects": ["./packages/exporter/Cargo.toml"]

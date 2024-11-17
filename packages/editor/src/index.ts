@@ -3,7 +3,6 @@ import { Blueprint } from './core/Blueprint'
 import { GridPattern } from './containers/BlueprintContainer'
 import {
     registerAction,
-    callAction,
     forEachAction,
     resetKeybinds,
     importKeybinds,
@@ -16,7 +15,6 @@ export * from './core/bpString'
 export { Editor, Book, Blueprint, GridPattern, FD }
 export default {
     registerAction,
-    callAction,
     forEachAction,
     resetKeybinds,
     importKeybinds,

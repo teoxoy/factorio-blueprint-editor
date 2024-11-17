@@ -1,6 +1,5 @@
 node_modules
 dist
-packages/website/tools/.fusebox
 packages/exporter/data/*
 !packages/exporter/data/output
 packages/exporter/target

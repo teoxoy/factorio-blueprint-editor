@@ -1,11 +1,13 @@
-import * as PIXI from 'pixi.js'
+import { Container } from '@pixi/display'
+import { FederatedPointerEvent } from '@pixi/events'
+import { EventNames, EventListener } from 'eventemitter3'
 import G from '../../../common/globals'
-import { Entity } from '../../../core/Entity'
+import { Entity, EntityEvents } from '../../../core/Entity'
 import { Slot } from '../../controls/Slot'
 import F from '../../controls/functions'
 
 /** Module Slots for Entity */
-export class Modules extends PIXI.Container {
+export class Modules extends Container<Slot<number>> {
     /** Blueprint Editor Entity reference */
     private readonly m_Entity: Entity
 
@@ -32,10 +34,10 @@ export class Modules extends PIXI.Container {
 
         // Create slots for entity
         for (let slotIndex = 0; slotIndex < this.m_Modules.length; slotIndex++) {
-            const slot: Slot = new Slot()
+            const slot = new Slot<number>()
             slot.position.set(slotIndex * 38, 0)
             slot.data = slotIndex
-            slot.on('pointerdown', (e: PIXI.InteractionEvent) => this.onSlotPointerDown(e))
+            slot.on('pointerdown', this.onSlotPointerDown)
             if (this.m_Modules[slotIndex] !== undefined) {
                 slot.content = F.CreateIcon(this.m_Modules[slotIndex])
             }
@@ -48,23 +50,21 @@ export class Modules extends PIXI.Container {
                 ...Array(this.m_Entity.moduleSlots - modules.length).fill(undefined),
             ].forEach((m: string, i: number) => {
                 this.m_Modules[i] = m
-                this.updateContent(this.getChildAt(i) as Slot, m)
+                this.updateContent(this.getChildAt(i), m)
             })
         )
     }
 
-    private onEntityChange(event: string, fn: (...args: any[]) => void): void {
+    private onEntityChange<T extends EventNames<EntityEvents>>(
+        event: T,
+        fn: EventListener<EntityEvents, T>
+    ): void {
         this.m_Entity.on(event, fn)
-        this.once('destroy', () => this.m_Entity.off(event, fn))
-    }
-
-    public destroy(opts?: boolean | PIXI.IDestroyOptions): void {
-        this.emit('destroy')
-        super.destroy(opts)
+        this.once('destroyed', () => this.m_Entity.off(event, fn))
     }
 
     /** Update Content Icon */
-    private updateContent(slot: Slot, module: string): void {
+    private updateContent(slot: Slot<number>, module: string): void {
         if (module === undefined) {
             if (slot.content !== undefined) {
                 slot.content = undefined
@@ -76,16 +76,16 @@ export class Modules extends PIXI.Container {
     }
 
     /** Event handler for click on slot */
-    private onSlotPointerDown(e: PIXI.InteractionEvent): void {
+    private onSlotPointerDown(e: FederatedPointerEvent): void {
         e.stopPropagation()
-        const slot: Slot = e.target as Slot
-        const index: number = slot.data as number
-        if (e.data.button === 0) {
+        const slot = e.target as Slot<number>
+        const index = slot.data
+        if (e.button === 0) {
             G.UI.createInventory('Select Module', this.m_Entity.acceptedModules, name => {
                 this.m_Modules[index] = name
                 this.m_Entity.modules = this.m_Modules
             })
-        } else if (e.data.button === 2) {
+        } else if (e.button === 2) {
             this.m_Modules[index] = undefined
             this.m_Entity.modules = this.m_Modules
         }

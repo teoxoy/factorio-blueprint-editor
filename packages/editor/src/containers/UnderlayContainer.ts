@@ -1,5 +1,9 @@
-import * as PIXI from 'pixi.js'
+import { Sprite } from '@pixi/sprite'
+import { Container } from '@pixi/display'
+import { Texture } from '@pixi/core'
+import { AlphaFilter } from '@pixi/filter-alpha'
 import FD from '../core/factorioData'
+import { IPoint } from '../types'
 import { VisualizationArea } from './VisualizationArea'
 
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
@@ -11,19 +15,19 @@ interface IVisualizationData {
     alpha: number
 }
 
-export class UnderlayContainer extends PIXI.Container {
+export class UnderlayContainer extends Container {
     private active: Type[] = []
-    private readonly logistics0 = new PIXI.Container()
-    private readonly logistics1 = new PIXI.Container()
-    private readonly poles = new PIXI.Container()
-    private readonly beacons = new PIXI.Container()
-    private readonly drills = new PIXI.Container()
+    private readonly logistics0 = new Container()
+    private readonly logistics1 = new Container()
+    private readonly poles = new Container()
+    private readonly beacons = new Container()
+    private readonly drills = new Container()
     private readonly dummyVisualizationArea = new VisualizationArea([])
 
     public constructor() {
         super()
 
-        const filter = new PIXI.filters.AlphaFilter(VisualizationArea.ALPHA)
+        const filter = new AlphaFilter(VisualizationArea.ALPHA)
         this.logistics0.filters = [filter]
         this.logistics1.filters = [filter]
 
@@ -132,7 +136,7 @@ export class UnderlayContainer extends PIXI.Container {
 
     public create(entityName: string, position: IPoint): VisualizationArea {
         const sprites = UnderlayContainer.getDataForVisualizationArea(entityName).map(data => {
-            const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
+            const sprite = new Sprite(Texture.WHITE)
             sprite.tint = data.color
             sprite.alpha = data.alpha
             sprite.visible = this.active.includes(data.type)
