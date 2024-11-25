@@ -315,7 +315,12 @@ do
     'ammo-turret',
     'electric-turret',
     'fluid-turret',
-    'wall'
+    'wall',
+    'thruster',
+    'asteroid-collector',
+    'agricultural-tower',
+    'lightning-attractor',
+    'fusion-generator'
   }
 
   local entityBlacklist = {
