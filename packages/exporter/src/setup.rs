@@ -155,6 +155,7 @@ pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dy
     let data = include_str!("export-data/data-final-fixes.lua");
     let locale = generate_locale(factorio_data).await?;
 
+    tokio::fs::create_dir_all(&scenario_dir).await?;
     tokio::fs::write(mod_dir.join("info.json"), info).await?;
     tokio::fs::write(mod_dir.join("locale.lua"), locale).await?;
     tokio::fs::write(mod_dir.join("data-final-fixes.lua"), data).await?;
