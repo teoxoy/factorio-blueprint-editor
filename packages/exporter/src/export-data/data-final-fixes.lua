@@ -320,7 +320,9 @@ do
     'asteroid-collector',
     'agricultural-tower',
     'lightning-attractor',
-    'fusion-generator'
+    'fusion-generator',
+    'cargo-bay',
+    'space-platform-hub'
   }
 
   local entityBlacklist = {
