@@ -155,14 +155,12 @@ pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dy
     let data = include_str!("export-data/data-final-fixes.lua");
     let locale = generate_locale(factorio_data).await?;
 
-    tokio::fs::create_dir_all(&scenario_dir).await?;
     tokio::fs::write(mod_dir.join("info.json"), info).await?;
     tokio::fs::write(mod_dir.join("locale.lua"), locale).await?;
     tokio::fs::write(mod_dir.join("data-final-fixes.lua"), data).await?;
     tokio::fs::write(scenario_dir.join("control.lua"), script).await?;
 
     println!("Generating defines.lua");
-
     Command::new(factorio_executable)
         .args(&["--start-server-load-scenario", "export-data/export-data"])
         .stdout(std::process::Stdio::null())
@@ -172,7 +170,6 @@ pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dy
     let content = tokio::fs::read_to_string(&extracted_data_path).await?;
     tokio::fs::create_dir_all(&output_dir).await?;
     tokio::fs::write(output_dir.join("data.json"), &content).await?;
-
     let metadata_path = output_dir.join("metadata.yaml");
     let mut metadata_file = tokio::fs::OpenOptions::new()
         .read(true)
@@ -189,7 +186,6 @@ pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dy
         serde_yaml::from_str(&buffer)?
     };
     let obj = Arc::new(Mutex::new(obj));
-
     lazy_static! {
         static ref IMG_REGEX: Regex = Regex::new(r#""([^"]+?\.png)""#).unwrap();
     }
@@ -202,22 +198,19 @@ pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dy
         .into_iter()
         .map(|s| {
             let in_path =
-                factorio_data.join(s.replace("__core__", "core").replace("__base__", "base"));
+                factorio_data.join(s.replace("__core__", "core").replace("__base__", "base").replace("__space-age__", "space-age").replace("__quality__", "quality").replace("__elevated-rails__", "elevated-rails"));
             let out_path = output_dir.join(s.replace(".png", ".basis").as_str());
             (in_path, out_path)
         })
         .collect::<Vec<(PathBuf, PathBuf)>>();
 
     file_paths.sort_unstable();
-
     let progress = ProgressBar::new(file_paths.len() as u64);
     progress.set_style(ProgressStyle::default_bar().template("{wide_bar} {pos}/{len} ({elapsed})"));
 
     let file_paths = Arc::new(Mutex::new(file_paths));
-
     let tmp_dir = std::env::temp_dir().join("__FBE__");
     tokio::fs::create_dir_all(&tmp_dir).await?;
-
     let metadata_file = Arc::new(tokio::sync::Mutex::new(metadata_file));
     futures::future::try_join_all((0..num_cpus::get()).map(|_| {
         compress_next_img(
@@ -231,7 +224,6 @@ pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dy
     .await?;
 
     progress.finish();
-
     tokio::fs::remove_dir_all(&tmp_dir).await?;
     println!("DONE!");
 
