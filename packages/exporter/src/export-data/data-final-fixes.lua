@@ -443,7 +443,7 @@ do
   end
 
   entities['offshore-pump'].size = { width = 1, height = 1 }
-  entities['curved-rail-b'].size = { width = 4, height = 8 }
+  entities['curved-rail-b'].size = { width = 4, height = 8 } -- TODO: may have to be fixed for 2.0
 
   entities['centrifuge'].possible_directions = nil
   entities['assembling-machine-1'].possible_directions = nil
@@ -453,15 +453,6 @@ do
 
   -- fix inconsistent radius
   entities.beacon.supply_area_distance = entities.beacon.supply_area_distance + 1
-
-
-  -- keep pictures consistent
-  entities['pipe-to-ground'].pictures = {
-    north = entities['pipe-to-ground'].pictures.up,
-    east = entities['pipe-to-ground'].pictures.right,
-    south = entities['pipe-to-ground'].pictures.down,
-    west = entities['pipe-to-ground'].pictures.left
-  }
 
   output.entities = entities
 end
