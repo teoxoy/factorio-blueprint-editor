@@ -322,7 +322,9 @@ do
     'lightning-attractor',
     'fusion-generator',
     'cargo-bay',
-    'space-platform-hub'
+    'space-platform-hub',
+    'fusion-reactor',
+    'selector-combinator'
   }
 
   local entityBlacklist = {
