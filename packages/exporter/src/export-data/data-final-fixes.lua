@@ -324,7 +324,8 @@ do
     'cargo-bay',
     'space-platform-hub',
     'fusion-reactor',
-    'selector-combinator'
+    'selector-combinator',
+    'display-panel'
   }
 
   local entityBlacklist = {
