@@ -18,8 +18,6 @@ You can file new issues by selecting from our [new issue templates](https://gith
 -   [node](https://nodejs.org/en/)
 -   [vscode](https://code.visualstudio.com/)
 -   [rust](https://rust-lang.org)
--   [systemfd](https://github.com/mitsuhiko/systemfd)
--   [cargo-watch](https://github.com/passcod/cargo-watch)
 
 ### Note
 

@@ -63,8 +63,8 @@ class Context {
                 {
                     path: '/data',
                     options: {
-                        target: `http://localhost:8888`,
-                        // pathRewrite: { '^/api': '' },
+                        target: `http://127.0.0.1:8081`,
+                        pathRewrite: { '^/data': '' },
                     },
                 },
             ],

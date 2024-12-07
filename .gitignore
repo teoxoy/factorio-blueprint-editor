@@ -3,5 +3,6 @@ dist
 packages/website/tools/.fusebox
 packages/exporter/data/*
 !packages/exporter/data/output
+packages/exporter/data/output/metadata.json
 packages/exporter/target
 .env

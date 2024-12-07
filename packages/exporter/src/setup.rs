@@ -1,11 +1,10 @@
-use async_compression::stream::LzmaDecoder;
 use async_recursion::async_recursion;
-use globset::{Glob, GlobSetBuilder};
 use globset::{GlobBuilder, GlobMatcher};
-use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
+use indicatif::{ProgressBar, ProgressStyle};
 use regex::Regex;
 use serde::Deserialize;
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::{collections::HashSet, env};
@@ -35,13 +34,6 @@ async fn get_info(path: &Path) -> Result<Info, Box<dyn Error>> {
     Ok(p)
 }
 
-fn get_download_url(buid_type: &str, version: &str, username: &str, token: &str) -> String {
-    format!(
-        "https://www.factorio.com/get-download/{}/{}/linux64?username={}&token={}",
-        version, buid_type, username, token
-    )
-}
-
 #[allow(clippy::needless_lifetimes)]
 async fn make_img_pow2<'a>(
     path: &'a Path,
@@ -65,46 +57,46 @@ async fn make_img_pow2<'a>(
         let img = image::load_from_memory_with_format(&buffer, format)?;
         image::imageops::replace(&mut out, &img, 0, 0);
         buffer.clear();
+        let mut buffer = std::io::Cursor::new(buffer);
         out.write_to(&mut buffer, format)?;
 
         let tmp_path = tmp_dir.join(path);
         tokio::fs::create_dir_all(tmp_path.parent().unwrap()).await?;
-        tokio::fs::write(&tmp_path, &buffer).await?;
+        tokio::fs::write(&tmp_path, &buffer.into_inner()).await?;
         Ok(Cow::Owned(tmp_path))
     } else {
         Ok(Cow::Borrowed(path))
     }
 }
 
-async fn content_to_lines(path: &Path) -> Result<Vec<String>, Box<dyn Error>> {
+async fn content_to_lines(path: &Path) -> Result<String, Box<dyn Error>> {
     let file = tokio::fs::File::open(path).await?;
     let buf = tokio::io::BufReader::new(file);
     use tokio::io::AsyncBufReadExt;
-    use tokio::stream::StreamExt;
-    let lines_stream = buf.lines();
+    let mut lines_stream = buf.lines();
 
+    let mut content = String::new();
     let mut group = String::new();
-    let content = lines_stream
-        .filter_map(|line| {
-            let line = line.ok()?;
-            if line.is_empty() || line.starts_with(';') {
-                return None;
-            }
-            if line.starts_with('[') {
-                group = line[1..line.len() - 1].to_string();
-                return None;
-            }
-            let idx = line.find('=')?;
-            let sep = match group.len() {
-                0 => "",
-                _ => ".",
-            };
-            let val = line[idx + 1..].to_string().replace("'", r"\'");
-            let subgroup = &line[..idx];
-            Some(format!("['{}{}{}']='{}'", group, sep, subgroup, val))
-        })
-        .collect()
-        .await;
+    while let Some(line) = lines_stream.next_line().await? {
+        if line.is_empty() || line.starts_with(';') {
+            continue;
+        }
+        if line.starts_with('[') {
+            group = line[1..line.len() - 1].to_string();
+            continue;
+        }
+        let Some(idx) = line.find('=') else { continue };
+        let sep = match group.len() {
+            0 => "",
+            _ => ".",
+        };
+        let val = line[idx + 1..].to_string().replace("'", r"\'");
+        let subgroup = &line[..idx];
+
+        use std::fmt::Write;
+        write!(&mut content, "['{group}{sep}{subgroup}']='{val}',")?;
+    }
+
     Ok(content)
 }
 
@@ -130,7 +122,7 @@ async fn glob(
     Ok(paths)
 }
 
-async fn generate_locale(factorio_data: &Path) -> Result<String, Box<dyn Error>> {
+async fn generate_locale(factorio_data: &PathBuf) -> Result<String, Box<dyn Error>> {
     let matcher = GlobBuilder::new("**/*/locale/en/*.cfg")
         .literal_separator(true)
         .build()?
@@ -138,22 +130,21 @@ async fn generate_locale(factorio_data: &Path) -> Result<String, Box<dyn Error>>
     let paths = glob(factorio_data, &matcher).await?;
     let content = futures::future::try_join_all(paths.iter().map(|path| content_to_lines(&path)))
         .await?
-        .concat()
-        .join(",");
+        .concat();
     Ok(format!("return {{{}}}", content))
 }
 
-pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dyn Error>> {
-    let output_dir = data_dir.join("output");
-    let mod_dir = data_dir.join("factorio/mods/export-data");
+pub async fn extract(output_dir: &Path, base_factorio_dir: &Path) -> Result<(), Box<dyn Error>> {
+    let factorio_data = base_factorio_dir.join("data");
+    let mod_dir = base_factorio_dir.join("mods/export-data");
     let scenario_dir = mod_dir.join("scenarios/export-data");
-    let extracted_data_path = data_dir.join("factorio/script-output/data.json");
-    let factorio_executable = data_dir.join("factorio/bin/x64/factorio");
+    let extracted_data_path = base_factorio_dir.join("script-output/data.json");
+    let factorio_executable = base_factorio_dir.join("bin/x64/factorio");
 
     let info = include_str!("export-data/info.json");
     let script = include_str!("export-data/control.lua");
     let data = include_str!("export-data/data-final-fixes.lua");
-    let locale = generate_locale(factorio_data).await?;
+    let locale = generate_locale(&factorio_data).await?;
 
     tokio::fs::create_dir_all(&scenario_dir).await?;
     tokio::fs::write(mod_dir.join("info.json"), info).await?;
@@ -167,38 +158,34 @@ pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dy
         .args(&["--start-server-load-scenario", "export-data/export-data"])
         .stdout(std::process::Stdio::null())
         .spawn()?
+        .wait()
         .await?;
 
     let content = tokio::fs::read_to_string(&extracted_data_path).await?;
     tokio::fs::create_dir_all(&output_dir).await?;
     tokio::fs::write(output_dir.join("data.json"), &content).await?;
 
-    let metadata_path = output_dir.join("metadata.yaml");
-    let mut metadata_file = tokio::fs::OpenOptions::new()
-        .read(true)
-        .append(true)
-        .create(true)
-        .open(&metadata_path)
-        .await?;
-    use tokio::io::AsyncReadExt;
-    let mut buffer = String::new();
-    metadata_file.read_to_string(&mut buffer).await?;
-    let obj: serde_yaml::Value = if buffer.is_empty() {
-        serde_yaml::Value::Mapping(serde_yaml::mapping::Mapping::new())
-    } else {
-        serde_yaml::from_str(&buffer)?
+    let metadata_path = output_dir.join("metadata.json");
+
+    let res = tokio::fs::read_to_string(&metadata_path).await;
+    let old_metadata: HashMap<String, (u64, u64)> = match res {
+        Ok(buffer) => serde_json::from_str(&buffer)?,
+        Err(e) => match e.kind() {
+            std::io::ErrorKind::NotFound => HashMap::new(),
+            _ => return Err(Box::new(e)),
+        },
     };
-    let obj = Arc::new(Mutex::new(obj));
+    let new_metadata = Arc::new(Mutex::new(HashMap::new()));
 
     lazy_static! {
         static ref IMG_REGEX: Regex = Regex::new(r#""([^"]+?\.png)""#).unwrap();
     }
-    let iter: HashSet<String> = IMG_REGEX
+    let file_paths: HashSet<String> = IMG_REGEX
         .captures_iter(&content)
         .map(|cap| cap[1].to_string())
         .collect();
 
-    let mut file_paths = iter
+    let file_paths = file_paths
         .into_iter()
         .map(|s| {
             let in_path =
@@ -208,27 +195,37 @@ pub async fn extract(data_dir: &Path, factorio_data: &Path) -> Result<(), Box<dy
         })
         .collect::<Vec<(PathBuf, PathBuf)>>();
 
-    file_paths.sort_unstable();
-
     let progress = ProgressBar::new(file_paths.len() as u64);
-    progress.set_style(ProgressStyle::default_bar().template("{wide_bar} {pos}/{len} ({elapsed})"));
+    progress.set_style(
+        ProgressStyle::default_bar()
+            .template("{wide_bar} {pos}/{len} ({elapsed})")
+            .unwrap(),
+    );
 
     let file_paths = Arc::new(Mutex::new(file_paths));
 
     let tmp_dir = std::env::temp_dir().join("__FBE__");
     tokio::fs::create_dir_all(&tmp_dir).await?;
 
-    let metadata_file = Arc::new(tokio::sync::Mutex::new(metadata_file));
-    futures::future::try_join_all((0..num_cpus::get()).map(|_| {
+    let available_parallelism =
+        std::thread::available_parallelism().map_or(1, std::num::NonZeroUsize::get);
+
+    futures::future::try_join_all((0..available_parallelism).map(|_| {
         compress_next_img(
             file_paths.clone(),
             &tmp_dir,
             progress.clone(),
-            obj.clone(),
-            metadata_file.clone(),
+            &old_metadata,
+            new_metadata.clone(),
         )
     }))
     .await?;
+
+    let new_metadata = {
+        let new_metadata = new_metadata.lock().unwrap();
+        serde_json::to_vec(&*new_metadata)?
+    };
+    tokio::fs::write(metadata_path, new_metadata).await?;
 
     progress.finish();
 
@@ -250,22 +247,24 @@ async fn get_len_and_mtime(path: &Path) -> Result<(u64, u64), Box<dyn Error>> {
     Ok((metadata.len(), mtime))
 }
 
-#[async_recursion]
 async fn compress_next_img(
     file_paths: Arc<Mutex<Vec<(PathBuf, PathBuf)>>>,
     tmp_dir: &Path,
     progress: ProgressBar,
-    obj: Arc<Mutex<serde_yaml::Value>>,
-    metadata_file: Arc<tokio::sync::Mutex<tokio::fs::File>>,
+    old_metadata: &HashMap<String, (u64, u64)>,
+    new_metadata: Arc<Mutex<HashMap<String, (u64, u64)>>>,
 ) -> Result<(), Box<dyn Error>> {
-    let file_path = { file_paths.lock().unwrap().pop() };
-    if let Some((in_path, out_path)) = file_path {
+    let get_paths = || file_paths.lock().unwrap().pop();
+    while let Some((in_path, out_path)) = get_paths() {
         let (len, mtime) = get_len_and_mtime(&in_path).await?;
         let key = in_path.to_str().ok_or("PathBuf to &str failed")?;
-        let new_val = serde_yaml::to_value([len, mtime])?;
 
-        let same = { obj.lock().unwrap()[key] == new_val };
-        if !same {
+        if old_metadata.get(key) == Some(&(len, mtime)) {
+            new_metadata
+                .lock()
+                .unwrap()
+                .insert(key.to_string(), (len, mtime));
+        } else {
             let path = make_img_pow2(&in_path, tmp_dir).await?;
 
             tokio::fs::create_dir_all(out_path.parent().unwrap()).await?;
@@ -283,36 +282,32 @@ async fn compress_next_img(
                 ])
                 .stdout(std::process::Stdio::null())
                 .spawn()?
+                .wait()
                 .await?;
 
             if status.success() {
-                let content = format!("\"{}\": [{}, {}]\n", key, len, mtime);
-                use tokio::io::AsyncWriteExt;
-                let mut file = metadata_file.lock().await;
-                file.write_all(content.as_bytes()).await?;
+                new_metadata
+                    .lock()
+                    .unwrap()
+                    .insert(key.to_string(), (len, mtime));
             } else {
-                println!("FAILED: {:?}", path);
+                progress.println(format!("FAILED: {:?}", path));
             }
         }
 
         progress.inc(1);
-    } else {
-        return Ok(());
     }
 
-    compress_next_img(file_paths, tmp_dir, progress, obj, metadata_file).await
+    Ok(())
 }
 
 // TODO: look into using https://wiki.factorio.com/Download_API
 pub async fn download_factorio(
     data_dir: &Path,
-    factorio_data: &Path,
+    base_factorio_dir: &Path,
     factorio_version: &str,
 ) -> Result<(), Box<dyn Error>> {
-    let username = get_env_var!("FACTORIO_USERNAME")?;
-    let token = get_env_var!("FACTORIO_TOKEN")?;
-
-    let info_path = factorio_data.join("base/info.json");
+    let info_path = base_factorio_dir.join("data/base/info.json");
 
     let same_version = get_info(&info_path)
         .await
@@ -328,43 +323,29 @@ pub async fn download_factorio(
         }
         tokio::fs::create_dir_all(data_dir).await?;
 
-        let mpb = MultiProgress::new();
+        let username = get_env_var!("FACTORIO_USERNAME")?;
+        let token = get_env_var!("FACTORIO_TOKEN")?;
 
-        let d0 = download(
-            get_download_url("alpha", factorio_version, &username, &token),
-            data_dir,
-            &["factorio/data/*"],
-            mpb.add(ProgressBar::new(0)),
-        );
-        let d1 = download(
-            get_download_url("headless", factorio_version, &username, &token),
-            data_dir,
-            &["factorio/bin/*", "factorio/config-path.cfg"],
-            mpb.add(ProgressBar::new(0)),
-        );
-
-        async fn wait_for_progress_bar(mpb: MultiProgress) -> Result<(), Box<dyn Error>> {
-            tokio::task::spawn_blocking(move || mpb.join())
-                .await?
-                .map_err(Box::from)
-        }
-
-        tokio::try_join!(d0, d1, wait_for_progress_bar(mpb))?;
+        download(factorio_version, &username, &token, data_dir).await?;
     }
 
     Ok(())
 }
 
-async fn download<I, S>(
-    url: String,
+async fn download(
+    version: &str,
+    username: &str,
+    token: &str,
     out_dir: &Path,
-    filter: I,
-    pb: ProgressBar,
-) -> Result<(), Box<dyn Error>>
-where
-    I: IntoIterator<Item = S>,
-    S: AsRef<str>,
-{
+) -> Result<(), Box<dyn Error>> {
+    let os = match std::env::consts::OS {
+        "linux" => "linux64",
+        "windows" => "win64-manual",
+        // "macos" => "osx",
+        _ => panic!("unsupported OS"),
+    };
+    let url = format!("https://www.factorio.com/get-download/{version}/alpha/{os}?username={username}&token={token}");
+
     let client = reqwest::Client::new();
     let res = client.get(&url).send().await?;
 
@@ -372,11 +353,16 @@ where
         panic!("Status code was not successful");
     }
 
-    if let Some(content_length) = res.content_length() {
+    let pb = ProgressBar::new(0);
+
+    let content_length = res.content_length();
+
+    if let Some(content_length) = content_length {
         pb.set_length(content_length);
         pb.set_style(
             ProgressStyle::default_bar()
                 .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})")
+                .unwrap()
                 .progress_chars("=> "),
         );
     } else {
@@ -392,22 +378,27 @@ where
         pb.inc(chunk.len() as u64);
     });
 
-    let decompressor = LzmaDecoder::new(stream);
-
-    let mut builder = GlobSetBuilder::new();
-    for pattern in filter.into_iter() {
-        builder.add(Glob::new(pattern.as_ref())?);
-    }
-    let matcher = builder.build()?;
-
-    let stream_reader = decompressor.into_async_read();
-    let ar = async_tar::Archive::new(stream_reader);
-    let mut entries = ar.entries()?;
-    use futures::stream::StreamExt;
-    while let Some(Ok(mut file)) = entries.next().await {
-        if matcher.is_match(file.path()?.to_path_buf()) {
-            file.unpack_in(out_dir).await?;
+    #[cfg(target_os = "windows")]
+    {
+        let mut bytes = if let Some(content_length) = content_length {
+            Vec::with_capacity(content_length.try_into()?)
+        } else {
+            Vec::new()
+        };
+        let mut stream = stream;
+        while let Some(chunk) = stream.try_next().await? {
+            bytes.extend(chunk);
         }
+        let mut ar = zip::ZipArchive::new(std::io::Cursor::new(bytes))?;
+        ar.extract(out_dir)?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        let stream_reader = tokio_util::io::StreamReader::new(stream);
+        let decompressor = async_compression::tokio::bufread::LzmaDecoder::new(stream_reader);
+
+        let mut ar = tokio_tar::Archive::new(decompressor);
+        ar.unpack(out_dir).await?;
     }
 
     pb.finish();

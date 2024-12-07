@@ -6,7 +6,7 @@
     ],
     "scripts": {
         "start:website": "npm --workspace=@fbe/website run start",
-        "start:exporter": "cd ./packages/exporter && systemfd --no-pid -s http::8888 -- cargo watch -w ./src -x \"run --features dev\"",
+        "start:exporter": "cd ./packages/exporter && cargo run --release",
         "build:website": "npm --workspace=@fbe/website run build",
         "lint": "eslint **/*.ts --config .eslintrc.yml --ignore-path .gitignore",
         "lint:fix": "eslint **/*.ts --fix --config .eslintrc.yml --ignore-path .gitignore",

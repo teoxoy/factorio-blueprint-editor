@@ -1,5 +1,9 @@
-use actix_web::{web, App, HttpResponse, HttpServer};
+use hyper::service::service_fn;
+use hyper_staticfile::Static;
+use hyper_util::rt::TokioIo;
+use std::path::Path;
 use std::path::PathBuf;
+use tokio::net::TcpListener;
 
 mod setup;
 
@@ -10,41 +14,39 @@ static FACTORIO_VERSION: &str = "1.1.100";
 
 lazy_static! {
     static ref DATA_DIR: PathBuf = PathBuf::from("./data");
-    static ref FACTORIO_DATA: PathBuf = DATA_DIR.join("factorio/data");
 }
 
-#[actix_rt::main]
-async fn main() -> std::io::Result<()> {
-    #[cfg(feature = "dev")]
-    dotenv::dotenv().ok();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenvy::dotenv()?;
 
-    setup::download_factorio(&DATA_DIR, &FACTORIO_DATA, FACTORIO_VERSION)
-        .await
-        .unwrap();
-    setup::extract(&DATA_DIR, &FACTORIO_DATA).await.unwrap();
-
-    let mut server = HttpServer::new(move || {
-        App::new()
-            .service(actix_files::Files::new("/data", "./data/output").show_files_listing())
-            .default_service(web::to(not_found))
-    });
-
-    #[cfg(feature = "dev")]
-    let listener = listenfd::ListenFd::from_env().take_tcp_listener(0).unwrap();
-    #[cfg(not(feature = "dev"))]
-    let listener = None;
-
-    server = if let Some(l) = listener {
-        server.listen(l)?
-    } else {
-        server.bind("0.0.0.0:85")?
+    let factorio_dir_name = match std::env::consts::OS {
+        "linux" => "factorio",
+        "windows" => &format!("Factorio_{FACTORIO_VERSION}"),
+        _ => panic!("unsupported OS"),
     };
+    let output_dir = DATA_DIR.join("output");
+    let base_factorio_dir = DATA_DIR.join(factorio_dir_name);
 
-    server.run().await
-}
+    setup::download_factorio(&DATA_DIR, &base_factorio_dir, FACTORIO_VERSION).await?;
+    setup::extract(&output_dir, &base_factorio_dir).await?;
 
-fn not_found() -> HttpResponse {
-    HttpResponse::NotFound()
-        .content_type("text/plain")
-        .body("404 Not Found")
+    let static_ = Static::new(Path::new("data/output/"));
+
+    let listener = TcpListener::bind(std::net::SocketAddr::from(([127, 0, 0, 1], 8081))).await?;
+
+    loop {
+        let (stream, _) = listener.accept().await?;
+        let io = TokioIo::new(stream);
+
+        let static_ = static_.clone();
+        tokio::spawn(async move {
+            if let Err(err) = hyper::server::conn::http1::Builder::new()
+                .serve_connection(io, service_fn(|req| static_.clone().serve(req)))
+                .await
+            {
+                eprintln!("Error serving connection: {}", err);
+            }
+        });
+    }
 }
