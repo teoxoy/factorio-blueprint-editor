@@ -1,12 +1,13 @@
 {
     "private": true,
     "workspaces": [
-        "packages/*"
+        "packages/editor",
+        "packages/website"
     ],
     "scripts": {
-        "start:website": "yarn workspace @fbe/website run start",
+        "start:website": "npm --workspace=@fbe/website run start",
         "start:exporter": "cd ./packages/exporter && systemfd --no-pid -s http::8888 -- cargo watch -w ./src -x \"run --features dev\"",
-        "build:website": "yarn workspace @fbe/website run build",
+        "build:website": "npm --workspace=@fbe/website run build",
         "lint": "eslint **/*.ts --config .eslintrc.yml --ignore-path .gitignore",
         "lint:fix": "eslint **/*.ts --fix --config .eslintrc.yml --ignore-path .gitignore",
         "format": "prettier **/*.{js,ts,html,json,yml,md} --check --config .prettierrc.yml --ignore-path .gitignore",
