@@ -3,6 +3,6 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "sumneko.lua",
-        "matklad.rust-analyzer"
+        "rust-lang.rust-analyzer"
     ]
 }
