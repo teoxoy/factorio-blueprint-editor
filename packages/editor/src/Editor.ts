@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 import { BasisLoader } from '@pixi/basis'
-import basisTranscoderJS from './basis/transcoder.7f0a00a.js'
-import basisTranscoderWASM from './basis/transcoder.7f0a00a.wasm'
+import basisTranscoderJS from './basis/transcoder.1.16.4.js'
+import basisTranscoderWASM from './basis/transcoder.1.16.4.wasm'
 import { loadData } from './core/factorioData'
 import G from './common/globals'
 import { Entity } from './core/Entity'
@@ -195,8 +195,8 @@ export class Editor {
         }
 
         function doFlip(vertical: boolean): void  {
-                if (G.BPC.mode === EditorMode.PAINT
-                    && G.BPC.paintContainer.canFlipOrRotateByCopying()) {
+            if (G.BPC.mode === EditorMode.PAINT
+                && G.BPC.paintContainer.canFlipOrRotateByCopying()) {
                 try {
                     const copies = G.BPC.paintContainer.flippedEntities(vertical)
                     G.BPC.paintContainer.destroy()
