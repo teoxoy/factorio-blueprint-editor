@@ -10,8 +10,8 @@
         "build:website": "npm --workspace=@fbe/website run build",
         "lint": "eslint **/*.ts --config .eslintrc.yml --ignore-path .gitignore",
         "lint:fix": "eslint **/*.ts --fix --config .eslintrc.yml --ignore-path .gitignore",
-        "format": "prettier **/*.{js,ts,html,json,yml,md} --check --config .prettierrc.yml --ignore-path .gitignore",
-        "format:fix": "prettier **/*.{js,ts,html,json,yml,md} --write --config .prettierrc.yml --ignore-path .gitignore"
+        "format": "prettier . --check",
+        "format:fix": "prettier . --write"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.7.0",
@@ -20,7 +20,7 @@
         "eslint-config-prettier": "^8.3.0",
         "eslint-import-resolver-typescript": "^2.5.0",
         "eslint-plugin-import": "^2.25.3",
-        "prettier": "^2.5.1",
+        "prettier": "^3.4.2",
         "typescript": "^4.5.4"
     }
 }
