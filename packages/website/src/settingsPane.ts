@@ -96,7 +96,7 @@ export function initSettingsPane(
             }
             editor.debug = debug
         })
-    
+
     if (localStorage.getItem('limitWireReach')) {
         const limitWireReach = localStorage.getItem('limitWireReach') === 'true'
         editor.limitWireReach = limitWireReach

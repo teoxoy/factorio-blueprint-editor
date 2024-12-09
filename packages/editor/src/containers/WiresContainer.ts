@@ -13,7 +13,12 @@ export class WiresContainer extends PIXI.Container {
         this.bp = bp
     }
 
-    private static createWire(p1: IPoint, p2: IPoint, color: string, connectionsReach = true): PIXI.Graphics {
+    private static createWire(
+        p1: IPoint,
+        p2: IPoint,
+        color: string,
+        connectionsReach = true
+    ): PIXI.Graphics {
         const wire = new PIXI.Graphics()
 
         const minX = Math.min(p1.x, p2.x)
@@ -32,7 +37,7 @@ export class WiresContainer extends PIXI.Container {
         wire.lineStyle({
             width: 1.5,
             color: colorMap[color],
-            alpha: (connectionsReach ? 1 : 0.3),
+            alpha: connectionsReach ? 1 : 0.3,
         })
         wire.moveTo(0, 0)
 
@@ -99,7 +104,9 @@ export class WiresContainer extends PIXI.Container {
 
         for (const conn of connections) {
             const entNr =
-                entityNumber === conn.cps[0].entityNumber ? conn.cps[1].entityNumber : conn.cps[0].entityNumber
+                entityNumber === conn.cps[0].entityNumber
+                    ? conn.cps[1].entityNumber
+                    : conn.cps[0].entityNumber
             const ec = EntityContainer.mappings.get(entNr)
             if (ec.entity.type === 'electric_pole') {
                 ec.redraw()
@@ -161,7 +168,10 @@ export class WiresContainer extends PIXI.Container {
         const connectionsReach = U.pointInCircle(
             getPos(connection.cps[0]),
             getPos(connection.cps[1]),
-            Math.min(Infinity, ...connection.cps.map(getMaxWireDistance).filter(d => d !== undefined))
+            Math.min(
+                Infinity,
+                ...connection.cps.map(getMaxWireDistance).filter(d => d !== undefined)
+            )
         )
 
         return WiresContainer.createWire(

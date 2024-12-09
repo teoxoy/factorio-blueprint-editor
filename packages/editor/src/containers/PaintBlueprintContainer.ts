@@ -89,11 +89,17 @@ export class PaintBlueprintContainer extends PaintContainer {
     }
 
     public logDataForComparison(): void {
-        const withOutNums = [...this.entities.keys()].map(e => ({...e.rawEntity, entity_number: undefined}))
-        withOutNums.sort((a, b) => Math.sign(b.position.y - a.position.y) || Math.sign(b.position.x - a.position.x))
+        const withOutNums = [...this.entities.keys()].map(e => ({
+            ...e.rawEntity,
+            entity_number: undefined,
+        }))
+        withOutNums.sort(
+            (a, b) =>
+                Math.sign(b.position.y - a.position.y) || Math.sign(b.position.x - a.position.x)
+        )
         console.log(withOutNums)
     }
-    
+
     public canFlipOrRotateByCopying(): boolean {
         return true
     }
@@ -114,7 +120,6 @@ export class PaintBlueprintContainer extends PaintContainer {
         }
         return result
     }
-
 
     public moveAtCursor(): void {
         if (!this.visible) return
@@ -164,16 +169,14 @@ export class PaintBlueprintContainer extends PaintContainer {
                 this.bp.wireConnections
                     .getEntityConnections(oldID)
                     .filter(connection =>
-                        connection.cps.every(cp =>
-                            oldEntIDToNewEntID.has(cp.entityNumber)
-                        )
+                        connection.cps.every(cp => oldEntIDToNewEntID.has(cp.entityNumber))
                     )
                     .map(connection => ({
                         ...connection,
                         cps: connection.cps.map(cp => ({
                             ...cp,
                             entityNumber: oldEntIDToNewEntID.get(cp.entityNumber),
-                        }))
+                        })),
                     }))
                     .forEach(conn => this.bpc.bp.wireConnections.create(conn))
             }

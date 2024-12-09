@@ -69,7 +69,7 @@ export class PaintTileContainer extends PaintContainer {
     }
 
     public canFlipOrRotateByCopying(): boolean {
-        return false;
+        return false
     }
 
     protected redraw(): void {
@@ -95,9 +95,7 @@ export class PaintTileContainer extends PaintContainer {
         const position = this.getGridPosition()
 
         this.bpc.bp.removeTiles(
-            PaintTileContainer.getTilePositions().map(p =>
-                util.sumprod(p, position)
-            )
+            PaintTileContainer.getTilePositions().map(p => util.sumprod(p, position))
         )
     }
 
@@ -108,9 +106,7 @@ export class PaintTileContainer extends PaintContainer {
 
         this.bpc.bp.createTiles(
             this.name,
-            PaintTileContainer.getTilePositions().map(p =>
-                util.sumprod(p, position)
-            )
+            PaintTileContainer.getTilePositions().map(p => util.sumprod(p, position))
         )
     }
 }

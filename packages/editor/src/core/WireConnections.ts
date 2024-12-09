@@ -27,7 +27,9 @@ export class WireConnections extends EventEmitter {
     }
 
     private static hash(conn: IConnection): string {
-        const cps = conn.cps.sort((cp1,cp2) => cp1.entityNumber-cp2.entityNumber || cp1.entitySide-cp2.entitySide)
+        const cps = conn.cps.sort(
+            (cp1, cp2) => cp1.entityNumber - cp2.entityNumber || cp1.entitySide - cp2.entitySide
+        )
         const [firstE, secondE] = cps.map(cp => cp.entityNumber)
         const [firstS, secondS] = cps.map(cp => cp.entitySide)
         return `${conn.color}-${firstE}-${secondE}-${firstS}-${secondS}`
@@ -51,13 +53,13 @@ export class WireConnections extends EventEmitter {
                             cps: [
                                 {
                                     entityNumber: entityNumber,
-                                    entitySide: Number(side)
+                                    entitySide: Number(side),
                                 },
                                 {
                                     entityNumber: data.entity_id,
-                                    entitySide: data.circuit_id || 1
-                                }
-                            ]
+                                    entitySide: data.circuit_id || 1,
+                                },
+                            ],
                         })
                     }
                 }
@@ -73,13 +75,13 @@ export class WireConnections extends EventEmitter {
                     cps: [
                         {
                             entityNumber: entityNumber,
-                            entitySide: Number(side.slice(2, 3)) + 1
+                            entitySide: Number(side.slice(2, 3)) + 1,
                         },
                         {
                             entityNumber: data.entity_id,
-                            entitySide: 1
-                        }
-                    ]
+                            entitySide: 1,
+                        },
+                    ],
                 })
             }
         }
@@ -159,13 +161,13 @@ export class WireConnections extends EventEmitter {
             cps: [
                 {
                     entityNumber: entityNumber1,
-                    entitySide: 1
+                    entitySide: 1,
                 },
                 {
                     entityNumber: entityNumber2,
-                    entitySide: 1
-                }
-            ]
+                    entitySide: 1,
+                },
+            ],
         }
     }
 
@@ -384,7 +386,9 @@ export class WireConnections extends EventEmitter {
 
     public getPowerPoleDirection(entityNumber: number): number {
         const connections = this.getEntityConnections(entityNumber).map(conn =>
-            entityNumber === conn.cps[0].entityNumber ? conn.cps[1].entityNumber : conn.cps[0].entityNumber
+            entityNumber === conn.cps[0].entityNumber
+                ? conn.cps[1].entityNumber
+                : conn.cps[0].entityNumber
         )
         if (connections.length === 0) return 0
 

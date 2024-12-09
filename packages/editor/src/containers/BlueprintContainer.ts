@@ -62,7 +62,8 @@ export class BlueprintContainer extends PIXI.Container {
     )
 
     private _moveSpeed = Number(localStorage.getItem('moveSpeed') ?? 10)
-    private _gridColor = (localStorage.getItem('darkTheme') ?? 'true') === 'true' ? 0x303030 : 0xc9c9c9
+    private _gridColor =
+        (localStorage.getItem('darkTheme') ?? 'true') === 'true' ? 0x303030 : 0xc9c9c9
     private _gridPattern: GridPattern = (localStorage.getItem('pattern') ?? 'grid') as GridPattern
     private _limitWireReach = (localStorage.getItem('limitWireReach') ?? 'true') === 'true'
     private _mode: EditorMode = EditorMode.NONE
@@ -446,7 +447,7 @@ export class BlueprintContainer extends PIXI.Container {
 
         const entity = this.bp.entityPositionGrid.getEntityAtPosition({
             x: this.gridData.x32,
-            y: this.gridData.y32
+            y: this.gridData.y32,
         })
         const eC = entity ? EntityContainer.mappings.get(entity.entityNumber) : undefined
 

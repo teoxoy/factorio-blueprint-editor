@@ -71,11 +71,11 @@ export class PositionGrid {
     public getConnectionPointAtPosition(position: IPoint, color: string): IConnectionPoint {
         const entity = this.getEntityAtPosition(position)
         if (entity === undefined) return undefined
-        const rel_position = util.sumprod(position, -1,entity.position)
+        const rel_position = util.sumprod(position, -1, entity.position)
         for (let side = 1; side <= 10; side++) {
             const bbox = entity.getWireConnectionBoundingBox(color, side)
-            if (bbox === undefined) break  // no more sides expected for that color
-            const rel_bbox = bbox.map(b => util.sumprod(rel_position, -1,b))
+            if (bbox === undefined) break // no more sides expected for that color
+            const rel_bbox = bbox.map(b => util.sumprod(rel_position, -1, b))
             if (Object.values(rel_bbox[0]).some(v => v < 0)) continue
             if (Object.values(rel_bbox[1]).some(v => v > 0)) continue
             return {

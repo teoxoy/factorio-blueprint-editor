@@ -126,8 +126,8 @@ function decode(str: string): Promise<Blueprint | Book> {
             throw hasTrain()
                 ? new TrainBlueprintError(errors)
                 : isModded()
-                ? new ModdedBlueprintError(errors)
-                : errors
+                  ? new ModdedBlueprintError(errors)
+                  : errors
         }
     })
 }

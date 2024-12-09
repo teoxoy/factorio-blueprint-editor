@@ -55,7 +55,7 @@ export class GridData extends EventEmitter {
         return this._constrained
     }
 
-    public set constrained(constrained: boolean)   {
+    public set constrained(constrained: boolean) {
         this._constrained = constrained
         this._constrainTo = undefined
     }
@@ -77,14 +77,19 @@ export class GridData extends EventEmitter {
             return false
         }
 
-        if (element.startsWith(`_${  this._constrainTo}`)) {
+        if (element.startsWith(`_${this._constrainTo}`)) {
             const sign = Math.sign(target - this[element])
             this[element] += sign
             return this[element] != target
         }
     }
 
-    private updateValuesWithConstraints(x16: number, y16: number, x32: number, y32: number): boolean {
+    private updateValuesWithConstraints(
+        x16: number,
+        y16: number,
+        x32: number,
+        y32: number
+    ): boolean {
         let anythingChanged = false
         if (this.constrainMove('_x16', x16)) anythingChanged = true
         if (this.constrainMove('_y16', y16)) anythingChanged = true

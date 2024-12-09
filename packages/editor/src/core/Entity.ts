@@ -72,7 +72,7 @@ export class Entity extends EventEmitter {
     }
 
     public get rawEntity(): BPS.IEntity {
-        return this.m_rawEntity;
+        return this.m_rawEntity
     }
 
     /** Entity size */
@@ -93,20 +93,25 @@ export class Entity extends EventEmitter {
         // Check if the new position breaks any valid entity connections
         const connectionsBreak = this.m_BP.wireConnections
             .getEntityConnections(this.entityNumber)
-            .map(c => (c.cps[0].entityNumber === this.entityNumber ? c.cps[1].entityNumber : c.cps[0].entityNumber))
+            .map(c =>
+                c.cps[0].entityNumber === this.entityNumber
+                    ? c.cps[1].entityNumber
+                    : c.cps[0].entityNumber
+            )
             .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
-            .some(e =>
-                // Make sure that a reaching connection is not broken
-                U.pointInCircle(
-                    e.position,
-                    this.position,
-                    Math.min(e.maxWireDistance, this.maxWireDistance)
-                ) &&
-                !U.pointInCircle(
-                    e.position,
-                    position,
-                    Math.min(e.maxWireDistance, this.maxWireDistance)
-                )
+            .some(
+                e =>
+                    // Make sure that a reaching connection is not broken
+                    U.pointInCircle(
+                        e.position,
+                        this.position,
+                        Math.min(e.maxWireDistance, this.maxWireDistance)
+                    ) &&
+                    !U.pointInCircle(
+                        e.position,
+                        position,
+                        Math.min(e.maxWireDistance, this.maxWireDistance)
+                    )
             )
         if (G.BPC.limitWireReach && connectionsBreak) return
 
@@ -130,16 +135,20 @@ export class Entity extends EventEmitter {
 
     public connectionsReach(position?: IPoint): boolean {
         return this.m_BP.wireConnections
-        .getEntityConnections(this.entityNumber)
-        .map(c => (c.cps[0].entityNumber === this.entityNumber ? c.cps[1].entityNumber : c.cps[0].entityNumber))
-        .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
-        .every(e =>
-            U.pointInCircle(
-                e.position,
-                position ?? this.position,
-                Math.min(e.maxWireDistance, this.maxWireDistance)
+            .getEntityConnections(this.entityNumber)
+            .map(c =>
+                c.cps[0].entityNumber === this.entityNumber
+                    ? c.cps[1].entityNumber
+                    : c.cps[0].entityNumber
             )
-        )
+            .map(otherEntityNumer => this.m_BP.entities.get(otherEntityNumer))
+            .every(e =>
+                U.pointInCircle(
+                    e.position,
+                    position ?? this.position,
+                    Math.min(e.maxWireDistance, this.maxWireDistance)
+                )
+            )
     }
 
     public moveBy(offset: IPoint): void {
@@ -580,21 +589,20 @@ export class Entity extends EventEmitter {
 
     public getRotatedCopy(ccw = false): Entity {
         const position = ccw
-            ? {x: this.m_rawEntity.position.y, y: -this.m_rawEntity.position.x}
-            : {x: -this.m_rawEntity.position.y, y: this.m_rawEntity.position.x}
+            ? { x: this.m_rawEntity.position.y, y: -this.m_rawEntity.position.x }
+            : { x: -this.m_rawEntity.position.y, y: this.m_rawEntity.position.x }
         const direction = this.constrainDirection((this.direction + (ccw ? 6 : 2)) % 8)
-        const updatedRawEntity = {...this.m_rawEntity, position, direction}
+        const updatedRawEntity = { ...this.m_rawEntity, position, direction }
         if (direction === 0) delete updatedRawEntity.direction
 
-        return new Entity(updatedRawEntity, this.m_BP);
+        return new Entity(updatedRawEntity, this.m_BP)
     }
 
     private constrainDirection(direction: number): number {
         const pr = this.entityData.possible_rotations
         let canRotate = pr !== undefined
 
-        if (this.type === 'assembling_machine')
-            canRotate = this.assemblerCraftsWithFluid
+        if (this.type === 'assembling_machine') canRotate = this.assemblerCraftsWithFluid
         if (canRotate) {
             if (!pr.includes(direction)) {
                 if (direction === 4 && pr.includes(0)) {
@@ -612,10 +620,8 @@ export class Entity extends EventEmitter {
     }
 
     private changePriority(priority?: 'left' | 'right'): 'left' | 'right' | undefined {
-        if (priority === 'left')
-            return 'right'
-        else if (priority === 'right')
-            return 'left'
+        if (priority === 'left') return 'right'
+        else if (priority === 'right') return 'left'
         return priority
     }
 
@@ -626,49 +632,65 @@ export class Entity extends EventEmitter {
         // Straight rail: 1, 2, 7, 0, 5, 2, 3, 0
         // Vert: 1-3, 2-2, 7-5, 0-0
         // Horz: 1-7, 3-5
-        const translation_map: {[key: string]: {[vert: string]: number[]}} = {
-            'curved_rail': {true: [5, 4, 3, 2, 1, 0, 7, 6], false: [1, 0, 7, 6, 5, 4, 3, 2] },
-            'straight_rail': {true: [0, 3, 2, 1, 4, 7, 6, 5], false: [0, 7, 2, 5, 4, 3, 6, 1]},
-            'default': {true: [4, 1, 2, 3, 0, 5, 6, 7], false: [0, 1, 6, 3, 4, 5, 2, 7]}
+        const translation_map: { [key: string]: { [vert: string]: number[] } } = {
+            curved_rail: { true: [5, 4, 3, 2, 1, 0, 7, 6], false: [1, 0, 7, 6, 5, 4, 3, 2] },
+            straight_rail: { true: [0, 3, 2, 1, 4, 7, 6, 5], false: [0, 7, 2, 5, 4, 3, 6, 1] },
+            default: { true: [4, 1, 2, 3, 0, 5, 6, 7], false: [0, 1, 6, 3, 4, 5, 2, 7] },
         }
 
-        const non_flip_entities = ['chemical_plant', 'oil_refinery', 'train_stop', 'rail_chain_signal', 'rail_signal']
+        const non_flip_entities = [
+            'chemical_plant',
+            'oil_refinery',
+            'train_stop',
+            'rail_chain_signal',
+            'rail_signal',
+        ]
 
         if (non_flip_entities.includes(this.name))
-            throw new IllegalFlipError(`${this.name  } cannot be flipped`);
+            throw new IllegalFlipError(`${this.name} cannot be flipped`)
 
-        const translation = this.name in translation_map ? translation_map[this.name] : translation_map.default
-        const direction = this.name === 'storage_tank'
-            ? (2 - this.direction)
-            : this.constrainDirection(translation[String(vertical)][this.direction])
+        const translation =
+            this.name in translation_map ? translation_map[this.name] : translation_map.default
+        const direction =
+            this.name === 'storage_tank'
+                ? 2 - this.direction
+                : this.constrainDirection(translation[String(vertical)][this.direction])
 
         let input_priority = this.m_rawEntity.input_priority
         let output_priority = this.m_rawEntity.output_priority
 
-        if ((vertical && (direction === 2 || direction === 4))
-            || (!vertical && (direction === 0 || direction === 6))) {
+        if (
+            (vertical && (direction === 2 || direction === 4)) ||
+            (!vertical && (direction === 0 || direction === 6))
+        ) {
             input_priority = this.changePriority(input_priority)
             output_priority = this.changePriority(output_priority)
         }
 
         const position = vertical
-            ? {x: this.m_rawEntity.position.x, y: -this.m_rawEntity.position.y}
-            : {x: -this.m_rawEntity.position.x, y: this.m_rawEntity.position.y}
-            const updatedRawEntity = {...this.m_rawEntity, direction, position, input_priority, output_priority}
-            if (direction === 0) delete updatedRawEntity.direction
+            ? { x: this.m_rawEntity.position.x, y: -this.m_rawEntity.position.y }
+            : { x: -this.m_rawEntity.position.x, y: this.m_rawEntity.position.y }
+        const updatedRawEntity = {
+            ...this.m_rawEntity,
+            direction,
+            position,
+            input_priority,
+            output_priority,
+        }
+        if (direction === 0) delete updatedRawEntity.direction
 
-        return new Entity(updatedRawEntity, this.m_BP);
+        return new Entity(updatedRawEntity, this.m_BP)
     }
 
     private rotateDir(ccw: boolean): number {
         if (!this.canBeRotated) return this.direction
         const pr = this.entityData.possible_rotations
         return pr[
-                (pr.indexOf(this.direction) +
-                    (this.size.x !== this.size.y || this.type === 'underground_belt' ? 2 : 1) *
-                        (ccw ? 3 : 1)) %
-                    pr.length
-            ]
+            (pr.indexOf(this.direction) +
+                (this.size.x !== this.size.y || this.type === 'underground_belt' ? 2 : 1) *
+                    (ccw ? 3 : 1)) %
+                pr.length
+        ]
     }
 
     public rotate(ccw = false, rotateOpposingUB = false): void {
@@ -895,23 +917,26 @@ export class Entity extends EventEmitter {
     ): number[][] {
         const e = this.entityData
         const size_box = [
-            [-e.size.width/2, -e.size.height/2],
-            [+e.size.width/2, +e.size.height/2],
+            [-e.size.width / 2, -e.size.height / 2],
+            [+e.size.width / 2, +e.size.height / 2],
         ]
         // use size_box for cell-wise selection, use e.selection_box for "true" selection
-        if (side===1 && e.connection_points?.[direction/2].wire[color]) return size_box
-        if (side===1 && e.circuit_wire_connection_point?.wire[color]) return size_box
-        if (side===1 && e.circuit_wire_connection_points?.[direction/2].wire[color]) return size_box
-        if (side===1 && e.input_connection_points?.[direction/2].wire[color]) return e.input_connection_bounding_box
-        if (side===2 && e.output_connection_points?.[direction/2].wire[color]) return e.output_connection_bounding_box
-        if (side===1 && e.left_wire_connection_point?.wire[color]) {
+        if (side === 1 && e.connection_points?.[direction / 2].wire[color]) return size_box
+        if (side === 1 && e.circuit_wire_connection_point?.wire[color]) return size_box
+        if (side === 1 && e.circuit_wire_connection_points?.[direction / 2].wire[color])
+            return size_box
+        if (side === 1 && e.input_connection_points?.[direction / 2].wire[color])
+            return e.input_connection_bounding_box
+        if (side === 2 && e.output_connection_points?.[direction / 2].wire[color])
+            return e.output_connection_bounding_box
+        if (side === 1 && e.left_wire_connection_point?.wire[color]) {
             const box = util.duplicate(size_box)
-            box[1][0] = (box[0][0]+box[1][0])/2
+            box[1][0] = (box[0][0] + box[1][0]) / 2
             return box
         }
-        if (side===2 && e.right_wire_connection_point?.wire[color]) {
+        if (side === 2 && e.right_wire_connection_point?.wire[color]) {
             const box = util.duplicate(size_box)
-            box[0][0] = (box[0][0]+box[1][0])/2
+            box[0][0] = (box[0][0] + box[1][0]) / 2
             return box
         }
     }
@@ -923,11 +948,11 @@ export class Entity extends EventEmitter {
     ): IPoint[] {
         const box = this.getWire_connection_box(color, side, direction)
         if (box === undefined) return undefined
-        let bbox : IPoint[] = box.map(util.Point)
+        let bbox: IPoint[] = box.map(util.Point)
         bbox = bbox.map(p => util.rotatePointBasedOnDir(p, direction))
         bbox = [
-            {x: Math.min(...bbox.map(p => p.x)), y: Math.min(...bbox.map(p => p.y))},
-            {x: Math.max(...bbox.map(p => p.x)), y: Math.max(...bbox.map(p => p.y))},
+            { x: Math.min(...bbox.map(p => p.x)), y: Math.min(...bbox.map(p => p.y)) },
+            { x: Math.max(...bbox.map(p => p.x)), y: Math.max(...bbox.map(p => p.y)) },
         ]
         return bbox
     }

@@ -81,7 +81,12 @@ export class InventoryDialog extends Dialog {
                     if (itemsFilter === undefined) {
                         const itemData = FD.items[item.name]
                         if (!itemData) continue
-                        if (!itemData.place_result && !itemData.place_as_tile && !itemData.wire_count) continue
+                        if (
+                            !itemData.place_result &&
+                            !itemData.place_as_tile &&
+                            !itemData.wire_count
+                        )
+                            continue
                         // needed for robots/trains/cars
                         if (itemData.place_result && !FD.entities[itemData.place_result]) continue
                     } else {

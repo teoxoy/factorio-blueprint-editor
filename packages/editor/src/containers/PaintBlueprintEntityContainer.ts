@@ -32,13 +32,13 @@ export class PaintBlueprintEntityContainer {
 
         this.entitySprites = EntitySprite.getParts(
             this.entity,
-            util.sumprod(32,this.entity.position),
+            util.sumprod(32, this.entity.position),
             this.bp.entityPositionGrid
         )
     }
 
     private get entityPosition(): IPoint {
-        return util.sumprod(1/32,this.pbpc, this.entity.position)
+        return util.sumprod(1 / 32, this.pbpc, this.entity.position)
     }
 
     private get position(): IPoint {

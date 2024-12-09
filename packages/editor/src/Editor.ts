@@ -127,11 +127,11 @@ export class Editor {
     }
 
     public haveBlueprint(): boolean {
-        return !G.bp.isEmpty();
+        return !G.bp.isEmpty()
     }
 
     public async appendBlueprint(bp: Blueprint): Promise<void> {
-        const result = bp.entities.valuesArray().map(e => new Entity(e.rawEntity, G.BPC.bp));
+        const result = bp.entities.valuesArray().map(e => new Entity(e.rawEntity, G.BPC.bp))
 
         G.BPC.spawnPaintContainer(result, 0)
     }
@@ -180,7 +180,7 @@ export class Editor {
 
         registerAction('focus', 'f').bind({ press: () => G.BPC.centerViewport() })
 
-        function doRotate(ccw: boolean): void  {
+        function doRotate(ccw: boolean): void {
             if (G.BPC.mode === EditorMode.EDIT) {
                 G.BPC.hoverContainer.entity.rotate(ccw, true)
             } else if (G.BPC.mode === EditorMode.PAINT) {
@@ -194,9 +194,11 @@ export class Editor {
             }
         }
 
-        function doFlip(vertical: boolean): void  {
-            if (G.BPC.mode === EditorMode.PAINT
-                && G.BPC.paintContainer.canFlipOrRotateByCopying()) {
+        function doFlip(vertical: boolean): void {
+            if (
+                G.BPC.mode === EditorMode.PAINT &&
+                G.BPC.paintContainer.canFlipOrRotateByCopying()
+            ) {
                 try {
                     const copies = G.BPC.paintContainer.flippedEntities(vertical)
                     G.BPC.paintContainer.destroy()
@@ -212,19 +214,19 @@ export class Editor {
         }
 
         registerAction('rotate', 'r').bind({
-            press: () => doRotate(false)
+            press: () => doRotate(false),
         })
 
         registerAction('reverseRotate', 'shift+r').bind({
-            press: () => doRotate(true)
+            press: () => doRotate(true),
         })
 
         registerAction('flipHorizontal', 'shift+f').bind({
-            press: () => doFlip(false)
+            press: () => doFlip(false),
         })
 
         registerAction('flipVertical', 'shift+g').bind({
-            press: () => doFlip(true)
+            press: () => doFlip(true),
         })
 
         registerAction('pipette', 'q').bind({

@@ -14,8 +14,8 @@ const Point = (p: IPoint | number[]): IPoint => {
 }
 
 /** Computes a weighted sum of vectors. Weights are preceding their corresponding vector, and equal to 1 if not specified */
-const sumprod = (...args: (number | (number[]|IPoint))[]): IPoint => {
-    const ans: IPoint = {x:0, y:0}
+const sumprod = (...args: (number | (number[] | IPoint))[]): IPoint => {
+    const ans: IPoint = { x: 0, y: 0 }
     let coef: number = undefined
     for (let arg of args) {
         if (typeof arg === 'number') {
@@ -27,7 +27,7 @@ const sumprod = (...args: (number | (number[]|IPoint))[]): IPoint => {
         ans.y += (coef ?? 1) * arg.y
         coef = undefined
     }
-    if (coef !== undefined) throw new TypeError("weights should be followed by a vector")
+    if (coef !== undefined) throw new TypeError('weights should be followed by a vector')
     return ans
 }
 

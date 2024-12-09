@@ -14,10 +14,10 @@ You can file new issues by selecting from our [new issue templates](https://gith
 
 ## Prerequisites
 
--   [git](https://git-scm.com/)
--   [node](https://nodejs.org/en/)
--   [vscode](https://code.visualstudio.com/)
--   [rust](https://rust-lang.org)
+- [git](https://git-scm.com/)
+- [node](https://nodejs.org/en/)
+- [vscode](https://code.visualstudio.com/)
+- [rust](https://rust-lang.org)
 
 ### Note
 

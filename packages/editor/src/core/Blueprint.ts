@@ -476,21 +476,27 @@ class Blueprint extends EventEmitter {
             .filter(vis => vis.length)
             .forEach((vis, i) => {
                 vis.forEach((v, j, arr) => {
-                    setTimeout(() => {
-                        const tint = v.color ? v.color : 0xffffff * Math.random()
-                        v.path.forEach((p, k) => {
-                            setTimeout(() => {
-                                const s = new PIXI.Sprite(PIXI.Texture.WHITE)
-                                s.tint = tint
-                                s.anchor.set(0.5)
-                                s.alpha = v.alpha
-                                s.width = v.size
-                                s.height = v.size
-                                s.position.set(p.x * 32, p.y * 32)
-                                G.BPC.wiresContainer.addChild(s)
-                            }, k * (timePerVis / arr.length / v.path.length))
-                        })
-                    }, j * (timePerVis / arr.length) + i * timePerVis)
+                    setTimeout(
+                        () => {
+                            const tint = v.color ? v.color : 0xffffff * Math.random()
+                            v.path.forEach((p, k) => {
+                                setTimeout(
+                                    () => {
+                                        const s = new PIXI.Sprite(PIXI.Texture.WHITE)
+                                        s.tint = tint
+                                        s.anchor.set(0.5)
+                                        s.alpha = v.alpha
+                                        s.width = v.size
+                                        s.height = v.size
+                                        s.position.set(p.x * 32, p.y * 32)
+                                        G.BPC.wiresContainer.addChild(s)
+                                    },
+                                    k * (timePerVis / arr.length / v.path.length)
+                                )
+                            })
+                        },
+                        j * (timePerVis / arr.length) + i * timePerVis
+                    )
                 })
             })
     }

@@ -1077,7 +1077,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                             h: size.y,
                         })
                         .filter(e => e.name === 'gate')
-                        .map(e => util.sumprod(e.position, -1,data.position))
+                        .map(e => util.sumprod(e.position, -1, data.position))
                         // Rotate relative to mid point
                         .map(p => util.rotatePointBasedOnDir(p, dir).y)
                         // Remove duplicates
@@ -1306,7 +1306,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                 if (data.dir === 0 && data.positionGrid) {
                     const wall = data.positionGrid.getEntityAtPosition({
                         x: data.position.x,
-                        y: data.position.y + 1
+                        y: data.position.y + 1,
                     })
                     if (wall && wall.name === 'stone_wall') {
                         return [...getBaseSprites(), e.wall_patch.layers[0]]
@@ -1459,9 +1459,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
 
                 const belt0Parts = getBeltSprites(
                     e.belt_animation_set,
-                    data.positionGrid
-                        ? util.sumprod(data.position, b0Offset)
-                        : b0Offset,
+                    data.positionGrid ? util.sumprod(data.position, b0Offset) : b0Offset,
                     data.dir,
                     data.positionGrid,
                     true,
@@ -1471,9 +1469,7 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
 
                 const belt1Parts = getBeltSprites(
                     e.belt_animation_set,
-                    data.positionGrid
-                        ? util.sumprod(data.position, b1Offset)
-                        : b1Offset,
+                    data.positionGrid ? util.sumprod(data.position, b1Offset) : b1Offset,
                     data.dir,
                     data.positionGrid,
                     true,
@@ -1573,8 +1569,8 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                                 ? structure.direction_in_side_loading.sheet
                                 : structure.direction_out_side_loading.sheet
                             : isInput
-                            ? structure.direction_in.sheet
-                            : structure.direction_out.sheet,
+                              ? structure.direction_in.sheet
+                              : structure.direction_out.sheet,
                         'x',
                         'width',
                         dir / 2

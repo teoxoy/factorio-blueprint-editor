@@ -131,7 +131,7 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     public canFlipOrRotateByCopying(): boolean {
-        return false;
+        return false
     }
 
     protected redraw(): void {

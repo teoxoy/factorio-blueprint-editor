@@ -8,15 +8,15 @@ import { PaintContainer } from './PaintContainer'
 import { BlueprintContainer } from './BlueprintContainer'
 
 export class PaintWireContainer extends PaintContainer {
-    private color? : string
-    private cp? : IConnectionPoint? = undefined
+    private color?: string
+    private cp?: IConnectionPoint? = undefined
     /** This is only a reference */
     private cursorBox: PIXI.Container
 
     public constructor(bpc: BlueprintContainer, name: string) {
         super(bpc, name)
 
-        this.color = name.split("_",1)[0]
+        this.color = name.split('_', 1)[0]
         this.cp = undefined
 
         this.moveAtCursor()
@@ -58,9 +58,12 @@ export class PaintWireContainer extends PaintContainer {
         const entity = this.bpc.bp.entityPositionGrid.getEntityAtPosition(cursor_position)
         if (entity === undefined) return undefined
         const ec = EntityContainer.mappings.get(entity.entityNumber)
-        
-        const cp = this.bpc.bp.entityPositionGrid.getConnectionPointAtPosition(cursor_position, this.color)
-        
+
+        const cp = this.bpc.bp.entityPositionGrid.getConnectionPointAtPosition(
+            cursor_position,
+            this.color
+        )
+
         let connectionsReach = true
         if (this.cp && G.BPC.limitWireReach) {
             connectionsReach &&= U.pointInCircle(
@@ -76,9 +79,7 @@ export class PaintWireContainer extends PaintContainer {
         this.cursorBox = this.bpc.overlayContainer.createCursorBox(
             ec.position,
             entity.size,
-            cp === undefined ? 'not_allowed'
-            : (!connectionsReach) ? 'not_allowed'
-            : 'regular'
+            cp === undefined ? 'not_allowed' : !connectionsReach ? 'not_allowed' : 'regular'
         )
         if (connectionsReach) return cp
     }
@@ -94,22 +95,22 @@ export class PaintWireContainer extends PaintContainer {
         // entity?.rotate(ccw, true)
 
         /** Non-standard behavior: cycle between colors */
-        if (this.name === "red_wire") this.name = "green_wire"
-        else if (this.name === "green_wire") this.name = "red_wire"
-        this.color = this.name.split("_",1)[0]
+        if (this.name === 'red_wire') this.name = 'green_wire'
+        else if (this.name === 'green_wire') this.name = 'red_wire'
+        this.color = this.name.split('_', 1)[0]
 
         this.redraw()
     }
 
     public canFlipOrRotateByCopying(): boolean {
-        return false;
+        return false
     }
 
     protected redraw(): void {
         this.updatecursorBox()
         this.bpc.wiresContainer.remove('paint-wire')
         if (this.cp) {
-            const connection : IConnection = {
+            const connection: IConnection = {
                 color: this.color,
                 cps: [this.cp, { position: this.getGridPosition() }],
             }
@@ -131,7 +132,7 @@ export class PaintWireContainer extends PaintContainer {
         if (this.cp?.entityNumber === undefined) {
             this.cp = cp
         } else {
-            const connection : IConnection = {
+            const connection: IConnection = {
                 color: this.color,
                 cps: [this.cp, cp],
             }
@@ -158,7 +159,7 @@ export class PaintWireContainer extends PaintContainer {
         if (this.cp?.entityNumber === undefined) {
             this.cp = cp
         } else {
-            const connection : IConnection = {
+            const connection: IConnection = {
                 color: this.color,
                 cps: [this.cp, cp],
             }
