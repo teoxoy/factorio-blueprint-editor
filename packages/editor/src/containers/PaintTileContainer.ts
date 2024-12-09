@@ -60,7 +60,7 @@ export class PaintTileContainer extends PaintContainer {
         this.redraw()
     }
 
-    public rotate(ccw = false): void {
+    public rotate(): void {
         const nD = FD.tiles[this.name].next_direction
         if (nD) {
             this.name = nD

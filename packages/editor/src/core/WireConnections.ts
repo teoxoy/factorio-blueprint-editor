@@ -44,7 +44,6 @@ export class WireConnections extends EventEmitter {
 
         const addConnSide = (side: string): void => {
             if (connections[side]) {
-                // eslint-disable-next-line guard-for-in
                 for (const color in connections[side]) {
                     const conn = connections[side] as BPS.IConnSide
                     for (const data of conn[color]) {

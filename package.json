@@ -8,19 +8,16 @@
         "start:website": "npm --workspace=@fbe/website run start",
         "start:exporter": "cd ./packages/exporter && cargo run --release",
         "build:website": "npm --workspace=@fbe/website run build",
-        "lint": "eslint **/*.ts --config .eslintrc.yml --ignore-path .gitignore",
-        "lint:fix": "eslint **/*.ts --fix --config .eslintrc.yml --ignore-path .gitignore",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
         "format": "prettier . --check",
         "format:fix": "prettier . --write"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.7.0",
-        "@typescript-eslint/parser": "^5.7.0",
-        "eslint": "^8.4.1",
-        "eslint-config-prettier": "^8.3.0",
-        "eslint-import-resolver-typescript": "^2.5.0",
-        "eslint-plugin-import": "^2.25.3",
+        "@eslint/js": "^9.16.0",
+        "eslint": "^9.16.0",
         "prettier": "^3.4.2",
-        "typescript": "^4.5.4"
+        "typescript": "^4.5.4",
+        "typescript-eslint": "^8.17.0"
     }
 }

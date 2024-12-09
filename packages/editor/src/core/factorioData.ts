@@ -50,8 +50,6 @@ export function loadData(str: string): void {
 
 export default FD
 
-/* eslint-disable import/group-exports */
-
 export interface Color {
     r: number
     g: number

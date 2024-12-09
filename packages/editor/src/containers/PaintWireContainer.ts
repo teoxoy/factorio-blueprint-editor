@@ -87,7 +87,7 @@ export class PaintWireContainer extends PaintContainer {
         this.cursorBox?.destroy()
     }
 
-    public rotate(ccw = false): void {
+    public rotate(): void {
         if (!this.visible) return
 
         // const cursor_position = this.getGridPosition()
