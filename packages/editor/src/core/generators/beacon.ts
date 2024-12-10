@@ -171,17 +171,25 @@ export function generateBeacons(
     }, new Map())
 
     // GENERATE BEACONS
+    possibleBeacons = possibleBeacons
+        .sort((a, b) => {
+            // first by effects given, descending order (more effects means faster or more efficient extraction)
+            let c = b.effectsGiven - a.effectsGiven
+            if (c !== 0) {
+                return c
+            }
+
+            // then by number of overlaps, ascending order (fewer overlaps is better use of power)
+            c = a.nrOfOverlaps - b.nrOfOverlaps
+            if (c !== 0) {
+                return c
+            }
+
+            // then by average distance to entities, descending order (more distance allows other beacons or electric poles)
+            return b.avgDistToEntities - a.avgDistToEntities
+        })
     const beacons = []
     while (possibleBeacons.length) {
-        possibleBeacons = possibleBeacons
-            .sort((a, b) => {
-                if (a.effectsGiven === 1 || b.effectsGiven === 1) {
-                    return b.avgDistToEntities - a.avgDistToEntities
-                }
-                return a.nrOfOverlaps - b.nrOfOverlaps
-            })
-            .sort((a, b) => b.effectsGiven - a.effectsGiven)
-
         const beacon = possibleBeacons.shift()
         beacons.push(beacon)
 
