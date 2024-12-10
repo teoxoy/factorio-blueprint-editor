@@ -1,19 +1,22 @@
 {
     "compilerOptions": {
-        "pretty": true,
-        "sourceMap": true,
-        "alwaysStrict": true,
-        "removeComments": true,
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "preserveConstEnums": true,
+        "target": "ESNext",
+        "module": "ES6",
+        "skipLibCheck": true,
+
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "isolatedModules": true,
+        "moduleDetection": "force",
+        "noEmit": true,
+
+        // "strict": true, // TODO: enable
 
         "rootDir": ".",
         "baseUrl": ".",
         "paths": {
-            "@fbe/*": ["packages/*/src/index.ts"],
-            "mini-signals": ["node_modules/resource-loader/typings/mini-signals.d.ts"]
+            "@fbe/*": ["packages/*/src/index.ts"]
         },
 
         "typeRoots": ["./node_modules/@types"]

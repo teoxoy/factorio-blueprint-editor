@@ -8,7 +8,6 @@ import { BlueprintContainer } from './BlueprintContainer'
 export class PaintBlueprintContainer extends PaintContainer {
     private readonly bp: Blueprint
     private readonly entities = new Map<Entity, PaintBlueprintEntityContainer>()
-    public children: EntitySprite[]
 
     public constructor(bpc: BlueprintContainer, entities: Entity[]) {
         super(bpc, 'blueprint')

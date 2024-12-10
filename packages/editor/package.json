@@ -10,6 +10,7 @@
     },
     "bugs": "https://github.com/Teoxoy/factorio-blueprint-editor/issues",
     "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
+    "module": "./src/index.ts",
     "dependencies": {
         "@pixi/basis": "^6.2.0",
         "ajv": "^6.12.6",

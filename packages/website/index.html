@@ -13,17 +13,16 @@
 
         <title>Factorio Blueprint Editor</title>
 
-        <link rel="icon" href="$import('../assets/favicon.png')" />
-        $css
+        <link rel="icon" href="/favicon.png" />
     </head>
 
     <body>
         <div id="loadingScreen" class="active">
-            <img id="logo" src="$import('../assets/logo.svg')" alt />
-            <img class="loadingWheel" src="$import('../assets/loadingWheel.svg')" alt />
+            <img id="logo" src="/logo.svg" alt />
+            <img class="loadingWheel" src="/loadingWheel.svg" alt />
         </div>
         <div id="corner-panel">
-            <img src="$import('../assets/logo-small.svg')" alt />
+            <img src="/logo-small.svg" alt />
             <span>Press I for info</span>
         </div>
         <div id="buttons">
@@ -34,7 +33,7 @@
                 rel="noopener"
             >
                 <span>Discord</span>
-                <img src="$import('../assets/discord.svg')" alt />
+                <img src="/discord.svg" alt />
             </a>
             <a
                 class="github-button"
@@ -43,7 +42,7 @@
                 rel="noopener"
             >
                 <span>Github</span>
-                <img src="$import('../assets/github.svg')" alt />
+                <img src="/github.svg" alt />
             </a>
         </div>
         <div id="info-panel">
@@ -93,6 +92,6 @@
             </p>
         </div>
         <canvas id="editor" tabindex="1"></canvas>
-        $bundles
+        <script type="module" src="/src/index.ts"></script>
     </body>
 </html>

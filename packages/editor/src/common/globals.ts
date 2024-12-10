@@ -39,7 +39,7 @@ function getBT(path: string): Promise<PIXI.BaseTexture> {
 }
 
 function getTexture(path: string, x = 0, y = 0, w = 0, h = 0): PIXI.Texture {
-    const key = `__STATIC_URL__/${path.replace('.png', '.basis')}`
+    const key = `/data/${path.replace('.png', '.basis')}`
     const KK = `${key}-${x}-${y}-${w}-${h}`
     let t = textureCache.get(KK)
     if (t) return t

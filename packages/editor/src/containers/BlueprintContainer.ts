@@ -21,7 +21,10 @@ import { PaintBlueprintContainer } from './PaintBlueprintContainer'
 import { OptimizedContainer } from './OptimizedContainer'
 import { GridData } from './GridData'
 
-export type GridPattern = 'checker' | 'grid'
+export enum GridPattern {
+    CHECKER = 'checker',
+    GRID = 'grid',
+}
 
 export enum EditorMode {
     /** Default */

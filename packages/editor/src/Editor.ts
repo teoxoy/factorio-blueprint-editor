@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 import { BasisLoader } from '@pixi/basis'
-import basisTranscoderJS from './basis/transcoder.1.16.4.js'
-import basisTranscoderWASM from './basis/transcoder.1.16.4.wasm'
+import basisTranscoderJS from './basis/transcoder.1.16.4.js?url'
+import basisTranscoderWASM from './basis/transcoder.1.16.4.wasm?url'
 import { loadData } from './core/factorioData'
 import G from './common/globals'
 import { Entity } from './core/Entity'
@@ -16,7 +16,7 @@ import { IllegalFlipError } from './containers/PaintContainer'
 export class Editor {
     public async init(canvas: HTMLCanvasElement, showError: (msg: string) => void): Promise<void> {
         await Promise.all([
-            fetch('__STATIC_URL__/data.json')
+            fetch('/data/data.json')
                 .then(res => res.text())
                 .then(modules => loadData(modules)),
             BasisLoader.loadTranscoder(basisTranscoderJS, basisTranscoderWASM),
