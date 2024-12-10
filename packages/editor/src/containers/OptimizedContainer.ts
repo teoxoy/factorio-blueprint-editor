@@ -5,7 +5,6 @@ import { BlueprintContainer } from './BlueprintContainer'
 
 export class OptimizedContainer extends PIXI.Container {
     private bpc: BlueprintContainer
-    public children: EntitySprite[]
 
     public constructor(bpc: BlueprintContainer) {
         super()

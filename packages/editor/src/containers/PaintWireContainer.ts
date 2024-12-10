@@ -9,7 +9,7 @@ import { BlueprintContainer } from './BlueprintContainer'
 
 export class PaintWireContainer extends PaintContainer {
     private color?: string
-    private cp?: IConnectionPoint? = undefined
+    private cp?: IConnectionPoint = undefined
     /** This is only a reference */
     private cursorBox: PIXI.Container
 
