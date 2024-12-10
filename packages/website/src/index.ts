@@ -159,11 +159,7 @@ document.addEventListener('copy', (e: ClipboardEvent) => {
     }
 
     encode(book || bp)
-        .then(s =>
-            navigator.clipboard && navigator.clipboard.writeText
-                ? navigator.clipboard.writeText(s)
-                : e.clipboardData.setData('text/plain', s)
-        )
+        .then(s => navigator.clipboard.writeText(s))
         .then(onSuccess)
         .catch(onError)
 })
@@ -174,12 +170,8 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
 
     loadingScreen.show()
 
-    const promise =
-        navigator.clipboard && navigator.clipboard.readText
-            ? navigator.clipboard.readText()
-            : Promise.resolve(e.clipboardData.getData('text'))
-
-    promise
+    navigator.clipboard
+        .readText()
         .then(getBlueprintOrBookFromSource)
         .then(loadBp)
         .catch(error => {
