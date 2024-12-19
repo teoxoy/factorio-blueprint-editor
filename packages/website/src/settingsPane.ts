@@ -1,4 +1,6 @@
 import { GUI } from 'dat.gui'
+// import { NumberInputParams, Pane } from 'tweakpane'
+// import * as TweakpaneTablePlugin from 'tweakpane-table'
 import EDITOR, { Blueprint, Book, GridPattern, Editor, FD } from '@fbe/editor'
 
 GUI.TEXT_CLOSED = 'Close Settings'
@@ -14,6 +16,63 @@ export function initSettingsPane(
 ): {
     changeBook: (bpOrBook: Book | Blueprint) => void
 } {
+    //     const style = document.createElement('style')
+    //     style.innerHTML = `
+    //         :root {
+    //             --tp-base-background-color: hsla(0, 0%, 10%, 0.80);
+    //             --tp-base-shadow-color: hsla(0, 0%, 0%, 0.20);
+    //             --tp-button-background-color: hsla(0, 0%, 80%, 1.00);
+    //             --tp-button-background-color-active: hsla(0, 0%, 100%, 1.00);
+    //             --tp-button-background-color-focus: hsla(0, 0%, 95%, 1.00);
+    //             --tp-button-background-color-hover: hsla(0, 0%, 85%, 1.00);
+    //             --tp-button-foreground-color: hsla(0, 0%, 0%, 0.80);
+    //             --tp-container-background-color: hsla(0, 0%, 0%, 0.30);
+    //             --tp-container-background-color-active: hsla(0, 0%, 0%, 0.60);
+    //             --tp-container-background-color-focus: hsla(0, 0%, 0%, 0.50);
+    //             --tp-container-background-color-hover: hsla(0, 0%, 0%, 0.40);
+    //             --tp-container-foreground-color: hsla(0, 0%, 100%, 0.50);
+    //             --tp-groove-foreground-color: hsla(0, 0%, 0%, 0.20);
+    //             --tp-input-background-color: hsla(0, 0%, 0%, 0.30);
+    //             --tp-input-background-color-active: hsla(0, 0%, 0%, 0.60);
+    //             --tp-input-background-color-focus: hsla(0, 0%, 0%, 0.50);
+    //             --tp-input-background-color-hover: hsla(0, 0%, 0%, 0.40);
+    //             --tp-input-foreground-color: hsla(0, 0%, 100%, 0.50);
+    //             --tp-label-foreground-color: hsla(0, 0%, 100%, 0.50);
+    //             --tp-monitor-background-color: hsla(0, 0%, 0%, 0.30);
+    //             --tp-monitor-foreground-color: hsla(0, 0%, 100%, 0.30);
+    //         }
+    //         .paneContainer {
+    //             width: 350px;
+    //             margin: 0 auto;
+    //         }
+    //         .paneContainer .tp-lblv_v {
+    //             min-width: fit-content;
+    //         }
+    //     `
+    //     document.head.appendChild(style)
+
+    //     const container = document.createElement('div')
+    //     container.classList.add('paneContainer')
+    //     document.body.appendChild(container)
+
+    //     const pane = new Pane({
+    //         expanded: localStorage.getItem('dat.gui.closed') !== 'true',
+    //         title: 'Settings',
+    //         container,
+    //     })
+    //     pane.registerPlugin(TweakpaneTablePlugin)
+
+    //     const PARAMS = {
+    //         bpIndex: 0,
+    //     }
+
+    //     pane.addInput(PARAMS, 'bpIndex', {
+    //         label: 'BP Book Index',
+    //         min: 0,
+    //         max: 0,
+    //         step: 1,
+    //     } as NumberInputParams).on('change')
+
     const gui = new GUI({
         autoPlace: false,
         hideable: false,
