@@ -562,11 +562,13 @@ export class Editor {
         const keydown = (e: KeyboardEvent): void => {
             if (e.repeat) return
             if (e.target instanceof HTMLInputElement) return
+            if (e.target instanceof HTMLTextAreaElement) return
             G.actions.pressKey(e)
         }
 
         const keyup = (e: KeyboardEvent): void => {
             if (e.target instanceof HTMLInputElement) return
+            if (e.target instanceof HTMLTextAreaElement) return
             G.actions.releaseKey(e)
         }
 

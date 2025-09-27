@@ -242,6 +242,7 @@ function registerActions(): void {
 
     window.addEventListener('keydown', e => {
         if (e.target instanceof HTMLInputElement) return
+        if (e.target instanceof HTMLTextAreaElement) return
         const infoPanel = document.getElementById('info-panel')
         if (e.key === 'i') {
             if (infoPanel.classList.contains('active')) {
