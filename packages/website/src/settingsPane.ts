@@ -151,9 +151,6 @@ export function initSettingsPane(
     oilOutpostFolder
         .add(oilOutpostSettings, 'BEACON_MODULE', getModulesObjFor('beacon'))
         .name('Beacon Modules')
-    oilOutpostFolder
-        .add({ generate: () => EDITOR.callAction('generateOilOutpost') }, 'generate')
-        .name('Generate')
 
     // Keybinds folder
     const keybindsFolder = gui.addFolder('Keybinds')

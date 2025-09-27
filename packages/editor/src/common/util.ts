@@ -1,3 +1,5 @@
+import { IPoint, NamedDirection } from '../types'
+
 const duplicate = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
 const getRandomInt = (min: number, max: number): number => {
@@ -103,7 +105,7 @@ const switchSizeBasedOnDirection = (
     return { x: size.width, y: size.height }
 }
 
-const intToDir = (i: number): 'north' | 'east' | 'south' | 'west' => {
+const intToDir = (i: number): NamedDirection => {
     switch (i) {
         case 0:
             return 'north'

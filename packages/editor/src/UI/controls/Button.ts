@@ -1,31 +1,31 @@
-import * as PIXI from 'pixi.js'
+import { Container, Sprite } from 'pixi.js'
 import { colors } from '../style'
 import F from './functions'
 
 /**
  * Base Button
  */
-export class Button extends PIXI.Container {
+export class Button<Data = undefined, Content extends Container = Container> extends Container {
     /** Background Graphic */
-    private readonly m_Background: PIXI.Graphics
+    private readonly m_Background: Sprite
 
     /** Active Graphic */
-    private readonly m_Active: PIXI.Graphics
+    private readonly m_Active: Sprite
 
     /** Rollover Graphic */
-    private readonly m_Hover: PIXI.Graphics
+    private readonly m_Hover: Sprite
 
     /** Content of Control */
-    private m_Content: PIXI.DisplayObject
+    private m_Content: Content
 
     /** Data of Control */
-    private m_Data: unknown
+    private m_Data: Data
 
     public constructor(width = 36, height = 36, border = colors.controls.button.border) {
         super()
 
-        this.interactive = true
-        this.buttonMode = true
+        this.eventMode = 'static'
+        this.cursor = 'pointer'
 
         this.m_Background = F.DrawRectangle(
             width,
@@ -81,10 +81,10 @@ export class Button extends PIXI.Container {
     }
 
     /** Control Content */
-    public get content(): PIXI.DisplayObject {
+    public get content(): Content {
         return this.m_Content
     }
-    public set content(content: PIXI.DisplayObject) {
+    public set content(content: Content) {
         if (
             this.m_Content !== undefined ||
             (this.m_Content !== undefined && content === undefined)
@@ -106,10 +106,10 @@ export class Button extends PIXI.Container {
 
     /** Control Data */
     // Need to use any to be able to assign anything
-    public get data(): unknown {
+    public get data(): Data {
         return this.m_Data
     }
-    public set data(value: unknown) {
+    public set data(value: Data) {
         this.m_Data = value
     }
 

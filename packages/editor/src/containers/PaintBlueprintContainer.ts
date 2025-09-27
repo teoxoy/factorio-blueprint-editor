@@ -54,6 +54,8 @@ export class PaintBlueprintContainer extends PaintContainer {
         for (const [e] of this.entities) {
             this.bpc.underlayContainer.activateRelatedAreas(e.name)
         }
+
+        this.attachUpdateOn16()
         this.moveAtCursor()
     }
 
@@ -79,13 +81,11 @@ export class PaintBlueprintContainer extends PaintContainer {
         super.destroy()
     }
 
-    public getItemName(): string {
+    public override getItemName(): string {
         return 'blueprint'
     }
 
-    public rotate(): void {
-        return undefined
-    }
+    public override rotate(_ccw?: boolean): void {}
 
     public logDataForComparison(): void {
         const withOutNums = [...this.entities.keys()].map(e => ({
@@ -99,11 +99,11 @@ export class PaintBlueprintContainer extends PaintContainer {
         console.log(withOutNums)
     }
 
-    public canFlipOrRotateByCopying(): boolean {
+    public override canFlipOrRotateByCopying(): boolean {
         return true
     }
 
-    public rotatedEntities(ccw?: boolean): Entity[] {
+    public override rotatedEntities(ccw?: boolean): Entity[] {
         if (!this.visible) return undefined
         const result = []
         for (const [e] of this.entities) {
@@ -112,7 +112,7 @@ export class PaintBlueprintContainer extends PaintContainer {
         return result
     }
 
-    public flippedEntities(vertical: boolean): Entity[] {
+    public override flippedEntities(vertical: boolean): Entity[] {
         const result = []
         for (const [e] of this.entities) {
             result.push(e.getFlippedCopy(vertical))
@@ -120,7 +120,7 @@ export class PaintBlueprintContainer extends PaintContainer {
         return result
     }
 
-    public moveAtCursor(): void {
+    public override moveAtCursor(): void {
         if (!this.visible) return
 
         const firstRailPosHere = this.bp.getFirstRailRelatedEntityPos()
@@ -134,11 +134,15 @@ export class PaintBlueprintContainer extends PaintContainer {
             const oX = -Math.abs((Math.abs(frX) % 2) - (Math.abs(firstRailPosInBP.x - 1) % 2)) + 1
             const oY = -Math.abs((Math.abs(frY) % 2) - (Math.abs(firstRailPosInBP.y - 1) % 2)) + 1
 
-            this.x = (this.bpc.gridData.x32 + oX) * 32
-            this.y = (this.bpc.gridData.y32 + oY) * 32
+            this.setPosition({
+                x: (this.bpc.gridData.x32 + oX) * 32,
+                y: (this.bpc.gridData.y32 + oY) * 32,
+            })
         } else {
-            this.x = this.bpc.gridData.x32 * 32
-            this.y = this.bpc.gridData.y32 * 32
+            this.setPosition({
+                x: this.bpc.gridData.x32 * 32,
+                y: this.bpc.gridData.y32 * 32,
+            })
         }
 
         for (const [, c] of this.entities) {
@@ -146,9 +150,9 @@ export class PaintBlueprintContainer extends PaintContainer {
         }
     }
 
-    protected redraw(): void {}
+    protected override redraw(): void {}
 
-    public placeEntityContainer(): void {
+    public override placeEntityContainer(): void {
         if (!this.visible) return
 
         this.bpc.bp.history.startTransaction('Create Entities')
@@ -183,7 +187,7 @@ export class PaintBlueprintContainer extends PaintContainer {
         this.bpc.bp.history.commitTransaction()
     }
 
-    public removeContainerUnder(): void {
+    public override removeContainerUnder(): void {
         if (!this.visible) return
 
         this.bpc.bp.history.startTransaction('Remove Entities')

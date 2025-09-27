@@ -1,5 +1,6 @@
-import * as PIXI from 'pixi.js'
+import { Sprite, Container, Texture, AlphaFilter, ColorSource } from 'pixi.js'
 import FD from '../core/factorioData'
+import { IPoint } from '../types'
 import { VisualizationArea } from './VisualizationArea'
 
 type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
@@ -7,23 +8,23 @@ type Type = 'logistics0' | 'logistics1' | 'poles' | 'beacons' | 'drills'
 interface IVisualizationData {
     type: Type
     radius: number
-    color: number
+    color: ColorSource
     alpha: number
 }
 
-export class UnderlayContainer extends PIXI.Container {
+export class UnderlayContainer extends Container {
     private active: Type[] = []
-    private readonly logistics0 = new PIXI.Container()
-    private readonly logistics1 = new PIXI.Container()
-    private readonly poles = new PIXI.Container()
-    private readonly beacons = new PIXI.Container()
-    private readonly drills = new PIXI.Container()
+    private readonly logistics0 = new Container()
+    private readonly logistics1 = new Container()
+    private readonly poles = new Container()
+    private readonly beacons = new Container()
+    private readonly drills = new Container()
     private readonly dummyVisualizationArea = new VisualizationArea([])
 
     public constructor() {
         super()
 
-        const filter = new PIXI.filters.AlphaFilter(VisualizationArea.ALPHA)
+        const filter = new AlphaFilter({ alpha: VisualizationArea.ALPHA })
         this.logistics0.filters = [filter]
         this.logistics1.filters = [filter]
 
@@ -44,7 +45,11 @@ export class UnderlayContainer extends PIXI.Container {
                 {
                     type: 'logistics1',
                     radius: ed.logistics_radius,
-                    color: undoBlendModeColorShift(0xff8800, 0x83d937, VisualizationArea.ALPHA),
+                    color: {
+                        r: 0xff - 0x83 * VisualizationArea.ALPHA,
+                        g: 0x88 - 0xd9 * VisualizationArea.ALPHA,
+                        b: 0x00 - 0x37 * VisualizationArea.ALPHA,
+                    },
                     alpha: 1,
                 },
             ]
@@ -54,7 +59,7 @@ export class UnderlayContainer extends PIXI.Container {
                 {
                     type: 'poles',
                     radius: ed.supply_area_distance,
-                    color: 0x33755d9,
+                    color: 0x3755d9,
                     alpha: VisualizationArea.ALPHA,
                 },
             ]
@@ -81,12 +86,6 @@ export class UnderlayContainer extends PIXI.Container {
         }
 
         return []
-
-        function undoBlendModeColorShift(color0: number, color1: number, alpha: number): number {
-            // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendFunc
-            // array[BLEND_MODES.NORMAL] = [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
-            return color1 - color0 * (1 - alpha)
-        }
     }
 
     public activateRelatedAreas(entityName: string): void {
@@ -132,11 +131,11 @@ export class UnderlayContainer extends PIXI.Container {
 
     public create(entityName: string, position: IPoint): VisualizationArea {
         const sprites = UnderlayContainer.getDataForVisualizationArea(entityName).map(data => {
-            const sprite = new PIXI.Sprite(PIXI.Texture.WHITE)
+            const sprite = new Sprite(Texture.WHITE)
             sprite.tint = data.color
             sprite.alpha = data.alpha
             sprite.visible = this.active.includes(data.type)
-            sprite.scale.set(data.radius * 4)
+            sprite.scale.set(data.radius * 2 * 32)
             sprite.anchor.set(0.5)
             sprite.position.set(position.x, position.y)
 

@@ -1,6 +1,6 @@
 import './index.styl'
 
-import { isMobile } from '@pixi/settings'
+import { isMobile } from 'pixi.js'
 import FileSaver from 'file-saver'
 import EDITOR, {
     Editor,
@@ -91,7 +91,7 @@ for (const p of params) {
 let changeBookForIndexSelector: (bpOrBook: Book | Blueprint) => void
 
 editor
-    .init(CANVAS, (text: string) => createToast({ text, type: 'error', timeout: 3000 }))
+    .init(CANVAS, createToast)
     .then(() => {
         if (localStorage.getItem('quickbarItemNames')) {
             const quickbarItems = JSON.parse(localStorage.getItem('quickbarItemNames'))
@@ -181,32 +181,67 @@ document.addEventListener('paste', (e: ClipboardEvent) => {
 })
 
 function registerActions(): void {
-    EDITOR.registerAction('clear', 'shift+n').bind({
-        press: () => loadBp(new Blueprint()),
-    })
-
-    EDITOR.registerAction('appendBlueprint', 'shift+modifier+v').bind({
-        press: () => {
-            navigator.clipboard
-                .readText()
-                .then(getBlueprintOrBookFromSource)
-                .then(bp => editor.appendBlueprint(bp instanceof Book ? bp.selectBlueprint(0) : bp))
-                .catch(error => {
-                    createBPImportError(error)
-                })
+    EDITOR.registerAction('clear', {
+        trigger: { code: 'KeyN' },
+        modifiers: { shift: true },
+        callbacks: {
+            onPress: () => {
+                loadBp(new Blueprint())
+                return true
+            },
         },
     })
 
-    EDITOR.registerAction('generateOilOutpost', 'g').bind({
-        press: () => {
-            const errorMessage = bp.generatePipes()
-            if (errorMessage) {
-                createToast({ text: errorMessage, type: 'warning' })
-            }
+    EDITOR.registerAction('appendBlueprint', {
+        trigger: { code: 'KeyV' },
+        modifiers: { shift: true, control: true },
+        callbacks: {
+            onPress: () => {
+                navigator.clipboard
+                    .readText()
+                    .then(getBlueprintOrBookFromSource)
+                    .then(bp =>
+                        editor.appendBlueprint(bp instanceof Book ? bp.selectBlueprint(0) : bp)
+                    )
+                    .catch(error => {
+                        createBPImportError(error)
+                    })
+                return true
+            },
+        },
+    })
+
+    EDITOR.registerAction('generateOilOutpost', {
+        trigger: { code: 'KeyG' },
+        callbacks: {
+            onPress: () => {
+                const errorMessage = bp.generatePipes()
+                if (errorMessage) {
+                    createToast({ text: errorMessage, type: 'warning' })
+                }
+                return true
+            },
+        },
+    })
+
+    EDITOR.registerAction('takePicture', {
+        trigger: { code: 'KeyS' },
+        modifiers: { control: true },
+        callbacks: {
+            onPress: () => {
+                if (bp.isEmpty()) return
+
+                editor.getPicture().then(blob => {
+                    FileSaver.saveAs(blob, `${bp.name}.png`)
+                    createToast({ text: 'Blueprint image successfully generated', type: 'success' })
+                })
+                return true
+            },
         },
     })
 
     window.addEventListener('keydown', e => {
+        if (e.target instanceof HTMLInputElement) return
         const infoPanel = document.getElementById('info-panel')
         if (e.key === 'i') {
             if (infoPanel.classList.contains('active')) {
@@ -219,25 +254,14 @@ function registerActions(): void {
         }
     })
 
-    EDITOR.registerAction('takePicture', 'modifier+s').bind({
-        press: () => {
-            if (bp.isEmpty()) return
-
-            editor.getPicture().then(blob => {
-                FileSaver.saveAs(blob, `${bp.name}.png`)
-                createToast({ text: 'Blueprint image successfully generated', type: 'success' })
-            })
-        },
-    })
-
-    EDITOR.importKeybinds(JSON.parse(localStorage.getItem('keybinds')))
+    EDITOR.importKeybinds(JSON.parse(localStorage.getItem('keybinds2')))
 
     window.addEventListener('visibilitychange', () => {
         const keybinds = EDITOR.exportKeybinds()
         if (Object.keys(keybinds).length) {
-            localStorage.setItem('keybinds', JSON.stringify(keybinds))
+            localStorage.setItem('keybinds2', JSON.stringify(keybinds))
         } else {
-            localStorage.removeItem('keybinds')
+            localStorage.removeItem('keybinds2')
         }
     })
 }

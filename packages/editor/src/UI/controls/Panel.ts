@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js'
+import { Container, Sprite } from 'pixi.js'
 import { colors } from '../style'
 import F from './functions'
 
@@ -8,14 +8,14 @@ import F from './functions'
  *
  * Per default the panel
  *  + is visible (this.visible = true)
- *  + is interactive (this.interactive = true)
+ *  + is interactive (this.eventMode = 'static')
  *  + has interactive children (this.interactiveChildren = true)
  *  + automatically calls 'setPosition()' on Browser Resizing
  *  + does not automatically set its position (hint: override setPosition())
  */
-export abstract class Panel extends PIXI.Container {
+export abstract class Panel extends Container {
     /** Background Graphic */
-    private readonly m_Background: PIXI.Graphics
+    private readonly m_Background: Sprite
 
     private _setPosition: () => void
 
@@ -37,7 +37,7 @@ export abstract class Panel extends PIXI.Container {
     ) {
         super()
 
-        this.interactive = true
+        this.eventMode = 'static'
         this.interactiveChildren = true
 
         this.m_Background = F.DrawRectangle(width, height, background, alpha, border, false)
@@ -50,7 +50,6 @@ export abstract class Panel extends PIXI.Container {
     }
 
     public destroy(): void {
-        this.emit('destroy')
         window.removeEventListener('resize', this._setPosition)
         super.destroy({ children: true })
     }

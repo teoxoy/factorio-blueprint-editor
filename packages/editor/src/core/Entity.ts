@@ -1,8 +1,18 @@
-import { EventEmitter } from 'eventemitter3'
+import EventEmitter from 'eventemitter3'
+import {
+    IArithmeticCondition,
+    IConstantCombinatorFilter,
+    IDeciderCondition,
+    IEntity,
+    IPoint,
+    FilterPriority,
+    FilterMode,
+    DirectionType,
+} from '../types'
 import util from '../common/util'
 import { IllegalFlipError } from '../containers/PaintContainer'
 import G from '../common/globals'
-import FD, { Entity as FD_Entity } from './factorioData'
+import FD, { ColorWithAlpha, Entity as FD_Entity } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
 import U from './generators/util'
@@ -18,10 +28,29 @@ export interface IFilter {
 
 // TODO: Handle the modules within the class differently so that modules would stay in the same place during editing the blueprint
 
+export interface EntityEvents {
+    destroy: []
+    position: [newValue: IPoint, oldValue: IPoint]
+    direction: []
+    directionType: []
+    recipe: [recipe: string]
+    modules: [modules: string[]]
+    splitterInputPriority: [priority: FilterPriority]
+    splitterOutputPriority: [priority: FilterPriority]
+    splitterFilter: []
+    filters: []
+    inserterFilters: []
+    filterMode: [mode: FilterMode]
+    logisticChestFilters: []
+    requestFromBufferChest: []
+    station: []
+    manualTrainsLimit: []
+}
+
 /** Entity Base Class */
-export class Entity extends EventEmitter {
+export class Entity extends EventEmitter<EntityEvents> {
     /** Field to hold raw entity */
-    private readonly m_rawEntity: BPS.IEntity
+    private readonly m_rawEntity: IEntity
 
     /** Field to hold reference to blueprint */
     private readonly m_BP: Blueprint
@@ -31,10 +60,14 @@ export class Entity extends EventEmitter {
      * @param rawEntity Raw entity object
      * @param blueprint Reference to blueprint
      */
-    public constructor(rawEntity: BPS.IEntity, blueprint: Blueprint) {
+    public constructor(rawEntity: IEntity, blueprint: Blueprint) {
         super()
         this.m_BP = blueprint
         this.m_rawEntity = rawEntity
+    }
+
+    public get rawEntity(): IEntity {
+        return this.m_rawEntity
     }
 
     public static getItemName(name: string): string {
@@ -69,10 +102,6 @@ export class Entity extends EventEmitter {
     /** Direct access to entity meta data from core */
     public get entityData(): FD_Entity {
         return FD.entities[this.name]
-    }
-
-    public get rawEntity(): BPS.IEntity {
-        return this.m_rawEntity
     }
 
     /** Entity size */
@@ -172,10 +201,10 @@ export class Entity extends EventEmitter {
     }
 
     /** Direction Type (input|output) for underground belts */
-    public get directionType(): 'input' | 'output' {
+    public get directionType(): DirectionType {
         return this.m_rawEntity.type
     }
-    public set directionType(type: 'input' | 'output') {
+    public set directionType(type: DirectionType) {
         if (this.m_rawEntity.type === type) return
 
         this.m_BP.history
@@ -338,10 +367,10 @@ export class Entity extends EventEmitter {
     }
 
     /** Splitter input priority */
-    public get splitterInputPriority(): string {
+    public get splitterInputPriority(): FilterPriority {
         return this.m_rawEntity.input_priority
     }
-    public set splitterInputPriority(priority: string) {
+    public set splitterInputPriority(priority: FilterPriority) {
         if (this.m_rawEntity.input_priority === priority) return
 
         this.m_BP.history
@@ -356,10 +385,10 @@ export class Entity extends EventEmitter {
     }
 
     /** Splitter output priority */
-    public get splitterOutputPriority(): string {
+    public get splitterOutputPriority(): FilterPriority {
         return this.m_rawEntity.output_priority
     }
-    public set splitterOutputPriority(priority: string) {
+    public set splitterOutputPriority(priority: FilterPriority) {
         if (this.m_rawEntity.output_priority === priority) return
 
         this.m_BP.history.startTransaction()
@@ -398,18 +427,20 @@ export class Entity extends EventEmitter {
             .onDone(() => this.emit('filters'))
             .commit()
 
-        if (this.splitterOutputPriority === undefined) {
-            this.splitterOutputPriority = 'left'
+        if (filter !== undefined) {
+            if (this.splitterOutputPriority === undefined) {
+                this.splitterOutputPriority = 'left'
+            }
         }
 
         this.m_BP.history.commitTransaction()
     }
 
-    public get filterMode(): 'whitelist' | 'blacklist' {
+    public get filterMode(): FilterMode {
         return this.m_rawEntity.filter_mode === 'blacklist' ? 'blacklist' : 'whitelist'
     }
 
-    public set filterMode(filterMode: 'whitelist' | 'blacklist') {
+    public set filterMode(filterMode: FilterMode) {
         const mode = filterMode === 'blacklist' ? 'blacklist' : undefined
 
         this.m_BP.history
@@ -482,19 +513,19 @@ export class Entity extends EventEmitter {
         return 3
     }
 
-    public get constantCombinatorFilters(): BPS.IConstantCombinatorFilter[] {
+    public get constantCombinatorFilters(): IConstantCombinatorFilter[] {
         return this.m_rawEntity.control_behavior === undefined
             ? undefined
             : this.m_rawEntity.control_behavior.filters
     }
 
-    public get deciderCombinatorConditions(): BPS.IDeciderCondition {
+    public get deciderCombinatorConditions(): IDeciderCondition {
         return this.m_rawEntity.control_behavior === undefined
             ? undefined
             : this.m_rawEntity.control_behavior.decider_conditions
     }
 
-    public get arithmeticCombinatorConditions(): BPS.IArithmeticCondition {
+    public get arithmeticCombinatorConditions(): IArithmeticCondition {
         return this.m_rawEntity.control_behavior === undefined
             ? undefined
             : this.m_rawEntity.control_behavior.arithmetic_conditions
@@ -520,7 +551,7 @@ export class Entity extends EventEmitter {
         return !FD.recipes[this.recipe].results.find(result => result.type === 'fluid')
     }
 
-    public get trainStopColor(): BPS.IColor {
+    public get trainStopColor(): ColorWithAlpha {
         return this.m_rawEntity.color
     }
 
@@ -619,7 +650,7 @@ export class Entity extends EventEmitter {
         return direction
     }
 
-    private changePriority(priority?: 'left' | 'right'): 'left' | 'right' | undefined {
+    private changePriority(priority?: FilterPriority): FilterPriority | undefined {
         if (priority === 'left') return 'right'
         else if (priority === 'right') return 'left'
         return priority
@@ -865,7 +896,7 @@ export class Entity extends EventEmitter {
         )
     }
 
-    public get assemblerPipeDirection(): 'input' | 'output' {
+    public get assemblerPipeDirection(): DirectionType {
         if (!this.recipe) return undefined
         const recipe = FD.recipes[this.recipe]
         if (recipe.ingredients.find(ingredient => ingredient.type === 'fluid')) return 'input'
@@ -957,7 +988,7 @@ export class Entity extends EventEmitter {
         return bbox
     }
 
-    public serialize(entNrWhitelist?: Set<number>): BPS.IEntity {
+    public serialize(entNrWhitelist?: Set<number>): IEntity {
         return util.duplicate({
             ...this.m_rawEntity,
             ...this.m_BP.wireConnections.serializeConnectionData(this.entityNumber, entNrWhitelist),

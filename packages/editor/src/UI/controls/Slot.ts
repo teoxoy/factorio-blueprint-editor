@@ -1,10 +1,13 @@
+import { Container } from 'pixi.js'
 import { colors } from '../style'
 import { Button } from './Button'
 
 /**
  * Base Slot
  */
-export class Slot extends Button {
+export class Slot<Data, Content extends Container = Container> extends Button<Data, Content> {
+    public name: string
+
     // Override Rollover Color of Button
     public get hover(): number {
         return colors.controls.slot.hover.color

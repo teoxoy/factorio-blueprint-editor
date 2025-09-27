@@ -12,20 +12,18 @@
     "homepage": "https://github.com/Teoxoy/factorio-blueprint-editor",
     "module": "./src/index.ts",
     "dependencies": {
-        "@pixi/basis": "^6.2.0",
-        "ajv": "^6.12.6",
-        "delaunator": "^5.0.0",
-        "eventemitter3": "^4.0.7",
-        "keyboardjs": "^2.6.4",
-        "maxrects-packer": "^2.7.2",
-        "pako": "^1.0.11",
-        "pathfinding": "^0.4.18",
-        "pixi.js": "^6.2.0"
+        "ajv": "8.17.1",
+        "delaunator": "5.0.1",
+        "eventemitter3": "5.0.1",
+        "pako": "2.1.0",
+        "pathfinding": "0.4.18",
+        "pixi.js": "8.13.2",
+        "buffer": "6.0.3",
+        "utility-types": "3.11.0"
     },
     "devDependencies": {
-        "@types/delaunator": "^3.0.0",
-        "@types/keyboardjs": "^2.5.0",
-        "@types/pako": "^1.0.2",
-        "@types/pathfinding": "^0.0.5"
+        "@types/delaunator": "5.0.3",
+        "@types/pako": "2.0.4",
+        "@types/pathfinding": "0.1.0"
     }
 }

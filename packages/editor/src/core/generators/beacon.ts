@@ -1,3 +1,4 @@
+import { IPoint } from '../../types'
 import U from './util'
 import { IVisualization } from './index'
 
@@ -63,8 +64,8 @@ export function generateBeacons(
         })
     }
 
-    const entityAreas: IArea[][] = entities.map(e =>
-        U.range(0, e.size * e.size).map(i => ({
+    const entityAreas = entities.map(e =>
+        U.range(0, e.size * e.size).map<IArea>(i => ({
             x: Math.floor(e.position.x) + ((i % e.size) - Math.floor(e.size / 2)),
             y: Math.floor(e.position.y) + (Math.floor(i / e.size) - Math.floor(e.size / 2)),
             effect: e.effect,

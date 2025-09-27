@@ -1,4 +1,4 @@
-import { TextStyle } from 'pixi.js'
+import { TextStyle, TextStyleFontWeight } from 'pixi.js'
 
 const colors = {
     text: {
@@ -90,12 +90,12 @@ const styles = {
                 fontSize: 14,
             }),
         },
-        textbox: new TextStyle({
+        textbox: {
             fill: colors.controls.textbox.foreground.color,
             fontFamily,
-            fontWeight: '500',
+            fontWeight: '500' as TextStyleFontWeight,
             fontSize: 14,
-        }),
+        },
     },
     dialog: {
         title: new TextStyle({
@@ -117,8 +117,7 @@ const styles = {
             fontFamily,
             fontWeight: '500',
             fontSize: 13,
-            stroke: 0x000000,
-            strokeThickness: 2,
+            stroke: { color: 0x000000, width: 2 },
         }),
     },
     debug: {

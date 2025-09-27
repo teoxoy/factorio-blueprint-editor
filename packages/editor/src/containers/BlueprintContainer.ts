@@ -1,11 +1,21 @@
-import * as PIXI from 'pixi.js'
+import {
+    TilingSprite,
+    Rectangle,
+    Container,
+    Graphics,
+    RenderTexture,
+    EventBoundary,
+    FederatedPointerEvent,
+    Ticker,
+} from 'pixi.js'
 import FD from '../core/factorioData'
 import G from '../common/globals'
 import { Tile } from '../core/Tile'
 import { Entity } from '../core/Entity'
 import { Blueprint } from '../core/Blueprint'
 import { IConnection } from '../core/WireConnections'
-import { isActionActive, callAction } from '../actions'
+import { IPoint } from '../types'
+import { Dialog } from '../UI/controls/Dialog'
 import { Viewport } from './Viewport'
 import { EntitySprite } from './EntitySprite'
 import { WiresContainer } from './WiresContainer'
@@ -16,14 +26,20 @@ import { PaintEntityContainer } from './PaintEntityContainer'
 import { TileContainer } from './TileContainer'
 import { PaintTileContainer } from './PaintTileContainer'
 import { PaintWireContainer } from './PaintWireContainer'
-import { PaintContainer } from './PaintContainer'
+import { Axis, IllegalFlipError, PaintContainer } from './PaintContainer'
 import { PaintBlueprintContainer } from './PaintBlueprintContainer'
-import { OptimizedContainer } from './OptimizedContainer'
 import { GridData } from './GridData'
 
 export enum GridPattern {
     CHECKER = 'checker',
     GRID = 'grid',
+}
+
+type MoveDirections = {
+    up: boolean
+    left: boolean
+    down: boolean
+    right: boolean
 }
 
 export enum EditorMode {
@@ -41,9 +57,14 @@ export enum EditorMode {
     DELETE,
 }
 
-export class BlueprintContainer extends PIXI.Container {
-    /** Nr of cunks needs to be odd because the chunk grid is offset */
-    private readonly chunks = 32 - 1
+export class BlueprintContainer extends Container {
+    private static _moveSpeed = 10
+    private static _gridColor = 0x303030
+    private static _gridPattern = GridPattern.GRID
+    private static _limitWireReach = true
+
+    /** Nr of cunks */
+    private readonly chunks = 32
     /** Chunk offset - from 0,0 - Measured in tiles */
     private readonly chunkOffset = 16
     private readonly size: IPoint = {
@@ -64,26 +85,21 @@ export class BlueprintContainer extends PIXI.Container {
         3
     )
 
-    private _moveSpeed = Number(localStorage.getItem('moveSpeed') ?? 10)
-    private _gridColor =
-        (localStorage.getItem('darkTheme') ?? 'true') === 'true' ? 0x303030 : 0xc9c9c9
-    private _gridPattern: GridPattern = (localStorage.getItem('pattern') ?? 'grid') as GridPattern
-    private _limitWireReach = (localStorage.getItem('limitWireReach') ?? 'true') === 'true'
     private _mode: EditorMode = EditorMode.NONE
     public readonly bp: Blueprint
     public readonly gridData: GridData
 
     // Children
-    private grid: PIXI.TilingSprite
-    private readonly chunkGrid: PIXI.TilingSprite
-    private readonly tileSprites: OptimizedContainer
-    private readonly tilePaintSlot: PIXI.Container
+    private grid: TilingSprite
+    private readonly chunkGrid: TilingSprite
+    private readonly tileSprites: Container<EntitySprite>
+    private readonly tilePaintSlot: Container<PaintTileContainer>
     public readonly underlayContainer: UnderlayContainer
-    private readonly entitySprites: OptimizedContainer
+    private readonly entitySprites: Container<EntitySprite>
     public readonly wiresContainer: WiresContainer
     public readonly overlayContainer: OverlayContainer
-    private readonly entityPaintSlot: PIXI.Container
-    private readonly wirePaintSlot: PIXI.Container
+    private readonly entityPaintSlot: Container<PaintEntityContainer | PaintBlueprintContainer>
+    private readonly wirePaintSlot: Container<PaintWireContainer>
 
     public hoverContainer: EntityContainer
     public paintContainer: PaintContainer
@@ -93,35 +109,52 @@ export class BlueprintContainer extends PIXI.Container {
     private deleteModeEntities: Entity[] = []
     private copyModeUpdateFn: (endX: number, endY: number) => void
     private deleteModeUpdateFn: (endX: number, endY: number) => void
-    private draggingCreateUpdateFn: () => void
-
-    public viewportCulling = true
+    private copySettingsActive = false
 
     // PIXI properties
-    public readonly interactive = true
+    public readonly eventMode = 'static'
     public readonly interactiveChildren = false
-    public readonly hitArea = new PIXI.Rectangle(
+    public readonly hitArea = new Rectangle(
         -this.size.x * this.anchor.x,
         -this.size.y * this.anchor.y,
         this.size.x,
         this.size.y
     )
+    panStart: () => boolean
+    panEnd: () => void
+    moveStart: (dir: keyof MoveDirections) => boolean
+    moveEnd: (dir: keyof MoveDirections) => void
+    buildStart: () => boolean
+    buildEnd: () => void
+    openEditor: () => boolean
+    mineStart: () => boolean
+    mineEnd: () => void
+    pasteEntitySettingsStart: () => boolean
+    pasteEntitySettingsEnd: () => void
+    pasteEntitySettingsModifiersStart: () => boolean
+    pasteEntitySettingsModifiersEnd: () => void
 
     public constructor(bp: Blueprint) {
         super()
+
+        this.enableRenderGroup()
+
         this.bp = bp
         this.gridData = new GridData(this)
 
         this.grid = this.generateGrid()
         this.chunkGrid = this.generateChunkGrid(this.chunkOffset)
-        this.tileSprites = new OptimizedContainer(this)
-        this.tilePaintSlot = new PIXI.Container()
+        this.tileSprites = new Container()
+        this.tilePaintSlot = new Container()
         this.underlayContainer = new UnderlayContainer()
-        this.entitySprites = new OptimizedContainer(this)
+        this.entitySprites = new Container()
         this.wiresContainer = new WiresContainer(this.bp)
         this.overlayContainer = new OverlayContainer(this)
-        this.entityPaintSlot = new PIXI.Container()
-        this.wirePaintSlot = new PIXI.Container()
+        this.entityPaintSlot = new Container()
+        this.wirePaintSlot = new Container()
+
+        this.tileSprites.enableRenderGroup()
+        this.entitySprites.enableRenderGroup()
 
         this.addChild(
             this.grid,
@@ -136,6 +169,15 @@ export class BlueprintContainer extends PIXI.Container {
             this.wirePaintSlot
         )
 
+        this.onRender = () => {
+            if (this.viewport.update()) {
+                this.gridData.recalculate()
+                const t = this.viewport.getTransform()
+                this.position.set(t.tx, t.ty)
+                this.scale.set(t.a, t.d)
+            }
+        }
+
         this.on('pointerover', () => {
             if (this.mode === EditorMode.PAINT) {
                 this.paintContainer.show()
@@ -149,68 +191,205 @@ export class BlueprintContainer extends PIXI.Container {
             this.updateHoverContainer()
         })
 
-        const panCb = (): void => {
-            if (this.mode !== EditorMode.PAN) {
-                const WSXOR = isActionActive('moveUp') !== isActionActive('moveDown')
-                const ADXOR = isActionActive('moveLeft') !== isActionActive('moveRight')
-                if (WSXOR || ADXOR) {
-                    const finalSpeed = this.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)
-                    this.viewport.translateBy(
-                        (ADXOR ? (isActionActive('moveLeft') ? 1 : -1) : 0) * finalSpeed,
-                        (WSXOR ? (isActionActive('moveUp') ? 1 : -1) : 0) * finalSpeed
-                    )
-                }
-            }
-        }
-
-        const onUpdate16 = (): void => {
-            if (this.mode === EditorMode.PAINT) {
-                this.paintContainer.moveAtCursor()
-            }
-        }
-
         const onUpdate32 = (): void => {
             // Instead of decreasing the global interactionFrequency, call the over and out entity events here
             this.updateHoverContainer()
-
-            if (isActionActive('build')) {
-                callAction('build')
-            }
-            if (isActionActive('mine')) {
-                callAction('mine')
-            }
-            if (isActionActive('pasteEntitySettings')) {
-                callAction('pasteEntitySettings')
-            }
         }
 
-        let lastX = 0
-        let lastY = 0
-        const onMouseMove = (e: MouseEvent): void => {
-            if (this.mode === EditorMode.PAN) {
-                this.viewport.translateBy(e.clientX - lastX, e.clientY - lastY)
-            }
-            lastX = e.clientX
-            lastY = e.clientY
-        }
-
-        const onResize = (): void => {
-            this.viewport.setSize(G.app.screen.width, G.app.screen.height)
-        }
-
-        G.app.ticker.add(panCb)
-        this.gridData.on('update16', onUpdate16)
         this.gridData.on('update32', onUpdate32)
-        document.addEventListener('mousemove', onMouseMove)
-        window.addEventListener('resize', onResize, false)
 
-        this.on('destroy', () => {
-            G.app.ticker.remove(panCb)
-            this.gridData.off('update16', onUpdate16)
+        this.on('destroyed', () => {
             this.gridData.off('update32', onUpdate32)
             this.gridData.destroy()
-            document.removeEventListener('mousemove', onMouseMove)
-            window.removeEventListener('resize', onResize, false)
+        })
+
+        {
+            const onResize = (): void => {
+                this.viewport.setSize(G.app.screen.width, G.app.screen.height)
+            }
+
+            window.addEventListener('resize', onResize, false)
+            this.on('destroyed', () => {
+                window.removeEventListener('resize', onResize, false)
+            })
+        }
+
+        const panModule = {
+            _onPan: (e: FederatedPointerEvent): void => {
+                this.viewport.translateBy(e.movement.x, e.movement.y)
+            },
+            panStart: (): boolean => {
+                if (this.mode === EditorMode.NONE) {
+                    this.cursor = 'move'
+                    this.setMode(EditorMode.PAN)
+                    this.on('globalpointermove', panModule._onPan)
+                    return true
+                }
+            },
+            panEnd: (): void => {
+                if (this.mode === EditorMode.PAN) {
+                    this.off('globalpointermove', panModule._onPan)
+                    this.setMode(EditorMode.NONE)
+                    this.cursor = null
+                }
+            },
+        }
+        this.panStart = panModule.panStart
+        this.panEnd = panModule.panEnd
+
+        const moveTracker = {
+            directions: {
+                up: false,
+                left: false,
+                down: false,
+                right: false,
+            },
+            start: (dir: keyof MoveDirections): boolean => {
+                moveTracker.directions[dir] = true
+                return true
+            },
+            end: (dir: keyof MoveDirections): void => {
+                moveTracker.directions[dir] = false
+            },
+        }
+        this.moveStart = moveTracker.start
+        this.moveEnd = moveTracker.end
+
+        {
+            const panCb = (ticker: Ticker): void => {
+                if (this.mode !== EditorMode.PAN) {
+                    const WSXOR = moveTracker.directions.up !== moveTracker.directions.down
+                    const ADXOR = moveTracker.directions.left !== moveTracker.directions.right
+                    if (WSXOR || ADXOR) {
+                        let mult = ticker.elapsedMS / 16.66
+                        const finalSpeed = (this.moveSpeed / (WSXOR && ADXOR ? 1.4142 : 1)) * mult
+                        this.viewport.translateBy(
+                            (ADXOR ? (moveTracker.directions.left ? 1 : -1) : 0) * finalSpeed,
+                            (WSXOR ? (moveTracker.directions.up ? 1 : -1) : 0) * finalSpeed
+                        )
+                    }
+                }
+            }
+
+            G.app.ticker.add(panCb)
+            this.on('destroyed', () => {
+                G.app.ticker.remove(panCb)
+            })
+        }
+
+        let constraint: boolean
+        const build = (_x: number, _y: number, dx: number, dy: number): void => {
+            if (constraint === undefined) {
+                const cX = Math.abs(Math.sign(dx))
+                const cY = Math.abs(Math.sign(dy))
+                if (cX !== cY) {
+                    constraint = true
+                    if (cX === 1) {
+                        this.paintContainer.setPosConstraint(Axis.X)
+                    } else {
+                        this.paintContainer.setPosConstraint(Axis.Y)
+                    }
+                }
+            }
+            this.paintContainer.placeEntityContainer()
+        }
+
+        let draggingCreateMode = false
+        this.buildStart = (): boolean => {
+            if (this.mode !== EditorMode.PAINT) return false
+
+            draggingCreateMode = true
+
+            this.paintContainer.placeEntityContainer()
+
+            this.gridData.on('update32', build)
+
+            return true
+        }
+        this.buildEnd = (): void => {
+            if (!draggingCreateMode) return
+
+            draggingCreateMode = false
+
+            constraint = undefined
+            this.paintContainer.setPosConstraint(undefined)
+
+            this.gridData.off('update32', build)
+        }
+
+        this.openEditor = (): boolean => {
+            if (this.mode === EditorMode.EDIT) {
+                if (G.debug) {
+                    console.log(this.hoverContainer.entity.serialize())
+                }
+
+                Dialog.closeAll()
+                G.UI.createEditor(this.hoverContainer.entity)
+                return true
+            }
+            return false
+        }
+
+        let remove = false
+        this.mineStart = (): boolean => {
+            remove = true
+            this.gridData.on('update32', mine)
+            mine()
+            return true
+        }
+        const mine = (): void => {
+            if (remove) {
+                if (this.mode === EditorMode.EDIT) {
+                    this.bp.removeEntity(this.hoverContainer.entity)
+                }
+                if (this.mode === EditorMode.PAINT) {
+                    this.paintContainer.removeContainerUnder()
+                }
+            }
+        }
+        this.mineEnd = (): void => {
+            remove = false
+            this.gridData.off('update32', mine)
+        }
+
+        this.pasteEntitySettingsStart = (): boolean => {
+            const isValid = this.pasteEntitySettings()
+            if (isValid) this.gridData.on('update32', this.pasteEntitySettings, this)
+            return isValid
+        }
+        this.pasteEntitySettingsEnd = (): void => {
+            this.gridData.off('update32', this.pasteEntitySettings, this)
+        }
+        this.pasteEntitySettingsModifiersStart = (): boolean => {
+            this.copySettingsActive = true
+            this.updateCopyCursorBox()
+            return true
+        }
+        this.pasteEntitySettingsModifiersEnd = (): void => {
+            this.copySettingsActive = false
+            this.updateCopyCursorBox()
+        }
+
+        const onWheel = (e: WheelEvent): void => {
+            e.preventDefault()
+            e.stopPropagation()
+
+            if (Math.sign(e.deltaY) === 1) {
+                this.zoom(false)
+            } else {
+                this.zoom(true)
+            }
+        }
+
+        this.addEventListener('wheel', onWheel, { passive: false })
+        this.on('destroyed', () => {
+            this.removeEventListener('wheel', onWheel)
+        })
+
+        this.addEventListener('pointerdown', G.actions.pressButton.bind(G.actions))
+        this.on('destroyed', () => {
+            this.removeEventListener('pointerdown', G.actions.pressButton.bind(G.actions))
+            G.actions.releaseAll()
         })
     }
 
@@ -218,18 +397,23 @@ export class BlueprintContainer extends PIXI.Container {
         return this._entityForCopyData
     }
 
-    public copyEntitySettings(): void {
+    public copyEntitySettings(): boolean {
         if (this.mode === EditorMode.EDIT) {
             // Store reference to source entity
             this._entityForCopyData = this.hoverContainer.entity
+            this.updateCopyCursorBox()
+            return true
         }
+        return false
     }
 
-    public pasteEntitySettings(): void {
+    public pasteEntitySettings(): boolean {
         if (this._entityForCopyData && this.mode === EditorMode.EDIT) {
             // Hand over reference of source entity to target entity for pasting data
             this.hoverContainer.entity.pasteSettings(this._entityForCopyData)
+            return true
         }
+        return false
     }
 
     public getViewportScale(): number {
@@ -242,28 +426,6 @@ export class BlueprintContainer extends PIXI.Container {
         return [(x - t.tx) / t.a, (y - t.ty) / t.d]
     }
 
-    public render(renderer: PIXI.Renderer): void {
-        if (this.viewport.update()) {
-            this.gridData.recalculate()
-        }
-
-        const destinationFrame = renderer.screen
-        const sourceFrame = destinationFrame.clone()
-        const t = this.viewport.getTransform()
-        sourceFrame.x -= t.tx / t.a
-        sourceFrame.y -= t.ty / t.d
-        sourceFrame.width /= t.a
-        sourceFrame.height /= t.d
-
-        const previous = renderer.renderTexture.current
-        for (const child of this.children) {
-            renderer.renderTexture.bind(null, sourceFrame, destinationFrame)
-            child.render(renderer)
-        }
-        renderer.batch.flush()
-        renderer.renderTexture.bind(previous)
-    }
-
     public get mode(): EditorMode {
         return this._mode
     }
@@ -273,8 +435,58 @@ export class BlueprintContainer extends PIXI.Container {
         this.emit('mode', mode)
     }
 
-    public enterCopyMode(): void {
-        if (this.mode === EditorMode.COPY) return
+    public rotate(ccw: boolean): void {
+        if (this.mode === EditorMode.EDIT) {
+            this.hoverContainer.entity.rotate(ccw, true)
+        } else if (this.mode === EditorMode.PAINT) {
+            if (this.paintContainer.canFlipOrRotateByCopying()) {
+                const copies = this.paintContainer.rotatedEntities(ccw)
+                this.paintContainer.destroy()
+                this.spawnPaintContainer(copies, 0)
+            } else {
+                this.paintContainer.rotate(ccw)
+            }
+        }
+    }
+
+    public flip(vertical: boolean): void {
+        if (this.mode === EditorMode.PAINT && this.paintContainer.canFlipOrRotateByCopying()) {
+            try {
+                const copies = this.paintContainer.flippedEntities(vertical)
+                this.paintContainer.destroy()
+                this.spawnPaintContainer(copies, 0)
+            } catch (e) {
+                if (e instanceof IllegalFlipError) {
+                    G.logger({ text: e.message, type: 'warning' })
+                } else {
+                    throw e
+                }
+            }
+        }
+    }
+
+    public pipette(): void {
+        if (this.mode === EditorMode.EDIT) {
+            const entity = this.hoverContainer.entity
+            const itemName = Entity.getItemName(entity.name)
+            const direction =
+                entity.directionType === 'output' ? (entity.direction + 4) % 8 : entity.direction
+            this.spawnPaintContainer(itemName, direction)
+        } else if (this.mode === EditorMode.PAINT) {
+            this.paintContainer.destroy()
+        }
+        this.exitCopyMode(true)
+        this.exitDeleteMode(true)
+    }
+
+    public moveEntity(offset: IPoint) {
+        if (this.mode === EditorMode.EDIT) {
+            this.hoverContainer.entity.moveBy(offset)
+        }
+    }
+
+    public enterCopyMode(): boolean {
+        if (this.mode === EditorMode.COPY) return false
         if (this.mode === EditorMode.PAINT) this.paintContainer.destroy()
 
         this.updateHoverContainer(true)
@@ -305,14 +517,16 @@ export class BlueprintContainer extends PIXI.Container {
             }
         }
         this.copyModeUpdateFn(startPos.x, startPos.y)
-        this.gridData.on('update32', this.copyModeUpdateFn)
+        this.gridData.on('update32', this.copyModeUpdateFn, this)
+
+        return true
     }
 
     public exitCopyMode(cancel = false): void {
         if (this.mode !== EditorMode.COPY) return
 
         this.overlayContainer.hideSelectionArea()
-        this.gridData.off('update32', this.copyModeUpdateFn)
+        this.gridData.off('update32', this.copyModeUpdateFn, this)
 
         this.setMode(EditorMode.NONE)
         this.updateHoverContainer()
@@ -326,29 +540,8 @@ export class BlueprintContainer extends PIXI.Container {
         this.copyModeEntities = []
     }
 
-    public enterDraggingCreateMode(): void {
-        if (this.mode !== EditorMode.PAINT) return
-        if (this.draggingCreateUpdateFn !== undefined) return
-
-        this.paintContainer.placeEntityContainer()
-        this.gridData.constrained = true
-
-        this.draggingCreateUpdateFn = () => {
-            this.paintContainer.placeEntityContainer()
-        }
-
-        this.gridData.on('update32', this.draggingCreateUpdateFn)
-    }
-
-    public exitDraggingCreateMode(): void {
-        if (this.draggingCreateUpdateFn === undefined) return
-        this.gridData.constrained = false
-        this.gridData.off('update32', this.draggingCreateUpdateFn)
-        this.draggingCreateUpdateFn = undefined
-    }
-
-    public enterDeleteMode(): void {
-        if (this.mode === EditorMode.DELETE) return
+    public enterDeleteMode(): boolean {
+        if (this.mode === EditorMode.DELETE) return false
         if (this.mode === EditorMode.PAINT) this.paintContainer.destroy()
 
         this.updateHoverContainer(true)
@@ -379,14 +572,16 @@ export class BlueprintContainer extends PIXI.Container {
             }
         }
         this.deleteModeUpdateFn(startPos.x, startPos.y)
-        this.gridData.on('update32', this.deleteModeUpdateFn)
+        this.gridData.on('update32', this.deleteModeUpdateFn, this)
+
+        return true
     }
 
     public exitDeleteMode(cancel = false): void {
         if (this.mode !== EditorMode.DELETE) return
 
         this.overlayContainer.hideSelectionArea()
-        this.gridData.off('update32', this.deleteModeUpdateFn)
+        this.gridData.off('update32', this.deleteModeUpdateFn, this)
 
         this.setMode(EditorMode.NONE)
         this.updateHoverContainer()
@@ -402,20 +597,6 @@ export class BlueprintContainer extends PIXI.Container {
         this.deleteModeEntities = []
     }
 
-    public enterPanMode(): void {
-        if (this.mode === EditorMode.NONE && this.isPointerInside) {
-            this.setMode(EditorMode.PAN)
-            this.cursor = 'move'
-        }
-    }
-
-    public exitPanMode(): void {
-        if (this.mode === EditorMode.PAN) {
-            this.setMode(EditorMode.NONE)
-            this.cursor = 'inherit'
-        }
-    }
-
     public zoom(zoomIn = true): void {
         const zoomFactor = 0.1
         this.viewport.setScaleCenter(this.gridData.x, this.gridData.y)
@@ -423,10 +604,8 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     private get isPointerInside(): boolean {
-        const container = G.app.renderer.plugins.interaction.hitTest(
-            G.app.renderer.plugins.interaction.mouse.global,
-            G.app.stage
-        )
+        const boundary = new EventBoundary(G.app.stage)
+        const container = boundary.hitTest(this.gridData.x, this.gridData.y)
         return container === this
     }
 
@@ -436,7 +615,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.hoverContainer = undefined
             this.setMode(EditorMode.NONE)
             this.cursor = 'inherit'
-            this.emit('removeHoverContainer')
+            this.updateCopyCursorBox()
         }
 
         if (forceRemove || !this.isPointerInside) {
@@ -465,33 +644,37 @@ export class BlueprintContainer extends PIXI.Container {
             this.setMode(EditorMode.EDIT)
             this.cursor = 'pointer'
             eC.pointerOverEventHandler()
-            this.emit('createHoverContainer')
+            this.updateCopyCursorBox()
         }
     }
 
+    private updateCopyCursorBox(): void {
+        this.overlayContainer.updateCopyCursorBox(!this.copySettingsActive)
+    }
+
     public get moveSpeed(): number {
-        return this._moveSpeed
+        return BlueprintContainer._moveSpeed
     }
 
     public set moveSpeed(speed: number) {
-        this._moveSpeed = speed
+        BlueprintContainer._moveSpeed = speed
     }
 
     public get gridColor(): number {
-        return this._gridColor
+        return BlueprintContainer._gridColor
     }
 
     public set gridColor(color: number) {
-        this._gridColor = color
+        BlueprintContainer._gridColor = color
         this.grid.tint = color
     }
 
     public get gridPattern(): GridPattern {
-        return this._gridPattern
+        return BlueprintContainer._gridPattern
     }
 
     public set gridPattern(pattern: GridPattern) {
-        this._gridPattern = pattern
+        BlueprintContainer._gridPattern = pattern
 
         const index = this.getChildIndex(this.grid)
         const old = this.grid
@@ -500,35 +683,40 @@ export class BlueprintContainer extends PIXI.Container {
         old.destroy()
     }
 
-    private generateGrid(pattern = this.gridPattern): PIXI.TilingSprite {
+    public get limitWireReach(): boolean {
+        return BlueprintContainer._limitWireReach
+    }
+
+    public set limitWireReach(limit: boolean) {
+        BlueprintContainer._limitWireReach = limit
+    }
+
+    private generateGrid(pattern = this.gridPattern): TilingSprite {
         const gridGraphics =
             pattern === 'checker'
-                ? new PIXI.Graphics()
-                      .beginFill(0x808080)
-                      .drawRect(0, 0, 32, 32)
-                      .drawRect(32, 32, 32, 32)
-                      .endFill()
-                      .beginFill(0xffffff)
-                      .drawRect(0, 32, 32, 32)
-                      .drawRect(32, 0, 32, 32)
-                      .endFill()
-                : new PIXI.Graphics()
-                      .beginFill(0x808080)
-                      .drawRect(0, 0, 32, 32)
-                      .endFill()
-                      .beginFill(0xffffff)
-                      .drawRect(1, 1, 31, 31)
-                      .endFill()
+                ? new Graphics()
+                      .rect(0, 0, 32, 32)
+                      .rect(32, 32, 32, 32)
+                      .fill(0x808080)
+                      .rect(0, 32, 32, 32)
+                      .rect(32, 0, 32, 32)
+                      .fill(0xffffff)
+                : new Graphics().rect(0, 0, 32, 32).fill(0x808080).rect(1, 1, 31, 31).fill(0xffffff)
 
-        const renderTexture = PIXI.RenderTexture.create({
+        const renderTexture = RenderTexture.create({
             width: gridGraphics.width,
             height: gridGraphics.height,
+            autoGenerateMipmaps: true,
         })
 
-        renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
-        G.app.renderer.render(gridGraphics, { renderTexture })
+        G.app.renderer.render({ container: gridGraphics, target: renderTexture })
+        renderTexture.source.updateMipmaps()
 
-        const grid = new PIXI.TilingSprite(renderTexture, this.size.x, this.size.y)
+        const grid = new TilingSprite({
+            texture: renderTexture,
+            width: this.size.x,
+            height: this.size.y,
+        })
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
         grid.tint = this.gridColor
@@ -536,40 +724,37 @@ export class BlueprintContainer extends PIXI.Container {
         return grid
     }
 
-    private generateChunkGrid(chunkOffset: number): PIXI.TilingSprite {
+    private generateChunkGrid(chunkOffset: number): TilingSprite {
         const W = 32 * 32
         const H = 32 * 32
-        const gridGraphics = new PIXI.Graphics()
-            .lineStyle({ width: 2, color: 0x000000 })
+        const gridGraphics = new Graphics()
             .moveTo(0, 0)
             .lineTo(W, 0)
             .lineTo(W, H)
             .lineTo(0, H)
             .lineTo(0, 0)
+            .stroke({ width: 2, color: 0x000000 })
 
-        const renderTexture = PIXI.RenderTexture.create({
+        const renderTexture = RenderTexture.create({
             width: W,
             height: H,
+            autoGenerateMipmaps: true,
         })
 
-        renderTexture.baseTexture.mipmap = PIXI.MIPMAP_MODES.POW2
-        G.app.renderer.render(gridGraphics, { renderTexture })
+        G.app.renderer.render({ container: gridGraphics, target: renderTexture })
+        renderTexture.source.updateMipmaps()
 
         // Add one more chunk to the size because of the offset
-        const grid = new PIXI.TilingSprite(renderTexture, this.size.x + W, this.size.y + H)
+        const grid = new TilingSprite({
+            texture: renderTexture,
+            width: this.size.x + W,
+            height: this.size.y + H,
+        })
         // Offset chunk grid
         grid.position.set(chunkOffset * 32, chunkOffset * 32)
         grid.anchor.set(this.anchor.x, this.anchor.y)
 
         return grid
-    }
-
-    public get limitWireReach(): boolean {
-        return this._limitWireReach
-    }
-
-    public set limitWireReach(limit: boolean) {
-        this._limitWireReach = limit
     }
 
     public initBP(): void {
@@ -606,7 +791,7 @@ export class BlueprintContainer extends PIXI.Container {
             this.wiresContainer.add(hash, connection)
         )
 
-        this.on('destroy', () => {
+        this.on('destroyed', () => {
             this.bp.off('create-entity', onCreateEntity)
             this.bp.off('remove-entity', onRemoveEntity)
             this.bp.off('create-tile', onCreateTile)
@@ -620,7 +805,6 @@ export class BlueprintContainer extends PIXI.Container {
     }
 
     public destroy(): void {
-        this.emit('destroy')
         super.destroy({ children: true })
     }
 
@@ -648,7 +832,7 @@ export class BlueprintContainer extends PIXI.Container {
 
     public centerViewport(): void {
         const bounds = this.bp.isEmpty()
-            ? new PIXI.Rectangle(-16 * 32, -16 * 32, 32 * 32, 32 * 32)
+            ? new Rectangle(-16 * 32, -16 * 32, 32 * 32, 32 * 32)
             : this.getBlueprintBounds()
 
         this.viewport.centerViewPort(
@@ -663,50 +847,41 @@ export class BlueprintContainer extends PIXI.Container {
         )
     }
 
-    public getBlueprintBounds(): PIXI.Rectangle {
-        const bounds = new PIXI.Bounds()
-
-        const addBounds = (sprite: EntitySprite): void => {
-            const sB = new PIXI.Bounds()
-            sB.minX = sprite.cachedBounds[0]
-            sB.minY = sprite.cachedBounds[1]
-            sB.maxX = sprite.cachedBounds[2]
-            sB.maxY = sprite.cachedBounds[3]
-            bounds.addBounds(sB)
-        }
-
-        this.entitySprites.children.forEach(addBounds)
-        this.tileSprites.children.forEach(addBounds)
-
-        const rect = bounds.getRectangle(new PIXI.Rectangle())
+    public getBlueprintBounds(): Rectangle {
+        const rect = this.entitySprites
+            .getLocalBounds()
+            .rectangle.enlarge(this.tileSprites.getLocalBounds().rectangle)
 
         const X = Math.floor(rect.x / 32) * 32
         const Y = Math.floor(rect.y / 32) * 32
         const W = Math.ceil((rect.width + rect.x - X) / 32) * 32
         const H = Math.ceil((rect.height + rect.y - Y) / 32) * 32
-        return new PIXI.Rectangle(X, Y, W, H)
+        rect.x = X
+        rect.y = Y
+        rect.width = W
+        rect.height = H
+
+        return rect
     }
 
     public getPicture(): Promise<Blob> {
         if (this.bp.isEmpty()) return
 
-        const region = this.getBlueprintBounds()
-        this.viewportCulling = false
-        // swap our custom render method with the original one
-        const _render = this.render
-        this.render = super.render
-        const texture = G.app.renderer.generateTexture(this, {
-            scaleMode: PIXI.SCALE_MODES.LINEAR,
+        const frame = this.getBlueprintBounds()
+        const texture = G.app.renderer.generateTexture({
+            target: this,
+            frame,
             resolution: 1,
-            region,
+            textureSourceOptions: {
+                scaleMode: 'linear',
+            },
         })
-        this.render = _render
-        this.viewportCulling = true
-        const canvas = G.app.renderer.plugins.extract.canvas(texture)
+
+        const canvas = G.app.renderer.extract.canvas(texture)
 
         return new Promise(resolve => {
             canvas.toBlob(blob => {
-                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+                texture.destroy(true)
                 resolve(blob)
             })
         })
@@ -728,25 +903,29 @@ export class BlueprintContainer extends PIXI.Container {
             const placeResult = itemData.place_result || tileResult || wireResult
 
             if (wireResult) {
-                this.paintContainer = new PaintWireContainer(this, placeResult)
-                this.wirePaintSlot.addChild(this.paintContainer)
+                this.paintContainer = this.wirePaintSlot.addChild(
+                    new PaintWireContainer(this, placeResult)
+                )
             } else if (tileResult) {
-                this.paintContainer = new PaintTileContainer(this, placeResult)
-                this.tilePaintSlot.addChild(this.paintContainer)
+                this.paintContainer = this.tilePaintSlot.addChild(
+                    new PaintTileContainer(this, placeResult)
+                )
             } else {
-                this.paintContainer = new PaintEntityContainer(this, placeResult, direction)
-                this.entityPaintSlot.addChild(this.paintContainer)
+                this.paintContainer = this.entityPaintSlot.addChild(
+                    new PaintEntityContainer(this, placeResult, direction)
+                )
             }
         } else {
-            this.paintContainer = new PaintBlueprintContainer(this, itemNameOrEntities)
-            this.entityPaintSlot.addChild(this.paintContainer)
+            this.paintContainer = this.entityPaintSlot.addChild(
+                new PaintBlueprintContainer(this, itemNameOrEntities)
+            )
         }
 
         if (!this.isPointerInside) {
             this.paintContainer.hide()
         }
 
-        this.paintContainer.on('destroy', () => {
+        this.paintContainer.on('destroyed', () => {
             this.paintContainer = undefined
             this.setMode(EditorMode.NONE)
             this.updateHoverContainer()

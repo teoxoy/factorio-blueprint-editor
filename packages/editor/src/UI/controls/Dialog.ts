@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js'
+import { Graphics, Text } from 'pixi.js'
 import G from '../../common/globals'
 import { colors, styles } from '../style'
 import F from './functions'
@@ -9,7 +9,7 @@ import { Panel } from './Panel'
  *
  * Per default the dialog
  *  + is not visible (this.visible = false)
- *  + is interactive (this.interactive = true)
+ *  + is interactive (this.eventMode = 'static')
  *  + has interactive children (this.interactiveChildren = true)
  *  + automatically executes 'setDialogPosition()' on Browser Resizing
  */
@@ -27,7 +27,7 @@ export abstract class Dialog extends Panel {
         )
 
         this.visible = true
-        this.interactive = true
+        this.eventMode = 'static'
         this.interactiveChildren = true
 
         if (title !== undefined) {
@@ -69,7 +69,7 @@ export abstract class Dialog extends Panel {
     }
 
     /** Automatically sets position of dialog to center screen */
-    protected setPosition(): void {
+    protected override setPosition(): void {
         this.position.set(
             G.app.screen.width / 2 - this.width / 2,
             G.app.screen.height / 2 - this.height / 2
@@ -91,45 +91,14 @@ export abstract class Dialog extends Panel {
      * @param y - Vertical position of label from top left corner
      * @param text - Text for label
      * @param style - Style of label
-     * @returns Reference to PIXI.Text for further usage
+     * @returns Reference to Text for further usage
      */
-    protected addLabel(x = 140, y = 56, text = 'Recipe:', style = styles.dialog.label): PIXI.Text {
-        const label: PIXI.Text = new PIXI.Text(text, style)
+    protected addLabel(x = 140, y = 56, text = 'Recipe:', style = styles.dialog.label): Text {
+        const label = new Text({ text, style })
         label.position.set(x, y)
         this.addChild(label)
 
         // Return label in case extension wants to use it
         return label
-    }
-
-    /**
-     * Add Visual Line to Dialog
-     * @description Defined in base dialog class so extensions of dialog can use it
-     * @param x - Horizontal position of line from top left corner
-     * @param y - Vertical position of line from top left corner
-     * @param width - Width from left to right of line
-     * @param style - Height from top to bottom of line
-     * @returns Reference to PIXI.Graphics for further usage
-     */
-    protected addLine(
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        border: number = colors.dialog.line.background.border
-    ): PIXI.Graphics {
-        const line: PIXI.Graphics = F.DrawRectangle(
-            width,
-            height,
-            colors.dialog.line.background.color,
-            colors.dialog.line.background.alpha,
-            border,
-            true
-        )
-        line.position.set(x, y)
-        this.addChild(line)
-
-        // Return line in case extension wants to use it
-        return line
     }
 }

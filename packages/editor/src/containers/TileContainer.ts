@@ -1,4 +1,5 @@
 import FD from '../core/factorioData'
+import { IPoint } from '../types'
 import G from '../common/globals'
 import { Tile } from '../core/Tile'
 import { EntitySprite } from './EntitySprite'

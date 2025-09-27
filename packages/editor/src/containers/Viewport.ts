@@ -1,4 +1,5 @@
-import * as PIXI from 'pixi.js'
+import { Matrix } from 'pixi.js'
+import { IPoint } from '../types'
 
 export class Viewport {
     private size: IPoint
@@ -12,8 +13,8 @@ export class Viewport {
     private scaleY = 1
     private scaleCenterX = 0
     private scaleCenterY = 0
-    private origTransform = new PIXI.Matrix()
-    private transform = new PIXI.Matrix()
+    private origTransform = new Matrix()
+    private transform = new Matrix()
 
     public constructor(size: IPoint, viewPortSize: IPoint, anchor: IPoint, maxZoom: number) {
         this.size = size
@@ -25,11 +26,9 @@ export class Viewport {
     private _updateMatrix(): void {
         // Accumulate zoom transformations.
         // origTransform is an intermediate accumulative matrix used for tracking the current zoom target.
-        this.origTransform.append(new PIXI.Matrix(1, 0, 0, 1, this.scaleCenterX, this.scaleCenterY))
-        this.origTransform.append(new PIXI.Matrix(this.scaleX, 0, 0, this.scaleY, 0, 0))
-        this.origTransform.append(
-            new PIXI.Matrix(1, 0, 0, 1, -this.scaleCenterX, -this.scaleCenterY)
-        )
+        this.origTransform.append(new Matrix(1, 0, 0, 1, this.scaleCenterX, this.scaleCenterY))
+        this.origTransform.append(new Matrix(this.scaleX, 0, 0, this.scaleY, 0, 0))
+        this.origTransform.append(new Matrix(1, 0, 0, 1, -this.scaleCenterX, -this.scaleCenterY))
 
         // We reset Scale because origTransform is accumulative and has "captured" the information.
         this.scaleX = 1
@@ -53,7 +52,7 @@ export class Viewport {
 
         // Check if viewport area is bigger than the container
         if (maxX - minX > 0 || maxY - minY > 0) {
-            this.origTransform = new PIXI.Matrix()
+            this.origTransform = new Matrix()
 
             this.scaleCenterX = this.size.x / 2
             this.scaleCenterY = this.size.y / 2
@@ -88,7 +87,7 @@ export class Viewport {
     }
 
     public centerViewPort(focusObjectSize: IPoint, offset: IPoint): void {
-        this.origTransform = new PIXI.Matrix()
+        this.origTransform = new Matrix()
 
         this.positionX = -this.size.x / 2 + this.viewPortSize.x / 2 + offset.x
         this.positionY = -this.size.y / 2 + this.viewPortSize.y / 2 + offset.y
@@ -117,7 +116,7 @@ export class Viewport {
         return false
     }
 
-    public getTransform(): PIXI.Matrix {
+    public getTransform(): Matrix {
         return this.transform
     }
 

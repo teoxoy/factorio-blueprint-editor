@@ -1,4 +1,5 @@
-import { EventEmitter } from 'eventemitter3'
+import EventEmitter from 'eventemitter3'
+import { IBPConnection, IConnSide, IPoint, IWireColor } from '../types'
 import FD from './factorioData'
 import U from './generators/util'
 import { Blueprint } from './Blueprint'
@@ -17,7 +18,12 @@ export interface IConnectionPoint {
     position?: IPoint
 }
 
-export class WireConnections extends EventEmitter {
+export interface WireConnectionsEvents {
+    create: [hash: string, connection: IConnection]
+    remove: [hash: string, connection: IConnection]
+}
+
+export class WireConnections extends EventEmitter<WireConnectionsEvents> {
     private bp: Blueprint
     private readonly connections = new WireConnectionMap()
 
@@ -37,7 +43,7 @@ export class WireConnections extends EventEmitter {
 
     public static deserialize(
         entityNumber: number,
-        connections: BPS.IConnection,
+        connections: IBPConnection,
         neighbours: number[]
     ): IConnection[] {
         const parsedConnections: IConnection[] = []
@@ -45,7 +51,7 @@ export class WireConnections extends EventEmitter {
         const addConnSide = (side: string): void => {
             if (connections[side]) {
                 for (const color in connections[side]) {
-                    const conn = connections[side] as BPS.IConnSide
+                    const conn = connections[side] as IConnSide
                     for (const data of conn[color]) {
                         parsedConnections.push({
                             color,
@@ -68,7 +74,7 @@ export class WireConnections extends EventEmitter {
         const addCopperConnSide = (side: string, color: string): void => {
             if (connections[side]) {
                 // For some reason Cu0 and Cu1 are arrays but the switch can only have 1 copper connection
-                const data = (connections[side] as BPS.IWireColor[])[0]
+                const data = (connections[side] as IWireColor[])[0]
                 parsedConnections.push({
                     color,
                     cps: [
@@ -107,8 +113,8 @@ export class WireConnections extends EventEmitter {
         connections: IConnection[],
         getType: (entityNumber: number) => string,
         entNrWhitelist?: Set<number>
-    ): { connections: BPS.IConnection; neighbours: number[] } {
-        const serialized: BPS.IConnection = {}
+    ): { connections: IBPConnection; neighbours: number[] } {
+        const serialized: IBPConnection = {}
         const neighbours: number[] = []
 
         for (const connection of connections) {
@@ -127,7 +133,7 @@ export class WireConnections extends EventEmitter {
                     if (serialized[SIDE] === undefined) {
                         serialized[SIDE] = []
                     }
-                    const c = serialized[SIDE] as BPS.IWireColor[]
+                    const c = serialized[SIDE] as IWireColor[]
                     c.push({
                         entity_id: otherE.entityNumber,
                         wire_id: 0,
@@ -137,7 +143,7 @@ export class WireConnections extends EventEmitter {
                 if (serialized[entitySide] === undefined) {
                     serialized[entitySide] = {}
                 }
-                const SIDE = serialized[entitySide] as BPS.IConnSide
+                const SIDE = serialized[entitySide] as IConnSide
                 if (SIDE[color] === undefined) {
                     SIDE[color] = []
                 }
@@ -213,7 +219,7 @@ export class WireConnections extends EventEmitter {
 
     public createEntityConnections(
         entityNumber: number,
-        connections: BPS.IConnection,
+        connections: IBPConnection,
         neighbours: number[]
     ): void {
         const conns = WireConnections.deserialize(entityNumber, connections, neighbours)
@@ -240,7 +246,7 @@ export class WireConnections extends EventEmitter {
     public serializeConnectionData(
         entityNumber: number,
         entNrWhitelist?: Set<number>
-    ): { connections: BPS.IConnection; neighbours: number[] } {
+    ): { connections: IBPConnection; neighbours: number[] } {
         const connections = this.getEntityConnections(entityNumber)
         return WireConnections.serialize(
             entityNumber,
@@ -309,9 +315,9 @@ export class WireConnections extends EventEmitter {
             name: string
         }
 
-        const poles: IPole[] = this.bp.entities
+        const poles = this.bp.entities
             .filter(e => e.type === 'electric_pole')
-            .map(e => ({
+            .map<IPole>(e => ({
                 entityNumber: e.entityNumber,
                 name: e.name,
                 x: e.position.x,

@@ -1,3 +1,4 @@
+import { IPoint } from '../../types'
 import { generatePipes } from './pipe'
 import { generateBeacons } from './beacon'
 import { generatePoles } from './pole'

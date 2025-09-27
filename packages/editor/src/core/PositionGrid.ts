@@ -1,4 +1,5 @@
 import util from '../common/util'
+import { IPoint } from '../types'
 import FD from './factorioData'
 import { Blueprint } from './Blueprint'
 import { Entity } from './Entity'
@@ -255,8 +256,8 @@ export class PositionGrid {
         name: string,
         direction: number,
         pos: IPoint
-    ): Entity {
-        if (name === 'straight_rail') return
+    ): Entity | undefined {
+        if (name === 'straight_rail') return undefined
 
         const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
         const area = {
@@ -266,7 +267,7 @@ export class PositionGrid {
             h: size.y,
         }
 
-        if (this.sharesCell(area)) return
+        if (this.sharesCell(area)) return undefined
         const entity = this.findInArea(area, entity => entity.name === name)
 
         if (
@@ -275,7 +276,7 @@ export class PositionGrid {
             pos.y !== entity.position.y ||
             entity.direction === direction
         ) {
-            return
+            return undefined
         }
         return entity
     }
@@ -286,7 +287,7 @@ export class PositionGrid {
         position: IPoint,
         searchDirection: number,
         maxDistance: number
-    ): number {
+    ): number | undefined {
         const horizontal = searchDirection % 4 !== 0
         const sign = searchDirection === 0 || searchDirection === 6 ? -1 : 1
 
@@ -299,10 +300,12 @@ export class PositionGrid {
                 const entity = this.bp.entities.get(cell)
                 if (entity.name === name) {
                     if (entity.direction === direction) return cell
-                    if ((entity.direction + 4) % 8 === direction) return
+                    if ((entity.direction + 4) % 8 === direction) return undefined
                 }
             }
         }
+
+        return undefined
     }
 
     /** Returns true if any of the cells in the area are an array */
@@ -385,7 +388,7 @@ export class PositionGrid {
 
         return util
             .uniqueInArray(
-                coordinates.reduce((acc, coord) => {
+                coordinates.reduce<number[]>((acc, coord) => {
                     const cell = this.grid.get(`${coord[0]},${coord[1]}`)
                     if (!cell) return acc
                     if (typeof cell === 'number') {

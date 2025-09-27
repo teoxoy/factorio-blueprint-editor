@@ -1,27 +1,26 @@
-import * as PIXI from 'pixi.js'
+import { Container, Text } from 'pixi.js'
 import G from '../common/globals'
 import { EditorMode } from '../containers/BlueprintContainer'
 import { styles } from './style'
 
-export class DebugContainer extends PIXI.Container {
-    public x = 145
-    public y = 5
-
+export class DebugContainer extends Container {
     public constructor() {
         super()
+        this.x = 145
+        this.y = 5
 
-        const fpsGUIText = new PIXI.Text('', styles.debug.text)
+        const fpsGUIText = new Text({ text: '', style: styles.debug.text })
         this.addChild(fpsGUIText)
 
         G.app.ticker.add(() => {
             fpsGUIText.text = `${Math.round(G.app.ticker.FPS)} FPS`
         })
 
-        const gridposGUIText = new PIXI.Text('', styles.debug.text)
+        const gridposGUIText = new Text({ text: '', style: styles.debug.text })
         gridposGUIText.position.set(0, 32)
         this.addChild(gridposGUIText)
 
-        const modeText = new PIXI.Text('', styles.debug.text)
+        const modeText = new Text({ text: '', style: styles.debug.text })
         modeText.position.set(0, 64)
         this.addChild(modeText)
 
@@ -39,7 +38,7 @@ export class DebugContainer extends PIXI.Container {
         const attachBPCEvents = (): void => {
             bpc.gridData.on('update32', onUpdate32)
             bpc.on('mode', onModeChange)
-            bpc.on('destroy', () => {
+            bpc.on('destroyed', () => {
                 bpc.gridData.off('update32', onUpdate32)
                 bpc.off('mode', onModeChange)
                 bpc = G.BPC

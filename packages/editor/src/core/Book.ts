@@ -1,15 +1,16 @@
+import { IBlueprint, IBlueprintBook, IBlueprintBookEntry, IIcon } from '../types'
 import { Blueprint, getFactorioVersion } from './Blueprint'
 
 class Book {
     private _active: Blueprint
     private _activeIndex: number
-    private readonly blueprints: BPS.IBlueprintBookEntry[]
+    private readonly blueprints: IBlueprintBookEntry[]
 
     private readonly label?: string
     private readonly description?: string
-    private readonly icons?: BPS.IIcon[]
+    private readonly icons?: IIcon[]
 
-    public constructor(data: BPS.IBlueprintBook) {
+    public constructor(data: IBlueprintBook) {
         if (data) {
             this._activeIndex = getFlattenedActiveIndex(data.blueprints, data.active_index)
             this.blueprints = data.blueprints || []
@@ -55,7 +56,7 @@ class Book {
         return bp
     }
 
-    public serialize(): BPS.IBlueprintBook {
+    public serialize(): IBlueprintBook {
         const activeIndex = this.saveActiveBlueprint()
 
         return {
@@ -70,10 +71,7 @@ class Book {
     }
 }
 
-function countNestedBlueprints(
-    bps: BPS.IBlueprintBookEntry[] = [],
-    includePlanners = false
-): number {
+function countNestedBlueprints(bps: IBlueprintBookEntry[] = [], includePlanners = false): number {
     return bps.reduce((count, { blueprint, blueprint_book }) => {
         if (blueprint_book) {
             return count + countNestedBlueprints(blueprint_book.blueprints, includePlanners)
@@ -85,10 +83,7 @@ function countNestedBlueprints(
     }, 0)
 }
 
-function getFlattenedActiveIndex(
-    bps: BPS.IBlueprintBookEntry[] = [],
-    active_index: number
-): number {
+function getFlattenedActiveIndex(bps: IBlueprintBookEntry[] = [], active_index: number): number {
     {
         const { upgrade_planner, deconstruction_planner, blueprint_book } = bps[active_index]
 
@@ -122,14 +117,8 @@ function getFlattenedActiveIndex(
     return res
 }
 
-function getBlueprintAtFlattenedActiveIndex(
-    bps: BPS.IBlueprintBookEntry[],
-    index: number
-): BPS.IBlueprint {
-    const search = (
-        bps: BPS.IBlueprintBookEntry[] = [],
-        index: number
-    ): number | BPS.IBlueprint => {
+function getBlueprintAtFlattenedActiveIndex(bps: IBlueprintBookEntry[], index: number): IBlueprint {
+    const search = (bps: IBlueprintBookEntry[] = [], index: number): number | IBlueprint => {
         let i = index
         for (const { blueprint, blueprint_book } of bps) {
             if (blueprint) {
@@ -152,9 +141,9 @@ function getBlueprintAtFlattenedActiveIndex(
 }
 
 function saveBlueprint(
-    bps: BPS.IBlueprintBookEntry[] = [],
+    bps: IBlueprintBookEntry[] = [],
     index: number,
-    bp: BPS.IBlueprint
+    bp: IBlueprint
 ): [number, number] {
     let i = index
     for (let j = 0; j < bps.length; j++) {

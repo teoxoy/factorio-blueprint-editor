@@ -9,15 +9,15 @@
     },
     "dependencies": {
         "@fbe/editor": "*",
-        "dat.gui": "^0.7.7",
-        "file-saver": "^2.0.5",
-        "@pixi/settings": "^6.2.0"
+        "dat.gui": "0.7.9",
+        "file-saver": "2.0.5",
+        "pixi.js": "8.13.2"
     },
     "devDependencies": {
-        "@types/dat.gui": "^0.7.7",
-        "@types/file-saver": "^2.0.4",
-        "stylus": "^0.64.0",
-        "vite": "^6.0.3",
-        "vite-plugin-static-copy": "^2.2.0"
+        "@types/dat.gui": "0.7.13",
+        "@types/file-saver": "2.0.7",
+        "stylus": "0.64.0",
+        "vite": "7.1.7",
+        "vite-plugin-static-copy": "3.1.2"
     }
 }

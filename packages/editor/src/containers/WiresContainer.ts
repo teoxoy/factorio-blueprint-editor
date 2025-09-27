@@ -1,12 +1,14 @@
-import * as PIXI from 'pixi.js'
+import { Container, Graphics, RenderTexture, Sprite } from 'pixi.js'
 import { Blueprint } from '../core/Blueprint'
 import { IConnection, IConnectionPoint } from '../core/WireConnections'
 import U from '../core/generators/util'
+import { IPoint } from '../types'
 import { EntityContainer } from './EntityContainer'
+import G from '../common/globals'
 
-export class WiresContainer extends PIXI.Container {
+export class WiresContainer extends Container {
     private readonly bp: Blueprint
-    private connectionToSprite = new Map<string, PIXI.Graphics>()
+    private connectionToSprite = new Map<string, Sprite>()
 
     public constructor(bp: Blueprint) {
         super()
@@ -18,8 +20,8 @@ export class WiresContainer extends PIXI.Container {
         p2: IPoint,
         color: string,
         connectionsReach = true
-    ): PIXI.Graphics {
-        const wire = new PIXI.Graphics()
+    ): Sprite {
+        const wire = new Graphics()
 
         const minX = Math.min(p1.x, p2.x)
         const minY = Math.min(p1.y, p2.y)
@@ -34,11 +36,6 @@ export class WiresContainer extends PIXI.Container {
             green: 0x588c38,
         }
 
-        wire.lineStyle({
-            width: 1.5,
-            color: colorMap[color],
-            alpha: connectionsReach ? 1 : 0.3,
-        })
         wire.moveTo(0, 0)
 
         if (p1.x === p2.x) {
@@ -65,14 +62,37 @@ export class WiresContainer extends PIXI.Container {
             wire.bezierCurveTo(X, Y, X2, Y2, dX, dY)
         }
 
-        wire.position.set(minX + dX / 2, minY + dY / 2)
-        wire.pivot.set(dX / 2, dY / 2)
+        wire.stroke({
+            width: 1.5,
+            color: colorMap[color],
+            alpha: connectionsReach ? 1 : 0.3,
+        })
+
+        let bounds = wire.bounds
+
+        const renderTexture = RenderTexture.create({
+            width: bounds.width,
+            height: bounds.height,
+            autoGenerateMipmaps: true,
+            antialias: true,
+            resolution: window.devicePixelRatio * 2,
+        })
+
+        G.app.renderer.render({ container: wire, target: renderTexture })
+        renderTexture.source.updateMipmaps()
+
+        wire.destroy()
+
+        const s = new Sprite(renderTexture)
+
+        s.position.set(minX + dX / 2, minY + dY / 2)
+        s.pivot.set(dX / 2, dY / 2)
 
         if (!((p1.x < p2.x && p1.y < p2.y) || (p2.x < p1.x && p2.y < p1.y))) {
-            wire.scale.x = -1
+            s.scale.x = -1
         }
 
-        return wire
+        return s
     }
 
     public connect(hash: string, connection: IConnection): void {
@@ -94,7 +114,7 @@ export class WiresContainer extends PIXI.Container {
     public remove(hash: string): void {
         const sprite = this.connectionToSprite.get(hash)
         if (sprite) {
-            sprite.destroy()
+            sprite.destroy({ texture: true, textureSource: true })
             this.connectionToSprite.delete(hash)
         }
     }
@@ -135,7 +155,7 @@ export class WiresContainer extends PIXI.Container {
         }
     }
 
-    private getWireSprite(connection: IConnection): PIXI.Graphics {
+    private getWireSprite(connection: IConnection): Sprite {
         const getWirePos = (cp: IConnectionPoint, color: string): IPoint => {
             if (cp.entityNumber) {
                 const entity = this.bp.entities.get(cp.entityNumber)

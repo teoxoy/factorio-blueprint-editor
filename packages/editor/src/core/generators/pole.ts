@@ -1,3 +1,4 @@
+import { IPoint } from '../../types'
 import U from './util'
 import { IVisualization } from './index'
 

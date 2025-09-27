@@ -1,19 +1,19 @@
-import * as PIXI from 'pixi.js'
+import { Container, FederatedPointerEvent } from 'pixi.js'
 import { colors } from '../style'
 import F from './functions'
 
 /** Slider Control */
-export class Slider extends PIXI.Container {
+export class Slider extends Container {
     /** Static width of slider */
     private static readonly SLIDER_WIDTH = 148 // Actual Width is 164 ... this is a necessary constant to improve calculation
     /** Static height of slider */
     private static readonly SLIDER_HEIGHT = 16
 
     /** Container to hold slider button */
-    private readonly m_SliderButton: PIXI.Container
+    private readonly m_SliderButton: Container
 
     /** Container to hold slider value graphic */
-    private readonly m_SliderValue: PIXI.Container
+    private readonly m_SliderValue: Container
 
     /** Is the button being dragged */
     private m_Dragging: boolean
@@ -32,7 +32,7 @@ export class Slider extends PIXI.Container {
     public constructor(value = 1) {
         super()
 
-        this.interactive = true
+        this.eventMode = 'static'
         this.m_Dragging = false
         const factor = 2
 
@@ -52,7 +52,7 @@ export class Slider extends PIXI.Container {
         this.addChild(slidebar)
 
         // Draw slider value
-        this.m_SliderValue = new PIXI.Container()
+        this.m_SliderValue = new Container()
         this.m_SliderValue.position.set(0, 0)
         this.addChild(this.m_SliderValue)
 
@@ -85,8 +85,8 @@ export class Slider extends PIXI.Container {
         buttonHover.visible = false
 
         // Add Button
-        this.m_SliderButton = new PIXI.Container()
-        this.m_SliderButton.interactive = true
+        this.m_SliderButton = new Container()
+        this.m_SliderButton.eventMode = 'static'
         this.m_SliderButton.addChild(buttonFace)
         this.m_SliderButton.addChild(buttonHover)
         this.m_SliderButton.on('pointerover', () => {
@@ -97,10 +97,10 @@ export class Slider extends PIXI.Container {
                 buttonHover.visible = false
             }
         })
-        this.m_SliderButton.on('pointerdown', this.onButtonDragStart)
-        this.m_SliderButton.on('pointermove', this.onButtonDragMove)
-        this.m_SliderButton.on('pointerup', this.onButtonDragEnd)
-        this.m_SliderButton.on('pointerupoutside', this.onButtonDragEnd)
+        this.m_SliderButton.on('pointerdown', this.onButtonDragStart, this)
+        this.m_SliderButton.on('globalpointermove', this.onButtonDragMove, this)
+        this.m_SliderButton.on('pointerup', this.onButtonDragEnd, this)
+        this.m_SliderButton.on('pointerupoutside', this.onButtonDragEnd, this)
         this.addChild(this.m_SliderButton)
         this.value = value
     }
@@ -166,19 +166,20 @@ export class Slider extends PIXI.Container {
     }
 
     /** Drag start event responder */
-    private readonly onButtonDragStart = (event: PIXI.InteractionEvent): void => {
+    private readonly onButtonDragStart = (event: FederatedPointerEvent): void => {
         if (!this.m_Dragging) {
             this.m_Dragging = true
             this.m_Dragpoint =
-                event.data.getLocalPosition(this.m_SliderButton.parent).x - this.m_SliderButton.x
+                this.m_SliderButton.parent.worldTransform.applyInverse(event.global).x -
+                this.m_SliderButton.x
             this.m_SliderButton.getChildAt(1).visible = true
         }
     }
 
     /** Drag move event callback  */
-    private readonly onButtonDragMove = (event: PIXI.InteractionEvent): void => {
+    private readonly onButtonDragMove = (event: FederatedPointerEvent): void => {
         if (this.m_Dragging) {
-            const position: PIXI.Point = event.data.getLocalPosition(this.m_SliderButton.parent)
+            const position = this.m_SliderButton.parent.worldTransform.applyInverse(event.global)
 
             let x = position.x - this.m_Dragpoint
             if (x > 0 && x < Slider.SLIDER_WIDTH) {

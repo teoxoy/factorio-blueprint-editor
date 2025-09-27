@@ -1,5 +1,6 @@
-import { EventEmitter } from 'eventemitter3'
-import * as PIXI from 'pixi.js'
+import EventEmitter from 'eventemitter3'
+import { Sprite, Texture } from 'pixi.js'
+import { IBlueprint, IEntity, IPoint, ISchedule, SignalType } from '../types'
 import G from '../common/globals'
 import util from '../common/util'
 import FD from './factorioData'
@@ -11,7 +12,7 @@ import { IVisualization } from './generators'
 import { History } from './History'
 import { Tile } from './Tile'
 
-interface IOilOutpostSettings extends Record<string, string | boolean | number> {
+export interface IOilOutpostSettings extends Record<string, string | boolean | number> {
     DEBUG: boolean
     PUMPJACK_MODULE: string
     MIN_GAP_BETWEEN_UNDERGROUNDS: number
@@ -40,7 +41,7 @@ const getFactorioVersion = (main = 1, major = 1, minor = 41): number =>
 class OurMap<K, V> extends Map<K, V> {
     public constructor(values?: V[], mapFn?: (value: V) => K) {
         if (values) {
-            super(values.map(e => [mapFn(e), e] as [K, V]))
+            super(values.map(e => [mapFn(e), e]))
         } else {
             super()
         }
@@ -72,12 +73,18 @@ class OurMap<K, V> extends Map<K, V> {
     }
 }
 
-interface IEntityData extends Omit<BPS.IEntity, 'entity_number'> {
+interface IEntityData extends Omit<IEntity, 'entity_number'> {
     entity_number?: number
 }
 
+export interface BlueprintEvents {
+    'create-entity': [entity: Entity]
+    'remove-entity': []
+    'create-tile': [tile: Tile]
+}
+
 /** Blueprint base class */
-class Blueprint extends EventEmitter {
+class Blueprint extends EventEmitter<BlueprintEvents> {
     public name = 'Blueprint'
     private readonly icons = new Map<1 | 2 | 3 | 4, string>()
     public readonly wireConnections = new WireConnections(this)
@@ -88,14 +95,14 @@ class Blueprint extends EventEmitter {
 
     // unused blueprint properties
     private readonly description?: string
-    private readonly schedules?: BPS.ISchedule[]
+    private readonly schedules?: ISchedule[]
     private readonly absolute_snapping?: boolean
     private readonly snap_to_grid?: IPoint
     private readonly position_relative_to_grid?: IPoint
 
     private m_nextEntityNumber = 1
 
-    public constructor(data?: Partial<BPS.IBlueprint>) {
+    public constructor(data?: Partial<IBlueprint>) {
         super()
 
         if (data) {
@@ -313,13 +320,13 @@ class Blueprint extends EventEmitter {
         return nr
     }
 
-    public getFirstRailRelatedEntityPos(): IPoint {
+    public getFirstRailRelatedEntityPos(): IPoint | undefined {
         for (const [, e] of this.entities) {
             if (e.name === 'straight_rail') return e.position
             if (e.name === 'train_stop') return e.position
             if (e.name === 'curved_rail') return { x: e.position.x - 1, y: e.position.y - 1 }
         }
-        return null
+        return undefined
     }
 
     public isEmpty(): boolean {
@@ -482,7 +489,7 @@ class Blueprint extends EventEmitter {
                             v.path.forEach((p, k) => {
                                 setTimeout(
                                     () => {
-                                        const s = new PIXI.Sprite(PIXI.Texture.WHITE)
+                                        const s = new Sprite(Texture.WHITE)
                                         s.tint = tint
                                         s.anchor.set(0.5)
                                         s.alpha = v.alpha
@@ -543,7 +550,7 @@ class Blueprint extends EventEmitter {
     }
 
     /** Transforms sparse entity numbers into consecutive ones */
-    private processRawEntities(entities: BPS.IEntity[]): BPS.IEntity[] {
+    private processRawEntities(entities: IEntity[]): IEntity[] {
         const oldToNewID = new Map(
             new Array(entities.length).fill(0).map((_, i) => [entities[i].entity_number, i + 1])
         )
@@ -554,7 +561,7 @@ class Blueprint extends EventEmitter {
             if (e.connections) {
                 for (const side in e.connections) {
                     if (util.objectHasOwnProperty(e.connections, side)) {
-                        const SIDE = e.connections[side] as BPS.IConnSide | BPS.IWireColor[]
+                        const SIDE = e.connections[side]
                         if (Array.isArray(SIDE)) {
                             for (const c of SIDE) {
                                 c.entity_id = oldToNewID.get(c.entity_id)
@@ -582,7 +589,7 @@ class Blueprint extends EventEmitter {
         })
     }
 
-    public serialize(): BPS.IBlueprint {
+    public serialize(): IBlueprint {
         if (!this.icons.size) {
             this.generateIcons()
         }
@@ -613,7 +620,7 @@ class Blueprint extends EventEmitter {
             name: tile.name,
         }))
         const iconData = [...this.icons.entries()].map(([index, icon]) => {
-            const getItemTypeForBp = (name: string): BPS.SignalType => {
+            const getItemTypeForBp = (name: string): SignalType => {
                 if (FD.signals[name]) return 'virtual'
                 if (FD.fluids[name]) return 'fluid'
                 return 'item'
@@ -640,7 +647,7 @@ class Blueprint extends EventEmitter {
     }
 }
 
-function getOffset(data?: Partial<BPS.IBlueprint>): IPoint {
+function getOffset(data?: Partial<IBlueprint>): IPoint {
     let minX = Infinity
     let minY = Infinity
     let maxX = -Infinity
@@ -680,4 +687,4 @@ function getOffset(data?: Partial<BPS.IBlueprint>): IPoint {
     }
 }
 
-export { Blueprint, oilOutpostSettings, getFactorioVersion, IOilOutpostSettings }
+export { Blueprint, oilOutpostSettings, getFactorioVersion }

@@ -1,4 +1,12 @@
-import * as PIXI from 'pixi.js'
+import {
+    ColorSource,
+    Container,
+    Graphics,
+    Sprite,
+    Text,
+    CanvasTextMetrics,
+    RenderTexture,
+} from 'pixi.js'
 import FD, { IngredientOrResult, ColorWithAlpha, Item, Icon } from '../../core/factorioData'
 import { styles } from '../style'
 import G from '../../common/globals'
@@ -15,12 +23,13 @@ function ShadeColor(color: number, percent: number): number {
     const G = ((color >> 8) & 0x00ff) + amt
     const B = (color & 0x0000ff) + amt
     return (
-        0x1000000 +
         (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
         (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
         (B < 255 ? (B < 1 ? 0 : B) : 255)
     )
 }
+
+const rect_map: Map<string, RenderTexture> = new Map()
 
 /**
  * Draw Rectangle with Border
@@ -39,70 +48,86 @@ function DrawRectangle(
     alpha = 1,
     border = 0,
     pressed = false
-): PIXI.Graphics {
-    const rectangle = new PIXI.Graphics()
-    rectangle.alpha = alpha
-    rectangle.beginFill(background)
-    if (border === 0) {
-        rectangle.drawRect(0, 0, width, height)
-    } else {
-        if (border > 0) {
-            rectangle
-                .lineStyle({
-                    width: 1,
-                    color: ShadeColor(background, pressed ? -12.5 : 22.5),
-                    alignment: 0,
-                })
-                .moveTo(0, height)
-                .lineTo(0, 0)
-                .lineTo(width, 0)
-                .lineStyle({
-                    width: 1,
-                    color: ShadeColor(background, pressed ? 10 : -7.5),
-                    alignment: 0,
-                })
-                .lineTo(width, height)
-                .lineTo(0, height)
-        }
-        if (border > 1) {
-            rectangle
-                .lineStyle({
-                    width: 1,
-                    color: ShadeColor(background, pressed ? -10 : 20),
-                    alignment: 0,
-                })
-                .moveTo(1, height - 1)
-                .lineTo(1, 1)
-                .lineTo(width - 1, 1)
-                .lineStyle({
-                    width: 1,
-                    color: ShadeColor(background, pressed ? 7.5 : -5),
-                    alignment: 0,
-                })
-                .lineTo(width - 1, height - 1)
-                .lineTo(1, height - 1)
-        }
-        if (border > 2) {
-            rectangle
-                .lineStyle({
-                    width: 1,
-                    color: ShadeColor(background, pressed ? -7.5 : 17.5),
-                    alignment: 0,
-                })
-                .moveTo(2, height - 2)
-                .lineTo(2, 2)
-                .lineTo(width - 2, 2)
-                .lineStyle({
-                    width: 1,
-                    color: ShadeColor(background, pressed ? 5 : -2.5),
-                    alignment: 0,
-                })
-                .lineTo(width - 2, height - 2)
-                .lineTo(2, height - 2)
-        }
+): Sprite {
+    const key = `${width}-${height}-${background}-${alpha}-${border}-${pressed}`
+    const existing_texture = rect_map.get(key)
+    if (existing_texture) {
+        return new Sprite(existing_texture)
     }
-    rectangle.endFill()
-    return rectangle
+
+    const rectangle = new Graphics()
+    rectangle.alpha = alpha
+    rectangle.rect(0, 0, width, height).fill(background)
+
+    if (border > 0) {
+        rectangle
+            .moveTo(0, height)
+            .lineTo(0, 0)
+            .lineTo(width, 0)
+            .stroke({
+                width: 1,
+                color: ShadeColor(background, pressed ? -12.5 : 22.5),
+                alignment: 1,
+            })
+            .lineTo(width, height)
+            .lineTo(0, height)
+            .stroke({
+                width: 1,
+                color: ShadeColor(background, pressed ? 10 : -7.5),
+                alignment: 1,
+            })
+    }
+    if (border > 1) {
+        rectangle
+            .moveTo(1, height - 1)
+            .lineTo(1, 1)
+            .lineTo(width - 1, 1)
+            .stroke({
+                width: 1,
+                color: ShadeColor(background, pressed ? -10 : 20),
+                alignment: 1,
+            })
+            .lineTo(width - 1, height - 1)
+            .lineTo(1, height - 1)
+            .stroke({
+                width: 1,
+                color: ShadeColor(background, pressed ? 7.5 : -5),
+                alignment: 1,
+            })
+    }
+    if (border > 2) {
+        rectangle
+            .moveTo(2, height - 2)
+            .lineTo(2, 2)
+            .lineTo(width - 2, 2)
+            .stroke({
+                width: 1,
+                color: ShadeColor(background, pressed ? -7.5 : 17.5),
+                alignment: 1,
+            })
+            .lineTo(width - 2, height - 2)
+            .lineTo(2, height - 2)
+            .stroke({
+                width: 1,
+                color: ShadeColor(background, pressed ? 5 : -2.5),
+                alignment: 1,
+            })
+    }
+
+    const renderTexture = RenderTexture.create({
+        width: width,
+        height: height,
+    })
+
+    G.app.renderer.render({ container: rectangle, target: renderTexture })
+
+    rectangle.destroy()
+
+    rect_map.set(key, renderTexture)
+
+    const s = new Sprite(renderTexture)
+
+    return s
 }
 
 /**
@@ -128,38 +153,42 @@ function DrawControlFace(
     p1: number,
     p2: number,
     p3: number
-): PIXI.Graphics {
+): Container {
+    const out = new Container()
+
     const wf = w * f
     const hf = h * f
 
-    const mask: PIXI.Graphics = new PIXI.Graphics()
-    mask.beginFill(0x000000).drawRoundedRect(0, 0, wf, hf, 6).endFill()
+    const mask = new Graphics()
+    mask.roundRect(0, 0, wf, hf, 6).fill(0x000000)
 
-    const face: PIXI.Graphics = new PIXI.Graphics()
-    face.beginFill(c, a)
-        .drawRect(0, 0, wf, hf)
-        .endFill()
-        .lineStyle({ width: f, color: ShadeColor(c, p3), alpha: a, alignment: 0 })
+    const face = new Graphics()
+    face.rect(0, 0, wf, hf)
+        .fill(colorAndAlphaToColorSource(c, a))
         .moveTo(wf, 0)
         .lineTo(wf, hf)
         .lineTo(0, hf)
-        .lineStyle({ width: f, color: ShadeColor(c, p2), alpha: a, alignment: 0 })
+        .stroke({ width: f, color: ShadeColor(c, p3), alpha: a, alignment: 1 })
         .moveTo(wf - f, f)
         .lineTo(wf - f, hf - f)
         .lineTo(f, hf - f)
-        .lineStyle({ width: f, color: ShadeColor(c, p1), alpha: a, alignment: 0 })
+        .stroke({ width: f, color: ShadeColor(c, p2), alpha: a, alignment: 1 })
         .moveTo(wf - f, f)
         .lineTo(f, f)
         .lineTo(f, hf - f)
-        .lineStyle({ width: f, color: ShadeColor(c, p0), alpha: a, alignment: 0 })
+        .stroke({ width: f, color: ShadeColor(c, p1), alpha: a, alignment: 1 })
         .moveTo(wf, 0)
         .lineTo(0, 0)
         .lineTo(0, hf)
-    face.cacheAsBitmap = true
+        .stroke({ width: f, color: ShadeColor(c, p0), alpha: a, alignment: 1 })
     face.scale.set(1 / f, 1 / f)
     face.mask = mask
 
-    return face
+    out.addChild(mask)
+    out.addChild(face)
+    out.cacheAsTexture(true)
+
+    return out
 }
 
 /** Create Icon from Sprite Item information */
@@ -168,7 +197,7 @@ function CreateIcon(
     maxSize = 32,
     setAnchor = true,
     darkBackground = false
-): PIXI.DisplayObject {
+): Container {
     const item =
         FD.items[itemName] ||
         FD.fluids[itemName] ||
@@ -183,12 +212,12 @@ function CreateIcon(
 
     if (item.icons) return generateIcons(item.icons, item.icon_size, item.icon_mipmaps)
 
-    function generateIcon(data: Icon): PIXI.Sprite {
+    function generateIcon(data: Icon): Sprite {
         const icon =
             darkBackground && data.dark_background_icon ? data.dark_background_icon : data.icon
 
         const texture = G.getTexture(icon, 0, 0, data.icon_size, data.icon_size)
-        const sprite = new PIXI.Sprite(texture)
+        const sprite = new Sprite(texture)
         sprite.scale.set(maxSize / data.icon_size)
         if (setAnchor) {
             sprite.anchor.set(0.5)
@@ -196,12 +225,8 @@ function CreateIcon(
         return sprite
     }
 
-    function generateIcons(
-        icons: Icon[],
-        icon_size?: number,
-        icon_mipmaps?: number
-    ): PIXI.Container {
-        const img = new PIXI.Container()
+    function generateIcons(icons: Icon[], icon_size?: number, icon_mipmaps?: number): Container {
+        const img = new Container()
         for (const icon of icons) {
             const sprite = generateIcon({ icon_size, icon_mipmaps, ...icon })
             if (icon.scale) {
@@ -227,32 +252,32 @@ function CreateIcon(
 
 /**
  * Creates an icon with amount on host at coordinates
- * @param host - PIXI.Container on top of which the icon shall be created
+ * @param host - Container on top of which the icon shall be created
  * @param x - Horizontal position of icon from top left corner
  * @param y - Vertical position of icon from top left corner
  * @param name - Name if item
  * @param amount - Amount to show
  */
 function CreateIconWithAmount(
-    host: PIXI.Container,
+    host: Container,
     x: number,
     y: number,
     name: string,
     amount: number
 ): void {
-    const icon: PIXI.DisplayObject = CreateIcon(name, undefined, false)
+    const icon = CreateIcon(name, undefined, false)
     icon.position.set(x, y)
     host.addChild(icon)
 
-    const amountString: string = amount < 1000 ? amount.toString() : `${Math.floor(amount / 1000)}k`
-    const text = new PIXI.Text(amountString, styles.icon.amount)
+    const amountString = amount < 1000 ? amount.toString() : `${Math.floor(amount / 1000)}k`
+    const text = new Text({ text: amountString, style: styles.icon.amount })
     text.anchor.set(1, 1)
     text.position.set(x + 33, y + 33)
     host.addChild(text)
 }
 
 function CreateRecipe(
-    host: PIXI.Container,
+    host: Container,
     x: number,
     y: number,
     ingredients: IngredientOrResult[],
@@ -268,8 +293,8 @@ function CreateRecipe(
 
     nextX += 2
     const timeText = `=${time}s>`
-    const timeSize: PIXI.TextMetrics = PIXI.TextMetrics.measureText(timeText, styles.dialog.label)
-    const timeObject: PIXI.Text = new PIXI.Text(timeText, styles.dialog.label)
+    const timeSize = CanvasTextMetrics.measureText(timeText, styles.dialog.label)
+    const timeObject = new Text({ text: timeText, style: styles.dialog.label })
     timeObject.position.set(nextX, 6 + y)
     host.addChild(timeObject)
     nextX += timeSize.width + 6
@@ -280,9 +305,23 @@ function CreateRecipe(
     }
 }
 
-function applyTint(s: PIXI.Sprite, tint: ColorWithAlpha): void {
-    s.tint = PIXI.utils.rgb2hex([tint.r || 0, tint.g || 0, tint.b || 0])
+function colorAndAlphaToColorSource(color: number, a: number): ColorSource {
+    const r = (color >> 16) & 0xff
+    const g = (color >> 8) & 0xff
+    const b = color & 0xff
+    return { r, g, b, a }
+}
+
+function applyTint(s: { tint: ColorSource; alpha: number }, tint: ColorWithAlpha): void {
+    const r = tint.r || 0
+    const g = tint.g || 0
+    const b = tint.b || 0
+    s.tint = rgbToColorSource(r, g, b)
     s.alpha = tint.a || 1
+}
+
+function rgbToColorSource(r: number, g: number, b: number): ColorSource {
+    return Math.floor(r * 255) * 0x10000 + Math.floor(g * 255) * 0x100 + Math.floor(b * 255)
 }
 
 export default {
@@ -293,4 +332,6 @@ export default {
     CreateIconWithAmount,
     CreateRecipe,
     applyTint,
+    colorAndAlphaToColorSource,
+    rgbToColorSource,
 }

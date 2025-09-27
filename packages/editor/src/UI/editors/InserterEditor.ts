@@ -33,7 +33,7 @@ export class InserterEditor extends Editor {
             })
 
             filterModeSwitch.on('changed', () => {
-                this.m_Entity.filterMode = filterModeSwitch.value as 'whitelist' | 'blacklist'
+                this.m_Entity.filterMode = filterModeSwitch.value
             })
 
             filterModeBlacklist.on('changed', () => {

@@ -1,4 +1,5 @@
-import * as PIXI from 'pixi.js'
+import { Container } from 'pixi.js'
+import { IPoint } from '../types'
 import FD, { CursorBoxType } from '../core/factorioData'
 import G from '../common/globals'
 import { Entity } from '../core/Entity'
@@ -17,12 +18,12 @@ export class EntityContainer {
     }
 
     private visualizationArea: VisualizationArea
-    private entityInfo: PIXI.Container
+    private entityInfo: Container
     private entitySprites: EntitySprite[] = []
     /** This is only a reference */
-    private cursorBoxContainer: PIXI.Container
+    private cursorBoxContainer: Container
     /** This is only a reference */
-    private undergroundLine: PIXI.Container
+    private undergroundLine: Container
 
     private readonly m_Entity: Entity
 
@@ -111,7 +112,7 @@ export class EntityContainer {
 
         this.m_Entity.on('destroy', onEntityDestroy)
 
-        G.BPC.on('destroy', () => {
+        G.BPC.on('destroyed', () => {
             this.m_Entity.off('recipe', onRecipeChange)
             this.m_Entity.off('direction', onDirectionChange)
             this.m_Entity.off('directionType', onDirectionTypeChange)

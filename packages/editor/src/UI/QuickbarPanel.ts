@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js'
+import { Container, Graphics } from 'pixi.js'
 import { EditorMode } from '../containers/BlueprintContainer'
 import G from '../common/globals'
 import { Panel } from './controls/Panel'
@@ -6,9 +6,9 @@ import { Slot } from './controls/Slot'
 import F from './controls/functions'
 import { colors } from './style'
 
-class QuickbarSlot extends Slot {
+class QuickbarSlot extends Slot<string | undefined> {
     public get itemName(): string {
-        return this.data as string
+        return this.data
     }
 
     public assignItem(itemName: string): void {
@@ -29,7 +29,7 @@ export class QuickbarPanel extends Panel {
     private rows: number
 
     private slots: QuickbarSlot[]
-    private slotsContainer: PIXI.Container
+    private slotsContainer: Container
 
     public constructor(rows = 1, itemNames?: string[]) {
         super(
@@ -44,7 +44,7 @@ export class QuickbarPanel extends Panel {
         this.iHeight = 24 + rows * 38
         this.slots = new Array<QuickbarSlot>(rows * 10)
 
-        this.slotsContainer = new PIXI.Container()
+        this.slotsContainer = new Container()
         this.slotsContainer.position.set(12, 12)
         this.addChild(this.slotsContainer)
 
@@ -56,18 +56,17 @@ export class QuickbarPanel extends Panel {
         this.addChild(t)
     }
 
-    private static createTriangleButton(width: number, height: number): PIXI.Graphics {
-        const button = new PIXI.Graphics()
+    private static createTriangleButton(width: number, height: number): Graphics {
+        const button = new Graphics()
 
         button
-            .beginFill(colors.controls.button.background.color)
             .moveTo(0, height)
             .lineTo(width / 2, 0)
             .lineTo(width, height)
             .lineTo(0, height)
-            .endFill()
+            .fill(colors.controls.button.background.color)
 
-        button.interactive = true
+        button.eventMode = 'static'
 
         button.on('pointerover', () => {
             button.alpha = 0.8
@@ -89,7 +88,7 @@ export class QuickbarPanel extends Panel {
                     quickbarSlot.assignItem(itemNames[r * 10 + i])
                 }
 
-                quickbarSlot.on('pointerdown', (e: PIXI.InteractionEvent) => {
+                quickbarSlot.on('pointerdown', e => {
                     // Use Case 1:   Left Click  & Slot=Empty & Mouse=Painting                      >> Assign Mouse Item to Slot
                     // Use Case 2:   Left Click  & Slot=Item  & Mouse=Painting                      >> Assign Slot Item to Mouse
                     // Use Case 2.5: Left Click  & Slot=Item  & Mouse=Painting & Item=PaintingItem  >> Destroy Painting Item
@@ -97,7 +96,7 @@ export class QuickbarPanel extends Panel {
                     // Use Case 4:   Left Click  & Slot=Item  & Mouse=Empty                         >> Assign Slot Item to Mouse
                     // Use Case 5:   Right Click & Slot=*     & Mouse=*                             >> Unassign Slot
 
-                    if (e.data.button === 0) {
+                    if (e.button === 0) {
                         if (G.BPC.mode === EditorMode.PAINT) {
                             if (quickbarSlot.itemName) {
                                 if (quickbarSlot.itemName === G.BPC.paintContainer.getItemName()) {
@@ -120,7 +119,7 @@ export class QuickbarPanel extends Panel {
                                 quickbarSlot.assignItem(item)
                             )
                         }
-                    } else if (e.data.button === 2) {
+                    } else if (e.button === 2) {
                         // UC5
                         quickbarSlot.unassignItem()
                     }
@@ -157,7 +156,7 @@ export class QuickbarPanel extends Panel {
         return this.slots.map(s => s.itemName)
     }
 
-    protected setPosition(): void {
+    protected override setPosition(): void {
         this.position.set(
             G.app.screen.width / 2 - this.width / 2,
             G.app.screen.height - this.height + 1
