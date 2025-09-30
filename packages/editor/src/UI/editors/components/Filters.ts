@@ -46,7 +46,7 @@ export class Filters extends Container<Slot<number>> {
     /* Blueprint Logist Chests
     ########################
     entity_number: 2
-    name: "logistic_chest_storage"
+    name: "storage_chest"
     position: {x: 0, y: 0}
     request_filters: Array(1)
         0: {index: 1, name: "assembling_machine_2", count: 0}
@@ -54,16 +54,16 @@ export class Filters extends Container<Slot<number>> {
     // Filter Count: N/A >> Needs to be written as 0
     ########################
     entity_number: 4
-    name: "logistic_chest_requester"
+    name: "requester_chest"
     position: {x: 0, y: 2}
     request_filters: Array(1)
-        0: {index: 1, name: "logistic_chest_storage", count: 50}
+        0: {index: 1, name: "storage_chest", count: 50}
     request_from_buffers: true
     // Filter Slots: 12
     // Filter Count: Stack Size
     ########################
     entity_number: 5
-    name: "logistic_chest_buffer"
+    name: "buffer_chest"
     position: {x: 0, y: 1}
     request_filters: Array(2)
         0: {index: 1, name: "assembling_machine_2", count: 50}

@@ -309,7 +309,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (this.entityData.max_logistic_slots !== undefined) {
             return this.entityData.max_logistic_slots
         }
-        if (this.name === 'logistic_chest_buffer' || this.name === 'logistic_chest_requester') {
+        if (this.name === 'buffer_chest' || this.name === 'requester_chest') {
             return this.logisticChestFilters.reduce(
                 (max, filter) => Math.max(max, filter.index),
                 30 // TODO: find a way to fix this properly
@@ -326,13 +326,17 @@ export class Entity extends EventEmitter<EntityEvents> {
             case 'express_splitter': {
                 return this.splitterFilter
             }
-            case 'filter_inserter':
-            case 'stack_filter_inserter': {
+            case 'burner_inserter':
+            case 'inserter':
+            case 'long_handed_inserter':
+            case 'fast_inserter':
+            case 'bulk_inserter':
+            case 'stack_inserter': {
                 return this.inserterFilters
             }
-            case 'logistic_chest_storage':
-            case 'logistic_chest_requester':
-            case 'logistic_chest_buffer':
+            case 'storage_chest':
+            case 'requester_chest':
+            case 'buffer_chest':
                 return this.logisticChestFilters
             case 'infinity_chest':
                 return this.infinityChestFilters
@@ -353,14 +357,18 @@ export class Entity extends EventEmitter<EntityEvents> {
                 this.splitterFilter = FILTERS
                 return
             }
-            case 'filter_inserter':
-            case 'stack_filter_inserter': {
+            case 'burner_inserter':
+            case 'inserter':
+            case 'long_handed_inserter':
+            case 'fast_inserter':
+            case 'bulk_inserter':
+            case 'stack_inserter': {
                 this.inserterFilters = FILTERS
                 return
             }
-            case 'logistic_chest_storage':
-            case 'logistic_chest_requester':
-            case 'logistic_chest_buffer': {
+            case 'storage_chest':
+            case 'requester_chest':
+            case 'buffer_chest': {
                 this.logisticChestFilters = FILTERS
             }
         }
@@ -664,8 +672,11 @@ export class Entity extends EventEmitter<EntityEvents> {
         // Vert: 1-3, 2-2, 7-5, 0-0
         // Horz: 1-7, 3-5
         const translation_map: { [key: string]: { [vert: string]: number[] } } = {
-            curved_rail: { true: [5, 4, 3, 2, 1, 0, 7, 6], false: [1, 0, 7, 6, 5, 4, 3, 2] },
-            straight_rail: { true: [0, 3, 2, 1, 4, 7, 6, 5], false: [0, 7, 2, 5, 4, 3, 6, 1] },
+            legacy_curved_rail: { true: [5, 4, 3, 2, 1, 0, 7, 6], false: [1, 0, 7, 6, 5, 4, 3, 2] },
+            legacy_straight_rail: {
+                true: [0, 3, 2, 1, 4, 7, 6, 5],
+                false: [0, 7, 2, 5, 4, 3, 6, 1],
+            },
             default: { true: [4, 1, 2, 3, 0, 5, 6, 7], false: [0, 1, 6, 3, 4, 5, 2, 7] },
         }
 
@@ -817,10 +828,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         }
 
         // PASTE REQUESTER CHEST SETTINGS
-        if (
-            this.type === 'logistic_chest_requester' &&
-            sourceEntity.type === 'logistic_chest_requester'
-        ) {
+        if (this.type === 'requester_chest' && sourceEntity.type === 'requester_chest') {
             this.requestFromBufferChest = sourceEntity.requestFromBufferChest
         }
 

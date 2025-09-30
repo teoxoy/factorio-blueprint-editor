@@ -80,7 +80,6 @@ export class EntitySprite extends Sprite {
         positionGrid?: PositionGrid
     ): EntitySprite[] {
         const spriteData = getSpriteData({
-            hr: G.hr,
             dir: entity.direction,
 
             name: entity.name,
@@ -116,7 +115,10 @@ export class EntitySprite extends Sprite {
                 i === 0
             ) {
                 sprite.__zIndex = -8
-            } else if (entity.name === 'straight_rail' || entity.name === 'curved_rail') {
+            } else if (
+                entity.name === 'legacy_straight_rail' ||
+                entity.name === 'legacy_curved_rail'
+            ) {
                 if (i < 2) {
                     sprite.__zIndex = -10
                 } else if (i < 4) {

@@ -92,6 +92,31 @@ const nameMigrations: Record<string, string> = {
 
     // if (blueprintVersion < getFactorioVersion(0, 17, 10))
     '"grass-1"': '"landfill"',
+
+    // 2.0
+    '"stack-inserter"': '"bulk-inserter"',
+    '"stack-filter-inserter"': '"bulk-inserter"',
+    '"filter-inserter"': '"fast-inserter"',
+    '"effectivity-module"': '"efficiency-module"',
+    '"effectivity-module-2"': '"efficiency-module-2"',
+    '"effectivity-module-3"': '"efficiency-module-3"',
+    '"used-up-uranium-fuel-cell"': '"depleted-uranium-fuel-cell"',
+    '"straight-rail"': '"legacy-straight-rail"',
+    '"curved-rail"': '"legacy-curved-rail"',
+    '"logistic-chest-storage"': '"storage-chest"',
+    '"logistic-chest-buffer"': '"buffer-chest"',
+    '"logistic-chest-requester"': '"requester-chest"',
+    '"logistic-chest-active-provider"': '"active-provider-chest"',
+    '"logistic-chest-passive-provider"': '"passive-provider-chest"',
+    '"fusion-reactor-equipment"': '"fission-reactor-equipment"',
+    '"empty-barrel"': '"barrel"',
+    '"fill-water-barrel"': '"water-barrel"',
+    '"fill-crude-oil-barrel"': '"crude-oil-barrel"',
+    '"fill-petroleum-gas-barrel"': '"petroleum-gas-barrel"',
+    '"fill-light-oil-barrel"': '"light-oil-barrel"',
+    '"fill-heavy-oil-barrel"': '"heavy-oil-barrel"',
+    '"fill-lubricant-barrel"': '"lubricant-barrel"',
+    '"fill-sulfuric-acid-barrel"': '"sulfuric-acid-barrel"',
 }
 const nameMigrationsRegex = new RegExp(Object.keys(nameMigrations).join('|'), 'g')
 

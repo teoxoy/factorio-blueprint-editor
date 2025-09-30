@@ -10,7 +10,13 @@ const getRandomInt = (min: number, max: number): number => {
 
 const getRandomItem = <T>(array: T[]): T => array[getRandomInt(0, array.length - 1)]
 
-const Point = (p: IPoint | number[]): IPoint => {
+declare global {
+    interface ArrayConstructor {
+        isArray(arg: unknown): arg is unknown[] | readonly unknown[]
+    }
+}
+
+const Point = (p: IPoint | readonly [number, number]): IPoint => {
     if (Array.isArray(p)) return { x: p[0], y: p[1] }
     return { ...p }
 }
@@ -33,7 +39,7 @@ const sumprod = (...args: (number | (number[] | IPoint))[]): IPoint => {
     return ans
 }
 
-const rotatePointBasedOnDir = (p: IPoint | number[], dir: number): IPoint => {
+const rotatePointBasedOnDir = (p: IPoint | readonly [number, number], dir: number): IPoint => {
     const point: IPoint = { x: 0, y: 0 }
     const nP = Point(p)
     switch (dir) {

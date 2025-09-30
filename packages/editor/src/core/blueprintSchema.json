@@ -297,21 +297,21 @@
                             },
                             "request_from_buffers": {
                                 "type": "boolean",
-                                "$comment": "only present if entity is logistic-chest-requester"
+                                "$comment": "only present if entity is requester-chest"
                             },
                             "filter_mode": {
                                 "type": "string",
                                 "enum": ["blacklist"],
-                                "$comment": "only present if entity is filter-inserter or stack-filter-inserter"
+                                "$comment": "only present if entity is of type inserter"
                             },
                             "filters": {
                                 "type": "array",
-                                "$comment": "only present if entity is filter-inserter or stack-filter-inserter",
+                                "$comment": "only present if entity is of type inserter or loader",
                                 "items": { "$ref": "blueprintSchema.json#/definitions/filter" }
                             },
                             "request_filters": {
                                 "type": "array",
-                                "$comment": "only present if entity is logistic-chest-storage, logistic-chest-buffer or logistic-chest-requester",
+                                "$comment": "only present if entity is storage-chest, buffer-chest or requester-chest",
                                 "items": {
                                     "type": "object",
                                     "required": ["index", "name"],
@@ -493,7 +493,7 @@
                                     },
                                     "circuit_mode_of_operation": {
                                         "type": "integer",
-                                        "$comment": "only present if entity is roboport or logistic-chest-buffer or logistic-chest-requester or of type inserter(3)????????????????"
+                                        "$comment": "only present if entity is roboport or buffer-chest or requester-chest or of type inserter(3)????????????????"
                                     },
 
                                     "available_logistic_output_signal": {
