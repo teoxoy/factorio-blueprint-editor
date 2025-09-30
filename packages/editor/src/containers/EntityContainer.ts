@@ -1,10 +1,11 @@
 import { Container } from 'pixi.js'
 import { IPoint } from '../types'
-import FD, { CursorBoxType } from '../core/factorioData'
+import FD, { isCraftingMachine } from '../core/factorioData'
 import G from '../common/globals'
 import { Entity } from '../core/Entity'
 import { EntitySprite } from './EntitySprite'
 import { VisualizationArea } from './VisualizationArea'
+import { CursorBoxSpecification } from 'factorio:prototype'
 
 export class EntityContainer {
     public static readonly mappings: Map<number, EntityContainer> = new Map()
@@ -168,8 +169,8 @@ export class EntityContainer {
                 updates: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
             },
             {
-                is: ['stone_wall', 'gate', 'straight_rail'],
-                updates: ['stone_wall', 'gate', 'straight_rail'],
+                is: ['stone_wall', 'gate', 'legacy_straight_rail'],
+                updates: ['stone_wall', 'gate', 'legacy_straight_rail'],
             },
         ]
 
@@ -211,7 +212,7 @@ export class EntityContainer {
         }
     }
 
-    public set cursorBox(type: CursorBoxType) {
+    public set cursorBox(type: keyof CursorBoxSpecification) {
         if (this.cursorBoxContainer) {
             this.cursorBoxContainer.destroy()
         }
@@ -253,7 +254,7 @@ export class EntityContainer {
         if (
             this.m_Entity.moduleSlots !== 0 ||
             this.m_Entity.type === 'splitter' ||
-            this.m_Entity.entityData.crafting_categories !== undefined ||
+            isCraftingMachine(this.m_Entity.entityData) ||
             this.m_Entity.type === 'mining_drill' ||
             this.m_Entity.type === 'boiler' ||
             this.m_Entity.type === 'generator' ||
@@ -261,8 +262,7 @@ export class EntityContainer {
             this.m_Entity.name === 'offshore_pump' ||
             this.m_Entity.name === 'arithmetic_combinator' ||
             this.m_Entity.name === 'decider_combinator' ||
-            this.m_Entity.name === 'filter_inserter' ||
-            this.m_Entity.name === 'stack_filter_inserter' ||
+            this.m_Entity.type === 'inserter' ||
             this.m_Entity.type === 'splitter' ||
             this.m_Entity.type === 'logistic_container'
         ) {
@@ -300,7 +300,7 @@ export class EntityContainer {
             w: this.m_Entity.size.x,
             h: this.m_Entity.size.y,
         }
-        if (this.m_Entity.name === 'straight_rail') {
+        if (this.m_Entity.name === 'legacy_straight_rail') {
             G.bp.entityPositionGrid
                 .getEntitiesInArea(area)
                 .filter(e => e.name === 'gate')

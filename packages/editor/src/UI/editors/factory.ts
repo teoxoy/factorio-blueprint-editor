@@ -35,12 +35,12 @@ export function createEditor(entity: Entity): Editor {
             break
         }
         // Inserters
-        // case 'inserter':             // Disabled for now as there are currently no entity settings
-        // case 'fast_inserter':        // Disabled for now as there are currently no entity settings
-        // case 'long_handed_inserter': // Disabled for now as there are currently no entity settings
-        // case 'stack_inserter':       // Disabled for now as there are currently no entity settings
-        case 'filter_inserter':
-        case 'stack_filter_inserter': {
+        case 'burner_inserter':
+        case 'inserter':
+        case 'long_handed_inserter':
+        case 'fast_inserter':
+        case 'bulk_inserter':
+        case 'stack_inserter': {
             editor = new InserterEditor(entity)
             break
         }
@@ -57,9 +57,9 @@ export function createEditor(entity: Entity): Editor {
             break
         }
         // Chests
-        case 'logistic_chest_buffer':
-        case 'logistic_chest_requester':
-        case 'logistic_chest_storage': {
+        case 'buffer_chest':
+        case 'requester_chest':
+        case 'storage_chest': {
             editor = new ChestEditor(entity)
             break
         }

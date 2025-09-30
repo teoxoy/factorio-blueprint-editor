@@ -185,10 +185,10 @@ export class PositionGrid {
                 case 'gate':
                     gate = entity
                     break
-                case 'curved_rail':
+                case 'legacy_curved_rail':
                     curvedRail = entity
                     break
-                case 'straight_rail':
+                case 'legacy_straight_rail':
                     if (!straightRails.includes(entity)) {
                         straightRails.push(entity)
                     }
@@ -209,19 +209,22 @@ export class PositionGrid {
                 straightRails.length === 1 &&
                 straightRails[0].direction !== direction &&
                 !gate) ||
-            (name === 'straight_rail' &&
+            (name === 'legacy_straight_rail' &&
                 gate &&
                 gate.direction !== direction &&
                 straightRails.length === 0 &&
                 !otherEntities) ||
-            (name === 'straight_rail' && straightRails.length > 0 && !sameDirStrRails && !gate) ||
-            (name === 'curved_rail' && straightRails.length > 0 && !gate) ||
-            (name === 'straight_rail' && curvedRail) ||
-            (name === 'curved_rail' && curvedRail && curvedRail.direction !== direction) ||
+            (name === 'legacy_straight_rail' &&
+                straightRails.length > 0 &&
+                !sameDirStrRails &&
+                !gate) ||
+            (name === 'legacy_curved_rail' && straightRails.length > 0 && !gate) ||
+            (name === 'legacy_straight_rail' && curvedRail) ||
+            (name === 'legacy_curved_rail' && curvedRail && curvedRail.direction !== direction) ||
             // TODO: remove this when we add better rail support
             ((name === 'rail_signal' || name === 'rail_chain_signal') &&
                 (curvedRail || straightRails.length > 0)) ||
-            ((name === 'straight_rail' || name === 'curved_rail') && signal)
+            ((name === 'legacy_straight_rail' || name === 'legacy_curved_rail') && signal)
         ) {
             return true
         }
@@ -257,7 +260,7 @@ export class PositionGrid {
         direction: number,
         pos: IPoint
     ): Entity | undefined {
-        if (name === 'straight_rail') return undefined
+        if (name === 'legacy_straight_rail') return undefined
 
         const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
         const area = {

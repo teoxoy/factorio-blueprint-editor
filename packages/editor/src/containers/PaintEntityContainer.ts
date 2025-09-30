@@ -157,7 +157,7 @@ export class PaintEntityContainer extends PaintContainer {
     public override moveAtCursor(): void {
         if (!this.visible) return
 
-        const railRelatedNames = ['straight_rail', 'curved_rail', 'train_stop']
+        const railRelatedNames = ['legacy_straight_rail', 'legacy_curved_rail', 'train_stop']
         const firstRailPos = this.bpc.bp.getFirstRailRelatedEntityPos()
 
         if (railRelatedNames.includes(this.name) && firstRailPos) {

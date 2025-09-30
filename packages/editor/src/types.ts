@@ -139,13 +139,13 @@ export interface IEntity {
     auto_launch?: boolean
     /** override stack size, only present if entity is of type inserter */
     override_stack_size?: number
-    /** only present if entity is logistic-chest-requester */
+    /** only present if entity is requester-chest */
     request_from_buffers?: boolean
-    /** only present if entity is filter-inserter or stack-filter-inserter */
+    /** only present if entity is of type inserter */
     filter_mode?: 'blacklist'
-    /** only present if entity is filter-inserter, stack-filter-inserter or of type loader */
+    /** only present if entity is of type inserter or loader */
     filters?: IFilter[]
-    /** only present if entity is logistic-chest-storage, logistic-chest-buffer or logistic-chest-requester */
+    /** only present if entity is storage-chest, buffer-chest or requester-chest */
     request_filters?: {
         index: number
         name: string
@@ -227,7 +227,7 @@ export interface IEntity {
         /** 0 = pulse, 1 = hold, only present if entity is of type transport-belt and circuit_read_hand_contents is true */
         circuit_contents_read_mode?: 0 | 1
 
-        /** only present if entity is roboport or logistic-chest-buffer or logistic-chest-requester or of type inserter(3)???????????????? */
+        /** only present if entity is roboport or buffer-chest or requester-chest or of type inserter(3)???????????????? */
         circuit_mode_of_operation?: number
 
         available_logistic_output_signal?: ISignal

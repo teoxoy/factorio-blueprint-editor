@@ -4,7 +4,6 @@ import { UIContainer } from '../UI/UIContainer'
 import { BlueprintContainer } from '../containers/BlueprintContainer'
 import { ActionRegistry } from '../actions'
 
-const hr = true
 const debug = false
 
 export interface ILogMessage {
@@ -87,7 +86,6 @@ function getTexture(path: string, x = 0, y = 0, w = 0, h = 0): Texture {
 
 export default {
     debug,
-    hr,
     BPC,
     UI,
     app,

@@ -16,9 +16,9 @@ export class TileContainer {
     }
 
     public static generateSprite(name: string, x: number, y: number): EntitySprite {
-        const width = G.hr ? 64 : 32
-        const height = G.hr ? 64 : 32
-        const scale = G.hr ? 0.5 : 1
+        const width = 64
+        const height = 64
+        const scale = 0.5
 
         let filename: string
         let countX: number
@@ -29,9 +29,6 @@ export class TileContainer {
         const variants = FD.tiles[name].variants
         if (variants.material_background === undefined) {
             let variant = variants.main.find(v => (v.size || 1) === 1)
-            if (G.hr) {
-                variant = variant.hr_version
-            }
             filename = variant.picture
             countX = variant.count
             countY = 1
@@ -39,9 +36,6 @@ export class TileContainer {
             Y = Math.floor(Math.random() * (countY - 1))
         } else {
             let variant = variants.material_background
-            if (G.hr) {
-                variant = variant.hr_version
-            }
             filename = variant.picture
             countX = 8
             countY = 8

@@ -320,7 +320,6 @@ export interface TileSpriteData {
     size?: number
     scale?: number
     probability?: number
-    hr_version?: TileSpriteData
     weights?: number[]
 }
 
@@ -847,10 +846,7 @@ export interface Signal {
 export interface SignalToColorMapping extends Signal {
     color: Color
 }
-export interface SpriteData extends SpriteDataPart {
-    hr_version?: SpriteDataPart
-}
-export interface SpriteDataPart {
+export interface SpriteData {
     filename?: string
     filenames?: string[]
     stripes?: Stripes[]
@@ -954,20 +950,14 @@ export interface StorageTankPictures {
     gas_flow: SpriteData
 }
 export interface RailPictures {
-    straight_rail_horizontal: RailSpriteLayers
-    straight_rail_vertical: RailSpriteLayers
-    straight_rail_diagonal_left_top: RailSpriteLayers
-    straight_rail_diagonal_right_top: RailSpriteLayers
-    straight_rail_diagonal_right_bottom: RailSpriteLayers
-    straight_rail_diagonal_left_bottom: RailSpriteLayers
-    curved_rail_vertical_left_top: RailSpriteLayers
-    curved_rail_vertical_right_top: RailSpriteLayers
-    curved_rail_vertical_right_bottom: RailSpriteLayers
-    curved_rail_vertical_left_bottom: RailSpriteLayers
-    curved_rail_horizontal_left_top: RailSpriteLayers
-    curved_rail_horizontal_right_top: RailSpriteLayers
-    curved_rail_horizontal_right_bottom: RailSpriteLayers
-    curved_rail_horizontal_left_bottom: RailSpriteLayers
+    north: RailSpriteLayers
+    northeast: RailSpriteLayers
+    east: RailSpriteLayers
+    southeast: RailSpriteLayers
+    south: RailSpriteLayers
+    southwest: RailSpriteLayers
+    west: RailSpriteLayers
+    northwest: RailSpriteLayers
     rail_endings: SpriteSheet
 }
 export interface RailSpriteLayers {
