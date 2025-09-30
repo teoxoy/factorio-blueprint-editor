@@ -125,16 +125,16 @@ export class EntitySprite extends Sprite {
 
             if (data.filename.includes('circuit-connector')) {
                 sprite.__zIndex = 1
-            } else if (entity.name === 'artillery-turret' && i > 0) {
+            } else if (entity.type === 'artillery-turret' && i > 0) {
                 sprite.__zIndex = 2
             } else if (
-                (entity.name === 'rail-signal' || entity.name === 'rail-chain-signal') &&
+                (entity.type === 'rail-signal' || entity.type === 'rail-chain-signal') &&
                 i === 0
             ) {
                 sprite.__zIndex = -8
             } else if (
-                entity.name === 'legacy-straight-rail' ||
-                entity.name === 'legacy-curved-rail'
+                entity.type === 'legacy-straight-rail' ||
+                entity.type === 'legacy-curved-rail'
             ) {
                 if (i < 2) {
                     sprite.__zIndex = -10
@@ -143,7 +143,7 @@ export class EntitySprite extends Sprite {
                 } else {
                     sprite.__zIndex = -7
                 }
-            } else if (entity.type === 'transport-belt' || entity.name === 'heat-pipe') {
+            } else if (entity.type === 'transport-belt' || entity.type === 'heat-pipe') {
                 sprite.__zIndex = i === 0 ? -6 : -5
 
                 if (data.filename.includes('connector') && !data.filename.includes('back-patch')) {

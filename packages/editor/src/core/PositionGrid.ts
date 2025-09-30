@@ -181,7 +181,7 @@ export class PositionGrid {
         if (this.isAreaEmpty(area)) return true
 
         for (const entity of this.getEntitiesInArea(area)) {
-            switch (entity.name) {
+            switch (entity.type) {
                 case 'gate':
                     gate = entity
                     break

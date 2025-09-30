@@ -12,7 +12,7 @@ import {
 import util from '../common/util'
 import { IllegalFlipError } from '../containers/PaintContainer'
 import G from '../common/globals'
-import FD, { ColorWithAlpha, getModule, isCraftingMachine } from './factorioData'
+import FD, { ColorWithAlpha, getModule, isCraftingMachine, isInserter } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
 import U from './generators/util'
@@ -96,7 +96,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     /** Entity Type */
-    public get type(): string {
+    public get type(): EntityWithOwnerPrototype['type'] {
         return FD.entities[this.name].type
     }
 
@@ -307,7 +307,7 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     /** Count of filter slots */
     public get filterSlots(): number {
-        if (this.name.includes('splitter')) return 1
+        if (this.type === 'splitter') return 1
         if (this.entityData.filter_count !== undefined) return this.entityData.filter_count
         if (this.entityData.max_logistic_slots !== undefined) {
             return this.entityData.max_logistic_slots
@@ -518,10 +518,16 @@ export class Entity extends EventEmitter<EntityEvents> {
             .commit()
     }
 
-    public get inserterStackSize(): number {
+    public get inserterStackSize(): null | number {
         if (this.m_rawEntity.override_stack_size) return this.m_rawEntity.override_stack_size
-        if (this.name.includes('stack')) return 12
-        return 3
+        if (isInserter(this.entityData)) {
+            if (this.entityData.bulk) {
+                return 12
+            } else {
+                return 3
+            }
+        }
+        return null
     }
 
     public get constantCombinatorFilters(): IConstantCombinatorFilter[] {
@@ -595,7 +601,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     public get operator(): string {
-        if (this.name === 'decider-combinator') {
+        if (this.type === 'decider-combinator') {
             const cb = this.m_rawEntity.control_behavior
             if (cb) {
                 return cb.decider_conditions === undefined
@@ -603,7 +609,7 @@ export class Entity extends EventEmitter<EntityEvents> {
                     : cb.decider_conditions.comparator
             }
         }
-        if (this.name === 'arithmetic-combinator') {
+        if (this.type === 'arithmetic-combinator') {
             const cb = this.m_rawEntity.control_behavior
             if (cb) {
                 return cb.arithmetic_conditions === undefined
@@ -675,8 +681,11 @@ export class Entity extends EventEmitter<EntityEvents> {
         // Vert: 1-3, 2-2, 7-5, 0-0
         // Horz: 1-7, 3-5
         const translation_map: { [key: string]: { [vert: string]: number[] } } = {
-            legacy_curved_rail: { true: [5, 4, 3, 2, 1, 0, 7, 6], false: [1, 0, 7, 6, 5, 4, 3, 2] },
-            legacy_straight_rail: {
+            'legacy-curved-rail': {
+                true: [5, 4, 3, 2, 1, 0, 7, 6],
+                false: [1, 0, 7, 6, 5, 4, 3, 2],
+            },
+            'legacy-straight-rail': {
                 true: [0, 3, 2, 1, 4, 7, 6, 5],
                 false: [0, 7, 2, 5, 4, 3, 6, 1],
             },
@@ -684,6 +693,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         }
 
         const non_flip_entities = [
+            // : EntityWithOwnerPrototype['type'][]
             'chemical-plant',
             'oil-refinery',
             'train-stop',
@@ -695,9 +705,9 @@ export class Entity extends EventEmitter<EntityEvents> {
             throw new IllegalFlipError(`${this.name} cannot be flipped`)
 
         const translation =
-            this.name in translation_map ? translation_map[this.name] : translation_map.default
+            this.type in translation_map ? translation_map[this.name] : translation_map.default
         const direction =
-            this.name === 'storage-tank'
+            this.type === 'storage-tank'
                 ? 2 - this.direction
                 : this.constrainDirection(translation[String(vertical)][this.direction])
 
@@ -831,7 +841,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         }
 
         // PASTE REQUESTER CHEST SETTINGS
-        if (this.type === 'requester-chest' && sourceEntity.type === 'requester-chest') {
+        if (this.name === 'requester-chest' && sourceEntity.name === 'requester-chest') {
             this.requestFromBufferChest = sourceEntity.requestFromBufferChest
         }
 
@@ -928,7 +938,7 @@ export class Entity extends EventEmitter<EntityEvents> {
             return e.output_connection_points[direction / 2].wire[color]
         }
 
-        if (this.name === 'power-switch' && color === 'copper') {
+        if (this.type === 'power-switch' && color === 'copper') {
             return side === 1
                 ? e.left_wire_connection_point.wire.copper
                 : e.right_wire_connection_point.wire.copper

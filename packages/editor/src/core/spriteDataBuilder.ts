@@ -270,9 +270,9 @@ function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly 
             }
 
             if (
-                ent.name === 'pipe' ||
-                ent.name === 'infinity-pipe' ||
-                ent.name === 'pipe-to-ground' ||
+                ent.type === 'pipe' ||
+                ent.type === 'infinity-pipe' ||
+                ent.type === 'pipe-to-ground' ||
                 ent.entityData.fluid_box ||
                 ent.entityData.output_fluid_box ||
                 ent.entityData.fluid_boxes
@@ -719,7 +719,7 @@ function getAnimation(a: Animation4Way, dir: number): Animation {
 }
 
 function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => readonly SpriteData[] {
-    switch (e.type as string) {
+    switch (e.type) {
         case 'accumulator':
             return draw_accumulator(e as AccumulatorPrototype)
         case 'agricultural-tower':
@@ -1248,7 +1248,7 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
                 x: data.position.x,
                 y: data.position.y + 1,
             })
-            if (wall && wall.name === 'stone-wall') {
+            if (wall && wall.type === 'wall') {
                 return [...getBaseSprites(), ...e.wall_patch.layers]
             }
         }
@@ -1547,7 +1547,7 @@ function draw_legacy_straight_rail(
                     w: size.x,
                     h: size.y,
                 })
-                .filter(e => e.name === 'gate')
+                .filter(e => e.type === 'gate')
                 .map(e => util.sumprod(e.position, -1, data.position))
                 // Rotate relative to mid point
                 .map(p => util.rotatePointBasedOnDir(p, dir).y)
@@ -1701,10 +1701,10 @@ function draw_pipe(e: PipePrototype): (data: IDrawData) => readonly SpriteData[]
                         return false
                     }
 
-                    if (entity.name === 'pipe' || entity.name === 'infinity-pipe') {
+                    if (entity.type === 'pipe' || entity.type === 'infinity-pipe') {
                         return true
                     }
-                    if (entity.name === 'pipe-to-ground' && entity.direction === (relDir + 4) % 8) {
+                    if (entity.type === 'pipe-to-ground' && entity.direction === (relDir + 4) % 8) {
                         return true
                     }
 
@@ -2128,8 +2128,8 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                 .map(
                     ({ entity, relDir }) =>
                         entity &&
-                        (entity.name === 'stone-wall' ||
-                            (entity.name === 'gate' && entity.direction === relDir % 4))
+                        (entity.type === 'wall' ||
+                            (entity.type === 'gate' && entity.direction === relDir % 4))
                 )
 
             const wall = (() => {
@@ -2165,7 +2165,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                 .getNeighbourData(data.position)
                 .filter(
                     ({ entity, relDir }) =>
-                        entity && entity.name === 'gate' && entity.direction === relDir % 4
+                        entity && entity.type === 'gate' && entity.direction === relDir % 4
                 )
                 .map(({ relDir }) => relDir)
 
@@ -2192,7 +2192,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                     const ent = data.positionGrid.getEntityAtPosition(
                         util.sumprod(data.position, o)
                     )
-                    return !!ent && ent.name === 'stone-wall'
+                    return !!ent && ent.type === 'wall'
                 })
                 .every(e => e)
 

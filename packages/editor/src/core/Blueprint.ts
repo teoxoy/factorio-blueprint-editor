@@ -322,9 +322,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
 
     public getFirstRailRelatedEntityPos(): IPoint | undefined {
         for (const [, e] of this.entities) {
-            if (e.name === 'legacy-straight-rail') return e.position
-            if (e.name === 'train-stop') return e.position
-            if (e.name === 'legacy-curved-rail') return { x: e.position.x - 1, y: e.position.y - 1 }
+            if (e.type === 'legacy-straight-rail') return e.position
+            if (e.type === 'train-stop') return e.position
+            if (e.type === 'legacy-curved-rail') return { x: e.position.x - 1, y: e.position.y - 1 }
         }
         return undefined
     }

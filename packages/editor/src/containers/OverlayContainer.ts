@@ -120,8 +120,8 @@ export class OverlayContainer extends Container {
             filters !== undefined &&
             (entity.type === 'inserter' ||
                 entity.type === 'logistic-container' ||
-                entity.name === 'infinity-chest' ||
-                entity.name === 'infinity-pipe')
+                entity.type === 'infinity-container' ||
+                entity.type === 'infinity-pipe')
         ) {
             const filterInfo = new Container()
             for (let i = 0; i < filters.length; i++) {
@@ -265,8 +265,8 @@ export class OverlayContainer extends Container {
 
         if (
             entity.name === 'pumpjack' ||
-            entity.name === 'pump' ||
-            entity.name === 'offshore-pump' ||
+            entity.type === 'pump' ||
+            entity.type === 'offshore-pump' ||
             entity.type === 'boiler' ||
             entity.type === 'generator' ||
             entity.name === 'oil-refinery' ||
@@ -276,7 +276,7 @@ export class OverlayContainer extends Container {
         ) {
             const createFluidArrow = (position: IPoint, type = 1): void => {
                 const offset = 0.5
-                if (entity.name === 'offshore-pump') {
+                if (entity.type === 'offshore-pump') {
                     position.y -= 2
                 }
                 if (entity.name === 'flamethrower-turret') {
@@ -337,7 +337,7 @@ export class OverlayContainer extends Container {
                 if (entity.entityData.fluid_box) {
                     for (const p of entity.entityData.fluid_box.pipe_connections) {
                         if (
-                            entity.name === 'pump' &&
+                            entity.type === 'pump' &&
                             p === entity.entityData.fluid_box.pipe_connections[1]
                         ) {
                             break
@@ -364,7 +364,7 @@ export class OverlayContainer extends Container {
             if (entity.name !== 'pumpjack') {
                 arrows.rotation =
                     (entity.name === 'oil-refinery' ||
-                    entity.name === 'pump' ||
+                    entity.type === 'pump' ||
                     entity.type === 'boiler'
                         ? entity.direction
                         : (entity.direction + 4) % 8) *
@@ -513,11 +513,11 @@ export class OverlayContainer extends Container {
         searchDirection: number
     ): Container {
         const fd = FD.entities[name]
-        if (fd.type === 'underground-belt' || name === 'pipe-to-ground') {
+        if (fd.type === 'underground-belt' || fd.type === 'pipe-to-ground') {
             const otherEntity = this.bpc.bp.entities.get(
                 this.bpc.bp.entityPositionGrid.getOpposingEntity(
                     name,
-                    name === 'pipe-to-ground' ? searchDirection : direction,
+                    fd.type === 'pipe-to-ground' ? searchDirection : direction,
                     position,
                     searchDirection,
                     fd.max_distance || 10
@@ -549,7 +549,7 @@ export class OverlayContainer extends Container {
 
                 for (let i = 1; i < distance; i++) {
                     const data =
-                        name === 'pipe-to-ground'
+                        fd.type === 'pipe-to-ground'
                             ? FD.utilitySprites.underground_pipe_connection
                             : fd.underground_sprite
                     const s = new Sprite(
