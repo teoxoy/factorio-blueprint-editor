@@ -78,7 +78,7 @@ export class EntityContainer {
 
         const onModulesChange = (): void => {
             this.redrawEntityInfo()
-            if (this.m_Entity.name === 'beacon') {
+            if (this.m_Entity.type === 'beacon') {
                 this.redraw()
             }
         }
@@ -230,7 +230,7 @@ export class EntityContainer {
             this.m_Entity.name,
             this.m_Entity.position,
             this.m_Entity.direction,
-            this.m_Entity.directionType === 'output' || this.m - Entity.name === 'pipe-to-ground'
+            this.m_Entity.directionType === 'output' || this.m_Entity.type === 'pipe-to-ground'
                 ? (this.m_Entity.direction + 4) % 8
                 : this.m_Entity.direction
         )
@@ -258,12 +258,11 @@ export class EntityContainer {
             this.m_Entity.type === 'mining-drill' ||
             this.m_Entity.type === 'boiler' ||
             this.m_Entity.type === 'generator' ||
-            this.m_Entity.name === 'pump' ||
-            this.m_Entity.name === 'offshore-pump' ||
-            this.m_Entity.name === 'arithmetic-combinator' ||
-            this.m_Entity.name === 'decider-combinator' ||
+            this.m_Entity.type === 'pump' ||
+            this.m_Entity.type === 'offshore-pump' ||
+            this.m_Entity.type === 'arithmetic-combinator' ||
+            this.m_Entity.type === 'decider-combinator' ||
             this.m_Entity.type === 'inserter' ||
-            this.m_Entity.type === 'splitter' ||
             this.m_Entity.type === 'logistic-container'
         ) {
             if (this.entityInfo !== undefined) {
@@ -300,10 +299,10 @@ export class EntityContainer {
             w: this.m_Entity.size.x,
             h: this.m_Entity.size.y,
         }
-        if (this.m_Entity.name === 'legacy-straight-rail') {
+        if (this.m_Entity.type === 'legacy-straight-rail') {
             G.bp.entityPositionGrid
                 .getEntitiesInArea(area)
-                .filter(e => e.name === 'gate')
+                .filter(e => e.type === 'gate')
                 .forEach(entity => EntityContainer.mappings.get(entity.entityNumber).redraw())
         } else {
             const entities = G.bp.entityPositionGrid.getSurroundingEntities(area)

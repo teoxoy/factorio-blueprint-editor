@@ -113,12 +113,12 @@ function getModulesFor(entityName: string): ItemPrototype[] {
     )
 }
 
-function isModule(item: ItemPrototype): item is ModulePrototype {
-    const type: ModulePrototype['type'] = 'module'
+export function isInserter(item: EntityWithOwnerPrototype): item is InserterPrototype {
+    const type: InserterPrototype['type'] = 'inserter'
     return item.type === type
 }
 export function isCraftingMachine(e: EntityWithOwnerPrototype): e is CraftingMachinePrototype {
-    switch (e.type as string) {
+    switch (e.type) {
         case 'assembling-machine':
         case 'furnace':
         case 'rocket-silo': {
@@ -129,6 +129,10 @@ export function isCraftingMachine(e: EntityWithOwnerPrototype): e is CraftingMac
     }
 }
 
+function isModule(item: ItemPrototype): item is ModulePrototype {
+    const type: ModulePrototype['type'] = 'module'
+    return item.type === type
+}
 export function getModule(name: string): ModulePrototype {
     const item = FD.items[name]
     if (isModule(item)) return item
@@ -139,7 +143,7 @@ export function getCircuitConnector(
     e: EntityWithOwnerPrototype,
     dir: number
 ): null | CircuitConnectorDefinition {
-    switch (e.type as string) {
+    switch (e.type) {
         case 'accumulator':
         case 'agricultural-tower':
         case 'artillery-turret':
@@ -231,7 +235,7 @@ export function getCircuitConnector(
 }
 
 export function getHeatBuffer(e: EntityWithOwnerPrototype): null | HeatBuffer {
-    switch (e.type as string) {
+    switch (e.type) {
         case 'heat-pipe':
         case 'heat-interface':
         case 'reactor': {
@@ -243,7 +247,7 @@ export function getHeatBuffer(e: EntityWithOwnerPrototype): null | HeatBuffer {
     }
 }
 export function getEnergySource(e: EntityWithOwnerPrototype): null | EnergySource {
-    switch (e.type as string) {
+    switch (e.type) {
         case 'agricultural-tower':
         case 'boiler':
         case 'assembling-machine':
