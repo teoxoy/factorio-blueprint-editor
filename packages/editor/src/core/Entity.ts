@@ -187,7 +187,7 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     /** Entity direction */
     public get direction(): number {
-        if (this.type === 'electric_pole') {
+        if (this.type === 'electric-pole') {
             return this.m_BP.wireConnections.getPowerPoleDirection(this.entityNumber)
         }
         return this.m_rawEntity.direction === undefined ? 0 : this.m_rawEntity.direction
@@ -312,7 +312,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (this.entityData.max_logistic_slots !== undefined) {
             return this.entityData.max_logistic_slots
         }
-        if (this.name === 'buffer_chest' || this.name === 'requester_chest') {
+        if (this.name === 'buffer-chest' || this.name === 'requester-chest') {
             return this.logisticChestFilters.reduce(
                 (max, filter) => Math.max(max, filter.index),
                 30 // TODO: find a way to fix this properly
@@ -325,25 +325,25 @@ export class Entity extends EventEmitter<EntityEvents> {
     public get filters(): IFilter[] {
         switch (this.name) {
             case 'splitter':
-            case 'fast_splitter':
-            case 'express_splitter': {
+            case 'fast-splitter':
+            case 'express-splitter': {
                 return this.splitterFilter
             }
-            case 'burner_inserter':
+            case 'burner-inserter':
             case 'inserter':
-            case 'long_handed_inserter':
-            case 'fast_inserter':
-            case 'bulk_inserter':
-            case 'stack_inserter': {
+            case 'long-handed-inserter':
+            case 'fast-inserter':
+            case 'bulk-inserter':
+            case 'stack-inserter': {
                 return this.inserterFilters
             }
-            case 'storage_chest':
-            case 'requester_chest':
-            case 'buffer_chest':
+            case 'storage-chest':
+            case 'requester-chest':
+            case 'buffer-chest':
                 return this.logisticChestFilters
-            case 'infinity_chest':
+            case 'infinity-chest':
                 return this.infinityChestFilters
-            case 'infinity_pipe':
+            case 'infinity-pipe':
                 return this.infinityPipeFilters
             default: {
                 return undefined
@@ -355,23 +355,23 @@ export class Entity extends EventEmitter<EntityEvents> {
             list === undefined || list.length === 0 ? undefined : list.filter(f => !!f.name)
         switch (this.name) {
             case 'splitter':
-            case 'fast_splitter':
-            case 'express_splitter': {
+            case 'fast-splitter':
+            case 'express-splitter': {
                 this.splitterFilter = FILTERS
                 return
             }
-            case 'burner_inserter':
+            case 'burner-inserter':
             case 'inserter':
-            case 'long_handed_inserter':
-            case 'fast_inserter':
-            case 'bulk_inserter':
-            case 'stack_inserter': {
+            case 'long-handed-inserter':
+            case 'fast-inserter':
+            case 'bulk-inserter':
+            case 'stack-inserter': {
                 this.inserterFilters = FILTERS
                 return
             }
-            case 'storage_chest':
-            case 'requester_chest':
-            case 'buffer_chest': {
+            case 'storage-chest':
+            case 'requester-chest':
+            case 'buffer-chest': {
                 this.logisticChestFilters = FILTERS
             }
         }
@@ -595,7 +595,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     public get operator(): string {
-        if (this.name === 'decider_combinator') {
+        if (this.name === 'decider-combinator') {
             const cb = this.m_rawEntity.control_behavior
             if (cb) {
                 return cb.decider_conditions === undefined
@@ -603,7 +603,7 @@ export class Entity extends EventEmitter<EntityEvents> {
                     : cb.decider_conditions.comparator
             }
         }
-        if (this.name === 'arithmetic_combinator') {
+        if (this.name === 'arithmetic-combinator') {
             const cb = this.m_rawEntity.control_behavior
             if (cb) {
                 return cb.arithmetic_conditions === undefined
@@ -615,7 +615,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     private get canBeRotated(): boolean {
-        if (this.name === 'assembling_machine_2' || this.name === 'assembling_machine_3') {
+        if (this.name === 'assembling-machine-2' || this.name === 'assembling-machine-3') {
             return this.assemblerCraftsWithFluid
         }
         return (
@@ -644,7 +644,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         const pr = this.entityData.possible_rotations
         let canRotate = pr !== undefined
 
-        if (this.type === 'assembling_machine') canRotate = this.assemblerCraftsWithFluid
+        if (this.type === 'assembling-machine') canRotate = this.assemblerCraftsWithFluid
         if (canRotate) {
             if (!pr.includes(direction)) {
                 if (direction === 4 && pr.includes(0)) {
@@ -684,11 +684,11 @@ export class Entity extends EventEmitter<EntityEvents> {
         }
 
         const non_flip_entities = [
-            'chemical_plant',
-            'oil_refinery',
-            'train_stop',
-            'rail_chain_signal',
-            'rail_signal',
+            'chemical-plant',
+            'oil-refinery',
+            'train-stop',
+            'rail-chain-signal',
+            'rail-signal',
         ]
 
         if (non_flip_entities.includes(this.name))
@@ -697,7 +697,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         const translation =
             this.name in translation_map ? translation_map[this.name] : translation_map.default
         const direction =
-            this.name === 'storage_tank'
+            this.name === 'storage-tank'
                 ? 2 - this.direction
                 : this.constrainDirection(translation[String(vertical)][this.direction])
 
@@ -732,7 +732,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         const pr = this.entityData.possible_rotations
         return pr[
             (pr.indexOf(this.direction) +
-                (this.size.x !== this.size.y || this.type === 'underground_belt' ? 2 : 1) *
+                (this.size.x !== this.size.y || this.type === 'underground-belt' ? 2 : 1) *
                     (ccw ? 3 : 1)) %
                 pr.length
         ]
@@ -745,7 +745,7 @@ export class Entity extends EventEmitter<EntityEvents> {
 
         this.m_BP.history.startTransaction('Rotate entity')
 
-        if (this.type === 'underground_belt' || this.type === 'loader') {
+        if (this.type === 'underground-belt' || this.type === 'loader') {
             if (rotateOpposingUB) {
                 const otherEntity = this.m_BP.entities.get(
                     this.m_BP.entityPositionGrid.getOpposingEntity(
@@ -792,10 +792,10 @@ export class Entity extends EventEmitter<EntityEvents> {
 
         // PASTE DIRECTION (only for type assembling_machine)
         if (
-            this.type === 'assembling_machine' &&
-            this.name !== 'assembling_machine' &&
+            this.type === 'assembling-machine' &&
+            this.name !== 'assembling-machine' &&
             tRecipe &&
-            FD.recipes[tRecipe].category === 'crafting_with_fluid'
+            FD.recipes[tRecipe].category === 'crafting-with-fluid'
         ) {
             this.direction = sourceEntity.direction
         }
@@ -831,7 +831,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         }
 
         // PASTE REQUESTER CHEST SETTINGS
-        if (this.type === 'requester_chest' && sourceEntity.type === 'requester_chest') {
+        if (this.type === 'requester-chest' && sourceEntity.type === 'requester-chest') {
             this.requestFromBufferChest = sourceEntity.requestFromBufferChest
         }
 
@@ -895,7 +895,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     public get assemblerCraftsWithFluid(): boolean {
         return (
             this.recipe &&
-            FD.recipes[this.recipe].category === 'crafting_with_fluid' &&
+            FD.recipes[this.recipe].category === 'crafting-with-fluid' &&
             this.mayCraftWithFluid
         )
     }
@@ -903,7 +903,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     public get mayCraftWithFluid(): boolean {
         const e = this.entityData
         if (!isCraftingMachine(e)) return false
-        return e.crafting_categories && e.crafting_categories.includes('crafting_with_fluid')
+        return e.crafting_categories && e.crafting_categories.includes('crafting-with-fluid')
     }
 
     public get assemblerPipeDirection(): DirectionType {
@@ -928,7 +928,7 @@ export class Entity extends EventEmitter<EntityEvents> {
             return e.output_connection_points[direction / 2].wire[color]
         }
 
-        if (this.name === 'power_switch' && color === 'copper') {
+        if (this.name === 'power-switch' && color === 'copper') {
             return side === 1
                 ? e.left_wire_connection_point.wire.copper
                 : e.right_wire_connection_point.wire.copper
@@ -940,7 +940,7 @@ export class Entity extends EventEmitter<EntityEvents> {
             return e.circuit_connector.points.wire[color]
 
         const getIndex = (): number => {
-            if (this.type === 'transport_belt') {
+            if (this.type === 'transport-belt') {
                 const i = getBeltWireConnectionIndex(
                     this.m_BP.entityPositionGrid,
                     this.position,

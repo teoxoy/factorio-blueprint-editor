@@ -54,7 +54,7 @@ export class UnderlayContainer extends Container {
                 },
             ]
         }
-        if (ed.type === 'electric_pole') {
+        if (ed.type === 'electric-pole') {
             return [
                 {
                     type: 'poles',
@@ -74,7 +74,7 @@ export class UnderlayContainer extends Container {
                 },
             ]
         }
-        if (name === 'electric_mining_drill') {
+        if (name === 'electric-mining-drill') {
             return [
                 {
                     type: 'drills',
@@ -96,7 +96,7 @@ export class UnderlayContainer extends Container {
             toActivate.add(data.type)
         }
 
-        if (ed.type === 'logistic_container') {
+        if (ed.type === 'logistic-container') {
             toActivate.add('logistics0')
             toActivate.add('logistics1')
         }

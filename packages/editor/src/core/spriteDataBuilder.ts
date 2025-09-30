@@ -223,8 +223,8 @@ function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly 
 
     if (
         e.name === 'pipe' ||
-        e.name === 'infinity_pipe' ||
-        ((e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') &&
+        e.name === 'infinity-pipe' ||
+        ((e.name === 'assembling-machine-2' || e.name === 'assembling-machine-3') &&
             !data.assemblerCraftsWithFluid)
     ) {
         return []
@@ -240,7 +240,7 @@ function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly 
         const dir = util.getRelativeDirection(connection)
 
         const needsCover = (): boolean => {
-            if (e.name === 'chemical_plant') {
+            if (e.name === 'chemical-plant') {
                 // don't generate covers for northen side - the texture already contains those
                 if (dir === 0) {
                     return false
@@ -262,7 +262,7 @@ function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly 
             }
 
             if (
-                ent.name === 'chemical_plant' &&
+                ent.name === 'chemical-plant' &&
                 ent.chemicalPlantDontConnectOutput &&
                 ent.direction === dir
             ) {
@@ -271,8 +271,8 @@ function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly 
 
             if (
                 ent.name === 'pipe' ||
-                ent.name === 'infinity_pipe' ||
-                ent.name === 'pipe_to_ground' ||
+                ent.name === 'infinity-pipe' ||
+                ent.name === 'pipe-to-ground' ||
                 ent.entityData.fluid_box ||
                 ent.entityData.output_fluid_box ||
                 ent.entityData.fluid_boxes
@@ -331,7 +331,7 @@ function getPipeConnectionPoints(
             return [...e.fluid_box.pipe_connections, ...e.output_fluid_box.pipe_connections]
         }
         if (e.fluid_box) {
-            if (e.name === 'pipe_to_ground') {
+            if (e.name === 'pipe-to-ground') {
                 return [e.fluid_box.pipe_connections[0]]
             }
             return e.fluid_box.pipe_connections
@@ -360,7 +360,7 @@ function getPipeConnectionPoints(
             x: connections[0].positions[dir / 2][0],
             y: connections[0].positions[dir / 2][1],
         })
-    } else if (e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') {
+    } else if (e.name === 'assembling-machine-2' || e.name === 'assembling-machine-3') {
         positions.push(
             util.rotatePointBasedOnDir(
                 connections[assemblerPipeDirection === 'input' ? 0 : 1].position,
@@ -418,9 +418,9 @@ function getBeltWireConnectionIndex(
     let C = positionGrid.getNeighbourData(position).map(d => {
         if (
             d.entity &&
-            (d.entity.type === 'transport_belt' ||
+            (d.entity.type === 'transport-belt' ||
                 d.entity.type === 'splitter' ||
-                ((d.entity.type === 'underground_belt' || d.entity.type === 'loader') &&
+                ((d.entity.type === 'underground-belt' || d.entity.type === 'loader') &&
                     d.entity.directionType === 'output')) &&
             d.entity.direction === (d.relDir + 4) % 8
         ) {
@@ -574,9 +574,9 @@ function getBeltSprites(
         let C = positionGrid.getNeighbourData(pos).map(d => {
             if (
                 d.entity &&
-                (d.entity.type === 'transport_belt' ||
+                (d.entity.type === 'transport-belt' ||
                     d.entity.type === 'splitter' ||
-                    d.entity.type === 'underground_belt' ||
+                    d.entity.type === 'underground-belt' ||
                     d.entity.type === 'loader')
             ) {
                 return d
@@ -589,7 +589,7 @@ function getBeltSprites(
         const C2 = C.map(d => {
             if (
                 !d ||
-                ((d.entity.type === 'underground_belt' || d.entity.type === 'loader') &&
+                ((d.entity.type === 'underground-belt' || d.entity.type === 'loader') &&
                     d.entity.directionType === 'input')
             ) {
                 return
@@ -603,7 +603,7 @@ function getBeltSprites(
         if (
             forceStraight ||
             entAtPos.type === 'splitter' ||
-            entAtPos.type === 'underground_belt' ||
+            entAtPos.type === 'underground-belt' ||
             entAtPos.type === 'loader'
         ) {
             return {
@@ -722,83 +722,83 @@ function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => rea
     switch (e.type as string) {
         case 'accumulator':
             return draw_accumulator(e as AccumulatorPrototype)
-        case 'agricultural_tower':
+        case 'agricultural-tower':
             return draw_agricultural_tower(e as AgriculturalTowerPrototype)
-        case 'ammo_turret':
+        case 'ammo-turret':
             return draw_ammo_turret(e as AmmoTurretPrototype)
-        case 'arithmetic_combinator':
+        case 'arithmetic-combinator':
             return draw_arithmetic_combinator(e as ArithmeticCombinatorPrototype)
-        case 'artillery_turret':
+        case 'artillery-turret':
             return draw_artillery_turret(e as ArtilleryTurretPrototype)
-        case 'artillery_wagon':
+        case 'artillery-wagon':
             return draw_artillery_wagon(e as ArtilleryWagonPrototype)
-        case 'assembling_machine':
+        case 'assembling-machine':
             return draw_assembling_machine(e as AssemblingMachinePrototype)
-        case 'asteroid_collector':
+        case 'asteroid-collector':
             return draw_asteroid_collector(e as AsteroidCollectorPrototype)
         case 'beacon':
             return draw_beacon(e as BeaconPrototype)
         case 'boiler':
             return draw_boiler(e as BoilerPrototype)
-        case 'burner_generator':
+        case 'burner-generator':
             return draw_burner_generator(e as BurnerGeneratorPrototype)
-        case 'cargo_bay':
+        case 'cargo-bay':
             return draw_cargo_bay(e as CargoBayPrototype)
-        case 'cargo_landing_pad':
+        case 'cargo-landing-pad':
             return draw_cargo_landing_pad(e as CargoLandingPadPrototype)
-        case 'cargo_wagon':
+        case 'cargo-wagon':
             return draw_cargo_wagon(e as CargoWagonPrototype)
-        case 'constant_combinator':
+        case 'constant-combinator':
             return draw_constant_combinator(e as ConstantCombinatorPrototype)
-        case 'construction_robot':
+        case 'construction-robot':
             return draw_construction_robot(e as ConstructionRobotPrototype)
         case 'container':
             return draw_container(e as ContainerPrototype)
-        case 'curved_rail_a':
+        case 'curved-rail-a':
             return draw_curved_rail_a(e as CurvedRailAPrototype)
-        case 'curved_rail_b':
+        case 'curved-rail-b':
             return draw_curved_rail_b(e as CurvedRailBPrototype)
-        case 'decider_combinator':
+        case 'decider-combinator':
             return draw_decider_combinator(e as DeciderCombinatorPrototype)
-        case 'display_panel':
+        case 'display-panel':
             return draw_display_panel(e as DisplayPanelPrototype)
-        case 'electric_energy_interface':
+        case 'electric-energy-interface':
             return draw_electric_energy_interface(e as ElectricEnergyInterfacePrototype)
-        case 'electric_pole':
+        case 'electric-pole':
             return draw_electric_pole(e as ElectricPolePrototype)
-        case 'electric_turret':
+        case 'electric-turret':
             return draw_electric_turret(e as ElectricTurretPrototype)
-        case 'elevated_curved_rail_a':
+        case 'elevated-curved-rail-a':
             return draw_elevated_curved_rail_a(e as ElevatedCurvedRailAPrototype)
-        case 'elevated_curved_rail_b':
+        case 'elevated-curved-rail-b':
             return draw_elevated_curved_rail_b(e as ElevatedCurvedRailBPrototype)
-        case 'elevated_half_diagonal_rail':
+        case 'elevated-half-diagonal-rail':
             return draw_elevated_half_diagonal_rail(e as ElevatedHalfDiagonalRailPrototype)
-        case 'elevated_straight_rail':
+        case 'elevated-straight-rail':
             return draw_elevated_straight_rail(e as ElevatedStraightRailPrototype)
-        case 'fluid_turret':
+        case 'fluid-turret':
             return draw_fluid_turret(e as FluidTurretPrototype)
-        case 'fluid_wagon':
+        case 'fluid-wagon':
             return draw_fluid_wagon(e as FluidWagonPrototype)
         case 'furnace':
             return draw_furnace(e as FurnacePrototype)
-        case 'fusion_generator':
+        case 'fusion-generator':
             return draw_fusion_generator(e as FusionGeneratorPrototype)
-        case 'fusion_reactor':
+        case 'fusion-reactor':
             return draw_fusion_reactor(e as FusionReactorPrototype)
         case 'gate':
             return draw_gate(e as GatePrototype)
         case 'generator':
             return draw_generator(e as GeneratorPrototype)
-        case 'half_diagonal_rail':
+        case 'half-diagonal-rail':
             return draw_half_diagonal_rail(e as HalfDiagonalRailPrototype)
-        case 'heat_interface':
+        case 'heat-interface':
             return draw_heat_interface(e as HeatInterfacePrototype)
-        case 'heat_pipe':
+        case 'heat-pipe':
             return draw_heat_pipe(e as HeatPipePrototype)
-        case 'infinity_cargo_wagon':
+        case 'infinity-cargo-wagon':
             return draw_infinity_cargo_wagon(e as InfinityCargoWagonPrototype)
-        case 'infinity_container':
+        case 'infinity-container':
             return draw_infinity_container(e as InfinityContainerPrototype)
         case 'inserter':
             return draw_inserter(e as InserterPrototype)
@@ -806,82 +806,82 @@ function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => rea
             return draw_lab(e as LabPrototype)
         case 'lamp':
             return draw_lamp(e as LampPrototype)
-        case 'land_mine':
+        case 'land-mine':
             return draw_land_mine(e as LandMinePrototype)
-        case 'lane_splitter':
+        case 'lane-splitter':
             return draw_lane_splitter(e as LaneSplitterPrototype)
-        case 'legacy_curved_rail':
+        case 'legacy-curved-rail':
             return draw_legacy_curved_rail(e as LegacyCurvedRailPrototype)
-        case 'legacy_straight_rail':
+        case 'legacy-straight-rail':
             return draw_legacy_straight_rail(e as LegacyStraightRailPrototype)
-        case 'lightning_attractor':
+        case 'lightning-attractor':
             return draw_lightning_attractor(e as LightningAttractorPrototype)
-        case 'linked_belt':
+        case 'linked-belt':
             return draw_linked_belt(e as LinkedBeltPrototype)
-        case 'linked_container':
+        case 'linked-container':
             return draw_linked_container(e as LinkedContainerPrototype)
-        case 'loader_1x1':
+        case 'loader-1x1':
         case 'loader':
             return draw_loader(e as LoaderPrototype)
         case 'locomotive':
             return draw_locomotive(e as LocomotivePrototype)
-        case 'logistic_container':
+        case 'logistic-container':
             return draw_logistic_container(e as LogisticContainerPrototype)
-        case 'logistic_robot':
+        case 'logistic-robot':
             return draw_logistic_robot(e as LogisticRobotPrototype)
-        case 'mining_drill':
+        case 'mining-drill':
             return draw_mining_drill(e as MiningDrillPrototype)
-        case 'offshore_pump':
+        case 'offshore-pump':
             return draw_offshore_pump(e as OffshorePumpPrototype)
         case 'pipe':
-        case 'infinity_pipe':
+        case 'infinity-pipe':
             return draw_pipe(e as PipePrototype)
-        case 'pipe_to_ground':
+        case 'pipe-to-ground':
             return draw_pipe_to_ground(e as PipeToGroundPrototype)
-        case 'power_switch':
+        case 'power-switch':
             return draw_power_switch(e as PowerSwitchPrototype)
-        case 'programmable_speaker':
+        case 'programmable-speaker':
             return draw_programmable_speaker(e as ProgrammableSpeakerPrototype)
-        case 'proxy_container':
+        case 'proxy-container':
             return draw_proxy_container(e as ProxyContainerPrototype)
         case 'pump':
             return draw_pump(e as PumpPrototype)
         case 'radar':
             return draw_radar(e as RadarPrototype)
-        case 'rail_ramp':
+        case 'rail-ramp':
             return draw_rail_ramp(e as RailRampPrototype)
-        case 'rail_signal':
-        case 'rail_chain_signal':
+        case 'rail-signal':
+        case 'rail-chain-signal':
             return draw_rail_signal_base(e as RailSignalBasePrototype)
-        case 'rail_support':
+        case 'rail-support':
             return draw_rail_support(e as RailSupportPrototype)
         case 'reactor':
             return draw_reactor(e as ReactorPrototype)
         case 'roboport':
             return draw_roboport(e as RoboportPrototype)
-        case 'rocket_silo':
+        case 'rocket-silo':
             return draw_rocket_silo(e as RocketSiloPrototype)
-        case 'selector_combinator':
+        case 'selector-combinator':
             return draw_selector_combinator(e as SelectorCombinatorPrototype)
-        case 'solar_panel':
+        case 'solar-panel':
             return draw_solar_panel(e as SolarPanelPrototype)
-        case 'space_platform_hub':
+        case 'space-platform-hub':
             return draw_space_platform_hub(e as SpacePlatformHubPrototype)
         case 'splitter':
             return draw_splitter(e as SplitterPrototype)
-        case 'storage_tank':
+        case 'storage-tank':
             return draw_storage_tank(e as StorageTankPrototype)
-        case 'straight_rail':
+        case 'straight-rail':
             return draw_straight_rail(e as StraightRailPrototype)
         case 'thruster':
             return draw_thruster(e as ThrusterPrototype)
-        case 'train_stop':
+        case 'train-stop':
             return draw_train_stop(e as TrainStopPrototype)
-        case 'transport_belt':
+        case 'transport-belt':
             return draw_transport_belt(e as TransportBeltPrototype)
         case 'turret':
             return draw_turret(e as TurretPrototype)
-        case 'underground_belt':
+        case 'underground-belt':
             return draw_underground_belt(e as UndergroundBeltPrototype)
         case 'valve':
             return draw_valve(e as ValvePrototype)
@@ -982,7 +982,7 @@ function draw_assembling_machine(
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
         if (
-            (e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') &&
+            (e.name === 'assembling-machine-2' || e.name === 'assembling-machine-3') &&
             data.assemblerCraftsWithFluid
         ) {
             const pipeDirection =
@@ -1220,7 +1220,7 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
                         w: size.x,
                         h: size.y,
                     },
-                    entity => entity.name === 'legacy_straight_rail'
+                    entity => entity.name === 'legacy-straight-rail'
                 )
                 if (rail) {
                     if (data.dir === 0) {
@@ -1248,7 +1248,7 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
                 x: data.position.x,
                 y: data.position.y + 1,
             })
-            if (wall && wall.name === 'stone_wall') {
+            if (wall && wall.name === 'stone-wall') {
                 return [...getBaseSprites(), ...e.wall_patch.layers]
             }
         }
@@ -1355,7 +1355,7 @@ function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly Spri
         const armAngle = 45
         const armAngleLHI = 25
 
-        if (e.name === 'long_handed_inserter') {
+        if (e.name === 'long-handed-inserter') {
             switch (data.dir) {
                 case 6:
                     handData.rotAngle = armAngleLHI - 180
@@ -1657,7 +1657,7 @@ function draw_logistic_robot(
 }
 function draw_mining_drill(e: MiningDrillPrototype): (data: IDrawData) => readonly SpriteData[] {
     switch (e.name) {
-        case 'burner_mining_drill':
+        case 'burner-mining-drill':
             return (data: IDrawData) => e.graphics_set.animation[util.intToDir(data.dir)].layers
 
         case 'pumpjack':
@@ -1666,16 +1666,16 @@ function draw_mining_drill(e: MiningDrillPrototype): (data: IDrawData) => readon
                 ...e.graphics_set.animation.north.layers,
             ]
 
-        case 'electric_mining_drill':
+        case 'electric-mining-drill':
             return (data: IDrawData) => {
                 const dir = util.intToDir(data.dir)
                 const layers0 = e.graphics_set.animation[dir].layers
 
                 const animDir = `${dir}_animation` as
-                    | 'north_animation'
-                    | 'east_animation'
-                    | 'south_animation'
-                    | 'west_animation'
+                    | 'north-animation'
+                    | 'east-animation'
+                    | 'south-animation'
+                    | 'west-animation'
 
                 const layers1 = e.graphics_set.working_visualisations
                     .filter(vis => vis.always_draw)
@@ -1701,22 +1701,22 @@ function draw_pipe(e: PipePrototype): (data: IDrawData) => readonly SpriteData[]
                         return false
                     }
 
-                    if (entity.name === 'pipe' || entity.name === 'infinity_pipe') {
+                    if (entity.name === 'pipe' || entity.name === 'infinity-pipe') {
                         return true
                     }
-                    if (entity.name === 'pipe_to_ground' && entity.direction === (relDir + 4) % 8) {
+                    if (entity.name === 'pipe-to-ground' && entity.direction === (relDir + 4) % 8) {
                         return true
                     }
 
                     if (
-                        (entity.name === 'assembling_machine_2' ||
-                            entity.name === 'assembling_machine_3') &&
+                        (entity.name === 'assembling-machine-2' ||
+                            entity.name === 'assembling-machine-3') &&
                         !entity.assemblerCraftsWithFluid
                     ) {
                         return false
                     }
                     if (
-                        entity.name === 'chemical_plant' &&
+                        entity.name === 'chemical-plant' &&
                         entity.chemicalPlantDontConnectOutput &&
                         entity.direction === relDir
                     ) {
@@ -2052,9 +2052,9 @@ function draw_underground_belt(
             let C = data.positionGrid.getNeighbourData(data.position).map(d => {
                 if (
                     d.entity &&
-                    (d.entity.type === 'transport_belt' ||
+                    (d.entity.type === 'transport-belt' ||
                         d.entity.type === 'splitter' ||
-                        ((d.entity.type === 'underground_belt' || d.entity.type === 'loader') &&
+                        ((d.entity.type === 'underground-belt' || d.entity.type === 'loader') &&
                             d.entity.directionType === 'output'))
                 ) {
                     return d
@@ -2128,7 +2128,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                 .map(
                     ({ entity, relDir }) =>
                         entity &&
-                        (entity.name === 'stone_wall' ||
+                        (entity.name === 'stone-wall' ||
                             (entity.name === 'gate' && entity.direction === relDir % 4))
                 )
 
@@ -2192,7 +2192,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                     const ent = data.positionGrid.getEntityAtPosition(
                         util.sumprod(data.position, o)
                     )
-                    return !!ent && ent.name === 'stone_wall'
+                    return !!ent && ent.name === 'stone-wall'
                 })
                 .every(e => e)
 

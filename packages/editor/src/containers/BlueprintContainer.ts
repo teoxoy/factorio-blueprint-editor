@@ -568,7 +568,7 @@ export class BlueprintContainer extends Container {
             })
 
             for (const e of this.deleteModeEntities) {
-                EntityContainer.mappings.get(e.entityNumber).cursorBox = 'not_allowed'
+                EntityContainer.mappings.get(e.entityNumber).cursorBox = 'not-allowed'
             }
         }
         this.deleteModeUpdateFn(startPos.x, startPos.y)

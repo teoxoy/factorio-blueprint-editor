@@ -329,7 +329,7 @@ export function generatePoles(entities: { position: IPoint; size: number; power:
 
     return {
         poles: finalGroup.poles.map(p => ({
-            name: 'medium_electric_pole',
+            name: 'medium-electric-pole',
             position: { x: p.x + 0.5, y: p.y + 0.5 },
         })),
         info,

@@ -87,7 +87,7 @@ export class PositionGrid {
     }
 
     public setTileData(entity: Entity, position: IPoint = entity.position): void {
-        // if (entity.entityData.flags.includes('placeable_off_grid')) {
+        // if (entity.entityData.flags.includes('placeable-off-grid')) {
         //     return
         // }
 
@@ -185,16 +185,16 @@ export class PositionGrid {
                 case 'gate':
                     gate = entity
                     break
-                case 'legacy_curved_rail':
+                case 'legacy-curved-rail':
                     curvedRail = entity
                     break
-                case 'legacy_straight_rail':
+                case 'legacy-straight-rail':
                     if (!straightRails.includes(entity)) {
                         straightRails.push(entity)
                     }
                     break
-                case 'rail_signal':
-                case 'rail_chain_signal':
+                case 'rail-signal':
+                case 'rail-chain-signal':
                     signal = entity
                     break
                 default:
@@ -209,22 +209,22 @@ export class PositionGrid {
                 straightRails.length === 1 &&
                 straightRails[0].direction !== direction &&
                 !gate) ||
-            (name === 'legacy_straight_rail' &&
+            (name === 'legacy-straight-rail' &&
                 gate &&
                 gate.direction !== direction &&
                 straightRails.length === 0 &&
                 !otherEntities) ||
-            (name === 'legacy_straight_rail' &&
+            (name === 'legacy-straight-rail' &&
                 straightRails.length > 0 &&
                 !sameDirStrRails &&
                 !gate) ||
-            (name === 'legacy_curved_rail' && straightRails.length > 0 && !gate) ||
-            (name === 'legacy_straight_rail' && curvedRail) ||
-            (name === 'legacy_curved_rail' && curvedRail && curvedRail.direction !== direction) ||
+            (name === 'legacy-curved-rail' && straightRails.length > 0 && !gate) ||
+            (name === 'legacy-straight-rail' && curvedRail) ||
+            (name === 'legacy-curved-rail' && curvedRail && curvedRail.direction !== direction) ||
             // TODO: remove this when we add better rail support
-            ((name === 'rail_signal' || name === 'rail_chain_signal') &&
+            ((name === 'rail-signal' || name === 'rail-chain-signal') &&
                 (curvedRail || straightRails.length > 0)) ||
-            ((name === 'legacy_straight_rail' || name === 'legacy_curved_rail') && signal)
+            ((name === 'legacy-straight-rail' || name === 'legacy-curved-rail') && signal)
         ) {
             return true
         }
@@ -260,7 +260,7 @@ export class PositionGrid {
         direction: number,
         pos: IPoint
     ): Entity | undefined {
-        if (name === 'legacy_straight_rail') return undefined
+        if (name === 'legacy-straight-rail') return undefined
 
         const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
         const area = {

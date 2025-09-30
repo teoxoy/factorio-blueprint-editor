@@ -61,7 +61,7 @@ class Book {
 
         return {
             blueprints: this.blueprints.map((v, index) => ({ ...v, index })),
-            item: 'blueprint_book',
+            item: 'blueprint-book',
             active_index: activeIndex,
             version: getFactorioVersion(),
             label: this.label,

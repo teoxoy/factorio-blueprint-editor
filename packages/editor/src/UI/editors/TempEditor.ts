@@ -8,7 +8,7 @@ export class TempEditor extends Editor {
         let i = 0
         if (
             entity.acceptedRecipes.length > 0 &&
-            !(entity.name === 'electric_furnace' || entity.name === 'rocket_silo')
+            !(entity.name === 'electric-furnace' || entity.name === 'rocket-silo')
         ) {
             this.addLabel(140, 56, 'Recipe:')
             this.addRecipe(208, 45)

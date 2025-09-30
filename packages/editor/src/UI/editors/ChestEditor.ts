@@ -27,8 +27,8 @@ export class ChestEditor extends Editor {
     public constructor(entity: Entity) {
         const rows = Math.ceil(entity.filterSlots / 6)
         const filterAreaHeight = rows * 38 + Math.min(0, rows - 1) * 2
-        const requesterCheckboxHeight = entity.name === 'requester_chest' ? 23 + 6 : 0
-        const countAreaHeight = entity.name === 'storage_chest' ? 0 : 23 + 6
+        const requesterCheckboxHeight = entity.name === 'requester-chest' ? 23 + 6 : 0
+        const countAreaHeight = entity.name === 'storage-chest' ? 0 : 23 + 6
 
         super(
             446,
@@ -36,7 +36,7 @@ export class ChestEditor extends Editor {
             entity
         )
 
-        this.m_Amount = entity.name !== 'storage_chest'
+        this.m_Amount = entity.name !== 'storage-chest'
         this.m_Filter = -1
 
         let yOffset = 45
@@ -50,7 +50,7 @@ export class ChestEditor extends Editor {
         if (!this.m_Amount) return
 
         // For Requester Chest: Add Request from Buffer Chest for
-        if (entity.name === 'requester_chest') {
+        if (entity.name === 'requester-chest') {
             const checkbox = new Checkbox(
                 this.m_Entity.requestFromBufferChest,
                 'Request from buffer chests'

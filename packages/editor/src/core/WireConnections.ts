@@ -125,10 +125,10 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
 
             if (entNrWhitelist && !entNrWhitelist.has(otherE.entityNumber)) continue
 
-            if (color === 'copper' && getType(otherE.entityNumber) === 'electric_pole') {
-                if (getType(entityNumber) === 'electric_pole') {
+            if (color === 'copper' && getType(otherE.entityNumber) === 'electric-pole') {
+                if (getType(entityNumber) === 'electric-pole') {
                     neighbours.push(otherE.entityNumber)
-                } else if (getType(entityNumber) === 'power_switch') {
+                } else if (getType(entityNumber) === 'power-switch') {
                     const SIDE = `Cu${entitySide - 1}`
                     if (serialized[SIDE] === undefined) {
                         serialized[SIDE] = []
@@ -258,7 +258,7 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
 
     public connectPowerPole(entityNumber: number): void {
         const entity = this.bp.entities.get(entityNumber)
-        if (entity.type !== 'electric_pole') return
+        if (entity.type !== 'electric-pole') return
 
         const areaSize = (entity.maxWireDistance + 1) * 2
 
@@ -272,7 +272,7 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
             .filter(
                 e =>
                     e !== entity &&
-                    e.type === 'electric_pole' &&
+                    e.type === 'electric-pole' &&
                     this.getEntityConnections(e.entityNumber).filter(c => c.color === 'copper')
                         .length < MAX_POLE_CONNECTION_COUNT &&
                     U.pointInCircle(
@@ -316,7 +316,7 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
         }
 
         const poles = this.bp.entities
-            .filter(e => e.type === 'electric_pole')
+            .filter(e => e.type === 'electric-pole')
             .map<IPole>(e => ({
                 entityNumber: e.entityNumber,
                 name: e.name,

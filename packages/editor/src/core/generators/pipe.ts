@@ -439,7 +439,7 @@ function generatePipes(
     const pipes = [
         ...pipePositions.map(pos => ({ name: 'pipe', position: pos, direction: 0 })),
         ...undergroundPipes.map(e => ({
-            name: 'pipe_to_ground',
+            name: 'pipe-to-ground',
             position: { x: e.x, y: e.y },
             direction: e.dir,
         })),
