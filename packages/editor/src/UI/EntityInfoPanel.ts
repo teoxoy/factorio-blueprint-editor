@@ -105,7 +105,7 @@ export class EntityInfoPanel extends Panel {
         this.m_EntityName.position.set(10, nextY)
         nextY = this.m_EntityName.position.y + this.m_EntityName.height + 10
 
-        if (entity.entityData.type === 'assembling_machine') {
+        if (entity.entityData.type === 'assembling-machine') {
             // Details for assembling machines with or without recipe
             let productivity = 0
             let consumption = 0
@@ -226,8 +226,8 @@ export class EntityInfoPanel extends Panel {
         }
 
         const isBelt = (e: Entity): boolean =>
-            e.entityData.type === 'transport_belt' ||
-            e.entityData.type === 'underground_belt' ||
+            e.entityData.type === 'transport-belt' ||
+            e.entityData.type === 'underground-belt' ||
             e.entityData.type === 'splitter' ||
             e.entityData.type === 'loader'
 
@@ -237,7 +237,7 @@ export class EntityInfoPanel extends Panel {
                 entity.entityData.rotation_speed,
                 entity.inserterStackSize
             )
-            const tiles = entity.name === 'long_handed_inserter' ? 2 : 1
+            const tiles = entity.name === 'long-handed-inserter' ? 2 : 1
             // const fromP = util.rotatePointBasedOnDir([0, -tiles], entity.direction)
             const toP = util.rotatePointBasedOnDir([0, tiles], entity.direction)
             // const from = G.bp.entities.get(

@@ -80,7 +80,7 @@ export class PaintWireContainer extends PaintContainer {
         this.cursorBox = this.bpc.overlayContainer.createCursorBox(
             ec.position,
             entity.size,
-            cp === undefined ? 'not_allowed' : connectionsReach ? 'regular' : 'not_allowed'
+            cp === undefined ? 'not-allowed' : connectionsReach ? 'regular' : 'not-allowed'
         )
         if (connectionsReach) return cp
     }
@@ -97,8 +97,8 @@ export class PaintWireContainer extends PaintContainer {
         // entity?.rotate(ccw, true)
 
         /** Non-standard behavior: cycle between colors */
-        if (this.name === 'red_wire') this.name = 'green_wire'
-        else if (this.name === 'green_wire') this.name = 'red_wire'
+        if (this.name === 'red-wire') this.name = 'green-wire'
+        else if (this.name === 'green-wire') this.name = 'red-wire'
         this.color = this.name.split('_', 1)[0]
 
         this.redraw()

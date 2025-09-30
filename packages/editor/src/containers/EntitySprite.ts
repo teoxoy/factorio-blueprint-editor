@@ -125,16 +125,16 @@ export class EntitySprite extends Sprite {
 
             if (data.filename.includes('circuit-connector')) {
                 sprite.__zIndex = 1
-            } else if (entity.name === 'artillery_turret' && i > 0) {
+            } else if (entity.name === 'artillery-turret' && i > 0) {
                 sprite.__zIndex = 2
             } else if (
-                (entity.name === 'rail_signal' || entity.name === 'rail_chain_signal') &&
+                (entity.name === 'rail-signal' || entity.name === 'rail-chain-signal') &&
                 i === 0
             ) {
                 sprite.__zIndex = -8
             } else if (
-                entity.name === 'legacy_straight_rail' ||
-                entity.name === 'legacy_curved_rail'
+                entity.name === 'legacy-straight-rail' ||
+                entity.name === 'legacy-curved-rail'
             ) {
                 if (i < 2) {
                     sprite.__zIndex = -10
@@ -143,7 +143,7 @@ export class EntitySprite extends Sprite {
                 } else {
                     sprite.__zIndex = -7
                 }
-            } else if (entity.type === 'transport_belt' || entity.name === 'heat_pipe') {
+            } else if (entity.type === 'transport-belt' || entity.name === 'heat-pipe') {
                 sprite.__zIndex = i === 0 ? -6 : -5
 
                 if (data.filename.includes('connector') && !data.filename.includes('back-patch')) {
@@ -151,7 +151,7 @@ export class EntitySprite extends Sprite {
                 }
             } else if (
                 entity.type === 'splitter' ||
-                entity.type === 'underground_belt' ||
+                entity.type === 'underground-belt' ||
                 entity.type === 'loader'
             ) {
                 if (!foundMainBelt && data.filename.includes('transport-belt')) {

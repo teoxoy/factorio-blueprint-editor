@@ -128,7 +128,7 @@ export class WiresContainer extends Container {
                     ? conn.cps[1].entityNumber
                     : conn.cps[0].entityNumber
             const ec = EntityContainer.mappings.get(entNr)
-            if (ec.entity.type === 'electric_pole') {
+            if (ec.entity.type === 'electric-pole') {
                 ec.redraw()
                 this.redrawEntityConnections(entNr)
             }

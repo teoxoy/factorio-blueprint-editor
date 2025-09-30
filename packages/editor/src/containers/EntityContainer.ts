@@ -43,7 +43,7 @@ export class EntityContainer {
 
         const onRecipeChange = (): void => {
             this.redrawEntityInfo()
-            if (this.m_Entity.name === 'chemical_plant' || this.m_Entity.mayCraftWithFluid) {
+            if (this.m_Entity.name === 'chemical-plant' || this.m_Entity.mayCraftWithFluid) {
                 this.redraw()
                 this.redrawSurroundingEntities()
             }
@@ -132,45 +132,45 @@ export class EntityContainer {
         const mappigs = [
             {
                 is: [
-                    'transport_belt',
-                    'fast_transport_belt',
-                    'express_transport_belt',
+                    'transport-belt',
+                    'fast-transport-belt',
+                    'express-transport-belt',
                     'splitter',
-                    'fast_splitter',
-                    'express_splitter',
-                    'underground_belt',
-                    'fast_underground_belt',
-                    'express_underground_belt',
+                    'fast-splitter',
+                    'express-splitter',
+                    'underground-belt',
+                    'fast-underground-belt',
+                    'express-underground-belt',
                     'loader',
-                    'fast_loader',
-                    'express_loader',
+                    'fast-loader',
+                    'express-loader',
                 ],
                 updates: [
-                    'transport_belt',
-                    'fast_transport_belt',
-                    'express_transport_belt',
+                    'transport-belt',
+                    'fast-transport-belt',
+                    'express-transport-belt',
                     'splitter',
-                    'fast_splitter',
-                    'express_splitter',
-                    'underground_belt',
-                    'fast_underground_belt',
-                    'express_underground_belt',
+                    'fast-splitter',
+                    'express-splitter',
+                    'underground-belt',
+                    'fast-underground-belt',
+                    'express-underground-belt',
                     'loader',
-                    'fast_loader',
-                    'express_loader',
+                    'fast-loader',
+                    'express-loader',
                 ],
             },
             {
-                is: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
-                updates: ['heat_pipe', 'nuclear_reactor', 'heat_exchanger', 'heat_interface'],
+                is: ['heat-pipe', 'nuclear-reactor', 'heat-exchanger', 'heat-interface'],
+                updates: ['heat-pipe', 'nuclear-reactor', 'heat-exchanger', 'heat-interface'],
             },
             {
                 has: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
                 updates: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
             },
             {
-                is: ['stone_wall', 'gate', 'legacy_straight_rail'],
-                updates: ['stone_wall', 'gate', 'legacy_straight_rail'],
+                is: ['stone-wall', 'gate', 'legacy-straight-rail'],
+                updates: ['stone-wall', 'gate', 'legacy-straight-rail'],
             },
         ]
 
@@ -230,7 +230,7 @@ export class EntityContainer {
             this.m_Entity.name,
             this.m_Entity.position,
             this.m_Entity.direction,
-            this.m_Entity.directionType === 'output' || this.m_Entity.name === 'pipe_to_ground'
+            this.m_Entity.directionType === 'output' || this.m - Entity.name === 'pipe-to-ground'
                 ? (this.m_Entity.direction + 4) % 8
                 : this.m_Entity.direction
         )
@@ -255,16 +255,16 @@ export class EntityContainer {
             this.m_Entity.moduleSlots !== 0 ||
             this.m_Entity.type === 'splitter' ||
             isCraftingMachine(this.m_Entity.entityData) ||
-            this.m_Entity.type === 'mining_drill' ||
+            this.m_Entity.type === 'mining-drill' ||
             this.m_Entity.type === 'boiler' ||
             this.m_Entity.type === 'generator' ||
             this.m_Entity.name === 'pump' ||
-            this.m_Entity.name === 'offshore_pump' ||
-            this.m_Entity.name === 'arithmetic_combinator' ||
-            this.m_Entity.name === 'decider_combinator' ||
+            this.m_Entity.name === 'offshore-pump' ||
+            this.m_Entity.name === 'arithmetic-combinator' ||
+            this.m_Entity.name === 'decider-combinator' ||
             this.m_Entity.type === 'inserter' ||
             this.m_Entity.type === 'splitter' ||
-            this.m_Entity.type === 'logistic_container'
+            this.m_Entity.type === 'logistic-container'
         ) {
             if (this.entityInfo !== undefined) {
                 this.entityInfo.destroy()
@@ -300,7 +300,7 @@ export class EntityContainer {
             w: this.m_Entity.size.x,
             h: this.m_Entity.size.y,
         }
-        if (this.m_Entity.name === 'legacy_straight_rail') {
+        if (this.m_Entity.name === 'legacy-straight-rail') {
             G.bp.entityPositionGrid
                 .getEntitiesInArea(area)
                 .filter(e => e.name === 'gate')
@@ -310,9 +310,9 @@ export class EntityContainer {
 
             // We need to update a larger area because belt endings might change
             if (
-                this.m_Entity.type === 'transport_belt' ||
+                this.m_Entity.type === 'transport-belt' ||
                 this.m_Entity.type === 'splitter' ||
-                this.m_Entity.type === 'underground_belt' ||
+                this.m_Entity.type === 'underground-belt' ||
                 this.m_Entity.type === 'loader'
             ) {
                 entities.push(
@@ -328,7 +328,7 @@ export class EntityContainer {
                 .filter(entity => updatesEntities.has(entity.name))
                 .forEach(entity => {
                     EntityContainer.mappings.get(entity.entityNumber).redraw()
-                    if (entity.type === 'transport_belt') {
+                    if (entity.type === 'transport-belt') {
                         G.BPC.wiresContainer.update(entity.entityNumber)
                     }
                 })

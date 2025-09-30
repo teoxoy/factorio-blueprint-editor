@@ -119,9 +119,9 @@ function isModule(item: ItemPrototype): item is ModulePrototype {
 }
 export function isCraftingMachine(e: EntityWithOwnerPrototype): e is CraftingMachinePrototype {
     switch (e.type as string) {
-        case 'assembling_machine':
+        case 'assembling-machine':
         case 'furnace':
-        case 'rocket_silo': {
+        case 'rocket-silo': {
             return true
         }
         default:
@@ -141,21 +141,21 @@ export function getCircuitConnector(
 ): null | CircuitConnectorDefinition {
     switch (e.type as string) {
         case 'accumulator':
-        case 'agricultural_tower':
-        case 'artillery_turret':
-        case 'cargo_landing_pad':
+        case 'agricultural-tower':
+        case 'artillery-turret':
+        case 'cargo-landing-pad':
         case 'container':
-        case 'infinity_container':
-        case 'logistic_container':
-        case 'temporary_container':
+        case 'infinity-container':
+        case 'logistic-container':
+        case 'temporary-container':
         case 'lamp':
-        case 'linked_container':
-        case 'programmable_speaker':
-        case 'proxy_container':
+        case 'linked-container':
+        case 'programmable-speaker':
+        case 'proxy-container':
         case 'radar':
         case 'reactor':
         case 'roboport':
-        case 'space_platform_hub':
+        case 'space-platform-hub':
         case 'wall': {
             const e_resolved = e as
                 | AccumulatorPrototype
@@ -174,17 +174,17 @@ export function getCircuitConnector(
                 | WallPrototype
             return e_resolved.circuit_connector
         }
-        case 'assembling_machine':
-        case 'rocket_silo':
-        case 'asteroid_collector':
-        case 'display_panel':
+        case 'assembling-machine':
+        case 'rocket-silo':
+        case 'asteroid-collector':
+        case 'display-panel':
         case 'furnace':
         case 'inserter':
-        case 'mining_drill':
-        case 'offshore_pump':
+        case 'mining-drill':
+        case 'offshore-pump':
         case 'pump':
-        case 'storage_tank':
-        case 'train_stop': {
+        case 'storage-tank':
+        case 'train-stop': {
             const e_resolved = e as
                 | AssemblingMachinePrototype // also has circuit_connector_flipped
                 | AsteroidCollectorPrototype
@@ -198,27 +198,27 @@ export function getCircuitConnector(
                 | TrainStopPrototype
             return e_resolved.circuit_connector[dir / 2]
         }
-        case 'rail_chain_signal':
-        case 'rail_signal': {
+        case 'rail-chain-signal':
+        case 'rail-signal': {
             const e_resolved = e as RailSignalBasePrototype
             return e_resolved.ground_picture_set.circuit_connector[dir * 2]
         }
         case 'loader':
-        case 'loader_1x1': {
+        case 'loader-1x1': {
             const e_resolved = e as LoaderPrototype
             // First the four cardinal directions for `direction_out`, followed by the four directions for `direction_in`.
             // TODO
             return e_resolved.circuit_connector[0]
         }
-        case 'transport_belt': {
+        case 'transport-belt': {
             const e_resolved = e as TransportBeltPrototype
             // Set of 7 CircuitConnectorDefinition in order: X, H, V, SE, SW, NE and NW.
             // TODO
             return e_resolved.circuit_connector[0]
         }
-        case 'ammo_turret':
-        case 'electric_turret':
-        case 'fluid_turret':
+        case 'ammo-turret':
+        case 'electric-turret':
+        case 'fluid-turret':
         case 'turret': {
             const e_resolved = e as TurretPrototype
             // Set of CircuitConnectorDefinition for all directions used by this turret. Required amount of elements is based on other prototype values: 8 elements if building-direction-8-way flag is set, or 16 elements if building-direction-16-way flag is set, or 4 elements if turret_base_has_direction is set to true, or 1 element.
@@ -232,8 +232,8 @@ export function getCircuitConnector(
 
 export function getHeatBuffer(e: EntityWithOwnerPrototype): null | HeatBuffer {
     switch (e.type as string) {
-        case 'heat_pipe':
-        case 'heat_interface':
+        case 'heat-pipe':
+        case 'heat-interface':
         case 'reactor': {
             const e_resolved = e as HeatPipePrototype | HeatInterfacePrototype | ReactorPrototype
             return e_resolved.heat_buffer
@@ -244,15 +244,15 @@ export function getHeatBuffer(e: EntityWithOwnerPrototype): null | HeatBuffer {
 }
 export function getEnergySource(e: EntityWithOwnerPrototype): null | EnergySource {
     switch (e.type as string) {
-        case 'agricultural_tower':
+        case 'agricultural-tower':
         case 'boiler':
-        case 'assembling_machine':
+        case 'assembling-machine':
         case 'furnace':
-        case 'rocket_silo':
+        case 'rocket-silo':
         case 'inserter':
         case 'lab':
-        case 'mining_drill':
-        case 'offshore_pump':
+        case 'mining-drill':
+        case 'offshore-pump':
         case 'pump':
         case 'radar':
         case 'reactor': {
@@ -313,12 +313,7 @@ const FD: {
 } = {}
 
 export function loadData(str: string): void {
-    // convert every - to _ without file paths
-    const data = JSON.parse(
-        str.replace(/("(?!__base__|__core__)[^":]+?-[^":]+?")/g, (_: string, capture: string) =>
-            capture.replace(/-/g, '_')
-        )
-    )
+    const data = JSON.parse(str)
     console.log(data)
     FD.items = data.items
     FD.fluids = data.fluids

@@ -23,9 +23,9 @@ export function createEditor(entity: Entity): Editor {
     let editor: Editor
     switch (entity.name) {
         // Assembly Machines
-        case 'assembling_machine_1':
-        case 'assembling_machine_2':
-        case 'assembling_machine_3': {
+        case 'assembling-machine-1':
+        case 'assembling-machine-2':
+        case 'assembling-machine-3': {
             editor = new MachineEditor(entity)
             break
         }
@@ -35,46 +35,46 @@ export function createEditor(entity: Entity): Editor {
             break
         }
         // Inserters
-        case 'burner_inserter':
+        case 'burner-inserter':
         case 'inserter':
-        case 'long_handed_inserter':
-        case 'fast_inserter':
-        case 'bulk_inserter':
-        case 'stack_inserter': {
+        case 'long-handed-inserter':
+        case 'fast-inserter':
+        case 'bulk-inserter':
+        case 'stack-inserter': {
             editor = new InserterEditor(entity)
             break
         }
         // Mining
-        case 'electric_mining_drill': {
+        case 'electric-mining-drill': {
             editor = new MiningEditor(entity)
             break
         }
         // Splitters
         case 'splitter':
-        case 'fast_splitter':
-        case 'express_splitter': {
+        case 'fast-splitter':
+        case 'express-splitter': {
             editor = new SplitterEditor(entity)
             break
         }
         // Chests
-        case 'buffer_chest':
-        case 'requester_chest':
-        case 'storage_chest': {
+        case 'buffer-chest':
+        case 'requester-chest':
+        case 'storage-chest': {
             editor = new ChestEditor(entity)
             break
         }
         // Temp
         case 'lab':
-        case 'electric_furnace':
+        case 'electric-furnace':
         case 'pumpjack':
-        case 'oil_refinery':
-        case 'chemical_plant':
+        case 'oil-refinery':
+        case 'chemical-plant':
         case 'centrifuge':
-        case 'rocket_silo':
+        case 'rocket-silo':
             editor = new TempEditor(entity)
             break
         // Train stop
-        case 'train_stop':
+        case 'train-stop':
             editor = new TrainStopEditor(entity)
             break
         default: {

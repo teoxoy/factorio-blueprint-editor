@@ -122,11 +122,11 @@
                 },
                 "label": { "type": "string" },
                 "description": { "type": "string" },
-                "absolute_snapping": { "type": "boolean" },
-                "snap_to_grid": {
+                "absolute-snapping": { "type": "boolean" },
+                "snap-to-grid": {
                     "$ref": "blueprintSchema.json#/definitions/position"
                 },
-                "position_relative_to_grid": {
+                "position-relative-to-grid": {
                     "$ref": "blueprintSchema.json#/definitions/position"
                 },
                 "icons": { "$ref": "blueprintSchema.json#/definitions/icons" },
@@ -167,11 +167,11 @@
                                                             "inactivity",
                                                             "full",
                                                             "empty",
-                                                            "item_count",
-                                                            "fluid_count",
+                                                            "item-count",
+                                                            "fluid-count",
                                                             "circuit",
-                                                            "passenger_present",
-                                                            "passenger_not_present"
+                                                            "passenger-present",
+                                                            "passenger-not-present"
                                                         ]
                                                     },
                                                     "ticks": { "type": "integer" },
@@ -366,7 +366,7 @@
 
                             "mode": {
                                 "type": "string",
-                                "enum": ["at_least", "at_most", "exactly"],
+                                "enum": ["at-least", "at-most", "exactly"],
                                 "$comment": "only present if entity is heat_interface"
                             },
                             "temperature": {
@@ -382,7 +382,7 @@
                                     "name": { "type": "string", "fluidName": true },
                                     "mode": {
                                         "type": "string",
-                                        "enum": ["at_least", "at_most", "exactly"]
+                                        "enum": ["at-least", "at-most", "exactly"]
                                     },
                                     "percentage": { "type": "number" },
                                     "temperature": { "type": "number" },
@@ -395,7 +395,7 @@
                                                 "name": { "type": "string", "itemName": true },
                                                 "mode": {
                                                     "type": "string",
-                                                    "enum": ["at_least", "at_most", "exactly"]
+                                                    "enum": ["at-least", "at-most", "exactly"]
                                                 },
                                                 "index": { "type": "number" },
                                                 "count": { "type": "number" }
@@ -693,7 +693,7 @@
                 "version": { "type": "integer" },
                 "item": {
                     "type": "string",
-                    "const": "blueprint_book"
+                    "const": "blueprint-book"
                 },
                 "label": { "type": "string" },
                 "description": { "type": "string" },

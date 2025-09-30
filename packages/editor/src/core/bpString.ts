@@ -94,6 +94,8 @@ const nameMigrations: Record<string, string> = {
     '"grass-1"': '"landfill"',
 
     // 2.0
+    ',"recipe":"rocket-control-unit"': '',
+    ',"name":"rocket-control-unit"': ',"name":"raw-fish"',
     '"stack-inserter"': '"bulk-inserter"',
     '"stack-filter-inserter"': '"bulk-inserter"',
     '"filter-inserter"': '"fast-inserter"',
@@ -127,7 +129,6 @@ function decode(str: string): Promise<Blueprint | Book> {
             const data = pako
                 .inflate(decodedStr, { to: 'string' })
                 .replace(nameMigrationsRegex, match => nameMigrations[match])
-                .replace(/("[^,]{3,}?")/g, (_, capture: string) => capture.replace(/-/g, '_'))
             const parsedData = JSON.parse(data)
             resolve(parsedData)
         } catch (e) {
@@ -155,7 +156,7 @@ function decode(str: string): Promise<Blueprint | Book> {
             }
         } else {
             const errors = validate.errors
-            const trainEntityNames = new Set(['locomotive', 'cargo_wagon', 'fluid_wagon'])
+            const trainEntityNames = new Set(['locomotive', 'cargo-wagon', 'fluid-wagon'])
             const hasTrain = (): boolean => errors.some(e => trainEntityNames.has(e.data as string))
             const isModded = (): boolean =>
                 errors.some(e => !!keywords.find(k => k.keyword === e.keyword))
@@ -173,10 +174,7 @@ function encode(bpOrBook: Blueprint | Book): Promise<string> {
         try {
             const keyName = bpOrBook instanceof Blueprint ? 'blueprint' : 'blueprint_book'
             const data = { [keyName]: bpOrBook.serialize() }
-            const string = JSON.stringify(data).replace(
-                /(:".+?"|"[a-z]+?_module(|_[0-9])")/g,
-                (_: string, capture: string) => capture.replace(/_/g, '-')
-            )
+            const string = JSON.stringify(data)
             resolve(`0${Buffer.from(pako.deflate(string)).toString('base64')}`)
         } catch (e) {
             reject(e)

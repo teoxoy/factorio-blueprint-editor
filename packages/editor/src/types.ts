@@ -92,7 +92,7 @@ export interface IArithmeticCondition {
 export type FilterPriority = 'left' | 'right'
 export type FilterMode = 'whitelist' | 'blacklist'
 export type DirectionType = 'input' | 'output'
-export type InfinityMode = 'at_least' | 'at_most' | 'exactly'
+export type InfinityMode = 'at-least' | 'at-most' | 'exactly'
 
 export interface IEntity {
     entity_number: number
@@ -318,11 +318,11 @@ export type WaitConditionType =
     | 'inactivity'
     | 'full'
     | 'empty'
-    | 'item_count'
-    | 'fluid_count'
+    | 'item-count'
+    | 'fluid-count'
     | 'circuit'
-    | 'passenger_present'
-    | 'passenger_not_present'
+    | 'passenger-present'
+    | 'passenger-not-present'
 
 export interface ISchedule {
     locomotives: number[]
@@ -353,9 +353,9 @@ export interface IBlueprint {
     entities?: IEntity[]
     tiles?: ITile[]
     schedules?: ISchedule[]
-    absolute_snapping?: boolean
-    snap_to_grid?: IPoint
-    position_relative_to_grid?: IPoint
+    'absolute-snapping'?: boolean
+    'snap-to-grid'?: IPoint
+    'position-relative-to-grid'?: IPoint
 }
 
 export interface IBlueprintBookEntry {
@@ -368,7 +368,7 @@ export interface IBlueprintBookEntry {
 
 export interface IBlueprintBook {
     version: number
-    item: 'blueprint_book'
+    item: 'blueprint-book'
     active_index: number
     blueprints?: IBlueprintBookEntry[]
 

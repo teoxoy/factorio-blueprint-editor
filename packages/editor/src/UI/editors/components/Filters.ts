@@ -11,9 +11,9 @@ export class Filters extends Container<Slot<number>> {
     /* Blueprint Splitters
     ########################
     entity_number: 1
-    filter: "assembling_machine_2"
+    filter: "assembling-machine-2"
     input_priority: "right"
-    name: "express_splitter"
+    name: "express-splitter"
     output_priority: "left"
     position: { x: -0.5, y: 0 }
     // Filter Slots: 1
@@ -24,9 +24,9 @@ export class Filters extends Container<Slot<number>> {
     ########################
     entity_number: 1
     filters: Array(2)
-        0: {index: 1, name: "long_handed_inserter"}
+        0: {index: 1, name: "long-handed-inserter"}
         1: {index: 2, name: "inserter"}
-    name: "filter_inserter"
+    name: "filter-inserter"
     override_stack_size: 3
     position: {x: -1, y: 0}
     // Filter Slots: 5
@@ -34,9 +34,9 @@ export class Filters extends Container<Slot<number>> {
     ########################
     entity_number: 2
     filters: Array(1)
-        0: {index: 1, name: "express_transport_belt"}
+        0: {index: 1, name: "express-transport-belt"}
     length: 1
-    name: "stack_filter_inserter"
+    name: "stack-filter-inserter"
     override_stack_size: 10
     position: {x: 0, y: 0}
     // Filter Slots: 1
@@ -46,28 +46,28 @@ export class Filters extends Container<Slot<number>> {
     /* Blueprint Logist Chests
     ########################
     entity_number: 2
-    name: "storage_chest"
+    name: "storage-chest"
     position: {x: 0, y: 0}
     request_filters: Array(1)
-        0: {index: 1, name: "assembling_machine_2", count: 0}
+        0: {index: 1, name: "assembling-machine-2", count: 0}
     // Filter Slots: 1
     // Filter Count: N/A >> Needs to be written as 0
     ########################
     entity_number: 4
-    name: "requester_chest"
+    name: "requester-chest"
     position: {x: 0, y: 2}
     request_filters: Array(1)
-        0: {index: 1, name: "storage_chest", count: 50}
+        0: {index: 1, name: "storage-chest", count: 50}
     request_from_buffers: true
     // Filter Slots: 12
     // Filter Count: Stack Size
     ########################
     entity_number: 5
-    name: "buffer_chest"
+    name: "buffer-chest"
     position: {x: 0, y: 1}
     request_filters: Array(2)
-        0: {index: 1, name: "assembling_machine_2", count: 50}
-        1: {index: 2, name: "assembling_machine_3", count: 10}
+        0: {index: 1, name: "assembling-machine-2", count: 50}
+        1: {index: 2, name: "assembling-machine-3", count: 10}
     // Filter Slots: 12
     // Filter Count: Stack Size
     */

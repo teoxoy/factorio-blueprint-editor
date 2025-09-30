@@ -82,7 +82,7 @@ export class PaintEntityContainer extends PaintContainer {
 
     private updateUndergroundBeltRotation(): void {
         const fd = FD.entities[this.name]
-        if (fd.type === 'underground_belt') {
+        if (fd.type === 'underground-belt') {
             const otherEntity = this.bpc.bp.entityPositionGrid.getOpposingEntity(
                 this.name,
                 (this.direction + 4) % 8,
@@ -111,7 +111,7 @@ export class PaintEntityContainer extends PaintContainer {
             this.name,
             this.getGridPosition(),
             this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
-            this.name === 'pipe_to_ground' ? (this.direction + 4) % 8 : this.direction
+            this.name === 'pipe-to-ground' ? (this.direction + 4) % 8 : this.direction
         )
     }
 
@@ -157,7 +157,7 @@ export class PaintEntityContainer extends PaintContainer {
     public override moveAtCursor(): void {
         if (!this.visible) return
 
-        const railRelatedNames = ['legacy_straight_rail', 'legacy_curved_rail', 'train_stop']
+        const railRelatedNames = ['legacy-straight-rail', 'legacy-curved-rail', 'train-stop']
         const firstRailPos = this.bpc.bp.getFirstRailRelatedEntityPos()
 
         if (railRelatedNames.includes(this.name) && firstRailPos) {
@@ -225,14 +225,14 @@ export class PaintEntityContainer extends PaintContainer {
                     position,
                     direction,
                     type:
-                        fd.type === 'underground_belt' || fd.type === 'loader'
+                        fd.type === 'underground-belt' || fd.type === 'loader'
                             ? this.directionType
                             : undefined,
                 },
                 true
             )
 
-            if (fd.type === 'underground_belt' || this.name === 'pipe_to_ground') {
+            if (fd.type === 'underground-belt' || this.name === 'pipe-to-ground') {
                 this.direction = (direction + 4) % 8
                 this.redraw()
                 this.destroyUndergroundLine()

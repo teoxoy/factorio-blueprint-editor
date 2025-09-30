@@ -23,11 +23,11 @@ export interface IOilOutpostSettings extends Record<string, string | boolean | n
 
 const oilOutpostSettings: IOilOutpostSettings = {
     DEBUG: false,
-    PUMPJACK_MODULE: 'productivity_module_3',
+    PUMPJACK_MODULE: 'productivity-module-3',
     MIN_GAP_BETWEEN_UNDERGROUNDS: 1,
     BEACONS: true,
     MIN_AFFECTED_ENTITIES: 1,
-    BEACON_MODULE: 'speed_module_3',
+    BEACON_MODULE: 'speed-module-3',
 }
 
 // this is how it works in factorio but js doesn't support 64bit bitwise operations
@@ -139,7 +139,7 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
 
                 // Approximate position of placeable_off_grid entities (i.e. landmines)
                 for (const e of ENTITIES) {
-                    if (!FD.entities[e.name].flags.includes('placeable_off_grid')) continue
+                    if (!FD.entities[e.name].flags.includes('placeable-off-grid')) continue
 
                     const size = util.rotatePointBasedOnDir(
                         [FD.entities[e.name].size.width / 2, FD.entities[e.name].size.height / 2],
@@ -182,9 +182,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
 
             this.description = data.description
             this.schedules = data.schedules
-            this.absolute_snapping = data.absolute_snapping
-            this.snap_to_grid = data.snap_to_grid
-            this.position_relative_to_grid = data.position_relative_to_grid
+            this.absolute_snapping = data['absolute-snapping']
+            this.snap_to_grid = data['snap-to-grid']
+            this.position_relative_to_grid = data['position-relative-to-grid']
         }
 
         // makes initial entities non undoable and resets the history if the user cleared the editor
@@ -322,9 +322,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
 
     public getFirstRailRelatedEntityPos(): IPoint | undefined {
         for (const [, e] of this.entities) {
-            if (e.name === 'legacy_straight_rail') return e.position
-            if (e.name === 'train_stop') return e.position
-            if (e.name === 'legacy_curved_rail') return { x: e.position.x - 1, y: e.position.y - 1 }
+            if (e.name === 'legacy-straight-rail') return e.position
+            if (e.name === 'train-stop') return e.position
+            if (e.name === 'legacy-curved-rail') return { x: e.position.x - 1, y: e.position.y - 1 }
         }
         return undefined
     }
@@ -640,9 +640,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
             label: this.name,
             description: this.description,
             schedules: this.schedules,
-            absolute_snapping: this.absolute_snapping,
-            snap_to_grid: this.snap_to_grid,
-            position_relative_to_grid: this.position_relative_to_grid,
+            'absolute-snapping': this.absolute_snapping,
+            'snap-to-grid': this.snap_to_grid,
+            'position-relative-to-grid': this.position_relative_to_grid,
         }
     }
 }
@@ -662,7 +662,7 @@ function getOffset(data?: Partial<IBlueprint>): IPoint {
 
     if (data.entities) {
         for (const entity of data.entities) {
-            if (FD.entities[entity.name].flags.includes('placeable_off_grid')) continue
+            if (FD.entities[entity.name].flags.includes('placeable-off-grid')) continue
 
             const size = util.switchSizeBasedOnDirection(
                 FD.entities[entity.name].size,
