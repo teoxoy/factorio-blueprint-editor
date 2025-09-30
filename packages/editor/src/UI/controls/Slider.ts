@@ -1,4 +1,4 @@
-import { Container, FederatedPointerEvent } from 'pixi.js'
+import { Container, ContainerChild, FederatedPointerEvent } from 'pixi.js'
 import { colors } from '../style'
 import F from './functions'
 
@@ -172,7 +172,7 @@ export class Slider extends Container {
             this.m_Dragpoint =
                 this.m_SliderButton.parent.worldTransform.applyInverse(event.global).x -
                 this.m_SliderButton.x
-            this.m_SliderButton.getChildAt(1).visible = true
+            this.m_SliderButton.getChildAt<ContainerChild>(1).visible = true
         }
     }
 
@@ -213,7 +213,7 @@ export class Slider extends Container {
     private readonly onButtonDragEnd = (): void => {
         if (this.m_Dragging) {
             this.m_Dragging = false
-            this.m_SliderButton.getChildAt(1).visible = false
+            this.m_SliderButton.getChildAt<ContainerChild>(1).visible = false
         }
     }
 }

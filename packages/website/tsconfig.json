@@ -1,8 +1,7 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "lib": ["ESNext", "DOM"],
-        "types": ["vite/client"]
+        "lib": ["ESNext", "DOM"]
     },
     "include": ["src", "../editor/src/global.d.ts"]
 }

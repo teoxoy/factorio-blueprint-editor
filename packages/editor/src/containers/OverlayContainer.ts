@@ -1,12 +1,14 @@
 import { Container, Graphics, Sprite } from 'pixi.js'
 import { IPoint } from '../types'
-import FD, { FluidBox, CursorBoxType, SpriteData } from '../core/factorioData'
+import FD from '../core/factorioData'
 import F from '../UI/controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
 import { Entity } from '../core/Entity'
 import { EditorMode, BlueprintContainer } from './BlueprintContainer'
 import { EntityContainer } from './EntityContainer'
+import { CursorBoxSpecification } from 'factorio:prototype'
+import { FluidBox, Sprite as SpriteData } from 'factorio:prototype'
 
 export class OverlayContainer extends Container {
     private readonly bpc: BlueprintContainer
@@ -98,7 +100,7 @@ export class OverlayContainer extends Container {
         const modules = entity.modules
         if (modules.length !== 0 && entity.name !== 'beacon') {
             const moduleInfo = new Container()
-            const shift = entity.entityData.module_specification.module_info_icon_shift
+            const shift = undefined //entity.entityData.module_specification.module_info_icon_shift
             for (let index = 0; index < modules.length; index++) {
                 createIconWithBackground(moduleInfo, modules[index], { x: index * 32, y: 0 })
             }
@@ -461,7 +463,7 @@ export class OverlayContainer extends Container {
     public createCursorBox(
         position: IPoint,
         size: IPoint,
-        type: CursorBoxType = 'regular'
+        type: keyof CursorBoxSpecification = 'regular'
     ): Container {
         const cursorBox = new Container()
         cursorBox.scale.set(0.5, 0.5)

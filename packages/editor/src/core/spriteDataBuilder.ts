@@ -1,30 +1,110 @@
 import util from '../common/util'
 import { IPoint } from '../types'
 import FD, {
-    Entity as FD_Entity,
-    SpriteData,
-    DirectionalSpriteLayers,
-    PipeConnection,
-    Connections,
-    BeltAnimationSet,
-    DirectionalSpriteData,
-    SpriteLayers,
-    StorageTankPictures,
-    SpriteSheets,
-    RailSpriteLayers,
-    RailPictures,
-    WallPictures,
-    PipePictures,
-    UndergroundBeltStructure,
-    CircuitConnectorSprites,
     ColorWithAlpha,
-    SpriteDataPart,
+    getHeatBuffer,
+    getEnergySource,
+    getCircuitConnector,
 } from './factorioData'
 import { PositionGrid } from './PositionGrid'
 import { Entity } from './Entity'
+import {
+    CircuitConnectorDefinition,
+    RailPieceLayers,
+    SpriteVariations,
+    EntityWithOwnerPrototype,
+    TransportBeltAnimationSetWithCorners,
+    Sprite as SpriteData,
+    CombinatorPrototype,
+    HeatConnection,
+    Sprite4Way,
+    AccumulatorPrototype,
+    AgriculturalTowerPrototype,
+    AmmoTurretPrototype,
+    ArithmeticCombinatorPrototype,
+    ArtilleryTurretPrototype,
+    ArtilleryWagonPrototype,
+    AssemblingMachinePrototype,
+    AsteroidCollectorPrototype,
+    BeaconPrototype,
+    BoilerPrototype,
+    BurnerGeneratorPrototype,
+    CargoBayPrototype,
+    CargoLandingPadPrototype,
+    CargoWagonPrototype,
+    ConstantCombinatorPrototype,
+    ConstructionRobotPrototype,
+    ContainerPrototype,
+    CurvedRailAPrototype,
+    CurvedRailBPrototype,
+    DeciderCombinatorPrototype,
+    DisplayPanelPrototype,
+    ElectricEnergyInterfacePrototype,
+    ElectricPolePrototype,
+    ElectricTurretPrototype,
+    ElevatedCurvedRailAPrototype,
+    ElevatedCurvedRailBPrototype,
+    ElevatedHalfDiagonalRailPrototype,
+    ElevatedStraightRailPrototype,
+    FluidTurretPrototype,
+    FluidWagonPrototype,
+    FurnacePrototype,
+    FusionGeneratorPrototype,
+    FusionReactorPrototype,
+    GatePrototype,
+    GeneratorPrototype,
+    HalfDiagonalRailPrototype,
+    HeatInterfacePrototype,
+    HeatPipePrototype,
+    InfinityCargoWagonPrototype,
+    InfinityContainerPrototype,
+    InserterPrototype,
+    LabPrototype,
+    LampPrototype,
+    LandMinePrototype,
+    LaneSplitterPrototype,
+    LegacyCurvedRailPrototype,
+    LegacyStraightRailPrototype,
+    LightningAttractorPrototype,
+    LinkedBeltPrototype,
+    LinkedContainerPrototype,
+    LoaderPrototype,
+    LocomotivePrototype,
+    LogisticContainerPrototype,
+    LogisticRobotPrototype,
+    MiningDrillPrototype,
+    OffshorePumpPrototype,
+    PipePrototype,
+    PipeToGroundPrototype,
+    PowerSwitchPrototype,
+    ProgrammableSpeakerPrototype,
+    ProxyContainerPrototype,
+    PumpPrototype,
+    RadarPrototype,
+    RailRampPrototype,
+    RailSignalBasePrototype,
+    RailSupportPrototype,
+    ReactorPrototype,
+    RoboportPrototype,
+    RocketSiloPrototype,
+    SelectorCombinatorPrototype,
+    SolarPanelPrototype,
+    SpacePlatformHubPrototype,
+    SplitterPrototype,
+    StorageTankPrototype,
+    StraightRailPrototype,
+    ThrusterPrototype,
+    TrainStopPrototype,
+    TransportBeltPrototype,
+    TurretPrototype,
+    UndergroundBeltPrototype,
+    ValvePrototype,
+    WallPrototype,
+} from 'factorio:prototype'
+import { Animation } from 'factorio:prototype'
+import { Animation4Way } from 'factorio:prototype'
 
 interface IDrawData {
-    hr: boolean
     dir: number
 
     name: string
@@ -41,51 +121,34 @@ interface IDrawData {
     modules: string[]
 }
 
-export interface ExtendedSpriteDataPart extends SpriteDataPart {
+export interface ExtendedSpriteData extends SpriteData {
     anchorX?: number
     anchorY?: number
     squishY?: number
     rotAngle?: number
 }
 
-export interface ExtendedSpriteData extends ExtendedSpriteDataPart {
-    hr_version?: ExtendedSpriteDataPart
-}
+const generatorCache = new Map<string, (data: IDrawData) => readonly ExtendedSpriteData[]>()
 
-const generatorCache = new Map<string, (data: IDrawData) => ExtendedSpriteData[]>()
-
-function getSpriteData(data: IDrawData): ExtendedSpriteData[] {
+function getSpriteData(data: IDrawData): readonly ExtendedSpriteData[] {
     if (generatorCache.has(data.name)) {
         return generatorCache.get(data.name)(data)
     }
 
     const entity = FD.entities[data.name]
-    const generator = (data: IDrawData): ExtendedSpriteData[] => {
-        const spriteData = [
+    const generator = (data: IDrawData): readonly ExtendedSpriteData[] => {
+        return [
             ...generateGraphics(entity)(data),
             ...generateCovers(entity, data),
             ...generateConnection(entity, data),
         ]
-        for (let i = 0; i < spriteData.length; i++) {
-            spriteData[i] =
-                data.hr && spriteData[i].hr_version ? spriteData[i].hr_version : spriteData[i]
-            if (spriteData[i].apply_runtime_tint && !spriteData[i].tint) {
-                spriteData[i].tint = {
-                    r: 233 / 255,
-                    g: 195 / 255,
-                    b: 153 / 255,
-                    a: 0.8,
-                }
-            }
-        }
-        return spriteData
     }
     generatorCache.set(data.name, generator)
 
     return generator(data)
 }
 
-function getPipeCovers(e: FD_Entity): DirectionalSpriteLayers {
+function getPipeCovers(e: EntityWithOwnerPrototype): DirectionalSpriteLayers {
     if (e.fluid_box && e.output_fluid_box) {
         return e.fluid_box.pipe_covers
     }
@@ -104,29 +167,11 @@ function getPipeCovers(e: FD_Entity): DirectionalSpriteLayers {
     }
 }
 
-function generateConnection(e: FD_Entity, data: IDrawData): SpriteData[] {
-    const hasWireConnectionFeature = (e: FD_Entity): boolean => {
-        if (e.type === 'transport_belt') {
-            return false
-        }
-        if (
-            e.connection_points ||
-            e.input_connection_points ||
-            e.circuit_wire_connection_point ||
-            e.circuit_wire_connection_points
-        ) {
-            return true
-        }
-    }
-    if (!hasWireConnectionFeature(e)) {
-        return []
-    }
-    if (data.generateConnector && e.circuit_connector_sprites) {
-        const getIndex = (sprites: CircuitConnectorSprites[]): number =>
-            sprites.length === 8 ? data.dir : data.dir / 2
-        const ccs = Array.isArray(e.circuit_connector_sprites)
-            ? e.circuit_connector_sprites[getIndex(e.circuit_connector_sprites)]
-            : e.circuit_connector_sprites
+function generateConnection(e: EntityWithOwnerPrototype, data: IDrawData): readonly SpriteData[] {
+    if (!data.generateConnector) return []
+    const cc = getCircuitConnector(e, data.dir)
+    if (cc) {
+        const ccs = cc.sprites
         return [ccs.connector_main, ccs.wire_pins, ccs.led_blue_off]
     }
     return []
@@ -136,23 +181,16 @@ function addToShift(shift: IPoint | number[], tab: SpriteData): SpriteData {
     const SHIFT: number[] = Array.isArray(shift) ? shift : [shift.x, shift.y]
 
     tab.shift = tab.shift ? [SHIFT[0] + tab.shift[0], SHIFT[1] + tab.shift[1]] : SHIFT
-    if (tab.hr_version) {
-        tab.hr_version.shift = tab.hr_version.shift
-            ? [SHIFT[0] + tab.hr_version.shift[0], SHIFT[1] + tab.hr_version.shift[1]]
-            : SHIFT
-    }
+
     return tab
 }
 
-function setProperty<K extends keyof ExtendedSpriteDataPart>(
+function setProperty<K extends keyof ExtendedSpriteData>(
     img: ExtendedSpriteData,
     key: K,
     val: ExtendedSpriteData[K]
 ): ExtendedSpriteData {
     img[key] = val
-    if (img.hr_version) {
-        img.hr_version[key] = val
-    }
     return img
 }
 
@@ -166,9 +204,6 @@ function setPropertyUsing<
 >(img: ExtendedSpriteData, key0: K0, key1: K1, mult = 1): ExtendedSpriteData {
     if (key1) {
         img[key0] = img[key1] * mult
-        if (img.hr_version) {
-            img.hr_version[key0] = img.hr_version[key1] * mult
-        }
     }
     return img
 }
@@ -180,7 +215,7 @@ function duplicateAndSetPropertyUsing<
     return setPropertyUsing(util.duplicate(img), key0, key1, mult)
 }
 
-function generateCovers(e: FD_Entity, data: IDrawData): SpriteData[] {
+function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly SpriteData[] {
     // entity doesn't have PipeCoverFeature
     if (!(e.fluid_box || e.fluid_boxes || e.output_fluid_box)) {
         return []
@@ -287,7 +322,7 @@ function generateCovers(e: FD_Entity, data: IDrawData): SpriteData[] {
 }
 
 function getPipeConnectionPoints(
-    e: FD_Entity,
+    e: EntityWithOwnerPrototype,
     dir: number,
     assemblerPipeDirection: string
 ): IPoint[] {
@@ -340,29 +375,15 @@ function getPipeConnectionPoints(
     return positions
 }
 
-function getHeatConectionPoints(e: FD_Entity): Connections[] {
-    // nuclear reactor
-    if (e.heat_buffer) {
-        return e.heat_buffer.connections
-    }
-    // heat exchanger
-    if (e.energy_source) {
-        return e.energy_source.connections
-    }
-}
-
 function getHeatConnections(position: IPoint, positionGrid: PositionGrid): boolean[] {
     return positionGrid.getNeighbourData(position).map(({ x, y, entity }) => {
         if (!entity) {
             return false
         }
 
-        if (entity.name === 'heat_pipe' || entity.name === 'heat_interface') {
-            return true
-        }
-        if (entity.name === 'heat_exchanger' || entity.name === 'nuclear_reactor') {
+        const checkConnections = (connections: readonly HeatConnection[]): boolean => {
             return (
-                getHeatConectionPoints(entity.entityData)
+                connections
                     .map(conn => util.rotatePointBasedOnDir(conn.position, entity.direction))
                     .filter(
                         offset =>
@@ -371,6 +392,21 @@ function getHeatConnections(position: IPoint, positionGrid: PositionGrid): boole
                     ).length > 0
             )
         }
+
+        // check for heat_buffer first since the reactor has both properties
+        const heat_buffer = getHeatBuffer(entity.entityData)
+        if (heat_buffer) {
+            return checkConnections(heat_buffer.connections)
+        }
+
+        const energy_source = getEnergySource(entity.entityData)
+        if (energy_source) {
+            if (energy_source.type === 'heat') {
+                return checkConnections(energy_source.connections)
+            }
+        }
+
+        return false
     })
 }
 
@@ -428,14 +464,14 @@ function getBeltWireConnectionIndex(
 }
 
 function getBeltSprites(
-    bas: BeltAnimationSet,
+    bas: TransportBeltAnimationSetWithCorners,
     position: IPoint,
     direction: number,
     positionGrid?: PositionGrid,
     stratingEnding = true,
     endingEnding = true,
     forceStraight = false
-): SpriteData[] {
+): readonly SpriteData[] {
     const parts = []
 
     if (positionGrid) {
@@ -599,11 +635,11 @@ function getBeltSprites(
     }
 
     function getBeltSpriteFromData(
-        bas: BeltAnimationSet,
+        bas: TransportBeltAnimationSetWithCorners,
         dir: number,
         type: BeltShape
     ): SpriteData {
-        return duplicateAndSetPropertyUsing(bas.animation_set, 'y', 'height', getIndex() - 1)
+        return duplicateAndSetPropertyUsing(bas.animation_set, 'y', 'size', getIndex() - 1)
 
         function getIndex(): number {
             switch (type) {
@@ -671,209 +707,964 @@ function getBeltSprites(
     }
 }
 
-function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
-    if (e.name.includes('combinator')) {
-        return (data: IDrawData) => {
-            if (e.name === 'decider_combinator' || e.name === 'arithmetic_combinator') {
-                const operatorToSpriteData = (operator: string): DirectionalSpriteData => {
-                    switch (operator) {
-                        case '<':
-                            return e.less_symbol_sprites
-                        case '>':
-                            return e.greater_symbol_sprites
-                        case '≤':
-                            return e.less_or_equal_symbol_sprites
-                        case '≥':
-                            return e.greater_or_equal_symbol_sprites
-                        case '=':
-                            return e.equal_symbol_sprites
-                        case '≠':
-                            return e.not_equal_symbol_sprites
+function getAnimation(a: Animation4Way, dir: number): Animation {
+    const ad = a[util.intToDir(dir)]
+    if (ad) {
+        return ad
+    } else if (a['north']) {
+        return a['north']
+    } else {
+        return a as Animation
+    }
+}
 
-                        case '+':
-                            return e.plus_symbol_sprites
-                        case '-':
-                            return e.minus_symbol_sprites
-                        case '*':
-                            return e.multiply_symbol_sprites
-                        case '/':
-                            return e.divide_symbol_sprites
-                        case '%':
-                            return e.modulo_symbol_sprites
-                        case '^':
-                            return e.power_symbol_sprites
-                        case '<<':
-                            return e.left_shift_symbol_sprites
-                        case '>>':
-                            return e.right_shift_symbol_sprites
-                        case 'AND':
-                            return e.and_symbol_sprites
-                        case 'OR':
-                            return e.or_symbol_sprites
-                        case 'XOR':
-                            return e.xor_symbol_sprites
-                        default:
-                            return e.name === 'decider_combinator'
-                                ? e.less_symbol_sprites
-                                : e.multiply_symbol_sprites
+function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => readonly SpriteData[] {
+    switch (e.type as string) {
+        case 'accumulator':
+            return draw_accumulator(e as AccumulatorPrototype)
+        case 'agricultural_tower':
+            return draw_agricultural_tower(e as AgriculturalTowerPrototype)
+        case 'ammo_turret':
+            return draw_ammo_turret(e as AmmoTurretPrototype)
+        case 'arithmetic_combinator':
+            return draw_arithmetic_combinator(e as ArithmeticCombinatorPrototype)
+        case 'artillery_turret':
+            return draw_artillery_turret(e as ArtilleryTurretPrototype)
+        case 'artillery_wagon':
+            return draw_artillery_wagon(e as ArtilleryWagonPrototype)
+        case 'assembling_machine':
+            return draw_assembling_machine(e as AssemblingMachinePrototype)
+        case 'asteroid_collector':
+            return draw_asteroid_collector(e as AsteroidCollectorPrototype)
+        case 'beacon':
+            return draw_beacon(e as BeaconPrototype)
+        case 'boiler':
+            return draw_boiler(e as BoilerPrototype)
+        case 'burner_generator':
+            return draw_burner_generator(e as BurnerGeneratorPrototype)
+        case 'cargo_bay':
+            return draw_cargo_bay(e as CargoBayPrototype)
+        case 'cargo_landing_pad':
+            return draw_cargo_landing_pad(e as CargoLandingPadPrototype)
+        case 'cargo_wagon':
+            return draw_cargo_wagon(e as CargoWagonPrototype)
+        case 'constant_combinator':
+            return draw_constant_combinator(e as ConstantCombinatorPrototype)
+        case 'construction_robot':
+            return draw_construction_robot(e as ConstructionRobotPrototype)
+        case 'container':
+            return draw_container(e as ContainerPrototype)
+        case 'curved_rail_a':
+            return draw_curved_rail_a(e as CurvedRailAPrototype)
+        case 'curved_rail_b':
+            return draw_curved_rail_b(e as CurvedRailBPrototype)
+        case 'decider_combinator':
+            return draw_decider_combinator(e as DeciderCombinatorPrototype)
+        case 'display_panel':
+            return draw_display_panel(e as DisplayPanelPrototype)
+        case 'electric_energy_interface':
+            return draw_electric_energy_interface(e as ElectricEnergyInterfacePrototype)
+        case 'electric_pole':
+            return draw_electric_pole(e as ElectricPolePrototype)
+        case 'electric_turret':
+            return draw_electric_turret(e as ElectricTurretPrototype)
+        case 'elevated_curved_rail_a':
+            return draw_elevated_curved_rail_a(e as ElevatedCurvedRailAPrototype)
+        case 'elevated_curved_rail_b':
+            return draw_elevated_curved_rail_b(e as ElevatedCurvedRailBPrototype)
+        case 'elevated_half_diagonal_rail':
+            return draw_elevated_half_diagonal_rail(e as ElevatedHalfDiagonalRailPrototype)
+        case 'elevated_straight_rail':
+            return draw_elevated_straight_rail(e as ElevatedStraightRailPrototype)
+        case 'fluid_turret':
+            return draw_fluid_turret(e as FluidTurretPrototype)
+        case 'fluid_wagon':
+            return draw_fluid_wagon(e as FluidWagonPrototype)
+        case 'furnace':
+            return draw_furnace(e as FurnacePrototype)
+        case 'fusion_generator':
+            return draw_fusion_generator(e as FusionGeneratorPrototype)
+        case 'fusion_reactor':
+            return draw_fusion_reactor(e as FusionReactorPrototype)
+        case 'gate':
+            return draw_gate(e as GatePrototype)
+        case 'generator':
+            return draw_generator(e as GeneratorPrototype)
+        case 'half_diagonal_rail':
+            return draw_half_diagonal_rail(e as HalfDiagonalRailPrototype)
+        case 'heat_interface':
+            return draw_heat_interface(e as HeatInterfacePrototype)
+        case 'heat_pipe':
+            return draw_heat_pipe(e as HeatPipePrototype)
+        case 'infinity_cargo_wagon':
+            return draw_infinity_cargo_wagon(e as InfinityCargoWagonPrototype)
+        case 'infinity_container':
+            return draw_infinity_container(e as InfinityContainerPrototype)
+        case 'inserter':
+            return draw_inserter(e as InserterPrototype)
+        case 'lab':
+            return draw_lab(e as LabPrototype)
+        case 'lamp':
+            return draw_lamp(e as LampPrototype)
+        case 'land_mine':
+            return draw_land_mine(e as LandMinePrototype)
+        case 'lane_splitter':
+            return draw_lane_splitter(e as LaneSplitterPrototype)
+        case 'legacy_curved_rail':
+            return draw_legacy_curved_rail(e as LegacyCurvedRailPrototype)
+        case 'legacy_straight_rail':
+            return draw_legacy_straight_rail(e as LegacyStraightRailPrototype)
+        case 'lightning_attractor':
+            return draw_lightning_attractor(e as LightningAttractorPrototype)
+        case 'linked_belt':
+            return draw_linked_belt(e as LinkedBeltPrototype)
+        case 'linked_container':
+            return draw_linked_container(e as LinkedContainerPrototype)
+        case 'loader_1x1':
+        case 'loader':
+            return draw_loader(e as LoaderPrototype)
+        case 'locomotive':
+            return draw_locomotive(e as LocomotivePrototype)
+        case 'logistic_container':
+            return draw_logistic_container(e as LogisticContainerPrototype)
+        case 'logistic_robot':
+            return draw_logistic_robot(e as LogisticRobotPrototype)
+        case 'mining_drill':
+            return draw_mining_drill(e as MiningDrillPrototype)
+        case 'offshore_pump':
+            return draw_offshore_pump(e as OffshorePumpPrototype)
+        case 'pipe':
+        case 'infinity_pipe':
+            return draw_pipe(e as PipePrototype)
+        case 'pipe_to_ground':
+            return draw_pipe_to_ground(e as PipeToGroundPrototype)
+        case 'power_switch':
+            return draw_power_switch(e as PowerSwitchPrototype)
+        case 'programmable_speaker':
+            return draw_programmable_speaker(e as ProgrammableSpeakerPrototype)
+        case 'proxy_container':
+            return draw_proxy_container(e as ProxyContainerPrototype)
+        case 'pump':
+            return draw_pump(e as PumpPrototype)
+        case 'radar':
+            return draw_radar(e as RadarPrototype)
+        case 'rail_ramp':
+            return draw_rail_ramp(e as RailRampPrototype)
+        case 'rail_signal':
+        case 'rail_chain_signal':
+            return draw_rail_signal_base(e as RailSignalBasePrototype)
+        case 'rail_support':
+            return draw_rail_support(e as RailSupportPrototype)
+        case 'reactor':
+            return draw_reactor(e as ReactorPrototype)
+        case 'roboport':
+            return draw_roboport(e as RoboportPrototype)
+        case 'rocket_silo':
+            return draw_rocket_silo(e as RocketSiloPrototype)
+        case 'selector_combinator':
+            return draw_selector_combinator(e as SelectorCombinatorPrototype)
+        case 'solar_panel':
+            return draw_solar_panel(e as SolarPanelPrototype)
+        case 'space_platform_hub':
+            return draw_space_platform_hub(e as SpacePlatformHubPrototype)
+        case 'splitter':
+            return draw_splitter(e as SplitterPrototype)
+        case 'storage_tank':
+            return draw_storage_tank(e as StorageTankPrototype)
+        case 'straight_rail':
+            return draw_straight_rail(e as StraightRailPrototype)
+        case 'thruster':
+            return draw_thruster(e as ThrusterPrototype)
+        case 'train_stop':
+            return draw_train_stop(e as TrainStopPrototype)
+        case 'transport_belt':
+            return draw_transport_belt(e as TransportBeltPrototype)
+        case 'turret':
+            return draw_turret(e as TurretPrototype)
+        case 'underground_belt':
+            return draw_underground_belt(e as UndergroundBeltPrototype)
+        case 'valve':
+            return draw_valve(e as ValvePrototype)
+        case 'wall':
+            return draw_wall(e as WallPrototype)
+        default:
+            throw new Error(`Missing draw function for: '${e.type}'`)
+    }
+}
+
+function draw_accumulator(e: AccumulatorPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.chargable_graphics.picture.layers
+}
+function draw_agricultural_tower(
+    e: AgriculturalTowerPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_ammo_turret(e: AmmoTurretPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => [
+        ...e.graphics_set.base_visualisation.animation.layers,
+        duplicateAndSetPropertyUsing(e.folded_animation.layers[0], 'y', 'height', data.dir / 2),
+        duplicateAndSetPropertyUsing(e.folded_animation.layers[1], 'y', 'height', data.dir / 2),
+    ]
+}
+function draw_arithmetic_combinator(
+    e: ArithmeticCombinatorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const operatorToSpriteData = (operator: string): Sprite4Way => {
+            switch (operator) {
+                case '+':
+                    return e.plus_symbol_sprites
+                case '-':
+                    return e.minus_symbol_sprites
+                case '*':
+                    return e.multiply_symbol_sprites
+                case '/':
+                    return e.divide_symbol_sprites
+                case '%':
+                    return e.modulo_symbol_sprites
+                case '^':
+                    return e.power_symbol_sprites
+                case '<<':
+                    return e.left_shift_symbol_sprites
+                case '>>':
+                    return e.right_shift_symbol_sprites
+                case 'AND':
+                    return e.and_symbol_sprites
+                case 'OR':
+                    return e.or_symbol_sprites
+                case 'XOR':
+                    return e.xor_symbol_sprites
+                default:
+                    throw new Error('Internal Error!')
+            }
+        }
+        return [
+            ...e.sprites[util.intToDir(data.dir)].layers,
+            operatorToSpriteData(data.operator)[util.intToDir(data.dir)],
+        ]
+    }
+}
+function draw_artillery_turret(
+    e: ArtilleryTurretPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const d = data.dir
+        let base = util.duplicate(e.cannon_base_pictures.layers[0])
+        base = setProperty(base, 'filename', base.filenames[d])
+        base = addToShift([0, -0.6875], base)
+        let barrel = util.duplicate(e.cannon_barrel_pictures.layers[0])
+        barrel = setProperty(barrel, 'filename', barrel.filenames[d])
+        barrel = addToShift([0, -0.6875], barrel)
+        barrel = addToShift(getShift(), barrel)
+        function getShift(): number[] {
+            switch (data.dir) {
+                case 0:
+                    return [0, 1]
+                case 2:
+                    return [-1, 0.31]
+                case 4:
+                    return [0, -0.4]
+                case 6:
+                    return [1, 0.31]
+            }
+        }
+        return [...e.base_picture.layers, barrel, base]
+    }
+}
+function draw_artillery_wagon(
+    e: ArtilleryWagonPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_assembling_machine(
+    e: AssemblingMachinePrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        if (
+            (e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') &&
+            data.assemblerCraftsWithFluid
+        ) {
+            const pipeDirection =
+                data.assemblerPipeDirection === 'input' ? data.dir : (data.dir + 4) % 8
+            const out = [
+                e.graphics_set.animation.layers[0],
+                addToShift(
+                    getPipeConnectionPoints(e, data.dir, data.assemblerPipeDirection)[0],
+                    util.duplicate(e.fluid_boxes[0].pipe_picture[util.intToDir(pipeDirection)])
+                ),
+            ]
+            if (pipeDirection === 0) {
+                return [out[1], out[0]]
+            }
+            return out
+        }
+
+        if (e.graphics_set.always_draw_idle_animation) {
+            return e.graphics_set.idle_animation.layers
+        } else {
+            return getAnimation(e.graphics_set.animation, data.dir).layers
+        }
+    }
+}
+function draw_asteroid_collector(
+    e: AsteroidCollectorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_beacon(e: BeaconPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const layers = e.graphics_set.animation_list
+            .filter(vis => vis.always_draw)
+            .map(vis => vis.animation)
+            .flatMap(vis => (vis.layers ? vis.layers : [vis]))
+
+        const modules = (data.modules || []).map(name => FD.items[name])
+        const moduleLayers = e.graphics_set.module_visualisations
+            .flatMap(vis => vis.slots)
+            .flatMap((arr, i) => {
+                const module = modules[i]
+                if (module) {
+                    return arr.map(slot => {
+                        const img = util.duplicate(slot.pictures)
+
+                        let variationIndex = module.tier - 1
+                        if (slot.has_empty_slot) {
+                            variationIndex += 1
+                        }
+                        setPropertyUsing(img, 'x', 'width', variationIndex)
+
+                        if (slot.apply_module_tint) {
+                            let tint = module.beacon_tint[slot.apply_module_tint]
+                            if (Array.isArray(tint)) {
+                                tint = { r: tint[0], g: tint[1], b: tint[2], a: 1 }
+                            }
+                            setProperty(img, 'tint', tint)
+                        }
+                        return img
+                    })
+                } else {
+                    return arr.filter(slot => slot.has_empty_slot).map(slot => slot.pictures)
+                }
+            })
+
+        return [...layers, ...moduleLayers]
+    }
+}
+function draw_boiler(e: BoilerPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        let energy_source = getEnergySource(e)
+        if (energy_source.type === 'heat') {
+            let needsEnding = true
+            if (data.positionGrid) {
+                const conn = energy_source.connections[0]
+                const pos = util.rotatePointBasedOnDir(conn.position, data.dir)
+                const c = getHeatConnections(
+                    {
+                        x: Math.floor(data.position.x + pos.x),
+                        y: Math.floor(data.position.y + pos.y),
+                    },
+                    data.positionGrid
+                )
+                needsEnding = !c[((data.dir + conn.direction) % 8) / 2]
+            }
+            if (needsEnding) {
+                return [
+                    addToShift(
+                        util.rotatePointBasedOnDir([0, 1.5], data.dir),
+                        util.duplicate(energy_source.pipe_covers[util.intToDir((data.dir + 4) % 8)])
+                    ),
+                    ...e.pictures[util.intToDir(data.dir)].structure.layers,
+                ]
+            }
+        }
+        return e.pictures[util.intToDir(data.dir)].structure.layers
+    }
+}
+function draw_burner_generator(
+    e: BurnerGeneratorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_cargo_bay(e: CargoBayPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_cargo_landing_pad(
+    e: CargoLandingPadPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_cargo_wagon(e: CargoWagonPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_constant_combinator(
+    e: ConstantCombinatorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        return e.sprites[util.intToDir(data.dir)].layers
+    }
+}
+function draw_construction_robot(
+    e: ConstructionRobotPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_container(e: ContainerPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.picture.layers
+}
+function draw_curved_rail_a(e: CurvedRailAPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_curved_rail_b(e: CurvedRailBPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_decider_combinator(
+    e: DeciderCombinatorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const operatorToSpriteData = (operator: string): Sprite4Way => {
+            switch (operator) {
+                case '<':
+                    return e.less_symbol_sprites
+                case '>':
+                    return e.greater_symbol_sprites
+                case '≤':
+                    return e.less_or_equal_symbol_sprites
+                case '≥':
+                    return e.greater_or_equal_symbol_sprites
+                case '=':
+                    return e.equal_symbol_sprites
+                case '≠':
+                    return e.not_equal_symbol_sprites
+                default:
+                    throw new Error('Internal Error!')
+            }
+        }
+        return [
+            ...e.sprites[util.intToDir(data.dir)].layers,
+            operatorToSpriteData(data.operator)[util.intToDir(data.dir)],
+        ]
+    }
+}
+function draw_display_panel(e: DisplayPanelPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_electric_energy_interface(
+    e: ElectricEnergyInterfacePrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.picture.layers
+}
+function draw_electric_pole(e: ElectricPolePrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => [
+        duplicateAndSetPropertyUsing(e.pictures.layers[0], 'x', 'width', data.dir / 2),
+    ]
+}
+function draw_electric_turret(
+    e: ElectricTurretPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => [
+        ...e.graphics_set.base_visualisation.animation.layers,
+        duplicateAndSetPropertyUsing(e.folded_animation.layers[0], 'y', 'height', data.dir / 2),
+        duplicateAndSetPropertyUsing(e.folded_animation.layers[2], 'y', 'height', data.dir / 2),
+    ]
+}
+function draw_elevated_curved_rail_a(
+    e: ElevatedCurvedRailAPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_elevated_curved_rail_b(
+    e: ElevatedCurvedRailBPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_elevated_half_diagonal_rail(
+    e: ElevatedHalfDiagonalRailPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_elevated_straight_rail(
+    e: ElevatedStraightRailPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_fluid_turret(e: FluidTurretPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) =>
+        e.graphics_set.base_visualisation.animation[util.intToDir(data.dir)].layers
+}
+function draw_fluid_wagon(e: FluidWagonPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_furnace(e: FurnacePrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.graphics_set.animation.layers
+}
+function draw_fusion_generator(
+    e: FusionGeneratorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_fusion_reactor(
+    e: FusionReactorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        function getBaseSprites(): readonly SpriteData[] {
+            if (data.positionGrid) {
+                const size = util.switchSizeBasedOnDirection(e.size, data.dir)
+                const rail = data.positionGrid.findInArea(
+                    {
+                        x: data.position.x,
+                        y: data.position.y,
+                        w: size.x,
+                        h: size.y,
+                    },
+                    entity => entity.name === 'legacy_straight_rail'
+                )
+                if (rail) {
+                    if (data.dir === 0) {
+                        if (rail.position.y > data.position.y) {
+                            return e.vertical_rail_animation_left.layers
+                        }
+                        return e.vertical_rail_animation_right.layers
+                    } else {
+                        if (rail.position.x > data.position.x) {
+                            return e.horizontal_rail_animation_left.layers
+                        }
+                        return e.horizontal_rail_animation_right.layers
                     }
                 }
-                return [
-                    e.sprites[util.intToDir(data.dir)].layers[0],
-                    operatorToSpriteData(data.operator)[util.intToDir(data.dir)],
-                ]
             }
-            return [e.sprites[util.intToDir(data.dir)].layers[0]]
-        }
-    }
 
-    if (e.name.includes('assembling_machine')) {
-        return (data: IDrawData) => {
-            if (
-                (e.name === 'assembling_machine_2' || e.name === 'assembling_machine_3') &&
-                data.assemblerCraftsWithFluid
-            ) {
-                const pipeDirection =
-                    data.assemblerPipeDirection === 'input' ? data.dir : (data.dir + 4) % 8
-                const out = [
-                    (e.animation as SpriteLayers).layers[0],
-                    addToShift(
-                        getPipeConnectionPoints(e, data.dir, data.assemblerPipeDirection)[0],
-                        util.duplicate(e.fluid_boxes[0].pipe_picture[util.intToDir(pipeDirection)])
-                    ),
-                ]
-                if (pipeDirection === 0) {
-                    return [out[1], out[0]]
+            if (data.dir === 0) {
+                return e.vertical_animation.layers
+            }
+            return e.horizontal_animation.layers
+        }
+
+        if (data.dir === 0 && data.positionGrid) {
+            const wall = data.positionGrid.getEntityAtPosition({
+                x: data.position.x,
+                y: data.position.y + 1,
+            })
+            if (wall && wall.name === 'stone_wall') {
+                return [...getBaseSprites(), ...e.wall_patch.layers]
+            }
+        }
+
+        return getBaseSprites()
+    }
+}
+function draw_generator(e: GeneratorPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) =>
+        data.dir === 0 ? e.vertical_animation.layers : e.horizontal_animation.layers
+}
+function draw_half_diagonal_rail(
+    e: HalfDiagonalRailPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_heat_interface(
+    e: HeatInterfacePrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return () => [e.picture]
+}
+function draw_heat_pipe(e: HeatPipePrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        if (data.positionGrid) {
+            const getOpt = (): SpriteVariations => {
+                const conn = getHeatConnections(data.position, data.positionGrid)
+                if (conn[0] && conn[1] && conn[2] && conn[3]) {
+                    return e.connection_sprites.cross
                 }
-                return out
+                if (conn[0] && conn[1] && conn[3]) {
+                    return e.connection_sprites.t_up
+                }
+                if (conn[1] && conn[2] && conn[3]) {
+                    return e.connection_sprites.t_down
+                }
+                if (conn[0] && conn[1] && conn[2]) {
+                    return e.connection_sprites.t_right
+                }
+                if (conn[0] && conn[2] && conn[3]) {
+                    return e.connection_sprites.t_left
+                }
+                if (conn[0] && conn[2]) {
+                    return e.connection_sprites.straight_vertical
+                }
+                if (conn[1] && conn[3]) {
+                    return e.connection_sprites.straight_horizontal
+                }
+                if (conn[0] && conn[1]) {
+                    return e.connection_sprites.corner_right_up
+                }
+                if (conn[0] && conn[3]) {
+                    return e.connection_sprites.corner_left_up
+                }
+                if (conn[1] && conn[2]) {
+                    return e.connection_sprites.corner_right_down
+                }
+                if (conn[2] && conn[3]) {
+                    return e.connection_sprites.corner_left_down
+                }
+                if (conn[0]) {
+                    return e.connection_sprites.ending_up
+                }
+                if (conn[2]) {
+                    return e.connection_sprites.ending_down
+                }
+                if (conn[1]) {
+                    return e.connection_sprites.ending_right
+                }
+                if (conn[3]) {
+                    return e.connection_sprites.ending_left
+                }
+                return e.connection_sprites.single
             }
-            return [(e.animation as SpriteLayers).layers[0]]
+            return [util.getRandomItem(getOpt())]
         }
+        return [util.getRandomItem(e.connection_sprites.single)]
     }
+}
+function draw_infinity_cargo_wagon(
+    e: InfinityCargoWagonPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_infinity_container(
+    e: InfinityContainerPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.picture.layers
+}
+function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        let ho = util.duplicate(e.hand_open_picture)
+        let hb = util.duplicate(e.hand_base_picture)
 
+        const handData = {
+            anchorX: 0.5,
+            anchorY: 1,
+            rotAngle: 0,
+            squishY: 1,
+            x: 0,
+            y: 0,
+        }
+        const armData = { ...handData }
+
+        const armAngle = 45
+        const armAngleLHI = 25
+
+        if (e.name === 'long_handed_inserter') {
+            switch (data.dir) {
+                case 6:
+                    handData.rotAngle = armAngleLHI - 180
+                    handData.squishY = 1.5
+                    handData.x = -0.275
+                    handData.y = -0.7
+
+                    armData.rotAngle = -armAngleLHI
+                    armData.squishY = 1.25
+                    armData.x = 0.03
+                    armData.y = 0.03
+                    break
+                case 2:
+                    handData.rotAngle = -armAngleLHI + 180
+                    handData.squishY = 1.5
+                    handData.x = 0.275
+                    handData.y = -0.7
+
+                    armData.rotAngle = armAngleLHI
+                    armData.squishY = 1.25
+                    armData.x = -0.03
+                    armData.y = 0.03
+                    break
+                case 4:
+                    handData.rotAngle = 180
+                    handData.squishY = 1.25
+                    handData.y = -0.3
+
+                    armData.squishY = 2.5
+                    armData.y = 0.03
+                    break
+                case 0:
+                    handData.rotAngle = 180
+                    handData.squishY = 3.5
+                    handData.y = -0.95
+
+                    armData.y = 0.05
+            }
+        } else {
+            switch (data.dir) {
+                case 6:
+                    handData.rotAngle = -armAngle - 90
+                    handData.squishY = 2.5
+                    handData.x = -0.325
+                    handData.y = -0.325
+
+                    armData.rotAngle = -armAngle
+                    armData.squishY = 1.9
+                    armData.x = 0.03
+                    armData.y = 0.03
+                    break
+                case 2:
+                    handData.rotAngle = armAngle + 90
+                    handData.squishY = 2.5
+                    handData.x = 0.325
+                    handData.y = -0.325
+
+                    armData.rotAngle = armAngle
+                    armData.squishY = 1.9
+                    armData.x = -0.03
+                    armData.y = 0.03
+                    break
+                case 4:
+                    handData.rotAngle = 180
+                    handData.squishY = 1.75
+                    handData.y = 0.03
+
+                    armData.rotAngle = 180
+                    armData.squishY = 7
+                    armData.y = -0.03
+                    break
+                case 0:
+                    handData.squishY = 3
+                    handData.y = -0.5
+
+                    armData.squishY = 1.4
+                    armData.y = 0.05
+            }
+        }
+
+        ho = setProperty(ho, 'anchorX', handData.anchorX)
+        ho = setProperty(ho, 'anchorY', handData.anchorY)
+        ho = setProperty(ho, 'rotAngle', handData.rotAngle)
+        ho = setProperty(ho, 'squishY', handData.squishY)
+        ho = addToShift(handData, ho)
+
+        hb = setProperty(hb, 'anchorX', armData.anchorX)
+        hb = setProperty(hb, 'anchorY', armData.anchorY)
+        hb = setProperty(hb, 'rotAngle', armData.rotAngle)
+        hb = setProperty(hb, 'squishY', armData.squishY)
+        hb = addToShift(armData, hb)
+
+        return [
+            duplicateAndSetPropertyUsing(
+                e.platform_picture.sheet,
+                'x',
+                'width',
+                ((data.dir + 4) % 8) / 2
+            ),
+            ho,
+            hb,
+        ]
+    }
+}
+function draw_lab(e: LabPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.off_animation.layers
+}
+function draw_lamp(e: LampPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.picture_off.layers
+}
+function draw_land_mine(e: LandMinePrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => [e.picture_set]
+}
+function draw_lane_splitter(e: LaneSplitterPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_legacy_curved_rail(
+    e: LegacyCurvedRailPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const dir = data.dir
+        function getBaseSprites(): SpriteVariations[] {
+            const pictures = e.pictures
+            function getRailSpriteForDir(): RailPieceLayers {
+                switch (dir) {
+                    case 0:
+                        return pictures['north']
+                    case 1:
+                        return pictures['northeast']
+                    case 2:
+                        return pictures['east']
+                    case 3:
+                        return pictures['southeast']
+                    case 4:
+                        return pictures['south']
+                    case 5:
+                        return pictures['southwest']
+                    case 6:
+                        return pictures['west']
+                    case 7:
+                        return pictures['northwest']
+                }
+            }
+            const ps = getRailSpriteForDir()
+            return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
+        }
+
+        return getBaseSprites()
+    }
+}
+function draw_legacy_straight_rail(
+    e: LegacyStraightRailPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const dir = data.dir
+        function getBaseSprites(): SpriteVariations[] {
+            const pictures = e.pictures
+            function getRailSpriteForDir(): RailPieceLayers {
+                switch (dir) {
+                    case 0:
+                        return pictures['north']
+                    case 1:
+                        return pictures['northeast']
+                    case 2:
+                        return pictures['east']
+                    case 3:
+                        return pictures['southeast']
+                    case 4:
+                        return pictures['south']
+                    case 5:
+                        return pictures['southwest']
+                    case 6:
+                        return pictures['west']
+                    case 7:
+                        return pictures['northwest']
+                }
+            }
+            const ps = getRailSpriteForDir()
+            return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
+        }
+
+        if (data.positionGrid && (dir === 0 || dir === 2)) {
+            const size = util.switchSizeBasedOnDirection(e.size, dir)
+
+            const railBases = data.positionGrid
+                .getEntitiesInArea({
+                    x: data.position.x,
+                    y: data.position.y,
+                    w: size.x,
+                    h: size.y,
+                })
+                .filter(e => e.name === 'gate')
+                .map(e => util.sumprod(e.position, -1, data.position))
+                // Rotate relative to mid point
+                .map(p => util.rotatePointBasedOnDir(p, dir).y)
+                // Remove duplicates
+                .sort()
+                .filter((y, i, arr) => i === 0 || y !== arr[i - 1])
+                // Reverse rotate relative to mid point
+                .map(y => util.rotatePointBasedOnDir([0, y], (8 - dir) % 8))
+                // Map positions to SpriteData
+                .map(p =>
+                    addToShift(
+                        p,
+                        util.duplicate(
+                            dir === 0
+                                ? FD.entities.gate.horizontal_rail_base
+                                : FD.entities.gate.vertical_rail_base
+                        )
+                    )
+                )
+
+            return [...getBaseSprites(), ...railBases]
+        }
+        return getBaseSprites()
+    }
+}
+function draw_lightning_attractor(
+    e: LightningAttractorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_linked_belt(e: LinkedBeltPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_linked_container(
+    e: LinkedContainerPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_loader(e: LoaderPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const isInput = data.dirType === 'input'
+        const dir = isInput ? data.dir : (data.dir + 4) % 8
+
+        const beltParts = getBeltSprites(
+            e.belt_animation_set,
+            data.position,
+            data.dir,
+            data.positionGrid,
+            isInput,
+            !isInput,
+            true
+        ).map(sprite => addToShift(util.rotatePointBasedOnDir([0, 0.5], dir), sprite))
+
+        let mainBelt = beltParts[0]
+        if (dir === 2 || dir === 6) {
+            mainBelt = setPropertyUsing(mainBelt, 'width', 'width', 0.5)
+        } else {
+            mainBelt = setPropertyUsing(mainBelt, 'height', 'height', 0.5)
+        }
+
+        if (dir === 2) {
+            mainBelt = setProperty(mainBelt, 'anchorX', 1)
+        }
+        if (dir === 6) {
+            mainBelt = setProperty(mainBelt, 'anchorX', 0.5)
+        }
+        if (dir === 4) {
+            mainBelt = setProperty(mainBelt, 'anchorY', 1)
+        }
+        if (dir === 0) {
+            mainBelt = setProperty(mainBelt, 'anchorY', 0.5)
+        }
+
+        const structure = e.structure
+        const sprites = []
+
+        sprites.push(mainBelt)
+
+        sprites.push(
+            duplicateAndSetPropertyUsing(
+                isInput ? structure.direction_in.sheet : structure.direction_out.sheet,
+                'x',
+                'width',
+                dir / 2
+            )
+        )
+
+        if (beltParts[1]) {
+            sprites.push(beltParts[1])
+        }
+
+        return sprites
+    }
+}
+function draw_locomotive(e: LocomotivePrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_logistic_container(
+    e: LogisticContainerPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.animation.layers
+}
+function draw_logistic_robot(
+    e: LogisticRobotPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_mining_drill(e: MiningDrillPrototype): (data: IDrawData) => readonly SpriteData[] {
     switch (e.name) {
-        case 'accumulator':
-        case 'electric_energy_interface':
-        case 'infinity_chest':
-            return () => [(e.picture as SpriteLayers).layers[0]]
-        case 'solar_panel':
-            return () => [(e.picture as SpriteLayers).layers[0]]
-        case 'radar':
-            return () => [(e.pictures as SpriteLayers).layers[0]]
-        case 'small_lamp':
-            return () => [e.picture_off.layers[0]]
-        case 'land_mine':
-            return () => [e.picture_set]
-        case 'programmable_speaker':
-            return () => [e.sprite.layers[0]]
-        case 'power_switch':
-            return () => [e.power_on_animation.layers[0], e.led_off]
-        case 'lab':
-            return () => [e.off_animation.layers[0]]
-        case 'heat_interface':
-            return () => [e.picture as SpriteData]
-
-        case 'offshore_pump':
-            return (data: IDrawData) => [
-                (e.picture as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-            ]
-        case 'pipe_to_ground':
-            return (data: IDrawData) => [
-                (e.pictures as DirectionalSpriteData)[util.intToDir(data.dir)],
-            ]
         case 'burner_mining_drill':
-            return (data: IDrawData) => [
-                (e.animations as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-            ]
+            return (data: IDrawData) => e.graphics_set.animation[util.intToDir(data.dir)].layers
 
         case 'pumpjack':
             return (data: IDrawData) => [
-                duplicateAndSetPropertyUsing(
-                    (e.base_picture as SpriteSheets).sheets[0],
-                    'x',
-                    'width',
-                    data.dir / 2
-                ),
-                (e.animations as DirectionalSpriteLayers).north.layers[0],
+                duplicateAndSetPropertyUsing(e.base_picture.sheets[0], 'x', 'width', data.dir / 2),
+                ...e.graphics_set.animation.north.layers,
             ]
-        case 'storage_tank':
-            return (data: IDrawData) => [
-                (e.pictures as StorageTankPictures).window_background,
-                setPropertyUsing(
-                    util.duplicate((e.pictures as StorageTankPictures).picture.sheets[0]),
-                    'x',
-                    data.dir === 2 ? 'width' : undefined
-                ),
-            ]
-        case 'centrifuge':
-            return () => [
-                e.idle_animation.layers[0],
-                e.idle_animation.layers[2],
-                e.idle_animation.layers[4],
-            ]
-        case 'roboport':
-            return () => [
-                e.base.layers[0],
-                e.door_animation_up,
-                e.door_animation_down,
-                e.base_animation,
-            ]
-        case 'rocket_silo':
-            return () => [
-                e.door_back_sprite,
-                e.door_front_sprite,
-                e.base_day_sprite,
-                e.arm_01_back_animation,
-                e.arm_02_right_animation,
-                e.arm_03_front_animation,
-                e.satellite_animation,
-            ]
-
-        case 'beacon':
-            return (data: IDrawData) => {
-                const layers = e.graphics_set.animation_list
-                    .filter(vis => vis.always_draw)
-                    .map(vis => vis.animation)
-                    .flatMap(vis =>
-                        (vis as SpriteLayers).layers
-                            ? (vis as SpriteLayers).layers
-                            : [vis as SpriteData]
-                    )
-                    .filter(layer => !layer.draw_as_shadow)
-
-                const modules = (data.modules || []).map(name => FD.items[name])
-                const moduleLayers = e.graphics_set.module_visualisations
-                    .flatMap(vis => vis.slots)
-                    .flatMap((arr, i) => {
-                        const module = modules[i]
-                        if (module) {
-                            return arr.map(slot => {
-                                const img = util.duplicate(slot.pictures)
-
-                                let variationIndex = module.tier - 1
-                                if (slot.has_empty_slot) {
-                                    variationIndex += 1
-                                }
-                                setPropertyUsing(img, 'x', 'width', variationIndex)
-
-                                if (slot.apply_module_tint) {
-                                    let tint = module.beacon_tint[slot.apply_module_tint]
-                                    if (Array.isArray(tint)) {
-                                        tint = { r: tint[0], g: tint[1], b: tint[2], a: 1 }
-                                    }
-                                    setProperty(img, 'tint', tint)
-                                }
-                                return img
-                            })
-                        } else {
-                            return arr
-                                .filter(slot => slot.has_empty_slot)
-                                .map(slot => slot.pictures)
-                        }
-                    })
-
-                return [...layers, ...moduleLayers]
-            }
 
         case 'electric_mining_drill':
             return (data: IDrawData) => {
@@ -890,1023 +1681,542 @@ function generateGraphics(e: FD_Entity): (data: IDrawData) => SpriteData[] {
                     .filter(vis => vis.always_draw)
                     .map(vis => vis[animDir])
                     .filter(vis => !!vis)
-                    .flatMap(vis =>
-                        (vis as SpriteLayers).layers
-                            ? (vis as SpriteLayers).layers
-                            : [vis as SpriteData]
-                    )
+                    .flatMap(vis => (vis.layers ? vis.layers : [vis]))
 
-                return [...layers0, ...layers1].filter(layer => !layer.draw_as_shadow)
-            }
-        case 'pump':
-            return (data: IDrawData) => [
-                (e.animations as DirectionalSpriteData)[util.intToDir(data.dir)],
-            ]
-        case 'boiler':
-            return (data: IDrawData) => [
-                (e.structure as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-            ]
-        case 'heat_exchanger':
-            return (data: IDrawData) => {
-                let needsEnding = true
-                if (data.positionGrid) {
-                    const conn = getHeatConectionPoints(e)[0]
-                    const pos = util.rotatePointBasedOnDir(conn.position, data.dir)
-                    const c = getHeatConnections(
-                        {
-                            x: Math.floor(data.position.x + pos.x),
-                            y: Math.floor(data.position.y + pos.y),
-                        },
-                        data.positionGrid
-                    )
-                    needsEnding = !c[((data.dir + conn.direction) % 8) / 2]
-                }
-                if (needsEnding) {
-                    return [
-                        addToShift(
-                            util.rotatePointBasedOnDir([0, 1.5], data.dir),
-                            util.duplicate(
-                                e.energy_source.pipe_covers[util.intToDir((data.dir + 4) % 8)]
-                            )
-                        ),
-                        (e.structure as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-                    ]
-                }
-                return [(e.structure as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0]]
-            }
-        case 'oil_refinery':
-        case 'chemical_plant':
-            return (data: IDrawData) => [
-                (e.animation as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-            ]
-        case 'steam_engine':
-        case 'steam_turbine':
-            return (data: IDrawData) => [
-                data.dir === 0 ? e.vertical_animation.layers[0] : e.horizontal_animation.layers[0],
-            ]
-        case 'gun_turret':
-            return (data: IDrawData) => [
-                (e.base_picture as SpriteLayers).layers[0],
-                (e.base_picture as SpriteLayers).layers[1],
-                duplicateAndSetPropertyUsing(
-                    (e.folded_animation as SpriteLayers).layers[0],
-                    'y',
-                    'height',
-                    data.dir / 2
-                ),
-                duplicateAndSetPropertyUsing(
-                    (e.folded_animation as SpriteLayers).layers[1],
-                    'y',
-                    'height',
-                    data.dir / 2
-                ),
-            ]
-        case 'laser_turret':
-            return (data: IDrawData) => [
-                (e.base_picture as SpriteLayers).layers[0],
-                duplicateAndSetPropertyUsing(
-                    (e.folded_animation as SpriteLayers).layers[0],
-                    'y',
-                    'height',
-                    data.dir / 2
-                ),
-                duplicateAndSetPropertyUsing(
-                    (e.folded_animation as SpriteLayers).layers[2],
-                    'y',
-                    'height',
-                    data.dir / 2
-                ),
-            ]
-
-        case 'train_stop':
-            return (data: IDrawData) => {
-                const dir = data.dir
-                let ta = util.duplicate(e.top_animations[util.intToDir(dir)].layers[1])
-                ta = setProperty(ta, 'tint', data.trainStopColor ? data.trainStopColor : e.color)
-                return [
-                    e.rail_overlay_animations[util.intToDir(dir)],
-                    (e.animations as DirectionalSpriteLayers)[util.intToDir(dir)].layers[0],
-                    e.top_animations[util.intToDir(dir)].layers[0],
-                    ta,
-                    e.light1.picture[util.intToDir(dir)],
-                    e.light2.picture[util.intToDir(dir)],
-                ]
-            }
-        case 'flamethrower_turret':
-            return (data: IDrawData) => [
-                (e.base_picture as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-                (e.base_picture as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[1],
-                (e.folded_animation as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[0],
-                (e.folded_animation as DirectionalSpriteLayers)[util.intToDir(data.dir)].layers[1],
-            ]
-        case 'artillery_turret':
-            return (data: IDrawData) => {
-                const d = data.dir * 2
-                let base = util.duplicate(e.cannon_base_pictures.layers[0])
-                base = setProperty(
-                    base,
-                    'filename',
-                    data.hr ? base.hr_version.filenames[d] : base.filenames[d]
-                )
-                let barrel = util.duplicate(e.cannon_barrel_pictures.layers[0])
-                barrel = setProperty(
-                    barrel,
-                    'filename',
-                    data.hr ? barrel.hr_version.filenames[d] : barrel.filenames[d]
-                )
-                barrel = addToShift(getShift(), barrel)
-                function getShift(): number[] {
-                    switch (data.dir) {
-                        case 0:
-                            return [0, 1]
-                        case 2:
-                            return [-1, 0.31]
-                        case 4:
-                            return [0, -0.4]
-                        case 6:
-                            return [1, 0.31]
-                    }
-                }
-                return [(e.base_picture as SpriteLayers).layers[0], barrel, base]
-            }
-        case 'straight_rail':
-        case 'curved_rail':
-            return (data: IDrawData) => {
-                const dir = data.dir
-                function getBaseSprites(): SpriteData[] {
-                    function getRailSpriteForDir(): RailSpriteLayers {
-                        const pictures = e.pictures as RailPictures
-                        if (e.name === 'straight_rail') {
-                            switch (dir) {
-                                case 0:
-                                    return pictures.straight_rail_vertical
-                                case 1:
-                                    return pictures.straight_rail_diagonal_right_top
-                                case 2:
-                                    return pictures.straight_rail_horizontal
-                                case 3:
-                                    return pictures.straight_rail_diagonal_right_bottom
-                                case 4:
-                                    return pictures.straight_rail_vertical
-                                case 5:
-                                    return pictures.straight_rail_diagonal_left_bottom
-                                case 6:
-                                    return pictures.straight_rail_horizontal
-                                case 7:
-                                    return pictures.straight_rail_diagonal_left_top
-                            }
-                        } else {
-                            switch (dir) {
-                                case 0:
-                                    return pictures.curved_rail_vertical_left_bottom
-                                case 1:
-                                    return pictures.curved_rail_vertical_right_bottom
-                                case 2:
-                                    return pictures.curved_rail_horizontal_left_top
-                                case 3:
-                                    return pictures.curved_rail_horizontal_left_bottom
-                                case 4:
-                                    return pictures.curved_rail_vertical_right_top
-                                case 5:
-                                    return pictures.curved_rail_vertical_left_top
-                                case 6:
-                                    return pictures.curved_rail_horizontal_right_bottom
-                                case 7:
-                                    return pictures.curved_rail_horizontal_right_top
-                            }
-                        }
-                    }
-                    const ps = getRailSpriteForDir()
-                    return [
-                        ps.stone_path_background,
-                        ps.stone_path,
-                        ps.ties,
-                        ps.backplates,
-                        ps.metals,
-                    ]
-                }
-
-                if (data.positionGrid && e.name === 'straight_rail' && (dir === 0 || dir === 2)) {
-                    const size = util.switchSizeBasedOnDirection(e.size, dir)
-
-                    const railBases = data.positionGrid
-                        .getEntitiesInArea({
-                            x: data.position.x,
-                            y: data.position.y,
-                            w: size.x,
-                            h: size.y,
-                        })
-                        .filter(e => e.name === 'gate')
-                        .map(e => util.sumprod(e.position, -1, data.position))
-                        // Rotate relative to mid point
-                        .map(p => util.rotatePointBasedOnDir(p, dir).y)
-                        // Remove duplicates
-                        .sort()
-                        .filter((y, i, arr) => i === 0 || y !== arr[i - 1])
-                        // Reverse rotate relative to mid point
-                        .map(y => util.rotatePointBasedOnDir([0, y], (8 - dir) % 8))
-                        // Map positions to SpriteData
-                        .map(p =>
-                            addToShift(
-                                p,
-                                util.duplicate(
-                                    dir === 0
-                                        ? FD.entities.gate.horizontal_rail_base
-                                        : FD.entities.gate.vertical_rail_base
-                                )
-                            )
-                        )
-
-                    return [...getBaseSprites(), ...railBases]
-                }
-                return getBaseSprites()
-            }
-        case 'rail_signal':
-        case 'rail_chain_signal':
-            return (data: IDrawData) => {
-                const dir = data.dir
-                let rp = duplicateAndSetPropertyUsing(e.rail_piece, 'x', 'width', dir)
-                let a = duplicateAndSetPropertyUsing(
-                    (e.animation as SpriteLayers).layers[0],
-                    'y',
-                    'height',
-                    dir
-                )
-                if (e.name === 'rail_chain_signal') {
-                    const getRightShift = (): number[] => {
-                        switch (dir) {
-                            case 0:
-                                return [1, 0]
-                            case 1:
-                                return [1, 1]
-                            case 2:
-                                return [0, 1]
-                            case 3:
-                                return [-1, 1]
-                            case 4:
-                                return [-2, 0]
-                            case 5:
-                                return [-1, -1]
-                            case 6:
-                                return [0, -2]
-                            case 7:
-                                return [1, -1]
-                        }
-                    }
-                    const s = getRightShift()
-                    rp = addToShift(s, rp)
-                    a = addToShift(s, a)
-                }
-                return [rp, a]
-            }
-        case 'nuclear_reactor':
-            return (data: IDrawData) => {
-                const conn = e.heat_buffer.connections
-                const patches = []
-                for (let i = 0; i < conn.length; i++) {
-                    let patchSheet = e.connection_patches_disconnected.sheet
-                    if (data.positionGrid) {
-                        const c = getHeatConnections(
-                            {
-                                x: Math.floor(data.position.x) + conn[i].position[0],
-                                y: Math.floor(data.position.y) + conn[i].position[1],
-                            },
-                            data.positionGrid
-                        )
-                        if (c[conn[i].direction / 2]) {
-                            patchSheet = e.connection_patches_connected.sheet
-                        }
-                    }
-                    patchSheet = duplicateAndSetPropertyUsing(patchSheet, 'x', 'width', i)
-                    patchSheet = addToShift(conn[i].position, patchSheet)
-                    patches.push(patchSheet)
-                }
-                return [...patches, e.lower_layer_picture, (e.picture as SpriteLayers).layers[0]]
-            }
-        case 'stone_wall':
-            return (data: IDrawData) => {
-                const pictures = e.pictures as WallPictures
-
-                if (data.positionGrid) {
-                    const sprites = []
-
-                    const conn = data.positionGrid
-                        .getNeighbourData(data.position)
-                        .map(
-                            ({ entity, relDir }) =>
-                                entity &&
-                                (entity.name === 'stone_wall' ||
-                                    (entity.name === 'gate' && entity.direction === relDir % 4))
-                        )
-
-                    const wall = (() => {
-                        if (conn[1] && conn[2] && conn[3]) {
-                            return pictures.t_up.layers[0]
-                        } else if (conn[1] && conn[2]) {
-                            return pictures.corner_right_down.layers[0]
-                        } else if (conn[2] && conn[3]) {
-                            return pictures.corner_left_down.layers[0]
-                        } else if (conn[1] && conn[3]) {
-                            return pictures.straight_horizontal.layers[0]
-                        } else if (conn[1]) {
-                            return pictures.ending_right.layers[0]
-                        } else if (conn[2]) {
-                            return pictures.straight_vertical.layers[0]
-                        } else if (conn[3]) {
-                            return pictures.ending_left.layers[0]
-                        } else {
-                            return pictures.single.layers[0]
-                        }
-                    })()
-
-                    sprites.push(
-                        duplicateAndSetPropertyUsing(
-                            wall,
-                            'x',
-                            'width',
-                            util.getRandomInt(0, wall.line_length)
-                        )
-                    )
-
-                    const neighbourDirections = data.positionGrid
-                        .getNeighbourData(data.position)
-                        .filter(
-                            ({ entity, relDir }) =>
-                                entity && entity.name === 'gate' && entity.direction === relDir % 4
-                        )
-                        .map(({ relDir }) => relDir)
-
-                    for (const relDir of neighbourDirections) {
-                        const patch = duplicateAndSetPropertyUsing(
-                            pictures.gate_connection_patch.sheets[0],
-                            'x',
-                            'width',
-                            relDir / 2
-                        )
-                        if (relDir === 0) {
-                            sprites.unshift(patch)
-                        } else {
-                            sprites.push(patch)
-                        }
-                    }
-
-                    const spawnFilling = [
-                        [-1, 0],
-                        [-1, 1],
-                        [0, 1],
-                    ]
-                        .map(o => {
-                            const ent = data.positionGrid.getEntityAtPosition(
-                                util.sumprod(data.position, o)
-                            )
-                            return !!ent && ent.name === 'stone_wall'
-                        })
-                        .every(e => e)
-
-                    if (spawnFilling) {
-                        let filling = duplicateAndSetPropertyUsing(
-                            pictures.filling,
-                            'x',
-                            'width',
-                            util.getRandomInt(0, pictures.filling.line_length)
-                        )
-                        filling = setProperty(filling, 'anchorX', 1.17)
-                        sprites.push(filling)
-                    }
-
-                    sprites.push(
-                        ...neighbourDirections.map(relDir =>
-                            duplicateAndSetPropertyUsing(
-                                e.wall_diode_red.sheet,
-                                'x',
-                                'width',
-                                relDir / 2
-                            )
-                        )
-                    )
-
-                    return sprites
-                }
-
-                return [pictures.single.layers[0]]
-            }
-        case 'gate':
-            return (data: IDrawData) => {
-                function getBaseSprites(): SpriteData[] {
-                    if (data.positionGrid) {
-                        const size = util.switchSizeBasedOnDirection(e.size, data.dir)
-                        const rail = data.positionGrid.findInArea(
-                            {
-                                x: data.position.x,
-                                y: data.position.y,
-                                w: size.x,
-                                h: size.y,
-                            },
-                            entity => entity.name === 'straight_rail'
-                        )
-                        if (rail) {
-                            if (data.dir === 0) {
-                                if (rail.position.y > data.position.y) {
-                                    return [e.vertical_rail_animation_left.layers[0]]
-                                }
-                                return [e.vertical_rail_animation_right.layers[0]]
-                            } else {
-                                if (rail.position.x > data.position.x) {
-                                    return [e.horizontal_rail_animation_left.layers[0]]
-                                }
-                                return [e.horizontal_rail_animation_right.layers[0]]
-                            }
-                        }
-                    }
-
-                    if (data.dir === 0) {
-                        return [e.vertical_animation.layers[0]]
-                    }
-                    return [e.horizontal_animation.layers[0]]
-                }
-
-                if (data.dir === 0 && data.positionGrid) {
-                    const wall = data.positionGrid.getEntityAtPosition({
-                        x: data.position.x,
-                        y: data.position.y + 1,
-                    })
-                    if (wall && wall.name === 'stone_wall') {
-                        return [...getBaseSprites(), e.wall_patch.layers[0]]
-                    }
-                }
-
-                return getBaseSprites()
-            }
-        case 'pipe':
-        case 'infinity_pipe':
-            return (data: IDrawData) => {
-                const pictures = e.pictures as PipePictures
-                if (data.positionGrid) {
-                    const conn = data.positionGrid
-                        .getNeighbourData(data.position)
-                        .map(({ entity, relDir }) => {
-                            if (!entity) {
-                                return false
-                            }
-
-                            if (entity.name === 'pipe' || entity.name === 'infinity_pipe') {
-                                return true
-                            }
-                            if (
-                                entity.name === 'pipe_to_ground' &&
-                                entity.direction === (relDir + 4) % 8
-                            ) {
-                                return true
-                            }
-
-                            if (
-                                (entity.name === 'assembling_machine_2' ||
-                                    entity.name === 'assembling_machine_3') &&
-                                !entity.assemblerCraftsWithFluid
-                            ) {
-                                return false
-                            }
-                            if (
-                                entity.name === 'chemical_plant' &&
-                                entity.chemicalPlantDontConnectOutput &&
-                                entity.direction === relDir
-                            ) {
-                                return false
-                            }
-
-                            if (
-                                entity.entityData.fluid_box ||
-                                entity.entityData.output_fluid_box ||
-                                entity.entityData.fluid_boxes
-                            ) {
-                                const connections = getPipeConnectionPoints(
-                                    entity.entityData,
-                                    entity.direction,
-                                    entity.assemblerPipeDirection
-                                )
-                                for (const connection of connections) {
-                                    if (
-                                        Math.floor(data.position.x) ===
-                                            Math.floor(entity.position.x + connection.x) &&
-                                        Math.floor(data.position.y) ===
-                                            Math.floor(entity.position.y + connection.y)
-                                    ) {
-                                        return true
-                                    }
-                                }
-                            }
-                            return undefined
-                        })
-
-                    if (conn[0] && conn[1] && conn[2] && conn[3]) {
-                        return [pictures.cross]
-                    }
-                    if (conn[0] && conn[1] && conn[3]) {
-                        return [pictures.t_up]
-                    }
-                    if (conn[1] && conn[2] && conn[3]) {
-                        return [pictures.t_down]
-                    }
-                    if (conn[0] && conn[1] && conn[2]) {
-                        return [pictures.t_right]
-                    }
-                    if (conn[0] && conn[2] && conn[3]) {
-                        return [pictures.t_left]
-                    }
-                    if (conn[0] && conn[2]) {
-                        return Math.floor(data.position.y) % 2 === 0
-                            ? [pictures.straight_vertical]
-                            : [
-                                  pictures.vertical_window_background,
-                                  pictures.straight_vertical_window,
-                              ]
-                    }
-                    if (conn[1] && conn[3]) {
-                        return Math.floor(data.position.x) % 2 === 0
-                            ? [pictures.straight_horizontal]
-                            : [
-                                  pictures.horizontal_window_background,
-                                  pictures.straight_horizontal_window,
-                              ]
-                    }
-                    if (conn[0] && conn[1]) {
-                        return [pictures.corner_up_right]
-                    }
-                    if (conn[0] && conn[3]) {
-                        return [pictures.corner_up_left]
-                    }
-                    if (conn[1] && conn[2]) {
-                        return [pictures.corner_down_right]
-                    }
-                    if (conn[2] && conn[3]) {
-                        return [pictures.corner_down_left]
-                    }
-                    if (conn[0]) {
-                        return [pictures.ending_up]
-                    }
-                    if (conn[2]) {
-                        return [pictures.ending_down]
-                    }
-                    if (conn[1]) {
-                        return [pictures.ending_right]
-                    }
-                    if (conn[3]) {
-                        return [pictures.ending_left]
-                    }
-                }
-                return [pictures.straight_vertical_single]
-            }
-        case 'heat_pipe':
-            return (data: IDrawData) => {
-                if (data.positionGrid) {
-                    const getOpt = (): SpriteData[] => {
-                        const conn = getHeatConnections(data.position, data.positionGrid)
-                        if (conn[0] && conn[1] && conn[2] && conn[3]) {
-                            return e.connection_sprites.cross
-                        }
-                        if (conn[0] && conn[1] && conn[3]) {
-                            return e.connection_sprites.t_up
-                        }
-                        if (conn[1] && conn[2] && conn[3]) {
-                            return e.connection_sprites.t_down
-                        }
-                        if (conn[0] && conn[1] && conn[2]) {
-                            return e.connection_sprites.t_right
-                        }
-                        if (conn[0] && conn[2] && conn[3]) {
-                            return e.connection_sprites.t_left
-                        }
-                        if (conn[0] && conn[2]) {
-                            return e.connection_sprites.straight_vertical
-                        }
-                        if (conn[1] && conn[3]) {
-                            return e.connection_sprites.straight_horizontal
-                        }
-                        if (conn[0] && conn[1]) {
-                            return e.connection_sprites.corner_right_up
-                        }
-                        if (conn[0] && conn[3]) {
-                            return e.connection_sprites.corner_left_up
-                        }
-                        if (conn[1] && conn[2]) {
-                            return e.connection_sprites.corner_right_down
-                        }
-                        if (conn[2] && conn[3]) {
-                            return e.connection_sprites.corner_left_down
-                        }
-                        if (conn[0]) {
-                            return e.connection_sprites.ending_up
-                        }
-                        if (conn[2]) {
-                            return e.connection_sprites.ending_down
-                        }
-                        if (conn[1]) {
-                            return e.connection_sprites.ending_right
-                        }
-                        if (conn[3]) {
-                            return e.connection_sprites.ending_left
-                        }
-                        return e.connection_sprites.single
-                    }
-                    return [util.getRandomItem(getOpt())]
-                }
-                return [util.getRandomItem(e.connection_sprites.single)]
+                return [...layers0, ...layers1]
             }
     }
-
-    switch (e.type) {
-        case 'furnace':
-        case 'logistic_container':
-            return () => [(e.animation as SpriteLayers).layers[0]]
-        case 'container':
-            return () => [(e.picture as SpriteLayers).layers[0]]
-
-        case 'electric_pole':
-            return (data: IDrawData) => [
-                duplicateAndSetPropertyUsing(
-                    (e.pictures as SpriteLayers).layers[0],
-                    'x',
-                    'width',
-                    data.dir / 2
-                ),
-            ]
-
-        case 'splitter':
-            return (data: IDrawData) => {
-                const b0Offset = util.rotatePointBasedOnDir([-0.5, 0], data.dir)
-                const b1Offset = util.rotatePointBasedOnDir([0.5, 0], data.dir)
-
-                const belt0Parts = getBeltSprites(
-                    e.belt_animation_set,
-                    data.positionGrid ? util.sumprod(data.position, b0Offset) : b0Offset,
-                    data.dir,
-                    data.positionGrid,
-                    true,
-                    true,
-                    true
-                ).map(sd => addToShift(b0Offset, sd))
-
-                const belt1Parts = getBeltSprites(
-                    e.belt_animation_set,
-                    data.positionGrid ? util.sumprod(data.position, b1Offset) : b1Offset,
-                    data.dir,
-                    data.positionGrid,
-                    true,
-                    true,
-                    true
-                ).map(sd => addToShift(b1Offset, sd))
-
-                const dir = util.intToDir(data.dir)
-                return [
-                    ...belt0Parts,
-                    ...belt1Parts,
-                    e.structure_patch[dir],
-                    (e.structure as DirectionalSpriteData)[dir],
-                ]
-            }
-        case 'underground_belt':
-            return (data: IDrawData) => {
-                const isInput = data.dirType === 'input'
-                const dir = isInput ? data.dir : (data.dir + 4) % 8
-
-                const beltParts = getBeltSprites(
-                    e.belt_animation_set,
-                    data.position,
-                    data.dir,
-                    data.positionGrid,
-                    isInput,
-                    !isInput,
-                    true
-                )
-
-                let mainBelt = beltParts[0]
-                if (dir === 2 || dir === 6) {
-                    mainBelt = setPropertyUsing(mainBelt, 'width', 'width', 0.5)
-                } else {
-                    mainBelt = setPropertyUsing(mainBelt, 'height', 'height', 0.5)
-                }
-
-                if (dir === 2) {
-                    mainBelt = setProperty(mainBelt, 'anchorX', 1)
-                }
-                if (dir === 6) {
-                    mainBelt = setProperty(mainBelt, 'anchorX', 0.5)
-                }
-                if (dir === 4) {
-                    mainBelt = setProperty(mainBelt, 'anchorY', 1)
-                }
-                if (dir === 0) {
-                    mainBelt = setProperty(mainBelt, 'anchorY', 0.5)
-                }
-
-                let sideloadingBack = false
-                let sideloadingFront = false
-
-                if (data.positionGrid && (dir === 2 || dir === 6)) {
-                    let C = data.positionGrid.getNeighbourData(data.position).map(d => {
-                        if (
-                            d.entity &&
-                            (d.entity.type === 'transport_belt' ||
-                                d.entity.type === 'splitter' ||
-                                ((d.entity.type === 'underground_belt' ||
-                                    d.entity.type === 'loader') &&
-                                    d.entity.directionType === 'output'))
-                        ) {
-                            return d
-                        }
-                        return undefined
-                    })
-
-                    // Belt facing this belt
-                    C = C.map(d => {
-                        if (d && d.entity.direction === (d.relDir + 4) % 8) {
-                            return d
-                        }
-                        return undefined
-                    })
-
-                    sideloadingBack = C[0] !== undefined
-                    sideloadingFront = C[2] !== undefined
-                }
-
-                const structure = e.structure as UndergroundBeltStructure
-                const sprites = []
-
-                if (!sideloadingBack) {
-                    sprites.push(
-                        duplicateAndSetPropertyUsing(
-                            structure.back_patch.sheet,
-                            'x',
-                            'width',
-                            dir / 2
-                        )
-                    )
-                }
-
-                sprites.push(mainBelt)
-
-                sprites.push(
-                    duplicateAndSetPropertyUsing(
-                        sideloadingFront
-                            ? isInput
-                                ? structure.direction_in_side_loading.sheet
-                                : structure.direction_out_side_loading.sheet
-                            : isInput
-                              ? structure.direction_in.sheet
-                              : structure.direction_out.sheet,
-                        'x',
-                        'width',
-                        dir / 2
-                    )
-                )
-
-                if (!sideloadingFront) {
-                    sprites.push(
-                        duplicateAndSetPropertyUsing(
-                            structure.front_patch.sheet,
-                            'x',
-                            'width',
-                            dir / 2
-                        )
-                    )
-                }
-
-                if (beltParts[1]) {
-                    sprites.push(beltParts[1])
-                }
-
-                return sprites
-            }
-        case 'transport_belt':
-            return (data: IDrawData) => {
-                if (data.generateConnector && data.positionGrid) {
-                    const connIndex = getBeltWireConnectionIndex(
-                        data.positionGrid,
-                        data.position,
-                        data.dir
-                    )
-                    const patchIndex = (() => {
-                        switch (connIndex) {
-                            case 1:
-                                return 0
-                            case 3:
-                                return 1
-                            case 4:
-                                return 2
-                            default:
-                                return undefined
-                        }
-                    })()
-
-                    const sprites = []
-
-                    if (patchIndex !== undefined) {
-                        const patch = e.connector_frame_sprites.frame_back_patch.sheet
-                        sprites.push(duplicateAndSetPropertyUsing(patch, 'x', 'width', patchIndex))
+}
+function draw_offshore_pump(e: OffshorePumpPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => e.graphics_set.animation[util.intToDir(data.dir)].layers
+}
+function draw_pipe(e: PipePrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const pictures = e.pictures
+        if (data.positionGrid) {
+            const conn = data.positionGrid
+                .getNeighbourData(data.position)
+                .map(({ entity, relDir }) => {
+                    if (!entity) {
+                        return false
                     }
 
-                    sprites.push(
-                        ...getBeltSprites(
-                            e.belt_animation_set,
-                            data.position,
-                            data.dir,
-                            data.positionGrid
+                    if (entity.name === 'pipe' || entity.name === 'infinity_pipe') {
+                        return true
+                    }
+                    if (entity.name === 'pipe_to_ground' && entity.direction === (relDir + 4) % 8) {
+                        return true
+                    }
+
+                    if (
+                        (entity.name === 'assembling_machine_2' ||
+                            entity.name === 'assembling_machine_3') &&
+                        !entity.assemblerCraftsWithFluid
+                    ) {
+                        return false
+                    }
+                    if (
+                        entity.name === 'chemical_plant' &&
+                        entity.chemicalPlantDontConnectOutput &&
+                        entity.direction === relDir
+                    ) {
+                        return false
+                    }
+
+                    if (
+                        entity.entityData.fluid_box ||
+                        entity.entityData.output_fluid_box ||
+                        entity.entityData.fluid_boxes
+                    ) {
+                        const connections = getPipeConnectionPoints(
+                            entity.entityData,
+                            entity.direction,
+                            entity.assemblerPipeDirection
                         )
-                    )
-
-                    let frame = e.connector_frame_sprites.frame_main.sheet
-                    frame = duplicateAndSetPropertyUsing(frame, 'x', 'width', 1)
-                    sprites.push(setPropertyUsing(frame, 'y', 'height', connIndex))
-
-                    return sprites
-                }
-                return [
-                    ...getBeltSprites(
-                        e.belt_animation_set,
-                        data.position,
-                        data.dir,
-                        data.positionGrid
-                    ),
-                ]
-            }
-        case 'inserter':
-            return (data: IDrawData) => {
-                let ho = util.duplicate(e.hand_open_picture)
-                let hb = util.duplicate(e.hand_base_picture)
-
-                const handData = {
-                    anchorX: 0.5,
-                    anchorY: 1,
-                    rotAngle: 0,
-                    squishY: 1,
-                    x: 0,
-                    y: 0,
-                }
-                const armData = { ...handData }
-
-                const armAngle = 45
-                const armAngleLHI = 25
-
-                if (e.name === 'long_handed_inserter') {
-                    switch (data.dir) {
-                        case 6:
-                            handData.rotAngle = armAngleLHI - 180
-                            handData.squishY = 1.5
-                            handData.x = -0.275
-                            handData.y = -0.7
-
-                            armData.rotAngle = -armAngleLHI
-                            armData.squishY = 1.25
-                            armData.x = 0.03
-                            armData.y = 0.03
-                            break
-                        case 2:
-                            handData.rotAngle = -armAngleLHI + 180
-                            handData.squishY = 1.5
-                            handData.x = 0.275
-                            handData.y = -0.7
-
-                            armData.rotAngle = armAngleLHI
-                            armData.squishY = 1.25
-                            armData.x = -0.03
-                            armData.y = 0.03
-                            break
-                        case 4:
-                            handData.rotAngle = 180
-                            handData.squishY = 1.25
-                            handData.y = -0.3
-
-                            armData.squishY = 2.5
-                            armData.y = 0.03
-                            break
-                        case 0:
-                            handData.rotAngle = 180
-                            handData.squishY = 3.5
-                            handData.y = -0.95
-
-                            armData.y = 0.05
+                        for (const connection of connections) {
+                            if (
+                                Math.floor(data.position.x) ===
+                                    Math.floor(entity.position.x + connection.x) &&
+                                Math.floor(data.position.y) ===
+                                    Math.floor(entity.position.y + connection.y)
+                            ) {
+                                return true
+                            }
+                        }
                     }
-                } else {
-                    switch (data.dir) {
-                        case 6:
-                            handData.rotAngle = -armAngle - 90
-                            handData.squishY = 2.5
-                            handData.x = -0.325
-                            handData.y = -0.325
+                    return undefined
+                })
 
-                            armData.rotAngle = -armAngle
-                            armData.squishY = 1.9
-                            armData.x = 0.03
-                            armData.y = 0.03
-                            break
-                        case 2:
-                            handData.rotAngle = armAngle + 90
-                            handData.squishY = 2.5
-                            handData.x = 0.325
-                            handData.y = -0.325
-
-                            armData.rotAngle = armAngle
-                            armData.squishY = 1.9
-                            armData.x = -0.03
-                            armData.y = 0.03
-                            break
-                        case 4:
-                            handData.rotAngle = 180
-                            handData.squishY = 1.75
-                            handData.y = 0.03
-
-                            armData.rotAngle = 180
-                            armData.squishY = 7
-                            armData.y = -0.03
-                            break
-                        case 0:
-                            handData.squishY = 3
-                            handData.y = -0.5
-
-                            armData.squishY = 1.4
-                            armData.y = 0.05
-                    }
-                }
-
-                ho = setProperty(ho, 'anchorX', handData.anchorX)
-                ho = setProperty(ho, 'anchorY', handData.anchorY)
-                ho = setProperty(ho, 'rotAngle', handData.rotAngle)
-                ho = setProperty(ho, 'squishY', handData.squishY)
-                ho = addToShift(handData, ho)
-
-                hb = setProperty(hb, 'anchorX', armData.anchorX)
-                hb = setProperty(hb, 'anchorY', armData.anchorY)
-                hb = setProperty(hb, 'rotAngle', armData.rotAngle)
-                hb = setProperty(hb, 'squishY', armData.squishY)
-                hb = addToShift(armData, hb)
-
-                return [
-                    duplicateAndSetPropertyUsing(
-                        e.platform_picture.sheet,
-                        'x',
-                        'width',
-                        ((data.dir + 4) % 8) / 2
-                    ),
-                    ho,
-                    hb,
-                ]
+            if (conn[0] && conn[1] && conn[2] && conn[3]) {
+                return [pictures.cross]
             }
-        case 'loader': {
-            return (data: IDrawData) => {
-                const isInput = data.dirType === 'input'
-                const dir = isInput ? data.dir : (data.dir + 4) % 8
-
-                const beltParts = getBeltSprites(
-                    e.belt_animation_set,
-                    data.position,
-                    data.dir,
-                    data.positionGrid,
-                    isInput,
-                    !isInput,
-                    true
-                ).map(sprite => addToShift(util.rotatePointBasedOnDir([0, 0.5], dir), sprite))
-
-                let mainBelt = beltParts[0]
-                if (dir === 2 || dir === 6) {
-                    mainBelt = setPropertyUsing(mainBelt, 'width', 'width', 0.5)
-                } else {
-                    mainBelt = setPropertyUsing(mainBelt, 'height', 'height', 0.5)
-                }
-
-                if (dir === 2) {
-                    mainBelt = setProperty(mainBelt, 'anchorX', 1)
-                }
-                if (dir === 6) {
-                    mainBelt = setProperty(mainBelt, 'anchorX', 0.5)
-                }
-                if (dir === 4) {
-                    mainBelt = setProperty(mainBelt, 'anchorY', 1)
-                }
-                if (dir === 0) {
-                    mainBelt = setProperty(mainBelt, 'anchorY', 0.5)
-                }
-
-                const structure = e.structure as UndergroundBeltStructure
-                const sprites = []
-
-                sprites.push(mainBelt)
-
-                sprites.push(
-                    duplicateAndSetPropertyUsing(
-                        isInput ? structure.direction_in.sheet : structure.direction_out.sheet,
-                        'x',
-                        'width',
-                        dir / 2
-                    )
-                )
-
-                if (beltParts[1]) {
-                    sprites.push(beltParts[1])
-                }
-
-                return sprites
+            if (conn[0] && conn[1] && conn[3]) {
+                return [pictures.t_up]
+            }
+            if (conn[1] && conn[2] && conn[3]) {
+                return [pictures.t_down]
+            }
+            if (conn[0] && conn[1] && conn[2]) {
+                return [pictures.t_right]
+            }
+            if (conn[0] && conn[2] && conn[3]) {
+                return [pictures.t_left]
+            }
+            if (conn[0] && conn[2]) {
+                return Math.floor(data.position.y) % 2 === 0
+                    ? [pictures.straight_vertical]
+                    : [pictures.vertical_window_background, pictures.straight_vertical_window]
+            }
+            if (conn[1] && conn[3]) {
+                return Math.floor(data.position.x) % 2 === 0
+                    ? [pictures.straight_horizontal]
+                    : [pictures.horizontal_window_background, pictures.straight_horizontal_window]
+            }
+            if (conn[0] && conn[1]) {
+                return [pictures.corner_up_right]
+            }
+            if (conn[0] && conn[3]) {
+                return [pictures.corner_up_left]
+            }
+            if (conn[1] && conn[2]) {
+                return [pictures.corner_down_right]
+            }
+            if (conn[2] && conn[3]) {
+                return [pictures.corner_down_left]
+            }
+            if (conn[0]) {
+                return [pictures.ending_up]
+            }
+            if (conn[2]) {
+                return [pictures.ending_down]
+            }
+            if (conn[1]) {
+                return [pictures.ending_right]
+            }
+            if (conn[3]) {
+                return [pictures.ending_left]
             }
         }
+        return [pictures.straight_vertical_single]
+    }
+}
+function draw_pipe_to_ground(e: PipeToGroundPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => [e.pictures[util.intToDir(data.dir)]]
+}
+function draw_power_switch(e: PowerSwitchPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => [...e.power_on_animation.layers, e.led_off]
+}
+function draw_programmable_speaker(
+    e: ProgrammableSpeakerPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.sprite.layers
+}
+function draw_proxy_container(
+    e: ProxyContainerPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_pump(e: PumpPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => [e.animations[util.intToDir(data.dir)]]
+}
+function draw_radar(e: RadarPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.pictures.layers
+}
+function draw_rail_ramp(e: RailRampPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_rail_signal_base(
+    e: RailSignalBasePrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const dir = data.dir
+        let rp = duplicateAndSetPropertyUsing(
+            e.ground_picture_set.rail_piece.sprites,
+            'x',
+            'width',
+            (dir * 2) % e.ground_picture_set.rail_piece.sprites.line_length
+        )
+        rp = setPropertyUsing(
+            rp,
+            'y',
+            'height',
+            Math.floor((dir * 2) / e.ground_picture_set.rail_piece.sprites.line_length)
+        )
+        let a = duplicateAndSetPropertyUsing(
+            e.ground_picture_set.structure.layers[0],
+            'y',
+            'height',
+            dir * 2
+        )
+        return [rp, a]
+    }
+}
+function draw_rail_support(e: RailSupportPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_reactor(e: ReactorPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const conn = e.heat_buffer.connections
+        const patches = []
+        for (let i = 0; i < conn.length; i++) {
+            let patchSheet = e.connection_patches_disconnected.sheet
+            if (data.positionGrid) {
+                const c = getHeatConnections(
+                    {
+                        x: Math.floor(data.position.x) + conn[i].position[0],
+                        y: Math.floor(data.position.y) + conn[i].position[1],
+                    },
+                    data.positionGrid
+                )
+                if (c[conn[i].direction / 2]) {
+                    patchSheet = e.connection_patches_connected.sheet
+                }
+            }
+            patchSheet = duplicateAndSetPropertyUsing(patchSheet, 'x', 'width', i)
+            patchSheet = addToShift(conn[i].position, patchSheet)
+            patches.push(patchSheet)
+        }
+        return [...patches, e.lower_layer_picture, ...e.picture.layers]
+    }
+}
+function draw_roboport(e: RoboportPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => [...e.base.layers, e.door_animation_up, e.door_animation_down, e.base_animation]
+}
+function draw_rocket_silo(e: RocketSiloPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => [
+        e.door_back_sprite,
+        e.door_front_sprite,
+        e.base_day_sprite,
+        e.arm_01_back_animation,
+        e.arm_02_right_animation,
+        e.arm_03_front_animation,
+        e.satellite_animation,
+    ]
+}
+function draw_selector_combinator(
+    e: SelectorCombinatorPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_solar_panel(e: SolarPanelPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return () => e.picture.layers
+}
+function draw_space_platform_hub(
+    e: SpacePlatformHubPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_splitter(e: SplitterPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const b0Offset = util.rotatePointBasedOnDir([-0.5, 0], data.dir)
+        const b1Offset = util.rotatePointBasedOnDir([0.5, 0], data.dir)
+
+        const belt0Parts = getBeltSprites(
+            e.belt_animation_set,
+            data.positionGrid ? util.sumprod(data.position, b0Offset) : b0Offset,
+            data.dir,
+            data.positionGrid,
+            true,
+            true,
+            true
+        ).map(sd => addToShift(b0Offset, sd))
+
+        const belt1Parts = getBeltSprites(
+            e.belt_animation_set,
+            data.positionGrid ? util.sumprod(data.position, b1Offset) : b1Offset,
+            data.dir,
+            data.positionGrid,
+            true,
+            true,
+            true
+        ).map(sd => addToShift(b1Offset, sd))
+
+        const dir = util.intToDir(data.dir)
+        return [...belt0Parts, ...belt1Parts, e.structure_patch[dir], e.structure[dir]]
+    }
+}
+function draw_storage_tank(e: StorageTankPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => [
+        addToShift([0, 1], util.duplicate(e.pictures.window_background)),
+        setPropertyUsing(
+            util.duplicate(e.pictures.picture.sheets[0]),
+            'x',
+            data.dir === 2 ? 'width' : undefined
+        ),
+    ]
+}
+function draw_straight_rail(e: StraightRailPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_thruster(e: ThrusterPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_train_stop(e: TrainStopPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const dir = data.dir
+        let ta = util.duplicate(e.top_animations[util.intToDir(dir)].layers[1])
+        ta = setProperty(ta, 'tint', data.trainStopColor ? data.trainStopColor : e.color)
+        return [
+            e.rail_overlay_animations[util.intToDir(dir)],
+            ...e.animations[util.intToDir(dir)].layers,
+            ...e.top_animations[util.intToDir(dir)].layers,
+            ta,
+            e.light1.picture[util.intToDir(dir)],
+            e.light2.picture[util.intToDir(dir)],
+        ]
+    }
+}
+function draw_transport_belt(
+    e: TransportBeltPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        if (data.generateConnector && data.positionGrid) {
+            const connIndex = getBeltWireConnectionIndex(data.positionGrid, data.position, data.dir)
+            const patchIndex = (() => {
+                switch (connIndex) {
+                    case 1:
+                        return 0
+                    case 3:
+                        return 1
+                    case 4:
+                        return 2
+                    default:
+                        return undefined
+                }
+            })()
+
+            const sprites = []
+
+            if (patchIndex !== undefined) {
+                const patch = e.connector_frame_sprites.frame_back_patch.sheet
+                sprites.push(duplicateAndSetPropertyUsing(patch, 'x', 'width', patchIndex))
+            }
+
+            sprites.push(
+                ...getBeltSprites(e.belt_animation_set, data.position, data.dir, data.positionGrid)
+            )
+
+            let frame = e.connector_frame_sprites.frame_main.sheet
+            frame = duplicateAndSetPropertyUsing(frame, 'x', 'width', 1)
+            sprites.push(setPropertyUsing(frame, 'y', 'height', connIndex))
+
+            return sprites
+        }
+        return [...getBeltSprites(e.belt_animation_set, data.position, data.dir, data.positionGrid)]
+    }
+}
+function draw_turret(e: TurretPrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_underground_belt(
+    e: UndergroundBeltPrototype
+): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const isInput = data.dirType === 'input'
+        const dir = isInput ? data.dir : (data.dir + 4) % 8
+
+        const beltParts = getBeltSprites(
+            e.belt_animation_set,
+            data.position,
+            data.dir,
+            data.positionGrid,
+            isInput,
+            !isInput,
+            true
+        )
+
+        let mainBelt = beltParts[0]
+        if (dir === 2 || dir === 6) {
+            mainBelt = setPropertyUsing(mainBelt, 'width', 'width', 0.5)
+        } else {
+            mainBelt = setPropertyUsing(mainBelt, 'height', 'height', 0.5)
+        }
+
+        if (dir === 2) {
+            mainBelt = setProperty(mainBelt, 'anchorX', 1)
+        }
+        if (dir === 6) {
+            mainBelt = setProperty(mainBelt, 'anchorX', 0.5)
+        }
+        if (dir === 4) {
+            mainBelt = setProperty(mainBelt, 'anchorY', 1)
+        }
+        if (dir === 0) {
+            mainBelt = setProperty(mainBelt, 'anchorY', 0.5)
+        }
+
+        let sideloadingBack = false
+        let sideloadingFront = false
+
+        if (data.positionGrid && (dir === 2 || dir === 6)) {
+            let C = data.positionGrid.getNeighbourData(data.position).map(d => {
+                if (
+                    d.entity &&
+                    (d.entity.type === 'transport_belt' ||
+                        d.entity.type === 'splitter' ||
+                        ((d.entity.type === 'underground_belt' || d.entity.type === 'loader') &&
+                            d.entity.directionType === 'output'))
+                ) {
+                    return d
+                }
+                return undefined
+            })
+
+            // Belt facing this belt
+            C = C.map(d => {
+                if (d && d.entity.direction === (d.relDir + 4) % 8) {
+                    return d
+                }
+                return undefined
+            })
+
+            sideloadingBack = C[0] !== undefined
+            sideloadingFront = C[2] !== undefined
+        }
+
+        const structure = e.structure
+        const sprites = []
+
+        if (!sideloadingBack) {
+            sprites.push(
+                duplicateAndSetPropertyUsing(structure.back_patch.sheet, 'x', 'width', dir / 2)
+            )
+        }
+
+        sprites.push(mainBelt)
+
+        sprites.push(
+            duplicateAndSetPropertyUsing(
+                sideloadingFront
+                    ? isInput
+                        ? structure.direction_in_side_loading.sheet
+                        : structure.direction_out_side_loading.sheet
+                    : isInput
+                      ? structure.direction_in.sheet
+                      : structure.direction_out.sheet,
+                'x',
+                'width',
+                dir / 2
+            )
+        )
+
+        if (!sideloadingFront) {
+            sprites.push(
+                duplicateAndSetPropertyUsing(structure.front_patch.sheet, 'x', 'width', dir / 2)
+            )
+        }
+
+        if (beltParts[1]) {
+            sprites.push(beltParts[1])
+        }
+
+        return sprites
+    }
+}
+function draw_valve(e: ValvePrototype): (data: IDrawData) => readonly SpriteData[] {
+    throw new Error('Not implemented!')
+}
+function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[] {
+    return (data: IDrawData) => {
+        const pictures = e.pictures
+
+        if (data.positionGrid) {
+            const sprites = []
+
+            const conn = data.positionGrid
+                .getNeighbourData(data.position)
+                .map(
+                    ({ entity, relDir }) =>
+                        entity &&
+                        (entity.name === 'stone_wall' ||
+                            (entity.name === 'gate' && entity.direction === relDir % 4))
+                )
+
+            const wall = (() => {
+                if (conn[1] && conn[2] && conn[3]) {
+                    return pictures.t_up.layers[0]
+                } else if (conn[1] && conn[2]) {
+                    return pictures.corner_right_down.layers[0]
+                } else if (conn[2] && conn[3]) {
+                    return pictures.corner_left_down.layers[0]
+                } else if (conn[1] && conn[3]) {
+                    return pictures.straight_horizontal.layers[0]
+                } else if (conn[1]) {
+                    return pictures.ending_right.layers[0]
+                } else if (conn[2]) {
+                    return pictures.straight_vertical.layers[0]
+                } else if (conn[3]) {
+                    return pictures.ending_left.layers[0]
+                } else {
+                    return pictures.single.layers[0]
+                }
+            })()
+
+            sprites.push(
+                duplicateAndSetPropertyUsing(
+                    wall,
+                    'x',
+                    'width',
+                    util.getRandomInt(0, wall.line_length)
+                )
+            )
+
+            const neighbourDirections = data.positionGrid
+                .getNeighbourData(data.position)
+                .filter(
+                    ({ entity, relDir }) =>
+                        entity && entity.name === 'gate' && entity.direction === relDir % 4
+                )
+                .map(({ relDir }) => relDir)
+
+            for (const relDir of neighbourDirections) {
+                const patch = duplicateAndSetPropertyUsing(
+                    pictures.gate_connection_patch.sheets[0],
+                    'x',
+                    'width',
+                    relDir / 2
+                )
+                if (relDir === 0) {
+                    sprites.unshift(patch)
+                } else {
+                    sprites.push(patch)
+                }
+            }
+
+            const spawnFilling = [
+                [-1, 0],
+                [-1, 1],
+                [0, 1],
+            ]
+                .map(o => {
+                    const ent = data.positionGrid.getEntityAtPosition(
+                        util.sumprod(data.position, o)
+                    )
+                    return !!ent && ent.name === 'stone_wall'
+                })
+                .every(e => e)
+
+            if (spawnFilling) {
+                let filling = duplicateAndSetPropertyUsing(
+                    pictures.filling,
+                    'x',
+                    'width',
+                    util.getRandomInt(0, pictures.filling.line_length)
+                )
+                filling = setProperty(filling, 'anchorX', 1.17)
+                sprites.push(filling)
+            }
+
+            sprites.push(
+                ...neighbourDirections.map(relDir =>
+                    duplicateAndSetPropertyUsing(e.wall_diode_red.sheet, 'x', 'width', relDir / 2)
+                )
+            )
+
+            return sprites
+        }
+
+        return pictures.single.layers
     }
 }
 

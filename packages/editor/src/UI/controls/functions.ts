@@ -7,9 +7,10 @@ import {
     CanvasTextMetrics,
     RenderTexture,
 } from 'pixi.js'
-import FD, { IngredientOrResult, ColorWithAlpha, Item, Icon } from '../../core/factorioData'
+import FD, { Color, ColorWithAlpha, getColor } from '../../core/factorioData'
 import { styles } from '../style'
 import G from '../../common/globals'
+import { IngredientPrototype, IconData, ProductPrototype, ItemPrototype } from 'factorio:prototype'
 
 /**
  * Shade Color
@@ -198,6 +199,17 @@ function CreateIcon(
     setAnchor = true,
     darkBackground = false
 ): Container {
+    if (darkBackground) {
+        const item = FD.items[itemName]
+        if (item) {
+            if (item.dark_background_icons) {
+                return generateIcons(item.dark_background_icons)
+            } else if (item.dark_background_icon) {
+                return generateIcon(item.dark_background_icon, item.dark_background_icon_size)
+            }
+        }
+    }
+
     const item =
         FD.items[itemName] ||
         FD.fluids[itemName] ||
@@ -206,29 +218,28 @@ function CreateIcon(
         // inventory group icon is not present in FD.items
         FD.inventoryLayout.find(g => g.name === itemName)
 
-    if (item.icon || (item as Item).dark_background_icon) {
-        return generateIcon(item as Icon)
+    if (item.icons) {
+        return generateIcons(item.icons)
+    } else if (item.icon) {
+        return generateIcon(item.icon, item.icon_size)
+    } else {
+        throw new Error('Internal Error!')
     }
 
-    if (item.icons) return generateIcons(item.icons, item.icon_size, item.icon_mipmaps)
-
-    function generateIcon(data: Icon): Sprite {
-        const icon =
-            darkBackground && data.dark_background_icon ? data.dark_background_icon : data.icon
-
-        const texture = G.getTexture(icon, 0, 0, data.icon_size, data.icon_size)
+    function generateIcon(filename: string, icon_size: number = 64): Sprite {
+        const texture = G.getTexture(filename, 0, 0, icon_size, icon_size)
         const sprite = new Sprite(texture)
-        sprite.scale.set(maxSize / data.icon_size)
+        sprite.scale.set(maxSize / icon_size)
         if (setAnchor) {
             sprite.anchor.set(0.5)
         }
         return sprite
     }
 
-    function generateIcons(icons: Icon[], icon_size?: number, icon_mipmaps?: number): Container {
+    function generateIcons(icons: readonly IconData[]): Container {
         const img = new Container()
         for (const icon of icons) {
-            const sprite = generateIcon({ icon_size, icon_mipmaps, ...icon })
+            const sprite = generateIcon(icon.icon, icon.icon_size)
             if (icon.scale) {
                 sprite.scale.set(icon.scale, icon.scale)
             }
@@ -236,7 +247,7 @@ function CreateIcon(
                 sprite.position.set(icon.shift[0], icon.shift[1])
             }
             if (icon.tint) {
-                applyTint(sprite, icon.tint)
+                applyTint(sprite, getColor(icon.tint))
             }
 
             if (!setAnchor && icon.shift) {
@@ -263,7 +274,7 @@ function CreateIconWithAmount(
     x: number,
     y: number,
     name: string,
-    amount: number
+    amount: number = 1
 ): void {
     const icon = CreateIcon(name, undefined, false)
     icon.position.set(x, y)
@@ -280,9 +291,9 @@ function CreateRecipe(
     host: Container,
     x: number,
     y: number,
-    ingredients: IngredientOrResult[],
-    results: IngredientOrResult[],
-    time: number
+    ingredients: readonly IngredientPrototype[],
+    results: readonly ProductPrototype[],
+    energy_required: number = 0.5
 ): void {
     let nextX = x
 
@@ -292,7 +303,7 @@ function CreateRecipe(
     }
 
     nextX += 2
-    const timeText = `=${time}s>`
+    const timeText = `=${energy_required}s>`
     const timeSize = CanvasTextMetrics.measureText(timeText, styles.dialog.label)
     const timeObject = new Text({ text: timeText, style: styles.dialog.label })
     timeObject.position.set(nextX, 6 + y)
@@ -300,7 +311,8 @@ function CreateRecipe(
     nextX += timeSize.width + 6
 
     for (const r of results) {
-        CreateIconWithAmount(host, nextX, y, r.name, r.amount)
+        const name = r.type === 'research-progress' ? r.research_item : r.name
+        CreateIconWithAmount(host, nextX, y, name, r.amount)
         nextX += 36
     }
 }
