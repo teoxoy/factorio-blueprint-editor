@@ -13,12 +13,10 @@
 
         // "strict": true, // TODO: enable
 
-        "rootDir": ".",
-        "baseUrl": ".",
         "paths": {
-            "@fbe/*": ["packages/*/src/index.ts"]
+            "@fbe/*": ["./packages/*/src/index.ts"]
         },
 
-        "typeRoots": ["./node_modules/@types"]
+        "types": ["vite/client", "./packages/editor/node_modules/typed-factorio/prototype"]
     }
 }

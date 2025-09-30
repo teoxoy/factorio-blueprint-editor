@@ -12,10 +12,11 @@ import {
 import util from '../common/util'
 import { IllegalFlipError } from '../containers/PaintContainer'
 import G from '../common/globals'
-import FD, { ColorWithAlpha, Entity as FD_Entity } from './factorioData'
+import FD, { ColorWithAlpha, getModule, isCraftingMachine } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
 import U from './generators/util'
+import { EntityWithOwnerPrototype } from 'factorio:prototype'
 
 export interface IFilter {
     /** Slot index (1 based ... not 0 like arrays) */
@@ -100,7 +101,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     /** Direct access to entity meta data from core */
-    public get entityData(): FD_Entity {
+    public get entityData(): EntityWithOwnerPrototype {
         return FD.entities[this.name]
     }
 
@@ -227,14 +228,15 @@ export class Entity extends EventEmitter<EntityEvents> {
             .onDone(r => this.emit('recipe', r))
             .commit()
 
-        if (recipe !== undefined) {
-            // Some modules on the entity may not be compatible with the new selected recipe, filter those out
+        // Some modules on the entity may not be compatible with the new selected recipe, filter those out
+        if (recipe !== undefined && FD.recipes[recipe].allowed_module_categories) {
+            console.log(FD.recipes[recipe].allowed_module_categories)
             this.modules = this.modules
-                .map(k => FD.items[k])
-                .filter(
-                    item => !(item.limitation !== undefined && !item.limitation.includes(recipe))
+                .map(m => getModule(m))
+                .filter(module =>
+                    FD.recipes[recipe].allowed_module_categories.includes(module.category)
                 )
-                .map(item => item.name)
+                .map(module => module.name)
         }
 
         this.m_BP.history.commitTransaction()
@@ -242,11 +244,12 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     /** Recipes this entity can accept */
     public get acceptedRecipes(): string[] {
-        if (this.entityData.crafting_categories === undefined) return []
+        const e = this.entityData
+        if (!isCraftingMachine(e)) return []
 
         return Object.keys(FD.recipes)
             .map(k => FD.recipes[k])
-            .filter(recipe => this.entityData.crafting_categories.includes(recipe.category))
+            .filter(recipe => e.crafting_categories.includes(recipe.category))
             .map(recipe => recipe.name)
     }
 
@@ -842,7 +845,7 @@ export class Entity extends EventEmitter<EntityEvents> {
 
             assembling machines -> requester chest:
                 filters
-                request amount formula: Math.min(ingredientAmount, Math.ceil((ingredientAmount * newCraftingSpeed) / recipe.time))
+                request amount formula: Math.min(ingredientAmount, Math.ceil((ingredientAmount * newCraftingSpeed) / recipe.energy_required))
 
             Locomotive:
                 Schedule
@@ -898,10 +901,9 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     public get mayCraftWithFluid(): boolean {
-        return (
-            this.entityData.crafting_categories &&
-            this.entityData.crafting_categories.includes('crafting_with_fluid')
-        )
+        const e = this.entityData
+        if (!isCraftingMachine(e)) return false
+        return e.crafting_categories && e.crafting_categories.includes('crafting_with_fluid')
     }
 
     public get assemblerPipeDirection(): DirectionType {
@@ -934,6 +936,9 @@ export class Entity extends EventEmitter<EntityEvents> {
 
         if (e.circuit_wire_connection_point) return e.circuit_wire_connection_point.wire[color]
 
+        if (e.circuit_connector && !Array.isArray(e.circuit_connector))
+            return e.circuit_connector.points.wire[color]
+
         const getIndex = (): number => {
             if (this.type === 'transport_belt') {
                 const i = getBeltWireConnectionIndex(
@@ -941,12 +946,25 @@ export class Entity extends EventEmitter<EntityEvents> {
                     this.position,
                     direction
                 )
-                return i * 4
+                return i
             }
-            if (e.circuit_wire_connection_points.length === 8) return direction
+            if (e.circuit_wire_connection_points?.length === 8) return direction
+            if (
+                e.ground_picture_set &&
+                Array.isArray(e.ground_picture_set.circuit_connector) &&
+                e.ground_picture_set.circuit_connector.length === 16
+            )
+                return direction
+            if (Array.isArray(e.circuit_connector) && e.circuit_connector.length === 8)
+                return direction
             return direction / 2
         }
-        return e.circuit_wire_connection_points[getIndex()].wire[color]
+        const index = getIndex()
+        if (e.circuit_wire_connection_points)
+            return e.circuit_wire_connection_points[index].wire[color]
+        if (e.ground_picture_set)
+            return e.ground_picture_set.circuit_connector[index].points.wire[color]
+        return e.circuit_connector[index].points.wire[color]
     }
 
     private getWire_connection_box(
@@ -964,6 +982,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (side === 1 && e.circuit_wire_connection_point?.wire[color]) return size_box
         if (side === 1 && e.circuit_wire_connection_points?.[direction / 2].wire[color])
             return size_box
+        if (side === 1 && e.circuit_connector?.[direction / 2].points.wire[color]) return size_box
         if (side === 1 && e.input_connection_points?.[direction / 2].wire[color])
             return e.input_connection_bounding_box
         if (side === 2 && e.output_connection_points?.[direction / 2].wire[color])

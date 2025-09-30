@@ -30,7 +30,7 @@ This project uses `eslint` and `prettier` to lint and format code. I would recom
 1. Download the recommended workspace extensions in vscode
 1. Create a new git branch (`git checkout -b my-fix-branch master`)
 1. Create a new file at the path `packages/exporter/.env` and add your `FACTORIO_USERNAME` and `FACTORIO_TOKEN` (you can get those [here](https://factorio.com/profile))
-1. Run `npm i`
+1. Run `npm i --legacy-peer-deps`
 1. Run `npm run start:website` and `npm run start:exporter`
 1. Open the link in a browser or use the vscode debugger
 1. Make changes

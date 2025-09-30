@@ -5,7 +5,7 @@ import F from '../UI/controls/functions'
 import { Entity } from '../core/Entity'
 import { PositionGrid } from '../core/PositionGrid'
 import { getSpriteData, ExtendedSpriteData } from '../core/spriteDataBuilder'
-import { ColorWithAlpha } from '../core/factorioData'
+import { ColorWithAlpha, getColor } from '../core/factorioData'
 
 interface IEntityData {
     name: string
@@ -63,7 +63,14 @@ export class EntitySprite extends Sprite {
         }
 
         if (data.tint) {
-            F.applyTint(this, data.tint)
+            F.applyTint(this, getColor(data.tint))
+        } else if (data.apply_runtime_tint) {
+            F.applyTint(this, {
+                r: 233 / 255,
+                g: 195 / 255,
+                b: 153 / 255,
+                a: 0.8,
+            })
         }
 
         return this
@@ -102,8 +109,18 @@ export class EntitySprite extends Sprite {
         let foundMainBelt = false
         for (let i = 0; i < spriteData.length; i++) {
             const data = spriteData[i]
+            if (!data) continue
+            if (data.draw_as_shadow) continue
+            // if (data.draw_as_glow) continue
+            // if (data.draw_as_light) continue
 
-            const texture = G.getTexture(data.filename, data.x, data.y, data.width, data.height)
+            const texture = G.getTexture(
+                data.filename,
+                data.x,
+                data.y,
+                data.width || (Array.isArray(data.size) ? data.size[0] : data.size),
+                data.height || (Array.isArray(data.size) ? data.size[1] : data.size)
+            )
             const sprite = new EntitySprite(texture, data, position)
 
             if (data.filename.includes('circuit-connector')) {

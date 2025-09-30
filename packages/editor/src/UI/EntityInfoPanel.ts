@@ -1,5 +1,5 @@
 import { Container, Rectangle, Text } from 'pixi.js'
-import FD from '../core/factorioData'
+import FD, { getModule } from '../core/factorioData'
 import G from '../common/globals'
 import util from '../common/util'
 import { Entity } from '../core/Entity'
@@ -114,41 +114,41 @@ export class EntityInfoPanel extends Panel {
 
             if (entity.modules.length > 0) {
                 for (const module of entity.modules) {
-                    const moduleData = FD.items[module]
+                    const moduleData = getModule(module)
                     if (moduleData.effect.productivity) {
-                        productivity += moduleData.effect.productivity.bonus
+                        productivity += moduleData.effect.productivity
                     }
                     if (moduleData.effect.consumption) {
-                        consumption += moduleData.effect.consumption.bonus
+                        consumption += moduleData.effect.consumption
                     }
                     // if (moduleData.effect.pollution) {
-                    //     pollution += moduleData.effect.pollution.bonus
+                    //     pollution += moduleData.effect.pollution
                     // }
                     if (moduleData.effect.speed) {
-                        speed += moduleData.effect.speed.bonus
+                        speed += moduleData.effect.speed
                     }
                 }
             }
 
             for (const beacon of this.findNearbyBeacons(entity)) {
                 for (const module of beacon.modules) {
-                    if (FD.items[module].effect.productivity) {
+                    const moduleData = getModule(module)
+                    if (moduleData.effect.productivity) {
                         productivity +=
-                            FD.items[module].effect.productivity.bonus *
+                            moduleData.effect.productivity *
                             beacon.entityData.distribution_effectivity
                     }
-                    if (FD.items[module].effect.consumption) {
+                    if (moduleData.effect.consumption) {
                         consumption +=
-                            FD.items[module].effect.consumption.bonus *
+                            moduleData.effect.consumption *
                             beacon.entityData.distribution_effectivity
                     }
-                    // if (FD.items[module].effect.pollution) {
-                    //     pollution += FD.items[module].effect.pollution.bonus * beacon.entityData.distribution_effectivity
+                    // if (moduleData.effect.pollution) {
+                    //     pollution += moduleData.effect.pollution * beacon.entityData.distribution_effectivity
                     // }
-                    if (FD.items[module].effect.speed) {
+                    if (moduleData.effect.speed) {
                         speed +=
-                            FD.items[module].effect.speed.bonus *
-                            beacon.entityData.distribution_effectivity
+                            moduleData.effect.speed * beacon.entityData.distribution_effectivity
                     }
                 }
             }
@@ -192,7 +192,7 @@ export class EntityInfoPanel extends Panel {
                 20,
                 recipe.ingredients,
                 recipe.results,
-                recipe.time
+                recipe.energy_required
             )
             this.m_RecipeContainer.position.set(10, nextY)
             nextY = this.m_RecipeContainer.position.y + this.m_RecipeContainer.height + 20
@@ -204,18 +204,19 @@ export class EntityInfoPanel extends Panel {
                     style: styles.dialog.label,
                 })
             )
+            const energy_required = recipe.energy_required || 0.5
             F.CreateRecipe(
                 this.m_RecipeIOContainer,
                 0,
                 20,
                 recipe.ingredients.map(i => ({
-                    name: i.name,
-                    amount: roundToTwo((i.amount * newCraftingSpeed) / recipe.time),
+                    ...i,
+                    amount: roundToTwo((i.amount * newCraftingSpeed) / energy_required),
                 })),
                 recipe.results.map(r => ({
-                    name: r.name,
+                    ...r,
                     amount: roundToTwo(
-                        ((r.amount * newCraftingSpeed) / recipe.time) * (1 + productivity)
+                        ((r.amount * newCraftingSpeed) / energy_required) * (1 + productivity)
                     ),
                 })),
                 1

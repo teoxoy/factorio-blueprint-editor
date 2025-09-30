@@ -225,7 +225,7 @@ export class InventoryDialog extends Dialog {
             0,
             recipe.ingredients,
             recipe.results,
-            recipe.time
+            recipe.energy_required
         )
     }
 }
