@@ -14,16 +14,19 @@ import { IllegalFlipError } from '../containers/PaintContainer'
 import G from '../common/globals'
 import FD, {
     ColorWithAlpha,
+    getCircuitConnector,
+    getWireConnectionPoint,
     getEntitySize,
     getModule,
     getPossibleRotations,
     isCraftingMachine,
     isInserter,
+    mapBoundingBox,
 } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
 import U from './generators/util'
-import { EntityWithOwnerPrototype } from 'factorio:prototype'
+import { EntityWithOwnerPrototype, CombinatorPrototype } from 'factorio:prototype'
 
 export interface IFilter {
     /** Slot index (1 based ... not 0 like arrays) */
@@ -931,86 +934,68 @@ export class Entity extends EventEmitter<EntityEvents> {
         color: string,
         side: number,
         direction = this.direction
-    ): number[] {
+    ): undefined | number[] {
         const e = this.entityData
-        // poles
-        if (e.connection_points) return e.connection_points[direction / 2].wire[color]
-        // combinators
-        if (e.input_connection_points) {
-            if (side === 1) return e.input_connection_points[direction / 2].wire[color]
-            return e.output_connection_points[direction / 2].wire[color]
+
+        const getCombinatorSide = () => (side === 1 ? 'input' : 'output')
+        const getPowerSwitchSide = () =>
+            color === 'copper' ? (side === 1 ? 'left' : 'right') : 'circuit'
+        const wcp = getWireConnectionPoint(e, direction, getCombinatorSide, getPowerSwitchSide)
+        if (wcp) {
+            return wcp.wire[color]
         }
 
-        if (this.type === 'power-switch' && color === 'copper') {
-            return side === 1
-                ? e.left_wire_connection_point.wire.copper
-                : e.right_wire_connection_point.wire.copper
+        const isLoaderInputting = () => this.directionType === 'input'
+        const getBeltConnectionIndex = () =>
+            getBeltWireConnectionIndex(this.m_BP.entityPositionGrid, this.position, direction)
+        const cc = getCircuitConnector(e, direction, isLoaderInputting, getBeltConnectionIndex)
+        if (cc) {
+            return cc.points.wire[color]
         }
-
-        if (e.circuit_wire_connection_point) return e.circuit_wire_connection_point.wire[color]
-
-        if (e.circuit_connector && !Array.isArray(e.circuit_connector))
-            return e.circuit_connector.points.wire[color]
-
-        const getIndex = (): number => {
-            if (this.type === 'transport-belt') {
-                const i = getBeltWireConnectionIndex(
-                    this.m_BP.entityPositionGrid,
-                    this.position,
-                    direction
-                )
-                return i
-            }
-            if (e.circuit_wire_connection_points?.length === 8) return direction
-            if (
-                e.ground_picture_set &&
-                Array.isArray(e.ground_picture_set.circuit_connector) &&
-                e.ground_picture_set.circuit_connector.length === 16
-            )
-                return direction
-            if (Array.isArray(e.circuit_connector) && e.circuit_connector.length === 8)
-                return direction
-            return direction / 2
-        }
-        const index = getIndex()
-        if (e.circuit_wire_connection_points)
-            return e.circuit_wire_connection_points[index].wire[color]
-        if (e.ground_picture_set)
-            return e.ground_picture_set.circuit_connector[index].points.wire[color]
-        return e.circuit_connector[index].points.wire[color]
     }
 
     private getWire_connection_box(
         color: string,
         side: number,
         direction = this.direction
-    ): number[][] {
+    ): [[number, number], [number, number]] {
+        const point = this.getWireConnectionPoint(color, side, direction)
+        if (!point) return undefined
+
         const e = this.entityData
         const e_size = getEntitySize(e)
-        const size_box = [
+        const size_box: [[number, number], [number, number]] = [
             [-e_size.x / 2, -e_size.y / 2],
             [+e_size.x / 2, +e_size.y / 2],
         ]
-        // use size_box for cell-wise selection, use e.selection_box for "true" selection
-        if (side === 1 && e.connection_points?.[direction / 2].wire[color]) return size_box
-        if (side === 1 && e.circuit_wire_connection_point?.wire[color]) return size_box
-        if (side === 1 && e.circuit_wire_connection_points?.[direction / 2].wire[color])
-            return size_box
-        if (side === 1 && e.circuit_connector?.[direction / 2].points.wire[color]) return size_box
-        if (side === 1 && e.input_connection_points?.[direction / 2].wire[color])
-            return e.input_connection_bounding_box
-        if (side === 2 && e.output_connection_points?.[direction / 2].wire[color])
-            return e.output_connection_bounding_box
-        if (side === 1 && e.left_wire_connection_point?.wire[color]) {
-            const box = util.duplicate(size_box)
-            box[1][0] = (box[0][0] + box[1][0]) / 2
-            return box
+
+        switch (e.type) {
+            case 'arithmetic-combinator':
+            case 'decider-combinator':
+            case 'selector-combinator': {
+                const e_resolved = e as CombinatorPrototype
+                if (side === 1) {
+                    return mapBoundingBox(e_resolved.input_connection_bounding_box)
+                } else {
+                    return mapBoundingBox(e_resolved.output_connection_bounding_box)
+                }
+            }
+            case 'power-switch': {
+                if (color === 'copper') {
+                    if (side === 1) {
+                        const box = util.duplicate(size_box)
+                        box[1][0] = (box[0][0] + box[1][0]) / 2
+                        return box
+                    } else {
+                        const box = util.duplicate(size_box)
+                        box[0][0] = (box[0][0] + box[1][0]) / 2
+                        return box
+                    }
+                }
+            }
         }
-        if (side === 2 && e.right_wire_connection_point?.wire[color]) {
-            const box = util.duplicate(size_box)
-            box[0][0] = (box[0][0] + box[1][0]) / 2
-            return box
-        }
+
+        return size_box
     }
 
     public getWireConnectionBoundingBox(

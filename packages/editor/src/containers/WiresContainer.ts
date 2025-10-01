@@ -160,6 +160,9 @@ export class WiresContainer extends Container {
             if (cp.entityNumber) {
                 const entity = this.bp.entities.get(cp.entityNumber)
                 const point = entity.getWireConnectionPoint(color, cp.entitySide)
+                if (!point) {
+                    throw new Error('Could not find the wire connection point!')
+                }
                 return {
                     x: (entity.position.x + point[0]) * 32,
                     y: (entity.position.y + point[1]) * 32,
