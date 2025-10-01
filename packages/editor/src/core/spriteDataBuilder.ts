@@ -170,7 +170,10 @@ function getPipeCovers(e: EntityWithOwnerPrototype): DirectionalSpriteLayers {
 
 function generateConnection(e: EntityWithOwnerPrototype, data: IDrawData): readonly SpriteData[] {
     if (!data.generateConnector) return []
-    const cc = getCircuitConnector(e, data.dir)
+    const isLoaderInputting = () => data.dirType === 'input'
+    const getBeltConnectionIndex = () =>
+        getBeltWireConnectionIndex(data.positionGrid, data.position, data.dir)
+    const cc = getCircuitConnector(e, data.dir, isLoaderInputting, getBeltConnectionIndex)
     if (cc) {
         const ccs = cc.sprites
         return [ccs.connector_main, ccs.wire_pins, ccs.led_blue_off]
@@ -411,6 +414,7 @@ function getHeatConnections(position: IPoint, positionGrid: PositionGrid): boole
     })
 }
 
+// X, H, V, SE, SW, NE and NW.
 function getBeltWireConnectionIndex(
     positionGrid: PositionGrid,
     position: IPoint,
