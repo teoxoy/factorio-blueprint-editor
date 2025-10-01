@@ -142,7 +142,9 @@ export function getModule(name: string): ModulePrototype {
 
 export function getCircuitConnector(
     e: EntityWithOwnerPrototype,
-    dir: number
+    dir: number,
+    isLoaderInputting: () => boolean,
+    getBeltConnectionIndex: () => number
 ): null | CircuitConnectorDefinition {
     switch (e.type) {
         case 'accumulator':
@@ -212,23 +214,32 @@ export function getCircuitConnector(
         case 'loader-1x1': {
             const e_resolved = e as LoaderPrototype
             // First the four cardinal directions for `direction_out`, followed by the four directions for `direction_in`.
-            // TODO
-            return e_resolved.circuit_connector[0]
+            return e_resolved.circuit_connector[(isLoaderInputting() ? 4 : 0) + dir / 2]
         }
         case 'transport-belt': {
             const e_resolved = e as TransportBeltPrototype
             // Set of 7 CircuitConnectorDefinition in order: X, H, V, SE, SW, NE and NW.
-            // TODO
-            return e_resolved.circuit_connector[0]
+            return e_resolved.circuit_connector[getBeltConnectionIndex()]
         }
         case 'ammo-turret':
         case 'electric-turret':
         case 'fluid-turret':
         case 'turret': {
             const e_resolved = e as TurretPrototype
-            // Set of CircuitConnectorDefinition for all directions used by this turret. Required amount of elements is based on other prototype values: 8 elements if building-direction-8-way flag is set, or 16 elements if building-direction-16-way flag is set, or 4 elements if turret_base_has_direction is set to true, or 1 element.
-            // TODO
-            return e_resolved.circuit_connector[0]
+            // Set of CircuitConnectorDefinition for all directions used by this turret.
+            // Required amount of elements is based on other prototype values: 8 elements if
+            // building-direction-8-way flag is set, or 16 elements if
+            // building-direction-16-way flag is set, or 4 elements if
+            // turret_base_has_direction is set to true, or 1 element.
+            let d = 0
+            if (e.flags && e.flags.includes('building-direction-16-way')) {
+                d = dir * 2
+            } else if (e.flags && e.flags.includes('building-direction-8-way')) {
+                d = dir
+            } else if (e_resolved.turret_base_has_direction) {
+                d = dir / 2
+            }
+            return e_resolved.circuit_connector[d]
         }
         default:
             return null
