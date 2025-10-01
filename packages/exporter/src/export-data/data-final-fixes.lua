@@ -8,7 +8,7 @@ end
 local function list_iter(t)
     local i = 0
     local n = #t
-    return function ()
+    return function()
         i = i + 1
         if i <= n then
             return t[i]
@@ -59,13 +59,15 @@ end
 
 local locale = require('locale')
 
-local function localise(obj, type)
+local function localise(obj, typeArg)
     local function localiseTemplate(t)
         local template = locale[t[1]]
         local args = t[2]
-        if args ~= nil then
+        if type(args) == "string" then
+            template = template:gsub('__1__', args)
+        elseif args ~= nil then
             for i = 1, #args do
-                template = template:gsub('__'..i..'__', locale[args[i]])
+                template = template:gsub('__' .. i .. '__', locale[args[i]])
             end
         end
         return template
@@ -74,7 +76,7 @@ local function localise(obj, type)
     if obj.localised_name ~= nil then
         obj.localised_name = localiseTemplate(obj.localised_name)
     else
-        local str = locale[type..'-name.'..obj.name]
+        local str = locale[typeArg .. '-name.' .. obj.name]
         if str ~= nil then
             obj.localised_name = str
         else
@@ -85,14 +87,14 @@ local function localise(obj, type)
     if obj.localised_description ~= nil then
         obj.localised_description = localiseTemplate(obj.localised_description)
     else
-        local str = locale[type..'-description.'..obj.name]
+        local str = locale[typeArg .. '-description.' .. obj.name]
         if str ~= nil then
             obj.localised_description = str
         end
     end
 
     if obj.limitation_message_key ~= nil then
-        local str = locale[type..'-limitation.'..obj.limitation_message_key]
+        local str = locale[typeArg .. '-limitation.' .. obj.limitation_message_key]
         if str ~= nil then
             obj.limitation_message = str
         end
@@ -119,46 +121,38 @@ do
     local itemPrototypes = {
         'item',
         'ammo',
-        'gun',
         'capsule',
+        'gun',
         'item-with-entity-data',
-        'blueprint',
+        'item-with-label',
+        'item-with-inventory',
         'blueprint-book',
-        'upgrade-item',
+        'item-with-tags',
+        'selection-tool',
+        'blueprint',
+        'copy-paste-tool',
         'deconstruction-item',
+        'spidertron-remote',
+        'upgrade-item',
         'module',
         'rail-planner',
+        'space-platform-starter-pack',
         'tool',
         'armor',
         'repair-tool',
-        'spidertron-remote'
-    }
-
-    local itemKeyBlacklist = {
-        'ammo_type',
-        'attack_parameters',
-        'capsule_action',
-        'durability_description_key',
-        'durability_description_value',
-        'flags',
-        'pictures',
-        'resistances',
-        'robot_action'
     }
 
     local getOrder = char_generator()
 
     for proto in list_iter(itemPrototypes) do
-        for _, item in pairs(deep_copy(data.raw[proto])) do
-            if list_includes(creativeEntities, item.name) then
-                item.subgroup = 'creative'
-                item.order = getOrder()
-                item.flags = nil
-            end
+        if data.raw[proto] then
+            for _, item in pairs(deep_copy(data.raw[proto])) do
+                if list_includes(creativeEntities, item.name) then
+                    item.subgroup = 'creative'
+                    item.order = getOrder()
+                end
 
-            if (item.icon ~= nil or item.icons ~= nil) and not (item.flags ~= nil and list_includes(item.flags, 'hidden')) then
                 localise(item, 'item')
-                table_filter(item, itemKeyBlacklist)
                 items[item.name] = item
             end
         end
@@ -171,13 +165,8 @@ end
 do
     local fluids = {}
 
-    local fluidKeyBlacklist = {
-        'auto_barrel'
-    }
-
     for _, fluid in pairs(deep_copy(data.raw.fluid)) do
         localise(fluid, 'fluid')
-        table_filter(fluid, fluidKeyBlacklist)
         fluids[fluid.name] = fluid
     end
 
@@ -202,56 +191,8 @@ do
 
     for _, recipe in pairs(deep_copy(data.raw.recipe)) do
         if not list_includes(creativeEntities, recipe.name) then
-            if recipe.normal ~= nil then
-                table_merge(recipe, recipe.normal)
-            end
-
-            local ingredients = {}
-            local results = {}
-
-            local function process_items(input, output)
-                for _, val in pairs(input) do
-                    if #val > 0 then
-                        table.insert(output, {
-                            name = val[1],
-                            amount = val[2]
-                        })
-                    else
-                        table.insert(output, val)
-                    end
-                end
-            end
-
-            process_items(recipe.ingredients, ingredients)
-
-            if recipe.result ~= nil then
-                results = {
-                    {
-                        name = recipe.result,
-                        amount = recipe.result_count or 1
-                    }
-                }
-            else
-                process_items(recipe.results, results)
-            end
-
-            local outRecipe = {
-                name = recipe.name,
-                icon = recipe.icon,
-                icons = recipe.icons,
-                icon_size = recipe.icon_size,
-                icon_mipmaps = recipe.icon_mipmaps,
-                category = recipe.category or 'crafting',
-                hidden = recipe.hidden,
-                time = recipe.energy_required or 0.5,
-                ingredients = ingredients,
-                results = results,
-                requester_paste_multiplier = recipe.requester_paste_multiplier,
-                crafting_machine_tint = recipe.crafting_machine_tint
-            }
-
-            localise(outRecipe, 'recipe')
-            recipes[recipe.name] = outRecipe
+            localise(recipe, 'recipe')
+            recipes[recipe.name] = recipe
         end
     end
 
@@ -264,20 +205,38 @@ do
 
     local placeableEntityPrototypes = {
         'accumulator',
+        'agricultural-tower',
         'artillery-turret',
+        'asteroid-collector',
+        -- 'asteroid',
         'beacon',
         'boiler',
+        'burner-generator',
+        'cargo-bay',
+        'cargo-landing-pad',
+        -- 'cargo-pod',
+        -- 'character',
         'arithmetic-combinator',
         'decider-combinator',
+        'selector-combinator',
         'constant-combinator',
         'container',
         'logistic-container',
         'infinity-container',
+        'temporary-container',
         'assembling-machine',
         'rocket-silo',
         'furnace',
+        'display-panel',
         'electric-energy-interface',
         'electric-pole',
+        -- 'unit-spawner',
+        -- 'capture-robot',
+        -- 'combat-robot',
+        -- 'construction-robot',
+        -- 'logistic-robot',
+        'fusion-generator',
+        'fusion-reactor',
         'gate',
         'generator',
         'heat-interface',
@@ -286,24 +245,50 @@ do
         'lab',
         'lamp',
         'land-mine',
+        'lightning-attractor',
+        'linked-container',
+        'market',
         'mining-drill',
         'offshore-pump',
         'pipe',
         'infinity-pipe',
         'pipe-to-ground',
+        -- 'player-port',
         'power-switch',
         'programmable-speaker',
+        'proxy-container',
         'pump',
         'radar',
-        'curved-rail',
+        'curved-rail-a',
+        'elevated-curved-rail-a',
+        'curved-rail-b',
+        'elevated-curved-rail-b',
+        'half-diagonal-rail',
+        'elevated-half-diagonal-rail',
+        'legacy-curved-rail',
+        'legacy-straight-rail',
+        'rail-ramp',
         'straight-rail',
+        'elevated-straight-rail',
         'rail-chain-signal',
         'rail-signal',
+        'rail-support',
         'reactor',
         'roboport',
+        -- 'segment',
+        -- 'segmented-unit',
+        'simple-entity-with-owner',
+        'simple-entity-with-force',
         'solar-panel',
+        'space-platform-hub',
+        -- 'spider-leg',
+        -- 'spider-unit',
         'storage-tank',
+        'thruster',
         'train-stop',
+        'lane-splitter',
+        'linked-belt',
+        'loader-1x1',
         'loader',
         'splitter',
         'transport-belt',
@@ -312,163 +297,83 @@ do
         'ammo-turret',
         'electric-turret',
         'fluid-turret',
+        -- 'unit',
+        'valve',
+        -- 'car',
+        'artillery-wagon',
+        'cargo-wagon',
+        'infinity-cargo-wagon',
+        'fluid-wagon',
+        'locomotive',
+        -- 'spider-vehicle',
         'wall'
     }
 
-    local entityBlacklist = {
-        'bait-chest',
-        'compilatron-chest',
-        'crash-site-chest-1',
-        'crash-site-chest-2',
-        'big-ship-wreck-1',
-        'big-ship-wreck-2',
-        'big-ship-wreck-3',
-        'red-chest',
-        'blue-chest',
-        'compi-logistics-chest',
-        'crash-site-assembling-machine-1-repaired',
-        'crash-site-assembling-machine-2-repaired',
-        'crash-site-generator',
-        'hidden-electric-energy-interface',
-        'crash-site-electric-pole',
-        'crash-site-lab-repaired',
-        'compi-roboport',
-        'small-worm-turret',
-        'medium-worm-turret',
-        'big-worm-turret',
-        'behemoth-worm-turret',
-        'cutscene-gun-turret'
-    }
-
-    local entityKeyBlacklist = {
-        'subgroup',
-        'repair_sound',
-        'vehicle_impact_sound',
-        'resistances',
-        'action',
-        'meltdown_action',
-        'ammo_type',
-        'attack_parameters',
-        'fluid_wagon_connector_graphics',
-        'cannon_base_shiftings',
-        'cannon_barrel_recoil_shiftings',
-        'folded_muzzle_animation_shift',
-        'preparing_muzzle_animation_shift',
-        'prepared_muzzle_animation_shift',
-        'attacking_muzzle_animation_shift',
-        'ending_attack_muzzle_animation_shift',
-        'folding_muzzle_animation_shift'
-    }
-
     for proto in list_iter(placeableEntityPrototypes) do
-        for _, entity in pairs(deep_copy(data.raw[proto])) do
-            if not list_includes(entityBlacklist, entity.name) then
+        if data.raw[proto] then
+            for _, entity in pairs(deep_copy(data.raw[proto])) do
+                if not list_includes(entity.flags or {}, 'not-blueprintable') and
+                    not list_includes(entity.flags or {}, 'breaths-air')
+                then
+                    -- add size
+                    entity.size = {
+                        width = math.ceil(math.abs(entity.selection_box[1][1]) + math.abs(entity.selection_box[2][1])),
+                        height = math.ceil(math.abs(entity.selection_box[1][2]) + math.abs(entity.selection_box[2][2]))
+                    }
 
-                -- add size
-                entity.size = {
-                    width = math.ceil(math.abs(entity.selection_box[1][1]) + math.abs(entity.selection_box[2][1])),
-                    height = math.ceil(math.abs(entity.selection_box[1][2]) + math.abs(entity.selection_box[2][2]))
-                }
+                    -- add possible_rotations
+                    if list_includes({
+                            'pipe-to-ground',
+                            'train-stop',
+                            'arithmetic-combinator',
+                            'decider-combinator',
+                            'constant-combinator',
+                            'artillery-turret',
+                            'flamethrower-turret',
+                            'offshore-pump',
+                            'pump'
+                        }, entity.name) or list_includes({
+                            'underground-belt',
+                            'transport-belt',
+                            'splitter',
+                            'inserter',
+                            'boiler',
+                            'mining-drill',
+                            'assembling-machine',
+                            'loader'
+                        }, entity.type) then
+                        entity.possible_rotations = { 0, 2, 4, 6 }
+                    elseif list_includes({
+                            'storage-tank',
+                            'gate',
+                        }, entity.name) or list_includes({
+                            'generator'
+                        }, entity.type) then
+                        entity.possible_rotations = { 0, 2 }
+                    elseif list_includes({
+                            'legacy-curved-rail',
+                            'rail-signal',
+                            'rail-chain-signal'
+                        }, entity.name) then
+                        entity.possible_rotations = { 0, 1, 2, 3, 4, 5, 6, 7 }
+                    elseif list_includes({
+                            'legacy-straight-rail'
+                        }, entity.name) then
+                        entity.possible_rotations = { 0, 1, 2, 3, 5, 7 }
+                    end
 
-                -- add possible_rotations
-                if list_includes({
-                    'pipe-to-ground',
-                    'train-stop',
-                    'arithmetic-combinator',
-                    'decider-combinator',
-                    'constant-combinator',
-                    'artillery-turret',
-                    'flamethrower-turret',
-                    'offshore-pump',
-                    'pump'
-                }, entity.name) or list_includes({
-                    'underground-belt',
-                    'transport-belt',
-                    'splitter',
-                    'inserter',
-                    'boiler',
-                    'mining-drill',
-                    'assembling-machine',
-                    'loader'
-                }, entity.type) then
-
-                    entity.possible_rotations = { 0, 2, 4, 6 }
-
-                elseif list_includes({
-                    'storage-tank',
-                    'gate',
-                }, entity.name) or list_includes({
-                    'generator'
-                }, entity.type) then
-
-                    entity.possible_rotations = { 0, 2 }
-
-                elseif list_includes({
-                    'curved-rail',
-                    'rail-signal',
-                    'rail-chain-signal'
-                }, entity.name) then
-
-                    entity.possible_rotations = { 0, 1, 2, 3, 4, 5, 6, 7 }
-
-                elseif list_includes({
-                    'straight-rail'
-                }, entity.name) then
-
-                    entity.possible_rotations = { 0, 1, 2, 3, 5, 7 }
+                    localise(entity, 'entity')
+                    entities[entity.name] = entity
                 end
-
-                -- modify fast_replaceable_group
-                if entity.type == 'splitter' then
-                    entity.fast_replaceable_group = 'splitter'
-                elseif entity.type == 'underground-belt' then
-                    entity.fast_replaceable_group = 'underground-belt'
-                end
-
-                -- move off_when_no_fluid_recipe outside of fluid_boxes props
-                if entity.fluid_boxes ~= nil and entity.fluid_boxes.off_when_no_fluid_recipe ~= nil then
-                    entity.fluid_boxes_off_when_no_fluid_recipe = entity.fluid_boxes.off_when_no_fluid_recipe
-                    entity.fluid_boxes.off_when_no_fluid_recipe = nil
-                end
-
-                localise(entity, 'entity')
-                table_filter(entity, entityKeyBlacklist)
-                entities[entity.name] = entity
             end
         end
     end
 
     entities['offshore-pump'].size = { width = 1, height = 1 }
-    entities['curved-rail'].size = { width = 4, height = 8 }
+    entities['legacy-curved-rail'].size = { width = 4, height = 8 }
 
-    entities['centrifuge'].possible_directions = nil
-    entities['assembling-machine-1'].possible_directions = nil
-
-    -- fix shifts
-    entities['storage-tank'].pictures.window_background.shift = { 0, 1 }
-    entities['storage-tank'].pictures.window_background.hr_version.shift = { 0, 1 }
-
-    -- fix inconsistent radius
-    entities.beacon.supply_area_distance = entities.beacon.supply_area_distance + 1
-
-    local function add_to_Y_shift(y_shift, layer)
-        layer.shift[2] = layer.shift[2] + y_shift
-        if layer.hr_version ~= nil then
-            layer.hr_version.shift[2] = layer.hr_version.shift[2] + y_shift
-        end
-    end
-
-    add_to_Y_shift(-0.6875, entities['artillery-turret'].base_picture.layers[1])
-    add_to_Y_shift(-0.6875, entities['artillery-turret'].cannon_barrel_pictures.layers[1])
-    add_to_Y_shift(-0.6875, entities['artillery-turret'].cannon_base_pictures.layers[1])
-
-    -- keep pictures consistent
-    entities['pipe-to-ground'].pictures = {
-        north = entities['pipe-to-ground'].pictures.up,
-        east = entities['pipe-to-ground'].pictures.right,
-        south = entities['pipe-to-ground'].pictures.down,
-        west = entities['pipe-to-ground'].pictures.left
-    }
+    entities['centrifuge'].possible_rotations = nil
+    entities['assembling-machine-1'].possible_rotations = nil
 
     output.entities = entities
 end
@@ -477,14 +382,9 @@ end
 do
     local tiles = {}
 
-    local tileKeyBlacklist = {
-        'autoplace'
-    }
-
     for _, tile in pairs(deep_copy(data.raw.tile)) do
-        if tile.minable ~= nil or tile.name == 'landfill' then
+        if tile.minable then
             localise(tile, 'tile')
-            table_filter(tile, tileKeyBlacklist)
             tiles[tile.name] = tile
         end
     end
@@ -500,6 +400,7 @@ do
         'environment',
         'enemies',
         'effects',
+        'tiles',
         'other'
     }
 
@@ -536,7 +437,6 @@ do
                     icon = entry.icon, -- or fluid.icon,
                     icons = entry.icons,
                     icon_size = entry.icon_size,
-                    icon_mipmaps = entry.icon_mipmaps,
                     order = entry.order -- or fluid.order
                 })
             end
@@ -555,7 +455,6 @@ do
             icon = infinityChest.icon,
             icons = infinityChest.icons,
             icon_size = infinityChest.icon_size,
-            icon_mipmaps = infinityChest.icon_mipmaps,
             order = 'z',
             subgroups = {}
         }
@@ -568,7 +467,6 @@ do
                 icon = group.icon,
                 icons = group.icons,
                 icon_size = group.icon_size,
-                icon_mipmaps = group.icon_mipmaps,
                 order = group.order,
                 subgroups = {}
             }
@@ -610,18 +508,18 @@ do
     -- into dummy entities
 
     local function embed_data(key, value)
-        data:extend({{
+        data:extend({ {
             type = "simple-entity",
             name = key,
             icon = "-",
             icon_size = 1,
             picture = {
-            filename = "-",
-            width = 1,
-            height = 1
+                filename = "-",
+                width = 1,
+                height = 1
             },
             localised_name = value
-        }})
+        } })
     end
 
     local l = string.len(serialized)
@@ -631,5 +529,5 @@ do
         embed_data('FBE-DATA-' .. tostring(total_parts), string.sub(serialized, i, i + 199))
     end
 
-    embed_data('FBE-DATA-COUNT', total_parts)
+    embed_data('FBE-DATA-COUNT', tostring(total_parts))
 end

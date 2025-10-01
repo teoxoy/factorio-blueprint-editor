@@ -286,7 +286,7 @@ export class EntityInfoPanel extends Panel {
             }
 
             const beaconAura = new Rectangle(beacon.position.x, beacon.position.y, 1, 1)
-            beaconAura.pad(FD.entities.beacon.supply_area_distance)
+            beaconAura.pad(FD.entities.beacon.supply_area_distance + 1)
 
             return (
                 beaconAura.contains(entityRect.left, entityRect.top) ||
