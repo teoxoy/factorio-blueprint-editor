@@ -68,7 +68,7 @@ export class UnderlayContainer extends Container {
             return [
                 {
                     type: 'beacons',
-                    radius: ed.supply_area_distance,
+                    radius: ed.supply_area_distance + 1,
                     color: 0xd9c037,
                     alpha: VisualizationArea.ALPHA,
                 },

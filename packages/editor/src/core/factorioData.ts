@@ -328,6 +328,15 @@ export function loadData(str: string): void {
     FD.inventoryLayout = data.inventoryLayout
     FD.utilitySprites = data.utilitySprites
     FD.getModulesFor = getModulesFor
+
+    for (const e of Object.values(FD.entities)) {
+        // separate fast_replaceable_group since we don't support fast replacing different types
+        if (e.type === 'splitter') {
+            e.fast_replaceable_group = 'splitter'
+        } else if (e.type === 'underground-belt') {
+            e.fast_replaceable_group = 'underground-belt'
+        }
+    }
 }
 
 export default FD
@@ -347,7 +356,6 @@ export interface InventoryLayoutGroup {
     icon: string
     icons?: IconData[]
     icon_size?: number
-    icon_mipmaps?: number
     order: string
     subgroups: InventoryLayoutSubgroup[]
     localised_name: string
