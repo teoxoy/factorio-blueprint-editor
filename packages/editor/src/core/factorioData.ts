@@ -33,6 +33,7 @@ import {
     CurvedRailAPrototype,
     CurvedRailBPrototype,
     DeciderCombinatorPrototype,
+    CombinatorPrototype,
     DisplayPanelPrototype,
     ElectricEnergyInterfacePrototype,
     ElectricPolePrototype,
@@ -97,6 +98,9 @@ import {
     WallPrototype,
 } from 'factorio:prototype'
 import { IPoint } from '../types'
+import { WireConnectionPoint } from 'factorio:prototype'
+import { BoundingBox } from 'factorio:prototype'
+import { MapPosition } from 'factorio:prototype'
 
 function getModulesFor(entityName: string): ItemPrototype[] {
     return (
@@ -246,12 +250,61 @@ export function getCircuitConnector(
     }
 }
 
+export function getWireConnectionPoint(
+    e: EntityWithOwnerPrototype,
+    dir: number,
+    getCombinatorSide: () => 'input' | 'output',
+    getPowerSwitchSide: () => 'circuit' | 'left' | 'right'
+): null | WireConnectionPoint {
+    switch (e.type) {
+        case 'arithmetic-combinator':
+        case 'decider-combinator':
+        case 'selector-combinator': {
+            const e_resolved = e as CombinatorPrototype
+            if (getCombinatorSide() === 'input') {
+                return e_resolved.input_connection_points[dir / 2]
+            } else {
+                return e_resolved.output_connection_points[dir / 2]
+            }
+        }
+        case 'constant-combinator': {
+            const e_resolved = e as ConstantCombinatorPrototype
+            return e_resolved.circuit_wire_connection_points[dir / 2]
+        }
+        case 'electric-pole': {
+            const e_resolved = e as ElectricPolePrototype
+            return e_resolved.connection_points[dir / 2]
+        }
+        case 'power-switch': {
+            const e_resolved = e as PowerSwitchPrototype
+            switch (getPowerSwitchSide()) {
+                case 'circuit':
+                    return e_resolved.circuit_wire_connection_point
+                case 'left':
+                    return e_resolved.left_wire_connection_point
+                case 'right':
+                    return e_resolved.right_wire_connection_point
+            }
+        }
+        default:
+            return null
+    }
+}
+
+export function mapBoundingBox(bb: BoundingBox): [[number, number], [number, number]] {
+    const mapP = (p: MapPosition): [number, number] =>
+        Array.isArray(p) ? [p[0], p[1]] : [p.x, p.y]
+    if (Array.isArray(bb)) {
+        return [mapP(bb[0]), mapP(bb[1])]
+    } else {
+        return [mapP(bb.left_top), mapP(bb.right_bottom)]
+    }
+}
+
 export function getEntitySize(e: EntityWithOwnerPrototype, dir: number = 0): IPoint {
-    const w =
-        e.tile_width || Math.ceil(Math.abs(e.collision_box[0][0]) + Math.abs(e.collision_box[1][0]))
-    const h =
-        e.tile_height ||
-        Math.ceil(Math.abs(e.collision_box[0][1]) + Math.abs(e.collision_box[1][1]))
+    const bb = mapBoundingBox(e.collision_box)
+    const w = e.tile_width || Math.ceil(Math.abs(bb[0][0]) + Math.abs(bb[1][0]))
+    const h = e.tile_height || Math.ceil(Math.abs(bb[0][1]) + Math.abs(bb[1][1]))
     if (w === h) {
         return { x: w, y: h }
     } else {
