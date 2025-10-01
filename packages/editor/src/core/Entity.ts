@@ -628,9 +628,6 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     private get canBeRotated(): boolean {
-        if (this.type === 'assembling-machine') {
-            return this.assemblerCraftsWithFluid
-        }
         return (
             getPossibleRotations(this.entityData).length !== 0 &&
             !this.m_BP.entityPositionGrid.sharesCell({
@@ -657,7 +654,6 @@ export class Entity extends EventEmitter<EntityEvents> {
         const pr = getPossibleRotations(this.entityData)
         let canRotate = pr.length !== 0
 
-        if (this.type === 'assembling-machine') canRotate = this.assemblerCraftsWithFluid
         if (canRotate) {
             if (!pr.includes(direction)) {
                 if (direction === 4 && pr.includes(0)) {
