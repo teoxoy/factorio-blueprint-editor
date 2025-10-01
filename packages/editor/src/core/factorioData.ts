@@ -96,6 +96,7 @@ import {
     ValvePrototype,
     WallPrototype,
 } from 'factorio:prototype'
+import { IPoint } from '../types'
 
 function getModulesFor(entityName: string): ItemPrototype[] {
     return (
@@ -231,6 +232,108 @@ export function getCircuitConnector(
         }
         default:
             return null
+    }
+}
+
+export function getEntitySize(e: EntityWithOwnerPrototype, dir: number = 0): IPoint {
+    const w =
+        e.tile_width || Math.ceil(Math.abs(e.collision_box[0][0]) + Math.abs(e.collision_box[1][0]))
+    const h =
+        e.tile_height ||
+        Math.ceil(Math.abs(e.collision_box[0][1]) + Math.abs(e.collision_box[1][1]))
+    if (w === h) {
+        return { x: w, y: h }
+    } else {
+        switch (dir) {
+            case 0:
+            case 4:
+                return { x: w, y: h }
+            case 2:
+            case 6:
+                return { x: h, y: w }
+            default:
+                throw new Error("Can't swap size based on dir!")
+        }
+    }
+}
+
+export function getPossibleRotations(e: EntityWithOwnerPrototype): number[] {
+    if (e.flags && e.flags.includes('not-rotatable')) {
+        return []
+    }
+    if (e.flags && e.flags.includes('building-direction-8-way')) {
+        return [0, 1, 2, 3, 4, 5, 6, 7]
+    }
+    if (e.flags && e.flags.includes('building-direction-16-way')) {
+        return [0, 1, 2, 3, 4, 5, 6, 7]
+    }
+    switch (e.type) {
+        case 'agricultural-tower':
+        case 'artillery-turret':
+        case 'asteroid-collector':
+        case 'boiler':
+        case 'burner-generator':
+        case 'arithmetic-combinator':
+        case 'decider-combinator':
+        case 'selector-combinator':
+        case 'constant-combinator':
+        case 'assembling-machine':
+        case 'fusion-generator':
+        case 'gate':
+        case 'generator':
+        case 'inserter':
+        case 'lightning-attractor':
+        case 'mining-drill':
+        case 'offshore-pump':
+        case 'pipe-to-ground':
+        case 'pump':
+        case 'curved-rail-a':
+        case 'elevated-curved-rail-a':
+        case 'curved-rail-b':
+        case 'elevated-curved-rail-b':
+        case 'half-diagonal-rail':
+        case 'elevated-half-diagonal-rail':
+        case 'legacy-curved-rail':
+        case 'legacy-straight-rail':
+        case 'rail-ramp':
+        case 'straight-rail':
+        case 'elevated-straight-rail':
+        case 'rail-chain-signal':
+        case 'rail-signal':
+        case 'rail-support':
+        case 'simple-entity-with-owner':
+        case 'simple-entity-with-force':
+        case 'thruster':
+        case 'train-stop':
+        case 'lane-splitter':
+        case 'linked-belt':
+        case 'loader-1x1':
+        case 'loader':
+        case 'splitter':
+        case 'transport-belt':
+        case 'underground-belt':
+        case 'turret':
+        case 'ammo-turret':
+        case 'electric-turret':
+        case 'fluid-turret':
+        case 'valve':
+        case 'artillery-wagon':
+        case 'cargo-wagon':
+        case 'infinity-cargo-wagon':
+        case 'fluid-wagon':
+        case 'locomotive':
+            return [0, 2, 4, 6]
+        case 'storage-tank':
+        case 'fusion-reactor': {
+            const e_resolved = e as StorageTankPrototype | FusionReactorPrototype
+            if (e_resolved.two_direction_only) {
+                return [0, 2]
+            } else {
+                return [0, 2, 4, 6]
+            }
+        }
+        default:
+            return []
     }
 }
 

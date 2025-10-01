@@ -315,65 +315,12 @@ do
                 if not list_includes(entity.flags or {}, 'not-blueprintable') and
                     not list_includes(entity.flags or {}, 'breaths-air')
                 then
-                    -- add size
-                    entity.size = {
-                        width = math.ceil(math.abs(entity.selection_box[1][1]) + math.abs(entity.selection_box[2][1])),
-                        height = math.ceil(math.abs(entity.selection_box[1][2]) + math.abs(entity.selection_box[2][2]))
-                    }
-
-                    -- add possible_rotations
-                    if list_includes({
-                            'pipe-to-ground',
-                            'train-stop',
-                            'arithmetic-combinator',
-                            'decider-combinator',
-                            'constant-combinator',
-                            'artillery-turret',
-                            'flamethrower-turret',
-                            'offshore-pump',
-                            'pump'
-                        }, entity.name) or list_includes({
-                            'underground-belt',
-                            'transport-belt',
-                            'splitter',
-                            'inserter',
-                            'boiler',
-                            'mining-drill',
-                            'assembling-machine',
-                            'loader'
-                        }, entity.type) then
-                        entity.possible_rotations = { 0, 2, 4, 6 }
-                    elseif list_includes({
-                            'storage-tank',
-                            'gate',
-                        }, entity.name) or list_includes({
-                            'generator'
-                        }, entity.type) then
-                        entity.possible_rotations = { 0, 2 }
-                    elseif list_includes({
-                            'legacy-curved-rail',
-                            'rail-signal',
-                            'rail-chain-signal'
-                        }, entity.name) then
-                        entity.possible_rotations = { 0, 1, 2, 3, 4, 5, 6, 7 }
-                    elseif list_includes({
-                            'legacy-straight-rail'
-                        }, entity.name) then
-                        entity.possible_rotations = { 0, 1, 2, 3, 5, 7 }
-                    end
-
                     localise(entity, 'entity')
                     entities[entity.name] = entity
                 end
             end
         end
     end
-
-    entities['offshore-pump'].size = { width = 1, height = 1 }
-    entities['legacy-curved-rail'].size = { width = 4, height = 8 }
-
-    entities['centrifuge'].possible_rotations = nil
-    entities['assembling-machine-1'].possible_rotations = nil
 
     output.entities = entities
 end

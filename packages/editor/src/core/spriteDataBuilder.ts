@@ -5,6 +5,7 @@ import FD, {
     getHeatBuffer,
     getEnergySource,
     getCircuitConnector,
+    getEntitySize,
 } from './factorioData'
 import { PositionGrid } from './PositionGrid'
 import { Entity } from './Entity'
@@ -309,7 +310,7 @@ function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly 
         }
 
         if (!data.positionGrid || needsCover()) {
-            let temp = getPipeCovers(e)[util.intToDir(dir)].layers[0]
+            let temp = getPipeCovers(e)[util.getDirName(dir)].layers[0]
             temp = addToShift(connection, util.duplicate(temp))
             if (dir === 4) {
                 output.push(temp)
@@ -708,7 +709,7 @@ function getBeltSprites(
 }
 
 function getAnimation(a: Animation4Way, dir: number): Animation {
-    const ad = a[util.intToDir(dir)]
+    const ad = a[util.getDirName(dir)]
     if (ad) {
         return ad
     } else if (a['north']) {
@@ -940,8 +941,8 @@ function draw_arithmetic_combinator(
             }
         }
         return [
-            ...e.sprites[util.intToDir(data.dir)].layers,
-            operatorToSpriteData(data.operator)[util.intToDir(data.dir)],
+            ...e.sprites[util.getDirName(data.dir)].layers,
+            operatorToSpriteData(data.operator)[util.getDirName(data.dir)],
         ]
     }
 }
@@ -991,7 +992,7 @@ function draw_assembling_machine(
                 e.graphics_set.animation.layers[0],
                 addToShift(
                     getPipeConnectionPoints(e, data.dir, data.assemblerPipeDirection)[0],
-                    util.duplicate(e.fluid_boxes[0].pipe_picture[util.intToDir(pipeDirection)])
+                    util.duplicate(e.fluid_boxes[0].pipe_picture[util.getDirName(pipeDirection)])
                 ),
             ]
             if (pipeDirection === 0) {
@@ -1072,13 +1073,15 @@ function draw_boiler(e: BoilerPrototype): (data: IDrawData) => readonly SpriteDa
                 return [
                     addToShift(
                         util.rotatePointBasedOnDir([0, 1.5], data.dir),
-                        util.duplicate(energy_source.pipe_covers[util.intToDir((data.dir + 4) % 8)])
+                        util.duplicate(
+                            energy_source.pipe_covers[util.getDirName((data.dir + 4) % 8)]
+                        )
                     ),
-                    ...e.pictures[util.intToDir(data.dir)].structure.layers,
+                    ...e.pictures[util.getDirName(data.dir)].structure.layers,
                 ]
             }
         }
-        return e.pictures[util.intToDir(data.dir)].structure.layers
+        return e.pictures[util.getDirName(data.dir)].structure.layers
     }
 }
 function draw_burner_generator(
@@ -1101,7 +1104,7 @@ function draw_constant_combinator(
     e: ConstantCombinatorPrototype
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
-        return e.sprites[util.intToDir(data.dir)].layers
+        return e.sprites[util.getDirName(data.dir)].layers
     }
 }
 function draw_construction_robot(
@@ -1141,8 +1144,8 @@ function draw_decider_combinator(
             }
         }
         return [
-            ...e.sprites[util.intToDir(data.dir)].layers,
-            operatorToSpriteData(data.operator)[util.intToDir(data.dir)],
+            ...e.sprites[util.getDirName(data.dir)].layers,
+            operatorToSpriteData(data.operator)[util.getDirName(data.dir)],
         ]
     }
 }
@@ -1190,7 +1193,7 @@ function draw_elevated_straight_rail(
 }
 function draw_fluid_turret(e: FluidTurretPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) =>
-        e.graphics_set.base_visualisation.animation[util.intToDir(data.dir)].layers
+        e.graphics_set.base_visualisation.animation[util.getDirName(data.dir)].layers
 }
 function draw_fluid_wagon(e: FluidWagonPrototype): (data: IDrawData) => readonly SpriteData[] {
     throw new Error('Not implemented!')
@@ -1212,7 +1215,7 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
     return (data: IDrawData) => {
         function getBaseSprites(): readonly SpriteData[] {
             if (data.positionGrid) {
-                const size = util.switchSizeBasedOnDirection(e.size, data.dir)
+                const size = getEntitySize(e, data.dir)
                 const rail = data.positionGrid.findInArea(
                     {
                         x: data.position.x,
@@ -1223,7 +1226,7 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
                     entity => entity.name === 'legacy-straight-rail'
                 )
                 if (rail) {
-                    if (data.dir === 0) {
+                    if (data.dir % 4 === 0) {
                         if (rail.position.y > data.position.y) {
                             return e.vertical_rail_animation_left.layers
                         }
@@ -1237,13 +1240,13 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
                 }
             }
 
-            if (data.dir === 0) {
+            if (data.dir % 4 === 0) {
                 return e.vertical_animation.layers
             }
             return e.horizontal_animation.layers
         }
 
-        if (data.dir === 0 && data.positionGrid) {
+        if (data.dir % 4 === 0 && data.positionGrid) {
             const wall = data.positionGrid.getEntityAtPosition({
                 x: data.position.x,
                 y: data.position.y + 1,
@@ -1258,7 +1261,7 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
 }
 function draw_generator(e: GeneratorPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) =>
-        data.dir === 0 ? e.vertical_animation.layers : e.horizontal_animation.layers
+        data.dir % 4 === 0 ? e.vertical_animation.layers : e.horizontal_animation.layers
 }
 function draw_half_diagonal_rail(
     e: HalfDiagonalRailPrototype
@@ -1477,33 +1480,8 @@ function draw_legacy_curved_rail(
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
         const dir = data.dir
-        function getBaseSprites(): SpriteVariations[] {
-            const pictures = e.pictures
-            function getRailSpriteForDir(): RailPieceLayers {
-                switch (dir) {
-                    case 0:
-                        return pictures['north']
-                    case 1:
-                        return pictures['northeast']
-                    case 2:
-                        return pictures['east']
-                    case 3:
-                        return pictures['southeast']
-                    case 4:
-                        return pictures['south']
-                    case 5:
-                        return pictures['southwest']
-                    case 6:
-                        return pictures['west']
-                    case 7:
-                        return pictures['northwest']
-                }
-            }
-            const ps = getRailSpriteForDir()
-            return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
-        }
-
-        return getBaseSprites()
+        const ps = e.pictures[util.getDirName8Way(dir)]
+        return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
     }
 }
 function draw_legacy_straight_rail(
@@ -1512,33 +1490,12 @@ function draw_legacy_straight_rail(
     return (data: IDrawData) => {
         const dir = data.dir
         function getBaseSprites(): SpriteVariations[] {
-            const pictures = e.pictures
-            function getRailSpriteForDir(): RailPieceLayers {
-                switch (dir) {
-                    case 0:
-                        return pictures['north']
-                    case 1:
-                        return pictures['northeast']
-                    case 2:
-                        return pictures['east']
-                    case 3:
-                        return pictures['southeast']
-                    case 4:
-                        return pictures['south']
-                    case 5:
-                        return pictures['southwest']
-                    case 6:
-                        return pictures['west']
-                    case 7:
-                        return pictures['northwest']
-                }
-            }
-            const ps = getRailSpriteForDir()
+            const ps = e.pictures[util.getDirName8Way(dir)]
             return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
         }
 
-        if (data.positionGrid && (dir === 0 || dir === 2)) {
-            const size = util.switchSizeBasedOnDirection(e.size, dir)
+        if (data.positionGrid && dir % 2 === 0) {
+            const size = getEntitySize(e, dir)
 
             const railBases = data.positionGrid
                 .getEntitiesInArea({
@@ -1561,7 +1518,7 @@ function draw_legacy_straight_rail(
                     addToShift(
                         p,
                         util.duplicate(
-                            dir === 0
+                            dir % 4 === 0
                                 ? FD.entities.gate.horizontal_rail_base
                                 : FD.entities.gate.vertical_rail_base
                         )
@@ -1658,7 +1615,7 @@ function draw_logistic_robot(
 function draw_mining_drill(e: MiningDrillPrototype): (data: IDrawData) => readonly SpriteData[] {
     switch (e.name) {
         case 'burner-mining-drill':
-            return (data: IDrawData) => e.graphics_set.animation[util.intToDir(data.dir)].layers
+            return (data: IDrawData) => e.graphics_set.animation[util.getDirName(data.dir)].layers
 
         case 'pumpjack':
             return (data: IDrawData) => [
@@ -1668,7 +1625,7 @@ function draw_mining_drill(e: MiningDrillPrototype): (data: IDrawData) => readon
 
         case 'electric-mining-drill':
             return (data: IDrawData) => {
-                const dir = util.intToDir(data.dir)
+                const dir = util.getDirName(data.dir)
                 const layers0 = e.graphics_set.animation[dir].layers
 
                 const animDir = `${dir}_animation` as
@@ -1688,7 +1645,7 @@ function draw_mining_drill(e: MiningDrillPrototype): (data: IDrawData) => readon
     }
 }
 function draw_offshore_pump(e: OffshorePumpPrototype): (data: IDrawData) => readonly SpriteData[] {
-    return (data: IDrawData) => e.graphics_set.animation[util.intToDir(data.dir)].layers
+    return (data: IDrawData) => e.graphics_set.animation[util.getDirName(data.dir)].layers
 }
 function draw_pipe(e: PipePrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
@@ -1801,7 +1758,7 @@ function draw_pipe(e: PipePrototype): (data: IDrawData) => readonly SpriteData[]
     }
 }
 function draw_pipe_to_ground(e: PipeToGroundPrototype): (data: IDrawData) => readonly SpriteData[] {
-    return (data: IDrawData) => [e.pictures[util.intToDir(data.dir)]]
+    return (data: IDrawData) => [e.pictures[util.getDirName(data.dir)]]
 }
 function draw_power_switch(e: PowerSwitchPrototype): (data: IDrawData) => readonly SpriteData[] {
     return () => [...e.power_on_animation.layers, e.led_off]
@@ -1817,7 +1774,7 @@ function draw_proxy_container(
     throw new Error('Not implemented!')
 }
 function draw_pump(e: PumpPrototype): (data: IDrawData) => readonly SpriteData[] {
-    return (data: IDrawData) => [e.animations[util.intToDir(data.dir)]]
+    return (data: IDrawData) => [e.animations[util.getDirName(data.dir)]]
 }
 function draw_radar(e: RadarPrototype): (data: IDrawData) => readonly SpriteData[] {
     return () => e.pictures.layers
@@ -1931,7 +1888,7 @@ function draw_splitter(e: SplitterPrototype): (data: IDrawData) => readonly Spri
             true
         ).map(sd => addToShift(b1Offset, sd))
 
-        const dir = util.intToDir(data.dir)
+        const dir = util.getDirName(data.dir)
         return [...belt0Parts, ...belt1Parts, e.structure_patch[dir], e.structure[dir]]
     }
 }
@@ -1941,7 +1898,8 @@ function draw_storage_tank(e: StorageTankPrototype): (data: IDrawData) => readon
         setPropertyUsing(
             util.duplicate(e.pictures.picture.sheets[0]),
             'x',
-            data.dir === 2 ? 'width' : undefined
+            'width',
+            Math.floor(data.dir / 2) % e.pictures.picture.sheets[0].frames
         ),
     ]
 }
@@ -1954,15 +1912,15 @@ function draw_thruster(e: ThrusterPrototype): (data: IDrawData) => readonly Spri
 function draw_train_stop(e: TrainStopPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
         const dir = data.dir
-        let ta = util.duplicate(e.top_animations[util.intToDir(dir)].layers[1])
+        let ta = util.duplicate(e.top_animations[util.getDirName(dir)].layers[1])
         ta = setProperty(ta, 'tint', data.trainStopColor ? data.trainStopColor : e.color)
         return [
-            e.rail_overlay_animations[util.intToDir(dir)],
-            ...e.animations[util.intToDir(dir)].layers,
-            ...e.top_animations[util.intToDir(dir)].layers,
+            e.rail_overlay_animations[util.getDirName(dir)],
+            ...e.animations[util.getDirName(dir)].layers,
+            ...e.top_animations[util.getDirName(dir)].layers,
             ta,
-            e.light1.picture[util.intToDir(dir)],
-            e.light2.picture[util.intToDir(dir)],
+            e.light1.picture[util.getDirName(dir)],
+            e.light2.picture[util.getDirName(dir)],
         ]
     }
 }
@@ -2129,7 +2087,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                     ({ entity, relDir }) =>
                         entity &&
                         (entity.type === 'wall' ||
-                            (entity.type === 'gate' && entity.direction === relDir % 4))
+                            (entity.type === 'gate' && entity.direction % 4 === relDir % 4))
                 )
 
             const wall = (() => {
@@ -2165,7 +2123,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                 .getNeighbourData(data.position)
                 .filter(
                     ({ entity, relDir }) =>
-                        entity && entity.type === 'gate' && entity.direction === relDir % 4
+                        entity && entity.type === 'gate' && entity.direction % 4 === relDir % 4
                 )
                 .map(({ relDir }) => relDir)
 

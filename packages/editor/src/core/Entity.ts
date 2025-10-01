@@ -12,7 +12,14 @@ import {
 import util from '../common/util'
 import { IllegalFlipError } from '../containers/PaintContainer'
 import G from '../common/globals'
-import FD, { ColorWithAlpha, getModule, isCraftingMachine, isInserter } from './factorioData'
+import FD, {
+    ColorWithAlpha,
+    getEntitySize,
+    getModule,
+    getPossibleRotations,
+    isCraftingMachine,
+    isInserter,
+} from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
 import U from './generators/util'
@@ -107,7 +114,7 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     /** Entity size */
     public get size(): IPoint {
-        return util.switchSizeBasedOnDirection(this.entityData.size, this.direction)
+        return getEntitySize(this.entityData, this.direction)
     }
 
     /** Entity position */
@@ -621,11 +628,11 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     private get canBeRotated(): boolean {
-        if (this.name === 'assembling-machine-2' || this.name === 'assembling-machine-3') {
+        if (this.type === 'assembling-machine') {
             return this.assemblerCraftsWithFluid
         }
         return (
-            this.entityData.possible_rotations !== undefined &&
+            getPossibleRotations(this.entityData).length !== 0 &&
             !this.m_BP.entityPositionGrid.sharesCell({
                 x: this.position.x,
                 y: this.position.y,
@@ -647,8 +654,8 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     private constrainDirection(direction: number): number {
-        const pr = this.entityData.possible_rotations
-        let canRotate = pr !== undefined
+        const pr = getPossibleRotations(this.entityData)
+        let canRotate = pr.length !== 0
 
         if (this.type === 'assembling-machine') canRotate = this.assemblerCraftsWithFluid
         if (canRotate) {
@@ -739,7 +746,7 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     private rotateDir(ccw: boolean): number {
         if (!this.canBeRotated) return this.direction
-        const pr = this.entityData.possible_rotations
+        const pr = getPossibleRotations(this.entityData)
         return pr[
             (pr.indexOf(this.direction) +
                 (this.size.x !== this.size.y || this.type === 'underground-belt' ? 2 : 1) *
@@ -983,9 +990,10 @@ export class Entity extends EventEmitter<EntityEvents> {
         direction = this.direction
     ): number[][] {
         const e = this.entityData
+        const e_size = getEntitySize(e)
         const size_box = [
-            [-e.size.width / 2, -e.size.height / 2],
-            [+e.size.width / 2, +e.size.height / 2],
+            [-e_size.x / 2, -e_size.y / 2],
+            [+e_size.x / 2, +e_size.y / 2],
         ]
         // use size_box for cell-wise selection, use e.selection_box for "true" selection
         if (side === 1 && e.connection_points?.[direction / 2].wire[color]) return size_box

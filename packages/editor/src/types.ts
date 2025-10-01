@@ -6,6 +6,12 @@ export interface IPoint {
 }
 
 export type NamedDirection = 'north' | 'east' | 'south' | 'west'
+export type NamedDirection8Way =
+    | NamedDirection
+    | 'northeast'
+    | 'southeast'
+    | 'southwest'
+    | 'northwest'
 
 /** Interfaces and types for blueprint string JSON structure */
 export type SignalType = 'item' | 'virtual' | 'fluid'

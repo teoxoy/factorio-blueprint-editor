@@ -80,7 +80,7 @@ export class PaintWireContainer extends PaintContainer {
         this.cursorBox = this.bpc.overlayContainer.createCursorBox(
             ec.position,
             entity.size,
-            cp === undefined ? 'not-allowed' : connectionsReach ? 'regular' : 'not-allowed'
+            cp === undefined ? 'not_allowed' : connectionsReach ? 'regular' : 'not_allowed'
         )
         if (connectionsReach) return cp
     }

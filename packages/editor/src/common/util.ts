@@ -1,4 +1,4 @@
-import { IPoint, NamedDirection } from '../types'
+import { IPoint, NamedDirection, NamedDirection8Way } from '../types'
 
 const duplicate = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
 
@@ -95,24 +95,8 @@ const transformConnectionPosition = (position: IPoint, direction: number): IPoin
     return rotatePointBasedOnDir(position, direction)
 }
 
-const switchSizeBasedOnDirection = (
-    size: {
-        width: number
-        height: number
-    },
-    direction: number
-): IPoint => {
-    if (
-        size.width !== size.height &&
-        (direction === 2 || direction === 3 || direction === 6 || direction === 7)
-    ) {
-        return { x: size.height, y: size.width }
-    }
-    return { x: size.width, y: size.height }
-}
-
-const intToDir = (i: number): NamedDirection => {
-    switch (i) {
+const getDirName = (dir: number): NamedDirection => {
+    switch (dir) {
         case 0:
             return 'north'
         case 2:
@@ -121,6 +105,31 @@ const intToDir = (i: number): NamedDirection => {
             return 'south'
         case 6:
             return 'west'
+        default:
+            throw new Error('Unexpected direction!')
+    }
+}
+
+const getDirName8Way = (dir: number): NamedDirection8Way => {
+    switch (dir) {
+        case 0:
+            return 'north'
+        case 1:
+            return 'northeast'
+        case 2:
+            return 'east'
+        case 3:
+            return 'southeast'
+        case 4:
+            return 'south'
+        case 5:
+            return 'southwest'
+        case 6:
+            return 'west'
+        case 7:
+            return 'northwest'
+        default:
+            throw new Error('Unexpected direction!')
     }
 }
 
@@ -180,8 +189,8 @@ export default {
     getRelativeDirection,
     rotatePointBasedOnDir,
     transformConnectionPosition,
-    switchSizeBasedOnDirection,
-    intToDir,
+    getDirName,
+    getDirName8Way,
     nearestPowerOf2,
     uniqueInArray,
     equalArrays,
