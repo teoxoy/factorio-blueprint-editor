@@ -1,7 +1,6 @@
 import { Container } from 'pixi.js'
 import { DirectionType, IPoint } from '../types'
-import FD from '../core/factorioData'
-import util from '../common/util'
+import FD, { getEntitySize, getPossibleRotations } from '../core/factorioData'
 import { Entity } from '../core/Entity'
 import { EntitySprite } from './EntitySprite'
 import { VisualizationArea } from './VisualizationArea'
@@ -31,7 +30,7 @@ export class PaintEntityContainer extends PaintContainer {
     }
 
     private get size(): IPoint {
-        return util.switchSizeBasedOnDirection(FD.entities[this.name].size, this.direction)
+        return getEntitySize(FD.entities[this.name], this.direction)
     }
 
     public hide(): void {
@@ -124,8 +123,8 @@ export class PaintEntityContainer extends PaintContainer {
     public override rotate(ccw = false): void {
         if (!this.visible) return
 
-        const pr = FD.entities[this.name].possible_rotations
-        if (!pr) return
+        const pr = getPossibleRotations(FD.entities[this.name])
+        if (pr.length === 0) return
         this.direction = pr[(pr.indexOf(this.direction) + (ccw ? 3 : 1)) % pr.length]
 
         this.redraw()

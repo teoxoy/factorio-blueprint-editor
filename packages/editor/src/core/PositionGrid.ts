@@ -1,6 +1,6 @@
 import util from '../common/util'
 import { IPoint } from '../types'
-import FD from './factorioData'
+import FD, { getEntitySize } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { Entity } from './Entity'
 import { IConnectionPoint } from './WireConnections'
@@ -163,7 +163,7 @@ export class PositionGrid {
     }
 
     public isAreaAvailable(name: string, pos: IPoint, direction = 0): boolean {
-        const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
+        const size = getEntitySize(FD.entities[name], direction)
 
         const straightRails: Entity[] = []
         let gate: Entity
@@ -202,16 +202,16 @@ export class PositionGrid {
             }
         }
 
-        const sameDirStrRails = straightRails.some(rail => rail.direction === direction)
+        const sameDirStrRails = straightRails.some(rail => rail.direction % 4 === direction % 4)
 
         if (
             (name === 'gate' &&
                 straightRails.length === 1 &&
-                straightRails[0].direction !== direction &&
+                straightRails[0].direction % 4 !== direction % 4 &&
                 !gate) ||
             (name === 'legacy-straight-rail' &&
                 gate &&
-                gate.direction !== direction &&
+                gate.direction % 4 !== direction % 4 &&
                 straightRails.length === 0 &&
                 !otherEntities) ||
             (name === 'legacy-straight-rail' &&
@@ -234,7 +234,7 @@ export class PositionGrid {
 
     public checkFastReplaceableGroup(name: string, direction: number, pos: IPoint): Entity {
         const fd = FD.entities[name]
-        const size = util.switchSizeBasedOnDirection(fd.size, direction)
+        const size = getEntitySize(fd, direction)
         const area = {
             x: pos.x,
             y: pos.y,
@@ -262,7 +262,7 @@ export class PositionGrid {
     ): Entity | undefined {
         if (name === 'legacy-straight-rail') return undefined
 
-        const size = util.switchSizeBasedOnDirection(FD.entities[name].size, direction)
+        const size = getEntitySize(FD.entities[name], direction)
         const area = {
             x: pos.x,
             y: pos.y,

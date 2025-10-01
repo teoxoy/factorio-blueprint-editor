@@ -84,7 +84,7 @@ export class Preview extends Container {
 
             if (this.m_Entity.entityData.drawing_boxes !== undefined) {
                 assignDataFromDrawingBox(
-                    this.m_Entity.entityData.drawing_boxes[util.intToDir(this.m_Entity.direction)]
+                    this.m_Entity.entityData.drawing_boxes[util.getDirName(this.m_Entity.direction)]
                 )
             }
         }

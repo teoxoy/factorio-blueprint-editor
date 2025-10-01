@@ -3,7 +3,7 @@ import { Sprite, Texture } from 'pixi.js'
 import { IBlueprint, IEntity, IPoint, ISchedule, SignalType } from '../types'
 import G from '../common/globals'
 import util from '../common/util'
-import FD from './factorioData'
+import FD, { getEntitySize } from './factorioData'
 import { Entity } from './Entity'
 import { WireConnections } from './WireConnections'
 import { PositionGrid } from './PositionGrid'
@@ -141,8 +141,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                 for (const e of ENTITIES) {
                     if (!FD.entities[e.name].flags.includes('placeable-off-grid')) continue
 
+                    const e_size = getEntitySize(FD.entities[e.name])
                     const size = util.rotatePointBasedOnDir(
-                        [FD.entities[e.name].size.width / 2, FD.entities[e.name].size.height / 2],
+                        [e_size.x / 2, e_size.y / 2],
                         e.direction || 0
                     )
                     // Take the offset into account for accurate positioning
@@ -523,8 +524,8 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
 
         if (!this.entities.isEmpty()) {
             const getSize = (name: string): number => {
-                const entity = FD.entities[FD.items[name].place_result]
-                return entity.size.width * entity.size.height
+                const e_size = getEntitySize(FD.entities[FD.items[name].place_result])
+                return e_size.x * e_size.y
             }
             const getItemScore = (item: [string, number]): number => getSize(item[0]) * item[1]
 
@@ -664,10 +665,7 @@ function getOffset(data?: Partial<IBlueprint>): IPoint {
         for (const entity of data.entities) {
             if (FD.entities[entity.name].flags.includes('placeable-off-grid')) continue
 
-            const size = util.switchSizeBasedOnDirection(
-                FD.entities[entity.name].size,
-                entity.direction
-            )
+            const size = getEntitySize(FD.entities[entity.name], entity.direction)
             comp(entity.position.x, entity.position.y, size.x, size.y)
         }
     } else if (data.tiles) {
