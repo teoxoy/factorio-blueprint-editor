@@ -163,8 +163,8 @@ function generateConnection(e: EntityWithOwnerPrototype, data: IDrawData): reado
     return []
 }
 // UTIL FUNCTIONS
-function addToShift(shift: IPoint | number[], tab: SpriteData): SpriteData {
-    const SHIFT: number[] = Array.isArray(shift) ? shift : [shift.x, shift.y]
+function addToShift(shift: IPoint | readonly [number, number], tab: SpriteData): SpriteData {
+    const SHIFT: readonly [number, number] = Array.isArray(shift) ? shift : [shift.x, shift.y]
 
     tab.shift = tab.shift ? [SHIFT[0] + tab.shift[0], SHIFT[1] + tab.shift[1]] : SHIFT
 
@@ -884,7 +884,7 @@ function draw_artillery_turret(
         barrel = setProperty(barrel, 'filename', barrel.filenames[d])
         barrel = addToShift([0, -0.6875], barrel)
         barrel = addToShift(getShift(), barrel)
-        function getShift(): number[] {
+        function getShift(): readonly [number, number] {
             switch (data.dir) {
                 case 0:
                     return [0, 1]
@@ -989,34 +989,35 @@ function draw_beacon(e: BeaconPrototype): (data: IDrawData) => readonly SpriteDa
 }
 function draw_boiler(e: BoilerPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
+        const patches = []
         let energy_source = getEnergySource(e)
         if (energy_source.type === 'heat') {
-            let needsEnding = true
-            if (data.positionGrid) {
-                const conn = energy_source.connections[0]
-                const pos = util.rotatePointBasedOnDir(conn.position, data.dir)
-                const c = getHeatConnections(
-                    {
-                        x: Math.floor(data.position.x + pos.x),
-                        y: Math.floor(data.position.y + pos.y),
-                    },
-                    data.positionGrid
-                )
-                needsEnding = !c[((data.dir + conn.direction / 2) % 8) / 2]
-            }
-            if (needsEnding) {
-                return [
-                    addToShift(
-                        util.rotatePointBasedOnDir([0, 1.5], data.dir),
-                        util.duplicate(
-                            energy_source.pipe_covers[util.getDirName((data.dir + 4) % 8)]
+            for (const conn of energy_source.connections) {
+                let needsEnding = true
+                if (data.positionGrid) {
+                    const pos = util.rotatePointBasedOnDir(conn.position, data.dir)
+                    const c = getHeatConnections(
+                        {
+                            x: Math.floor(data.position.x + pos.x),
+                            y: Math.floor(data.position.y + pos.y),
+                        },
+                        data.positionGrid
+                    )
+                    needsEnding = !c[((data.dir + conn.direction / 2) % 8) / 2]
+                }
+                if (needsEnding) {
+                    patches.push(
+                        addToShift(
+                            util.rotatePointBasedOnDir([0, 1.5], data.dir),
+                            util.duplicate(
+                                energy_source.pipe_covers[util.getDirName((data.dir + 4) % 8)]
+                            )
                         )
-                    ),
-                    ...e.pictures[util.getDirName(data.dir)].structure.layers,
-                ]
+                    )
+                }
             }
         }
-        return e.pictures[util.getDirName(data.dir)].structure.layers
+        return [...patches, ...e.pictures[util.getDirName(data.dir)].structure.layers]
     }
 }
 function draw_burner_generator(
@@ -1697,24 +1698,23 @@ function draw_rail_support(e: RailSupportPrototype): (data: IDrawData) => readon
 }
 function draw_reactor(e: ReactorPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
-        const conn = e.heat_buffer.connections
         const patches = []
-        for (let i = 0; i < conn.length; i++) {
+        for (const [i, conn] of e.heat_buffer.connections.entries()) {
             let patchSheet = e.connection_patches_disconnected.sheet
             if (data.positionGrid) {
                 const c = getHeatConnections(
                     {
-                        x: Math.floor(data.position.x) + conn[i].position[0],
-                        y: Math.floor(data.position.y) + conn[i].position[1],
+                        x: Math.floor(data.position.x) + conn.position[0],
+                        y: Math.floor(data.position.y) + conn.position[1],
                     },
                     data.positionGrid
                 )
-                if (c[conn[i].direction / 4]) {
+                if (c[conn.direction / 4]) {
                     patchSheet = e.connection_patches_connected.sheet
                 }
             }
             patchSheet = duplicateAndSetPropertyUsing(patchSheet, 'x', 'width', i)
-            patchSheet = addToShift(conn[i].position, patchSheet)
+            patchSheet = addToShift(conn.position, patchSheet)
             patches.push(patchSheet)
         }
         return [...patches, e.lower_layer_picture, ...e.picture.layers]
