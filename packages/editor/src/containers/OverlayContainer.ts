@@ -1,6 +1,6 @@
 import { Container, Graphics, Sprite } from 'pixi.js'
 import { IPoint } from '../types'
-import FD from '../core/factorioData'
+import FD, { getFluidBoxes, isCraftingMachine } from '../core/factorioData'
 import F from '../UI/controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
@@ -8,7 +8,7 @@ import { Entity } from '../core/Entity'
 import { EditorMode, BlueprintContainer } from './BlueprintContainer'
 import { EntityContainer } from './EntityContainer'
 import { CursorBoxSpecification } from 'factorio:prototype'
-import { FluidBox, Sprite as SpriteData } from 'factorio:prototype'
+import { Sprite as SpriteData } from 'factorio:prototype'
 
 export class OverlayContainer extends Container {
     private readonly bpc: BlueprintContainer
@@ -29,71 +29,92 @@ export class OverlayContainer extends Container {
     public static createEntityInfo(entity: Entity, position: IPoint): Container {
         const entityInfo = new Container()
 
-        if (entity.recipe && entity.entityData.show_recipe_icon !== false) {
+        if (
+            entity.recipe &&
+            isCraftingMachine(entity.entityData) &&
+            (entity.entityData.show_recipe_icon === undefined || entity.entityData.icon_size)
+        ) {
             const recipeInfo = new Container()
             createIconWithBackground(recipeInfo, entity.recipe)
             const S = entity.name === 'oil-refinery' ? 1.5 : 0.9
             recipeInfo.scale.set(S, S)
             recipeInfo.position.set(0, -10)
             entityInfo.addChild(recipeInfo)
+        }
 
+        {
             const fluidIcons = new Container()
-            const recipe = FD.recipes[entity.recipe]
-            if (recipe.category === 'oil-processing' || recipe.category === 'chemistry') {
-                const inputPositions: IPoint[] = []
-                const outputPositions: IPoint[] = []
-                for (const fb of entity.entityData.fluid_boxes) {
-                    const positions =
-                        fb.production_type === 'input' ? inputPositions : outputPositions
-                    positions.push({
-                        x: fb.pipe_connections[0].position[0],
-                        y: fb.pipe_connections[0].position[1],
-                    })
-                }
+            const arrows = new Container()
 
-                const createIconsForType = (type: string): void => {
-                    const iconNames = (type === 'input' ? recipe.ingredients : recipe.results)
+            const fbs = getFluidBoxes(
+                entity.entityData,
+                entity.assemblerHasFluidInputs || entity.assemblerHasFluidOutputs
+            )
+                .filter(
+                    conn =>
+                        !isCraftingMachine(entity.entityData) ||
+                        (entity.assemblerHasFluidInputs && conn.production_type === 'input') ||
+                        (entity.assemblerHasFluidOutputs && conn.production_type === 'output')
+                )
+                .filter(fb => !fb.hide_connection_info)
+
+            for (const [i, fb] of fbs.entries()) {
+                let filter = fb.filter
+                if (isCraftingMachine(entity.entityData)) {
+                    const recipe = FD.recipes[entity.recipe]
+                    const items =
+                        fb.production_type === 'input' ? recipe.ingredients : recipe.results
+                    const fluids = items
                         .filter(item => item.type === 'fluid')
-                        .map(item => item.name)
+                        .map(fluid => fluid.name)
+                    filter = fluids[i >= fluids.length ? 0 : i]
+                }
 
-                    if (iconNames.length !== 0) {
-                        const positions = type === 'input' ? inputPositions : outputPositions
-                        positions
-                            .map(p => util.transformConnectionPosition(p, entity.direction))
-                            .forEach((p, i) => {
-                                createIconWithBackground(
-                                    fluidIcons,
-                                    i > iconNames.length - 1 ? iconNames[0] : iconNames[i],
-                                    { x: p.x * 64, y: p.y * 64 }
-                                )
-                            })
-                    }
-                }
-                createIconsForType('input')
-                if (recipe.results) {
-                    createIconsForType('output')
-                }
-            } else if (recipe.category === 'crafting-with-fluid') {
-                for (const io of entity.assemblerPipeDirection === 'input'
-                    ? recipe.ingredients
-                    : recipe.results) {
-                    if (io.type === 'fluid') {
-                        const position = util.rotatePointBasedOnDir(
-                            entity.entityData.fluid_boxes.find(
-                                fb => fb.production_type === entity.assemblerPipeDirection
-                            ).pipe_connections[0].position,
-                            entity.direction
+                for (const connection of fb.pipe_connections) {
+                    if (
+                        !(
+                            connection.connection_type === undefined ||
+                            connection.connection_type === 'normal'
                         )
-                        createIconWithBackground(fluidIcons, io.name, {
-                            x: position.x * 32,
-                            y: position.y * 32,
+                    )
+                        continue
+
+                    const dir = (entity.direction + connection.direction / 2) % 8
+                    const offset = connection.position
+                        ? util.rotatePointBasedOnDir(connection.position, entity.direction)
+                        : util.Point(connection.positions[entity.direction / 2])
+                    const offset2 = util.rotatePointBasedOnDir([0, -0.5], dir)
+                    offset2.x += offset.x
+                    offset2.y += offset.y
+
+                    const type =
+                        connection.flow_direction === undefined ||
+                        connection.flow_direction === 'input-output'
+                            ? 2
+                            : 1
+                    const arrow = createArrow(util.sumprod(64, offset2), type)
+                    arrow.rotation = dir * 0.25 * Math.PI
+                    if (connection.flow_direction === 'input') {
+                        arrow.rotation += Math.PI
+                    }
+                    arrows.addChild(arrow)
+
+                    if (filter) {
+                        createIconWithBackground(fluidIcons, filter, {
+                            x: offset.x * 64,
+                            y: offset.y * 64,
                         })
                     }
                 }
             }
+
             fluidIcons.scale.set(0.5, 0.5)
             if (fluidIcons.children.length !== 0) {
                 entityInfo.addChild(fluidIcons)
+            }
+            arrows.scale.set(0.5, 0.5)
+            if (arrows.children.length !== 0) {
+                entityInfo.addChild(arrows)
             }
         }
 
@@ -186,28 +207,6 @@ export class OverlayContainer extends Container {
             }
         }
 
-        if (entity.type === 'boiler' || entity.type === 'generator') {
-            const filteredFluidInputs = new Container()
-            const generateIconsForFluidBox = (fluidBox: FluidBox): void => {
-                for (const c of fluidBox.pipe_connections) {
-                    const position = util.transformConnectionPosition(
-                        { x: c.position[0], y: c.position[1] },
-                        entity.direction
-                    )
-                    createIconWithBackground(filteredFluidInputs, fluidBox.filter, {
-                        x: position.x * 64,
-                        y: position.y * 64,
-                    })
-                }
-            }
-            generateIconsForFluidBox(entity.entityData.fluid_box)
-            if (entity.entityData.output_fluid_box) {
-                generateIconsForFluidBox(entity.entityData.output_fluid_box)
-            }
-            filteredFluidInputs.scale.set(0.5, 0.5)
-            entityInfo.addChild(filteredFluidInputs)
-        }
-
         if (entity.splitterInputPriority || entity.splitterOutputPriority) {
             const filterInfo = new Container()
 
@@ -259,118 +258,6 @@ export class OverlayContainer extends Container {
                 })
             )
             arrows.rotation = entity.direction * Math.PI * 0.25
-            arrows.scale.set(0.5, 0.5)
-            entityInfo.addChild(arrows)
-        }
-
-        if (
-            entity.name === 'pumpjack' ||
-            entity.type === 'pump' ||
-            entity.type === 'offshore-pump' ||
-            entity.type === 'boiler' ||
-            entity.type === 'generator' ||
-            entity.name === 'oil-refinery' ||
-            entity.name === 'chemical-plant' ||
-            entity.assemblerCraftsWithFluid ||
-            entity.name === 'flamethrower-turret'
-        ) {
-            const createFluidArrow = (position: IPoint, type = 1): void => {
-                const offset = 0.5
-                if (entity.type === 'offshore-pump') {
-                    position.y -= 2
-                }
-                if (entity.name === 'flamethrower-turret') {
-                    position.y -= 2
-                }
-                const dir = util.getRelativeDirection(position)
-                switch (dir) {
-                    case 0:
-                        position.y += offset
-                        break
-                    case 2:
-                        position.x -= offset
-                        break
-                    case 4:
-                        position.y -= offset
-                        break
-                    case 6:
-                        position.x += offset
-                }
-                const arrow = createArrow(util.sumprod(64, position), type)
-                if (entity.type === 'boiler' && type === 2) {
-                    arrow.rotation = 0.5 * Math.PI
-                }
-                if (entity.name === 'pumpjack') {
-                    arrow.rotation = entity.direction * Math.PI * 0.25
-                }
-                if (entity.name === 'flamethrower-turret') {
-                    arrow.rotation = 0.5 * Math.PI
-                }
-                arrows.addChild(arrow)
-            }
-
-            const arrows = new Container()
-            if (entity.entityData.fluid_boxes) {
-                if (entity.assemblerCraftsWithFluid) {
-                    const c =
-                        entity.entityData.fluid_boxes[
-                            entity.assemblerPipeDirection === 'input' ? 1 : 0
-                        ]
-                    createFluidArrow({
-                        x: c.pipe_connections[0].position[0],
-                        y: c.pipe_connections[0].position[1],
-                    })
-                } else {
-                    const dontConnectOutput =
-                        entity.name === 'chemical-plant' && entity.chemicalPlantDontConnectOutput
-                    for (const c of entity.entityData.fluid_boxes) {
-                        // fluid_boxes are reversed
-                        if (!(c.production_type === 'input' && dontConnectOutput)) {
-                            createFluidArrow({
-                                x: c.pipe_connections[0].position[0],
-                                y: c.pipe_connections[0].position[1],
-                            })
-                        }
-                    }
-                }
-            } else {
-                if (entity.entityData.fluid_box) {
-                    for (const p of entity.entityData.fluid_box.pipe_connections) {
-                        if (
-                            entity.type === 'pump' &&
-                            p === entity.entityData.fluid_box.pipe_connections[1]
-                        ) {
-                            break
-                        }
-                        createFluidArrow(
-                            {
-                                x: p.position[0],
-                                y: p.position[1],
-                            },
-                            entity.entityData.fluid_box.production_type === 'input-output' ? 2 : 1
-                        )
-                    }
-                }
-                if (entity.entityData.output_fluid_box) {
-                    for (const p of entity.entityData.output_fluid_box.pipe_connections) {
-                        createFluidArrow({
-                            x: p.position ? p.position[0] : p.positions[entity.direction / 2][0],
-                            y: p.position ? p.position[1] : p.positions[entity.direction / 2][1],
-                        })
-                    }
-                }
-            }
-
-            if (entity.name !== 'pumpjack') {
-                arrows.rotation =
-                    (entity.name === 'oil-refinery' ||
-                    entity.type === 'pump' ||
-                    entity.type === 'boiler'
-                        ? entity.direction
-                        : (entity.direction + 4) % 8) *
-                    Math.PI *
-                    0.25
-            }
             arrows.scale.set(0.5, 0.5)
             entityInfo.addChild(arrows)
         }

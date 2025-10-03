@@ -6,6 +6,8 @@ import FD, {
     getEnergySource,
     getCircuitConnector,
     getEntitySize,
+    getFluidBoxes,
+    isCraftingMachine,
 } from './factorioData'
 import { PositionGrid } from './PositionGrid'
 import { Entity } from './Entity'
@@ -113,12 +115,11 @@ interface IDrawData {
     position: IPoint
     generateConnector: boolean
 
-    assemblerPipeDirection: string
+    assemblerHasFluidInputs: boolean
+    assemblerHasFluidOutputs: boolean
     dirType: string
     operator: string
-    assemblerCraftsWithFluid: boolean
     trainStopColor: ColorWithAlpha
-    chemicalPlantDontConnectOutput: boolean
     modules: string[]
 }
 
@@ -147,25 +148,6 @@ function getSpriteData(data: IDrawData): readonly ExtendedSpriteData[] {
     generatorCache.set(data.name, generator)
 
     return generator(data)
-}
-
-function getPipeCovers(e: EntityWithOwnerPrototype): DirectionalSpriteLayers {
-    if (e.fluid_box && e.output_fluid_box) {
-        return e.fluid_box.pipe_covers
-    }
-    if (e.fluid_box) {
-        return e.fluid_box.pipe_covers
-    }
-    if (e.output_fluid_box) {
-        return e.output_fluid_box.pipe_covers
-    }
-    if (e.fluid_boxes) {
-        for (const fb of e.fluid_boxes) {
-            if (fb instanceof Object) {
-                return fb.pipe_covers
-            }
-        }
-    }
 }
 
 function generateConnection(e: EntityWithOwnerPrototype, data: IDrawData): readonly SpriteData[] {
@@ -220,163 +202,103 @@ function duplicateAndSetPropertyUsing<
 }
 
 function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly SpriteData[] {
-    // entity doesn't have PipeCoverFeature
-    if (!(e.fluid_box || e.fluid_boxes || e.output_fluid_box)) {
+    if (e.name === 'pipe' || e.name === 'infinity-pipe') {
         return []
     }
 
-    if (
-        e.name === 'pipe' ||
-        e.name === 'infinity-pipe' ||
-        ((e.name === 'assembling-machine-2' || e.name === 'assembling-machine-3') &&
-            !data.assemblerCraftsWithFluid)
-    ) {
-        return []
-    }
-
-    const connections = getPipeConnectionPoints(e, data.dir, data.assemblerPipeDirection)
-    if (!connections) {
-        return []
-    }
+    const fbs = getFluidBoxes(e, data.assemblerHasFluidInputs || data.assemblerHasFluidOutputs)
 
     const output = []
-    for (const connection of connections) {
-        const dir = util.getRelativeDirection(connection)
-
-        const needsCover = (): boolean => {
-            if (e.name === 'chemical-plant') {
-                // don't generate covers for northen side - the texture already contains those
-                if (dir === 0) {
-                    return false
-                }
-
-                if (data.chemicalPlantDontConnectOutput && data.dir === (dir + 4) % 8) {
-                    return true
-                }
-            }
-
-            const pos = {
-                x: Math.floor(data.position.x + connection.x),
-                y: Math.floor(data.position.y + connection.y),
-            }
-
-            const ent = data.positionGrid.getEntityAtPosition(pos)
-            if (!ent) {
-                return true
-            }
-
-            if (
-                ent.name === 'chemical-plant' &&
-                ent.chemicalPlantDontConnectOutput &&
-                ent.direction === dir
-            ) {
-                return true
-            }
-
-            if (
-                ent.type === 'pipe' ||
-                ent.type === 'infinity-pipe' ||
-                ent.type === 'pipe-to-ground' ||
-                ent.entityData.fluid_box ||
-                ent.entityData.output_fluid_box ||
-                ent.entityData.fluid_boxes
-            ) {
-                const connections2 = getPipeConnectionPoints(
-                    ent.entityData,
-                    ent.direction,
-                    ent.assemblerPipeDirection
-                )
-                for (const connection2 of connections2) {
-                    const p2 = { ...pos }
-                    switch (dir) {
-                        case 0:
-                            p2.y += 1
-                            break
-                        case 2:
-                            p2.x -= 1
-                            break
-                        case 4:
-                            p2.y -= 1
-                            break
-                        case 6:
-                            p2.x += 1
-                    }
-                    if (
-                        p2.x === Math.floor(ent.position.x + connection2.x) &&
-                        p2.y === Math.floor(ent.position.y + connection2.y)
-                    ) {
-                        return false
-                    }
-                }
-            }
-            return true
+    for (const fb of fbs) {
+        let force_cover =
+            isCraftingMachine(e) &&
+            ((fb.production_type === 'input' && !data.assemblerHasFluidInputs) ||
+                (fb.production_type === 'output' && !data.assemblerHasFluidOutputs))
+        if (
+            force_cover &&
+            e.type === 'assembling-machine' &&
+            (e as AssemblingMachinePrototype).fluid_boxes_off_when_no_fluid_recipe
+        ) {
+            continue
         }
+        for (const connection of fb.pipe_connections) {
+            if (
+                !(
+                    connection.connection_type === undefined ||
+                    connection.connection_type === 'normal'
+                )
+            )
+                continue
 
-        if (!data.positionGrid || needsCover()) {
-            let temp = getPipeCovers(e)[util.getDirName(dir)].layers[0]
-            temp = addToShift(connection, util.duplicate(temp))
-            if (dir === 4) {
+            const dir = (data.dir + connection.direction / 2) % 8
+
+            const offset = connection.position
+                ? util.rotatePointBasedOnDir(connection.position, data.dir)
+                : util.Point(connection.positions[data.dir / 2])
+            const offset2 = util.rotatePointBasedOnDir([0, -1], dir)
+            offset.x += offset2.x
+            offset.y += offset2.y
+
+            const isConnected = () => {
+                if (!data.positionGrid) return false
+                const pos = {
+                    x: Math.floor(data.position.x + offset.x),
+                    y: Math.floor(data.position.y + offset.y),
+                }
+                const ent = data.positionGrid.getEntityAtPosition(pos)
+                return ent && checkFluidConnection(pos.x, pos.y, ent, dir)
+            }
+
+            let needs_cover = force_cover || !isConnected()
+            if (needs_cover) {
+                let temp = fb.pipe_covers[util.getDirName(dir)].layers[0]
+                temp = addToShift(offset, util.duplicate(temp))
                 output.push(temp)
-            } else {
-                output.unshift(temp)
             }
         }
     }
     return output
 }
 
-function getPipeConnectionPoints(
-    e: EntityWithOwnerPrototype,
-    dir: number,
-    assemblerPipeDirection: string
-): IPoint[] {
-    function getConn(): PipeConnection[] {
-        if (e.fluid_box && e.output_fluid_box) {
-            return [...e.fluid_box.pipe_connections, ...e.output_fluid_box.pipe_connections]
-        }
-        if (e.fluid_box) {
-            if (e.name === 'pipe-to-ground') {
-                return [e.fluid_box.pipe_connections[0]]
-            }
-            return e.fluid_box.pipe_connections
-        }
-        if (e.output_fluid_box) {
-            return e.output_fluid_box.pipe_connections
-        }
-        if (e.fluid_boxes) {
-            const conn = []
-            for (const fb of e.fluid_boxes) {
-                if (fb instanceof Object) {
-                    conn.push(fb.pipe_connections[0])
-                }
-            }
-            return conn
-        }
-        return undefined
-    }
-    const connections = getConn()
-    if (!connections) {
-        return undefined
-    }
-    const positions = []
-    if (e.name === 'pumpjack') {
-        positions.push({
-            x: connections[0].positions[dir / 2][0],
-            y: connections[0].positions[dir / 2][1],
-        })
-    } else if (e.name === 'assembling-machine-2' || e.name === 'assembling-machine-3') {
-        positions.push(
-            util.rotatePointBasedOnDir(
-                connections[assemblerPipeDirection === 'input' ? 0 : 1].position,
-                dir
-            )
+function checkFluidConnection(x: number, y: number, entity: Entity, relDir: number): boolean {
+    const fbs = getFluidBoxes(
+        entity.entityData,
+        entity.assemblerHasFluidInputs || entity.assemblerHasFluidOutputs
+    )
+    const connections = fbs
+        .filter(
+            conn =>
+                !isCraftingMachine(entity.entityData) ||
+                (entity.assemblerHasFluidInputs && conn.production_type === 'input') ||
+                (entity.assemblerHasFluidOutputs && conn.production_type === 'output')
         )
-    } else {
-        for (const connection of connections) {
-            positions.push(util.rotatePointBasedOnDir(connection.position, dir))
+        .flatMap(fb => fb.pipe_connections)
+        .filter(conn => conn.connection_type === undefined || conn.connection_type === 'normal')
+
+    for (const connection of connections) {
+        const offset = connection.position
+            ? util.rotatePointBasedOnDir(connection.position, entity.direction)
+            : util.Point(connection.positions[entity.direction / 2])
+        if (
+            x === Math.floor(entity.position.x + offset.x) &&
+            y === Math.floor(entity.position.y + offset.y) &&
+            (entity.direction + connection.direction / 2) % 8 === (relDir + 4) % 8
+        ) {
+            return true
         }
     }
-    return positions
+
+    return false
+}
+
+function getFluidConnections(position: IPoint, positionGrid: PositionGrid): boolean[] {
+    return positionGrid.getNeighbourData(position).map(({ x, y, entity, relDir }) => {
+        if (!entity) {
+            return false
+        }
+
+        return checkFluidConnection(x, y, entity, relDir)
+    })
 }
 
 function getHeatConnections(position: IPoint, positionGrid: PositionGrid): boolean[] {
@@ -986,29 +908,38 @@ function draw_assembling_machine(
     e: AssemblingMachinePrototype
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
-        if (
-            (e.name === 'assembling-machine-2' || e.name === 'assembling-machine-3') &&
-            data.assemblerCraftsWithFluid
-        ) {
-            const pipeDirection =
-                data.assemblerPipeDirection === 'input' ? data.dir : (data.dir + 4) % 8
-            const out = [
-                e.graphics_set.animation.layers[0],
-                addToShift(
-                    getPipeConnectionPoints(e, data.dir, data.assemblerPipeDirection)[0],
-                    util.duplicate(e.fluid_boxes[0].pipe_picture[util.getDirName(pipeDirection)])
-                ),
-            ]
-            if (pipeDirection === 0) {
-                return [out[1], out[0]]
-            }
-            return out
-        }
-
         if (e.graphics_set.always_draw_idle_animation) {
             return e.graphics_set.idle_animation.layers
         } else {
-            return getAnimation(e.graphics_set.animation, data.dir).layers
+            const out = [...getAnimation(e.graphics_set.animation, data.dir).layers]
+
+            const fbs = getFluidBoxes(
+                e,
+                data.assemblerHasFluidInputs || data.assemblerHasFluidOutputs
+            ).filter(
+                conn =>
+                    (data.assemblerHasFluidInputs && conn.production_type === 'input') ||
+                    (data.assemblerHasFluidOutputs && conn.production_type === 'output')
+            )
+
+            for (const fb of fbs) {
+                if (!fb.pipe_picture) continue
+
+                for (const conn of fb.pipe_connections) {
+                    if (!(conn.connection_type === undefined || conn.connection_type === 'normal'))
+                        continue
+
+                    const dir = (data.dir + conn.direction / 2) % 8
+                    out.push(
+                        addToShift(
+                            util.rotatePointBasedOnDir([0, -2], dir),
+                            util.duplicate(fb.pipe_picture[util.getDirName(dir)])
+                        )
+                    )
+                }
+            }
+
+            return out
         }
     }
 }
@@ -1071,7 +1002,7 @@ function draw_boiler(e: BoilerPrototype): (data: IDrawData) => readonly SpriteDa
                     },
                     data.positionGrid
                 )
-                needsEnding = !c[((data.dir + conn.direction) % 8) / 2]
+                needsEnding = !c[((data.dir + conn.direction / 2) % 8) / 2]
             }
             if (needsEnding) {
                 return [
@@ -1655,58 +1586,7 @@ function draw_pipe(e: PipePrototype): (data: IDrawData) => readonly SpriteData[]
     return (data: IDrawData) => {
         const pictures = e.pictures
         if (data.positionGrid) {
-            const conn = data.positionGrid
-                .getNeighbourData(data.position)
-                .map(({ entity, relDir }) => {
-                    if (!entity) {
-                        return false
-                    }
-
-                    if (entity.type === 'pipe' || entity.type === 'infinity-pipe') {
-                        return true
-                    }
-                    if (entity.type === 'pipe-to-ground' && entity.direction === (relDir + 4) % 8) {
-                        return true
-                    }
-
-                    if (
-                        (entity.name === 'assembling-machine-2' ||
-                            entity.name === 'assembling-machine-3') &&
-                        !entity.assemblerCraftsWithFluid
-                    ) {
-                        return false
-                    }
-                    if (
-                        entity.name === 'chemical-plant' &&
-                        entity.chemicalPlantDontConnectOutput &&
-                        entity.direction === relDir
-                    ) {
-                        return false
-                    }
-
-                    if (
-                        entity.entityData.fluid_box ||
-                        entity.entityData.output_fluid_box ||
-                        entity.entityData.fluid_boxes
-                    ) {
-                        const connections = getPipeConnectionPoints(
-                            entity.entityData,
-                            entity.direction,
-                            entity.assemblerPipeDirection
-                        )
-                        for (const connection of connections) {
-                            if (
-                                Math.floor(data.position.x) ===
-                                    Math.floor(entity.position.x + connection.x) &&
-                                Math.floor(data.position.y) ===
-                                    Math.floor(entity.position.y + connection.y)
-                            ) {
-                                return true
-                            }
-                        }
-                    }
-                    return undefined
-                })
+            const conn = getFluidConnections(data.position, data.positionGrid)
 
             if (conn[0] && conn[1] && conn[2] && conn[3]) {
                 return [pictures.cross]
@@ -1829,7 +1709,7 @@ function draw_reactor(e: ReactorPrototype): (data: IDrawData) => readonly Sprite
                     },
                     data.positionGrid
                 )
-                if (c[conn[i].direction / 2]) {
+                if (c[conn[i].direction / 4]) {
                     patchSheet = e.connection_patches_connected.sheet
                 }
             }

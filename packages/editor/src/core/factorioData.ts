@@ -101,6 +101,7 @@ import { IPoint } from '../types'
 import { WireConnectionPoint } from 'factorio:prototype'
 import { BoundingBox } from 'factorio:prototype'
 import { MapPosition } from 'factorio:prototype'
+import { FluidBox } from 'factorio:prototype'
 
 function getModulesFor(entityName: string): ItemPrototype[] {
     return (
@@ -288,6 +289,88 @@ export function getWireConnectionPoint(
         }
         default:
             return null
+    }
+}
+
+export function getFluidBoxes(
+    e: EntityWithOwnerPrototype,
+    assemblingMachineHasFluidRecipe: boolean
+): readonly FluidBox[] {
+    const fbs = getInnerFluidBoxes(e, assemblingMachineHasFluidRecipe)
+    const es = getEnergySource(e)
+    if (es && es.type === 'fluid') {
+        fbs.push(es.fluid_box)
+    }
+    return fbs
+}
+
+function getInnerFluidBoxes(
+    e: EntityWithOwnerPrototype,
+    assemblingMachineHasFluidRecipe: boolean
+): FluidBox[] {
+    switch (e.type) {
+        case 'boiler': {
+            const e_resolved = e as BoilerPrototype
+            const out = [e_resolved.fluid_box]
+            if (e_resolved.mode === 'output-to-separate-pipe') {
+                out.push(e_resolved.output_fluid_box)
+            }
+            return out
+        }
+        case 'assembling-machine': {
+            const e_resolved = e as AssemblingMachinePrototype
+            if (
+                e_resolved.fluid_boxes_off_when_no_fluid_recipe &&
+                !assemblingMachineHasFluidRecipe
+            ) {
+                return []
+            } else {
+                return [...(e_resolved.fluid_boxes || [])]
+            }
+        }
+        case 'furnace':
+        case 'rocket-silo': {
+            const e_resolved = e as CraftingMachinePrototype
+            return [...(e_resolved.fluid_boxes || [])]
+        }
+        case 'fluid-turret':
+        case 'generator':
+        case 'offshore-pump':
+        case 'infinity-pipe':
+        case 'pipe':
+        case 'pipe-to-ground':
+        case 'pump':
+        case 'storage-tank':
+        case 'valve': {
+            const e_resolved = e as
+                | FluidTurretPrototype
+                | GeneratorPrototype
+                | OffshorePumpPrototype
+                | PipePrototype
+                | PipeToGroundPrototype
+                | PumpPrototype
+                | StorageTankPrototype
+                | ValvePrototype
+            return [e_resolved.fluid_box]
+        }
+        case 'fusion-generator':
+        case 'fusion-reactor': {
+            const e_resolved = e as FusionGeneratorPrototype | FusionReactorPrototype
+            return [e_resolved.input_fluid_box, e_resolved.output_fluid_box]
+        }
+        case 'mining-drill': {
+            const e_resolved = e as MiningDrillPrototype
+            const out = []
+            // if (e_resolved.input_fluid_box) out.push(e_resolved.input_fluid_box)
+            if (e_resolved.output_fluid_box) out.push(e_resolved.output_fluid_box)
+            return out
+        }
+        case 'thruster': {
+            const e_resolved = e as ThrusterPrototype
+            return [e_resolved.fuel_fluid_box, e_resolved.oxidizer_fluid_box]
+        }
+        default:
+            return []
     }
 }
 
