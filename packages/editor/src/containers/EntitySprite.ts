@@ -15,10 +15,9 @@ interface IEntityData {
     generateConnector?: boolean
     directionType?: string
     operator?: string
-    assemblerCraftsWithFluid?: boolean
-    assemblerPipeDirection?: string
+    assemblerHasFluidInputs?: boolean
+    assemblerHasFluidOutputs?: boolean
     trainStopColor?: ColorWithAlpha
-    chemicalPlantDontConnectOutput?: boolean
     modules?: string[]
 }
 
@@ -96,10 +95,9 @@ export class EntitySprite extends Sprite {
 
             dirType: entity.directionType,
             operator: entity.operator,
-            assemblerCraftsWithFluid: entity.assemblerCraftsWithFluid,
-            assemblerPipeDirection: entity.assemblerPipeDirection,
+            assemblerHasFluidInputs: entity.assemblerHasFluidInputs,
+            assemblerHasFluidOutputs: entity.assemblerHasFluidOutputs,
             trainStopColor: entity.trainStopColor,
-            chemicalPlantDontConnectOutput: entity.chemicalPlantDontConnectOutput,
             modules: entity.modules,
         })
 

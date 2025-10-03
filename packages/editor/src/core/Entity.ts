@@ -573,11 +573,6 @@ export class Entity extends EventEmitter<EntityEvents> {
         return this.m_BP.wireConnections.getEntityConnections(this.entityNumber).length > 0
     }
 
-    public get chemicalPlantDontConnectOutput(): boolean {
-        if (!this.recipe) return false
-        return !FD.recipes[this.recipe].results.find(result => result.type === 'fluid')
-    }
-
     public get trainStopColor(): ColorWithAlpha {
         return this.m_rawEntity.color
     }
@@ -908,26 +903,22 @@ export class Entity extends EventEmitter<EntityEvents> {
         */
     }
 
-    public get assemblerCraftsWithFluid(): boolean {
-        return (
-            this.recipe &&
-            FD.recipes[this.recipe].category === 'crafting-with-fluid' &&
-            this.mayCraftWithFluid
-        )
-    }
-
     public get mayCraftWithFluid(): boolean {
         const e = this.entityData
         if (!isCraftingMachine(e)) return false
         return e.crafting_categories && e.crafting_categories.includes('crafting-with-fluid')
     }
 
-    public get assemblerPipeDirection(): DirectionType {
-        if (!this.recipe) return undefined
+    public get assemblerHasFluidInputs(): boolean {
+        if (!this.recipe) return false
         const recipe = FD.recipes[this.recipe]
-        if (recipe.ingredients.find(ingredient => ingredient.type === 'fluid')) return 'input'
-        if (recipe.results.find(result => result.type === 'fluid')) return 'output'
-        return undefined
+        return !!recipe.ingredients.find(ingredient => ingredient.type === 'fluid')
+    }
+
+    public get assemblerHasFluidOutputs(): boolean {
+        if (!this.recipe) return false
+        const recipe = FD.recipes[this.recipe]
+        return !!recipe.results.find(result => result.type === 'fluid')
     }
 
     public getWireConnectionPoint(
