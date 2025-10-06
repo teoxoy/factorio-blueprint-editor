@@ -374,6 +374,95 @@ function getInnerFluidBoxes(
     }
 }
 
+export function getMaxWireDistance(e: EntityWithOwnerPrototype): number {
+    switch (e.type) {
+        case 'electric-pole': {
+            const e_resolved = e as ElectricPolePrototype
+            return e_resolved.maximum_wire_distance || 0
+        }
+        case 'power-switch': {
+            const e_resolved = e as PowerSwitchPrototype
+            return e_resolved.wire_max_distance || 0
+        }
+        case 'accumulator':
+        case 'agricultural-tower':
+        case 'artillery-turret':
+        case 'assembling-machine':
+        case 'rocket-silo':
+        case 'asteroid-collector':
+        case 'cargo-landing-pad':
+        case 'arithmetic-combinator':
+        case 'decider-combinator':
+        case 'selector-combinator':
+        case 'constant-combinator':
+        case 'container':
+        case 'infinity-container':
+        case 'logistic-container':
+        case 'temporary-container':
+        case 'display-panel':
+        case 'furnace':
+        case 'inserter':
+        case 'lamp':
+        case 'linked-container':
+        case 'loader-1x1':
+        case 'loader':
+        case 'mining-drill':
+        case 'offshore-pump':
+        case 'programmable-speaker':
+        case 'proxy-container':
+        case 'pump':
+        case 'radar':
+        case 'rail-chain-signal':
+        case 'rail-signal':
+        case 'reactor':
+        case 'roboport':
+        case 'space-platform-hub':
+        case 'storage-tank':
+        case 'train-stop':
+        case 'transport-belt':
+        case 'ammo-turret':
+        case 'electric-turret':
+        case 'fluid-turret':
+        case 'turret':
+        case 'wall': {
+            const e_resolved = e as
+                | AccumulatorPrototype
+                | AgriculturalTowerPrototype
+                | ArtilleryTurretPrototype
+                | AssemblingMachinePrototype
+                | AsteroidCollectorPrototype
+                | CargoLandingPadPrototype
+                | CombinatorPrototype
+                | ConstantCombinatorPrototype
+                | ContainerPrototype
+                | DisplayPanelPrototype
+                | FurnacePrototype
+                | InserterPrototype
+                | LampPrototype
+                | LinkedContainerPrototype
+                | LoaderPrototype
+                | MiningDrillPrototype
+                | OffshorePumpPrototype
+                | ProgrammableSpeakerPrototype
+                | ProxyContainerPrototype
+                | PumpPrototype
+                | RadarPrototype
+                | RailSignalBasePrototype
+                | ReactorPrototype
+                | RoboportPrototype
+                | SpacePlatformHubPrototype
+                | StorageTankPrototype
+                | TrainStopPrototype
+                | TransportBeltPrototype
+                | TurretPrototype
+                | WallPrototype
+            return e_resolved.circuit_wire_max_distance || 0
+        }
+        default:
+            return 0
+    }
+}
+
 export function mapBoundingBox(bb: BoundingBox): [[number, number], [number, number]] {
     const mapP = (p: MapPosition): [number, number] =>
         Array.isArray(p) ? [p[0], p[1]] : [p.x, p.y]

@@ -22,6 +22,7 @@ import FD, {
     isCraftingMachine,
     isInserter,
     mapBoundingBox,
+    getMaxWireDistance,
 } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
@@ -166,11 +167,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     public get maxWireDistance(): number {
-        return (
-            this.entityData.circuit_wire_max_distance ||
-            this.entityData.wire_max_distance ||
-            this.entityData.maximum_wire_distance
-        )
+        return getMaxWireDistance(this.entityData)
     }
 
     public connectionsReach(position?: IPoint): boolean {
