@@ -23,6 +23,8 @@ import FD, {
     isInserter,
     mapBoundingBox,
     getMaxWireDistance,
+    hasModuleFunctionality,
+    recipeSupportsModule,
 } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
@@ -236,14 +238,13 @@ export class Entity extends EventEmitter<EntityEvents> {
             .commit()
 
         // Some modules on the entity may not be compatible with the new selected recipe, filter those out
-        if (recipe !== undefined && FD.recipes[recipe].allowed_module_categories) {
-            console.log(FD.recipes[recipe].allowed_module_categories)
+        if (recipe !== undefined) {
+            console.log(this.modules)
             this.modules = this.modules
                 .map(m => getModule(m))
-                .filter(module =>
-                    FD.recipes[recipe].allowed_module_categories.includes(module.category)
-                )
+                .filter(module => recipeSupportsModule(recipe, module))
                 .map(module => module.name)
+            console.log(this.modules)
         }
 
         this.m_BP.history.commitTransaction()
@@ -262,22 +263,21 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     /** Count of module slots */
     public get moduleSlots(): number {
-        if (this.entityData.module_specification === undefined) return 0
-        return this.entityData.module_specification.module_slots
+        const e = this.entityData
+        if (hasModuleFunctionality(e)) return e.module_slots || 0
+        return 0
     }
 
     /** Modules this entity can accept */
     public get acceptedModules(): string[] {
-        if (this.entityData.module_specification === undefined) return []
+        const e = this.entityData
+        if (!hasModuleFunctionality(e)) return []
 
         return (
             FD.getModulesFor(this.name)
-                // filter modules based on module limitation
-                .filter(
-                    item =>
-                        !this.recipe || !(item.limitation && !item.limitation.includes(this.recipe))
-                )
-                .map(item => item.name)
+                // filter modules based on recipe
+                .filter(module => !this.recipe || recipeSupportsModule(this.recipe, module))
+                .map(module => module.name)
         )
     }
 

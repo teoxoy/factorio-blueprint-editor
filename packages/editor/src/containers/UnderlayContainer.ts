@@ -1,5 +1,5 @@
 import { Sprite, Container, Texture, AlphaFilter, ColorSource } from 'pixi.js'
-import FD from '../core/factorioData'
+import FD, { hasModuleFunctionality } from '../core/factorioData'
 import { IPoint } from '../types'
 import { VisualizationArea } from './VisualizationArea'
 
@@ -103,7 +103,7 @@ export class UnderlayContainer extends Container {
         if (ed.energy_source && ed.energy_source.type === 'electric') {
             toActivate.add('poles')
         }
-        if (ed.module_specification) {
+        if (hasModuleFunctionality(ed)) {
             toActivate.add('beacons')
         }
 

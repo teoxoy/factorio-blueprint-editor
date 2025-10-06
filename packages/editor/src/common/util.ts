@@ -10,12 +10,6 @@ const getRandomInt = (min: number, max: number): number => {
 
 const getRandomItem = <T>(array: T[]): T => array[getRandomInt(0, array.length - 1)]
 
-declare global {
-    interface ArrayConstructor {
-        isArray(arg: unknown): arg is unknown[] | readonly unknown[]
-    }
-}
-
 const Point = (p: IPoint | readonly [number, number]): IPoint => {
     if (Array.isArray(p)) return { x: p[0], y: p[1] }
     return { ...p }
