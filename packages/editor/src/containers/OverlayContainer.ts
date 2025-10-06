@@ -1,6 +1,12 @@
 import { Container, Graphics, Sprite } from 'pixi.js'
 import { IPoint } from '../types'
-import FD, { getFluidBoxes, isCraftingMachine, getModuleInventoryIndex } from '../core/factorioData'
+import FD, {
+    getFluidBoxes,
+    isCraftingMachine,
+    hasModuleFunctionality,
+    getModuleInventoryIndex,
+    hasModuleIconsSuppressed,
+} from '../core/factorioData'
 import F from '../UI/controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
@@ -121,25 +127,34 @@ export class OverlayContainer extends Container {
         }
 
         const modules = entity.modules
-        if (modules.length !== 0) {
-            const moduleInfo = new Container()
-            const icons_positioning = entity.entityData.icons_positioning || []
-            const module_icon_positioning = icons_positioning.find(
-                ip => ip.inventory_index === getModuleInventoryIndex(entity.entityData)
-            )
+        const e = entity.entityData
+        if (modules.length !== 0 && hasModuleFunctionality(e) && !hasModuleIconsSuppressed(e)) {
+            const module_slots = e.module_slots
+            if (module_slots > 0) {
+                const moduleInfo = new Container()
+                const icons_positioning = e.icons_positioning || []
+                const module_icon_positioning = icons_positioning.find(
+                    ip => ip.inventory_index === getModuleInventoryIndex(e)
+                )
 
-            const shift = module_icon_positioning?.shift || [0, 0.7]
-            const scale = module_icon_positioning?.scale || 0.5
-            const separation_multiplier = module_icon_positioning?.separation_multiplier || 1.1
-            for (const [index, module] of modules.entries()) {
-                createIconWithBackground(moduleInfo, module, {
-                    x: index * 32 * separation_multiplier,
-                    y: 0,
-                })
+                const shift = module_icon_positioning?.shift || [0, 0.7]
+                const scale = module_icon_positioning?.scale || 0.5
+                const separation_multiplier = module_icon_positioning?.separation_multiplier || 1.1
+                for (let slot = 0; slot < module_slots; slot++) {
+                    if (modules[slot]) {
+                        createIconWithBackground(moduleInfo, modules[slot], {
+                            x: slot * 32 * separation_multiplier,
+                            y: 0,
+                        })
+                    }
+                }
+                moduleInfo.scale.set(scale)
+                moduleInfo.position.set(
+                    shift[0] * 32 - module_slots * 8 * separation_multiplier + 8,
+                    shift[1] * 32
+                )
+                entityInfo.addChild(moduleInfo)
             }
-            moduleInfo.scale.set(scale)
-            moduleInfo.position.set(shift[0] * 32 - moduleInfo.width / 2, shift[1] * 32)
-            entityInfo.addChild(moduleInfo)
         }
 
         const filters =
