@@ -404,7 +404,10 @@ export function getEntitySize(e: EntityWithOwnerPrototype, dir: number = 0): IPo
     }
 }
 
-export function getPossibleRotations(e: EntityWithOwnerPrototype): number[] {
+export function getPossibleRotations(
+    e: EntityWithOwnerPrototype,
+    assemblingMachineHasFluidRecipe: boolean = false
+): number[] {
     if (e.flags && e.flags.includes('not-rotatable')) {
         return []
     }
@@ -424,7 +427,6 @@ export function getPossibleRotations(e: EntityWithOwnerPrototype): number[] {
         case 'decider-combinator':
         case 'selector-combinator':
         case 'constant-combinator':
-        case 'assembling-machine':
         case 'fusion-generator':
         case 'gate':
         case 'generator':
@@ -477,6 +479,30 @@ export function getPossibleRotations(e: EntityWithOwnerPrototype): number[] {
                 return [0, 2]
             } else {
                 return [0, 2, 4, 6]
+            }
+        }
+        case 'assembling-machine':
+        case 'furnace':
+        case 'rocket-silo': {
+            const e_resolved = e as CraftingMachinePrototype
+            const fbs = getFluidBoxes(e_resolved, assemblingMachineHasFluidRecipe)
+            const energy_source = getEnergySource(e_resolved)
+            const size = getEntitySize(e_resolved)
+            let canBeRotated = false
+            if (fbs.length > 0) {
+                canBeRotated = true
+            } else if (
+                energy_source &&
+                (energy_source.type === 'heat' || energy_source.type === 'fluid')
+            ) {
+                canBeRotated = true
+            } else if (size.x !== size.y) {
+                canBeRotated = true
+            }
+            if (canBeRotated) {
+                return [0, 2, 4, 6]
+            } else {
+                return []
             }
         }
         default:
