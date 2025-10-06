@@ -708,19 +708,41 @@ export function loadData(str: string): void {
 
 export default FD
 
+export function hasModuleFunctionality(
+    e: EntityWithOwnerPrototype
+): e is LabPrototype | MiningDrillPrototype | BeaconPrototype | CraftingMachinePrototype {
+    switch (e.type) {
+        case 'lab':
+        case 'mining-drill':
+        case 'beacon':
+        case 'assembling-machine':
+        case 'furnace':
+        case 'rocket-silo':
+            return true
+        default:
+            return false
+    }
+}
+
+export function hasModuleIconsSuppressed(e: EntityWithOwnerPrototype): boolean {
+    switch (e.type) {
+        case 'beacon': {
+            const e_resolved = e as BeaconPrototype
+            return !!e_resolved.graphics_set?.module_icons_suppressed
+        }
+        default:
+            return false
+    }
+}
+
 export function getModuleInventoryIndex(e: EntityWithOwnerPrototype): null | number {
     switch (e.type) {
         case 'lab':
             return FD.defines.inventory.lab_modules
         case 'mining-drill':
             return FD.defines.inventory.mining_drill_modules
-        case 'beacon': {
-            const e_resolved = e as BeaconPrototype
-            if (e_resolved.graphics_set?.module_icons_suppressed) {
-                return null
-            }
+        case 'beacon':
             return FD.defines.inventory.beacon_modules
-        }
         case 'assembling-machine':
         case 'furnace':
         case 'rocket-silo':
