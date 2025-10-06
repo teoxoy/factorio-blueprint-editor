@@ -625,9 +625,16 @@ export class Entity extends EventEmitter<EntityEvents> {
         return undefined
     }
 
+    private get possibleRotations(): number[] {
+        return getPossibleRotations(
+            this.entityData,
+            this.assemblerHasFluidInputs || this.assemblerHasFluidOutputs
+        )
+    }
+
     private get canBeRotated(): boolean {
         return (
-            getPossibleRotations(this.entityData).length !== 0 &&
+            this.possibleRotations.length !== 0 &&
             !this.m_BP.entityPositionGrid.sharesCell({
                 x: this.position.x,
                 y: this.position.y,
@@ -649,7 +656,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     private constrainDirection(direction: number): number {
-        const pr = getPossibleRotations(this.entityData)
+        const pr = this.possibleRotations
         let canRotate = pr.length !== 0
 
         if (canRotate) {
@@ -740,7 +747,7 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     private rotateDir(ccw: boolean): number {
         if (!this.canBeRotated) return this.direction
-        const pr = getPossibleRotations(this.entityData)
+        const pr = this.possibleRotations
         return pr[
             (pr.indexOf(this.direction) +
                 (this.size.x !== this.size.y || this.type === 'underground-belt' ? 2 : 1) *
