@@ -676,6 +676,7 @@ const FD: {
     tiles: Record<string, TilePrototype>
     inventoryLayout: InventoryLayoutGroup[]
     utilitySprites: UtilitySprites
+    defines: typeof defines
     // treesAndRocks: Record<string, TreeOrRock>
 
     getModulesFor: (entityName: string) => ItemPrototype[]
@@ -692,6 +693,7 @@ export function loadData(str: string): void {
     FD.tiles = data.tiles
     FD.inventoryLayout = data.inventoryLayout
     FD.utilitySprites = data.utilitySprites
+    FD.defines = data.defines
     FD.getModulesFor = getModulesFor
 
     for (const e of Object.values(FD.entities)) {
@@ -705,6 +707,28 @@ export function loadData(str: string): void {
 }
 
 export default FD
+
+export function getModuleInventoryIndex(e: EntityWithOwnerPrototype): null | number {
+    switch (e.type) {
+        case 'lab':
+            return FD.defines.inventory.lab_modules
+        case 'mining-drill':
+            return FD.defines.inventory.mining_drill_modules
+        case 'beacon': {
+            const e_resolved = e as BeaconPrototype
+            if (e_resolved.graphics_set?.module_icons_suppressed) {
+                return null
+            }
+            return FD.defines.inventory.beacon_modules
+        }
+        case 'assembling-machine':
+        case 'furnace':
+        case 'rocket-silo':
+            return FD.defines.inventory.crafter_modules
+        default:
+            return null
+    }
+}
 
 export interface Color {
     r: number
