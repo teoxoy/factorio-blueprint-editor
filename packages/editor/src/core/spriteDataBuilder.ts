@@ -1128,8 +1128,10 @@ function draw_elevated_straight_rail(
     throw new Error('Not implemented!')
 }
 function draw_fluid_turret(e: FluidTurretPrototype): (data: IDrawData) => readonly SpriteData[] {
-    return (data: IDrawData) =>
-        e.graphics_set.base_visualisation.animation[util.getDirName(data.dir)].layers
+    return (data: IDrawData) => [
+        ...e.graphics_set.base_visualisation.animation[util.getDirName(data.dir)].layers,
+        ...e.folded_animation[util.getDirName(data.dir)].layers,
+    ]
 }
 function draw_fluid_wagon(e: FluidWagonPrototype): (data: IDrawData) => readonly SpriteData[] {
     throw new Error('Not implemented!')
