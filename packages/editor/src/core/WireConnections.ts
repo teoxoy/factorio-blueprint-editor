@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3'
 import { IBPConnection, IConnSide, IPoint, IWireColor } from '../types'
-import FD from './factorioData'
+import FD, { getMaxWireDistance } from './factorioData'
 import U from './generators/util'
 import { Blueprint } from './Blueprint'
 import { WireConnectionMap } from './WireConnectionMap'
@@ -337,8 +337,8 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
                         pole0,
                         pole1,
                         Math.min(
-                            FD.entities[pole0.name].maximum_wire_distance,
-                            FD.entities[pole1.name].maximum_wire_distance
+                            getMaxWireDistance(FD.entities[pole0.name]),
+                            getMaxWireDistance(FD.entities[pole1.name])
                         )
                     )
                 )
