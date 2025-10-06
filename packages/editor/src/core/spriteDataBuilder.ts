@@ -1485,10 +1485,11 @@ function draw_loader(e: LoaderPrototype): (data: IDrawData) => readonly SpriteDa
     return (data: IDrawData) => {
         const isInput = data.dirType === 'input'
         const dir = isInput ? data.dir : (data.dir + 4) % 8
+        const offset = util.rotatePointBasedOnDir([0, 0.5], dir)
 
         const beltParts = getBeltSprites(
             e.belt_animation_set,
-            data.position,
+            data.positionGrid ? util.sumprod(data.position, offset) : offset,
             data.dir,
             data.positionGrid,
             isInput,
@@ -1498,9 +1499,9 @@ function draw_loader(e: LoaderPrototype): (data: IDrawData) => readonly SpriteDa
 
         let mainBelt = beltParts[0]
         if (dir === 2 || dir === 6) {
-            mainBelt = setPropertyUsing(mainBelt, 'width', 'width', 0.5)
+            mainBelt = setPropertyUsing(mainBelt, 'width', 'size', 0.5)
         } else {
-            mainBelt = setPropertyUsing(mainBelt, 'height', 'height', 0.5)
+            mainBelt = setPropertyUsing(mainBelt, 'height', 'size', 0.5)
         }
 
         if (dir === 2) {
@@ -1871,9 +1872,9 @@ function draw_underground_belt(
 
         let mainBelt = beltParts[0]
         if (dir === 2 || dir === 6) {
-            mainBelt = setPropertyUsing(mainBelt, 'width', 'width', 0.5)
+            mainBelt = setPropertyUsing(mainBelt, 'width', 'size', 0.5)
         } else {
-            mainBelt = setPropertyUsing(mainBelt, 'height', 'height', 0.5)
+            mainBelt = setPropertyUsing(mainBelt, 'height', 'size', 0.5)
         }
 
         if (dir === 2) {
