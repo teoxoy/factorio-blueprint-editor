@@ -395,8 +395,8 @@ function getBeltSprites(
     position: IPoint,
     direction: number,
     positionGrid?: PositionGrid,
-    stratingEnding = true,
-    endingEnding = true,
+    start = true,
+    end = true,
     forceStraight = false
 ): readonly SpriteData[] {
     const parts = []
@@ -406,7 +406,7 @@ function getBeltSprites(
 
         parts.push(getBeltSpriteFromData(bas, direction, conn.curve))
 
-        if (stratingEnding) {
+        if (start) {
             let spawn = true
 
             if (conn.from) {
@@ -426,13 +426,13 @@ function getBeltSprites(
                 parts.push(
                     addToShift(
                         util.rotatePointBasedOnDir([0, 1], direction),
-                        getBeltSpriteFromData(bas, direction, 'stratingEnding')
+                        getBeltSpriteFromData(bas, direction, 'start')
                     )
                 )
             }
         }
 
-        if (endingEnding) {
+        if (end) {
             let spawn = true
 
             if (conn.to) {
@@ -451,7 +451,7 @@ function getBeltSprites(
                 parts.push(
                     addToShift(
                         util.rotatePointBasedOnDir([0, -1], direction),
-                        getBeltSpriteFromData(bas, direction, 'endingEnding')
+                        getBeltSpriteFromData(bas, direction, 'end')
                     )
                 )
             }
@@ -459,20 +459,20 @@ function getBeltSprites(
     } else {
         parts.push(getBeltSpriteFromData(bas, direction, 'straight'))
 
-        if (stratingEnding) {
+        if (start) {
             parts.push(
                 addToShift(
                     util.rotatePointBasedOnDir([0, 1], direction),
-                    getBeltSpriteFromData(bas, direction, 'stratingEnding')
+                    getBeltSpriteFromData(bas, direction, 'start')
                 )
             )
         }
 
-        if (endingEnding) {
+        if (end) {
             parts.push(
                 addToShift(
                     util.rotatePointBasedOnDir([0, -1], direction),
-                    getBeltSpriteFromData(bas, direction, 'endingEnding')
+                    getBeltSpriteFromData(bas, direction, 'end')
                 )
             )
         }
@@ -480,7 +480,7 @@ function getBeltSprites(
 
     return parts
 
-    type BeltShape = 'straight' | 'rightCurve' | 'leftCurve' | 'stratingEnding' | 'endingEnding'
+    type BeltShape = 'straight' | 'right' | 'left' | 'start' | 'end'
 
     interface IFromTo extends IPoint {
         entity: Entity
@@ -544,14 +544,14 @@ function getBeltSprites(
             return {
                 from: C[1],
                 to: C[0],
-                curve: 'rightCurve',
+                curve: 'right',
             }
         }
         if (C2[3] && !C2[1] && !C2[2]) {
             return {
                 from: C[3],
                 to: C[0],
-                curve: 'leftCurve',
+                curve: 'left',
             }
         }
         return {
@@ -582,7 +582,7 @@ function getBeltSprites(
                             return bas.west_index || 2
                     }
                     break
-                case 'rightCurve':
+                case 'right':
                     switch (dir) {
                         case 0:
                             return bas.east_to_north_index || 5
@@ -594,7 +594,7 @@ function getBeltSprites(
                             return bas.north_to_west_index || 8
                     }
                     break
-                case 'leftCurve':
+                case 'left':
                     switch (dir) {
                         case 0:
                             return bas.west_to_north_index || 7
@@ -606,7 +606,7 @@ function getBeltSprites(
                             return bas.south_to_west_index || 11
                     }
                     break
-                case 'stratingEnding':
+                case 'start':
                     switch (dir) {
                         case 0:
                             return bas.starting_south_index || 13
@@ -618,7 +618,7 @@ function getBeltSprites(
                             return bas.starting_east_index || 19
                     }
                     break
-                case 'endingEnding':
+                case 'end':
                     switch (dir) {
                         case 0:
                             return bas.ending_north_index || 18
