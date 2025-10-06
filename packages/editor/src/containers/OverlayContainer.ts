@@ -32,13 +32,15 @@ export class OverlayContainer extends Container {
         if (
             entity.recipe &&
             isCraftingMachine(entity.entityData) &&
-            (entity.entityData.show_recipe_icon === undefined || entity.entityData.icon_size)
+            (entity.entityData.show_recipe_icon === undefined || entity.entityData.show_recipe_icon)
         ) {
+            const spec = entity.entityData.icon_draw_specification
+            const shift = spec.shift || [0, 0]
+            const scale = spec.scale || 1
             const recipeInfo = new Container()
             createIconWithBackground(recipeInfo, entity.recipe)
-            const S = entity.name === 'oil-refinery' ? 1.5 : 0.9
-            recipeInfo.scale.set(S, S)
-            recipeInfo.position.set(0, -10)
+            recipeInfo.scale.set(scale)
+            recipeInfo.position.set(shift[0] * 32, shift[1] * 32)
             entityInfo.addChild(recipeInfo)
         }
 
