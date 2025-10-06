@@ -446,6 +446,11 @@ do
     output.utilitySprites = utilitySprites
 end
 
+-- DEFINES
+do
+    output.defines = defines
+end
+
 -- PASSTROUGH OUTPUT DATA
 do
     local serialized = serpent.dump(output)

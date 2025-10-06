@@ -1,6 +1,6 @@
 import { Container, Graphics, Sprite } from 'pixi.js'
 import { IPoint } from '../types'
-import FD, { getFluidBoxes, isCraftingMachine } from '../core/factorioData'
+import FD, { getFluidBoxes, isCraftingMachine, getModuleInventoryIndex } from '../core/factorioData'
 import F from '../UI/controls/functions'
 import G from '../common/globals'
 import util from '../common/util'
@@ -119,17 +119,24 @@ export class OverlayContainer extends Container {
         }
 
         const modules = entity.modules
-        if (modules.length !== 0 && entity.name !== 'beacon') {
+        if (modules.length !== 0) {
             const moduleInfo = new Container()
-            const shift = undefined //entity.entityData.module_specification.module_info_icon_shift
-            for (let index = 0; index < modules.length; index++) {
-                createIconWithBackground(moduleInfo, modules[index], { x: index * 32, y: 0 })
-            }
-            moduleInfo.scale.set(0.5, 0.5)
-            moduleInfo.position.set(
-                (shift ? shift[0] : 0) * 32 - modules.length * 8 + 8,
-                (shift ? shift[1] : 0.75) * 32
+            const icons_positioning = entity.entityData.icons_positioning || []
+            const module_icon_positioning = icons_positioning.find(
+                ip => ip.inventory_index === getModuleInventoryIndex(entity.entityData)
             )
+
+            const shift = module_icon_positioning?.shift || [0, 0.7]
+            const scale = module_icon_positioning?.scale || 0.5
+            const separation_multiplier = module_icon_positioning?.separation_multiplier || 1.1
+            for (const [index, module] of modules.entries()) {
+                createIconWithBackground(moduleInfo, module, {
+                    x: index * 32 * separation_multiplier,
+                    y: 0,
+                })
+            }
+            moduleInfo.scale.set(scale)
+            moduleInfo.position.set(shift[0] * 32 - moduleInfo.width / 2, shift[1] * 32)
             entityInfo.addChild(moduleInfo)
         }
 
