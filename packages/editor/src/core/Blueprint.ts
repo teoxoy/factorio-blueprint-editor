@@ -3,7 +3,7 @@ import { Sprite, Texture } from 'pixi.js'
 import { IBlueprint, IEntity, IPoint, ISchedule, SignalType } from '../types'
 import G from '../common/globals'
 import util from '../common/util'
-import FD, { getEntitySize } from './factorioData'
+import FD, { getEntitySize, hasModuleFunctionality } from './factorioData'
 import { Entity } from './Entity'
 import { WireConnections } from './WireConnections'
 import { PositionGrid } from './PositionGrid'
@@ -450,10 +450,13 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
         for (const pipe of GP.pipes) {
             this.createEntity(pipe)
         }
+        const beacon_module_slots =
+            (hasModuleFunctionality(FD.entities['beacon']) && FD.entities['beacon'].module_slots) ||
+            0
         for (const beacon of beacons) {
             this.createEntity({
                 ...beacon,
-                items: { [BEACON_MODULE]: FD.entities.beacon.module_specification.module_slots },
+                items: { [BEACON_MODULE]: beacon_module_slots },
             })
         }
         for (const pole of GPO.poles) {

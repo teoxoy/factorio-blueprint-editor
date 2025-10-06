@@ -102,21 +102,45 @@ import { WireConnectionPoint } from 'factorio:prototype'
 import { BoundingBox } from 'factorio:prototype'
 import { MapPosition } from 'factorio:prototype'
 import { FluidBox } from 'factorio:prototype'
+import { EffectTypeLimitation } from 'factorio:prototype'
 
-function getModulesFor(entityName: string): ItemPrototype[] {
+function getModulesFor(entityName: string): ModulePrototype[] {
+    const e = FD.entities[entityName]
+    if (!hasModuleFunctionality(e)) return []
+    const allowed_effects = getAllowedEffects(e)
+    if (allowed_effects.length === 0) return []
+    const allowed_module_categories = e.allowed_module_categories
     return (
         Object.keys(FD.items)
             .map(k => FD.items[k])
             .filter(isModule)
             // filter modules based on entity allowed_effects (ex: beacons don't accept productivity effect)
+            .filter(module =>
+                Object.keys(module.effect)
+                    .filter(effect => module.effect[effect] > 0) // needed or else speed modules can't be placed in beacons, not sure what the game does here
+                    .every(effect => allowed_effects.includes(effect))
+            )
             .filter(
                 module =>
-                    !FD.entities[entityName].allowed_effects ||
-                    Object.keys(module.effect).every(effect =>
-                        FD.entities[entityName].allowed_effects.includes(effect)
-                    )
+                    !allowed_module_categories ||
+                    allowed_module_categories.includes(module.category)
             )
     )
+}
+
+export function recipeSupportsModule(recipe: string, module: ModulePrototype): boolean {
+    const r = FD.recipes[recipe]
+    console.log(r, module)
+    if (r.allowed_module_categories && !r.allowed_module_categories.includes(module.category))
+        return false
+    if (module.effect.consumption && !(r.allow_consumption === undefined || r.allow_consumption))
+        return false
+    if (module.effect.speed && !(r.allow_speed === undefined || r.allow_speed)) return false
+    if (module.effect.productivity && !r.allow_productivity) return false
+    if (module.effect.pollution && !(r.allow_pollution === undefined || r.allow_pollution))
+        return false
+    if (module.effect.quality && !(r.allow_quality === undefined || r.allow_quality)) return false
+    return true
 }
 
 export function isInserter(item: EntityWithOwnerPrototype): item is InserterPrototype {
@@ -679,7 +703,7 @@ const FD: {
     defines: typeof defines
     // treesAndRocks: Record<string, TreeOrRock>
 
-    getModulesFor: (entityName: string) => ItemPrototype[]
+    getModulesFor: (entityName: string) => ModulePrototype[]
 } = {}
 
 export function loadData(str: string): void {
@@ -721,6 +745,29 @@ export function hasModuleFunctionality(
             return true
         default:
             return false
+    }
+}
+
+function getAllowedEffects(e: EntityWithOwnerPrototype): readonly EffectTypeLimitation[] {
+    if (hasModuleFunctionality(e)) {
+        const allowed_effects = e.allowed_effects
+        if (allowed_effects) {
+            return Array.isArray(allowed_effects) ? allowed_effects : [allowed_effects]
+        }
+    }
+    // for defaults
+    switch (e.type) {
+        case 'lab':
+            return ['speed', 'productivity', 'consumption', 'pollution']
+        case 'mining-drill':
+            return ['speed', 'productivity', 'consumption', 'pollution', 'quality']
+        case 'beacon':
+        case 'assembling-machine':
+        case 'furnace':
+        case 'rocket-silo':
+            return []
+        default:
+            throw new Error('Forgot to set a default!')
     }
 }
 
