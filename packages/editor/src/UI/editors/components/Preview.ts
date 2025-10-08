@@ -6,6 +6,7 @@ import { OverlayContainer } from '../../../containers/OverlayContainer'
 import { Entity, EntityEvents } from '../../../core/Entity'
 import { colors } from '../../style'
 import F from '../../controls/functions'
+import { isTrainStop, mapBoundingBox } from '../../../core/factorioData'
 
 /** Preview of Entity */
 export class Preview extends Container {
@@ -71,20 +72,17 @@ export class Preview extends Container {
 
         if (this.m_Entity.entityData !== undefined) {
             /** Adjust sprite size and offset based on drawing box */
-            const assignDataFromDrawingBox = (db: number[][]): void => {
+            const assignDataFromDrawingBox = (db: [[number, number], [number, number]]): void => {
                 actualSpriteSize.x = Math.abs(db[0][0]) + db[1][0]
                 actualSpriteSize.y = Math.abs(db[0][1]) + db[1][1]
                 offset.x = actualSpriteSize.x / 2 - db[1][0]
                 offset.y = actualSpriteSize.y / 2 - db[1][1]
             }
 
-            if (this.m_Entity.entityData.drawing_box !== undefined) {
-                assignDataFromDrawingBox(this.m_Entity.entityData.drawing_box)
-            }
-
-            if (this.m_Entity.entityData.drawing_boxes !== undefined) {
+            const e = this.m_Entity.entityData
+            if (isTrainStop(e) && e.drawing_boxes) {
                 assignDataFromDrawingBox(
-                    this.m_Entity.entityData.drawing_boxes[util.getDirName(this.m_Entity.direction)]
+                    mapBoundingBox(e.drawing_boxes[util.getDirName(this.m_Entity.direction)])
                 )
             }
         }
