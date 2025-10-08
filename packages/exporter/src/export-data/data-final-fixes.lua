@@ -440,10 +440,17 @@ end
 
 -- UTILITY SPRITES
 do
-    local utilitySprites = deep_copy(data.raw['utility-sprites'].default)
-    utilitySprites.type = nil
-    utilitySprites.name = nil
-    output.utilitySprites = utilitySprites
+    output.utilitySprites = data.raw['utility-sprites'].default
+end
+
+-- UTILITY CONSTANTS
+do
+    output.utilityConstants = data.raw['utility-constants'].default
+end
+
+-- GUI STYLE
+do
+    output.guiStyle = data.raw['gui-style'].default
 end
 
 -- DEFINES
