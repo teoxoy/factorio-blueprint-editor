@@ -866,10 +866,11 @@ function draw_arithmetic_combinator(
                     throw new Error('Internal Error!')
             }
         }
-        return [
-            ...e.sprites[util.getDirName(data.dir)].layers,
-            operatorToSpriteData(data.operator)[util.getDirName(data.dir)],
-        ]
+        const out = [...e.sprites[util.getDirName(data.dir)].layers]
+        if (data.operator) {
+            out.push(operatorToSpriteData(data.operator)[util.getDirName(data.dir)])
+        }
+        return out
     }
 }
 function draw_artillery_turret(
@@ -1079,10 +1080,11 @@ function draw_decider_combinator(
                     throw new Error('Internal Error!')
             }
         }
-        return [
-            ...e.sprites[util.getDirName(data.dir)].layers,
-            operatorToSpriteData(data.operator)[util.getDirName(data.dir)],
-        ]
+        const out = [...e.sprites[util.getDirName(data.dir)].layers]
+        if (data.operator) {
+            out.push(operatorToSpriteData(data.operator)[util.getDirName(data.dir)])
+        }
+        return out
     }
 }
 function draw_display_panel(e: DisplayPanelPrototype): (data: IDrawData) => readonly SpriteData[] {
