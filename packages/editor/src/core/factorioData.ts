@@ -652,7 +652,9 @@ export function getEnergySource(e: EntityWithOwnerPrototype): null | EnergySourc
         case 'offshore-pump':
         case 'pump':
         case 'radar':
-        case 'reactor': {
+        case 'reactor':
+        case 'loader-1x1':
+        case 'loader': {
             const e_resolved = e as
                 | AgriculturalTowerPrototype
                 | BoilerPrototype
@@ -664,6 +666,44 @@ export function getEnergySource(e: EntityWithOwnerPrototype): null | EnergySourc
                 | PumpPrototype
                 | RadarPrototype
                 | ReactorPrototype
+                | LoaderPrototype
+            return e_resolved.energy_source
+        }
+        case 'accumulator':
+        case 'ammo-turret':
+        case 'asteroid-collector':
+        case 'beacon':
+        case 'burner-generator':
+        case 'arithmetic-combinator':
+        case 'decider-combinator':
+        case 'selector-combinator':
+        case 'electric-energy-interface':
+        case 'electric-turret':
+        case 'fusion-generator':
+        case 'fusion-reactor':
+        case 'generator':
+        case 'lamp':
+        case 'lightning-attractor':
+        case 'programmable-speaker':
+        case 'roboport':
+        case 'solar-panel': {
+            const e_resolved = e as
+                | AccumulatorPrototype
+                | AmmoTurretPrototype
+                | AsteroidCollectorPrototype
+                | BeaconPrototype
+                | BurnerGeneratorPrototype
+                | CombinatorPrototype
+                | ElectricEnergyInterfacePrototype
+                | ElectricTurretPrototype
+                | FusionGeneratorPrototype
+                | FusionReactorPrototype
+                | GeneratorPrototype
+                | LampPrototype
+                | LightningAttractorPrototype
+                | ProgrammableSpeakerPrototype
+                | RoboportPrototype
+                | SolarPanelPrototype
             return e_resolved.energy_source
         }
         default:
