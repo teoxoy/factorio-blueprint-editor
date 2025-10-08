@@ -1695,6 +1695,8 @@ function draw_rail_signal_base(
             'height',
             dir * 2
         )
+        const structure_index = e.ground_picture_set.signal_color_to_structure_frame_index.green
+        a = setPropertyUsing(a, 'x', 'width', structure_index)
         return [rp, a]
     }
 }
