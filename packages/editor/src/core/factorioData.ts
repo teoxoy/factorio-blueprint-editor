@@ -143,9 +143,9 @@ export function recipeSupportsModule(recipe: string, module: ModulePrototype): b
     return true
 }
 
-export function isInserter(item: EntityWithOwnerPrototype): item is InserterPrototype {
+export function isInserter(e: EntityWithOwnerPrototype): e is InserterPrototype {
     const type: InserterPrototype['type'] = 'inserter'
-    return item.type === type
+    return e.type === type
 }
 export function isCraftingMachine(e: EntityWithOwnerPrototype): e is CraftingMachinePrototype {
     switch (e.type) {
@@ -157,6 +157,10 @@ export function isCraftingMachine(e: EntityWithOwnerPrototype): e is CraftingMac
         default:
             return false
     }
+}
+export function isTrainStop(e: EntityWithOwnerPrototype): e is TrainStopPrototype {
+    const type: TrainStopPrototype['type'] = 'train-stop'
+    return e.type === type
 }
 
 function isModule(item: ItemPrototype): item is ModulePrototype {
