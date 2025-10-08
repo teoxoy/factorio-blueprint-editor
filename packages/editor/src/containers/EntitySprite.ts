@@ -1,4 +1,4 @@
-import { Sprite, Texture } from 'pixi.js'
+import { BLEND_MODES, Sprite, Texture } from 'pixi.js'
 import { IPoint } from '../types'
 import G from '../common/globals'
 import F from '../UI/controls/functions'
@@ -6,6 +6,7 @@ import { Entity } from '../core/Entity'
 import { PositionGrid } from '../core/PositionGrid'
 import { getSpriteData, ExtendedSpriteData } from '../core/spriteDataBuilder'
 import { ColorWithAlpha, getColor } from '../core/factorioData'
+import { BlendMode } from 'factorio:prototype'
 
 interface IEntityData {
     name: string
@@ -37,6 +38,24 @@ export class EntitySprite extends Sprite {
         super(texture)
 
         this.id = EntitySprite.getNextID()
+
+        const blend_mode = data.blend_mode || 'normal'
+        const mapBlendMode = (blend_mode: BlendMode): BLEND_MODES => {
+            switch (blend_mode) {
+                case 'normal':
+                    return 'normal'
+                case 'additive':
+                    return 'add'
+                case 'multiplicative':
+                    return 'multiply'
+                case 'additive-soft':
+                case 'multiplicative-with-alpha':
+                case 'overwrite':
+                default:
+                    throw new Error('Missing blend mode mapping!')
+            }
+        }
+        this.blendMode = mapBlendMode(blend_mode)
 
         this.entityPos = position
         this.position.set(position.x, position.y)
@@ -109,8 +128,6 @@ export class EntitySprite extends Sprite {
             const data = spriteData[i]
             if (!data) continue
             if (data.draw_as_shadow) continue
-            // if (data.draw_as_glow) continue
-            // if (data.draw_as_light) continue
 
             const texture = G.getTexture(
                 data.filename,
