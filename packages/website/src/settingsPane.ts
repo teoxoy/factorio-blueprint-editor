@@ -129,7 +129,7 @@ export function initSettingsPane(
             .sort((a, b) => a.order.localeCompare(b.order))
             .reduce<Record<string, string>>(
                 (obj, item) => {
-                    obj[item.localised_name] = item.name
+                    obj[item.localised_name as string] = item.name
                     return obj
                 },
                 { None: 'none' }
