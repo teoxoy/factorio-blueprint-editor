@@ -10,6 +10,8 @@ import {
     TilePrototype,
     EntityWithOwnerPrototype,
     UtilitySprites,
+    UtilityConstants,
+    GuiStyle,
     HeatBuffer,
     EnergySource,
     CraftingMachinePrototype,
@@ -744,6 +746,8 @@ const FD: {
     tiles: Record<string, TilePrototype>
     inventoryLayout: InventoryLayoutGroup[]
     utilitySprites: UtilitySprites
+    utilityConstants: UtilityConstants
+    guiStyle: GuiStyle
     defines: typeof defines
     // treesAndRocks: Record<string, TreeOrRock>
 
@@ -761,6 +765,8 @@ export function loadData(str: string): void {
     FD.tiles = data.tiles
     FD.inventoryLayout = data.inventoryLayout
     FD.utilitySprites = data.utilitySprites
+    FD.utilityConstants = data.utilityConstants
+    FD.guiStyle = data.guiStyle
     FD.defines = data.defines
     FD.getModulesFor = getModulesFor
 
