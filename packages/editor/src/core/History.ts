@@ -6,9 +6,6 @@ enum HistoryValue {
     Old,
 }
 
-/** Private interface hack to access properties of objects via `any` */
-type IIndexedObject = Record<string, any>
-
 /** Private class for historical actions */
 class Action<V> {
     /** Field to store old value (=overwritten value) */
@@ -202,19 +199,24 @@ export class History {
         this.transactionHistory = []
     }
 
-    /** Updates a value in an `Array` or `Object` at the specified path and stores it in the history  */
-    public updateValue<T, V>(target: T, path: string[], value: V, text: string): Action<V> {
-        const oldValue = this.GetValue<V>(target, path)
+    /** Updates a value in an `Array` or `Object` at the specified key and stores it in the history  */
+    public updateValue<T, K extends keyof T>(
+        target: T,
+        key: K,
+        value: T[K],
+        text: string
+    ): Action<T[K]> {
+        const oldValue = this.GetValue(target, key)
         const newValue = value
 
         const historyAction = new Action(this, oldValue, newValue, text, v => {
             if (v === undefined) {
-                const current = this.GetValue(target, path)
+                const current = this.GetValue(target, key)
                 if (current !== undefined) {
-                    this.DeleteValue(target, path)
+                    this.DeleteValue(target, key)
                 }
             } else {
-                this.SetValue<V>(target, path, v)
+                this.SetValue(target, key, v)
             }
         })
 
@@ -331,42 +333,20 @@ export class History {
         return false
     }
 
-    /** Gets the value of the `Array` or `Object` at the specified path  */
-    private GetValue<V>(obj: IIndexedObject, path: string[]): V {
-        if (path.length === 1) {
-            if (util.objectHasOwnProperty(obj, path[0])) {
-                return obj[path[0]]
-            } else {
-                return undefined
-            }
-        } else {
-            return this.GetValue(obj[path[0]], path.slice(1))
+    /** Gets the value of the `Array` or `Object` at the specified key  */
+    private GetValue<T, K extends keyof T>(obj: T, key: K): T[K] {
+        if (util.objectHasOwnProperty(obj, key)) {
+            return obj[key]
         }
     }
 
-    /** Sets the value of the `Array` or `Object` at the specified path  */
-    private SetValue<V>(obj: IIndexedObject, path: string[], value: V): void {
-        if (path.length === 1) {
-            if (Array.isArray(obj)) {
-                obj.push(value)
-            } else {
-                obj[path[0]] = value
-            }
-        } else {
-            this.SetValue<V>(obj[path[0]], path.slice(1), value)
-        }
+    /** Sets the value of the `Array` or `Object` at the specified key  */
+    private SetValue<T, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+        obj[key] = value
     }
 
-    /** Deletes the value of the `Array` or `Object` at the specified path  */
-    private DeleteValue(obj: IIndexedObject, path: string[]): void {
-        if (path.length === 1) {
-            if (Array.isArray(obj)) {
-                obj.splice(Number(path[0]), 1)
-            } else {
-                delete obj[path[0]]
-            }
-        } else {
-            this.DeleteValue(obj[path[0]], path.slice(1))
-        }
+    /** Deletes the value of the `Array` or `Object` at the specified key  */
+    private DeleteValue<T, K extends keyof T>(obj: T, key: K): void {
+        delete obj[key]
     }
 }

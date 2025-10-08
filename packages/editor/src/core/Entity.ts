@@ -159,7 +159,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (G.BPC.limitWireReach && connectionsBreak) return
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['position'], position, 'Change position')
+            .updateValue(this.m_rawEntity, 'position', position, 'Change position')
             .onDone((newValue, oldValue) => {
                 this.m_BP.entityPositionGrid.removeTileData(this, oldValue)
                 this.m_BP.entityPositionGrid.setTileData(this, newValue)
@@ -205,7 +205,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (this.m_rawEntity.direction === direction) return
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['direction'], direction, 'Change direction')
+            .updateValue(this.m_rawEntity, 'direction', direction, 'Change direction')
             .onDone(() => this.emit('direction'))
             .commit()
     }
@@ -218,7 +218,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (this.m_rawEntity.type === type) return
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['type'], type, 'Change direction type')
+            .updateValue(this.m_rawEntity, 'type', type, 'Change direction type')
             .onDone(() => this.emit('directionType'))
             .commit()
     }
@@ -233,7 +233,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         this.m_BP.history.startTransaction()
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['recipe'], recipe, 'Change recipe')
+            .updateValue(this.m_rawEntity, 'recipe', recipe, 'Change recipe')
             .onDone(r => this.emit('recipe', r))
             .commit()
 
@@ -307,7 +307,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         }
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['items'], ms, 'Change modules')
+            .updateValue(this.m_rawEntity, 'items', ms, 'Change modules')
             .onDone(() => this.emit('modules', this.modules))
             .commit()
     }
@@ -394,7 +394,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         this.m_BP.history
             .updateValue(
                 this.m_rawEntity,
-                ['input_priority'],
+                'input_priority',
                 priority,
                 'Change splitter input priority'
             )
@@ -414,7 +414,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         this.m_BP.history
             .updateValue(
                 this.m_rawEntity,
-                ['output_priority'],
+                'output_priority',
                 priority,
                 'Change splitter output priority'
             )
@@ -440,7 +440,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         this.m_BP.history.startTransaction()
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['filter'], filter, 'Change splitter filter')
+            .updateValue(this.m_rawEntity, 'filter', filter, 'Change splitter filter')
             .onDone(() => this.emit('splitterFilter'))
             .onDone(() => this.emit('filters'))
             .commit()
@@ -462,7 +462,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         const mode = filterMode === 'blacklist' ? 'blacklist' : undefined
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['filter_mode'], mode, 'Change filter mode')
+            .updateValue(this.m_rawEntity, 'filter_mode', mode, 'Change filter mode')
             .onDone(() => this.emit('filterMode', this.filterMode))
             .commit()
     }
@@ -476,7 +476,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (util.areArraysEquivalent(filters, this.m_rawEntity.filters)) return
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['filters'], filters, 'Change inserter filter')
+            .updateValue(this.m_rawEntity, 'filters', filters, 'Change inserter filter')
             .onDone(() => this.emit('inserterFilters'))
             .onDone(() => this.emit('filters'))
             .commit()
@@ -491,7 +491,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (util.areArraysEquivalent(filters, this.m_rawEntity.request_filters)) return
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['request_filters'], filters, 'Change chest filter')
+            .updateValue(this.m_rawEntity, 'request_filters', filters, 'Change chest filter')
             .onDone(() => this.emit('logisticChestFilters'))
             .onDone(() => this.emit('filters'))
             .commit()
@@ -517,7 +517,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         this.m_BP.history
             .updateValue(
                 this.m_rawEntity,
-                ['request_from_buffers'],
+                'request_from_buffers',
                 request,
                 'Change request from buffer chest'
             )
@@ -583,7 +583,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (this.m_rawEntity.station === station) return
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['station'], station, 'Change station name')
+            .updateValue(this.m_rawEntity, 'station', station, 'Change station name')
             .onDone(() => this.emit('station'))
             .commit()
     }
@@ -597,7 +597,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         if (this.m_rawEntity.manual_trains_limit === limit) return
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, ['manual_trains_limit'], limit, 'Change trains limit')
+            .updateValue(this.m_rawEntity, 'manual_trains_limit', limit, 'Change trains limit')
             .onDone(() => this.emit('manualTrainsLimit'))
             .commit()
     }
