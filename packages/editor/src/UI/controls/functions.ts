@@ -311,8 +311,7 @@ function CreateRecipe(
     nextX += timeSize.width + 6
 
     for (const r of results) {
-        const name = r.type === 'research-progress' ? r.research_item : r.name
-        CreateIconWithAmount(host, nextX, y, name, r.amount)
+        CreateIconWithAmount(host, nextX, y, r.name, r.amount)
         nextX += 36
     }
 }
