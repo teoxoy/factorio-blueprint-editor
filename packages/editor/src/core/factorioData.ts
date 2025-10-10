@@ -238,18 +238,18 @@ export function getCircuitConnector(
                 | PumpPrototype
                 | StorageTankPrototype
                 | TrainStopPrototype
-            return e_resolved.circuit_connector[dir / 2]
+            return e_resolved.circuit_connector[dir / 4]
         }
         case 'rail-chain-signal':
         case 'rail-signal': {
             const e_resolved = e as RailSignalBasePrototype
-            return e_resolved.ground_picture_set.circuit_connector[dir * 2]
+            return e_resolved.ground_picture_set.circuit_connector[dir]
         }
         case 'loader':
         case 'loader-1x1': {
             const e_resolved = e as LoaderPrototype
             // First the four cardinal directions for `direction_out`, followed by the four directions for `direction_in`.
-            return e_resolved.circuit_connector[(isLoaderInputting() ? 4 : 0) + dir / 2]
+            return e_resolved.circuit_connector[(isLoaderInputting() ? 4 : 0) + dir / 4]
         }
         case 'transport-belt': {
             const e_resolved = e as TransportBeltPrototype
@@ -268,11 +268,11 @@ export function getCircuitConnector(
             // turret_base_has_direction is set to true, or 1 element.
             let d = 0
             if (e.flags && e.flags.includes('building-direction-16-way')) {
-                d = dir * 2
-            } else if (e.flags && e.flags.includes('building-direction-8-way')) {
                 d = dir
-            } else if (e_resolved.turret_base_has_direction) {
+            } else if (e.flags && e.flags.includes('building-direction-8-way')) {
                 d = dir / 2
+            } else if (e_resolved.turret_base_has_direction) {
+                d = dir / 4
             }
             return e_resolved.circuit_connector[d]
         }
@@ -293,18 +293,18 @@ export function getWireConnectionPoint(
         case 'selector-combinator': {
             const e_resolved = e as CombinatorPrototype
             if (getCombinatorSide() === 'input') {
-                return e_resolved.input_connection_points[dir / 2]
+                return e_resolved.input_connection_points[dir / 4]
             } else {
-                return e_resolved.output_connection_points[dir / 2]
+                return e_resolved.output_connection_points[dir / 4]
             }
         }
         case 'constant-combinator': {
             const e_resolved = e as ConstantCombinatorPrototype
-            return e_resolved.circuit_wire_connection_points[dir / 2]
+            return e_resolved.circuit_wire_connection_points[dir / 4]
         }
         case 'electric-pole': {
             const e_resolved = e as ElectricPolePrototype
-            return e_resolved.connection_points[dir / 2]
+            return e_resolved.connection_points[dir / 4]
         }
         case 'power-switch': {
             const e_resolved = e as PowerSwitchPrototype
@@ -512,10 +512,10 @@ export function getEntitySize(e: EntityWithOwnerPrototype, dir: number = 0): IPo
     } else {
         switch (dir) {
             case 0:
-            case 4:
+            case 8:
                 return { x: w, y: h }
-            case 2:
-            case 6:
+            case 4:
+            case 12:
                 return { x: h, y: w }
             default:
                 throw new Error("Can't swap size based on dir!")
@@ -531,10 +531,10 @@ export function getPossibleRotations(
         return []
     }
     if (e.flags && e.flags.includes('building-direction-8-way')) {
-        return [0, 1, 2, 3, 4, 5, 6, 7]
+        return [0, 2, 4, 6, 8, 10, 12, 14]
     }
     if (e.flags && e.flags.includes('building-direction-16-way')) {
-        return [0, 1, 2, 3, 4, 5, 6, 7]
+        return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     }
     switch (e.type) {
         case 'agricultural-tower':
@@ -590,14 +590,14 @@ export function getPossibleRotations(
         case 'infinity-cargo-wagon':
         case 'fluid-wagon':
         case 'locomotive':
-            return [0, 2, 4, 6]
+            return [0, 4, 8, 12]
         case 'storage-tank':
         case 'fusion-reactor': {
             const e_resolved = e as StorageTankPrototype | FusionReactorPrototype
             if (e_resolved.two_direction_only) {
-                return [0, 2]
+                return [0, 4]
             } else {
-                return [0, 2, 4, 6]
+                return [0, 4, 8, 12]
             }
         }
         case 'assembling-machine':
@@ -619,7 +619,7 @@ export function getPossibleRotations(
                 canBeRotated = true
             }
             if (canBeRotated) {
-                return [0, 2, 4, 6]
+                return [0, 4, 8, 12]
             } else {
                 return []
             }

@@ -93,7 +93,7 @@ const nameMigrations: Record<string, string> = {
     // if (blueprintVersion < getFactorioVersion(0, 17, 10))
     '"grass-1"': '"landfill"',
 
-    // 2.0
+    // if (blueprintVersion < getFactorioVersion(2, 0, 0))
     ',"recipe":"rocket-control-unit"': '',
     ',"name":"rocket-control-unit"': ',"name":"raw-fish"',
     '"stack-inserter"': '"bulk-inserter"',

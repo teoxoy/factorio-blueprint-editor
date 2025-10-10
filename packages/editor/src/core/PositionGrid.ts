@@ -202,16 +202,16 @@ export class PositionGrid {
             }
         }
 
-        const sameDirStrRails = straightRails.some(rail => rail.direction % 4 === direction % 4)
+        const sameDirStrRails = straightRails.some(rail => rail.direction % 8 === direction % 8)
 
         if (
             (name === 'gate' &&
                 straightRails.length === 1 &&
-                straightRails[0].direction % 4 !== direction % 4 &&
+                straightRails[0].direction % 8 !== direction % 8 &&
                 !gate) ||
             (name === 'legacy-straight-rail' &&
                 gate &&
-                gate.direction % 4 !== direction % 4 &&
+                gate.direction % 8 !== direction % 8 &&
                 straightRails.length === 0 &&
                 !otherEntities) ||
             (name === 'legacy-straight-rail' &&
@@ -303,7 +303,7 @@ export class PositionGrid {
                 const entity = this.bp.entities.get(cell)
                 if (entity.name === name) {
                     if (entity.direction === direction) return cell
-                    if ((entity.direction + 4) % 8 === direction) return undefined
+                    if ((entity.direction + 8) % 16 === direction) return undefined
                 }
             }
         }
@@ -418,7 +418,7 @@ export class PositionGrid {
             const entity = cell
                 ? this.bp.entities.get(typeof cell === 'number' ? cell : cell[cell.length - 1])
                 : undefined
-            return { x, y, relDir: i * 2, entity }
+            return { x, y, relDir: i * 4, entity }
         })
     }
 }

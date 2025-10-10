@@ -645,7 +645,7 @@ export class Entity extends EventEmitter<EntityEvents> {
         const position = ccw
             ? { x: this.m_rawEntity.position.y, y: -this.m_rawEntity.position.x }
             : { x: -this.m_rawEntity.position.y, y: this.m_rawEntity.position.x }
-        const direction = this.constrainDirection((this.direction + (ccw ? 6 : 2)) % 8)
+        const direction = this.constrainDirection((this.direction + (ccw ? 12 : 4)) % 16)
         const updatedRawEntity = { ...this.m_rawEntity, position, direction }
         if (direction === 0) delete updatedRawEntity.direction
 
@@ -658,10 +658,10 @@ export class Entity extends EventEmitter<EntityEvents> {
 
         if (canRotate) {
             if (!pr.includes(direction)) {
-                if (direction === 4 && pr.includes(0)) {
+                if (direction === 8 && pr.includes(0)) {
                     return 0
-                } else if (direction === 6 && pr.includes(2)) {
-                    return 2
+                } else if (direction === 12 && pr.includes(4)) {
+                    return 4
                 } else {
                     return this.direction
                 }
@@ -679,49 +679,24 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     public getFlippedCopy(vertical: boolean): Entity {
-        // Curved Rail thing is (2, 4, 6, 0) down left, (7, 1, 3, 5)
-        // Vert: 2-7, 6-3, 4-5, 0-1  Normal: 0-4
-        // Horz: 2-3, 4-1, 6-7, 0-5  Normal: 2-6
-        // Straight rail: 1, 2, 7, 0, 5, 2, 3, 0
-        // Vert: 1-3, 2-2, 7-5, 0-0
-        // Horz: 1-7, 3-5
-        const translation_map: { [key: string]: { [vert: string]: number[] } } = {
-            'legacy-curved-rail': {
-                true: [5, 4, 3, 2, 1, 0, 7, 6],
-                false: [1, 0, 7, 6, 5, 4, 3, 2],
-            },
-            'legacy-straight-rail': {
-                true: [0, 3, 2, 1, 4, 7, 6, 5],
-                false: [0, 7, 2, 5, 4, 3, 6, 1],
-            },
-            default: { true: [4, 1, 2, 3, 0, 5, 6, 7], false: [0, 1, 6, 3, 4, 5, 2, 7] },
-        }
-
-        const non_flip_entities = [
-            // : EntityWithOwnerPrototype['type'][]
-            'chemical-plant',
-            'oil-refinery',
+        const non_flip_entities: EntityWithOwnerPrototype['type'][] = [
             'train-stop',
             'rail-chain-signal',
             'rail-signal',
         ]
 
-        if (non_flip_entities.includes(this.name))
+        if (non_flip_entities.includes(this.type))
             throw new IllegalFlipError(`${this.name} cannot be flipped`)
 
-        const translation =
-            this.type in translation_map ? translation_map[this.name] : translation_map.default
-        const direction =
-            this.type === 'storage-tank'
-                ? 2 - this.direction
-                : this.constrainDirection(translation[String(vertical)][this.direction])
+        const axisDir = vertical ? 12 : 8
+        const direction = this.constrainDirection((axisDir * 2 - this.direction) % 16)
 
         let input_priority = this.m_rawEntity.input_priority
         let output_priority = this.m_rawEntity.output_priority
 
         if (
-            (vertical && (direction === 2 || direction === 4)) ||
-            (!vertical && (direction === 0 || direction === 6))
+            (vertical && (direction === 4 || direction === 8)) ||
+            (!vertical && (direction === 0 || direction === 12))
         ) {
             input_priority = this.changePriority(input_priority)
             output_priority = this.changePriority(output_priority)
@@ -767,7 +742,7 @@ export class Entity extends EventEmitter<EntityEvents> {
                         this.name,
                         this.direction,
                         this.position,
-                        this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
+                        this.directionType === 'input' ? this.direction : (this.direction + 8) % 16,
                         this.entityData.max_distance
                     )
                 )
