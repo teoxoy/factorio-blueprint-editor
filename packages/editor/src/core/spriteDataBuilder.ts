@@ -120,7 +120,7 @@ interface IDrawData {
     dirType: string
     operator: string
     trainStopColor: ColorWithAlpha
-    modules: string[]
+    modules: (string | undefined)[]
 }
 
 export interface ExtendedSpriteData extends SpriteData {

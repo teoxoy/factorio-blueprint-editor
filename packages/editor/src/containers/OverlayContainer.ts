@@ -128,7 +128,11 @@ export class OverlayContainer extends Container {
 
         const modules = entity.modules
         const e = entity.entityData
-        if (modules.length !== 0 && hasModuleFunctionality(e) && !hasModuleIconsSuppressed(e)) {
+        if (
+            modules.filter(m => m).length !== 0 &&
+            hasModuleFunctionality(e) &&
+            !hasModuleIconsSuppressed(e)
+        ) {
             const module_slots = e.module_slots
             if (module_slots > 0) {
                 const moduleInfo = new Container()
