@@ -20,16 +20,7 @@ export class Modules extends Container<Slot<number>> {
         this.m_Entity = entity
 
         // Get modules from entity
-        this.m_Modules = new Array(this.m_Entity.moduleSlots)
-        const modules = this.m_Entity.modules
-        if (modules !== undefined) {
-            for (let slotIndex = 0; slotIndex < this.m_Modules.length; slotIndex++) {
-                this.m_Modules[slotIndex] =
-                    modules.length > slotIndex && modules[slotIndex] !== undefined
-                        ? modules[slotIndex]
-                        : undefined
-            }
-        }
+        this.m_Modules = this.m_Entity.modules
 
         // Create slots for entity
         for (let slotIndex = 0; slotIndex < this.m_Modules.length; slotIndex++) {
@@ -43,15 +34,12 @@ export class Modules extends Container<Slot<number>> {
             this.addChild(slot)
         }
 
-        this.onEntityChange('modules', modules =>
-            [
-                ...modules,
-                ...Array(this.m_Entity.moduleSlots - modules.length).fill(undefined),
-            ].forEach((m: string, i: number) => {
-                this.m_Modules[i] = m
-                this.updateContent(this.getChildAt(i), m)
-            })
-        )
+        this.onEntityChange('modules', modules => {
+            for (const [i, module] of modules.entries()) {
+                this.m_Modules[i] = module
+                this.updateContent(this.getChildAt(i), module)
+            }
+        })
     }
 
     private onEntityChange<T extends EventEmitter.EventNames<EntityEvents>>(

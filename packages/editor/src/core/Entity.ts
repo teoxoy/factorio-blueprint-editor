@@ -25,6 +25,7 @@ import FD, {
     getMaxWireDistance,
     hasModuleFunctionality,
     recipeSupportsModule,
+    getModuleInventoryIndex,
 } from './factorioData'
 import { Blueprint } from './Blueprint'
 import { getBeltWireConnectionIndex } from './spriteDataBuilder'
@@ -48,7 +49,7 @@ export interface EntityEvents {
     direction: []
     directionType: []
     recipe: [recipe: string]
-    modules: [modules: string[]]
+    modules: [modules: (string | undefined)[]]
     splitterInputPriority: [priority: FilterPriority]
     splitterOutputPriority: [priority: FilterPriority]
     splitterFilter: []
@@ -239,12 +240,12 @@ export class Entity extends EventEmitter<EntityEvents> {
 
         // Some modules on the entity may not be compatible with the new selected recipe, filter those out
         if (recipe !== undefined) {
-            console.log(this.modules)
-            this.modules = this.modules
-                .map(m => getModule(m))
-                .filter(module => recipeSupportsModule(recipe, module))
-                .map(module => module.name)
-            console.log(this.modules)
+            this.modules = this.modules.map(m => {
+                if (!m) return
+                const module = getModule(m)
+                if (!recipeSupportsModule(recipe, module)) return
+                return m
+            })
         }
 
         this.m_BP.history.commitTransaction()
@@ -290,24 +291,74 @@ export class Entity extends EventEmitter<EntityEvents> {
             .map(item => item.name)
     }
 
-    /** List of all modules */
-    public get modules(): string[] {
-        const modulesObj = this.m_rawEntity.items
-        if (modulesObj === undefined || Object.keys(modulesObj).length === 0) return []
-        return Object.keys(modulesObj).flatMap(k => Array<string>(modulesObj[k]).fill(k))
+    /** List of all modules. Slots that are undefined don't have a populated module. */
+    public get modules(): (string | undefined)[] {
+        const items = this.m_rawEntity.items
+        const out = new Array(this.moduleSlots)
+        if (!items) return out
+        if (!Array.isArray(items)) {
+            throw new Error('Old format for items!')
+        }
+        const inventory = getModuleInventoryIndex(this.entityData)
+        for (const item of items) {
+            if (item.items.in_inventory) {
+                for (const inv of item.items.in_inventory) {
+                    if (inv.inventory === inventory) {
+                        out[inv.stack] = item.id.name
+                    }
+                }
+            }
+        }
+        return out
     }
-    public set modules(modules: string[]) {
-        if (util.equalArrays(this.modules, modules)) return
+    /** The given list can be shorter than the one returned by the getter. */
+    public set modules(_modules: (string | undefined)[]) {
+        const modules = _modules || []
+        if (this.modules.entries().every(([i, m]) => m === modules[i])) return
 
-        const ms: Record<string, number> = {}
-        for (const m of modules) {
-            if (m) {
-                ms[m] = ms[m] ? ms[m] + 1 : 1
+        let items = util.duplicate(this.m_rawEntity.items || [])
+        if (!Array.isArray(items)) {
+            throw new Error('Old format for items!')
+        }
+        const inventory = getModuleInventoryIndex(this.entityData)
+        items = items.filter(item => {
+            if (item.items.in_inventory) {
+                item.items.in_inventory = item.items.in_inventory.filter(
+                    inv => inv.inventory !== inventory
+                )
+                if (item.items.in_inventory.length === 0) {
+                    delete item.items.in_inventory
+                }
+            }
+            return Object.keys(item.items).length !== 0
+        })
+
+        for (const [i, module] of modules.entries()) {
+            if (!module) continue
+
+            let found_module_entry = false
+            const inv_entry = { inventory, stack: i }
+            for (const item of items) {
+                if (item.id.name === module) {
+                    found_module_entry = true
+
+                    if (item.items.in_inventory) {
+                        item.items.in_inventory.push(inv_entry)
+                    } else {
+                        item.items.in_inventory = [inv_entry]
+                    }
+                }
+            }
+            if (!found_module_entry) {
+                items.push({
+                    id: { name: module },
+                    items: { in_inventory: [inv_entry] },
+                })
             }
         }
 
         this.m_BP.history
-            .updateValue(this.m_rawEntity, 'items', ms, 'Change modules')
+            .updateValue(this.m_rawEntity, 'items', items, 'Change modules')
             .onDone(() => this.emit('modules', this.modules))
             .commit()
     }

@@ -132,7 +132,6 @@ function getModulesFor(entityName: string): ModulePrototype[] {
 
 export function recipeSupportsModule(recipe: string, module: ModulePrototype): boolean {
     const r = FD.recipes[recipe]
-    console.log(r, module)
     if (r.allowed_module_categories && !r.allowed_module_categories.includes(module.category))
         return false
     if (module.effect.consumption && !(r.allow_consumption === undefined || r.allow_consumption))

@@ -47,6 +47,60 @@
                 }
             }
         },
+        "BlueprintItemIDAndQualityIDPair": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "itemName": true
+                },
+                "quality": {
+                    "type": "string"
+                }
+            }
+        },
+        "InventoryPosition": {
+            "type": "object",
+            "required": ["inventory", "stack"],
+            "additionalProperties": false,
+            "properties": {
+                "inventory": {
+                    "type": "integer"
+                },
+                "stack": { "type": "integer" },
+                "count": { "type": "integer" }
+            }
+        },
+        "ItemInventoryPositions": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "in_inventory": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "blueprintSchema.json#/definitions/InventoryPosition"
+                    }
+                },
+                "grid_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "BlueprintInsertPlan": {
+            "type": "object",
+            "required": ["id", "items"],
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "$ref": "blueprintSchema.json#/definitions/BlueprintItemIDAndQualityIDPair"
+                },
+                "items": {
+                    "$ref": "blueprintSchema.json#/definitions/ItemInventoryPositions"
+                }
+            }
+        },
         "wireColor": {
             "type": "array",
             "items": {
@@ -231,14 +285,24 @@
                                 "$comment": "inventory size limitation, only present if entity has inventory_size"
                             },
                             "items": {
-                                "type": "object",
-                                "propertyNames": {
-                                    "itemName": true
-                                },
-                                "patternProperties": {
-                                    ".*": { "type": "integer" }
-                                },
-                                "$comment": "object, keys are item names and value nr of items, only present if entity is locomotive or has module_specification, for the locomotive it represents fuel and for an entity with module_specification it represents modules"
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "propertyNames": {
+                                            "itemName": true
+                                        },
+                                        "patternProperties": {
+                                            ".*": { "type": "integer" }
+                                        },
+                                        "$comment": "object, keys are item names and value nr of items, only present if entity is locomotive or has module_specification, for the locomotive it represents fuel and for an entity with module_specification it represents modules"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "blueprintSchema.json#/definitions/BlueprintInsertPlan"
+                                        }
+                                    }
+                                ]
                             },
 
                             "input_priority": {

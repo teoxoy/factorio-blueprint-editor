@@ -63,6 +63,27 @@ export interface IConstantCombinatorFilter {
     signal: ISignal
 }
 
+export interface BlueprintItemIDAndQualityIDPair {
+    name: string
+    quality?: string
+}
+
+export interface InventoryPosition {
+    inventory: defines.inventory
+    stack: number
+    count?: number
+}
+
+export interface ItemInventoryPositions {
+    in_inventory?: InventoryPosition[]
+    grid_count?: number
+}
+
+export interface BlueprintInsertPlan {
+    id: BlueprintItemIDAndQualityIDPair
+    items: ItemInventoryPositions
+}
+
 export interface IDeciderCondition {
     comparator?: string
     constant?: number
@@ -114,10 +135,13 @@ export interface IEntity {
     /** inventory size limitation, only present if entity has inventory_size */
     bar?: number
     /**
+     * pre 2.0 this has type Record<string, number>,
+     * post 2.0 this has type BlueprintInsertPlan[]
+     *
      * keys are item names and value nr of items, only present if entity is locomotive or has module_specification
-     * for the locomotive it represents fuel and for an eintity with module_specification it represents modules
+     * for the locomotive it represents fuel and for an entity with module_specification it represents modules
      */
-    items?: Record<string, number>
+    items?: Record<string, number> | BlueprintInsertPlan[]
 
     /** splitter input priority, only present if entity is of type splitter */
     input_priority?: FilterPriority

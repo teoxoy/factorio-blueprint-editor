@@ -112,26 +112,28 @@ export class EntityInfoPanel extends Panel {
             // let pollution = 0
             let speed = 0
 
-            if (entity.modules.length > 0) {
-                for (const module of entity.modules) {
-                    const moduleData = getModule(module)
-                    if (moduleData.effect.productivity) {
-                        productivity += moduleData.effect.productivity
-                    }
-                    if (moduleData.effect.consumption) {
-                        consumption += moduleData.effect.consumption
-                    }
-                    // if (moduleData.effect.pollution) {
-                    //     pollution += moduleData.effect.pollution
-                    // }
-                    if (moduleData.effect.speed) {
-                        speed += moduleData.effect.speed
-                    }
+            for (const module of entity.modules) {
+                if (!module) continue
+
+                const moduleData = getModule(module)
+                if (moduleData.effect.productivity) {
+                    productivity += moduleData.effect.productivity
+                }
+                if (moduleData.effect.consumption) {
+                    consumption += moduleData.effect.consumption
+                }
+                // if (moduleData.effect.pollution) {
+                //     pollution += moduleData.effect.pollution
+                // }
+                if (moduleData.effect.speed) {
+                    speed += moduleData.effect.speed
                 }
             }
 
             for (const beacon of this.findNearbyBeacons(entity)) {
                 for (const module of beacon.modules) {
+                    if (!module) continue
+
                     const moduleData = getModule(module)
                     if (moduleData.effect.productivity) {
                         productivity +=

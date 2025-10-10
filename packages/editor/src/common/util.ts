@@ -131,12 +131,6 @@ const nearestPowerOf2 = (n: number): number => Math.pow(2, Math.ceil(Math.log2(n
 
 const uniqueInArray = <T>(array: T[]): T[] => [...new Set(array)]
 
-const equalArrays = <T>(array1: T[], array2: T[]): boolean =>
-    array1 &&
-    array2 &&
-    array1.length === array2.length &&
-    array1.sort().every((value, index) => value === array2.sort()[index])
-
 const areObjectsEquivalent = <T extends Record<string, any>>(a: T, b: T): boolean => {
     const aProps = Object.getOwnPropertyNames(a)
     const bProps = Object.getOwnPropertyNames(b)
@@ -187,7 +181,6 @@ export default {
     getDirName8Way,
     nearestPowerOf2,
     uniqueInArray,
-    equalArrays,
     areObjectsEquivalent,
     areArraysEquivalent,
     timer,

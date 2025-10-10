@@ -1,9 +1,17 @@
 import EventEmitter from 'eventemitter3'
 import { Sprite, Texture } from 'pixi.js'
-import { IBlueprint, IEntity, IPoint, ISchedule, SignalType } from '../types'
+import {
+    BlueprintInsertPlan,
+    IBlueprint,
+    IEntity,
+    InventoryPosition,
+    IPoint,
+    ISchedule,
+    SignalType,
+} from '../types'
 import G from '../common/globals'
 import util from '../common/util'
-import FD, { getEntitySize, hasModuleFunctionality } from './factorioData'
+import FD, { getEntitySize, getModuleInventoryIndex, hasModuleFunctionality } from './factorioData'
 import { Entity } from './Entity'
 import { WireConnections } from './WireConnections'
 import { PositionGrid } from './PositionGrid'
@@ -133,14 +141,15 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
             }
 
             if (data.entities !== undefined) {
-                const dirMult = data.version < getFactorioVersion(2, 0, 0) ? 2 : 1
+                const pre_2_0 = data.version < getFactorioVersion(2, 0, 0)
+                const dirMult = pre_2_0 ? 2 : 1
 
                 this.m_nextEntityNumber =
                     data.entities.reduce((acc, e) => Math.max(acc, e.entity_number), 0) + 1
 
                 this.history.startTransaction()
 
-                if (data.version < getFactorioVersion(2, 0, 0)) {
+                if (pre_2_0) {
                     for (const e of data.entities) {
                         this.wireConnections.createEntityConnections(
                             e.entity_number,
@@ -171,10 +180,46 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             const y = Math.round(e.position.y + offset.y - size.y) + size.y
                             position = { x, y }
                         }
+                        let items: BlueprintInsertPlan[]
+                        if (e.items) {
+                            if (!Array.isArray(e.items)) {
+                                if (!pre_2_0) {
+                                    throw new Error('Items is object but bp is not pre 2.0')
+                                }
+                                items = []
+                                for (const [name, count] of Object.entries(e.items)) {
+                                    const item = FD.items[name]
+                                    if (item.type === 'module') {
+                                        const inventory = getModuleInventoryIndex(
+                                            FD.entities[e.name]
+                                        )
+                                        if (!inventory) {
+                                            throw new Error("Can't find inventory index!")
+                                        }
+                                        const in_inventory: InventoryPosition[] = []
+                                        for (let i = 0; i < count; i++) {
+                                            in_inventory.push({
+                                                inventory,
+                                                stack: i,
+                                            })
+                                        }
+                                        items.push({
+                                            id: { name },
+                                            items: { in_inventory },
+                                        })
+                                    } else {
+                                        throw new Error("Can't map item to new format!")
+                                    }
+                                }
+                            } else {
+                                items = e.items
+                            }
+                        }
                         return this.createEntity({
                             ...e,
                             direction,
                             position,
+                            items,
                         })
                     }),
                     e => e.entityNumber
@@ -456,13 +501,25 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
         for (const pipe of GP.pipes) {
             this.createEntity(pipe)
         }
-        const beacon_module_slots =
-            (hasModuleFunctionality(FD.entities['beacon']) && FD.entities['beacon'].module_slots) ||
-            0
+        const e = FD.entities['beacon']
+        const inventory = getModuleInventoryIndex(e)
+        const beacon_module_slots = (hasModuleFunctionality(e) && e.module_slots) || 0
+        const items: BlueprintInsertPlan[] = []
+        const in_inventory: InventoryPosition[] = []
+        for (let i = 0; i < beacon_module_slots; i++) {
+            in_inventory.push({
+                inventory,
+                stack: i,
+            })
+        }
+        items.push({
+            id: { name: BEACON_MODULE },
+            items: { in_inventory },
+        })
         for (const beacon of beacons) {
             this.createEntity({
                 ...beacon,
-                items: { [BEACON_MODULE]: beacon_module_slots },
+                items,
             })
         }
         for (const pole of GPO.poles) {
