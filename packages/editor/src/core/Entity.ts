@@ -987,7 +987,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     public serialize(entNrWhitelist?: Set<number>): IEntity {
         return util.duplicate({
             ...this.m_rawEntity,
-            ...this.m_BP.wireConnections.serializeConnectionData(this.entityNumber, entNrWhitelist),
+            // ...this.m_BP.wireConnections.serializeConnectionData(this.entityNumber, entNrWhitelist),
         })
     }
 }

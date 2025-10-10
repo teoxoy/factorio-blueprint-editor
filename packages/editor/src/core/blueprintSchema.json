@@ -129,6 +129,17 @@
                 "position-relative-to-grid": {
                     "$ref": "blueprintSchema.json#/definitions/position"
                 },
+                "wires": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "minItems": 4,
+                        "maxItems": 4,
+                        "items": {
+                            "type": "number"
+                        }
+                    }
+                },
                 "icons": { "$ref": "blueprintSchema.json#/definitions/icons" },
                 "schedules": {
                     "type": "array",

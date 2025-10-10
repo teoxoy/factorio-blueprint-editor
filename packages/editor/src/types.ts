@@ -206,10 +206,10 @@ export interface IEntity {
         remove_unfiltered_items?: boolean
     }
 
-    /** power pole wire connections */
+    /** pre 2.0 - power pole wire connections */
     neighbours?: number[]
 
-    /** wire connections */
+    /** pre 2.0 - wire connections */
     connections?: IBPConnection
 
     control_behavior?: {
@@ -362,7 +362,17 @@ export interface IBlueprint {
     'absolute-snapping'?: boolean
     'snap-to-grid'?: IPoint
     'position-relative-to-grid'?: IPoint
+
+    /** post 2.0 */
+    wires?: BlueprintWire[]
 }
+
+export type BlueprintWire = [
+    source_entity_number: number,
+    source_wire_connector_id: defines.wire_connector_id,
+    target_entity_number: number,
+    target_wire_connector_id: defines.wire_connector_id,
+]
 
 export interface IBlueprintBookEntry {
     index: number
