@@ -140,8 +140,6 @@ export class PaintBlueprintEntityContainer {
             ent = this.bpc.bp.createEntity({
                 ...this.entity.serialize(),
                 entity_number: undefined,
-                connections: undefined,
-                neighbours: undefined,
                 position,
             })
         }

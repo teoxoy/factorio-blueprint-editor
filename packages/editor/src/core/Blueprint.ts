@@ -134,44 +134,47 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
 
             if (data.entities !== undefined) {
                 const dirMult = data.version < getFactorioVersion(2, 0, 0) ? 2 : 1
-                const ENTITIES = this.processRawEntities(data.entities)
 
-                this.m_nextEntityNumber += ENTITIES.length
-
-                // Approximate position of placeable_off_grid entities (i.e. landmines)
-                for (const e of ENTITIES) {
-                    if (!FD.entities[e.name].flags.includes('placeable-off-grid')) continue
-
-                    const e_size = getEntitySize(FD.entities[e.name])
-                    const size = util.rotatePointBasedOnDir(
-                        [e_size.x / 2, e_size.y / 2],
-                        e.direction || 0
-                    )
-                    // Take the offset into account for accurate positioning
-                    e.position.x = Math.round(e.position.x + offset.x - size.x) + size.x - offset.x
-                    e.position.y = Math.round(e.position.y + offset.y - size.y) + size.y - offset.y
-                }
+                this.m_nextEntityNumber =
+                    data.entities.reduce((acc, e) => Math.max(acc, e.entity_number), 0) + 1
 
                 this.history.startTransaction()
 
-                for (const e of ENTITIES) {
-                    this.wireConnections.createEntityConnections(
-                        e.entity_number,
-                        e.connections,
-                        e.neighbours
-                    )
+                if (data.version < getFactorioVersion(2, 0, 0)) {
+                    for (const e of data.entities) {
+                        this.wireConnections.createEntityConnections(
+                            e.entity_number,
+                            e.connections,
+                            e.neighbours
+                        )
+                        delete e.connections
+                        delete e.neighbours
+                    }
+                } else if (data.wires) {
+                    this.wireConnections.createBpConnections(data.wires)
+                    delete data.wires
                 }
 
                 this.entities = new OurMap(
-                    ENTITIES.map(e => {
-                        // remove connections from obj - connections are handled by wireConnections
-                        delete e.connections
-                        delete e.neighbours
+                    data.entities.map(e => {
                         const direction = (e.direction || 0) * dirMult
+                        let position = util.sumprod(e.position, offset)
+                        // Approximate position of placeable_off_grid entities (i.e. landmines)
+                        if (FD.entities[e.name].flags.includes('placeable-off-grid')) {
+                            const e_size = getEntitySize(FD.entities[e.name])
+                            const size = util.rotatePointBasedOnDir(
+                                [e_size.x / 2, e_size.y / 2],
+                                direction
+                            )
+                            // Take the offset into account for accurate positioning
+                            const x = Math.round(e.position.x + offset.x - size.x) + size.x
+                            const y = Math.round(e.position.y + offset.y - size.y) + size.y
+                            position = { x, y }
+                        }
                         return this.createEntity({
                             ...e,
                             direction,
-                            position: util.sumprod(e.position, offset),
+                            position,
                         })
                     }),
                     e => e.entityNumber
@@ -556,53 +559,12 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
         }
     }
 
-    /** Transforms sparse entity numbers into consecutive ones */
-    private processRawEntities(entities: IEntity[]): IEntity[] {
-        const oldToNewID = new Map(
-            new Array(entities.length).fill(0).map((_, i) => [entities[i].entity_number, i + 1])
-        )
-
-        return entities.map(e => {
-            e.entity_number = oldToNewID.get(e.entity_number)
-
-            if (e.connections) {
-                for (const side in e.connections) {
-                    if (util.objectHasOwnProperty(e.connections, side)) {
-                        const SIDE = e.connections[side]
-                        if (Array.isArray(SIDE)) {
-                            for (const c of SIDE) {
-                                c.entity_id = oldToNewID.get(c.entity_id)
-                            }
-                        } else {
-                            for (const color in SIDE) {
-                                if (util.objectHasOwnProperty(SIDE, color)) {
-                                    for (const c of SIDE[color]) {
-                                        c.entity_id = oldToNewID.get(c.entity_id)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (e.neighbours) {
-                for (let i = 0; i < e.neighbours.length; i++) {
-                    e.neighbours[i] = oldToNewID.get(e.neighbours[i])
-                }
-            }
-
-            return e
-        })
-    }
-
     public serialize(): IBlueprint {
         if (!this.icons.size) {
             this.generateIcons()
         }
-        const entityInfo = this.processRawEntities(
-            this.entities.valuesArray().map(e => e.serialize())
-        )
+        const entityInfo = this.entities.valuesArray().map(e => e.serialize())
+        const wires = this.wireConnections.serializeBpWires()
         const center = this.getCenter()
         const firstRailPos = this.getFirstRailRelatedEntityPos()
 
@@ -650,6 +612,7 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
             'absolute-snapping': this.absolute_snapping,
             'snap-to-grid': this.snap_to_grid,
             'position-relative-to-grid': this.position_relative_to_grid,
+            wires,
         }
     }
 }

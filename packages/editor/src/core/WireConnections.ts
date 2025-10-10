@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import { IBPConnection, IConnSide, IPoint, IWireColor } from '../types'
+import { IBPConnection, IConnSide, IPoint, IWireColor, BlueprintWire } from '../types'
 import FD, { getMaxWireDistance } from './factorioData'
 import U from './generators/util'
 import { Blueprint } from './Blueprint'
@@ -9,7 +9,7 @@ const MAX_POLE_CONNECTION_COUNT = 5
 
 export interface IConnection {
     color: string
-    cps: IConnectionPoint[]
+    cps: [IConnectionPoint, IConnectionPoint]
 }
 
 export interface IConnectionPoint {
@@ -108,6 +108,7 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
         return parsedConnections
     }
 
+    // pre 2.0
     public static serialize(
         entityNumber: number,
         connections: IConnection[],
@@ -217,6 +218,59 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
         this.connections.forEach(fn)
     }
 
+    // post 2.0
+    public createBpConnections(wires: BlueprintWire[]): void {
+        const connections = []
+        const getColorAndSide = (id: defines.wire_connector_id): [string, number] => {
+            switch (id) {
+                case FD.defines.wire_connector_id.circuit_red:
+                    return ['red', 1]
+                case FD.defines.wire_connector_id.circuit_green:
+                    return ['green', 1]
+                case FD.defines.wire_connector_id.combinator_input_red:
+                    return ['red', 1]
+                case FD.defines.wire_connector_id.combinator_input_green:
+                    return ['green', 1]
+                case FD.defines.wire_connector_id.combinator_output_red:
+                    return ['red', 2]
+                case FD.defines.wire_connector_id.combinator_output_green:
+                    return ['green', 2]
+                case FD.defines.wire_connector_id.pole_copper:
+                    return ['copper', 1]
+                case FD.defines.wire_connector_id.power_switch_left_copper:
+                    return ['copper', 1]
+                case FD.defines.wire_connector_id.power_switch_right_copper:
+                    return ['copper', 2]
+                default:
+                    throw new Error('Missing mapping!')
+            }
+        }
+        for (const wire of wires) {
+            const [c0, s0] = getColorAndSide(wire[1])
+            const [c1, s1] = getColorAndSide(wire[3])
+            if (c0 !== c1) {
+                throw new Error('Wire color mismatch!')
+            }
+            connections.push({
+                color: c0,
+                cps: [
+                    {
+                        entityNumber: wire[0],
+                        entitySide: s0,
+                    },
+                    {
+                        entityNumber: wire[2],
+                        entitySide: s1,
+                    },
+                ],
+            })
+        }
+        for (const conn of connections) {
+            this.create(conn)
+        }
+    }
+
+    // pre 2.0
     public createEntityConnections(
         entityNumber: number,
         connections: IBPConnection,
@@ -243,6 +297,66 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
         return this.connections.getEntityConnections(entityNumber)
     }
 
+    // post 2.0
+    public serializeBpWires(): BlueprintWire[] {
+        const wires = []
+        const getId = (type: string, color: string, side: number): defines.wire_connector_id => {
+            switch (color) {
+                case 'red':
+                    switch (type) {
+                        case 'arithmetic-combinator':
+                        case 'decider-combinator':
+                        case 'selector-combinator':
+                            if (side === 1) {
+                                return FD.defines.wire_connector_id.combinator_input_red
+                            } else {
+                                return FD.defines.wire_connector_id.combinator_output_red
+                            }
+                        default:
+                            return FD.defines.wire_connector_id.circuit_red
+                    }
+                case 'green':
+                    switch (type) {
+                        case 'arithmetic-combinator':
+                        case 'decider-combinator':
+                        case 'selector-combinator':
+                            if (side === 1) {
+                                return FD.defines.wire_connector_id.combinator_input_green
+                            } else {
+                                return FD.defines.wire_connector_id.combinator_output_green
+                            }
+                        default:
+                            return FD.defines.wire_connector_id.circuit_green
+                    }
+                case 'copper':
+                    switch (type) {
+                        case 'power-switch': {
+                            if (side === 1) {
+                                return FD.defines.wire_connector_id.power_switch_left_copper
+                            } else {
+                                return FD.defines.wire_connector_id.power_switch_right_copper
+                            }
+                        }
+                        case 'electric-pole':
+                            return FD.defines.wire_connector_id.pole_copper
+                        default:
+                            throw new Error('Missing mapping!')
+                    }
+                default:
+                    throw new Error('Missing mapping!')
+            }
+        }
+        for (const conn of this.connections.values()) {
+            const en0 = conn.cps[0].entityNumber
+            const en1 = conn.cps[1].entityNumber
+            const id0 = getId(this.bp.entities.get(en0).type, conn.color, conn.cps[0].entitySide)
+            const id1 = getId(this.bp.entities.get(en1).type, conn.color, conn.cps[1].entitySide)
+            wires.push([en0, id0, en1, id1])
+        }
+        return wires
+    }
+
+    // pre 2.0
     public serializeConnectionData(
         entityNumber: number,
         entNrWhitelist?: Set<number>

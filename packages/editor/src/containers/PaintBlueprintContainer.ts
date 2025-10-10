@@ -4,6 +4,7 @@ import { EntitySprite } from './EntitySprite'
 import { PaintContainer } from './PaintContainer'
 import { PaintBlueprintEntityContainer } from './PaintBlueprintEntityContainer'
 import { BlueprintContainer } from './BlueprintContainer'
+import { IConnectionPoint } from '../core/WireConnections'
 
 export class PaintBlueprintContainer extends PaintContainer {
     private readonly bp: Blueprint
@@ -35,6 +36,9 @@ export class PaintBlueprintContainer extends PaintContainer {
         }
 
         const entNrWhitelist = new Set(entities.map(e => e.entityNumber))
+        const wires = entities[0].Blueprint.wireConnections
+            .serializeBpWires()
+            .filter(wire => entNrWhitelist.has(wire[0]) && entNrWhitelist.has(wire[2]))
         this.bp = new Blueprint({
             entities: entities.map(e => {
                 const ent = e.serialize(entNrWhitelist)
@@ -42,6 +46,7 @@ export class PaintBlueprintContainer extends PaintContainer {
                 ent.position.y -= center.y
                 return ent
             }),
+            wires,
         })
 
         for (const [, e] of this.bp.entities) {
@@ -178,7 +183,7 @@ export class PaintBlueprintContainer extends PaintContainer {
                         cps: connection.cps.map(cp => ({
                             ...cp,
                             entityNumber: oldEntIDToNewEntID.get(cp.entityNumber),
-                        })),
+                        })) as [IConnectionPoint, IConnectionPoint],
                     }))
                     .forEach(conn => this.bpc.bp.wireConnections.create(conn))
             }
