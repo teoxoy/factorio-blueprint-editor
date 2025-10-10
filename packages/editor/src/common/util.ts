@@ -42,17 +42,17 @@ const rotatePointBasedOnDir = (p: IPoint | readonly [number, number], dir: numbe
             point.x = nP.x
             point.y = nP.y
             break
-        case 2:
+        case 4:
             // -y x
             point.x = nP.y * -1
             point.y = nP.x
             break
-        case 4:
+        case 8:
             // -x -y
             point.x = nP.x * -1
             point.y = nP.y * -1
             break
-        case 6:
+        case 12:
             // y -x
             point.x = nP.y
             point.y = nP.x * -1
@@ -63,11 +63,11 @@ const rotatePointBasedOnDir = (p: IPoint | readonly [number, number], dir: numbe
 }
 
 /** returns the direction of the point in relation to the origin at (0, 0) */
-const getRelativeDirection = (position: IPoint): 0 | 2 | 4 | 6 => {
+const getRelativeDirection = (position: IPoint): 0 | 4 | 8 | 12 => {
     if (Math.abs(position.x) > Math.abs(position.y)) {
-        return Math.sign(position.x) === 1 ? 2 : 6
+        return Math.sign(position.x) === 1 ? 4 : 12
     } else {
-        return Math.sign(position.y) === 1 ? 4 : 0
+        return Math.sign(position.y) === 1 ? 8 : 0
     }
 }
 
@@ -77,13 +77,13 @@ const transformConnectionPosition = (position: IPoint, direction: number): IPoin
         case 0:
             position.y += 1
             break
-        case 2:
+        case 4:
             position.x -= 1
             break
-        case 4:
+        case 8:
             position.y -= 1
             break
-        case 6:
+        case 12:
             position.x += 1
     }
     return rotatePointBasedOnDir(position, direction)
@@ -93,11 +93,11 @@ const getDirName = (dir: number): NamedDirection => {
     switch (dir) {
         case 0:
             return 'north'
-        case 2:
-            return 'east'
         case 4:
+            return 'east'
+        case 8:
             return 'south'
-        case 6:
+        case 12:
             return 'west'
         default:
             throw new Error('Unexpected direction!')
@@ -108,19 +108,19 @@ const getDirName8Way = (dir: number): NamedDirection8Way => {
     switch (dir) {
         case 0:
             return 'north'
-        case 1:
-            return 'northeast'
         case 2:
-            return 'east'
-        case 3:
-            return 'southeast'
+            return 'northeast'
         case 4:
-            return 'south'
-        case 5:
-            return 'southwest'
+            return 'east'
         case 6:
+            return 'southeast'
+        case 8:
+            return 'south'
+        case 10:
+            return 'southwest'
+        case 12:
             return 'west'
-        case 7:
+        case 14:
             return 'northwest'
         default:
             throw new Error('Unexpected direction!')

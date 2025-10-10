@@ -35,7 +35,7 @@ const oilOutpostSettings: IOilOutpostSettings = {
 // (uint64_t(minorVersion) << 16) |
 // (uint64_t(majorVersion) << 32) |
 // (uint64_t(mainVersion) << 48)
-const getFactorioVersion = (main = 1, major = 1, minor = 41): number =>
+const getFactorioVersion = (main = 2, major = 0, minor = 45): number =>
     (minor << 16) + (major | (main << 16)) * 0xffffffff
 
 class OurMap<K, V> extends Map<K, V> {
@@ -133,6 +133,7 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
             }
 
             if (data.entities !== undefined) {
+                const dirMult = data.version < getFactorioVersion(2, 0, 0) ? 2 : 1
                 const ENTITIES = this.processRawEntities(data.entities)
 
                 this.m_nextEntityNumber += ENTITIES.length
@@ -166,8 +167,10 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                         // remove connections from obj - connections are handled by wireConnections
                         delete e.connections
                         delete e.neighbours
+                        const direction = (e.direction || 0) * dirMult
                         return this.createEntity({
                             ...e,
+                            direction,
                             position: util.sumprod(e.position, offset),
                         })
                     }),
@@ -668,7 +671,8 @@ function getOffset(data?: Partial<IBlueprint>): IPoint {
         for (const entity of data.entities) {
             if (FD.entities[entity.name].flags.includes('placeable-off-grid')) continue
 
-            const size = getEntitySize(FD.entities[entity.name], entity.direction)
+            const dirMult = data.version < getFactorioVersion(2, 0, 0) ? 2 : 1
+            const size = getEntitySize(FD.entities[entity.name], (entity.direction || 0) * dirMult)
             comp(entity.position.x, entity.position.y, size.x, size.y)
         }
     } else if (data.tiles) {

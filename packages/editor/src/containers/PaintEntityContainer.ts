@@ -58,7 +58,8 @@ export class PaintEntityContainer extends PaintContainer {
 
     private checkBuildable(): void {
         const position = this.getGridPosition()
-        const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
+        const direction =
+            this.directionType === 'input' ? this.direction : (this.direction + 8) % 16
 
         if (
             this.bpc.bp.entityPositionGrid.checkFastReplaceableGroup(
@@ -84,7 +85,7 @@ export class PaintEntityContainer extends PaintContainer {
         if (fd.type === 'underground-belt') {
             const otherEntity = this.bpc.bp.entityPositionGrid.getOpposingEntity(
                 this.name,
-                (this.direction + 4) % 8,
+                (this.direction + 8) % 16,
                 {
                     x: this.x / 32,
                     y: this.y / 32,
@@ -109,8 +110,8 @@ export class PaintEntityContainer extends PaintContainer {
         this.undergroundLine = this.bpc.overlayContainer.createUndergroundLine(
             this.name,
             this.getGridPosition(),
-            this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
-            this.name === 'pipe-to-ground' ? (this.direction + 4) % 8 : this.direction
+            this.directionType === 'input' ? this.direction : (this.direction + 8) % 16,
+            this.name === 'pipe-to-ground' ? (this.direction + 8) % 16 : this.direction
         )
     }
 
@@ -147,7 +148,7 @@ export class PaintEntityContainer extends PaintContainer {
         this.removeChildren()
         const sprites = EntitySprite.getParts({
             name: this.name,
-            direction: this.directionType === 'input' ? this.direction : (this.direction + 4) % 8,
+            direction: this.directionType === 'input' ? this.direction : (this.direction + 8) % 16,
             directionType: this.directionType,
         })
         this.addChild(...sprites)
@@ -203,7 +204,8 @@ export class PaintEntityContainer extends PaintContainer {
 
         const fd = FD.entities[this.name]
         const position = this.getGridPosition()
-        const direction = this.directionType === 'input' ? this.direction : (this.direction + 4) % 8
+        const direction =
+            this.directionType === 'input' ? this.direction : (this.direction + 8) % 16
 
         if (this.bpc.bp.fastReplaceEntity(this.name, direction, position)) return
 
@@ -232,7 +234,7 @@ export class PaintEntityContainer extends PaintContainer {
             )
 
             if (fd.type === 'underground-belt' || this.name === 'pipe-to-ground') {
-                this.direction = (direction + 4) % 8
+                this.direction = (direction + 8) % 16
                 this.redraw()
                 this.destroyUndergroundLine()
             }

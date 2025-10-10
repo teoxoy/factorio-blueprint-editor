@@ -124,7 +124,7 @@ function generatePipes(
         .map<IPumpjack>(e => {
             const pos = globalToLocal(e.position)
             const plugs = PUMPJACK_PLUGS.map((o, i) => ({
-                dir: i * 2,
+                dir: i * 4,
                 x: pos.x + o.x,
                 y: pos.y + o.y,
             })).filter(p => !isPumpjackAtPos.has(U.hashPoint(p)))
@@ -357,19 +357,19 @@ function generatePipes(
         )
         // return true if there are no pipes to the left and right of the plug
         .filter(plug => {
-            return [2, 6]
+            return [4, 12]
                 .map(dir => posFromDir(plug, dir))
                 .every(pos => !pipePositions.find(U.equalPoints(pos)))
 
             function posFromDir(plug: IPlug, dir: number): IPoint {
-                switch ((plug.dir + dir) % 8) {
+                switch ((plug.dir + dir) % 16) {
                     case 0:
                         return { x: plug.x, y: plug.y - 1 }
-                    case 2:
-                        return { x: plug.x + 1, y: plug.y }
                     case 4:
+                        return { x: plug.x + 1, y: plug.y }
+                    case 8:
                         return { x: plug.x, y: plug.y + 1 }
-                    case 6:
+                    case 12:
                         return { x: plug.x - 1, y: plug.y }
                 }
             }
@@ -416,8 +416,8 @@ function generatePipes(
                     end: Math.floor(segmentLength * (i + 1)) - 1,
                 }))
                 .flatMap<IPlug>(segment => [
-                    { ...PATH[segment.start], dir: HOR ? 6 : 0 },
-                    { ...PATH[segment.end], dir: HOR ? 2 : 4 },
+                    { ...PATH[segment.start], dir: HOR ? 12 : 0 },
+                    { ...PATH[segment.end], dir: HOR ? 4 : 8 },
                 ])
         })
         .map(localToGlobal)

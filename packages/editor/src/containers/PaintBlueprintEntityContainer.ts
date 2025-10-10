@@ -86,9 +86,9 @@ export class PaintBlueprintEntityContainer {
             this.entityPosition,
             this.entity.directionType === 'input'
                 ? this.entity.direction
-                : (this.entity.direction + 4) % 8,
+                : (this.entity.direction + 8) % 16,
             this.entity.type === 'pipe-to-ground' || this.entity.directionType === 'output'
-                ? (this.entity.direction + 4) % 8
+                ? (this.entity.direction + 8) % 16
                 : this.entity.direction
         )
     }

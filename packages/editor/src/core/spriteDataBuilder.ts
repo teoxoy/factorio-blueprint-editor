@@ -230,11 +230,11 @@ function generateCovers(e: EntityWithOwnerPrototype, data: IDrawData): readonly 
             )
                 continue
 
-            const dir = (data.dir + connection.direction / 2) % 8
+            const dir = (data.dir + connection.direction) % 16
 
             const offset = connection.position
                 ? util.rotatePointBasedOnDir(connection.position, data.dir)
-                : util.Point(connection.positions[data.dir / 2])
+                : util.Point(connection.positions[data.dir / 4])
             const offset2 = util.rotatePointBasedOnDir([0, -1], dir)
             offset.x += offset2.x
             offset.y += offset2.y
@@ -278,11 +278,11 @@ function checkFluidConnection(x: number, y: number, entity: Entity, relDir: numb
     for (const connection of connections) {
         const offset = connection.position
             ? util.rotatePointBasedOnDir(connection.position, entity.direction)
-            : util.Point(connection.positions[entity.direction / 2])
+            : util.Point(connection.positions[entity.direction / 4])
         if (
             x === Math.floor(entity.position.x + offset.x) &&
             y === Math.floor(entity.position.y + offset.y) &&
-            (entity.direction + connection.direction / 2) % 8 === (relDir + 4) % 8
+            (entity.direction + connection.direction) % 16 === (relDir + 8) % 16
         ) {
             return true
         }
@@ -349,16 +349,16 @@ function getBeltWireConnectionIndex(
                 d.entity.type === 'splitter' ||
                 ((d.entity.type === 'underground-belt' || d.entity.type === 'loader') &&
                     d.entity.directionType === 'output')) &&
-            d.entity.direction === (d.relDir + 4) % 8
+            d.entity.direction === (d.relDir + 8) % 16
         ) {
             return d
         }
     })
     // Rotate directions
-    C = [...C, ...C].splice(dir / 2, 4)
+    C = [...C, ...C].splice(dir / 4, 4)
 
     if (!C[1] && C[2] && !C[3]) {
-        if (dir === 0 || dir === 4) {
+        if (dir === 0 || dir === 8) {
             return 2
         }
         return 1
@@ -367,11 +367,11 @@ function getBeltWireConnectionIndex(
         switch (dir) {
             case 0:
                 return 5
-            case 2:
-                return 3
             case 4:
+                return 3
+            case 8:
                 return 4
-            case 6:
+            case 12:
                 return 6
         }
     }
@@ -379,11 +379,11 @@ function getBeltWireConnectionIndex(
         switch (dir) {
             case 0:
                 return 6
-            case 2:
-                return 5
             case 4:
+                return 5
+            case 8:
                 return 3
-            case 6:
+            case 12:
                 return 4
         }
     }
@@ -510,7 +510,7 @@ function getBeltSprites(
             }
         })
         // Rotate based on belt direction
-        C = [...C, ...C].splice(direction / 2, 4)
+        C = [...C, ...C].splice(direction / 4, 4)
 
         // Belt facing this belt
         const C2 = C.map(d => {
@@ -521,7 +521,7 @@ function getBeltSprites(
             ) {
                 return
             }
-            if (d.entity.direction === (d.relDir + 4) % 8) {
+            if (d.entity.direction === (d.relDir + 8) % 16) {
                 return d
             }
         })
@@ -574,11 +574,11 @@ function getBeltSprites(
                     switch (dir) {
                         case 0:
                             return bas.north_index || 3
-                        case 2:
-                            return bas.east_index || 1
                         case 4:
+                            return bas.east_index || 1
+                        case 8:
                             return bas.south_index || 4
-                        case 6:
+                        case 12:
                             return bas.west_index || 2
                     }
                     break
@@ -586,11 +586,11 @@ function getBeltSprites(
                     switch (dir) {
                         case 0:
                             return bas.east_to_north_index || 5
-                        case 2:
-                            return bas.south_to_east_index || 9
                         case 4:
+                            return bas.south_to_east_index || 9
+                        case 8:
                             return bas.west_to_south_index || 12
-                        case 6:
+                        case 12:
                             return bas.north_to_west_index || 8
                     }
                     break
@@ -598,11 +598,11 @@ function getBeltSprites(
                     switch (dir) {
                         case 0:
                             return bas.west_to_north_index || 7
-                        case 2:
-                            return bas.north_to_east_index || 6
                         case 4:
+                            return bas.north_to_east_index || 6
+                        case 8:
                             return bas.east_to_south_index || 10
-                        case 6:
+                        case 12:
                             return bas.south_to_west_index || 11
                     }
                     break
@@ -610,11 +610,11 @@ function getBeltSprites(
                     switch (dir) {
                         case 0:
                             return bas.starting_south_index || 13
-                        case 2:
-                            return bas.starting_west_index || 15
                         case 4:
+                            return bas.starting_west_index || 15
+                        case 8:
                             return bas.starting_north_index || 17
-                        case 6:
+                        case 12:
                             return bas.starting_east_index || 19
                     }
                     break
@@ -622,11 +622,11 @@ function getBeltSprites(
                     switch (dir) {
                         case 0:
                             return bas.ending_north_index || 18
-                        case 2:
-                            return bas.ending_east_index || 20
                         case 4:
+                            return bas.ending_east_index || 20
+                        case 8:
                             return bas.ending_south_index || 14
-                        case 6:
+                        case 12:
                             return bas.ending_west_index || 16
                     }
             }
@@ -830,8 +830,8 @@ function draw_agricultural_tower(
 function draw_ammo_turret(e: AmmoTurretPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => [
         ...e.graphics_set.base_visualisation.animation.layers,
-        duplicateAndSetPropertyUsing(e.folded_animation.layers[0], 'y', 'height', data.dir / 2),
-        duplicateAndSetPropertyUsing(e.folded_animation.layers[1], 'y', 'height', data.dir / 2),
+        duplicateAndSetPropertyUsing(e.folded_animation.layers[0], 'y', 'height', data.dir / 4),
+        duplicateAndSetPropertyUsing(e.folded_animation.layers[1], 'y', 'height', data.dir / 4),
     ]
 }
 function draw_arithmetic_combinator(
@@ -877,7 +877,7 @@ function draw_artillery_turret(
     e: ArtilleryTurretPrototype
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
-        const d = data.dir
+        const d = data.dir / 2
         let base = util.duplicate(e.cannon_base_pictures.layers[0])
         base = setProperty(base, 'filename', base.filenames[d])
         base = addToShift([0, -0.6875], base)
@@ -889,11 +889,11 @@ function draw_artillery_turret(
             switch (data.dir) {
                 case 0:
                     return [0, 1]
-                case 2:
-                    return [-1, 0.31]
                 case 4:
+                    return [-1, 0.31]
+                case 8:
                     return [0, -0.4]
-                case 6:
+                case 12:
                     return [1, 0.31]
             }
         }
@@ -930,7 +930,7 @@ function draw_assembling_machine(
                     if (!(conn.connection_type === undefined || conn.connection_type === 'normal'))
                         continue
 
-                    const dir = (data.dir + conn.direction / 2) % 8
+                    const dir = (data.dir + conn.direction) % 16
                     out.push(
                         addToShift(
                             util.rotatePointBasedOnDir([0, -2], dir),
@@ -1004,14 +1004,14 @@ function draw_boiler(e: BoilerPrototype): (data: IDrawData) => readonly SpriteDa
                         },
                         data.positionGrid
                     )
-                    needsEnding = !c[((data.dir + conn.direction / 2) % 8) / 2]
+                    needsEnding = !c[((data.dir + conn.direction) % 16) / 4]
                 }
                 if (needsEnding) {
                     patches.push(
                         addToShift(
                             util.rotatePointBasedOnDir([0, 1.5], data.dir),
                             util.duplicate(
-                                energy_source.pipe_covers[util.getDirName((data.dir + 4) % 8)]
+                                energy_source.pipe_covers[util.getDirName((data.dir + 8) % 16)]
                             )
                         )
                     )
@@ -1097,7 +1097,7 @@ function draw_electric_energy_interface(
 }
 function draw_electric_pole(e: ElectricPolePrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => [
-        duplicateAndSetPropertyUsing(e.pictures.layers[0], 'x', 'width', data.dir / 2),
+        duplicateAndSetPropertyUsing(e.pictures.layers[0], 'x', 'width', data.dir / 4),
     ]
 }
 function draw_electric_turret(
@@ -1105,8 +1105,8 @@ function draw_electric_turret(
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => [
         ...e.graphics_set.base_visualisation.animation.layers,
-        duplicateAndSetPropertyUsing(e.folded_animation.layers[0], 'y', 'height', data.dir / 2),
-        duplicateAndSetPropertyUsing(e.folded_animation.layers[2], 'y', 'height', data.dir / 2),
+        duplicateAndSetPropertyUsing(e.folded_animation.layers[0], 'y', 'height', data.dir / 4),
+        duplicateAndSetPropertyUsing(e.folded_animation.layers[2], 'y', 'height', data.dir / 4),
     ]
 }
 function draw_elevated_curved_rail_a(
@@ -1166,7 +1166,7 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
                     entity => entity.name === 'legacy-straight-rail'
                 )
                 if (rail) {
-                    if (data.dir % 4 === 0) {
+                    if (data.dir % 8 === 0) {
                         if (rail.position.y > data.position.y) {
                             return e.vertical_rail_animation_left.layers
                         }
@@ -1180,13 +1180,13 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
                 }
             }
 
-            if (data.dir % 4 === 0) {
+            if (data.dir % 8 === 0) {
                 return e.vertical_animation.layers
             }
             return e.horizontal_animation.layers
         }
 
-        if (data.dir % 4 === 0 && data.positionGrid) {
+        if (data.dir % 8 === 0 && data.positionGrid) {
             const wall = data.positionGrid.getEntityAtPosition({
                 x: data.position.x,
                 y: data.position.y + 1,
@@ -1201,7 +1201,7 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
 }
 function draw_generator(e: GeneratorPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) =>
-        data.dir % 4 === 0 ? e.vertical_animation.layers : e.horizontal_animation.layers
+        data.dir % 8 === 0 ? e.vertical_animation.layers : e.horizontal_animation.layers
 }
 function draw_half_diagonal_rail(
     e: HalfDiagonalRailPrototype
@@ -1300,7 +1300,7 @@ function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly Spri
 
         if (e.name === 'long-handed-inserter') {
             switch (data.dir) {
-                case 6:
+                case 12:
                     handData.rotAngle = armAngleLHI - 180
                     handData.squishY = 1.5
                     handData.x = -0.275
@@ -1311,7 +1311,7 @@ function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly Spri
                     armData.x = 0.03
                     armData.y = 0.03
                     break
-                case 2:
+                case 4:
                     handData.rotAngle = -armAngleLHI + 180
                     handData.squishY = 1.5
                     handData.x = 0.275
@@ -1322,7 +1322,7 @@ function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly Spri
                     armData.x = -0.03
                     armData.y = 0.03
                     break
-                case 4:
+                case 8:
                     handData.rotAngle = 180
                     handData.squishY = 1.25
                     handData.y = -0.3
@@ -1339,7 +1339,7 @@ function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly Spri
             }
         } else {
             switch (data.dir) {
-                case 6:
+                case 12:
                     handData.rotAngle = -armAngle - 90
                     handData.squishY = 2.5
                     handData.x = -0.325
@@ -1350,7 +1350,7 @@ function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly Spri
                     armData.x = 0.03
                     armData.y = 0.03
                     break
-                case 2:
+                case 4:
                     handData.rotAngle = armAngle + 90
                     handData.squishY = 2.5
                     handData.x = 0.325
@@ -1361,7 +1361,7 @@ function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly Spri
                     armData.x = -0.03
                     armData.y = 0.03
                     break
-                case 4:
+                case 8:
                     handData.rotAngle = 180
                     handData.squishY = 1.75
                     handData.y = 0.03
@@ -1396,7 +1396,7 @@ function draw_inserter(e: InserterPrototype): (data: IDrawData) => readonly Spri
                 e.platform_picture.sheet,
                 'x',
                 'width',
-                ((data.dir + 4) % 8) / 2
+                ((data.dir + 8) % 16) / 4
             ),
             ho,
             hb,
@@ -1434,7 +1434,7 @@ function draw_legacy_straight_rail(
             return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
         }
 
-        if (data.positionGrid && dir % 2 === 0) {
+        if (data.positionGrid && dir % 4 === 0) {
             const size = getEntitySize(e, dir)
 
             const railBases = data.positionGrid
@@ -1452,13 +1452,13 @@ function draw_legacy_straight_rail(
                 .sort()
                 .filter((y, i, arr) => i === 0 || y !== arr[i - 1])
                 // Reverse rotate relative to mid point
-                .map(y => util.rotatePointBasedOnDir([0, y], (8 - dir) % 8))
+                .map(y => util.rotatePointBasedOnDir([0, y], (16 - dir) % 16))
                 // Map positions to SpriteData
                 .map(p =>
                     addToShift(
                         p,
                         util.duplicate(
-                            dir % 4 === 0
+                            dir % 8 === 0
                                 ? FD.entities.gate.horizontal_rail_base
                                 : FD.entities.gate.vertical_rail_base
                         )
@@ -1486,7 +1486,7 @@ function draw_linked_container(
 function draw_loader(e: LoaderPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
         const isInput = data.dirType === 'input'
-        const dir = isInput ? data.dir : (data.dir + 4) % 8
+        const dir = isInput ? data.dir : (data.dir + 8) % 16
         const offset = util.rotatePointBasedOnDir([0, 0.5], dir)
 
         const beltParts = getBeltSprites(
@@ -1500,19 +1500,19 @@ function draw_loader(e: LoaderPrototype): (data: IDrawData) => readonly SpriteDa
         ).map(sprite => addToShift(util.rotatePointBasedOnDir([0, 0.5], dir), sprite))
 
         let mainBelt = beltParts[0]
-        if (dir === 2 || dir === 6) {
+        if (dir === 4 || dir === 12) {
             mainBelt = setPropertyUsing(mainBelt, 'width', 'size', 0.5)
         } else {
             mainBelt = setPropertyUsing(mainBelt, 'height', 'size', 0.5)
         }
 
-        if (dir === 2) {
+        if (dir === 4) {
             mainBelt = setProperty(mainBelt, 'anchorX', 1)
         }
-        if (dir === 6) {
+        if (dir === 12) {
             mainBelt = setProperty(mainBelt, 'anchorX', 0.5)
         }
-        if (dir === 4) {
+        if (dir === 8) {
             mainBelt = setProperty(mainBelt, 'anchorY', 1)
         }
         if (dir === 0) {
@@ -1529,7 +1529,7 @@ function draw_loader(e: LoaderPrototype): (data: IDrawData) => readonly SpriteDa
                 isInput ? structure.direction_in.sheet : structure.direction_out.sheet,
                 'x',
                 'width',
-                dir / 2
+                dir / 4
             )
         )
 
@@ -1560,7 +1560,7 @@ function draw_mining_drill(e: MiningDrillPrototype): (data: IDrawData) => readon
 
         case 'pumpjack':
             return (data: IDrawData) => [
-                duplicateAndSetPropertyUsing(e.base_picture.sheets[0], 'x', 'width', data.dir / 2),
+                duplicateAndSetPropertyUsing(e.base_picture.sheets[0], 'x', 'width', data.dir / 4),
                 ...e.graphics_set.animation.north.layers,
             ]
 
@@ -1681,19 +1681,19 @@ function draw_rail_signal_base(
             e.ground_picture_set.rail_piece.sprites,
             'x',
             'width',
-            (dir * 2) % e.ground_picture_set.rail_piece.sprites.line_length
+            dir % e.ground_picture_set.rail_piece.sprites.line_length
         )
         rp = setPropertyUsing(
             rp,
             'y',
             'height',
-            Math.floor((dir * 2) / e.ground_picture_set.rail_piece.sprites.line_length)
+            Math.floor(dir / e.ground_picture_set.rail_piece.sprites.line_length)
         )
         let a = duplicateAndSetPropertyUsing(
             e.ground_picture_set.structure.layers[0],
             'y',
             'height',
-            dir * 2
+            dir
         )
         const structure_index = e.ground_picture_set.signal_color_to_structure_frame_index.green
         a = setPropertyUsing(a, 'x', 'width', structure_index)
@@ -1790,7 +1790,7 @@ function draw_storage_tank(e: StorageTankPrototype): (data: IDrawData) => readon
             util.duplicate(e.pictures.picture.sheets[0]),
             'x',
             'width',
-            Math.floor(data.dir / 2) % e.pictures.picture.sheets[0].frames
+            Math.floor(data.dir / 4) % e.pictures.picture.sheets[0].frames
         ),
     ]
 }
@@ -1802,16 +1802,16 @@ function draw_thruster(e: ThrusterPrototype): (data: IDrawData) => readonly Spri
 }
 function draw_train_stop(e: TrainStopPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
-        const dir = data.dir
-        let ta = util.duplicate(e.top_animations[util.getDirName(dir)].layers[1])
+        const dir = util.getDirName(data.dir)
+        let ta = util.duplicate(e.top_animations[dir].layers[1])
         ta = setProperty(ta, 'tint', data.trainStopColor ? data.trainStopColor : e.color)
         return [
-            e.rail_overlay_animations[util.getDirName(dir)],
-            ...e.animations[util.getDirName(dir)].layers,
-            ...e.top_animations[util.getDirName(dir)].layers,
+            e.rail_overlay_animations[dir],
+            ...e.animations[dir].layers,
+            ...e.top_animations[dir].layers,
             ta,
-            e.light1.picture[util.getDirName(dir)],
-            e.light2.picture[util.getDirName(dir)],
+            e.light1.picture[dir],
+            e.light2.picture[dir],
         ]
     }
 }
@@ -1862,7 +1862,7 @@ function draw_underground_belt(
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
         const isInput = data.dirType === 'input'
-        const dir = isInput ? data.dir : (data.dir + 4) % 8
+        const dir = isInput ? data.dir : (data.dir + 8) % 16
 
         const beltParts = getBeltSprites(
             e.belt_animation_set,
@@ -1875,19 +1875,19 @@ function draw_underground_belt(
         )
 
         let mainBelt = beltParts[0]
-        if (dir === 2 || dir === 6) {
+        if (dir === 4 || dir === 12) {
             mainBelt = setPropertyUsing(mainBelt, 'width', 'size', 0.5)
         } else {
             mainBelt = setPropertyUsing(mainBelt, 'height', 'size', 0.5)
         }
 
-        if (dir === 2) {
+        if (dir === 4) {
             mainBelt = setProperty(mainBelt, 'anchorX', 1)
         }
-        if (dir === 6) {
+        if (dir === 12) {
             mainBelt = setProperty(mainBelt, 'anchorX', 0.5)
         }
-        if (dir === 4) {
+        if (dir === 8) {
             mainBelt = setProperty(mainBelt, 'anchorY', 1)
         }
         if (dir === 0) {
@@ -1897,7 +1897,7 @@ function draw_underground_belt(
         let sideloadingBack = false
         let sideloadingFront = false
 
-        if (data.positionGrid && (dir === 2 || dir === 6)) {
+        if (data.positionGrid && (dir === 4 || dir === 12)) {
             let C = data.positionGrid.getNeighbourData(data.position).map(d => {
                 if (
                     d.entity &&
@@ -1913,7 +1913,7 @@ function draw_underground_belt(
 
             // Belt facing this belt
             C = C.map(d => {
-                if (d && d.entity.direction === (d.relDir + 4) % 8) {
+                if (d && d.entity.direction === (d.relDir + 8) % 16) {
                     return d
                 }
                 return undefined
@@ -1928,7 +1928,7 @@ function draw_underground_belt(
 
         if (!sideloadingBack) {
             sprites.push(
-                duplicateAndSetPropertyUsing(structure.back_patch.sheet, 'x', 'width', dir / 2)
+                duplicateAndSetPropertyUsing(structure.back_patch.sheet, 'x', 'width', dir / 4)
             )
         }
 
@@ -1945,13 +1945,13 @@ function draw_underground_belt(
                       : structure.direction_out.sheet,
                 'x',
                 'width',
-                dir / 2
+                dir / 4
             )
         )
 
         if (!sideloadingFront) {
             sprites.push(
-                duplicateAndSetPropertyUsing(structure.front_patch.sheet, 'x', 'width', dir / 2)
+                duplicateAndSetPropertyUsing(structure.front_patch.sheet, 'x', 'width', dir / 4)
             )
         }
 
@@ -1978,7 +1978,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                     ({ entity, relDir }) =>
                         entity &&
                         (entity.type === 'wall' ||
-                            (entity.type === 'gate' && entity.direction % 4 === relDir % 4))
+                            (entity.type === 'gate' && entity.direction % 8 === relDir % 8))
                 )
 
             const wall = (() => {
@@ -2014,7 +2014,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                 .getNeighbourData(data.position)
                 .filter(
                     ({ entity, relDir }) =>
-                        entity && entity.type === 'gate' && entity.direction % 4 === relDir % 4
+                        entity && entity.type === 'gate' && entity.direction % 8 === relDir % 8
                 )
                 .map(({ relDir }) => relDir)
 
@@ -2023,7 +2023,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
                     pictures.gate_connection_patch.sheets[0],
                     'x',
                     'width',
-                    relDir / 2
+                    relDir / 4
                 )
                 if (relDir === 0) {
                     sprites.unshift(patch)
@@ -2058,7 +2058,7 @@ function draw_wall(e: WallPrototype): (data: IDrawData) => readonly SpriteData[]
 
             sprites.push(
                 ...neighbourDirections.map(relDir =>
-                    duplicateAndSetPropertyUsing(e.wall_diode_red.sheet, 'x', 'width', relDir / 2)
+                    duplicateAndSetPropertyUsing(e.wall_diode_red.sheet, 'x', 'width', relDir / 4)
                 )
             )
 

@@ -231,7 +231,7 @@ export class EntityContainer {
             this.m_Entity.position,
             this.m_Entity.direction,
             this.m_Entity.directionType === 'output' || this.m_Entity.type === 'pipe-to-ground'
-                ? (this.m_Entity.direction + 4) % 8
+                ? (this.m_Entity.direction + 8) % 16
                 : this.m_Entity.direction
         )
     }

@@ -87,10 +87,10 @@ export class OverlayContainer extends Container {
                     )
                         continue
 
-                    const dir = (entity.direction + connection.direction / 2) % 8
+                    const dir = (entity.direction + connection.direction) % 16
                     const offset = connection.position
                         ? util.rotatePointBasedOnDir(connection.position, entity.direction)
-                        : util.Point(connection.positions[entity.direction / 2])
+                        : util.Point(connection.positions[entity.direction / 4])
                     const offset2 = util.rotatePointBasedOnDir([0, -0.5], dir)
                     offset2.x += offset.x
                     offset2.y += offset.y
@@ -101,7 +101,7 @@ export class OverlayContainer extends Container {
                             ? 2
                             : 1
                     const arrow = createArrow(util.sumprod(64, offset2), type)
-                    arrow.rotation = dir * 0.25 * Math.PI
+                    arrow.rotation = dir * 0.125 * Math.PI
                     if (connection.flow_direction === 'input') {
                         arrow.rotation += Math.PI
                     }
@@ -242,7 +242,7 @@ export class OverlayContainer extends Container {
                     )
                 )
                 arrow.scale.set(0.75, 0.75)
-                arrow.rotation = entity.direction * Math.PI * 0.25
+                arrow.rotation = entity.direction * Math.PI * 0.125
                 filterInfo.addChild(arrow)
             }
 
@@ -268,7 +268,7 @@ export class OverlayContainer extends Container {
         if (entity.name === 'arithmetic-combinator' || entity.name === 'decider-combinator') {
             const arrows = new Container()
             arrows.addChild(createArrow({ x: 0, y: -48 }), createArrow({ x: 0, y: 48 }))
-            arrows.rotation = entity.direction * Math.PI * 0.25
+            arrows.rotation = entity.direction * Math.PI * 0.125
             arrows.scale.set(0.5, 0.5)
             entityInfo.addChild(arrows)
         }
@@ -281,7 +281,7 @@ export class OverlayContainer extends Container {
                     y: entity.entityData.vector_to_place_result[1] * 64 + 18,
                 })
             )
-            arrows.rotation = entity.direction * Math.PI * 0.25
+            arrows.rotation = entity.direction * Math.PI * 0.125
             arrows.scale.set(0.5, 0.5)
             entityInfo.addChild(arrows)
         }
@@ -441,7 +441,7 @@ export class OverlayContainer extends Container {
                     fd.type === 'underground-belt' &&
                     (otherEntity.directionType === 'input'
                         ? otherEntity.direction
-                        : otherEntity.direction + (4 % 8)) === searchDirection
+                        : otherEntity.direction + (8 % 16)) === searchDirection
                 ) {
                     return
                 }
@@ -466,7 +466,7 @@ export class OverlayContainer extends Container {
                     const s = new Sprite(
                         G.getTexture(data.filename, data.x, data.y, data.width, data.height)
                     )
-                    s.rotation = direction * Math.PI * 0.25
+                    s.rotation = direction * Math.PI * 0.125
                     if (data.scale) {
                         s.scale.set(data.scale)
                     }

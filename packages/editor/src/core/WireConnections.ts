@@ -414,7 +414,7 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
                 .map(angleToSector)
                 .reduce((acc, sec) => acc + sec, 0)
 
-            return Math.floor(sectorSum / points.length) * 2
+            return Math.floor(sectorSum / points.length) * 4
 
             function angleToSector(angle: number): 0 | 1 | 2 | 3 {
                 const cwAngle = 360 - angle
