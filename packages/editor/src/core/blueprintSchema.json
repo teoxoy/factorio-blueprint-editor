@@ -382,7 +382,7 @@
                             },
                             "filter_mode": {
                                 "type": "string",
-                                "enum": ["blacklist"],
+                                "enum": ["whitelist", "blacklist"],
                                 "$comment": "only present if entity is of type inserter"
                             },
                             "filters": {
