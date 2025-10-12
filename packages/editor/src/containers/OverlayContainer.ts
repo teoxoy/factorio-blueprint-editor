@@ -198,7 +198,7 @@ export class OverlayContainer extends Container {
         }
 
         if (entity.constantCombinatorFilters !== undefined) {
-            const filters = entity.constantCombinatorFilters
+            const filters = entity.constantCombinatorFilters.filter(f => !!f.signal.name)
             const filterInfo = new Container()
             for (let i = 0; i < filters.length; i++) {
                 if (i === 4) {
@@ -220,13 +220,13 @@ export class OverlayContainer extends Container {
             const cFS = combinatorConditions.first_signal
             const cSS = combinatorConditions.second_signal
             const cOS = combinatorConditions.output_signal
-            if (cFS) {
+            if (cFS && cFS.name) {
                 createIconWithBackground(filterInfo, cFS.name, { x: cSS ? -16 : 0, y: -16 })
             }
-            if (cSS) {
+            if (cSS && cSS.name) {
                 createIconWithBackground(filterInfo, cSS.name, { x: 16, y: -16 })
             }
-            if (cOS) {
+            if (cOS && cOS.name) {
                 createIconWithBackground(filterInfo, cOS.name, { x: 0, y: 16 })
             }
             filterInfo.scale.set(0.5, 0.5)
