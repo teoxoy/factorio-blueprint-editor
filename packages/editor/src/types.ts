@@ -21,10 +21,10 @@ export interface ISignal {
     type: SignalType
 }
 
-export type ConditionComparator = '<' | '>' | '≤' | '≥' | '=' | '≠'
+export type ComparatorString = '<' | '>' | '≤' | '≥' | '=' | '≠'
 
 export interface ICondition {
-    comparator?: ConditionComparator
+    comparator?: ComparatorString
     constant?: number
     first_signal?: ISignal
     second_signal?: ISignal
@@ -85,7 +85,7 @@ export interface BlueprintInsertPlan {
 }
 
 export interface IDeciderCondition {
-    comparator?: string
+    comparator?: ComparatorString
     constant?: number
     copy_count_from_input?: boolean
     first_signal?: ISignal

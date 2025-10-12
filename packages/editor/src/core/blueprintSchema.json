@@ -32,6 +32,10 @@
                 }
             }
         },
+        "ComparatorString": {
+            "type": "string",
+            "enum": ["<", ">", "≤", "≥", "=", "≠"]
+        },
         "optional_signal": {
             "type": "object",
             "required": ["type"],
@@ -127,8 +131,7 @@
             "additionalProperties": false,
             "properties": {
                 "comparator": {
-                    "type": "string",
-                    "enum": ["<", ">", "≤", "≥", "=", "≠"]
+                    "$ref": "blueprintSchema.json#/definitions/ComparatorString"
                 },
                 "constant": { "type": "integer" },
                 "first_signal": { "$ref": "blueprintSchema.json#/definitions/signal" },
@@ -678,7 +681,9 @@
                                         "$comment": "only present if entity is decider-combinator",
                                         "additionalProperties": false,
                                         "properties": {
-                                            "comparator": { "type": "string" },
+                                            "comparator": {
+                                                "$ref": "blueprintSchema.json#/definitions/ComparatorString"
+                                            },
                                             "constant": { "type": "integer" },
                                             "copy_count_from_input": { "type": "boolean" },
                                             "first_signal": {
