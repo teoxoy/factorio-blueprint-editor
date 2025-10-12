@@ -17,8 +17,8 @@ export type NamedDirection8Way =
 export type SignalType = 'item' | 'virtual' | 'fluid'
 
 export interface ISignal {
-    name: string
-    type: SignalType
+    name?: string
+    type?: SignalType
 }
 
 export type ComparatorString = '<' | '>' | '≤' | '≥' | '=' | '≠'

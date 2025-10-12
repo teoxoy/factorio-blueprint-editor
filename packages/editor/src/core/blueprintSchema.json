@@ -19,7 +19,6 @@
         },
         "signal": {
             "type": "object",
-            "required": ["name", "type"],
             "additionalProperties": false,
             "properties": {
                 "name": {
@@ -39,21 +38,6 @@
         "CompareType": {
             "type": "string",
             "enum": ["and", "or"]
-        },
-        "optional_signal": {
-            "type": "object",
-            "required": ["type"],
-            "additionalProperties": false,
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "itemFluidSignalName": true
-                },
-                "type": {
-                    "type": "string",
-                    "enum": ["item", "virtual", "fluid"]
-                }
-            }
         },
         "BlueprintItemIDAndQualityIDPair": {
             "type": "object",
@@ -578,16 +562,16 @@
                                     },
 
                                     "available_logistic_output_signal": {
-                                        "$ref": "blueprintSchema.json#/definitions/optional_signal"
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
                                     },
                                     "total_logistic_output_signal": {
-                                        "$ref": "blueprintSchema.json#/definitions/optional_signal"
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
                                     },
                                     "available_construction_output_signal": {
-                                        "$ref": "blueprintSchema.json#/definitions/optional_signal"
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
                                     },
                                     "total_construction_output_signal": {
-                                        "$ref": "blueprintSchema.json#/definitions/optional_signal"
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
                                     },
 
                                     "circuit_read_resources": {

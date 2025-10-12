@@ -120,6 +120,7 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
 
             if (data.icons) {
                 for (const icon of data.icons) {
+                    if (!icon.signal.name) continue
                     this.icons.set(icon.index, icon.signal.name)
                 }
             }
