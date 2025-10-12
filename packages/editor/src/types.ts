@@ -192,7 +192,12 @@ export interface IEntity {
     /** only present if entity is programmable-speaker */
     parameters?: {
         playback_volume?: number
+        /** pre 2.0 */
         playback_globally?: boolean
+        /** post 2.0 */
+        playback_mode?: 'global' | 'surface' | 'local'
+        volume_controlled_by_signal?: boolean
+        volume_signal_id?: ISignal
         allow_polyphony?: boolean
     }
 
@@ -309,6 +314,7 @@ export interface IEntity {
             instrument_id?: number
             note_id?: number
             signal_value_is_pitch?: boolean
+            stop_playing_sounds?: boolean
         }
 
         /** only present if entity is decider-combinator */

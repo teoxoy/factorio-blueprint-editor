@@ -412,6 +412,14 @@
                                 "properties": {
                                     "playback_volume": { "type": "number" },
                                     "playback_globally": { "type": "boolean" },
+                                    "playback_mode": {
+                                        "type": "string",
+                                        "enum": ["global", "surface", "local"]
+                                    },
+                                    "volume_controlled_by_signal": { "type": "boolean" },
+                                    "volume_signal_id": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
                                     "allow_polyphony": { "type": "boolean" }
                                 }
                             },
@@ -660,7 +668,8 @@
                                         "properties": {
                                             "instrument_id": { "type": "integer" },
                                             "note_id": { "type": "integer" },
-                                            "signal_value_is_pitch": { "type": "boolean" }
+                                            "signal_value_is_pitch": { "type": "boolean" },
+                                            "stop_playing_sounds": { "type": "boolean" }
                                         }
                                     },
                                     "decider_conditions": {
