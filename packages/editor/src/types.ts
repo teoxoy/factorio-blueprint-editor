@@ -172,7 +172,7 @@ export interface IEntity {
     /** only present if entity is requester-chest */
     request_from_buffers?: boolean
     /** only present if entity is of type inserter */
-    filter_mode?: 'blacklist'
+    filter_mode?: FilterMode
     /** only present if entity is of type inserter or loader */
     filters?: IFilter[]
     /** only present if entity is storage-chest, buffer-chest or requester-chest */
