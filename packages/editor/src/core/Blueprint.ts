@@ -216,6 +216,15 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                                 items = e.items
                             }
                         }
+                        if (
+                            e.parameters &&
+                            e.parameters.playback_globally !== undefined &&
+                            !e.parameters.playback_mode
+                        ) {
+                            e.parameters.playback_mode = e.parameters.playback_globally
+                                ? 'global'
+                                : 'local'
+                        }
                         return this.createEntity({
                             ...e,
                             direction,
