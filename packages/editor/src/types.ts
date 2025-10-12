@@ -341,7 +341,7 @@ export interface ITile {
     position: IPoint
 }
 
-export type WaitConditionCompareType = 'and' | 'or'
+export type CompareType = 'and' | 'or'
 
 export type WaitConditionType =
     | 'time'
@@ -359,7 +359,7 @@ export interface ISchedule {
     schedule: {
         station: string
         wait_conditions: {
-            compare_type: WaitConditionCompareType
+            compare_type: CompareType
             type: WaitConditionType
 
             ticks?: number

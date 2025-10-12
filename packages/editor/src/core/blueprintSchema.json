@@ -36,6 +36,10 @@
             "type": "string",
             "enum": ["<", ">", "≤", "≥", "=", "≠"]
         },
+        "CompareType": {
+            "type": "string",
+            "enum": ["and", "or"]
+        },
         "optional_signal": {
             "type": "object",
             "required": ["type"],
@@ -225,8 +229,7 @@
                                                 "additionalProperties": false,
                                                 "properties": {
                                                     "compare_type": {
-                                                        "type": "string",
-                                                        "enum": ["and", "or"]
+                                                        "$ref": "blueprintSchema.json#/definitions/CompareType"
                                                     },
                                                     "type": {
                                                         "type": "string",
