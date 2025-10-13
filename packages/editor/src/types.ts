@@ -204,20 +204,27 @@ export interface IEntity {
     use_transitional_requests?: boolean
     /** override stack size, only present if entity is of type inserter */
     override_stack_size?: number
-    /** only present if entity is requester-chest */
-    request_from_buffers?: boolean
     /** only present if entity is of type inserter */
     filter_mode?: FilterMode
     /** only present if entity is of type inserter */
     use_filters?: boolean
     /** only present if entity is of type inserter or loader */
     filters?: IFilter[]
-    /** only present if entity is storage-chest, buffer-chest or requester-chest */
-    request_filters?: {
-        index: number
-        name: string
-        count?: number
-    }[]
+    /**
+     * post 2.0 format is LogisticSections,
+     * pre 2.0 is array of filters
+     *
+     * only present if entity is cargo-landing-pad, infinity-container, logistic-container, roboport, space-platform-hub
+     */
+    request_filters?:
+        | {
+              index: number
+              name: string
+              count?: number
+          }[]
+        | LogisticSections
+    /** pre 2.0, moved to request_filters, only present if entity is requester-chest */
+    request_from_buffers?: boolean
 
     /** only present if entity is programmable-speaker */
     alert_parameters?: {
