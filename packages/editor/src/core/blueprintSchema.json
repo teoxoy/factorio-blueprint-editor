@@ -660,10 +660,6 @@
                                         "enum": [true],
                                         "$comment": "only present if entity is small-lamp"
                                     },
-                                    "circuit_enable_disable": {
-                                        "type": "boolean",
-                                        "$comment": "only present if entity is of type mining-drill or transport-belt or train-stop"
-                                    },
 
                                     "circuit_set_filters": {
                                         "type": "boolean",
@@ -870,6 +866,16 @@
                                                 "$ref": "blueprintSchema.json#/definitions/signal"
                                             }
                                         }
+                                    },
+                                    "circuit_enable_disable": {
+                                        "type": "boolean",
+                                        "$comment": "only present if entity is of type mining-drill or transport-belt or train-stop"
+                                    },
+                                    "circuit_enabled": {
+                                        "type": "boolean"
+                                    },
+                                    "circuit_condition_enabled": {
+                                        "type": "boolean"
                                     },
                                     "circuit_condition": {
                                         "$ref": "blueprintSchema.json#/definitions/condition"
