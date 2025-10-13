@@ -264,6 +264,34 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             delete e.control_behavior.circuit_enable_disable
                         }
                         if (
+                            e.control_behavior &&
+                            e.control_behavior.decider_conditions !== undefined &&
+                            e.control_behavior.decider_conditions.conditions === undefined &&
+                            e.control_behavior.decider_conditions.outputs === undefined
+                        ) {
+                            const c = e.control_behavior.decider_conditions
+                            c.conditions = [
+                                {
+                                    comparator: c.comparator,
+                                    constant: c.constant,
+                                    first_signal: c.first_signal,
+                                    second_signal: c.second_signal,
+                                },
+                            ]
+                            c.outputs = [
+                                {
+                                    signal: c.output_signal,
+                                    copy_count_from_input: c.copy_count_from_input,
+                                },
+                            ]
+                            delete c.comparator
+                            delete c.constant
+                            delete c.copy_count_from_input
+                            delete c.first_signal
+                            delete c.second_signal
+                            delete c.output_signal
+                        }
+                        if (
                             e.auto_launch !== undefined &&
                             e.launch_to_orbit_automatically === undefined
                         ) {
