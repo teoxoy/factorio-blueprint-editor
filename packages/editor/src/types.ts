@@ -252,6 +252,8 @@ export interface IEntity {
         /** only present if entity is of type mining-drill or transport-belt or train-stop */
         circuit_enable_disable?: boolean
 
+        /** only present if entity is of type inserter */
+        circuit_set_filters?: boolean
         /** only present if entity is of type inserter or transport-belt */
         circuit_read_hand_contents?: boolean
         /** 0 = pulse, 1 = hold, only present if entity is of type inserter and circuit_read_hand_contents is true */

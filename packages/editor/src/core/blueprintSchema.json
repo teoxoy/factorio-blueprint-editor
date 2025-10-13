@@ -533,6 +533,11 @@
                                         "$comment": "only present if entity is of type mining-drill or transport-belt or train-stop"
                                     },
 
+                                    "circuit_set_filters": {
+                                        "type": "boolean",
+                                        "enum": [true],
+                                        "$comment": "only present if entity is of type inserter"
+                                    },
                                     "circuit_read_hand_contents": {
                                         "type": "boolean",
                                         "$comment": "only present if entity is of type inserter or transport-belt"
