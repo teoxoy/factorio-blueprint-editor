@@ -172,6 +172,18 @@
                 }
             }
         },
+        "SlotFilter": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "index": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "wireColor": {
             "type": "array",
             "items": {
@@ -531,6 +543,19 @@
                             "temperature": {
                                 "type": "number",
                                 "$comment": "only present if entity is heat_interface"
+                            },
+
+                            "priority-list": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "blueprintSchema.json#/definitions/SlotFilter"
+                                }
+                            },
+                            "ignore-unprioritised": {
+                                "type": "boolean"
+                            },
+                            "artillery_auto_targeting": {
+                                "type": "boolean"
                             },
 
                             "infinity_settings": {

@@ -110,6 +110,11 @@ export interface LogisticSections {
     request_from_buffers?: boolean
 }
 
+export interface SlotFilter {
+    index: number
+    name: string
+}
+
 export interface IDeciderCondition {
     comparator?: ComparatorString
     constant?: number
@@ -241,6 +246,13 @@ export interface IEntity {
     mode?: InfinityMode
     /** only present if entity is heat_interface */
     temperature?: number
+
+    /** only present if entity is ammo-turret, electric-turret, fluid-turret or turret */
+    'priority-list'?: SlotFilter[]
+    /** only present if entity is ammo-turret, electric-turret, fluid-turret or turret */
+    'ignore-unprioritised'?: boolean
+    /** only present if entity is artillery-turret */
+    artillery_auto_targeting?: boolean
 
     /** only present if entity is infinity_chest or infinity_pipe */
     infinity_settings?: {
