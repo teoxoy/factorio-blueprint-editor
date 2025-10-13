@@ -565,6 +565,9 @@
                                         "type": "boolean",
                                         "$comment": "only present if entity is roboport"
                                     },
+                                    "read_items_mode": {
+                                        "type": "integer"
+                                    },
                                     "read_robot_stats": {
                                         "type": "boolean",
                                         "$comment": "only present if entity is roboport"
@@ -579,6 +582,9 @@
                                         "$ref": "blueprintSchema.json#/definitions/signal"
                                     },
                                     "total_construction_output_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
+                                    "roboport_count_output_signal": {
                                         "$ref": "blueprintSchema.json#/definitions/signal"
                                     },
 

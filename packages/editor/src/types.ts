@@ -267,10 +267,17 @@ export interface IEntity {
             | defines.control_behavior.cargo_landing_pad.exclusive_mode
             | defines.control_behavior.logistic_container.exclusive_mode
 
+        // only present if entity is roboport
+        /** pre 2.0 */
+        read_logistics?: boolean
+        /** post 2.0 */
+        read_items_mode?: defines.control_behavior.roboport.read_items_mode
+        read_robot_stats?: boolean
         available_logistic_output_signal?: ISignal
         total_logistic_output_signal?: ISignal
         available_construction_output_signal?: ISignal
         total_construction_output_signal?: ISignal
+        roboport_count_output_signal?: ISignal
 
         /** only present if entity is of type mining-drill */
         circuit_read_resources?: boolean
