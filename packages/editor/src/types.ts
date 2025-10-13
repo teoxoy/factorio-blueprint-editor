@@ -255,12 +255,12 @@ export interface IEntity {
         /** only present if entity is of type inserter or transport-belt */
         circuit_read_hand_contents?: boolean
         /** 0 = pulse, 1 = hold, only present if entity is of type inserter and circuit_read_hand_contents is true */
-        circuit_hand_read_mode?: 0 | 1
+        circuit_hand_read_mode?: defines.control_behavior.inserter.hand_read_mode
         /** only present if entity is of type inserter and override_stack_size is not set */
         circuit_set_stack_size?: boolean
         stack_control_input_signal?: ISignal
         /** 0 = pulse, 1 = hold, only present if entity is of type transport-belt and circuit_read_hand_contents is true */
-        circuit_contents_read_mode?: 0 | 1
+        circuit_contents_read_mode?: defines.control_behavior.transport_belt.content_read_mode
 
         /** only present if entity is cargo landing pad, buffer-chest or requester-chest */
         circuit_mode_of_operation?:
@@ -282,7 +282,7 @@ export interface IEntity {
         /** only present if entity is of type mining-drill */
         circuit_read_resources?: boolean
         /** only present if entity is burner-mining-drill or electric-mining-drill and circuit_read_resources is true */
-        circuit_resource_read_mode?: 0 | 1
+        circuit_resource_read_mode?: defines.control_behavior.mining_drill.resource_read_mode
 
         /** only present if entity is stone-wall */
         circuit_open_gate?: boolean
