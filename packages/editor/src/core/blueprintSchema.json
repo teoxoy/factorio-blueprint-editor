@@ -188,6 +188,59 @@
             "type": "string",
             "enum": ["at-least", "at-most", "exactly", "add", "remove"]
         },
+        "CircuitNetworkSelection": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "red": {
+                    "type": "boolean"
+                },
+                "green": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "DeciderCombinatorCondition": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "first_signal": {
+                    "$ref": "blueprintSchema.json#/definitions/signal"
+                },
+                "first_signal_networks": {
+                    "$ref": "blueprintSchema.json#/definitions/CircuitNetworkSelection"
+                },
+                "second_signal": {
+                    "$ref": "blueprintSchema.json#/definitions/signal"
+                },
+                "second_signal_networks": {
+                    "$ref": "blueprintSchema.json#/definitions/CircuitNetworkSelection"
+                },
+                "constant": { "type": "integer" },
+                "comparator": {
+                    "$ref": "blueprintSchema.json#/definitions/ComparatorString"
+                },
+                "compare_type": {
+                    "$ref": "blueprintSchema.json#/definitions/CompareType"
+                }
+            }
+        },
+        "DeciderCombinatorOutput": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "signal": {
+                    "$ref": "blueprintSchema.json#/definitions/signal"
+                },
+                "copy_count_from_input": {
+                    "type": "boolean"
+                },
+                "constant": { "type": "integer" },
+                "networks": {
+                    "$ref": "blueprintSchema.json#/definitions/CircuitNetworkSelection"
+                }
+            }
+        },
         "wireColor": {
             "type": "array",
             "items": {
@@ -854,6 +907,18 @@
                                             },
                                             "output_signal": {
                                                 "$ref": "blueprintSchema.json#/definitions/signal"
+                                            },
+                                            "conditions": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "blueprintSchema.json#/definitions/DeciderCombinatorCondition"
+                                                }
+                                            },
+                                            "outputs": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "blueprintSchema.json#/definitions/DeciderCombinatorOutput"
+                                                }
                                             }
                                         }
                                     },

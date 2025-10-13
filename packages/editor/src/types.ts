@@ -115,13 +115,46 @@ export interface SlotFilter {
     name: string
 }
 
-export interface IDeciderCondition {
-    comparator?: ComparatorString
-    constant?: number
-    copy_count_from_input?: boolean
+export interface CircuitNetworkSelection {
+    red?: boolean
+    green?: boolean
+}
+
+export interface DeciderCombinatorCondition {
     first_signal?: ISignal
+    first_signal_networks?: CircuitNetworkSelection
     second_signal?: ISignal
+    second_signal_networks?: CircuitNetworkSelection
+    constant?: number
+    comparator?: ComparatorString
+    compare_type?: CompareType
+}
+
+export interface DeciderCombinatorOutput {
+    signal: ISignal
+    copy_count_from_input?: boolean
+    constant?: number
+    networks?: CircuitNetworkSelection
+}
+
+export interface IDeciderCondition {
+    /** pre 2.0 */
+    comparator?: ComparatorString
+    /** pre 2.0 */
+    constant?: number
+    /** pre 2.0 */
+    copy_count_from_input?: boolean
+    /** pre 2.0 */
+    first_signal?: ISignal
+    /** pre 2.0 */
+    second_signal?: ISignal
+    /** pre 2.0 */
     output_signal?: ISignal
+
+    /** post 2.0 */
+    conditions?: DeciderCombinatorCondition[]
+    /** post 2.0 */
+    outputs?: DeciderCombinatorOutput[]
 }
 
 export type ArithmeticOperation =
