@@ -9,6 +9,7 @@ import {
     ISchedule,
     LogisticFilter,
     LogisticSection,
+    LogisticSections,
     SignalType,
 } from '../types'
 import G from '../common/globals'
@@ -260,6 +261,29 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             e.launch_to_orbit_automatically = e.auto_launch
                             delete e.auto_launch
                         }
+                        if (
+                            (e.request_filters !== undefined && Array.isArray(e.request_filters)) ||
+                            e.request_from_buffers !== undefined
+                        ) {
+                            if (!pre_2_0) {
+                                throw new Error('request_filters is array but bp is not pre 2.0')
+                            }
+                            const out: LogisticSections = {
+                                request_from_buffers: e.request_from_buffers,
+                            }
+                            delete e.request_from_buffers
+                            if (Array.isArray(e.request_filters)) {
+                                const filters: LogisticFilter[] = e.request_filters.map(f => ({
+                                    index: f.index,
+                                    name: f.name,
+                                    count: f.count === undefined ? 1 : f.count,
+                                }))
+                                const section: LogisticSection = { index: 0, filters }
+                                out.sections = [section]
+                            }
+                            e.request_filters = out
+                        }
+
                         return this.createEntity({
                             ...e,
                             direction,

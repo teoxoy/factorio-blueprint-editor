@@ -462,10 +462,6 @@
                                 "type": "integer",
                                 "$comment": "override stack size, only present if entity is of type inserter"
                             },
-                            "request_from_buffers": {
-                                "type": "boolean",
-                                "$comment": "only present if entity is requester-chest"
-                            },
                             "filter_mode": {
                                 "type": "string",
                                 "enum": ["whitelist", "blacklist"],
@@ -481,21 +477,32 @@
                                 "items": { "$ref": "blueprintSchema.json#/definitions/filter" }
                             },
                             "request_filters": {
-                                "type": "array",
-                                "$comment": "only present if entity is storage-chest, buffer-chest or requester-chest",
-                                "items": {
-                                    "type": "object",
-                                    "required": ["index", "name"],
-                                    "additionalProperties": false,
-                                    "properties": {
-                                        "index": { "type": "integer" },
-                                        "name": {
-                                            "type": "string",
-                                            "itemName": true
-                                        },
-                                        "count": { "type": "integer" }
+                                "oneOf": [
+                                    {
+                                        "type": "array",
+                                        "$comment": "only present if entity is storage-chest, buffer-chest or requester-chest",
+                                        "items": {
+                                            "type": "object",
+                                            "required": ["index", "name"],
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "index": { "type": "integer" },
+                                                "name": {
+                                                    "type": "string",
+                                                    "itemName": true
+                                                },
+                                                "count": { "type": "integer" }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "$ref": "blueprintSchema.json#/definitions/LogisticSections"
                                     }
-                                }
+                                ]
+                            },
+                            "request_from_buffers": {
+                                "type": "boolean",
+                                "$comment": "only present if entity is requester-chest"
                             },
 
                             "alert_parameters": {
