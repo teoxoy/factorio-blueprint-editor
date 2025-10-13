@@ -250,6 +250,12 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             const section: LogisticSection = { index: 0, filters }
                             e.control_behavior.sections = { sections: [section] }
                         }
+                        if (
+                            e.auto_launch !== undefined &&
+                            e.launch_to_orbit_automatically === undefined
+                        ) {
+                            e.launch_to_orbit_automatically = e.auto_launch
+                        }
                         return this.createEntity({
                             ...e,
                             direction,

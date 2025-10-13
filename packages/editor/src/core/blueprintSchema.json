@@ -349,6 +349,9 @@
                                 "recipeName": true,
                                 "$comment": "recipe name, only present if entity is of type assembling-machine or has fixed_recipe"
                             },
+                            "recipe_quality": {
+                                "type": "string"
+                            },
                             "bar": {
                                 "type": "integer",
                                 "$comment": "inventory size limitation, only present if entity has inventory_size"
@@ -432,6 +435,10 @@
                                 "$comment": "only present if entity is power-switch"
                             },
                             "auto_launch": {
+                                "type": "boolean",
+                                "$comment": "auto launch, only present if entity is rocket-silo"
+                            },
+                            "launch_to_orbit_automatically": {
                                 "type": "boolean",
                                 "$comment": "auto launch, only present if entity is rocket-silo"
                             },
