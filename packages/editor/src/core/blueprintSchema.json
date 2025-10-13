@@ -305,6 +305,23 @@
                 }
             }
         },
+        "SplitterFilter": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "itemName": true
+                },
+                "quality": {
+                    "type": "string"
+                },
+                "comparator": {
+                    "$ref": "blueprintSchema.json#/definitions/ComparatorString"
+                }
+            }
+        },
         "icons": {
             "type": "array",
             "minItems": 1,
@@ -476,9 +493,16 @@
                                 "$comment": "splitter output priority, only present if entity is of type splitter"
                             },
                             "filter": {
-                                "type": "string",
-                                "itemName": true,
-                                "$comment": "splitter filter for output priority, only present if entity is of type splitter"
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "itemName": true,
+                                        "$comment": "splitter filter for output priority, only present if entity is of type splitter"
+                                    },
+                                    {
+                                        "$ref": "blueprintSchema.json#/definitions/SplitterFilter"
+                                    }
+                                ]
                             },
 
                             "station": {

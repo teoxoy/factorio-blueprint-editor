@@ -42,6 +42,12 @@ export interface InventoryWithFilters {
     filters?: ItemFilter[]
 }
 
+export interface SplitterFilter {
+    name: string
+    quality?: string
+    comparator?: ComparatorString
+}
+
 export interface IWireColor {
     /** Entity number */
     entity_id: number
@@ -219,8 +225,13 @@ export interface IEntity {
     input_priority?: FilterPriority
     /** splitter input priority, only present if entity is of type splitter */
     output_priority?: FilterPriority
-    /** splitter filter for output priority, only present if entity is of type splitter */
-    filter?: string
+    /**
+     * pre 2.0 - type is string
+     * post 2.0 - type is SplitterFilter
+     *
+     * splitter filter for output priority, only present if entity is of type splitter
+     */
+    filter?: string | SplitterFilter
 
     /** train stop station name, only present if entity is train-stop */
     station?: string

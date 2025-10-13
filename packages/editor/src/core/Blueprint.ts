@@ -291,6 +291,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             delete c.second_signal
                             delete c.output_signal
                         }
+                        if (typeof e.filter === 'string') {
+                            e.filter = { name: e.filter }
+                        }
                         if (
                             e.auto_launch !== undefined &&
                             e.launch_to_orbit_automatically === undefined
