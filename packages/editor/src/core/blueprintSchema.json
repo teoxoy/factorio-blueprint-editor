@@ -454,6 +454,10 @@
                                 "type": "boolean",
                                 "$comment": "auto launch, only present if entity is rocket-silo"
                             },
+                            "use_transitional_requests": {
+                                "type": "boolean",
+                                "$comment": "only present if entity is rocket-silo"
+                            },
                             "override_stack_size": {
                                 "type": "integer",
                                 "$comment": "override stack size, only present if entity is of type inserter"

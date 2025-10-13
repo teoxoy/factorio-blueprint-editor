@@ -201,6 +201,7 @@ export interface IEntity {
     auto_launch?: boolean
     /** post 2.0 - auto launch, only present if entity is rocket-silo */
     launch_to_orbit_automatically?: boolean
+    use_transitional_requests?: boolean
     /** override stack size, only present if entity is of type inserter */
     override_stack_size?: number
     /** only present if entity is requester-chest */
