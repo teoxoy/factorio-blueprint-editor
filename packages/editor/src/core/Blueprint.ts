@@ -226,6 +226,7 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             e.parameters.playback_mode = e.parameters.playback_globally
                                 ? 'global'
                                 : 'local'
+                            delete e.parameters.playback_globally
                         }
                         if (
                             e.control_behavior &&
@@ -235,6 +236,7 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             e.control_behavior.read_items_mode = e.control_behavior.read_logistics
                                 ? FD.defines.control_behavior.roboport.read_items_mode.logistics
                                 : FD.defines.control_behavior.roboport.read_items_mode.none
+                            delete e.control_behavior.read_logistics
                         }
                         if (
                             e.control_behavior &&
@@ -249,12 +251,14 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             }))
                             const section: LogisticSection = { index: 0, filters }
                             e.control_behavior.sections = { sections: [section] }
+                            delete e.control_behavior.filters
                         }
                         if (
                             e.auto_launch !== undefined &&
                             e.launch_to_orbit_automatically === undefined
                         ) {
                             e.launch_to_orbit_automatically = e.auto_launch
+                            delete e.auto_launch
                         }
                         return this.createEntity({
                             ...e,
