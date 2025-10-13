@@ -184,6 +184,10 @@
                 }
             }
         },
+        "InfinityMode": {
+            "type": "string",
+            "enum": ["at-least", "at-most", "exactly", "add", "remove"]
+        },
         "wireColor": {
             "type": "array",
             "items": {
@@ -551,8 +555,7 @@
                             },
 
                             "mode": {
-                                "type": "string",
-                                "enum": ["at-least", "at-most", "exactly"],
+                                "$ref": "blueprintSchema.json#/definitions/InfinityMode",
                                 "$comment": "only present if entity is heat_interface"
                             },
                             "temperature": {
@@ -580,8 +583,7 @@
                                 "properties": {
                                     "name": { "type": "string", "fluidName": true },
                                     "mode": {
-                                        "type": "string",
-                                        "enum": ["at-least", "at-most", "exactly"]
+                                        "$ref": "blueprintSchema.json#/definitions/InfinityMode"
                                     },
                                     "percentage": { "type": "number" },
                                     "temperature": { "type": "number" },
@@ -589,15 +591,16 @@
                                         "type": "array",
                                         "items": {
                                             "type": "object",
+                                            "required": ["name", "index"],
                                             "additionalProperties": false,
                                             "properties": {
                                                 "name": { "type": "string", "itemName": true },
+                                                "quality": { "type": "string" },
                                                 "mode": {
-                                                    "type": "string",
-                                                    "enum": ["at-least", "at-most", "exactly"]
+                                                    "$ref": "blueprintSchema.json#/definitions/InfinityMode"
                                                 },
-                                                "index": { "type": "number" },
-                                                "count": { "type": "number" }
+                                                "index": { "type": "integer" },
+                                                "count": { "type": "integer" }
                                             }
                                         }
                                     },

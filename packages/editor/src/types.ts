@@ -150,7 +150,7 @@ export interface IArithmeticCondition {
 export type FilterPriority = 'left' | 'right'
 export type FilterMode = 'whitelist' | 'blacklist'
 export type DirectionType = 'input' | 'output'
-export type InfinityMode = 'at-least' | 'at-most' | 'exactly'
+export type InfinityMode = 'at-least' | 'at-most' | 'exactly' | 'add' | 'remove'
 
 export interface IEntity {
     entity_number: number
@@ -278,9 +278,10 @@ export interface IEntity {
         /** only present if entity is infinity_chest */
         filters?: {
             name: string
-            mode: InfinityMode
+            quality?: string
+            mode?: InfinityMode
             index: number
-            count: number
+            count?: number
         }[]
         /** only present if entity is infinity_chest */
         remove_unfiltered_items?: boolean
