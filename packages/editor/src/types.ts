@@ -158,6 +158,7 @@ export interface IEntity {
     type?: DirectionType
     /** recipe name, only present if entity is of type assembling-machine or has fixed_recipe */
     recipe?: string
+    recipe_quality?: string
     /** inventory size limitation, only present if entity has inventory_size */
     bar?: number
     /**
@@ -191,8 +192,10 @@ export interface IEntity {
 
     /** only present if entity is power-switch */
     switch_state?: boolean
-    /** auto launch, only present if entity is rocket-silo */
+    /** pre 2.0 - auto launch, only present if entity is rocket-silo */
     auto_launch?: boolean
+    /** post 2.0 - auto launch, only present if entity is rocket-silo */
+    launch_to_orbit_automatically?: boolean
     /** override stack size, only present if entity is of type inserter */
     override_stack_size?: number
     /** only present if entity is requester-chest */
@@ -301,7 +304,9 @@ export interface IEntity {
         /** pre 2.0 */
         read_logistics?: boolean
         /** post 2.0 */
-        read_items_mode?: defines.control_behavior.roboport.read_items_mode
+        read_items_mode?:
+            | defines.control_behavior.roboport.read_items_mode
+            | defines.control_behavior.rocket_silo.read_mode
         read_robot_stats?: boolean
         available_logistic_output_signal?: ISignal
         total_logistic_output_signal?: ISignal
