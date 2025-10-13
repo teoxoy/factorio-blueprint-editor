@@ -186,8 +186,10 @@ export interface IEntity {
     station?: string
     /** trains limit, only present if entity is train-stop */
     manual_trains_limit?: number
-    /** only present if entity is locomotive or train-stop */
+    /** only present if entity is locomotive, train-stop or lamp */
     color?: ColorWithAlpha
+    /** only present if entity type is lamp */
+    always_on?: boolean
     /** only present if entity is locomotive, cargo_wagon or fluid_wagon */
     orientation?: number
     /** only present if entity is cargo_wagon */
@@ -301,8 +303,18 @@ export interface IEntity {
         /** post 2.0, only present if entity is constant-combinator */
         sections?: LogisticSections
 
-        /** only present if entity is small-lamp */
+        /** only present if entity type is lamp */
         use_colors?: boolean
+        /** only present if entity type is lamp */
+        color_mode?: defines.control_behavior.lamp.color_mode
+        /** only present if entity type is lamp */
+        red_signal?: ISignal
+        /** only present if entity type is lamp */
+        green_signal?: ISignal
+        /** only present if entity type is lamp */
+        blue_signal?: ISignal
+        /** only present if entity type is lamp */
+        rgb_signal?: ISignal
 
         /** only present if entity is of type inserter */
         circuit_set_filters?: boolean

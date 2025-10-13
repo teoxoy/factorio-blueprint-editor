@@ -421,13 +421,17 @@
                                 "type": "object",
                                 "required": ["r", "g", "b", "a"],
                                 "additionalProperties": false,
-                                "$comment": "only present if entity is locomotive or train-stop",
+                                "$comment": "only present if entity is locomotive, train-stop or lamp",
                                 "properties": {
                                     "r": { "type": "number" },
                                     "g": { "type": "number" },
                                     "b": { "type": "number" },
                                     "a": { "type": "number" }
                                 }
+                            },
+                            "always_on": {
+                                "type": "boolean",
+                                "$comment": "only present if entity type is lamp"
                             },
                             "orientation": {
                                 "type": "number",
@@ -658,7 +662,27 @@
                                     "use_colors": {
                                         "type": "boolean",
                                         "enum": [true],
-                                        "$comment": "only present if entity is small-lamp"
+                                        "$comment": "only present if entity type is lamp"
+                                    },
+                                    "color_mode": {
+                                        "type": "integer",
+                                        "$comment": "only present if entity type is lamp"
+                                    },
+                                    "red_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal",
+                                        "$comment": "only present if entity type is lamp"
+                                    },
+                                    "green_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal",
+                                        "$comment": "only present if entity type is lamp"
+                                    },
+                                    "blue_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal",
+                                        "$comment": "only present if entity type is lamp"
+                                    },
+                                    "rgb_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal",
+                                        "$comment": "only present if entity type is lamp"
                                     },
 
                                     "circuit_set_filters": {
