@@ -84,6 +84,32 @@ export interface BlueprintInsertPlan {
     items: ItemInventoryPositions
 }
 
+export interface LogisticFilter {
+    index: number
+    type?: SignalType
+    name?: string
+    quality?: string
+    comparator?: ComparatorString
+    count: number
+    max_count?: number
+    minimum_delivery_count?: number
+    import_from?: string
+}
+
+export interface LogisticSection {
+    index: number
+    filters?: LogisticFilter[]
+    group?: string
+    multiplier?: number
+    active?: number
+}
+
+export interface LogisticSections {
+    sections?: LogisticSection[]
+    trash_not_requested?: boolean
+    request_from_buffers?: boolean
+}
+
 export interface IDeciderCondition {
     comparator?: ComparatorString
     constant?: number
@@ -244,8 +270,10 @@ export interface IEntity {
     control_behavior?: {
         /** only present if entity is constant-combinator */
         is_on?: boolean
-        /** only present if entity is constant-combinator */
+        /** pre 2.0, only present if entity is constant-combinator */
         filters?: IConstantCombinatorFilter[]
+        /** post 2.0, only present if entity is constant-combinator */
+        sections?: LogisticSections
 
         /** only present if entity is small-lamp */
         use_colors?: boolean

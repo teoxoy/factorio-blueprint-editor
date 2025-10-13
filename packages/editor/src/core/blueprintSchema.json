@@ -93,6 +93,85 @@
                 }
             }
         },
+        "LogisticFilter": {
+            "type": "object",
+            "required": ["index", "count"],
+            "additionalProperties": false,
+            "properties": {
+                "index": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "itemFluidSignalName": true
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["item", "virtual", "fluid"]
+                },
+                "quality": {
+                    "type": "string"
+                },
+                "comparator": {
+                    "$ref": "blueprintSchema.json#/definitions/ComparatorString"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "max_count": {
+                    "type": "integer"
+                },
+                "minimum_delivery_count": {
+                    "type": "integer"
+                },
+                "import_from": {
+                    "type": "string"
+                }
+            }
+        },
+        "LogisticSection": {
+            "type": "object",
+            "required": ["index"],
+            "additionalProperties": false,
+            "properties": {
+                "index": {
+                    "type": "integer"
+                },
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "blueprintSchema.json#/definitions/LogisticFilter"
+                    }
+                },
+                "group": {
+                    "type": "string"
+                },
+                "multiplier": {
+                    "type": "number"
+                },
+                "active": {
+                    "type": "number"
+                }
+            }
+        },
+        "LogisticSections": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "sections": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "blueprintSchema.json#/definitions/LogisticSection"
+                    }
+                },
+                "trash_not_requested": {
+                    "type": "boolean"
+                },
+                "request_from_buffers": {
+                    "type": "boolean"
+                }
+            }
+        },
         "wireColor": {
             "type": "array",
             "items": {
@@ -521,6 +600,9 @@
                                                 }
                                             }
                                         }
+                                    },
+                                    "sections": {
+                                        "$ref": "blueprintSchema.json#/definitions/LogisticSections"
                                     },
 
                                     "use_colors": {
