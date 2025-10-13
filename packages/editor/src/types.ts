@@ -385,6 +385,8 @@ export interface IEntity {
 
         /** only present if entity is stone-wall or accumulator */
         output_signal?: ISignal
+        /** only present if entity type is accumulator */
+        read_charge?: boolean
 
         /** only present if entity is programmable-speaker */
         circuit_parameters?: {
