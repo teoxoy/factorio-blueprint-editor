@@ -7,6 +7,8 @@ import {
     InventoryPosition,
     IPoint,
     ISchedule,
+    LogisticFilter,
+    LogisticSection,
     SignalType,
 } from '../types'
 import G from '../common/globals'
@@ -233,6 +235,20 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             e.control_behavior.read_items_mode = e.control_behavior.read_logistics
                                 ? FD.defines.control_behavior.roboport.read_items_mode.logistics
                                 : FD.defines.control_behavior.roboport.read_items_mode.none
+                        }
+                        if (
+                            e.control_behavior &&
+                            e.control_behavior.filters !== undefined &&
+                            !e.control_behavior.sections
+                        ) {
+                            const filters: LogisticFilter[] = e.control_behavior.filters.map(f => ({
+                                index: f.index,
+                                type: f.signal.type,
+                                name: f.signal.name,
+                                count: f.count,
+                            }))
+                            const section: LogisticSection = { index: 0, filters }
+                            e.control_behavior.sections = { sections: [section] }
                         }
                         return this.createEntity({
                             ...e,
