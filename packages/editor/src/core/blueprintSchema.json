@@ -556,6 +556,11 @@
                                         "$comment": "0 = pulse, 1 = hold, only present if entity is of type transport-belt and circuit_read_hand_contents is true"
                                     },
 
+                                    "circuit_mode_of_operation": {
+                                        "type": "integer",
+                                        "$comment": "only present if entity is cargo landing pad, buffer-chest or requester-chest"
+                                    },
+
                                     "read_logistics": {
                                         "type": "boolean",
                                         "$comment": "only present if entity is roboport"
@@ -564,11 +569,6 @@
                                         "type": "boolean",
                                         "$comment": "only present if entity is roboport"
                                     },
-                                    "circuit_mode_of_operation": {
-                                        "type": "integer",
-                                        "$comment": "only present if entity is roboport or buffer-chest or requester-chest or of type inserter(3)????????????????"
-                                    },
-
                                     "available_logistic_output_signal": {
                                         "$ref": "blueprintSchema.json#/definitions/signal"
                                     },

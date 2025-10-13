@@ -262,8 +262,10 @@ export interface IEntity {
         /** 0 = pulse, 1 = hold, only present if entity is of type transport-belt and circuit_read_hand_contents is true */
         circuit_contents_read_mode?: 0 | 1
 
-        /** only present if entity is roboport or buffer-chest or requester-chest or of type inserter(3)???????????????? */
-        circuit_mode_of_operation?: number
+        /** only present if entity is cargo landing pad, buffer-chest or requester-chest */
+        circuit_mode_of_operation?:
+            | defines.control_behavior.cargo_landing_pad.exclusive_mode
+            | defines.control_behavior.logistic_container.exclusive_mode
 
         available_logistic_output_signal?: ISignal
         total_logistic_output_signal?: ISignal
