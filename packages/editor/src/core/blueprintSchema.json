@@ -823,6 +823,7 @@
                                     "output_signal": {
                                         "$ref": "blueprintSchema.json#/definitions/signal"
                                     },
+                                    "read_charge": { "type": "boolean" },
 
                                     "circuit_parameters": {
                                         "type": "object",
