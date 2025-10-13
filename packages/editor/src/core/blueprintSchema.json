@@ -471,6 +471,10 @@
                                 "enum": ["whitelist", "blacklist"],
                                 "$comment": "only present if entity is of type inserter"
                             },
+                            "use_filters": {
+                                "type": "boolean",
+                                "$comment": "only present if entity is of type inserter"
+                            },
                             "filters": {
                                 "type": "array",
                                 "$comment": "only present if entity is of type inserter or loader",
