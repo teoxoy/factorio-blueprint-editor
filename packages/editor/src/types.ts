@@ -30,9 +30,16 @@ export interface ICondition {
     second_signal?: ISignal
 }
 
-export interface IFilter {
+export interface ItemFilter {
     index: number
     name: string
+    quality?: string
+    comparator?: ComparatorString
+}
+
+export interface InventoryWithFilters {
+    bar?: number
+    filters?: ItemFilter[]
 }
 
 export interface IWireColor {
@@ -226,9 +233,7 @@ export interface IEntity {
     /** only present if entity is locomotive, cargo_wagon or fluid_wagon */
     orientation?: number
     /** only present if entity is cargo_wagon */
-    inventory?: {
-        filters: IFilter[]
-    }
+    inventory?: InventoryWithFilters
 
     /** only present if entity is power-switch */
     switch_state?: boolean
@@ -243,8 +248,8 @@ export interface IEntity {
     filter_mode?: FilterMode
     /** only present if entity is of type inserter */
     use_filters?: boolean
-    /** only present if entity is of type inserter or loader */
-    filters?: IFilter[]
+    /** only present if entity is of type container, infinity-container, logistic-container, inserter or loader */
+    filters?: ItemFilter[]
     /**
      * post 2.0 format is LogisticSections,
      * pre 2.0 is array of filters

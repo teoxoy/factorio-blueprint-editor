@@ -274,7 +274,7 @@
                 "second_signal": { "$ref": "blueprintSchema.json#/definitions/signal" }
             }
         },
-        "filter": {
+        "ItemFilter": {
             "type": "object",
             "required": ["index", "name"],
             "additionalProperties": false,
@@ -283,6 +283,25 @@
                 "name": {
                     "type": "string",
                     "itemName": true
+                },
+                "quality": {
+                    "type": "string"
+                },
+                "comparator": {
+                    "$ref": "blueprintSchema.json#/definitions/ComparatorString"
+                }
+            }
+        },
+        "InventoryWithFilters": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "bar": { "type": "integer" },
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "blueprintSchema.json#/definitions/ItemFilter"
+                    }
                 }
             }
         },
@@ -491,16 +510,8 @@
                                 "$comment": "only present if entity is locomotive, cargo_wagon or fluid_wagon"
                             },
                             "inventory": {
-                                "type": "object",
-                                "$comment": "only present if entity is cargo_wagon",
-                                "properties": {
-                                    "filters": {
-                                        "type": "array",
-                                        "items": {
-                                            "$ref": "blueprintSchema.json#/definitions/filter"
-                                        }
-                                    }
-                                }
+                                "$ref": "blueprintSchema.json#/definitions/InventoryWithFilters",
+                                "$comment": "only present if entity is cargo_wagon"
                             },
 
                             "switch_state": {
@@ -534,8 +545,8 @@
                             },
                             "filters": {
                                 "type": "array",
-                                "$comment": "only present if entity is of type inserter or loader",
-                                "items": { "$ref": "blueprintSchema.json#/definitions/filter" }
+                                "$comment": "only present if entity is of type container, infinity-container, logistic-container, inserter or loader",
+                                "items": { "$ref": "blueprintSchema.json#/definitions/ItemFilter" }
                             },
                             "request_filters": {
                                 "oneOf": [
