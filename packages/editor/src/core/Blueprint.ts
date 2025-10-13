@@ -225,6 +225,15 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                                 ? 'global'
                                 : 'local'
                         }
+                        if (
+                            e.control_behavior &&
+                            e.control_behavior.read_logistics !== undefined &&
+                            !e.control_behavior.read_items_mode
+                        ) {
+                            e.control_behavior.read_items_mode = e.control_behavior.read_logistics
+                                ? FD.defines.control_behavior.roboport.read_items_mode.logistics
+                                : FD.defines.control_behavior.roboport.read_items_mode.none
+                        }
                         return this.createEntity({
                             ...e,
                             direction,
