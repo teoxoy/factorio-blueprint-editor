@@ -255,6 +255,15 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             delete e.control_behavior.filters
                         }
                         if (
+                            e.control_behavior &&
+                            e.control_behavior.circuit_enable_disable !== undefined &&
+                            e.control_behavior.circuit_enabled === undefined
+                        ) {
+                            e.control_behavior.circuit_enabled =
+                                e.control_behavior.circuit_enable_disable
+                            delete e.control_behavior.circuit_enable_disable
+                        }
+                        if (
                             e.auto_launch !== undefined &&
                             e.launch_to_orbit_automatically === undefined
                         ) {

@@ -303,8 +303,6 @@ export interface IEntity {
 
         /** only present if entity is small-lamp */
         use_colors?: boolean
-        /** only present if entity is of type mining-drill or transport-belt or train-stop */
-        circuit_enable_disable?: boolean
 
         /** only present if entity is of type inserter */
         circuit_set_filters?: boolean
@@ -390,6 +388,12 @@ export interface IEntity {
         /** only present if entity is arithmetic-combinator */
         arithmetic_conditions?: IArithmeticCondition
 
+        /** pre 2.0 - only present if entity is of type mining-drill or transport-belt or train-stop */
+        circuit_enable_disable?: boolean
+        /** post 2.0 - present on most entity types */
+        circuit_enabled?: boolean
+        /** post 2.0 - only present if entity is of type logistic-container or infinity-container */
+        circuit_condition_enabled?: boolean
         /**
          *  only present if entity is pump, offshore-pump, rail-signal, train-stop, small-lamp,
          *  power-switch, stone-wall, programmable-speaker or of type: inserter, transport-belt or mining-drill
