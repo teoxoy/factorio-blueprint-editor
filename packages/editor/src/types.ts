@@ -476,6 +476,47 @@ export interface IEntity {
          */
         logistic_condition?: ICondition
     }
+
+    // `BlueprintEntity` added in v2.0.61
+    // - 62, 63 no changes
+    // - 64 documents new keys and fixes old ones
+    // - 65, 66 no changes
+    // - 67 type fixes + control_behavior for splitter
+    // - 68, 69 no changes
+
+    // remaining keys of BlueprintEntity from 'factorio:runtime'
+    // mirror: unknown
+    // quality: unknown
+    // tags: unknown
+    // wires: unknown
+    // burner_fuel_inventory: unknown
+    // player_description: unknown
+    // enable_logistics_while_moving: unknown
+    // grid: unknown
+    // copy_color_from_train_stop: unknown
+    // 'result-inventory': unknown
+    // 'chunk-filter': unknown
+    // trunk_inventory: unknown
+    // ammo_inventory: unknown
+    // driver_is_main_gunner: unknown
+    // selected_gun_index: unknown
+    // text: unknown
+    // icon: unknown
+    // always_show: unknown
+    // show_in_chart: unknown
+    // spoil_priority: unknown
+    // drop_position: unknown
+    // pickup_position: unknown
+    // belt_link: unknown
+    // link_id: unknown
+    // belt_stack_size_override: unknown
+    // schedule: unknown
+    // fluid_filter: unknown
+    // request_missing_construction_materials: unknown
+    // automatic_targeting_parameters: unknown
+    // label: unknown
+    // priority: unknown
+    // valve_threshold_override: unknown
 }
 
 export interface ITile {
@@ -558,3 +599,75 @@ export interface IBlueprintBook {
     description?: string
     icons?: IIcon[]
 }
+
+// used to explore remaining control_behavior properties:
+
+// import {
+//     BlueprintEntity,
+//     AccumulatorBlueprintControlBehavior,
+//     AgriculturalTowerBlueprintControlBehavior,
+//     TurretBlueprintControlBehavior,
+//     ArithmeticCombinatorBlueprintControlBehavior,
+//     ArtilleryTurretBlueprintControlBehavior,
+//     AssemblingMachineBlueprintControlBehavior,
+//     AsteroidCollectorBlueprintControlBehavior,
+//     CargoLandingPadBlueprintControlBehavior,
+//     ConstantCombinatorBlueprintControlBehavior,
+//     ContainerBlueprintControlBehavior,
+//     DeciderCombinatorBlueprintControlBehavior,
+//     DisplayPanelBlueprintControlBehavior,
+//     FurnaceBlueprintControlBehavior,
+//     LogisticContainerBlueprintControlBehavior,
+//     InserterBlueprintControlBehavior,
+//     MiningDrillBlueprintControlBehavior,
+//     PowerSwitchBlueprintControlBehavior,
+//     ProgrammableSpeakerBlueprintControlBehavior,
+//     ProxyContainerBlueprintControlBehavior,
+//     PumpBlueprintControlBehavior,
+//     RailSignalBaseBlueprintControlBehavior,
+//     ReactorBlueprintControlBehavior,
+//     RoboportBlueprintControlBehavior,
+//     RocketSiloBlueprintControlBehavior,
+//     SelectorCombinatorParameters,
+//     SpacePlatformHubBlueprintControlBehavior,
+//     SplitterBlueprintControlBehavior,
+//     StorageTankBlueprintControlBehavior,
+//     TrainStopBlueprintControlBehavior,
+//     TransportBeltBlueprintControlBehavior,
+//     WallBlueprintControlBehavior,
+// } from 'factorio:runtime'
+
+// type KeysOfUnion<T> = T extends T ? keyof T : never
+// type Test = Exclude<KeysOfUnion<ControlBehavior>, keyof IEntity['control_behavior']>
+// type ControlBehavior =
+//     | AccumulatorBlueprintControlBehavior
+//     | AgriculturalTowerBlueprintControlBehavior
+//     | TurretBlueprintControlBehavior
+//     | ArithmeticCombinatorBlueprintControlBehavior
+//     | ArtilleryTurretBlueprintControlBehavior
+//     | AssemblingMachineBlueprintControlBehavior
+//     | AsteroidCollectorBlueprintControlBehavior
+//     | CargoLandingPadBlueprintControlBehavior
+//     | ConstantCombinatorBlueprintControlBehavior
+//     | ContainerBlueprintControlBehavior
+//     | DeciderCombinatorBlueprintControlBehavior
+//     | DisplayPanelBlueprintControlBehavior
+//     | FurnaceBlueprintControlBehavior
+//     | LogisticContainerBlueprintControlBehavior
+//     | InserterBlueprintControlBehavior
+//     | MiningDrillBlueprintControlBehavior
+//     | PowerSwitchBlueprintControlBehavior
+//     | ProgrammableSpeakerBlueprintControlBehavior
+//     | ProxyContainerBlueprintControlBehavior
+//     | PumpBlueprintControlBehavior
+//     | RailSignalBaseBlueprintControlBehavior
+//     | ReactorBlueprintControlBehavior
+//     | RoboportBlueprintControlBehavior
+//     | RocketSiloBlueprintControlBehavior
+//     | SelectorCombinatorParameters
+//     | SpacePlatformHubBlueprintControlBehavior
+//     | SplitterBlueprintControlBehavior
+//     | StorageTankBlueprintControlBehavior
+//     | TrainStopBlueprintControlBehavior
+//     | TransportBeltBlueprintControlBehavior
+//     | WallBlueprintControlBehavior
