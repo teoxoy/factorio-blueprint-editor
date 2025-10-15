@@ -259,7 +259,7 @@ export class Entity extends EventEmitter<EntityEvents> {
 
         return Object.keys(FD.recipes)
             .map(k => FD.recipes[k])
-            .filter(recipe => e.crafting_categories.includes(recipe.category))
+            .filter(recipe => e.crafting_categories.includes(recipe.category || 'crafting'))
             .map(recipe => recipe.name)
     }
 
