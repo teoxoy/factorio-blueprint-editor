@@ -1,5 +1,5 @@
 import util from '../common/util'
-import { ArithmeticOperation, ComparatorString, IPoint } from '../types'
+import { ArithmeticOperation, ComparatorString, IPoint, ISignal } from '../types'
 import FD, {
     ColorWithAlpha,
     getHeatBuffer,
@@ -113,6 +113,7 @@ interface IDrawData {
     position: IPoint
     generateConnector: boolean
 
+    displayPanelIcon: undefined | ISignal
     assemblerHasFluidInputs: boolean
     assemblerHasFluidOutputs: boolean
     dirType: string
@@ -154,7 +155,7 @@ function generateConnection(e: EntityWithOwnerPrototype, data: IDrawData): reado
     const getBeltConnectionIndex = () =>
         getBeltWireConnectionIndex(data.positionGrid, data.position, data.dir)
     const cc = getCircuitConnector(e, data.dir, isLoaderInputting, getBeltConnectionIndex)
-    if (cc) {
+    if (cc?.sprites) {
         const ccs = cc.sprites
         return [ccs.connector_main, ccs.wire_pins, ccs.led_blue_off]
     }
@@ -1083,7 +1084,33 @@ function draw_decider_combinator(
     }
 }
 function draw_display_panel(e: DisplayPanelPrototype): (data: IDrawData) => readonly SpriteData[] {
-    throw new Error('Not implemented!')
+    return (data: IDrawData) => {
+        const out = [...e.sprites[util.getDirName(data.dir)].layers]
+        if (data.displayPanelIcon && data.displayPanelIcon.name) {
+            // TODO: move this out
+            const map = () => {
+                switch (data.displayPanelIcon.type) {
+                    case undefined:
+                    case 'item':
+                        return FD.items
+                    case 'fluid':
+                        return FD.fluids
+                    case 'virtual':
+                        return FD.signals
+                    default:
+                        throw new Error('Missing signal type mapping!')
+                }
+            }
+            const s = map()[data.displayPanelIcon.name]
+            out.push({
+                filename: s.icon,
+                size: s.icon_size || 64,
+                scale: 0.5 * (e.icon_draw_specification?.scale || 1),
+                shift: e.icon_draw_specification?.shift,
+            })
+        }
+        return out
+    }
 }
 function draw_electric_energy_interface(
     e: ElectricEnergyInterfacePrototype

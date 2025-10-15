@@ -1,5 +1,5 @@
 import { BLEND_MODES, Sprite, Texture } from 'pixi.js'
-import { ArithmeticOperation, ComparatorString, IPoint } from '../types'
+import { ArithmeticOperation, ComparatorString, IPoint, ISignal } from '../types'
 import G from '../common/globals'
 import F from '../UI/controls/functions'
 import { Entity } from '../core/Entity'
@@ -16,6 +16,7 @@ interface IEntityData {
     generateConnector?: boolean
     directionType?: string
     operator?: undefined | ComparatorString | ArithmeticOperation
+    displayPanelIcon?: undefined | ISignal
     assemblerHasFluidInputs?: boolean
     assemblerHasFluidOutputs?: boolean
     trainStopColor?: ColorWithAlpha
@@ -114,6 +115,7 @@ export class EntitySprite extends Sprite {
 
             dirType: entity.directionType,
             operator: entity.operator,
+            displayPanelIcon: entity.displayPanelIcon,
             assemblerHasFluidInputs: entity.assemblerHasFluidInputs,
             assemblerHasFluidOutputs: entity.assemblerHasFluidOutputs,
             trainStopColor: entity.trainStopColor,

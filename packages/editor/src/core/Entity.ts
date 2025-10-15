@@ -972,6 +972,11 @@ export class Entity extends EventEmitter<EntityEvents> {
         */
     }
 
+    public get displayPanelIcon(): ISignal {
+        if (this.type !== 'display-panel') return undefined
+        return this.m_rawEntity.icon || this.m_rawEntity.control_behavior?.parameters?.[0]?.icon
+    }
+
     public get mayCraftWithFluid(): boolean {
         const e = this.entityData
         if (!isCraftingMachine(e)) return false

@@ -589,6 +589,7 @@ export function getPossibleRotations(
         case 'infinity-cargo-wagon':
         case 'fluid-wagon':
         case 'locomotive':
+        case 'display-panel':
             return [0, 4, 8, 12]
         case 'storage-tank':
         case 'fusion-reactor': {
