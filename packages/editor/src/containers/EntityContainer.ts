@@ -169,8 +169,8 @@ export class EntityContainer {
                 updates: ['fluid_box', 'output_fluid_box', 'fluid_boxes'],
             },
             {
-                is: ['stone-wall', 'gate', 'legacy-straight-rail'],
-                updates: ['stone-wall', 'gate', 'legacy-straight-rail'],
+                is: ['stone-wall', 'gate', 'legacy-straight-rail', 'straight-rail'],
+                updates: ['stone-wall', 'gate', 'legacy-straight-rail', 'straight-rail'],
             },
         ]
 
@@ -299,7 +299,10 @@ export class EntityContainer {
             w: this.m_Entity.size.x,
             h: this.m_Entity.size.y,
         }
-        if (this.m_Entity.type === 'legacy-straight-rail') {
+        if (
+            this.m_Entity.type === 'legacy-straight-rail' ||
+            this.m_Entity.type === 'straight-rail'
+        ) {
             G.bp.entityPositionGrid
                 .getEntitiesInArea(area)
                 .filter(e => e.type === 'gate')

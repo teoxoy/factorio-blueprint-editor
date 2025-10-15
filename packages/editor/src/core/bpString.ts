@@ -103,7 +103,7 @@ const nameMigrations: Record<string, string> = {
     '"effectivity-module-2"': '"efficiency-module-2"',
     '"effectivity-module-3"': '"efficiency-module-3"',
     '"used-up-uranium-fuel-cell"': '"depleted-uranium-fuel-cell"',
-    '"straight-rail"': '"legacy-straight-rail"',
+    // '"straight-rail"': '"legacy-straight-rail"', -- must be done later since straight-rail are still in the game post 2.0
     '"curved-rail"': '"legacy-curved-rail"',
     '"logistic-chest-storage"': '"storage-chest"',
     '"logistic-chest-buffer"': '"buffer-chest"',

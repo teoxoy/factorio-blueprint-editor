@@ -509,6 +509,9 @@ export function getEntitySize(e: EntityWithOwnerPrototype, dir: number = 0): IPo
     if (w === h) {
         return { x: w, y: h }
     } else {
+        if (e.type === 'curved-rail-a' || e.type === 'curved-rail-b') {
+            dir = Math.floor((dir % 8) / 4) * 4
+        }
         switch (dir) {
             case 0:
             case 8:

@@ -184,6 +184,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             const y = Math.round(e.position.y + offset.y - size.y) + size.y
                             position = { x, y }
                         }
+                        if (pre_2_0 && e.name === 'straight-rail') {
+                            e.name = 'legacy-straight-rail'
+                        }
                         let items: BlueprintInsertPlan[]
                         if (e.items) {
                             if (!Array.isArray(e.items)) {
@@ -485,9 +488,17 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
 
     public getFirstRailRelatedEntityPos(): IPoint | undefined {
         for (const [, e] of this.entities) {
-            if (e.type === 'legacy-straight-rail') return e.position
-            if (e.type === 'train-stop') return e.position
-            if (e.type === 'legacy-curved-rail') return { x: e.position.x - 1, y: e.position.y - 1 }
+            switch (e.type) {
+                case 'legacy-straight-rail':
+                case 'straight-rail':
+                case 'half-diagonal-rail':
+                case 'curved-rail-a':
+                case 'curved-rail-b':
+                case 'train-stop':
+                    return e.position
+                case 'legacy-curved-rail':
+                    return { x: e.position.x - 1, y: e.position.y - 1 }
+            }
         }
         return undefined
     }
