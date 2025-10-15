@@ -29,6 +29,7 @@ import { PaintWireContainer } from './PaintWireContainer'
 import { Axis, IllegalFlipError, PaintContainer } from './PaintContainer'
 import { PaintBlueprintContainer } from './PaintBlueprintContainer'
 import { GridData } from './GridData'
+import { WiresPanel } from '../UI/WiresPanel'
 
 export enum GridPattern {
     CHECKER = 'checker',
@@ -898,7 +899,7 @@ export class BlueprintContainer extends Container {
 
         if (typeof itemNameOrEntities === 'string') {
             const itemData = FD.items[itemNameOrEntities]
-            const wireResult = itemData.wire_count && itemNameOrEntities
+            const wireResult = WiresPanel.Wires.includes(itemNameOrEntities) && itemNameOrEntities
             const tileResult = itemData.place_as_tile && itemData.place_as_tile.result
             const placeResult = itemData.place_result || tileResult || wireResult
 
