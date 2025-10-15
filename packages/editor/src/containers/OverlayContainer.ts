@@ -197,16 +197,16 @@ export class OverlayContainer extends Container {
             entityInfo.addChild(filterInfo)
         }
 
-        if (entity.constantCombinatorFilters !== undefined) {
-            const filters = entity.constantCombinatorFilters.filter(f => !!f.signal.name)
+        const constantCombinatorFilters = entity.constantCombinatorFilters
+        if (constantCombinatorFilters.length > 0) {
             const filterInfo = new Container()
-            for (let i = 0; i < filters.length; i++) {
+            for (let i = 0; i < constantCombinatorFilters.length; i++) {
                 if (i === 4) {
                     break
                 }
-                createIconWithBackground(filterInfo, filters[i].signal.name, {
-                    x: (i % 2) * 32 - (filters.length === 1 ? 0 : 16),
-                    y: filters.length < 3 ? 0 : (i < 2 ? -1 : 1) * 16,
+                createIconWithBackground(filterInfo, constantCombinatorFilters[i], {
+                    x: (i % 2) * 32 - (constantCombinatorFilters.length === 1 ? 0 : 16),
+                    y: constantCombinatorFilters.length < 3 ? 0 : (i < 2 ? -1 : 1) * 16,
                 })
             }
             filterInfo.scale.set(0.5, 0.5)
@@ -214,7 +214,9 @@ export class OverlayContainer extends Container {
         }
 
         const combinatorConditions =
-            entity.deciderCombinatorConditions || entity.arithmeticCombinatorConditions
+            entity.type === 'decider-combinator'
+                ? entity.deciderCombinatorConditions
+                : entity.arithmeticCombinatorConditions
         if (combinatorConditions) {
             const filterInfo = new Container()
             const cFS = combinatorConditions.first_signal

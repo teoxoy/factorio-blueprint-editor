@@ -1,5 +1,5 @@
 import util from '../common/util'
-import { IPoint } from '../types'
+import { ArithmeticOperation, ComparatorString, IPoint } from '../types'
 import FD, {
     ColorWithAlpha,
     getHeatBuffer,
@@ -118,7 +118,7 @@ interface IDrawData {
     assemblerHasFluidInputs: boolean
     assemblerHasFluidOutputs: boolean
     dirType: string
-    operator: string
+    operator: undefined | ComparatorString | ArithmeticOperation
     trainStopColor: ColorWithAlpha
     modules: (string | undefined)[]
 }
@@ -838,7 +838,7 @@ function draw_arithmetic_combinator(
     e: ArithmeticCombinatorPrototype
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
-        const operatorToSpriteData = (operator: string): Sprite4Way => {
+        const operatorToSpriteData = (operator: ArithmeticOperation): Sprite4Way => {
             switch (operator) {
                 case '+':
                     return e.plus_symbol_sprites
@@ -868,7 +868,11 @@ function draw_arithmetic_combinator(
         }
         const out = [...e.sprites[util.getDirName(data.dir)].layers]
         if (data.operator) {
-            out.push(operatorToSpriteData(data.operator)[util.getDirName(data.dir)])
+            out.push(
+                operatorToSpriteData(data.operator as ArithmeticOperation)[
+                    util.getDirName(data.dir)
+                ]
+            )
         }
         return out
     }
@@ -1062,7 +1066,7 @@ function draw_decider_combinator(
     e: DeciderCombinatorPrototype
 ): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
-        const operatorToSpriteData = (operator: string): Sprite4Way => {
+        const operatorToSpriteData = (operator: ComparatorString): Sprite4Way => {
             switch (operator) {
                 case '<':
                     return e.less_symbol_sprites
@@ -1082,7 +1086,9 @@ function draw_decider_combinator(
         }
         const out = [...e.sprites[util.getDirName(data.dir)].layers]
         if (data.operator) {
-            out.push(operatorToSpriteData(data.operator)[util.getDirName(data.dir)])
+            out.push(
+                operatorToSpriteData(data.operator as ComparatorString)[util.getDirName(data.dir)]
+            )
         }
         return out
     }

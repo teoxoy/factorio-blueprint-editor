@@ -21,6 +21,7 @@ export interface ISignal {
     type?: SignalType
 }
 
+/** If not specified, defaults to "<" */
 export type ComparatorString = '<' | '>' | '≤' | '≥' | '=' | '≠'
 
 export interface ICondition {
@@ -170,6 +171,7 @@ export interface IDeciderCondition {
     outputs?: DeciderCombinatorOutput[]
 }
 
+/** When not specified, defaults to "*". */
 export type ArithmeticOperation =
     | '+'
     | '-'

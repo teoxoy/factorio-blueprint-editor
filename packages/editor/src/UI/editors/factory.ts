@@ -57,12 +57,13 @@ export function createEditor(entity: Entity): Editor {
             break
         }
         // Chests
-        case 'buffer-chest':
-        case 'requester-chest':
-        case 'storage-chest': {
-            editor = new ChestEditor(entity)
-            break
-        }
+        // TODO: update using sections
+        // case 'buffer-chest':
+        // case 'requester-chest':
+        // case 'storage-chest': {
+        //     editor = new ChestEditor(entity)
+        //     break
+        // }
         // Temp
         case 'lab':
         case 'electric-furnace':
