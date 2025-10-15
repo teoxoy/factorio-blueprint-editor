@@ -1,5 +1,5 @@
 import { BLEND_MODES, Sprite, Texture } from 'pixi.js'
-import { IPoint } from '../types'
+import { ArithmeticOperation, ComparatorString, IPoint } from '../types'
 import G from '../common/globals'
 import F from '../UI/controls/functions'
 import { Entity } from '../core/Entity'
@@ -15,7 +15,7 @@ interface IEntityData {
     position?: IPoint
     generateConnector?: boolean
     directionType?: string
-    operator?: string
+    operator?: undefined | ComparatorString | ArithmeticOperation
     assemblerHasFluidInputs?: boolean
     assemblerHasFluidOutputs?: boolean
     trainStopColor?: ColorWithAlpha

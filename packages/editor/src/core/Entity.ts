@@ -1,13 +1,13 @@
 import EventEmitter from 'eventemitter3'
 import {
-    IArithmeticCondition,
-    IConstantCombinatorFilter,
-    IDeciderCondition,
     IEntity,
     IPoint,
     FilterPriority,
     FilterMode,
     DirectionType,
+    ComparatorString,
+    ArithmeticOperation,
+    ISignal,
 } from '../types'
 import util from '../common/util'
 import { IllegalFlipError } from '../containers/PaintContainer'
@@ -482,7 +482,13 @@ export class Entity extends EventEmitter<EntityEvents> {
     /** Splitter filter */
     private get splitterFilter(): IFilter[] {
         if (!this.m_rawEntity.filter) return []
-        return [{ index: 1, name: this.m_rawEntity.filter }]
+        if (typeof this.m_rawEntity.filter === 'string') {
+            throw new Error('pre 2.0 format!')
+        }
+        if (this.m_rawEntity.filter.name) {
+            return [{ index: 1, name: this.m_rawEntity.filter.name }]
+        }
+        return []
     }
     private set splitterFilter(filters: IFilter[]) {
         const filter = filters === undefined ? undefined : filters[0].name
@@ -490,8 +496,10 @@ export class Entity extends EventEmitter<EntityEvents> {
 
         this.m_BP.history.startTransaction()
 
+        const f = { name: filter }
+
         this.m_BP.history
-            .updateValue(this.m_rawEntity, 'filter', filter, 'Change splitter filter')
+            .updateValue(this.m_rawEntity, 'filter', f, 'Change splitter filter')
             .onDone(() => this.emit('splitterFilter'))
             .onDone(() => this.emit('filters'))
             .commit()
@@ -535,17 +543,31 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     /** Logistic chest filters */
     private get logisticChestFilters(): IFilter[] {
-        return this.m_rawEntity.request_filters || []
+        if (!this.m_rawEntity.request_filters) return []
+        if (Array.isArray(this.m_rawEntity.request_filters)) {
+            throw new Error('pre 2.0 format!')
+        }
+        const sections = this.m_rawEntity.request_filters.sections
+        if (!sections || !sections[0] || !sections[0].filters) return []
+
+        const out = []
+        for (const filter of sections[0].filters) {
+            if (!filter.name) continue
+            out.push(filter)
+        }
+        return out
     }
     private set logisticChestFilters(filters: IFilter[]) {
-        if (filters === undefined && this.m_rawEntity.request_filters === undefined) return
-        if (util.areArraysEquivalent(filters, this.m_rawEntity.request_filters)) return
+        throw new Error('TODO: set logisticChestFilters')
 
-        this.m_BP.history
-            .updateValue(this.m_rawEntity, 'request_filters', filters, 'Change chest filter')
-            .onDone(() => this.emit('logisticChestFilters'))
-            .onDone(() => this.emit('filters'))
-            .commit()
+        // if (filters === undefined && this.m_rawEntity.request_filters === undefined) return
+        // if (util.areArraysEquivalent(filters, this.m_rawEntity.request_filters)) return
+
+        // this.m_BP.history
+        //     .updateValue(this.m_rawEntity, 'request_filters', filters, 'Change chest filter')
+        //     .onDone(() => this.emit('logisticChestFilters'))
+        //     .onDone(() => this.emit('filters'))
+        //     .commit()
     }
 
     private get infinityChestFilters(): IFilter[] {
@@ -560,16 +582,28 @@ export class Entity extends EventEmitter<EntityEvents> {
 
     /** Requester chest - request from buffer chest */
     public get requestFromBufferChest(): boolean {
-        return this.m_rawEntity.request_from_buffers
+        if (
+            this.m_rawEntity.request_from_buffers ||
+            Array.isArray(this.m_rawEntity.request_filters)
+        ) {
+            throw new Error('pre 2.0 format!')
+        }
+        return this.m_rawEntity.request_filters.request_from_buffers
     }
     public set requestFromBufferChest(request: boolean) {
-        if (this.m_rawEntity.request_from_buffers === request) return
+        if (this.requestFromBufferChest === request) return
+
+        const obj = util.duplicate(this.m_rawEntity.request_filters) || {}
+        if (Array.isArray(obj)) {
+            throw new Error('pre 2.0 format!')
+        }
+        obj.request_from_buffers = request
 
         this.m_BP.history
             .updateValue(
                 this.m_rawEntity,
-                'request_from_buffers',
-                request,
+                'request_filters',
+                obj,
                 'Change request from buffer chest'
             )
             .onDone(() => this.emit('requestFromBufferChest'))
@@ -588,22 +622,37 @@ export class Entity extends EventEmitter<EntityEvents> {
         return null
     }
 
-    public get constantCombinatorFilters(): IConstantCombinatorFilter[] {
-        return this.m_rawEntity.control_behavior === undefined
-            ? undefined
-            : this.m_rawEntity.control_behavior.filters
+    public get constantCombinatorFilters(): string[] {
+        return (this.m_rawEntity.control_behavior?.sections?.sections || [])
+            .flatMap(f => f.filters)
+            .filter(f => f?.name)
+            .map(f => f.name)
     }
 
-    public get deciderCombinatorConditions(): IDeciderCondition {
-        return this.m_rawEntity.control_behavior === undefined
-            ? undefined
-            : this.m_rawEntity.control_behavior.decider_conditions
+    public get deciderCombinatorConditions(): {
+        first_signal?: ISignal
+        second_signal?: ISignal
+        output_signal?: ISignal
+    } {
+        const decider_conditions = this.m_rawEntity.control_behavior?.decider_conditions
+        return {
+            first_signal: decider_conditions?.conditions?.[0].first_signal,
+            second_signal: decider_conditions?.conditions?.[0].second_signal,
+            output_signal: decider_conditions?.outputs?.[0].signal,
+        }
     }
 
-    public get arithmeticCombinatorConditions(): IArithmeticCondition {
-        return this.m_rawEntity.control_behavior === undefined
-            ? undefined
-            : this.m_rawEntity.control_behavior.arithmetic_conditions
+    public get arithmeticCombinatorConditions(): {
+        first_signal?: ISignal
+        second_signal?: ISignal
+        output_signal?: ISignal
+    } {
+        const arithmetic_conditions = this.m_rawEntity.control_behavior?.arithmetic_conditions
+        return {
+            first_signal: arithmetic_conditions?.first_signal,
+            second_signal: arithmetic_conditions?.second_signal,
+            output_signal: arithmetic_conditions?.output_signal,
+        }
     }
 
     public get generateConnector(): boolean {
@@ -611,10 +660,7 @@ export class Entity extends EventEmitter<EntityEvents> {
     }
 
     private get connectToLogisticNetwork(): boolean {
-        return (
-            this.m_rawEntity.control_behavior &&
-            this.m_rawEntity.control_behavior.connect_to_logistic_network
-        )
+        return !!this.m_rawEntity.control_behavior?.connect_to_logistic_network
     }
 
     private get hasConnections(): boolean {
@@ -653,22 +699,15 @@ export class Entity extends EventEmitter<EntityEvents> {
             .commit()
     }
 
-    public get operator(): string {
+    public get operator(): undefined | ComparatorString | ArithmeticOperation {
         if (this.type === 'decider-combinator') {
-            const cb = this.m_rawEntity.control_behavior
-            if (cb) {
-                return cb.decider_conditions === undefined
-                    ? undefined
-                    : cb.decider_conditions.comparator
-            }
+            return (
+                this.m_rawEntity.control_behavior?.decider_conditions?.conditions?.[0].comparator ||
+                '<'
+            )
         }
         if (this.type === 'arithmetic-combinator') {
-            const cb = this.m_rawEntity.control_behavior
-            if (cb) {
-                return cb.arithmetic_conditions === undefined
-                    ? undefined
-                    : cb.arithmetic_conditions.operation
-            }
+            return this.m_rawEntity.control_behavior?.arithmetic_conditions?.operation || '*'
         }
         return undefined
     }
