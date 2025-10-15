@@ -107,6 +107,7 @@ import {
     UndergroundBeltPrototype,
     ValvePrototype,
     WallPrototype,
+    RailPrototype,
 } from 'factorio:prototype'
 import { Animation } from 'factorio:prototype'
 import { Animation4Way } from 'factorio:prototype'
@@ -685,10 +686,6 @@ function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => rea
             return draw_constant_combinator(e as ConstantCombinatorPrototype)
         case 'container':
             return draw_container(e as ContainerPrototype)
-        case 'curved-rail-a':
-            return draw_curved_rail_a(e as CurvedRailAPrototype)
-        case 'curved-rail-b':
-            return draw_curved_rail_b(e as CurvedRailBPrototype)
         case 'decider-combinator':
             return draw_decider_combinator(e as DeciderCombinatorPrototype)
         case 'display-panel':
@@ -721,8 +718,6 @@ function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => rea
             return draw_gate(e as GatePrototype)
         case 'generator':
             return draw_generator(e as GeneratorPrototype)
-        case 'half-diagonal-rail':
-            return draw_half_diagonal_rail(e as HalfDiagonalRailPrototype)
         case 'heat-interface':
             return draw_heat_interface(e as HeatInterfacePrototype)
         case 'heat-pipe':
@@ -741,10 +736,14 @@ function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => rea
             return draw_land_mine(e as LandMinePrototype)
         case 'lane-splitter':
             return draw_lane_splitter(e as LaneSplitterPrototype)
+        case 'curved-rail-a':
+        case 'curved-rail-b':
         case 'legacy-curved-rail':
-            return draw_legacy_curved_rail(e as LegacyCurvedRailPrototype)
+        case 'half-diagonal-rail':
+            return draw_rail(e as RailPrototype)
+        case 'straight-rail':
         case 'legacy-straight-rail':
-            return draw_legacy_straight_rail(e as LegacyStraightRailPrototype)
+            return draw_straight_rail(e as RailPrototype)
         case 'lightning-attractor':
             return draw_lightning_attractor(e as LightningAttractorPrototype)
         case 'linked-belt':
@@ -800,8 +799,6 @@ function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => rea
             return draw_splitter(e as SplitterPrototype)
         case 'storage-tank':
             return draw_storage_tank(e as StorageTankPrototype)
-        case 'straight-rail':
-            return draw_straight_rail(e as StraightRailPrototype)
         case 'thruster':
             return draw_thruster(e as ThrusterPrototype)
         case 'train-stop':
@@ -1053,12 +1050,6 @@ function draw_constant_combinator(
 function draw_container(e: ContainerPrototype): (data: IDrawData) => readonly SpriteData[] {
     return () => e.picture.layers
 }
-function draw_curved_rail_a(e: CurvedRailAPrototype): (data: IDrawData) => readonly SpriteData[] {
-    throw new Error('Not implemented!')
-}
-function draw_curved_rail_b(e: CurvedRailBPrototype): (data: IDrawData) => readonly SpriteData[] {
-    throw new Error('Not implemented!')
-}
 function draw_decider_combinator(
     e: DeciderCombinatorPrototype
 ): (data: IDrawData) => readonly SpriteData[] {
@@ -1192,7 +1183,8 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
                         w: size.x,
                         h: size.y,
                     },
-                    entity => entity.name === 'legacy-straight-rail'
+                    entity =>
+                        entity.type === 'legacy-straight-rail' || entity.type === 'straight-rail'
                 )
                 if (rail) {
                     if (data.dir % 8 === 0) {
@@ -1231,11 +1223,6 @@ function draw_gate(e: GatePrototype): (data: IDrawData) => readonly SpriteData[]
 function draw_generator(e: GeneratorPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) =>
         data.dir % 8 === 0 ? e.vertical_animation.layers : e.horizontal_animation.layers
-}
-function draw_half_diagonal_rail(
-    e: HalfDiagonalRailPrototype
-): (data: IDrawData) => readonly SpriteData[] {
-    throw new Error('Not implemented!')
 }
 function draw_heat_interface(
     e: HeatInterfacePrototype
@@ -1444,22 +1431,24 @@ function draw_land_mine(e: LandMinePrototype): (data: IDrawData) => readonly Spr
 function draw_lane_splitter(e: LaneSplitterPrototype): (data: IDrawData) => readonly SpriteData[] {
     throw new Error('Not implemented!')
 }
-function draw_legacy_curved_rail(
-    e: LegacyCurvedRailPrototype
-): (data: IDrawData) => readonly SpriteData[] {
+function draw_rail(e: RailPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
         const dir = data.dir
-        const ps = e.pictures[util.getDirName8Way(dir)]
+        let ps = e.pictures[util.getDirName8Way(dir)]
+        if (Object.entries(ps).length === 0) {
+            ps = e.pictures[util.getDirName8Way(dir % 8)]
+        }
         return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
     }
 }
-function draw_legacy_straight_rail(
-    e: LegacyStraightRailPrototype
-): (data: IDrawData) => readonly SpriteData[] {
+function draw_straight_rail(e: RailPrototype): (data: IDrawData) => readonly SpriteData[] {
     return (data: IDrawData) => {
         const dir = data.dir
         function getBaseSprites(): SpriteVariations[] {
-            const ps = e.pictures[util.getDirName8Way(dir)]
+            let ps = e.pictures[util.getDirName8Way(dir)]
+            if (Object.entries(ps).length === 0) {
+                ps = e.pictures[util.getDirName8Way(dir % 8)]
+            }
             return [ps.stone_path_background, ps.stone_path, ps.ties, ps.backplates, ps.metals]
         }
 
@@ -1848,9 +1837,6 @@ function draw_storage_tank(e: StorageTankPrototype): (data: IDrawData) => readon
             Math.floor(data.dir / 4) % e.pictures.picture.sheets[0].frames
         ),
     ]
-}
-function draw_straight_rail(e: StraightRailPrototype): (data: IDrawData) => readonly SpriteData[] {
-    throw new Error('Not implemented!')
 }
 function draw_thruster(e: ThrusterPrototype): (data: IDrawData) => readonly SpriteData[] {
     throw new Error('Not implemented!')

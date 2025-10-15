@@ -166,6 +166,7 @@ export class PositionGrid {
         const size = getEntitySize(FD.entities[name], direction)
 
         const straightRails: Entity[] = []
+        const halfDiagonalRails: Entity[] = []
         let gate: Entity
         let curvedRail: Entity
         let signal: Entity
@@ -180,17 +181,27 @@ export class PositionGrid {
 
         if (this.isAreaEmpty(area)) return true
 
+        // TODO: see how half-diagonal-rail fits into the picture here:
+
         for (const entity of this.getEntitiesInArea(area)) {
             switch (entity.type) {
                 case 'gate':
                     gate = entity
                     break
                 case 'legacy-curved-rail':
+                case 'curved-rail-a':
+                case 'curved-rail-b':
                     curvedRail = entity
                     break
                 case 'legacy-straight-rail':
+                case 'straight-rail':
                     if (!straightRails.includes(entity)) {
                         straightRails.push(entity)
+                    }
+                    break
+                case 'half-diagonal-rail':
+                    if (!halfDiagonalRails.includes(entity)) {
+                        halfDiagonalRails.push(entity)
                     }
                     break
                 case 'rail-signal':
@@ -203,31 +214,58 @@ export class PositionGrid {
         }
 
         const sameDirStrRails = straightRails.some(rail => rail.direction % 8 === direction % 8)
+        const sameDirHalfDiagRails = halfDiagonalRails.some(
+            rail => rail.direction % 8 === direction % 8
+        )
+
+        const isGate = name === 'gate'
+        const isSignal = name === 'rail-signal' || name === 'rail-chain-signal'
+        const isStraightRail = name === 'legacy-straight-rail' || name === 'straight-rail'
+        const isHalfDiagonalRail = name === 'half-diagonal-rail'
+        const isCurvedRail =
+            name === 'legacy-curved-rail' || name === 'curved-rail-a' || name === 'curved-rail-b'
 
         if (
-            (name === 'gate' &&
-                straightRails.length === 1 &&
-                straightRails[0].direction % 8 !== direction % 8 &&
-                !gate) ||
-            (name === 'legacy-straight-rail' &&
-                gate &&
-                gate.direction % 8 !== direction % 8 &&
-                straightRails.length === 0 &&
-                !otherEntities) ||
-            (name === 'legacy-straight-rail' &&
-                straightRails.length > 0 &&
-                !sameDirStrRails &&
-                !gate) ||
-            (name === 'legacy-curved-rail' && straightRails.length > 0 && !gate) ||
-            (name === 'legacy-straight-rail' && curvedRail) ||
-            (name === 'legacy-curved-rail' && curvedRail && curvedRail.direction !== direction) ||
-            // TODO: remove this when we add better rail support
-            ((name === 'rail-signal' || name === 'rail-chain-signal') &&
-                (curvedRail || straightRails.length > 0)) ||
-            ((name === 'legacy-straight-rail' || name === 'legacy-curved-rail') && signal)
-        ) {
+            isGate &&
+            straightRails.length === 1 &&
+            straightRails[0].direction % 8 !== direction % 8 &&
+            !gate
+        )
             return true
-        }
+
+        if (
+            isStraightRail &&
+            gate &&
+            gate.direction % 8 !== direction % 8 &&
+            straightRails.length === 0 &&
+            !otherEntities
+        )
+            return true
+
+        if (isStraightRail && straightRails.length > 0 && !sameDirStrRails && !gate) return true
+
+        if (isHalfDiagonalRail && halfDiagonalRails.length > 0 && !sameDirHalfDiagRails) return true
+
+        if (isCurvedRail && straightRails.length > 0 && !gate) return true
+
+        if (isHalfDiagonalRail && straightRails.length > 0 && !gate) return true
+
+        if (isCurvedRail && halfDiagonalRails.length > 0) return true
+
+        if (isStraightRail && halfDiagonalRails.length > 0) return true
+
+        if (isStraightRail && curvedRail) return true
+
+        if (isHalfDiagonalRail && curvedRail) return true
+
+        if (isCurvedRail && curvedRail && curvedRail.direction !== direction) return true
+
+        // TODO: remove this when we add better rail support
+        if (isSignal && (straightRails.length > 0 || halfDiagonalRails.length > 0 || curvedRail))
+            return true
+
+        // TODO: remove this when we add better rail support
+        if ((isStraightRail || isHalfDiagonalRail || isCurvedRail) && signal) return true
 
         return false
     }
@@ -260,7 +298,12 @@ export class PositionGrid {
         direction: number,
         pos: IPoint
     ): Entity | undefined {
-        if (name === 'legacy-straight-rail') return undefined
+        if (
+            name === 'legacy-straight-rail' ||
+            name === 'straight-rail' ||
+            name === 'half-diagonal-rail'
+        )
+            return undefined
 
         const size = getEntitySize(FD.entities[name], direction)
         const area = {

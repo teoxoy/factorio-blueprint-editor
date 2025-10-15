@@ -159,7 +159,11 @@ export class EntitySprite extends Sprite {
                 sprite.__zIndex = -8
             } else if (
                 entity.type === 'legacy-straight-rail' ||
-                entity.type === 'legacy-curved-rail'
+                entity.type === 'straight-rail' ||
+                entity.type === 'half-diagonal-rail' ||
+                entity.type === 'legacy-curved-rail' ||
+                entity.type === 'curved-rail-a' ||
+                entity.type === 'curved-rail-b'
             ) {
                 if (i < 2) {
                     sprite.__zIndex = -10
