@@ -195,6 +195,16 @@ export interface IArithmeticCondition {
     output_signal?: ISignal
 }
 
+/** Defaults to "select". */
+export type SelectorCombinatorOperation =
+    | 'select'
+    | 'count'
+    | 'random'
+    | 'quality-transfer'
+    | 'rocket-capacity'
+    | 'stack-size'
+    | 'quality-filter'
+
 export type FilterPriority = 'left' | 'right'
 export type FilterMode = 'whitelist' | 'blacklist'
 export type DirectionType = 'input' | 'output'
@@ -468,6 +478,32 @@ export interface IEntity {
 
         /** only present if entity is arithmetic-combinator */
         arithmetic_conditions?: IArithmeticCondition
+
+        /** only present if entity is selector-combinator */
+        operation?: SelectorCombinatorOperation
+        /** only present if entity is selector-combinator and operation is 'select' */
+        select_max?: boolean
+        /** only present if entity is selector-combinator and operation is 'select' */
+        index_signal?: ISignal
+        /** only present if entity is selector-combinator and operation is 'select' */
+        index_constant?: number
+        /** only present if entity is selector-combinator and operation is 'count' */
+        count_signal?: ISignal
+        /** only present if entity is selector-combinator and operation is 'random' */
+        random_update_interval?: number
+        /** only present if entity is selector-combinator and operation is 'quality-filter' */
+        quality_filter?: {
+            quality?: string
+            comparator?: ComparatorString
+        }
+        /** only present if entity is selector-combinator and operation is 'quality-transfer' */
+        select_quality_from_signal?: boolean
+        /** only present if entity is selector-combinator and operation is 'quality-transfer' */
+        quality_source_static?: string
+        /** only present if entity is selector-combinator and operation is 'quality-transfer' */
+        quality_source_signal?: ISignal
+        /** only present if entity is selector-combinator and operation is 'quality-transfer' */
+        quality_destination_signal?: ISignal
 
         /** pre 2.0 - only present if entity is of type mining-drill or transport-belt or train-stop */
         circuit_enable_disable?: boolean

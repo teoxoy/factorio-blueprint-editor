@@ -1013,6 +1013,45 @@
                                             }
                                         }
                                     },
+                                    "operation": {
+                                        "type": "string",
+                                        "enum": [
+                                            "select",
+                                            "count",
+                                            "random",
+                                            "quality-transfer",
+                                            "rocket-capacity",
+                                            "stack-size",
+                                            "quality-filter"
+                                        ]
+                                    },
+                                    "select_max": { "type": "boolean" },
+                                    "index_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
+                                    "index_constant": { "type": "integer" },
+                                    "count_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
+                                    "random_update_interval": { "type": "integer" },
+                                    "select_quality_from_signal": { "type": "boolean" },
+                                    "quality_filter": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "properties": {
+                                            "quality": { "type": "string" },
+                                            "comparator": {
+                                                "$ref": "blueprintSchema.json#/definitions/ComparatorString"
+                                            }
+                                        }
+                                    },
+                                    "quality_source_static": { "type": "string" },
+                                    "quality_source_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
+                                    "quality_destination_signal": {
+                                        "$ref": "blueprintSchema.json#/definitions/signal"
+                                    },
                                     "circuit_enable_disable": {
                                         "type": "boolean",
                                         "$comment": "only present if entity is of type mining-drill or transport-belt or train-stop"

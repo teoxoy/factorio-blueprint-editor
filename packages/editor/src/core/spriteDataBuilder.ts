@@ -1,5 +1,11 @@
 import util from '../common/util'
-import { ArithmeticOperation, ComparatorString, IPoint, ISignal } from '../types'
+import {
+    ArithmeticOperation,
+    ComparatorString,
+    IPoint,
+    ISignal,
+    SelectorCombinatorOperation,
+} from '../types'
 import FD, {
     ColorWithAlpha,
     getHeatBuffer,
@@ -117,7 +123,8 @@ interface IDrawData {
     assemblerHasFluidInputs: boolean
     assemblerHasFluidOutputs: boolean
     dirType: string
-    operator: undefined | ComparatorString | ArithmeticOperation
+    selectorCombinatorSelectMax: boolean
+    operator: undefined | ComparatorString | ArithmeticOperation | SelectorCombinatorOperation
     trainStopColor: ColorWithAlpha
     modules: (string | undefined)[]
 }
@@ -1761,7 +1768,38 @@ function draw_rocket_silo(e: RocketSiloPrototype): (data: IDrawData) => readonly
 function draw_selector_combinator(
     e: SelectorCombinatorPrototype
 ): (data: IDrawData) => readonly SpriteData[] {
-    throw new Error('Not implemented!')
+    return (data: IDrawData) => {
+        const operatorToSpriteData = (operator: SelectorCombinatorOperation): Sprite4Way => {
+            switch (operator) {
+                case 'select':
+                    return data.selectorCombinatorSelectMax
+                        ? e.max_symbol_sprites
+                        : e.min_symbol_sprites
+                case 'count':
+                    return e.count_symbol_sprites
+                case 'random':
+                    return e.random_symbol_sprites
+                case 'rocket-capacity':
+                    return e.rocket_capacity_sprites
+                case 'stack-size':
+                    return e.stack_size_sprites
+                case 'quality-transfer':
+                case 'quality-filter':
+                    return e.quality_symbol_sprites
+                default:
+                    throw new Error('Internal Error!')
+            }
+        }
+        const out = [...e.sprites[util.getDirName(data.dir)].layers]
+        if (data.operator) {
+            out.push(
+                operatorToSpriteData(data.operator as SelectorCombinatorOperation)[
+                    util.getDirName(data.dir)
+                ]
+            )
+        }
+        return out
+    }
 }
 function draw_solar_panel(e: SolarPanelPrototype): (data: IDrawData) => readonly SpriteData[] {
     return () => e.picture.layers
