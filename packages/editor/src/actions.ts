@@ -225,9 +225,8 @@ export class ActionRegistry {
             for (const action of this.sortedActions) {
                 if (action.pressMod(this.modifiers, e.key)) return
             }
-        } else {
-            this.press(e)
         }
+        this.press(e)
     }
     public releaseKey(e: KeyboardEvent): void {
         if (this.isModifier(e.key)) {
@@ -236,9 +235,8 @@ export class ActionRegistry {
             }
 
             this.setModifiers(e.key, false)
-        } else {
-            this.release(e)
         }
+        this.release(e)
     }
 
     private press(e: TriggerEvent): void {
