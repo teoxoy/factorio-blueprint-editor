@@ -8,6 +8,7 @@ import {
     ComparatorString,
     ArithmeticOperation,
     ISignal,
+    SelectorCombinatorOperation,
 } from '../types'
 import util from '../common/util'
 import { IllegalFlipError } from '../containers/PaintContainer'
@@ -629,29 +630,34 @@ export class Entity extends EventEmitter<EntityEvents> {
             .map(f => f.name)
     }
 
-    public get deciderCombinatorConditions(): {
+    public get combinatorConditions(): {
         first_signal?: ISignal
         second_signal?: ISignal
         output_signal?: ISignal
     } {
-        const decider_conditions = this.m_rawEntity.control_behavior?.decider_conditions
-        return {
-            first_signal: decider_conditions?.conditions?.[0].first_signal,
-            second_signal: decider_conditions?.conditions?.[0].second_signal,
-            output_signal: decider_conditions?.outputs?.[0].signal,
+        if (this.type === 'decider-combinator') {
+            const decider_conditions = this.m_rawEntity.control_behavior?.decider_conditions
+            return {
+                first_signal: decider_conditions?.conditions?.[0].first_signal,
+                second_signal: decider_conditions?.conditions?.[0].second_signal,
+                output_signal: decider_conditions?.outputs?.[0].signal,
+            }
         }
-    }
-
-    public get arithmeticCombinatorConditions(): {
-        first_signal?: ISignal
-        second_signal?: ISignal
-        output_signal?: ISignal
-    } {
-        const arithmetic_conditions = this.m_rawEntity.control_behavior?.arithmetic_conditions
-        return {
-            first_signal: arithmetic_conditions?.first_signal,
-            second_signal: arithmetic_conditions?.second_signal,
-            output_signal: arithmetic_conditions?.output_signal,
+        if (this.type === 'arithmetic-combinator') {
+            const arithmetic_conditions = this.m_rawEntity.control_behavior?.arithmetic_conditions
+            return {
+                first_signal: arithmetic_conditions?.first_signal,
+                second_signal: arithmetic_conditions?.second_signal,
+                output_signal: arithmetic_conditions?.output_signal,
+            }
+        }
+        if (
+            this.type === 'selector-combinator' &&
+            this.m_rawEntity.control_behavior?.index_signal
+        ) {
+            return {
+                first_signal: this.m_rawEntity.control_behavior?.index_signal,
+            }
         }
     }
 
@@ -699,7 +705,20 @@ export class Entity extends EventEmitter<EntityEvents> {
             .commit()
     }
 
-    public get operator(): undefined | ComparatorString | ArithmeticOperation {
+    public get selectorCombinatorSelectMax(): boolean {
+        if (this.type !== 'selector-combinator') return false
+        if (this.m_rawEntity.control_behavior?.operation === 'select') {
+            const select_max = this.m_rawEntity.control_behavior?.select_max
+            return select_max === undefined ? true : select_max
+        }
+        return false
+    }
+
+    public get operator():
+        | undefined
+        | ComparatorString
+        | ArithmeticOperation
+        | SelectorCombinatorOperation {
         if (this.type === 'decider-combinator') {
             return (
                 this.m_rawEntity.control_behavior?.decider_conditions?.conditions?.[0].comparator ||
@@ -708,6 +727,9 @@ export class Entity extends EventEmitter<EntityEvents> {
         }
         if (this.type === 'arithmetic-combinator') {
             return this.m_rawEntity.control_behavior?.arithmetic_conditions?.operation || '*'
+        }
+        if (this.type === 'selector-combinator') {
+            return this.m_rawEntity.control_behavior?.operation || 'select'
         }
         return undefined
     }

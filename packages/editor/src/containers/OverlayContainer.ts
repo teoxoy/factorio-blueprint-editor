@@ -213,10 +213,7 @@ export class OverlayContainer extends Container {
             entityInfo.addChild(filterInfo)
         }
 
-        const combinatorConditions =
-            entity.type === 'decider-combinator'
-                ? entity.deciderCombinatorConditions
-                : entity.arithmeticCombinatorConditions
+        const combinatorConditions = entity.combinatorConditions
         if (combinatorConditions) {
             const filterInfo = new Container()
             const cFS = combinatorConditions.first_signal
@@ -271,7 +268,11 @@ export class OverlayContainer extends Container {
             entityInfo.addChild(filterInfo)
         }
 
-        if (entity.name === 'arithmetic-combinator' || entity.name === 'decider-combinator') {
+        if (
+            entity.type === 'arithmetic-combinator' ||
+            entity.type === 'decider-combinator' ||
+            entity.type === 'selector-combinator'
+        ) {
             const arrows = new Container()
             arrows.addChild(createArrow({ x: 0, y: -48 }), createArrow({ x: 0, y: 48 }))
             arrows.rotation = entity.direction * Math.PI * 0.125
