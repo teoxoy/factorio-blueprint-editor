@@ -36,7 +36,6 @@ import {
     CargoLandingPadPrototype,
     CargoWagonPrototype,
     ConstantCombinatorPrototype,
-    ConstructionRobotPrototype,
     ContainerPrototype,
     CurvedRailAPrototype,
     CurvedRailBPrototype,
@@ -74,7 +73,6 @@ import {
     LoaderPrototype,
     LocomotivePrototype,
     LogisticContainerPrototype,
-    LogisticRobotPrototype,
     MiningDrillPrototype,
     OffshorePumpPrototype,
     PipePrototype,
@@ -677,8 +675,6 @@ function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => rea
             return draw_cargo_wagon(e as CargoWagonPrototype)
         case 'constant-combinator':
             return draw_constant_combinator(e as ConstantCombinatorPrototype)
-        case 'construction-robot':
-            return draw_construction_robot(e as ConstructionRobotPrototype)
         case 'container':
             return draw_container(e as ContainerPrototype)
         case 'curved-rail-a':
@@ -754,8 +750,6 @@ function generateGraphics(e: EntityWithOwnerPrototype): (data: IDrawData) => rea
             return draw_locomotive(e as LocomotivePrototype)
         case 'logistic-container':
             return draw_logistic_container(e as LogisticContainerPrototype)
-        case 'logistic-robot':
-            return draw_logistic_robot(e as LogisticRobotPrototype)
         case 'mining-drill':
             return draw_mining_drill(e as MiningDrillPrototype)
         case 'offshore-pump':
@@ -1047,11 +1041,6 @@ function draw_constant_combinator(
     return (data: IDrawData) => {
         return e.sprites[util.getDirName(data.dir)].layers
     }
-}
-function draw_construction_robot(
-    e: ConstructionRobotPrototype
-): (data: IDrawData) => readonly SpriteData[] {
-    throw new Error('Not implemented!')
 }
 function draw_container(e: ContainerPrototype): (data: IDrawData) => readonly SpriteData[] {
     return () => e.picture.layers
@@ -1553,11 +1542,6 @@ function draw_logistic_container(
     e: LogisticContainerPrototype
 ): (data: IDrawData) => readonly SpriteData[] {
     return () => e.animation.layers
-}
-function draw_logistic_robot(
-    e: LogisticRobotPrototype
-): (data: IDrawData) => readonly SpriteData[] {
-    throw new Error('Not implemented!')
 }
 function draw_mining_drill(e: MiningDrillPrototype): (data: IDrawData) => readonly SpriteData[] {
     switch (e.name) {
