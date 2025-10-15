@@ -317,6 +317,15 @@ export interface IEntity {
     /** only present if entity is artillery-turret */
     artillery_auto_targeting?: boolean
 
+    /** only present if entity is display-panel */
+    text?: string
+    /** only present if entity is display-panel */
+    icon?: ISignal
+    /** only present if entity is display-panel */
+    always_show?: boolean
+    /** only present if entity is display-panel */
+    show_in_chart?: boolean
+
     /** only present if entity is infinity_chest or infinity_pipe */
     infinity_settings?: {
         /** only present if entity is infinity_pipe */
@@ -447,6 +456,13 @@ export interface IEntity {
             stop_playing_sounds?: boolean
         }
 
+        /** only present if entity is display-panel */
+        parameters?: {
+            text?: string
+            icon?: ISignal
+            condition?: ICondition
+        }[]
+
         /** only present if entity is decider-combinator */
         decider_conditions?: IDeciderCondition
 
@@ -500,10 +516,6 @@ export interface IEntity {
     // ammo_inventory: unknown
     // driver_is_main_gunner: unknown
     // selected_gun_index: unknown
-    // text: unknown
-    // icon: unknown
-    // always_show: unknown
-    // show_in_chart: unknown
     // spoil_priority: unknown
     // drop_position: unknown
     // pickup_position: unknown
