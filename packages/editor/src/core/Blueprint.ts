@@ -191,6 +191,7 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                                     throw new Error('Items is object but bp is not pre 2.0')
                                 }
                                 items = []
+                                let stack = 0
                                 for (const [name, count] of Object.entries(e.items)) {
                                     const item = FD.items[name]
                                     if (item.type === 'module') {
@@ -204,8 +205,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                                         for (let i = 0; i < count; i++) {
                                             in_inventory.push({
                                                 inventory,
-                                                stack: i,
+                                                stack,
                                             })
+                                            stack += 1
                                         }
                                         items.push({
                                             id: { name },
