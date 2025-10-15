@@ -720,7 +720,7 @@
                             },
                             "control_behavior": {
                                 "type": "object",
-                                "additionalProperties": false,
+                                "additionalProperties": true,
                                 "properties": {
                                     "is_on": {
                                         "type": "boolean",
