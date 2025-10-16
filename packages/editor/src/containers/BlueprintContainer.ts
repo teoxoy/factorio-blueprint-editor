@@ -170,7 +170,7 @@ export class BlueprintContainer extends Container {
             this.wirePaintSlot
         )
 
-        this.onRender = () => {
+        const update = () => {
             if (this.viewport.update()) {
                 this.gridData.recalculate()
                 const t = this.viewport.getTransform()
@@ -178,6 +178,10 @@ export class BlueprintContainer extends Container {
                 this.scale.set(t.a, t.d)
             }
         }
+        G.app.ticker.add(update)
+        this.on('destroyed', () => {
+            G.app.ticker.remove(update)
+        })
 
         this.on('pointerover', () => {
             if (this.mode === EditorMode.PAINT) {
