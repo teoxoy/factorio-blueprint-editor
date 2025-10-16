@@ -21,7 +21,7 @@ interface IEntityData {
     position?: IPoint
     generateConnector?: boolean
     directionType?: string
-    selectorCombinatorSelectMax: boolean
+    selectorCombinatorSelectMax?: boolean
     operator?: undefined | ComparatorString | ArithmeticOperation | SelectorCombinatorOperation
     displayPanelIcon?: undefined | ISignal
     assemblerHasFluidInputs?: boolean

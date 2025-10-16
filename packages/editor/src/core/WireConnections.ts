@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import { IBPConnection, IConnSide, IPoint, IWireColor, BlueprintWire } from '../types'
+import { IBPConnection, IConnSide, IPoint, IWireColor, BlueprintWire, WireColor } from '../types'
 import FD, { getMaxWireDistance } from './factorioData'
 import U from './generators/util'
 import { Blueprint } from './Blueprint'
@@ -8,7 +8,7 @@ import { WireConnectionMap } from './WireConnectionMap'
 const MAX_POLE_CONNECTION_COUNT = 5
 
 export interface IConnection {
-    color: string
+    color: WireColor
     cps: [IConnectionPoint, IConnectionPoint]
 }
 
@@ -48,10 +48,11 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
     ): IConnection[] {
         const parsedConnections: IConnection[] = []
 
-        const addConnSide = (side: string): void => {
+        const addConnSide = (side: '1' | '2'): void => {
             if (connections[side]) {
-                for (const color in connections[side]) {
-                    const conn = connections[side] as IConnSide
+                for (const c in connections[side]) {
+                    const color = c as WireColor
+                    const conn = connections[side]
                     for (const data of conn[color]) {
                         parsedConnections.push({
                             color,
@@ -71,7 +72,7 @@ export class WireConnections extends EventEmitter<WireConnectionsEvents> {
             }
         }
 
-        const addCopperConnSide = (side: string, color: string): void => {
+        const addCopperConnSide = (side: 'Cu0' | 'Cu1', color: WireColor): void => {
             if (connections[side]) {
                 // For some reason Cu0 and Cu1 are arrays but the switch can only have 1 copper connection
                 const data = (connections[side] as IWireColor[])[0]

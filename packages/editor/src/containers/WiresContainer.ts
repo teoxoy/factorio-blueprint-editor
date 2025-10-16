@@ -2,7 +2,7 @@ import { Container, Graphics, RenderTexture, Sprite } from 'pixi.js'
 import { Blueprint } from '../core/Blueprint'
 import { IConnection, IConnectionPoint } from '../core/WireConnections'
 import U from '../core/generators/util'
-import { IPoint } from '../types'
+import { IPoint, WireColor } from '../types'
 import { EntityContainer } from './EntityContainer'
 import G from '../common/globals'
 
@@ -18,7 +18,7 @@ export class WiresContainer extends Container {
     private static createWire(
         p1: IPoint,
         p2: IPoint,
-        color: string,
+        color: WireColor,
         connectionsReach = true
     ): Sprite {
         const wire = new Graphics()

@@ -16,6 +16,8 @@ export type NamedDirection8Way =
 /** Interfaces and types for blueprint string JSON structure */
 export type SignalType = 'item' | 'virtual' | 'fluid'
 
+export type WireColor = 'copper' | 'red' | 'green'
+
 export interface ISignal {
     name?: string
     type?: SignalType
@@ -58,15 +60,15 @@ export interface IWireColor {
     wire_id?: number
 }
 
-export interface IConnSide extends Record<string, IWireColor[]> {
+export interface IConnSide {
     red?: IWireColor[]
     green?: IWireColor[]
     copper?: IWireColor[]
 }
 
-export interface IBPConnection extends Record<string, IConnSide | IWireColor[]> {
-    1?: IConnSide
-    2?: IConnSide
+export interface IBPConnection {
+    '1'?: IConnSide
+    '2'?: IConnSide
     Cu0?: IWireColor[]
     Cu1?: IWireColor[]
 }
