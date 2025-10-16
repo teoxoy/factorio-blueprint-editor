@@ -6,9 +6,10 @@ import { Entity } from '../core/Entity'
 import { EntityContainer } from './EntityContainer'
 import { PaintContainer } from './PaintContainer'
 import { BlueprintContainer } from './BlueprintContainer'
+import { WireColor } from '../types'
 
 export class PaintWireContainer extends PaintContainer {
-    private color?: string
+    private color: WireColor
     private cp?: IConnectionPoint = undefined
     /** This is only a reference */
     private cursorBox: Container
@@ -16,7 +17,7 @@ export class PaintWireContainer extends PaintContainer {
     public constructor(bpc: BlueprintContainer, name: string) {
         super(bpc, name)
 
-        this.color = name.split('-', 1)[0]
+        this.color = name.split('-', 1)[0] as WireColor
         this.cp = undefined
 
         this.attachUpdateOn1()
@@ -99,7 +100,7 @@ export class PaintWireContainer extends PaintContainer {
         /** Non-standard behavior: cycle between colors */
         if (this.name === 'red-wire') this.name = 'green-wire'
         else if (this.name === 'green-wire') this.name = 'red-wire'
-        this.color = this.name.split('-', 1)[0]
+        this.color = this.name.split('-', 1)[0] as WireColor
 
         this.redraw()
     }
