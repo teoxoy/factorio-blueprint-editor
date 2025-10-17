@@ -958,8 +958,14 @@
                                             "first_signal": {
                                                 "$ref": "blueprintSchema.json#/definitions/signal"
                                             },
+                                            "first_signal_networks": {
+                                                "$ref": "blueprintSchema.json#/definitions/CircuitNetworkSelection"
+                                            },
                                             "second_signal": {
                                                 "$ref": "blueprintSchema.json#/definitions/signal"
+                                            },
+                                            "second_signal_networks": {
+                                                "$ref": "blueprintSchema.json#/definitions/CircuitNetworkSelection"
                                             },
                                             "output_signal": {
                                                 "$ref": "blueprintSchema.json#/definitions/signal"
@@ -1005,8 +1011,14 @@
                                             "first_signal": {
                                                 "$ref": "blueprintSchema.json#/definitions/signal"
                                             },
+                                            "first_signal_networks": {
+                                                "$ref": "blueprintSchema.json#/definitions/CircuitNetworkSelection"
+                                            },
                                             "second_signal": {
                                                 "$ref": "blueprintSchema.json#/definitions/signal"
+                                            },
+                                            "second_signal_networks": {
+                                                "$ref": "blueprintSchema.json#/definitions/CircuitNetworkSelection"
                                             },
                                             "output_signal": {
                                                 "$ref": "blueprintSchema.json#/definitions/signal"
