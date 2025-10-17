@@ -280,7 +280,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                                     comparator: c.comparator,
                                     constant: c.constant,
                                     first_signal: c.first_signal,
+                                    first_signal_networks: c.first_signal_networks,
                                     second_signal: c.second_signal,
+                                    second_signal_networks: c.second_signal_networks,
                                 },
                             ]
                             c.outputs = [
@@ -293,7 +295,9 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
                             delete c.constant
                             delete c.copy_count_from_input
                             delete c.first_signal
+                            delete c.first_signal_networks
                             delete c.second_signal
+                            delete c.second_signal_networks
                             delete c.output_signal
                         }
                         if (typeof e.filter === 'string') {

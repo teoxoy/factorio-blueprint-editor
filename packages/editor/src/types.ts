@@ -163,7 +163,11 @@ export interface IDeciderCondition {
     /** pre 2.0 */
     first_signal?: ISignal
     /** pre 2.0 */
+    first_signal_networks?: CircuitNetworkSelection
+    /** pre 2.0 */
     second_signal?: ISignal
+    /** pre 2.0 */
+    second_signal_networks?: CircuitNetworkSelection
     /** pre 2.0 */
     output_signal?: ISignal
 
@@ -193,7 +197,9 @@ export interface IArithmeticCondition {
     first_constant?: number
     second_constant?: number
     first_signal?: ISignal
+    first_signal_networks?: CircuitNetworkSelection
     second_signal?: ISignal
+    second_signal_networks?: CircuitNetworkSelection
     output_signal?: ISignal
 }
 
