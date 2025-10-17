@@ -67,7 +67,13 @@ local function localise(obj, typeArg)
             template = template:gsub('__1__', args)
         elseif args ~= nil then
             for i = 1, #args do
-                template = template:gsub('__' .. i .. '__', locale[args[i]])
+                local arg = args[i]
+                if type(arg) == "table" then
+                    arg = localiseTemplate(arg)
+                else
+                    arg = locale[arg]
+                end
+                template = template:gsub('__' .. i .. '__', arg)
             end
         end
         return template

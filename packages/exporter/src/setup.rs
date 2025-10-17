@@ -161,9 +161,81 @@ pub async fn extract(output_dir: &Path, base_factorio_dir: &Path) -> Result<(), 
         .wait()
         .await?;
 
+    let old_content = tokio::fs::read_to_string(output_dir.join("data.json")).await?;
     let content = tokio::fs::read_to_string(&extracted_data_path).await?;
     tokio::fs::create_dir_all(&output_dir).await?;
     tokio::fs::write(output_dir.join("data.json"), &content).await?;
+
+    let new_data: serde_json::Value = serde_json::from_str(&content).unwrap();
+    let old_data: serde_json::Value = serde_json::from_str(&old_content).unwrap();
+
+    let diff = sjdiff::DiffBuilder::default()
+        .source(old_data)
+        .target(new_data)
+        .build()
+        .unwrap();
+    let diff = diff.compare();
+    if let Some(mut diff) = diff {
+        fn skip_missing(diff: &mut sjdiff::Difference) {
+            match diff {
+                sjdiff::Difference::Scalar(scalar_difference) => {}
+                sjdiff::Difference::Type {
+                    source_type,
+                    source_value,
+                    target_type,
+                    target_value,
+                } => {}
+                sjdiff::Difference::Array(array_difference) => match array_difference {
+                    sjdiff::ArrayDifference::PairsOnly { different_pairs } => {
+                        for (_, diff) in different_pairs.0.iter_mut() {
+                            skip_missing(diff);
+                        }
+                    }
+                    sjdiff::ArrayDifference::Shorter {
+                        different_pairs,
+                        missing_elements,
+                    } => {
+                        if let Some(different_pairs) = different_pairs {
+                            for (_, diff) in different_pairs.0.iter_mut() {
+                                skip_missing(diff);
+                            }
+                        }
+                    }
+                    sjdiff::ArrayDifference::Longer {
+                        different_pairs,
+                        extra_length,
+                    } => {
+                        if let Some(different_pairs) = different_pairs {
+                            for (_, diff) in different_pairs.0.iter_mut() {
+                                skip_missing(diff);
+                            }
+                        }
+                    }
+                },
+                sjdiff::Difference::Object { different_entries } => {
+                    let entries = core::mem::take(&mut different_entries.0);
+                    let new: Vec<(String, sjdiff::EntryDifference)> = entries
+                        .into_iter()
+                        .filter_map(|mut f| match &mut f.1 {
+                            sjdiff::EntryDifference::Missing { value } => None,
+                            sjdiff::EntryDifference::Extra { value } => Some(f),
+                            sjdiff::EntryDifference::Value { value_diff } => {
+                                skip_missing(value_diff);
+                                Some(f)
+                            }
+                        })
+                        .collect();
+                    *different_entries = sjdiff::Map(new);
+                }
+            }
+        }
+        skip_missing(&mut diff);
+        let mut diff_content = Vec::new();
+        serde_json::to_writer_pretty(&mut diff_content, &diff).unwrap();
+        tokio::fs::write(output_dir.join("data-diff.json"), &diff_content).await?;
+    } else {
+        tokio::fs::remove_file(output_dir.join("data-diff.json")).await?;
+    }
 
     let metadata_path = output_dir.join("metadata.json");
 
@@ -188,8 +260,13 @@ pub async fn extract(output_dir: &Path, base_factorio_dir: &Path) -> Result<(), 
     let file_paths = file_paths
         .into_iter()
         .map(|s| {
-            let in_path =
-                factorio_data.join(s.replace("__core__", "core").replace("__base__", "base"));
+            let in_path = factorio_data.join(
+                s.replace("__core__", "core")
+                    .replace("__base__", "base")
+                    .replace("__space-age__", "space-age")
+                    .replace("__elevated-rails__", "elevated-rails")
+                    .replace("__quality__", "quality"),
+            );
             let out_path = output_dir.join(s.replace(".png", ".basis").as_str());
             (in_path, out_path)
         })
@@ -344,7 +421,7 @@ async fn download(
         // "macos" => "osx",
         _ => panic!("unsupported OS"),
     };
-    let url = format!("https://www.factorio.com/get-download/{version}/alpha/{os}?username={username}&token={token}");
+    let url = format!("https://www.factorio.com/get-download/{version}/expansion/{os}?username={username}&token={token}");
 
     let client = reqwest::Client::new();
     let res = client.get(&url).send().await?;

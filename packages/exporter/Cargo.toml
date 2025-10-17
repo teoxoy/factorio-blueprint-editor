@@ -25,3 +25,4 @@ hyper-util = { version = "0.1.10", features = ["tokio"] }
 http = "1.2.0"
 zip = "2.2.1"
 dotenvy = "0.15.7"
+sjdiff = "0.0.7"
