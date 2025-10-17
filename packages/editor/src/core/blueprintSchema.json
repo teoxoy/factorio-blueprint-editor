@@ -23,11 +23,11 @@
             "properties": {
                 "name": {
                     "type": "string",
-                    "itemFluidSignalName": true
+                    "itemFluidSignalRecipeEntityName": true
                 },
                 "type": {
                     "type": "string",
-                    "enum": ["item", "virtual", "fluid"]
+                    "enum": ["item", "virtual", "fluid", "recipe", "entity"]
                 }
             }
         },
@@ -103,11 +103,11 @@
                 },
                 "name": {
                     "type": "string",
-                    "itemFluidSignalName": true
+                    "itemFluidSignalRecipeEntityName": true
                 },
                 "type": {
                     "type": "string",
-                    "enum": ["item", "virtual", "fluid"]
+                    "enum": ["item", "virtual", "fluid", "recipe", "entity"]
                 },
                 "quality": {
                     "type": "string"

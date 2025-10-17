@@ -64,8 +64,9 @@ const keywords: KeywordDefinition[] = [
         schema: false,
     },
     {
-        keyword: 'itemFluidSignalName',
-        validate: (data: string) => !!FD.items[data] || !!FD.fluids[data] || !!FD.signals[data],
+        keyword: 'itemFluidSignalRecipeEntityName',
+        validate: (data: string) =>
+            !!FD.items[data] || !!FD.fluids[data] || !!FD.signals[data] || !!FD.recipes[data],
         errors: false,
         schema: false,
     },

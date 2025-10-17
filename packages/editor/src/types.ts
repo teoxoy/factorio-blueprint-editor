@@ -14,7 +14,7 @@ export type NamedDirection8Way =
     | 'northwest'
 
 /** Interfaces and types for blueprint string JSON structure */
-export type SignalType = 'item' | 'virtual' | 'fluid'
+export type SignalType = 'item' | 'virtual' | 'fluid' | 'recipe' | 'entity'
 
 export type WireColor = 'copper' | 'red' | 'green'
 

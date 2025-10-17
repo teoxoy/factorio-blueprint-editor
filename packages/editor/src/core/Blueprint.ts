@@ -775,6 +775,8 @@ class Blueprint extends EventEmitter<BlueprintEvents> {
             const getItemTypeForBp = (name: string): SignalType => {
                 if (FD.signals[name]) return 'virtual'
                 if (FD.fluids[name]) return 'fluid'
+                if (FD.recipes[name]) return 'recipe'
+                if (FD.entities[name]) return 'entity'
                 return 'item'
             }
 

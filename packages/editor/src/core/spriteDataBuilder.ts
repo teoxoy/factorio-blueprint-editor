@@ -1095,6 +1095,10 @@ function draw_display_panel(e: DisplayPanelPrototype): (data: IDrawData) => read
                         return FD.fluids
                     case 'virtual':
                         return FD.signals
+                    case 'recipe':
+                        return FD.recipes
+                    case 'entity':
+                        return FD.entities
                     default:
                         throw new Error('Missing signal type mapping!')
                 }
